@@ -1,0 +1,25 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/azure/azure-network-service-subschema.json",
+    "title": "mlos_bench Azure Network Service config",
+    "description": "config for an mlos_bench Azure Network Service",
+    "type": "object",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.services.remote.azure.AzureNetworkService",
+                "mlos_bench.services.remote.azure.azure_network_services.AzureNetworkService"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "./azure-service-subschema.json#/$defs/azure_service_config"
+                }
+            ],
+            "unevaluatedProperties": false
+        }
+    },
+    "required": ["class", "config"]
+}

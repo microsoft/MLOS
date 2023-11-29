@@ -1,0 +1,8 @@
+{
+    "class": "mlos_bench.tests.services.remote.mock.mock_network_service.MockNetworkService",
+    "description": "descriptive text",
+
+    "config": {
+        "vnetName": "test-vnet"
+    }
+}

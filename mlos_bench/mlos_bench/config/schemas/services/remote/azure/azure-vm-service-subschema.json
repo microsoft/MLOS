@@ -15,52 +15,10 @@
             "type": "object",
             "allOf": [
                 {
-                    "$ref": "../../common-defs-subschemas.json#/$defs/poll_configs"
+                    "$ref": "./azure-service-subschema.json#/$defs/azure_service_config"
                 },
                 {
                     "properties": {
-                        "subscription": {
-                            "description": "Azure subscription id (typically provided in the global config in order to omit from source control).",
-                            "type": "string"
-                        },
-                        "resourceGroup": {
-                            "description": "The name of the resource group to place the deployment in (typically provided in the global config in order to omit from source control).",
-                            "type": "string"
-                        },
-                        "deploymentName": {
-                            "$comment": "TODO: provide templating strings to augment names via experiment_id/trial_id, for instance.",
-                            "description": "Name of the deployment to create for the experiment resources.",
-                            "type": "string"
-                        },
-                        "deploymentTemplatePath": {
-                            "description": "Path to an ARM template file.",
-                            "type": "string",
-                            "pattern": "[.]json[c]?$"
-                        },
-                        "deploymentTemplateParameters": {
-                            "description": "Key/value pairs of ARM template parameters.",
-                            "type": "object",
-                            "additionalProperties": {
-                                "$comment": "The value of any parameter can be a string, number, boolean, or null or an array of the same.",
-                                "type": [
-                                    "string",
-                                    "number",
-                                    "boolean",
-                                    "null",
-                                    "array"
-                                ],
-                                "items": {
-                                    "$comment": "The value of any const_arg list can be a string, number, boolean, or null.",
-                                    "type": [
-                                        "string",
-                                        "number",
-                                        "boolean",
-                                        "null"
-                                    ]
-                                }
-                            },
-                            "minProperties": 1
-                        },
                         "customDataFile": {
                             "description": "Path to a custom data file whose contents should be base64 encoded and passed to the VM template as customDataBase64 in the template parameters.",
                             "type": "string",
@@ -70,11 +28,7 @@
                                 "cloud-init.script.sh"
                             ]
                         }
-                    },
-                    "required": [
-                        "deploymentName",
-                        "deploymentTemplatePath"
-                    ]
+                    }
                 }
             ],
             "unevaluatedProperties": false

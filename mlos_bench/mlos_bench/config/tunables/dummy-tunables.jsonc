@@ -1,0 +1,15 @@
+// FIXME: A workaround to a bug (#613) in the config system that requires non-empty configs.
+{
+    "dummy_params": {
+        "cost": 0,
+        "description": "Dummy parameter group to allow a non-empty config for testing creating singleton resources that have no tunable params.",
+        "params": {
+            "dummy_param": {
+                "description": "Dummy parameter.",
+                "type": "categorical",
+                "values": ["dummy"],
+                "default": "dummy"
+            }
+        }
+    }
+}

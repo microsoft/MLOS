@@ -6,13 +6,10 @@
 Tests for mlos_bench.services.remote.azure.azure_vm_services
 """
 
-import json
 from copy import deepcopy
-from io import BytesIO
 from unittest.mock import MagicMock, patch
 
 import pytest
-import urllib3
 import requests.exceptions as requests_ex
 
 from mlos_bench.environments.status import Status
@@ -20,18 +17,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.services.remote.azure.azure_auth import AzureAuthService
 from mlos_bench.services.remote.azure.azure_vm_services import AzureVMService
 
-
-def make_httplib_json_response(status: int, json_data: dict) -> urllib3.HTTPResponse:
-    """
-    Prepare a json response object for use with urllib3
-    """
-    data = json.dumps(json_data).encode("utf-8")
-    response = urllib3.HTTPResponse(
-        status=status,
-        body=BytesIO(data),
-        preload_content=False,
-    )
-    return response
+from mlos_bench.tests.services.remote.azure import make_httplib_json_response
 
 
 @pytest.mark.parametrize(
@@ -137,7 +123,7 @@ def test_azure_vm_service_custom_data(azure_auth_service: AzureAuthService) -> N
         (401, Status.FAILED),
         (404, Status.FAILED),
     ])
-@patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
+@patch("mlos_bench.services.remote.azure.azure_services.requests")
 # pylint: disable=too-many-arguments
 def test_vm_operation_status(mock_requests: MagicMock,
                              azure_vm_service: AzureVMService,
@@ -153,12 +139,15 @@ def test_vm_operation_status(mock_requests: MagicMock,
     mock_requests.post.return_value = mock_response
 
     operation = getattr(azure_vm_service, operation_name)
+    with pytest.raises(ValueError):
+        # Missing vmName should raise ValueError
+        (status, _) = operation({}) if accepts_params else operation()
     (status, _) = operation({"vmName": "test-vm"}) if accepts_params else operation()
     assert status == operation_status
 
 
-@patch("mlos_bench.services.remote.azure.azure_vm_services.time.sleep")
-@patch("mlos_bench.services.remote.azure.azure_vm_services.requests.Session")
+@patch("mlos_bench.services.remote.azure.azure_services.time.sleep")
+@patch("mlos_bench.services.remote.azure.azure_services.requests.Session")
 def test_wait_vm_operation_ready(mock_session: MagicMock, mock_sleep: MagicMock,
                                  azure_vm_service: AzureVMService) -> None:
     """
@@ -186,7 +175,7 @@ def test_wait_vm_operation_ready(mock_session: MagicMock, mock_sleep: MagicMock,
     assert status.is_succeeded()
 
 
-@patch("mlos_bench.services.remote.azure.azure_vm_services.requests.Session")
+@patch("mlos_bench.services.remote.azure.azure_services.requests.Session")
 def test_wait_vm_operation_timeout(mock_session: MagicMock,
                                    azure_vm_service: AzureVMService) -> None:
     """

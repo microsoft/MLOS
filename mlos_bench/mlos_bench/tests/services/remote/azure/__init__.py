@@ -3,6 +3,22 @@
 # Licensed under the MIT License.
 #
 """
-Tests for mlos_bench.services.remote.azure.
-Used to make mypy happy about multiple conftest.py modules.
+Tests helpers for mlos_bench.services.remote.azure.
 """
+from io import BytesIO
+
+import json
+import urllib3
+
+
+def make_httplib_json_response(status: int, json_data: dict) -> urllib3.HTTPResponse:
+    """
+    Prepare a json response object for use with urllib3
+    """
+    data = json.dumps(json_data).encode("utf-8")
+    response = urllib3.HTTPResponse(
+        status=status,
+        body=BytesIO(data),
+        preload_content=False,
+    )
+    return response

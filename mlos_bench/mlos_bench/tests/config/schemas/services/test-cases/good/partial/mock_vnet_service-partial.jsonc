@@ -1,0 +1,3 @@
+{
+    "class": "mlos_bench.tests.services.remote.mock.mock_network_service.MockNetworkService"
+}
