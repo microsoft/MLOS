@@ -10,12 +10,12 @@ import abc
 import json
 import logging
 from datetime import datetime
-from string import Template
 from types import TracebackType
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Type, TYPE_CHECKING, Union
 from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
+from mlos_bench.dict_templater import DictTemplater
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import TunableValue
@@ -201,10 +201,7 @@ class Environment(metaclass=abc.ABCMeta):
         """
         Expand `$var` into actual values of the variables.
         """
-        return {
-            key: Template(val).safe_substitute(global_config) if isinstance(val, str) else val
-            for key, val in params.items()
-        }
+        return DictTemplater(params).expand_vars(extra_source_dict=global_config)
 
     @property
     def _config_loader_service(self) -> "SupportsConfigLoading":

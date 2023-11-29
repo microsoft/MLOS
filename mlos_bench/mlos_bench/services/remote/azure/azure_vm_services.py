@@ -15,6 +15,7 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 import requests
 from requests.adapters import HTTPAdapter, Retry
 
+from mlos_bench.dict_templater import DictTemplater
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.authenticator_type import SupportsAuth
@@ -191,8 +192,10 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
         assert template is not None and isinstance(template, dict)
         self._deploy_template = template
 
-        self._deploy_params = merge_parameters(
-            dest=self.config['deploymentTemplateParameters'].copy(), source=global_config)
+        # Allow for recursive variable expansion as we do with global params and const_args.
+        deploy_params = DictTemplater(self.config['deploymentTemplateParameters']).expand_vars(extra_source_dict=global_config)
+
+        self._deploy_params = merge_parameters(dest=deploy_params, source=global_config)
 
         # As a convenience, allow reading customData out of a file, rather than
         # embedding it in a json config file.
@@ -205,6 +208,13 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             self._custom_data_file = self.config_loader_service.resolve_path(self._custom_data_file)
             with open(self._custom_data_file, 'r', encoding='utf-8') as custom_data_fh:
                 self._deploy_params["customData"] = custom_data_fh.read()
+
+    @property
+    def deploy_params(self) -> dict:
+        """
+        Get the deployment parameters.
+        """
+        return self._deploy_params
 
     def _get_session(self, params: dict) -> requests.Session:
         """

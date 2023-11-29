@@ -70,6 +70,31 @@ def test_wait_host_deployment_retry(mock_getconn: MagicMock,
     assert status == operation_status
 
 
+def test_azure_vm_service_recursive_template_params(azure_auth_service: AzureAuthService) -> None:
+    """
+    Test expanding template params recursively.
+    """
+    config = {
+        "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
+        "deploymentName": "TEST_DEPLOYMENT1",
+        "subscription": "TEST_SUB1",
+        "resourceGroup": "TEST_RG1",
+        "deploymentTemplateParameters": {
+            "location": "$location",
+            "vmMeta": "$vmName-$location",
+            "vmNsg": "$vmMeta-nsg",
+        },
+    }
+    global_config = {
+        "vmName": "test-vm",
+        "location": "eastus",
+    }
+    azure_vm_service = AzureVMService(config, global_config, parent=azure_auth_service)
+    assert azure_vm_service.deploy_params["location"] == global_config["location"]
+    assert azure_vm_service.deploy_params["vmMeta"] == f'{global_config["vmName"]}-{global_config["location"]}'
+    assert azure_vm_service.deploy_params["vmNsg"] == f'{azure_vm_service.deploy_params["vmMeta"]}-nsg'
+
+
 def test_azure_vm_service_custom_data(azure_auth_service: AzureAuthService) -> None:
     """
     Test loading custom data from a file.
@@ -92,8 +117,7 @@ def test_azure_vm_service_custom_data(azure_auth_service: AzureAuthService) -> N
         config_with_custom_data['deploymentTemplateParameters']['customData'] = "DUMMY_CUSTOM_DATA"  # type: ignore[index]
         AzureVMService(config_with_custom_data, global_config, parent=azure_auth_service)
     azure_vm_service = AzureVMService(config, global_config, parent=azure_auth_service)
-    # pylint: disable=protected-access
-    assert azure_vm_service._deploy_params['customData']
+    assert azure_vm_service.deploy_params['customData']
 
 
 @pytest.mark.parametrize(

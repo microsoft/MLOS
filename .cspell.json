@@ -73,6 +73,8 @@
         "subcmd",
         "subschema",
         "subschemas",
+        "Templater",
+        "templating",
         "tolist",
         "tunables",
         "workerinput",

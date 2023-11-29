@@ -12,13 +12,12 @@ command line.
 
 import argparse
 import logging
-import os
 import sys
 
-from string import Template
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
 from mlos_bench.config.schemas import ConfigSchema
+from mlos_bench.dict_templater import DictTemplater
 from mlos_bench.util import BaseTypeVar, try_parse_val
 
 from mlos_bench.tunables.tunable import TunableValue
@@ -103,7 +102,7 @@ class Launcher:
         # It's useful to keep it there explicitly mostly for the --help output.
         if args.experiment_id:
             self.global_config['experiment_id'] = args.experiment_id
-        self.global_config = self._expand_vars(self.global_config)
+        self.global_config = DictTemplater(self.global_config).expand_vars(use_os_env=True)
         assert isinstance(self.global_config, dict)
         # Ensure that the trial_id is present since it gets used by some other
         # configs but is typically controlled by the run optimize loop.
@@ -296,30 +295,6 @@ class Launcher:
         if config_path:
             global_config["config_path"] = config_path
         return global_config
-
-    def _expand_vars(self, value: Any) -> Any:
-        """
-        Expand dollar variables in the globals.
-
-        NOTE: `self.global_config` must be set.
-        """
-        if isinstance(value, str):
-            # use values either from the environment or from the global config
-            # Note: python 3.8 doesn't support the | operator, so we create a
-            # new set of params explicitly.
-            # Since this operates by updating the global_config along the way,
-            # we need to continually update the set of params to use for substitution.
-            params = self.global_config.copy()
-            params.update(dict(os.environ))
-            return Template(value).safe_substitute(params)
-        if isinstance(value, dict):
-            # Note: we use a loop instead of dict comprehension in order to
-            # allow secondary expansion of subsequent values immediately.
-            for (key, val) in value.items():
-                value[key] = self._expand_vars(val)
-        if isinstance(value, list):
-            return [self._expand_vars(val) for val in value]
-        return value
 
     def _init_tunable_values(self, random_init: bool, seed: Optional[int],
                              args_tunables: Optional[str]) -> TunableGroups:
