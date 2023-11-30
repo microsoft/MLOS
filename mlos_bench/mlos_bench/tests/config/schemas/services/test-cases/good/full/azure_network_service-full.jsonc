@@ -7,7 +7,6 @@
         "deploymentTemplatePath": "some/path/to/deployment/template.jsonc",
         "subscription": "subscription-id",
         "resourceGroup": "rg",
-        "deploymentName": "${experiment_id}-vnet-deployment",
 
         "deploymentTemplateParameters": {
             "location": "westus2",

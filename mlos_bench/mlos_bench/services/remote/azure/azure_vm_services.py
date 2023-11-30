@@ -162,6 +162,15 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
             with open(self._custom_data_file, 'r', encoding='utf-8') as custom_data_fh:
                 self._deploy_params["customData"] = custom_data_fh.read()
 
+    def _set_default_params(self, params: dict) -> dict:    # pylint: disable=no-self-use
+        # Try and provide a semi sane default for the deploymentName if not provided
+        # since this is a common way to set the deploymentName and can same some
+        # config work for the caller.
+        if 'vmName' not in params:
+            raise ValueError("Required param 'vmName' is missing.")
+        params.setdefault(f"{params['vmName']}-deployment")
+        return params
+
     def wait_host_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
         """
         Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
@@ -203,6 +212,8 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
         _LOG.info("Wait for operation on VM %s", params["vmName"])
+        # Try and provide a semi sane default for the deploymentName
+        params.setdefault(f"{params['vmName']}-deployment")
         return self._wait_while(self._check_operation_status, Status.RUNNING, params)
 
     def wait_os_operation(self, params: dict) -> Tuple["Status", dict]:
@@ -243,6 +254,7 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        params = self._set_default_params(params)
         config = merge_parameters(
             dest=self.config.copy(),
             source=params,
@@ -280,6 +292,7 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        params = self._set_default_params(params)
         config = merge_parameters(
             dest=self.config.copy(),
             source=params,
@@ -311,6 +324,7 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        params = self._set_default_params(params)
         config = merge_parameters(
             dest=self.config.copy(),
             source=params,
@@ -344,6 +358,7 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        params = self._set_default_params(params)
         config = merge_parameters(
             dest=self.config.copy(),
             source=params,
@@ -380,6 +395,7 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        params = self._set_default_params(params)
         config = merge_parameters(
             dest=self.config.copy(),
             source=params,
@@ -422,6 +438,7 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        config = self._set_default_params(config)
         config = merge_parameters(
             dest=self.config.copy(),
             source=config,
