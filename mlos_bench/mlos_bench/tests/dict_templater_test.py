@@ -9,11 +9,10 @@ Unit tests for DictTemplater class.
 from copy import deepcopy
 from typing import Any, Dict
 
-import os
-
 import pytest
 
 from mlos_bench.dict_templater import DictTemplater
+from mlos_bench.os_env import environ
 
 
 @pytest.fixture
@@ -89,11 +88,12 @@ def test_os_env_expansion(source_template_dict: Dict[str, Any]) -> None:
     """
     Test that expansions from OS env work as expected.
     """
-    os.environ["extra_str"] = "os-env-extra_str"
-    os.environ["string"] = "shouldn't be used"
+    environ["extra_str"] = "os-env-extra_str"
+    environ["string"] = "shouldn't be used"
+
     results = DictTemplater(source_template_dict).expand_vars(use_os_env=True)
     assert results == {
-        "extra_str-ref": f"{os.environ['extra_str']}-ref",
+        "extra_str-ref": f"{environ['extra_str']}-ref",
         "str": "string",
         "str_ref": "string-ref",
         "secondary_expansion": "string-ref",
@@ -111,7 +111,7 @@ def test_os_env_expansion(source_template_dict: Dict[str, Any]) -> None:
         ],
         "dict": {
             "nested-str-ref": "nested-string-ref",
-            "nested-extra-str-ref": f"nested-{os.environ['extra_str']}-ref",
+            "nested-extra-str-ref": f"nested-{environ['extra_str']}-ref",
         },
     }
 

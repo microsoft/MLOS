@@ -10,7 +10,7 @@ from copy import deepcopy
 from string import Template
 from typing import Any, Dict, Optional
 
-import os
+from mlos_bench.os_env import environ
 
 
 class DictTemplater:    # pylint: disable=too-few-public-methods
@@ -67,7 +67,7 @@ class DictTemplater:    # pylint: disable=too-few-public-methods
                 value = Template(value).safe_substitute(extra_source_dict)
             # Finally, fallback to the os environment.
             if use_os_env:
-                value = Template(value).safe_substitute(dict(os.environ))
+                value = Template(value).safe_substitute(dict(environ))
         elif isinstance(value, dict):
             # Note: we use a loop instead of dict comprehension in order to
             # allow secondary expansion of subsequent values immediately.

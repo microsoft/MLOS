@@ -16,6 +16,7 @@ import pytest
 
 from mlos_bench.launcher import Launcher
 from mlos_bench.optimizers import MockOptimizer
+from mlos_bench.os_env import environ
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.util import path_join
 from mlos_bench.services.types import (
@@ -61,10 +62,10 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     # changing into the code directory, but doesn't update the PWD environment
     # variable so we use a separate variable.
     # See global_test_config.jsonc for more details.
-    os.environ["CUSTOM_PATH_FROM_ENV"] = os.getcwd()
+    environ["CUSTOM_PATH_FROM_ENV"] = os.getcwd()
     if sys.platform == 'win32':
         # Some env tweaks for platform compatibility.
-        os.environ['USER'] = os.environ['USERNAME']
+        environ['USER'] = environ['USERNAME']
 
     # This is part of the minimal required args by the Launcher.
     env_conf_path = 'environments/mock/mock_env.jsonc'
@@ -113,10 +114,10 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     # changing into the code directory, but doesn't update the PWD environment
     # variable so we use a separate variable.
     # See global_test_config.jsonc for more details.
-    os.environ["CUSTOM_PATH_FROM_ENV"] = os.getcwd()
+    environ["CUSTOM_PATH_FROM_ENV"] = os.getcwd()
     if sys.platform == 'win32':
         # Some env tweaks for platform compatibility.
-        os.environ['USER'] = os.environ['USERNAME']
+        environ['USER'] = environ['USERNAME']
 
     config_file = 'cli/test-cli-config.jsonc'
     cli_args = ' '.join([f"--config-path {config_path}" for config_path in config_paths]) + \
