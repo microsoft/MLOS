@@ -36,7 +36,7 @@ def configuration_space() -> ConfigurationSpace:
     spaces = ConfigurationSpace(space={
         "vmSize": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"],
         "idle": ["halt", "mwait", "noidle"],
-        "kernel_sched_migration_cost_ns": (-1, 500000),
+        "kernel_sched_migration_cost_ns": (0, 500000),
         "kernel_sched_latency_ns": (0, 1000000000),
     })
 

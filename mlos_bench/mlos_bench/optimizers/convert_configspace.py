@@ -98,4 +98,6 @@ def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
         A ConfigSpace Configuration.
     """
     configspace = tunable_groups_to_configspace(tunables)
-    return Configuration(configspace, values={tunable.name: tunable.value for (tunable, _group) in tunables})
+    return Configuration(configspace, values={
+        tunable.name: tunable.value for (tunable, _group) in tunables
+    })
