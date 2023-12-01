@@ -194,5 +194,5 @@ def test_tunable_assign_special_with_coercion_str(tunable_int: Tunable) -> None:
     Check the assignment of a special value outside of the range (but declared `special`).
     Check coercion from string to int.
     """
-    tunable_int.numerical_value = "-1"
+    tunable_int.value = "-1"
     assert tunable_int.numerical_value == -1
