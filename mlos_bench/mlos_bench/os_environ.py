@@ -26,12 +26,12 @@ else:
     from typing_extensions import TypeAlias
 
 if sys.version_info >= (3, 9):
-    ENVIRON_TYPE: TypeAlias = os._Environ[str]
+    EnvironType: TypeAlias = os._Environ[str]
 else:
-    ENVIRON_TYPE: TypeAlias = os._Environ
+    EnvironType: TypeAlias = os._Environ
 
 # Handle case sensitivity differences between platforms.
 # https://stackoverflow.com/a/19023293
-environ: ENVIRON_TYPE = nt.environ if sys.platform == 'win32' else os.environ
+environ: EnvironType = nt.environ if sys.platform == 'win32' else os.environ
 
 __all__ = ['environ']
