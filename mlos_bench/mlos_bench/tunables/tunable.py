@@ -32,7 +32,7 @@ class TunableDict(TypedDict, total=False):
     default: TunableValue
     values: Optional[List[Optional[str]]]
     range: Optional[Union[Sequence[int], Sequence[float]]]
-    special: Optional[Union[List[int], List[str]]]
+    special: Optional[Union[List[int], List[float]]]
     meta: Dict[str, Any]
 
 
@@ -76,7 +76,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             assert len(config_range) == 2, f"Invalid range: {config_range}"
             config_range = (config_range[0], config_range[1])
             self._range = config_range
-        self._special = config.get("special")
+        self._special = set(config.get("special") or [])
         self._current_value = None
         self._sanity_check()
         self.value = self._default
@@ -92,7 +92,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
                 raise ValueError("Range must be None for the categorical type")
             if len(set(self._values)) != len(self._values):
                 raise ValueError("Values must be unique for the categorical type")
-            if self._special is not None:
+            if self._special:
                 raise ValueError("Special values must be None for the categorical type")
         elif self.is_numerical:
             if self._values is not None:
@@ -270,8 +270,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             return value in self._values
         elif self.is_numerical and self._range:
             if isinstance(value, (int, float)):
-                # TODO: allow special values outside of range?
-                return bool(self._range[0] <= value <= self._range[1])  # or value == self._default
+                return bool(self._range[0] <= value <= self._range[1]) or value in self._special
             else:
                 raise ValueError(f"Invalid value type for tunable {self}: {value}={type(value)}")
         else:

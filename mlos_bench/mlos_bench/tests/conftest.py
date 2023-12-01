@@ -59,7 +59,7 @@ TUNABLE_GROUPS_JSON = """
                 "description": "Cost of migrating the thread to another core",
                 "type": "int",
                 "default": -1,
-                "range": [-1, 500000],
+                "range": [0, 500000],
                 "special": [-1]
             },
             "kernel_sched_latency_ns": {
