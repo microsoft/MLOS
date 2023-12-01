@@ -62,7 +62,6 @@ def test_azure_vm_service_recursive_template_params(azure_auth_service: AzureAut
     """
     config = {
         "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
-        "deploymentName": "TEST_DEPLOYMENT1",
         "subscription": "TEST_SUB1",
         "resourceGroup": "TEST_RG1",
         "deploymentTemplateParameters": {
@@ -72,6 +71,7 @@ def test_azure_vm_service_recursive_template_params(azure_auth_service: AzureAut
         },
     }
     global_config = {
+        "deploymentName": "TEST_DEPLOYMENT1",
         "vmName": "test-vm",
         "location": "eastus",
     }
@@ -88,7 +88,6 @@ def test_azure_vm_service_custom_data(azure_auth_service: AzureAuthService) -> N
     config = {
         "customDataFile": "services/remote/azure/cloud-init/alt-ssh.yml",
         "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
-        "deploymentName": "TEST_DEPLOYMENT1",
         "subscription": "TEST_SUB1",
         "resourceGroup": "TEST_RG1",
         "deploymentTemplateParameters": {
@@ -96,6 +95,7 @@ def test_azure_vm_service_custom_data(azure_auth_service: AzureAuthService) -> N
         },
     }
     global_config = {
+        "deploymentName": "TEST_DEPLOYMENT1",
         "vmName": "test-vm",
     }
     with pytest.raises(ValueError):

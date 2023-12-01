@@ -68,6 +68,15 @@ class AzureNetworkService(AzureService, SupportsNetworkProvisioning):
             ])
         )
 
+    def _set_default_params(self, params: dict) -> dict:    # pylint: disable=no-self-use
+        # Try and provide a semi sane default for the deploymentName if not provided
+        # since this is a common way to set the deploymentName and can same some
+        # config work for the caller.
+        if "vnetName" in params and "deploymentName" not in params:
+            params["deploymentName"] = f"{params['vnetName']}-deployment"
+            _LOG.info("deploymentName missing from params. Defaulting to '%s'.", params["deploymentName"])
+        return params
+
     def wait_network_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
         """
         Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
@@ -127,6 +136,7 @@ class AzureNetworkService(AzureService, SupportsNetworkProvisioning):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        params = self._set_default_params(params)
         config = merge_parameters(
             dest=self.config.copy(),
             source=params,

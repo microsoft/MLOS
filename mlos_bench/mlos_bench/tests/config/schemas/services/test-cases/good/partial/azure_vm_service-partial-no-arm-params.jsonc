@@ -1,7 +1,6 @@
 {
     "class": "mlos_bench.services.remote.azure.AzureVMService",
     "config": {
-        "deploymentName": "deployment",
         "deploymentTemplatePath": "some/path/to/deployment/template.jsonc"
     }
 }
