@@ -26,7 +26,7 @@ else:
     from typing_extensions import TypeAlias
 
 if sys.version_info >= (3, 9):
-    EnvironType: TypeAlias = os._Environ[str]   # pylint: disable=protected-access
+    EnvironType: TypeAlias = os._Environ[str]   # pylint: disable=protected-access,disable=unsubscriptable-object
 else:
     EnvironType: TypeAlias = os._Environ        # pylint: disable=protected-access
 
