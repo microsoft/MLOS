@@ -12,7 +12,7 @@ from typing import Any, Dict
 import pytest
 
 from mlos_bench.dict_templater import DictTemplater
-from mlos_bench.os_env import environ
+from mlos_bench.os_environ import environ
 
 
 @pytest.fixture

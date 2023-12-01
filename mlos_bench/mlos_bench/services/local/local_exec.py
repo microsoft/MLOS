@@ -18,7 +18,7 @@ from typing import (
     Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, TYPE_CHECKING, Union
 )
 
-from mlos_bench.os_env import environ
+from mlos_bench.os_environ import environ
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.local.temp_dir_context import TempDirContextService
 from mlos_bench.services.types.local_exec_type import SupportsLocalExec

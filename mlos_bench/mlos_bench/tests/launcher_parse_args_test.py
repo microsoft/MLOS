@@ -16,7 +16,7 @@ import pytest
 
 from mlos_bench.launcher import Launcher
 from mlos_bench.optimizers import MockOptimizer
-from mlos_bench.os_env import environ
+from mlos_bench.os_environ import environ
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.util import path_join
 from mlos_bench.services.types import (

@@ -10,7 +10,7 @@ from copy import deepcopy
 from string import Template
 from typing import Any, Dict, Optional
 
-from mlos_bench.os_env import environ
+from mlos_bench.os_environ import environ
 
 
 class DictTemplater:    # pylint: disable=too-few-public-methods
