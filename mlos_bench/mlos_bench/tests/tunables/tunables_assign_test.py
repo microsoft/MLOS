@@ -172,6 +172,14 @@ def test_tunable_assign_special(tunable_int: Tunable) -> None:
     assert tunable_int.numerical_value == -1
 
 
+def test_tunable_assign_special_fail(tunable_int: Tunable) -> None:
+    """
+    Assign a value that is neither special nor in range and fail.
+    """
+    with pytest.raises(ValueError):
+        tunable_int.numerical_value = -2
+
+
 def test_tunable_assign_special_with_coercion(tunable_int: Tunable) -> None:
     """
     Check the assignment of a special value outside of the range (but declared `special`).
