@@ -72,9 +72,8 @@ class AzureNetworkService(AzureService, SupportsNetworkProvisioning):
         # Try and provide a semi sane default for the deploymentName if not provided
         # since this is a common way to set the deploymentName and can same some
         # config work for the caller.
-        if 'vnetName' not in params:
-            raise ValueError("Required param 'vnetName' is missing.")
-        params.setdefault(f"{params['vnetName']}-deployment")
+        if "vnetName" in params:
+            params.setdefault("deploymentName", f"{params['vnetName']}-deployment")
         return params
 
     def wait_network_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
