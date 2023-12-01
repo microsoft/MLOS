@@ -166,8 +166,9 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
         # Try and provide a semi sane default for the deploymentName if not provided
         # since this is a common way to set the deploymentName and can same some
         # config work for the caller.
-        if "vmName" in params:
-            params.setdefault("deploymentName", f"{params['vmName']}-deployment")
+        if "vmName" in params and "deploymentName" not in params:
+            params["deploymentName"] = f"{params['vmName']}-deployment"
+            _LOG.info("deploymentName missing from params. Defaulting to %s", params["deploymentName"])
         return params
 
     def wait_host_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
