@@ -20,11 +20,6 @@
                             "description": "The name of the resource group to place the deployment in (typically provided in the global config in order to omit from source control).",
                             "type": "string"
                         },
-                        "deploymentName": {
-                            "$comment": "TODO: provide templating strings to augment names via experiment_id/trial_id, for instance.",
-                            "description": "Name of the deployment to create for the experiment resources.",
-                            "type": "string"
-                        },
                         "deploymentTemplatePath": {
                             "description": "Path to an ARM template file.",
                             "type": "string",
@@ -56,7 +51,6 @@
                         }
                     },
                     "required": [
-                        "deploymentName",
                         "deploymentTemplatePath"
                     ]
                 }

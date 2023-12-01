@@ -47,7 +47,6 @@ def azure_network_service(azure_auth_service: AzureAuthService) -> AzureNetworkS
     """
     return AzureNetworkService(config={
         "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
-        "deploymentName": "TEST_DEPLOYMENT-VNET",
         "subscription": "TEST_SUB",
         "resourceGroup": "TEST_RG",
         "deploymentTemplateParameters": {
@@ -56,6 +55,7 @@ def azure_network_service(azure_auth_service: AzureAuthService) -> AzureNetworkS
         "pollInterval": 1,
         "pollTimeout": 2
     }, global_config={
+        "deploymentName": "TEST_DEPLOYMENT-VNET",
         "vnetName": "test-vnet",  # Should come from the upper-level config
     }, parent=azure_auth_service)
 
@@ -67,7 +67,6 @@ def azure_vm_service(azure_auth_service: AzureAuthService) -> AzureVMService:
     """
     return AzureVMService(config={
         "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
-        "deploymentName": "TEST_DEPLOYMENT-VM",
         "subscription": "TEST_SUB",
         "resourceGroup": "TEST_RG",
         "deploymentTemplateParameters": {
@@ -76,6 +75,7 @@ def azure_vm_service(azure_auth_service: AzureAuthService) -> AzureVMService:
         "pollInterval": 1,
         "pollTimeout": 2
     }, global_config={
+        "deploymentName": "TEST_DEPLOYMENT-VM",
         "vmName": "test-vm",  # Should come from the upper-level config
     }, parent=azure_auth_service)
 

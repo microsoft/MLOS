@@ -73,7 +73,6 @@ class AzureService(Service, metaclass=abc.ABCMeta):
         check_required_params(self.config, [
             "subscription",
             "resourceGroup",
-            "deploymentName",
             "deploymentTemplatePath",
             "deploymentTemplateParameters",
         ])
@@ -101,6 +100,23 @@ class AzureService(Service, metaclass=abc.ABCMeta):
         Get the deployment parameters.
         """
         return self._deploy_params
+
+    @abc.abstractmethod
+    def _set_default_params(self, params: dict) -> dict:
+        """
+        Optionally set some default parameters for the request.
+
+        Parameters
+        ----------
+        params : dict
+            The parameters.
+
+        Returns
+        -------
+        dict
+            The updated parameters.
+        """
+        raise NotImplementedError("Should be overridden by subclass.")
 
     def _get_session(self, params: dict) -> requests.Session:
         """
@@ -250,7 +266,8 @@ class AzureService(Service, metaclass=abc.ABCMeta):
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
-        _LOG.info("Wait for %s to %s", params.get("deploymentName") or self.config.get("deploymentName"),
+        params = self._set_default_params(params)
+        _LOG.info("Wait for %s to %s", params.get("deploymentName"),
                   "provision" if is_setup else "deprovision")
         return self._wait_while(self._check_deployment, Status.PENDING, params)
 
@@ -268,12 +285,14 @@ class AzureService(Service, metaclass=abc.ABCMeta):
             Steady state status - keep polling `func` while it returns `loop_status`.
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
+            Requires deploymentName.
 
         Returns
         -------
         result : (Status, dict)
             A pair of Status and result.
         """
+        params = self._set_default_params(params)
         config = merge_parameters(
             dest=self.config.copy(), source=params, required_keys=["deploymentName"])
 
@@ -322,6 +341,7 @@ class AzureService(Service, metaclass=abc.ABCMeta):
             A pair of Status and result. The result is always {}.
             Status is one of {SUCCEEDED, PENDING, FAILED}
         """
+        params = self._set_default_params(params)
         config = merge_parameters(
             dest=self.config.copy(),
             source=params,
@@ -387,7 +407,8 @@ class AzureService(Service, metaclass=abc.ABCMeta):
             parameters extracted from the response JSON, or {} if the status is FAILED.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
-        config = merge_parameters(dest=self.config.copy(), source=params)
+        params = self._set_default_params(params)
+        config = merge_parameters(dest=self.config.copy(), source=params, required_keys=["deploymentName"])
         _LOG.info("Deploy: %s :: %s", config["deploymentName"], params)
 
         params = merge_parameters(dest=self._deploy_params.copy(), source=params)
