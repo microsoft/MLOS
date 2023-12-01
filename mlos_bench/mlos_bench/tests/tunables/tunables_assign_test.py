@@ -162,3 +162,29 @@ def test_tunable_assign_null_to_float(tunable_float: Tunable) -> None:
         tunable_float.value = None
     with pytest.raises(TypeError):
         tunable_float.numerical_value = None    # type: ignore[assignment]
+
+
+def test_tunable_assign_special(tunable_int: Tunable) -> None:
+    """
+    Check the assignment of a special value outside of the range (but declared `special`).
+    """
+    tunable_int.numerical_value = -1
+    assert tunable_int.numerical_value == -1
+
+
+def test_tunable_assign_special_with_coercion(tunable_int: Tunable) -> None:
+    """
+    Check the assignment of a special value outside of the range (but declared `special`).
+    Check coercion from float to int.
+    """
+    tunable_int.numerical_value = -1.0
+    assert tunable_int.numerical_value == -1
+
+
+def test_tunable_assign_special_with_coercion_str(tunable_int: Tunable) -> None:
+    """
+    Check the assignment of a special value outside of the range (but declared `special`).
+    Check coercion from string to int.
+    """
+    tunable_int.numerical_value = "-1"
+    assert tunable_int.numerical_value == -1
