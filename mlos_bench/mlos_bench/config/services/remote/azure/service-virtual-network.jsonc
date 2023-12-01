@@ -9,7 +9,6 @@
                 // can be overridden by the parameters pushed from the caller Environment.
                 "subscription": "PLACEHOLDER; AZURE SUBSCRIPTION ID",
                 "resourceGroup": "PLACEHOLDER; e.g., os-autotune",
-                "deploymentName": "$resourceGroup-vnet-deployment",
 
                 "deploymentTemplatePath": "services/remote/azure/arm-templates/ARM-virtual-network.jsonc",
                 // Make sure to list all ARM template parameters that can be overridden by the caller.
