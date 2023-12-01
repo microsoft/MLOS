@@ -74,7 +74,7 @@ class AzureNetworkService(AzureService, SupportsNetworkProvisioning):
         # config work for the caller.
         if "vnetName" in params and "deploymentName" not in params:
             params["deploymentName"] = f"{params['vnetName']}-deployment"
-            _LOG.info("deploymentName missing from params. Defaulting to %s", params["deploymentName"])
+            _LOG.info("deploymentName missing from params. Defaulting to '%s'.", params["deploymentName"])
         return params
 
     def wait_network_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:

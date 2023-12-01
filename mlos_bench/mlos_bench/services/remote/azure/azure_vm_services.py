@@ -168,7 +168,7 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
         # config work for the caller.
         if "vmName" in params and "deploymentName" not in params:
             params["deploymentName"] = f"{params['vmName']}-deployment"
-            _LOG.info("deploymentName missing from params. Defaulting to %s", params["deploymentName"])
+            _LOG.info("deploymentName missing from params. Defaulting to '%s'.", params["deploymentName"])
         return params
 
     def wait_host_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
