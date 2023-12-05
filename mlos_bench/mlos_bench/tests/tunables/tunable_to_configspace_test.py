@@ -8,19 +8,13 @@ Unit tests for Tunable to ConfigSpace conversion.
 
 import pytest
 
-from ConfigSpace import (
-    ConfigurationSpace,
-    CategoricalHyperparameter,
-    UniformIntegerHyperparameter,
-    UniformFloatHyperparameter,
-)
+from ConfigSpace import ConfigurationSpace, CategoricalHyperparameter
+
 from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
-from mlos_bench.optimizers.convert_configspace import (
-    _tunable_to_configspace,
-    tunable_groups_to_configspace,
-)
+from mlos_bench.optimizers.convert_configspace import _tunable_to_configspace
+from mlos_bench.optimizers.convert_configspace import tunable_groups_to_configspace
 
 # pylint: disable=redefined-outer-name
 
@@ -39,53 +33,49 @@ def configuration_space() -> ConfigurationSpace:
     spaces = ConfigurationSpace(space={
         "vmSize": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"],
         "idle": ["halt", "mwait", "noidle"],
-        "kernel_sched_migration_cost_ns": (0, 500000),
+        "kernel_sched_migration_cost_ns:range": (0, 500000),
+        "kernel_sched_migration_cost_ns:special": [-1],
+        "kernel_sched_migration_cost_ns:type": ["special", "range"],
         "kernel_sched_latency_ns": (0, 1000000000),
     })
 
     spaces["vmSize"].default_value = "Standard_B4ms"
     spaces["idle"].default_value = "halt"
-    spaces["kernel_sched_migration_cost_ns"].default_value = -1
+    spaces["kernel_sched_migration_cost_ns:range"].default_value = 250000
+    spaces["kernel_sched_migration_cost_ns:special"].default_value = -1
+    spaces["kernel_sched_migration_cost_ns:type"].default_value = "special"
     spaces["kernel_sched_latency_ns"].default_value = 2000000
 
     return spaces
 
 
 def _cmp_tunable_hyperparameter_categorical(
-        tunable: Tunable, cs_param: CategoricalHyperparameter) -> None:
+        tunable: Tunable, space: ConfigurationSpace) -> None:
     """
     Check if categorical Tunable and ConfigSpace Hyperparameter actually match.
     """
-    assert isinstance(cs_param, CategoricalHyperparameter)
-    assert set(cs_param.choices) == set(tunable.categories)
-    assert cs_param.default_value == tunable.value
+    param = space[tunable.name]
+    assert isinstance(param, CategoricalHyperparameter)
+    assert set(param.choices) == set(tunable.categories)
+    assert param.default_value == tunable.value
 
 
-def _cmp_tunable_hyperparameter_int(
-        tunable: Tunable, cs_param: UniformIntegerHyperparameter) -> None:
+def _cmp_tunable_hyperparameter_numerical(
+        tunable: Tunable, space: ConfigurationSpace) -> None:
     """
     Check if integer Tunable and ConfigSpace Hyperparameter actually match.
     """
-    assert isinstance(cs_param, UniformIntegerHyperparameter)
-    assert (cs_param.lower, cs_param.upper) == tuple(tunable.range)
-    assert cs_param.default_value == tunable.value
-
-
-def _cmp_tunable_hyperparameter_float(
-        tunable: Tunable, cs_param: UniformFloatHyperparameter) -> None:
-    """
-    Check if float Tunable and ConfigSpace Hyperparameter actually match.
-    """
-    assert isinstance(cs_param, UniformFloatHyperparameter)
-    assert (cs_param.lower, cs_param.upper) == tuple(tunable.range)
-    assert cs_param.default_value == tunable.value
+    param = space[tunable.name + (":range" if tunable.special else "")]
+    assert (param.lower, param.upper) == tuple(tunable.range)
+    if tunable.in_range(tunable.value):
+        assert param.default_value == tunable.value
 
 
 def test_tunable_to_configspace_categorical(tunable_categorical: Tunable) -> None:
     """
     Check the conversion of Tunable to CategoricalHyperparameter.
     """
-    cs_param = _tunable_to_configspace(tunable_categorical)[tunable_categorical.name]
+    cs_param = _tunable_to_configspace(tunable_categorical)
     _cmp_tunable_hyperparameter_categorical(tunable_categorical, cs_param)
 
 
@@ -93,22 +83,22 @@ def test_tunable_to_configspace_int(tunable_int: Tunable) -> None:
     """
     Check the conversion of Tunable to UniformIntegerHyperparameter.
     """
-    cs_param = _tunable_to_configspace(tunable_int)[tunable_int.name]
-    _cmp_tunable_hyperparameter_int(tunable_int, cs_param)
+    cs_param = _tunable_to_configspace(tunable_int)
+    _cmp_tunable_hyperparameter_numerical(tunable_int, cs_param)
 
 
 def test_tunable_to_configspace_float(tunable_float: Tunable) -> None:
     """
     Check the conversion of Tunable to UniformFloatHyperparameter.
     """
-    cs_param = _tunable_to_configspace(tunable_float)[tunable_float.name]
-    _cmp_tunable_hyperparameter_float(tunable_float, cs_param)
+    cs_param = _tunable_to_configspace(tunable_float)
+    _cmp_tunable_hyperparameter_numerical(tunable_float, cs_param)
 
 
 _CMP_FUNC = {
-    "int": _cmp_tunable_hyperparameter_int,
-    "float": _cmp_tunable_hyperparameter_float,
-    "categorical": _cmp_tunable_hyperparameter_categorical
+    "int": _cmp_tunable_hyperparameter_numerical,
+    "float": _cmp_tunable_hyperparameter_numerical,
+    "categorical": _cmp_tunable_hyperparameter_categorical,
 }
 
 
@@ -119,9 +109,7 @@ def test_tunable_groups_to_hyperparameters(tunable_groups: TunableGroups) -> Non
     """
     space = tunable_groups_to_configspace(tunable_groups)
     for (tunable, _group) in tunable_groups:
-        cs_param = space[tunable.name]
-        assert cs_param.default_value == tunable.value
-        _CMP_FUNC[tunable.type](tunable, cs_param)
+        _CMP_FUNC[tunable.type](tunable, space)
 
 
 def test_tunable_groups_to_configspace(

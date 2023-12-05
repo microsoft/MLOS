@@ -44,7 +44,7 @@ def _tunable_to_configspace(
     cs : ConfigurationSpace
         A ConfigurationSpace object that corresponds to the Tunable.
     """
-    meta = {"group": group_name, "cost": cost}  # {"lower": "", "upper": "", "scaling": ""}
+    meta = {"group": group_name, "cost": cost}  # {"scaling": ""}
 
     if tunable.type == "categorical":
         return ConfigurationSpace({
@@ -68,24 +68,28 @@ def _tunable_to_configspace(
                 meta=meta)
         })
 
-    cs = ConfigurationSpace(
-        name=tunable.name,
-        space={
-            "range": hp_type(
-                name="range", lower=tunable.range[0], upper=tunable.range[1],
-                default_value=tunable.default if tunable.in_range(tunable.default) else None,
-                meta=meta),
-            "special": CategoricalHyperparameter(
-                name="special", choices=tunable.special,
-                default_value=tunable.default if tunable.default in tunable.special else None,
-                meta=meta),
-            "type": CategoricalHyperparameter(
-                name="type", choices=["special", "range"], default_value="special",
-                weights=[0.1, 0.9]),  # TODO: make weights configurable
-        }
-    )
-    cs.add_condition(EqualsCondition(cs["special"], cs["type"], "special"))
-    cs.add_condition(EqualsCondition(cs["range"], cs["type"], "range"))
+    cs = ConfigurationSpace({
+        "range": hp_type(
+            name=tunable.name + ":range",
+            lower=tunable.range[0], upper=tunable.range[1],
+            default_value=tunable.default if tunable.in_range(tunable.default) else None,
+            meta=meta),
+        "special": CategoricalHyperparameter(
+            name=tunable.name + ":special",
+            choices=tunable.special,
+            default_value=tunable.default if tunable.default in tunable.special else None,
+            meta=meta),
+        "type": CategoricalHyperparameter(
+            name=tunable.name + ":type",
+            choices=["special", "range"], default_value="special",
+            weights=[0.1, 0.9]),  # TODO: Make weights configurable
+    })
+
+    cs.add_condition(EqualsCondition(
+        cs[tunable.name + ":special"], cs[tunable.name + ":type"], "special"))
+    cs.add_condition(EqualsCondition(
+        cs[tunable.name + ":range"], cs[tunable.name + ":type"], "range"))
+
     return cs
 
 
@@ -109,7 +113,7 @@ def tunable_groups_to_configspace(tunables: TunableGroups, seed: Optional[int] =
     space = ConfigurationSpace(seed=seed)
     for (tunable, group) in tunables:
         space.add_configuration_space(
-            prefix="",
+            prefix="", delimiter="",
             configuration_space=_tunable_to_configspace(
                 tunable, group.name, group.get_current_cost()))
     return space
@@ -133,11 +137,11 @@ def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
     for (tunable, _group) in tunables:
         if tunable.special:
             if tunable.value in tunable.special:
-                values[f"{tunable.name}:type"] = "special"
-                values[f"{tunable.name}:special"] = tunable.value
+                values[tunable.name + ":type"] = "special"
+                values[tunable.name + ":special"] = tunable.value
             else:
-                values[f"{tunable.name}:type"] = "range"
-                values[f"{tunable.name}:range"] = tunable.value
+                values[tunable.name + ":type"] = "range"
+                values[tunable.name + ":range"] = tunable.value
         else:
             values[tunable.name] = tunable.value
     configspace = tunable_groups_to_configspace(tunables)
