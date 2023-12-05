@@ -76,7 +76,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             assert len(config_range) == 2, f"Invalid range: {config_range}"
             config_range = (config_range[0], config_range[1])
             self._range = config_range
-        self._special = config.get("special") or []
+        self._special: Union[List[int], List[float]] = config.get("special") or []
         self._current_value = None
         self._sanity_check()
         self.value = self._default

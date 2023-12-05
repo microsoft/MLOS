@@ -8,16 +8,19 @@ Unit tests for Tunable to ConfigSpace conversion.
 
 import pytest
 
-from ConfigSpace import UniformIntegerHyperparameter
-from ConfigSpace import UniformFloatHyperparameter
-from ConfigSpace import CategoricalHyperparameter
-from ConfigSpace import ConfigurationSpace
-
+from ConfigSpace import (
+    ConfigurationSpace,
+    CategoricalHyperparameter,
+    UniformIntegerHyperparameter,
+    UniformFloatHyperparameter,
+)
 from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
-from mlos_bench.optimizers.convert_configspace import _tunable_to_hyperparameter
-from mlos_bench.optimizers.convert_configspace import tunable_groups_to_configspace
+from mlos_bench.optimizers.convert_configspace import (
+    _tunable_to_configspace,
+    tunable_groups_to_configspace,
+)
 
 # pylint: disable=redefined-outer-name
 
@@ -78,27 +81,27 @@ def _cmp_tunable_hyperparameter_float(
     assert cs_param.default_value == tunable.value
 
 
-def test_tunable_to_hyperparameter_categorical(tunable_categorical: Tunable) -> None:
+def test_tunable_to_configspace_categorical(tunable_categorical: Tunable) -> None:
     """
     Check the conversion of Tunable to CategoricalHyperparameter.
     """
-    cs_param = _tunable_to_hyperparameter(tunable_categorical)
+    cs_param = _tunable_to_configspace(tunable_categorical)[tunable_categorical.name]
     _cmp_tunable_hyperparameter_categorical(tunable_categorical, cs_param)
 
 
-def test_tunable_to_hyperparameter_int(tunable_int: Tunable) -> None:
+def test_tunable_to_configspace_int(tunable_int: Tunable) -> None:
     """
     Check the conversion of Tunable to UniformIntegerHyperparameter.
     """
-    cs_param = _tunable_to_hyperparameter(tunable_int)
+    cs_param = _tunable_to_configspace(tunable_int)[tunable_int.name]
     _cmp_tunable_hyperparameter_int(tunable_int, cs_param)
 
 
-def test_tunable_to_hyperparameter_float(tunable_float: Tunable) -> None:
+def test_tunable_to_configspace_float(tunable_float: Tunable) -> None:
     """
     Check the conversion of Tunable to UniformFloatHyperparameter.
     """
-    cs_param = _tunable_to_hyperparameter(tunable_float)
+    cs_param = _tunable_to_configspace(tunable_float)[tunable_float.name]
     _cmp_tunable_hyperparameter_float(tunable_float, cs_param)
 
 
