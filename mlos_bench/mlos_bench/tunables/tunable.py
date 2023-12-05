@@ -76,7 +76,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             assert len(config_range) == 2, f"Invalid range: {config_range}"
             config_range = (config_range[0], config_range[1])
             self._range = config_range
-        self._special = set(config.get("special") or [])
+        self._special = config.get("special") or []
         self._current_value = None
         self._sanity_check()
         self.value = self._default
@@ -270,11 +270,24 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             return value in self._values
         elif self.is_numerical and self._range:
             if isinstance(value, (int, float)):
-                return bool(self._range[0] <= value <= self._range[1]) or value in self._special
+                return self.in_range(value) or value in self._special
             else:
                 raise ValueError(f"Invalid value type for tunable {self}: {value}={type(value)}")
         else:
             raise ValueError(f"Invalid parameter type: {self._type}")
+
+    def in_range(self, value: Union[int, float, str, None]) -> bool:
+        """
+        Check if the value is within the range of the tunable.
+        Do *NOT* check for special values.
+        Return False if the tunable or value is categorical or None.
+        """
+        return (
+            isinstance(value, (float, int)) and
+            self.is_numerical and
+            self._range is not None and
+            bool(self._range[0] <= value <= self._range[1])
+        )
 
     @property
     def category(self) -> Optional[str]:
@@ -327,6 +340,18 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         Get the name / string ID of the tunable.
         """
         return self._name
+
+    @property
+    def special(self) -> Union[List[int], List[float]]:
+        """
+        Get the special values of the tunable. Return an empty list if there are none.
+
+        Returns
+        -------
+        special : [int] | [float]
+            A list of special values of the tunable. Can be empty.
+        """
+        return self._special
 
     @property
     def type(self) -> str:
