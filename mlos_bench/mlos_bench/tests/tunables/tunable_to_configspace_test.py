@@ -8,7 +8,7 @@ Unit tests for Tunable to ConfigSpace conversion.
 
 import pytest
 
-from ConfigSpace import ConfigurationSpace, CategoricalHyperparameter
+from ConfigSpace import ConfigurationSpace, CategoricalHyperparameter, EqualsCondition
 
 from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -44,7 +44,15 @@ def configuration_space() -> ConfigurationSpace:
     spaces["kernel_sched_migration_cost_ns:range"].default_value = 250000
     spaces["kernel_sched_migration_cost_ns:special"].default_value = -1
     spaces["kernel_sched_migration_cost_ns:type"].default_value = "special"
+    spaces["kernel_sched_migration_cost_ns:type"].probabilities = (0.1, 0.9)
     spaces["kernel_sched_latency_ns"].default_value = 2000000
+
+    spaces.add_condition(EqualsCondition(
+        spaces["kernel_sched_migration_cost_ns:special"],
+        spaces["kernel_sched_migration_cost_ns:type"], "special"))
+    spaces.add_condition(EqualsCondition(
+        spaces["kernel_sched_migration_cost_ns:range"],
+        spaces["kernel_sched_migration_cost_ns:type"], "range"))
 
     return spaces
 
