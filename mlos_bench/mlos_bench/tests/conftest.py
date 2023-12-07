@@ -60,7 +60,7 @@ TUNABLE_GROUPS_JSON = """
                 "type": "int",
                 "default": -1,
                 "range": [0, 500000],
-                "special": [-1]
+                "special": [-1, 0]
             },
             "kernel_sched_latency_ns": {
                 "description": "Initial value for the scheduler period",
