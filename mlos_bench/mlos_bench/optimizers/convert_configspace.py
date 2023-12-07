@@ -68,27 +68,29 @@ def _tunable_to_configspace(
                 meta=meta)
         })
 
+    # Create three hyperparameters: one for regular values,
+    # one for special values, and one to choose between the two.
     cs = ConfigurationSpace({
         "range": hp_type(
-            name=tunable.name + ":range",
+            name=tunable.name,
             lower=tunable.range[0], upper=tunable.range[1],
             default_value=tunable.default if tunable.in_range(tunable.default) else None,
             meta=meta),
         "special": CategoricalHyperparameter(
-            name=tunable.name + ":special",
+            name="special:" + tunable.name,
             choices=tunable.special,
             default_value=tunable.default if tunable.default in tunable.special else None,
             meta=meta),
         "type": CategoricalHyperparameter(
-            name=tunable.name + ":type",
+            name="__type:" + tunable.name,
             choices=["special", "range"], default_value="special",
             weights=[0.1, 0.9]),  # TODO: Make weights configurable
     })
 
     cs.add_condition(EqualsCondition(
-        cs[tunable.name + ":special"], cs[tunable.name + ":type"], "special"))
+        cs["special:" + tunable.name], cs["__type:" + tunable.name], "special"))
     cs.add_condition(EqualsCondition(
-        cs[tunable.name + ":range"], cs[tunable.name + ":type"], "range"))
+        cs[tunable.name], cs["__type:" + tunable.name], "range"))
 
     return cs
 
@@ -137,11 +139,11 @@ def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
     for (tunable, _group) in tunables:
         if tunable.special:
             if tunable.value in tunable.special:
-                values[tunable.name + ":type"] = "special"
-                values[tunable.name + ":special"] = tunable.value
+                values["__type:" + tunable.name] = "special"
+                values["special:" + tunable.name] = tunable.value
             else:
-                values[tunable.name + ":type"] = "range"
-                values[tunable.name + ":range"] = tunable.value
+                values["__type:" + tunable.name] = "range"
+                values[tunable.name] = tunable.value
         else:
             values[tunable.name] = tunable.value
     configspace = tunable_groups_to_configspace(tunables)

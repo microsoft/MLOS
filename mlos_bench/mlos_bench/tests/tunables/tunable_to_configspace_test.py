@@ -8,7 +8,13 @@ Unit tests for Tunable to ConfigSpace conversion.
 
 import pytest
 
-from ConfigSpace import ConfigurationSpace, CategoricalHyperparameter, EqualsCondition
+from ConfigSpace import (
+    ConfigurationSpace,
+    CategoricalHyperparameter,
+    UniformIntegerHyperparameter,
+    UniformFloatHyperparameter,
+    EqualsCondition,
+)
 
 from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -33,26 +39,26 @@ def configuration_space() -> ConfigurationSpace:
     spaces = ConfigurationSpace(space={
         "vmSize": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"],
         "idle": ["halt", "mwait", "noidle"],
-        "kernel_sched_migration_cost_ns:range": (0, 500000),
-        "kernel_sched_migration_cost_ns:special": [-1],
-        "kernel_sched_migration_cost_ns:type": ["special", "range"],
+        "kernel_sched_migration_cost_ns": (0, 500000),
+        "special:kernel_sched_migration_cost_ns": [-1],
+        "__type:kernel_sched_migration_cost_ns": ["special", "range"],
         "kernel_sched_latency_ns": (0, 1000000000),
     })
 
     spaces["vmSize"].default_value = "Standard_B4ms"
     spaces["idle"].default_value = "halt"
-    spaces["kernel_sched_migration_cost_ns:range"].default_value = 250000
-    spaces["kernel_sched_migration_cost_ns:special"].default_value = -1
-    spaces["kernel_sched_migration_cost_ns:type"].default_value = "special"
-    spaces["kernel_sched_migration_cost_ns:type"].probabilities = (0.1, 0.9)
+    spaces["kernel_sched_migration_cost_ns"].default_value = 250000
+    spaces["special:kernel_sched_migration_cost_ns"].default_value = -1
+    spaces["__type:kernel_sched_migration_cost_ns"].default_value = "special"
+    spaces["__type:kernel_sched_migration_cost_ns"].probabilities = (0.1, 0.9)
     spaces["kernel_sched_latency_ns"].default_value = 2000000
 
     spaces.add_condition(EqualsCondition(
-        spaces["kernel_sched_migration_cost_ns:special"],
-        spaces["kernel_sched_migration_cost_ns:type"], "special"))
+        spaces["special:kernel_sched_migration_cost_ns"],
+        spaces["__type:kernel_sched_migration_cost_ns"], "special"))
     spaces.add_condition(EqualsCondition(
-        spaces["kernel_sched_migration_cost_ns:range"],
-        spaces["kernel_sched_migration_cost_ns:type"], "range"))
+        spaces["kernel_sched_migration_cost_ns"],
+        spaces["__type:kernel_sched_migration_cost_ns"], "range"))
 
     return spaces
 
@@ -73,7 +79,8 @@ def _cmp_tunable_hyperparameter_numerical(
     """
     Check if integer Tunable and ConfigSpace Hyperparameter actually match.
     """
-    param = space[tunable.name + (":range" if tunable.special else "")]
+    param = space[tunable.name]
+    assert isinstance(param, (UniformIntegerHyperparameter, UniformFloatHyperparameter))
     assert (param.lower, param.upper) == tuple(tunable.range)
     if tunable.in_range(tunable.value):
         assert param.default_value == tunable.value
