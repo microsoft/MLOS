@@ -20,10 +20,12 @@ from mlos_core.optimizers import (
 )
 
 from mlos_bench.environments.status import Status
+from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.base_optimizer import Optimizer
-from mlos_bench.optimizers.convert_configspace import tunable_groups_to_configspace
-from mlos_bench.services.base_service import Service
+from mlos_bench.optimizers.convert_configspace import (
+    tunable_groups_to_configspace, configspace_data_to_tunable_values
+)
 
 _LOG = logging.getLogger(__name__)
 
@@ -103,9 +105,6 @@ class MlosCoreOptimizer(Optimizer):
             df_status_completed = df_status.apply(Status.is_completed)
             df_configs = df_configs[df_status_completed]
             df_scores = df_scores[df_status_completed]
-        # External data can have incorrect types (e.g., all strings).
-        for (tunable, _group) in self._tunables:
-            df_configs[tunable.name] = df_configs[tunable.name].astype(tunable.dtype)
         self._opt.register(df_configs, df_scores)
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
@@ -135,6 +134,16 @@ class MlosCoreOptimizer(Optimizer):
                 df_configs[tunable.name] = tunable.default
             else:
                 df_configs[tunable.name].fillna(tunable.default, inplace=True)
+            # External data can have incorrect types (e.g., all strings).
+            df_configs[tunable.name] = df_configs[tunable.name].astype(tunable.dtype)
+            # Add columns for tunables with special values.
+            if tunable.special:
+                is_special = df_configs[tunable.name].apply(tunable.special.__contains__)
+                df_configs["__type:" + tunable.name] = "range"
+                df_configs.loc[is_special, "__type:" + tunable.name] = "special"
+                df_configs["special:" + tunable.name] = df_configs[tunable.name]
+                df_configs.loc[~is_special, "special:" + tunable.name] = None
+                df_configs.loc[is_special, tunable.name] = None
         # By default, hyperparameters in ConfigurationSpace are sorted by name:
         df_configs = df_configs[sorted(tunables_names)]
         _LOG.debug("Loaded configs:\n%s", df_configs)
@@ -146,7 +155,8 @@ class MlosCoreOptimizer(Optimizer):
         df_config = self._opt.suggest(defaults=self._start_with_defaults)
         self._start_with_defaults = False
         _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, df_config)
-        return self._tunables.copy().assign(df_config.loc[0].to_dict())
+        return self._tunables.copy().assign(
+            configspace_data_to_tunable_values(df_config.loc[0].to_dict()))
 
     def register(self, tunables: TunableGroups, status: Status,
                  score: Optional[Union[float, dict]] = None) -> Optional[float]:
@@ -154,6 +164,7 @@ class MlosCoreOptimizer(Optimizer):
         if status.is_completed():
             # By default, hyperparameters in ConfigurationSpace are sorted by name:
             df_config = pd.DataFrame(dict(sorted(tunables.get_param_values().items())), index=[0])
+            # TODO: add special columns here!!!
             _LOG.debug("Score: %s Dataframe:\n%s", score, df_config)
             self._opt.register(df_config, pd.Series([score], dtype=float))
         self._iter += 1
@@ -163,7 +174,7 @@ class MlosCoreOptimizer(Optimizer):
         df_config = self._opt.get_best_observation()
         if len(df_config) == 0:
             return (None, None)
-        params = df_config.iloc[0].to_dict()
+        params = configspace_data_to_tunable_values(df_config.iloc[0].to_dict())
         _LOG.debug("Best observation: %s", params)
         score = params.pop("score") * self._opt_sign  # mlos_core always uses the `score` column
         return (score, self._tunables.copy().assign(params))

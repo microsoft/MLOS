@@ -148,3 +148,11 @@ def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
             values[tunable.name] = tunable.value
     configspace = tunable_groups_to_configspace(tunables)
     return Configuration(configspace, values=values)
+
+
+def configspace_data_to_tunable_values(data: dict) -> dict:
+    """
+    Remove the fields that correspond to special values in ConfigSpace.
+    In particular, remove `__type:*` keys and trim `special:` prefixes.
+    """
+    return {k.split(":", 1)[0]: v for (k, v) in data.items() if not k.startswith("__")}
