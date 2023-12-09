@@ -8,7 +8,7 @@ Functions to convert TunableGroups to ConfigSpace for use with the mlos_core opt
 
 import logging
 
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 from ConfigSpace import (
     Configuration,
@@ -70,27 +70,22 @@ def _tunable_to_configspace(
 
     # Create three hyperparameters: one for regular values,
     # one for special values, and one to choose between the two.
+    (special_name, type_name) = special_param_names(tunable.name)
     cs = ConfigurationSpace({
-        "range": hp_type(
-            name=tunable.name,
-            lower=tunable.range[0], upper=tunable.range[1],
+        tunable.name: hp_type(
+            name=tunable.name, lower=tunable.range[0], upper=tunable.range[1],
             default_value=tunable.default if tunable.in_range(tunable.default) else None,
             meta=meta),
-        "special": CategoricalHyperparameter(
-            name="special:" + tunable.name,
-            choices=tunable.special,
+        special_name: CategoricalHyperparameter(
+            name=special_name, choices=tunable.special,
             default_value=tunable.default if tunable.default in tunable.special else None,
             meta=meta),
-        "type": CategoricalHyperparameter(
-            name="__type:" + tunable.name,
-            choices=["special", "range"], default_value="special",
+        type_name: CategoricalHyperparameter(
+            name=type_name, choices=["special", "range"], default_value="special",
             weights=[0.1, 0.9]),  # TODO: Make weights configurable
     })
-
-    cs.add_condition(EqualsCondition(
-        cs["special:" + tunable.name], cs["__type:" + tunable.name], "special"))
-    cs.add_condition(EqualsCondition(
-        cs[tunable.name], cs["__type:" + tunable.name], "range"))
+    cs.add_condition(EqualsCondition(cs[special_name], cs[type_name], "special"))
+    cs.add_condition(EqualsCondition(cs[tunable.name], cs[type_name], "range"))
 
     return cs
 
@@ -138,11 +133,12 @@ def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
     values: Dict[str, TunableValue] = {}
     for (tunable, _group) in tunables:
         if tunable.special:
+            (special_name, type_name) = special_param_names(tunable.name)
             if tunable.value in tunable.special:
-                values["__type:" + tunable.name] = "special"
-                values["special:" + tunable.name] = tunable.value
+                values[type_name] = "special"
+                values[special_name] = tunable.value
             else:
-                values["__type:" + tunable.name] = "range"
+                values[type_name] = "range"
                 values[tunable.name] = tunable.value
         else:
             values[tunable.name] = tunable.value
@@ -153,6 +149,63 @@ def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
 def configspace_data_to_tunable_values(data: dict) -> dict:
     """
     Remove the fields that correspond to special values in ConfigSpace.
-    In particular, remove `__type:*` keys and trim `special:` prefixes.
+    In particular, remove `!type__` keys and trim `!special` suffixes.
     """
-    return {k.split(":", 1)[0]: v for (k, v) in data.items() if not k.startswith("__")}
+    return {
+        special_param_name_strip(k): v
+        for (k, v) in data.items() if not special_param_name_is_temp(k)
+    }
+
+
+def special_param_names(name: str) -> Tuple[str, str]:
+    """
+    Generate the names of the auxiliary hyperparameters that correspond
+    to a tunable that can have special values.
+
+    Parameters
+    ----------
+    name : str
+        The name of the tunable parameter.
+
+    Returns
+    -------
+    special_name : str
+        The name of the hyperparameter that corresponds to the special value.
+    type_name : str
+        The name of the hyperparameter that chooses between the regular and the special values.
+    """
+    return (name + "!special", name + "!type__")
+
+
+def special_param_name_is_temp(name: str) -> bool:
+    """
+    Check if name corresponds to a temporary ConfigSpace parameter.
+
+    Parameters
+    ----------
+    name : str
+        The name of the hyperparameter.
+
+    Returns
+    -------
+    is_special : bool
+        True if the name corresponds to a temporary ConfigSpace hyperparameter.
+    """
+    return name.endswith("__")
+
+
+def special_param_name_strip(name: str) -> str:
+    """
+    Remove the temporary suffix from a special parameter name.
+
+    Parameters
+    ----------
+    name : str
+        The name of the hyperparameter.
+
+    Returns
+    -------
+    stripped_name : str
+        The name of the hyperparameter without the temporary suffix.
+    """
+    return name.split("!", 1)[0]

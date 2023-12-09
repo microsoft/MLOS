@@ -334,6 +334,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         configurations : list
             List of ConfigSpace configurations.
         """
+        # FIXME: BUG!!! Need to generate proper dict keys for ConfigSpace.Configuration objects.
         return [
             ConfigSpace.Configuration(self.optimizer_parameter_space, values=config.to_dict())
             for (_, config) in configurations.iterrows()

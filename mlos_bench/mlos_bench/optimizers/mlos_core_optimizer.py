@@ -10,7 +10,7 @@ import logging
 import os
 
 from types import TracebackType
-from typing import Optional, Sequence, Tuple, Type, Union
+from typing import Dict, Optional, Sequence, Tuple, Type, Union
 from typing_extensions import Literal
 
 import pandas as pd
@@ -21,10 +21,12 @@ from mlos_core.optimizers import (
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.base_optimizer import Optimizer
+
 from mlos_bench.optimizers.convert_configspace import (
-    tunable_groups_to_configspace, configspace_data_to_tunable_values
+    tunable_groups_to_configspace, configspace_data_to_tunable_values, special_param_names
 )
 
 _LOG = logging.getLogger(__name__)
@@ -111,7 +113,7 @@ class MlosCoreOptimizer(Optimizer):
             _LOG.debug("Warm-up end: %s = %s", self.target, score)
         return True
 
-    def _to_df(self, configs: Sequence[dict]) -> pd.DataFrame:
+    def _to_df(self, configs: Sequence[Dict[str, TunableValue]]) -> pd.DataFrame:
         """
         Select from past trials only the columns required in this experiment and
         impute default values for the tunables that are missing in the dataframe.
@@ -127,7 +129,7 @@ class MlosCoreOptimizer(Optimizer):
             A dataframe with past trials data, with missing values imputed.
         """
         df_configs = pd.DataFrame(configs)
-        tunables_names = self._tunables.get_param_values().keys()
+        tunables_names = list(self._tunables.get_param_values().keys())
         missing_cols = set(tunables_names).difference(df_configs.columns)
         for (tunable, _group) in self._tunables:
             if tunable.name in missing_cols:
@@ -138,11 +140,13 @@ class MlosCoreOptimizer(Optimizer):
             df_configs[tunable.name] = df_configs[tunable.name].astype(tunable.dtype)
             # Add columns for tunables with special values.
             if tunable.special:
+                (special_name, type_name) = special_param_names(tunable.name)
+                tunables_names += [special_name, type_name]
                 is_special = df_configs[tunable.name].apply(tunable.special.__contains__)
-                df_configs["__type:" + tunable.name] = "range"
-                df_configs.loc[is_special, "__type:" + tunable.name] = "special"
-                df_configs["special:" + tunable.name] = df_configs[tunable.name]
-                df_configs.loc[~is_special, "special:" + tunable.name] = None
+                df_configs[type_name] = "range"
+                df_configs.loc[is_special, type_name] = "special"
+                df_configs[special_name] = df_configs[tunable.name]
+                df_configs.loc[~is_special, special_name] = None
                 df_configs.loc[is_special, tunable.name] = None
         # By default, hyperparameters in ConfigurationSpace are sorted by name:
         df_configs = df_configs[sorted(tunables_names)]
@@ -162,9 +166,7 @@ class MlosCoreOptimizer(Optimizer):
                  score: Optional[Union[float, dict]] = None) -> Optional[float]:
         score = super().register(tunables, status, score)  # With _opt_sign applied
         if status.is_completed():
-            # By default, hyperparameters in ConfigurationSpace are sorted by name:
-            df_config = pd.DataFrame(dict(sorted(tunables.get_param_values().items())), index=[0])
-            # TODO: add special columns here!!!
+            df_config = self._to_df([tunables.get_param_values()])
             _LOG.debug("Score: %s Dataframe:\n%s", score, df_config)
             self._opt.register(df_config, pd.Series([score], dtype=float))
         self._iter += 1

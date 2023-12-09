@@ -123,7 +123,7 @@ def test_update_mock_min(mock_opt: MockOptimizer, mock_configs: List[dict],
     assert mock_opt.suggest().get_param_values() == {
         "vmSize": "Standard_B4ms",
         "idle": "halt",
-        "kernel_sched_migration_cost_ns": 13111,
+        "kernel_sched_migration_cost_ns": 13112,
         'kernel_sched_latency_ns': 796233790,
     }
 

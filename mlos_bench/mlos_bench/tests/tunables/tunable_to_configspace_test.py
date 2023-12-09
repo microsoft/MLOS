@@ -18,9 +18,11 @@ from ConfigSpace import (
 
 from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
-
-from mlos_bench.optimizers.convert_configspace import _tunable_to_configspace
-from mlos_bench.optimizers.convert_configspace import tunable_groups_to_configspace
+from mlos_bench.optimizers.convert_configspace import (
+    _tunable_to_configspace,
+    tunable_groups_to_configspace,
+    special_param_names,
+)
 
 # pylint: disable=redefined-outer-name
 
@@ -36,29 +38,29 @@ def configuration_space() -> ConfigurationSpace:
     configuration_space : ConfigurationSpace
         A new ConfigurationSpace object for testing.
     """
+    (ksm_special, ksm_type) = special_param_names("kernel_sched_migration_cost_ns")
+
     spaces = ConfigurationSpace(space={
         "vmSize": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"],
         "idle": ["halt", "mwait", "noidle"],
         "kernel_sched_migration_cost_ns": (0, 500000),
-        "special:kernel_sched_migration_cost_ns": [-1, 0],
-        "__type:kernel_sched_migration_cost_ns": ["special", "range"],
+        ksm_special: [-1, 0],
+        ksm_type: ["special", "range"],
         "kernel_sched_latency_ns": (0, 1000000000),
     })
 
     spaces["vmSize"].default_value = "Standard_B4ms"
     spaces["idle"].default_value = "halt"
     spaces["kernel_sched_migration_cost_ns"].default_value = 250000
-    spaces["special:kernel_sched_migration_cost_ns"].default_value = -1
-    spaces["__type:kernel_sched_migration_cost_ns"].default_value = "special"
-    spaces["__type:kernel_sched_migration_cost_ns"].probabilities = (0.1, 0.9)
+    spaces[ksm_special].default_value = -1
+    spaces[ksm_type].default_value = "special"
+    spaces[ksm_type].probabilities = (0.1, 0.9)
     spaces["kernel_sched_latency_ns"].default_value = 2000000
 
     spaces.add_condition(EqualsCondition(
-        spaces["special:kernel_sched_migration_cost_ns"],
-        spaces["__type:kernel_sched_migration_cost_ns"], "special"))
+        spaces[ksm_special], spaces[ksm_type], "special"))
     spaces.add_condition(EqualsCondition(
-        spaces["kernel_sched_migration_cost_ns"],
-        spaces["__type:kernel_sched_migration_cost_ns"], "range"))
+        spaces["kernel_sched_migration_cost_ns"], spaces[ksm_type], "range"))
 
     return spaces
 
