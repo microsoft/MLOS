@@ -68,7 +68,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         self._default = self.dtype(self._default) if self._default is not None else self._default
         self._values = config.get("values")
         if self._values:
-            self._values = [str(v) if v else v for v in self._values]
+            self._values = [str(v) if v is not None else v for v in self._values]
         self._meta: Dict[str, Any] = config.get("meta", {})
         self._range: Optional[Union[Tuple[int, int], Tuple[float, float]]] = None
         config_range = config.get("range")
