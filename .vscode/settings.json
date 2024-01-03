@@ -6,12 +6,6 @@
     // For Windows it should be this instead:
     //"python.defaultInterpreterPath": "${env:USERPROFILE}/.conda/envs/mlos/python.exe",
     "python.testing.pytestEnabled": true,
-    "python.linting.enabled": true,
-    "python.linting.pylintEnabled": true,
-    "python.linting.pycodestyleEnabled": true,
-    "python.linting.pydocstyleEnabled": true,
-    "python.linting.flake8Enabled": true,
-    "python.linting.mypyEnabled": false, // use the dmypy daemon extension instead - it's faster
     // "mypy.runUsingActiveInterpreter": true,      // in the devcontainer we override this to use an explicit path
     "autoDocstring.docstringFormat": "numpy",
     "json.validate.enable": true,
@@ -122,10 +116,6 @@
     ],
     "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source",
     "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/",
-    "python.formatting.provider": "autopep8",
-    "python.formatting.autopep8Args": [
-        "--experimental"
-    ],
     "autopep8.args": [
         "--experimental"
     ],
