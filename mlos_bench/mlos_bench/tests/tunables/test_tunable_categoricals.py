@@ -28,6 +28,11 @@ def test_tunable_categorical_types() -> None:
                     "values": [True, False],
                     "default": True,
                 },
+                "false-bool-cat": {
+                    "type": "categorical",
+                    "values": [True, False],
+                    "default": False,
+                },
                 "str-cat": {
                     "type": "categorical",
                     "values": ["a", "b", "c"],
@@ -46,6 +51,10 @@ def test_tunable_categorical_types() -> None:
     bool_cat, _ = tunable_groups.get_tunable("bool-cat")
     assert isinstance(bool_cat.value, str)
     assert bool_cat.value == "True"
+
+    false_bool_cat, _ = tunable_groups.get_tunable("false-bool-cat")
+    assert isinstance(false_bool_cat.value, str)
+    assert false_bool_cat.value == "False"
 
     str_cat, _ = tunable_groups.get_tunable("str-cat")
     assert isinstance(str_cat.value, str)
