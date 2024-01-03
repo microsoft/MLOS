@@ -87,22 +87,22 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         """
         if self.is_categorical:
             if not (self._values and isinstance(self._values, collections.abc.Iterable)):
-                raise ValueError("Must specify values for the categorical type")
+                raise ValueError(f"Must specify values for the categorical type tunable {self}")
             if self._range is not None:
-                raise ValueError("Range must be None for the categorical type")
+                raise ValueError(f"Range must be None for the categorical type tunable {self}")
             if len(set(self._values)) != len(self._values):
-                raise ValueError("Values must be unique for the categorical type")
+                raise ValueError(f"Values must be unique for the categorical type tunable {self}")
             if self._special is not None:
-                raise ValueError("Special values must be None for the categorical type")
+                raise ValueError(f"Special values must be None for the categorical type tunable {self}")
         elif self.is_numerical:
             if self._values is not None:
-                raise ValueError("Values must be None for the numerical type")
+                raise ValueError(f"Values must be None for the numerical type tunable {self}")
             if not self._range or len(self._range) != 2 or self._range[0] >= self._range[1]:
-                raise ValueError(f"Invalid range: {self._range}")
+                raise ValueError(f"Invalid range for tunable {self}: {self._range}")
         else:
-            raise ValueError(f"Invalid parameter type: {self._type}")
+            raise ValueError(f"Invalid parameter type for tunable {self}: {self._type}")
         if not self.is_valid(self.default):
-            raise ValueError(f"Invalid default value: {self.default}")
+            raise ValueError(f"Invalid default value for tunable {self}: {self.default}")
 
     def __repr__(self) -> str:
         """
@@ -113,7 +113,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         string : str
             A human-readable version of the Tunable.
         """
-        return f"{self._name}={self._current_value}"
+        return f"{self._name}[{self._type}]={self._current_value}"
 
     def __eq__(self, other: object) -> bool:
         """
