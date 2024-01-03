@@ -113,7 +113,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         string : str
             A human-readable version of the Tunable.
         """
-        return f"{self._name}[{self._type}]={self._current_value}"
+        if self.is_categorical:
+            return f"{self._name}[{self._type}]({self._values}:{self._default})={self._current_value}"
+        return f"{self._name}[{self._type}]({self._range}:{self._default})={self._current_value}"
 
     def __eq__(self, other: object) -> bool:
         """
