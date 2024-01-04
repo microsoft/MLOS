@@ -38,12 +38,14 @@ def configuration_space() -> ConfigurationSpace:
         "idle": ["halt", "mwait", "noidle"],
         "kernel_sched_migration_cost_ns": (-1, 500000),
         "kernel_sched_latency_ns": (0, 1000000000),
+        "123": (1, 3),
     })
 
     spaces["vmSize"].default_value = "Standard_B4ms"
     spaces["idle"].default_value = "halt"
     spaces["kernel_sched_migration_cost_ns"].default_value = -1
     spaces["kernel_sched_latency_ns"].default_value = 2000000
+    spaces["123"].default_value = 2
 
     return spaces
 

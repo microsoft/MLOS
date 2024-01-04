@@ -25,24 +25,28 @@ def mock_configs() -> List[dict]:
     """
     return [
         {
+            '123': 2,
             'vmSize': 'Standard_B4ms',
             'idle': 'halt',
             'kernel_sched_migration_cost_ns': 50000,
             'kernel_sched_latency_ns': 1000000,
         },
         {
+            '123': 1,
             'vmSize': 'Standard_B4ms',
             'idle': 'halt',
             'kernel_sched_migration_cost_ns': 40000,
             'kernel_sched_latency_ns': 2000000,
         },
         {
+            '123': 3,
             'vmSize': 'Standard_B4ms',
             'idle': 'mwait',
             'kernel_sched_migration_cost_ns': 100000,
             'kernel_sched_latency_ns': 3000000,
         },
         {
+            '123': 2,
             'vmSize': 'Standard_B2s',
             'idle': 'mwait',
             'kernel_sched_migration_cost_ns': 200000,
@@ -109,7 +113,8 @@ def _test_opt_update_max(opt: Optimizer, configs: List[dict],
         "vmSize": "Standard_B2s",
         "idle": "mwait",
         "kernel_sched_migration_cost_ns": 200000,
-        'kernel_sched_latency_ns': 4000000,
+        "kernel_sched_latency_ns": 4000000,
+        "123": 2,
     }
 
 

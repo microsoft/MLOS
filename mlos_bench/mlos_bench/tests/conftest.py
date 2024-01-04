@@ -69,6 +69,17 @@ TUNABLE_GROUPS_JSON = """
                 "range": [0, 1000000000]
             }
         }
+    },
+    "integer_keyed": {
+        "cost": 0,
+        "params": {
+            "123": {
+                "description": "A parameter with an integer key",
+                "type": "int",
+                "default": 2,
+                "range": [1, 3]
+            }
+        }
     }
 }
 """
