@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Version number for the mlos_core package.
+Version number for the mlos_bench package.
 """
 
 # NOTE: This should be managed by bumpversion.

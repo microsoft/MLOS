@@ -65,6 +65,6 @@ setup(
     description=('MLOS Core Python interface for parameter optimization.'),
     license='MIT',
     keywords='',
-    url='https://aka.ms/mlos-core',
+    url='https://aka.ms/MLOS',
     python_requires='>=3.8',
 )
