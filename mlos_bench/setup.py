@@ -11,16 +11,31 @@ from itertools import chain
 from typing import Dict, List
 
 import os
+import re
 
 from setuptools import setup, find_packages
 
 from _version import _VERSION    # pylint: disable=import-private-name
 
 
-def _get_long_desc_from_readme() -> str:
-    readme_path = os.path.join(os.path.dirname(__file__), 'README.md')
-    with open(readme_path, mode='r', encoding='utf-8') as fh:
-        return ''.join(fh.readlines())
+# A simple routine to read and adjust the README.md for this module into a format
+# suitable for packaging.
+# See Also: copy-source-tree-docs.sh
+# Unfortunately we can't use that directly due to the way packaging happens inside a
+# temp directory.
+# Similarly, we can't use a utility script outside this module, so this code has to
+# be duplicated for now.
+def _get_long_desc_from_readme(base_url: str) -> str:
+    pkg_dir = os.path.dirname(__file__)
+    jsonc_re = re.compile(r'```jsonc')
+    link_re = re.compile(r'\]\(([^:#)]+)(#[a-zA-Z0-9_-]+)?\)')
+    with open(os.path.join(pkg_dir, 'README.md'), mode='r', encoding='utf-8') as readme_fh:
+        lines = readme_fh.readlines()
+        # Tweak the lexers for local expansion by pygments instead of github's.
+        lines = [link_re.sub(f"]({base_url}"+r'/\1\2)', line) for line in lines]
+        # Tweak source source code links.
+        lines = [jsonc_re.sub(r'```json', line) for line in lines]
+        return ''.join(lines)
 
 
 try:
@@ -95,7 +110,7 @@ setup(
     extras_require=extra_requires,
     author='Microsoft',
     license='MIT',
-    long_description=_get_long_desc_from_readme(),
+    long_description=_get_long_desc_from_readme('https://github.com/microsoft/MLOS/tree/main/mlos_bench'),
     long_description_content_type='text/markdown',
     author_email='mlos-maintainers@service.microsoft.com',
     description=('MLOS Bench Python interface for benchmark automation and optimization.'),
