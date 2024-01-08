@@ -10,6 +10,8 @@ on:
         description: Disable caching?
         default: false
         required: false
+  release:
+    types: [published]
   push:
     branches: [ main ]
   pull_request:
@@ -156,6 +158,26 @@ jobs:
         docker exec --user vscode --env USER=vscode --env MAKEFLAGS=-Oline mlos-devcontainer make CONDA_INFO_LEVEL=-v doc
         # Make sure we can publish the coverage report.
         rm -f doc/build/html/htmlcov/.gitignore
+
+    - name: Publish package to Test PyPi
+      if: github.ref == 'refs/heads/main' && (github.event == 'release' || github.event == 'manual')
+      env:
+        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      run: |
+        docker exec --user vscode --env USER=vscode --env MAKEFLAGS=-Oline \
+          --env TWINE_USERNAME=$TWINE_USERNAME --env TWINE_PASSWORD=$TWINE_PASSWORD \
+          mlos-devcontainer make CONDA_INFO_LEVEL=-v publish-testpypi
+
+    - name: Publish package to PyPi
+      if: github.ref == 'refs/heads/main' && github.event == 'release'
+      env:
+        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      run: |
+        docker exec --user vscode --env USER=vscode --env MAKEFLAGS=-Oline \
+          --env TWINE_USERNAME=$TWINE_USERNAME --env TWINE_PASSWORD=$TWINE_PASSWORD \
+          mlos-devcontainer make CONDA_INFO_LEVEL=-v publish-pypi
 
     - name: Deploy to GitHub pages
       if: github.ref == 'refs/heads/main'

@@ -279,6 +279,27 @@ dist-test-clean: dist-test-env-clean
 	rm -f build/dist-test-env.$(PYTHON_VERSION).build-stamp
 
 
+.PHONY: publish
+publish: publish-pypi
+
+.PHONY:
+pypi-publish-deps: build/pypi-publish-deps.build-stamp
+
+build/pypi-publish-deps.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
+	conda run -n ${CONDA_ENV_NAME} pip install -U twine
+	touch $@
+
+publish-pypi: build/publish-pypi.build-stamp
+publish-testpypi: build/publish-testpypi.build-stamp
+
+build/publish-%pypi.build-stamp: build/pypi-publish-deps.${CONDA_ENV_NAME}.build build/pytest.${CONDA_ENV_NAME}.build-stamp build/dist-test.$(PYTHON_VERSION).build-stamp build/check-doc.build-stamp build/linklint-doc.build-stamp
+	rm -f mlos_*/dist/*.tar.gz
+	ls mlos_*/dist/*.tar | xargs -I% gzip -k %
+	repo_name=`echo "$@" | sed -e 's|build/publish-||' -e 's|\.build-stamp||'` \
+		&& conda run -n ${CONDA_ENV_NAME} python3 -m twine upload --repository $$repo_name \
+			mlos_*/dist/mlos*-*.tar.gz mlos_*/dist/mlos*-*.whl
+	touch $@
+
 build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp: doc/requirements.txt
 	conda run -n ${CONDA_ENV_NAME} pip install -U -r doc/requirements.txt
@@ -340,7 +361,10 @@ doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile doc/copy-source-
 	# See check-doc
 
 .PHONY: doc
-doc: doc/build/html/.nojekyll build/check-doc.build-stamp build/linklint-doc.build-stamp
+doc: doc/build/html/.nojekyll doc-test
+
+.PHONY: doc-test
+doc-test: build/check-doc.build-stamp build/linklint-doc.build-stamp
 
 doc/build/html/htmlcov/index.html: doc/build/html/index.html
 	# Make the codecov html report available for the site.
