@@ -10,9 +10,18 @@ from logging import warning
 from itertools import chain
 from typing import Dict, List
 
+import os
+
 from setuptools import setup, find_packages
 
 from _version import _VERSION    # pylint: disable=import-private-name
+
+
+def _get_long_desc_from_readme() -> str:
+    readme_path = os.path.join(os.path.dirname(__file__), 'README.md')
+    with open(readme_path, mode='r', encoding='utf-8') as fh:
+        return ''.join(fh.readlines())
+
 
 try:
     from setuptools_scm import get_version
@@ -85,10 +94,29 @@ setup(
     ] + extra_requires['storage-sql-sqlite'],   # NOTE: For now sqlite is a fallback storage backend, so we always install it.
     extras_require=extra_requires,
     author='Microsoft',
+    license='MIT',
+    long_description=_get_long_desc_from_readme(),
+    long_description_content_type='text/markdown',
     author_email='mlos-maintainers@service.microsoft.com',
     description=('MLOS Bench Python interface for benchmark automation and optimization.'),
-    license='MIT',
-    keywords='',
-    url='https://aka.ms/mlos-core',
+    url='https://github.com/microsoft/MLOS',
+    project_urls={
+        'docs': 'https://microsoft.github.io/MLOS',
+        'package_source': 'https://github.com/microsoft/MLOS/tree/main/mlos_bench/',
+    },
     python_requires='>=3.8',
+    keywords=[
+        'autotuning',
+        'benchmarking',
+        'optimization',
+        'systems',
+    ],
+    classifiers=[
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: System Administrators",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+    ],
 )
