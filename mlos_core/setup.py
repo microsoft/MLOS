@@ -91,8 +91,8 @@ setup(
     description=('MLOS Core Python interface for parameter optimization.'),
     url='https://github.com/microsoft/MLOS',
     project_urls={
-        'docs': 'https://microsoft.github.io/MLOS',
-        'package_source': 'https://github.com/microsoft/MLOS/tree/main/mlos_core/',
+        'Documentation': 'https://microsoft.github.io/MLOS',
+        'Package Source': 'https://github.com/microsoft/MLOS/tree/main/mlos_core/',
     },
     python_requires='>=3.8',
     keywords=[

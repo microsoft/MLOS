@@ -116,8 +116,8 @@ setup(
     description=('MLOS Bench Python interface for benchmark automation and optimization.'),
     url='https://github.com/microsoft/MLOS',
     project_urls={
-        'docs': 'https://microsoft.github.io/MLOS',
-        'package_source': 'https://github.com/microsoft/MLOS/tree/main/mlos_bench/',
+        'Documentation': 'https://microsoft.github.io/MLOS',
+        'Package Source': 'https://github.com/microsoft/MLOS/tree/main/mlos_bench/',
     },
     python_requires='>=3.8',
     keywords=[
