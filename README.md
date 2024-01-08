@@ -141,18 +141,18 @@ MLOS is not [*yet*](https://github.com/microsoft/MLOS/issues/547) published on `
 
     ```sh
     # this will install just the optimizer component with SMAC support:
-    pip install dist/mlos_core-0.1.0-py3-none-any.whl[smac]
+    pip install dist/mlos_core-0.2.0-py3-none-any.whl[smac]
 
     # this will install just the optimizer component with flaml support:
-    pip install dist/mlos_core-0.1.0-py3-none-any.whl[flaml]
+    pip install dist/mlos_core-0.2.0-py3-none-any.whl[flaml]
 
     # this will install just the optimizer component with smac and flaml support:
-    pip install dist/mlos_core-0.1.0-py3-none-any.whl[smac,flaml]
+    pip install dist/mlos_core-0.2.0-py3-none-any.whl[smac,flaml]
     ```
 
     ```sh
     # this will install both the optimizer and the experiment runner:
-    pip install dist/mlos_bench-0.1.0-py3-none-any.whl
+    pip install dist/mlos_bench-0.2.0-py3-none-any.whl
     ```
 
     > Note: exact versions may differ due to automatic versioning.
