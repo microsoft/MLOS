@@ -6,6 +6,8 @@
 Setup instructions for the mlos_core package.
 """
 
+# pylint: disable=duplicate-code
+
 from itertools import chain
 from logging import warning
 from typing import Dict, List
@@ -42,7 +44,7 @@ def _get_long_desc_from_readme(base_url: str) -> str:
     with open(os.path.join(pkg_dir, 'README.md'), mode='r', encoding='utf-8') as readme_fh:
         lines = readme_fh.readlines()
         # Tweak the lexers for local expansion by pygments instead of github's.
-        lines = [link_re.sub(f"]({base_url}"+r'/\1\2)', line) for line in lines]
+        lines = [link_re.sub(f"]({base_url}" + r'/\1\2)', line) for line in lines]
         # Tweak source source code links.
         lines = [jsonc_re.sub(r'```json', line) for line in lines]
         return ''.join(lines)
