@@ -175,14 +175,19 @@ jobs:
       if: github.repository == 'microsoft/mlos' && github.ref == 'refs/heads/main'
       uses: docker/login-action@v3
       with:
+        # This is the URL of the container registry, which is configured in Github
+        # Settings and currently corresponds to the mlos-core ACR.
         registry: ${{ secrets.ACR_LOGINURL }}
         username: ${{ secrets.ACR_USERNAME }}
+        # This secret is configured in Github Settings.
+        # It can also be obtained in a keyvault in the Azure portal alongside the
+        # other resources used.
         password: ${{ secrets.ACR_PASSWORD }}
     - name: Publish the container images
       if: github.repository == 'microsoft/mlos' && github.ref == 'refs/heads/main'
       timeout-minutes: 15
-      # We only push to the :latest tag, to avoid needing to cleanup the
-      # registry manually (there's currently no API for that).
+      # We currently only push to the :latest tag, to avoid needing to cleanup the
+      # registry manually (there's no API for that atm).
       run: |
         set -x
         docker tag devcontainer-cli:latest ${{ secrets.ACR_LOGINURL }}/devcontainer-cli:latest
