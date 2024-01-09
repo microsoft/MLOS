@@ -136,7 +136,7 @@ class BaseOptimizer(metaclass=ABCMeta):
                 "Suggest returned a configuration with the wrong number of parameters."
         if self._space_adapter:
             configuration = self._space_adapter.transform(configuration)
-            assert len(configuration.columns) == len(self.parameter_space.values()), \
+            assert set(configuration).issubset(set(self.parameter_space)), \
                 "Space adapter transformed configuration with the wrong number of parameters."
         return configuration
 
