@@ -21,7 +21,7 @@ MLOS is a project to enable autotuning for systems.
         - [Usage Examples](#usage-examples)
             - [mlos-core](#mlos-core)
             - [mlos-bench](#mlos-bench)
-    - [Distributing](#distributing)
+    - [Installation](#installation)
     - [See Also](#see-also)
         - [Examples](#examples)
 
@@ -127,35 +127,30 @@ See Also:
 - [mlos_bench/config](./mlos_bench/mlos_bench/config/) for additional configuration details.
 - [sqlite-autotuning](https://github.com/Microsoft-CISL/sqlite-autotuning) for a complete external example of using MLOS to tune `sqlite`.
 
-## Distributing
+## Installation
 
-MLOS is not [*yet*](https://github.com/microsoft/MLOS/issues/547) published on `pypi`, so until them here are some instructions for installation for usage in production or other environments.
+The MLOS modules are published to [pypi](https://pypi.org) when new tags/releases are made.
 
-1. Build the *wheel* file(s)
+To install the latest release, simply run:
 
-    ```sh
-    make dist
-    ```
+```sh
+# this will install just the optimizer component with SMAC support:
+pip install -U mlos-core[smac]
 
-2. Install it (e.g. after copying it somewhere else).
+# this will install just the optimizer component with flaml support:
+pip install -U "mlos-core[flaml]"
 
-    ```sh
-    # this will install just the optimizer component with SMAC support:
-    pip install dist/mlos_core-0.1.0-py3-none-any.whl[smac]
+# this will install just the optimizer component with smac and flaml support:
+pip install -U "mlos-core[smac,flaml]"
 
-    # this will install just the optimizer component with flaml support:
-    pip install dist/mlos_core-0.1.0-py3-none-any.whl[flaml]
+# this will install both the flaml optimizer and the experiment runner with azure support:
+pip install -U "mlos-bench[flaml,azure]"
 
-    # this will install just the optimizer component with smac and flaml support:
-    pip install dist/mlos_core-0.1.0-py3-none-any.whl[smac,flaml]
-    ```
+# this will install both the smac optimizer and the experiment runner with ssh support:
+pip install -U "mlos-bench[smac,ssh]"
+```
 
-    ```sh
-    # this will install both the optimizer and the experiment runner:
-    pip install dist/mlos_bench-0.1.0-py3-none-any.whl
-    ```
-
-    > Note: exact versions may differ due to automatic versioning.
+Details on using a local version from git are available in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## See Also
 

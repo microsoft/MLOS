@@ -33,12 +33,15 @@ def pytest_configure(config: pytest.Config) -> None:
     """
     # Workaround some issues loading emukit in certain environments.
     if os.environ.get('DISPLAY', None):
-        import matplotlib   # pylint: disable=import-outside-toplevel
-        matplotlib.rcParams['backend'] = 'agg'
-        if is_master(config) or dict(getattr(config, 'workerinput', {}))['workerid'] == 'gw0':
-            # Only warn once.
-            warn(UserWarning('DISPLAY environment variable is set, which can cause problems in some setups (e.g. WSL). '
-                             + f'Adjusting matplotlib backend to "{matplotlib.rcParams["backend"]}" to compensate.'))
+        try:
+            import matplotlib   # pylint: disable=import-outside-toplevel
+            matplotlib.rcParams['backend'] = 'agg'
+            if is_master(config) or dict(getattr(config, 'workerinput', {}))['workerid'] == 'gw0':
+                # Only warn once.
+                warn(UserWarning('DISPLAY environment variable is set, which can cause problems in some setups (e.g. WSL). '
+                                 + f'Adjusting matplotlib backend to "{matplotlib.rcParams["backend"]}" to compensate.'))
+        except ImportError:
+            pass
 
     # Create a temporary directory for sharing files between master and worker nodes.
     if is_master(config):
@@ -72,8 +75,9 @@ def pytest_unconfigure(config: pytest.Config) -> None:
     Called after all tests have completed.
     """
     if is_master(config):
-        shared_tmp_dir = str(getattr(config, "shared_temp_dir"))
-        shutil.rmtree(shared_tmp_dir)
+        shared_tmp_dir = getattr(config, "shared_temp_dir", None)
+        if shared_tmp_dir:
+            shutil.rmtree(str(shared_tmp_dir))
 
 
 @pytest.fixture(scope="session")
