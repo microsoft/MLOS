@@ -92,8 +92,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
                 raise ValueError(f"Range must be None for the categorical type tunable {self}")
             if len(set(self._values)) != len(self._values):
                 raise ValueError(f"Values must be unique for the categorical type tunable {self}")
-            if self._special is not None:
-                raise ValueError(f"Special values must be None for the categorical type tunable {self}")
+            if self._special:
+                raise ValueError(f"Categorical tunable cannot have special values: {self}")
         elif self.is_numerical:
             if self._values is not None:
                 raise ValueError(f"Values must be None for the numerical type tunable {self}")
