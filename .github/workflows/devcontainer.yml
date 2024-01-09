@@ -10,7 +10,10 @@ on:
         description: Disable caching?
         default: false
         required: false
+  release:
+    types: [published]
   push:
+    tags: ["v*"]
     branches: [ main ]
   pull_request:
     branches: [ main ]
@@ -144,7 +147,9 @@ jobs:
         docker exec --user vscode --env USER=vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v dist dist-test
 
     - name: Test rebuilding the devcontainer in the devcontainer
-      timeout-minutes: 3
+      # FIXME:
+      # timeout-minutes: 3
+      timeout-minutes: 10
       run: |
         set -x
         git --no-pager diff --exit-code
@@ -156,6 +161,24 @@ jobs:
         docker exec --user vscode --env USER=vscode --env MAKEFLAGS=-Oline mlos-devcontainer make CONDA_INFO_LEVEL=-v doc
         # Make sure we can publish the coverage report.
         rm -f doc/build/html/htmlcov/.gitignore
+
+    - name: Publish package to Test PyPi
+      if: github.event == 'release' || github.ref_type == 'tag'
+      run: |
+        if [ -n "${{ secrets.PYPI_TEST_USERNAME }}" ]; then
+          docker exec --user vscode --env USER=vscode --env MAKEFLAGS=-Oline \
+            --env TWINE_USERNAME=${{ secrets.PYPI_TEST_USERNAME }} --env TWINE_PASSWORD=${{ secrets.PYPI_TEST_PASSWORD }} \
+            mlos-devcontainer make CONDA_INFO_LEVEL=-v publish-test-pypi
+        fi
+
+    - name: Publish package to PyPi
+      if: github.repository == 'microsoft/mlos' && (github.event == 'release' || github.ref_type == 'tag')
+      run: |
+        if [ -n "${{ secrets.PYPI_USERNAME }}" ]; then
+          docker exec --user vscode --env USER=vscode --env MAKEFLAGS=-Oline \
+            --env TWINE_USERNAME=${{ secrets.PYPI_USERNAME }} --env TWINE_PASSWORD=${{ secrets.PYPI_PASSWORD }} \
+            mlos-devcontainer make CONDA_INFO_LEVEL=-v publish-pypi
+        fi
 
     - name: Deploy to GitHub pages
       if: github.ref == 'refs/heads/main'
@@ -172,20 +195,36 @@ jobs:
         docker rm --force mlos-devcontainer || true
 
     - name: Container Registry Login
-      if: github.repository == 'microsoft/mlos' && github.ref == 'refs/heads/main'
+      # FIXME: testing
+      if: (github.repository == 'microsoft/mlos' || github.repository == 'bpkroth/mlos') && (github.ref == 'refs/heads/main' || github.event == 'release' || github.ref_type == 'tag')
       uses: docker/login-action@v3
       with:
+        # This is the URL of the container registry, which is configured in Github
+        # Settings and currently corresponds to the mlos-core ACR.
         registry: ${{ secrets.ACR_LOGINURL }}
         username: ${{ secrets.ACR_USERNAME }}
+        # This secret is configured in Github Settings.
+        # It can also be obtained in a keyvault in the Azure portal alongside the
+        # other resources used.
         password: ${{ secrets.ACR_PASSWORD }}
     - name: Publish the container images
-      if: github.repository == 'microsoft/mlos' && github.ref == 'refs/heads/main'
+      # FIXME: testing
+      if: (github.repository == 'microsoft/mlos' || github.repository == 'bpkroth/mlos') && (github.ref == 'refs/heads/main' || github.event == 'release' || github.ref_type == 'tag')
       timeout-minutes: 15
-      # We only push to the :latest tag, to avoid needing to cleanup the
-      # registry manually (there's currently no API for that).
       run: |
         set -x
-        docker tag devcontainer-cli:latest ${{ secrets.ACR_LOGINURL }}/devcontainer-cli:latest
-        docker push ${{ secrets.ACR_LOGINURL }}/devcontainer-cli:latest
-        docker tag mlos-devcontainer:latest ${{ secrets.ACR_LOGINURL }}/mlos-devcontainer:latest
-        docker push ${{ secrets.ACR_LOGINURL }}/mlos-devcontainer:latest
+        image_tag=''
+        if [ "${{ github.ref }}" == 'refs/heads/main' ]; then
+          image_tag='latest'
+        elif [ "${{ github.event }}" == 'release' ] || [ "${{ github.ref_type }}" == 'tag' ]; then
+          image_tag="${{ github.ref_name }}"
+        fi
+        if [ -z "$image_tag" ]; then
+          echo "ERROR: Unhandled event condition or ref: event=${{ github.event}}, ref=${{ github.ref }}, ref_type=${{ github.ref_type }}"
+          exit 1
+        fi
+
+        docker tag devcontainer-cli:latest ${{ secrets.ACR_LOGINURL }}/devcontainer-cli:$image_tag
+        docker push ${{ secrets.ACR_LOGINURL }}/devcontainer-cli:$image_tag
+        docker tag mlos-devcontainer:latest ${{ secrets.ACR_LOGINURL }}/mlos-devcontainer:$image_tag
+        docker push ${{ secrets.ACR_LOGINURL }}/mlos-devcontainer:$image_tag

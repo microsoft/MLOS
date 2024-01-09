@@ -232,6 +232,8 @@ mlos_bench/dist/tmp/mlos-bench-latest.tar: PACKAGE_NAME := mlos-bench
 	# Check to make sure the mlos_bench module has the config directory.
 	[ "$(MODULE_NAME)" != "mlos_bench" ] || unzip -t $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl | grep -m1 mlos_bench/config/
 	cd $(MODULE_NAME)/dist/tmp && ln -s ../$(MODULE_NAME)-*-py3-none-any.whl $(MODULE_NAME)-latest-py3-none-any.whl
+	# Check to make sure the README contents made it into the package metadata.
+	unzip -p $(MODULE_NAME)/dist/tmp/$(MODULE_NAME)-latest-py3-none-any.whl */METADATA | egrep -v '^[A-Z][a-zA-z-]+:' | grep -q -i '^# mlos'
 
 .PHONY: dist-test-env-clean
 dist-test-env-clean:
@@ -278,6 +280,27 @@ build/dist-test.$(PYTHON_VERSION).build-stamp: $(PYTHON_FILES) build/dist-test-e
 dist-test-clean: dist-test-env-clean
 	rm -f build/dist-test-env.$(PYTHON_VERSION).build-stamp
 
+
+.PHONY: publish
+publish: publish-pypi
+
+.PHONY:
+publish-pypi-deps: build/publish-pypi-deps.build-stamp
+
+build/publish-pypi-deps.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
+	conda run -n ${CONDA_ENV_NAME} pip install -U twine
+	touch $@
+
+build/publish.%.py.build-stamp: build/publish-pypi-deps.${CONDA_ENV_NAME}.build-stamp build/pytest.${CONDA_ENV_NAME}.build-stamp build/dist-test.$(PYTHON_VERSION).build-stamp build/check-doc.build-stamp build/linklint-doc.build-stamp
+	rm -f mlos_*/dist/*.tar.gz
+	ls mlos_*/dist/*.tar | xargs -I% gzip -k %
+	repo_name=`echo "$@" | sed -e 's|build/publish\.||' -e 's|\.py\.build-stamp||'` \
+		&& conda run -n ${CONDA_ENV_NAME} python3 -m twine upload --repository $$repo_name \
+			mlos_*/dist/mlos*-*.tar.gz mlos_*/dist/mlos*-*.whl
+	touch $@
+
+publish-pypi: build/publish.pypi.py.build-stamp
+publish-test-pypi: build/publish.testpypi.py.build-stamp
 
 build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp: doc/requirements.txt
@@ -340,7 +363,10 @@ doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile doc/copy-source-
 	# See check-doc
 
 .PHONY: doc
-doc: doc/build/html/.nojekyll build/check-doc.build-stamp build/linklint-doc.build-stamp
+doc: doc/build/html/.nojekyll doc-test
+
+.PHONY: doc-test
+doc-test: build/check-doc.build-stamp build/linklint-doc.build-stamp
 
 doc/build/html/htmlcov/index.html: doc/build/html/index.html
 	# Make the codecov html report available for the site.

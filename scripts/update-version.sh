@@ -14,4 +14,5 @@ cd "$scriptdir/.."
 
 set -x
 # Example usage: "./update-version.sh --dry-run patch" to bump v0.0.4 -> v0.0.5, for instance.
+# Example usage: "./update-version.sh --dry-run minor" to bump v0.0.4 -> v0.1.0, for instance.
 conda run -n ${CONDA_ENV_NAME:-mlos} bumpversion --verbose $*
