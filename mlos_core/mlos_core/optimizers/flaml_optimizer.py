@@ -134,11 +134,20 @@ class FlamlOptimizer(BaseOptimizer):
         result: Union[dict, None]
             Dictionary with a single key, `score`, if config already evaluated; `None` otherwise.
         """
-        cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(self.optimizer_parameter_space, values=config)
+        cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
+            self.optimizer_parameter_space, values=config, allow_inactive_with_values=True)
+        # FLAML ignores ConfigSpace conditionals when proposing new configurations.
+        # We have to manually remove inactive hyperparameters from FLAML suggestion here.
+        cs_config = ConfigSpace.Configuration(
+            self.optimizer_parameter_space, values={
+                key: cs_config[key]
+                for key in self.optimizer_parameter_space.get_active_hyperparameters(cs_config)
+            }
+        )
         if cs_config in self.evaluated_samples:
             return {'score': self.evaluated_samples[cs_config].score}
 
-        self._suggested_config = config
+        self._suggested_config = dict(cs_config)  # Cleaned-up version of config
         return None  # Returning None stops the process
 
     def _get_next_config(self) -> dict:
@@ -164,7 +173,7 @@ class FlamlOptimizer(BaseOptimizer):
         points_to_evaluate: list = []
         evaluated_rewards: list = []
         if len(self.evaluated_samples) > 0:
-            points_to_evaluate = [s.config for s in self.evaluated_samples.values()]
+            points_to_evaluate = [self._config_to_dict(conf) for conf in self.evaluated_samples]
             evaluated_rewards = [s.score for s in self.evaluated_samples.values()]
 
         # Warm start FLAML optimizer
@@ -174,8 +183,8 @@ class FlamlOptimizer(BaseOptimizer):
             config=self.flaml_parameter_space,
             mode='min',
             metric='score',
-            points_to_evaluate=list(points_to_evaluate),
-            evaluated_rewards=list(evaluated_rewards),
+            points_to_evaluate=points_to_evaluate,
+            evaluated_rewards=evaluated_rewards,
             num_samples=len(points_to_evaluate) + 1,
             low_cost_partial_config=self.low_cost_partial_config,
             verbose=0,
@@ -184,3 +193,22 @@ class FlamlOptimizer(BaseOptimizer):
             raise RuntimeError('FLAML did not produce a suggestion')
 
         return self._suggested_config  # type: ignore[unreachable]
+
+    @staticmethod
+    def _config_to_dict(config: ConfigSpace.Configuration) -> dict:
+        """Converts a ConfigSpace.Configuration to a dictionary.
+
+        Parameters
+        ----------
+        config: ConfigSpace.Configuration
+            Configuration to be converted.
+
+        Returns
+        -------
+        result: dict
+            Dictionary representation of the configuration.
+        """
+        return {
+            k: v for (k, v) in config.items()
+            if config.config_space[k].is_legal(v)
+        }

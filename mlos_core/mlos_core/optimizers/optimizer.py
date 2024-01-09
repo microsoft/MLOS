@@ -132,7 +132,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             configuration = self._suggest(context)
             assert len(configuration) == 1, \
                 "Suggest must return a single configuration."
-            assert len(configuration.columns) == len(self.optimizer_parameter_space.values()), \
+            assert set(configuration).issubset(set(self.parameter_space)), \
                 "Suggest returned a configuration with the wrong number of parameters."
         if self._space_adapter:
             configuration = self._space_adapter.transform(configuration)

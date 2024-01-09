@@ -111,8 +111,8 @@ def test_flaml_optimization_loop(mock_env_no_noise: MockEnv,
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B2s",
         "idle": "halt",
-        "kernel_sched_migration_cost_ns": 50132,
-        "kernel_sched_latency_ns": 22674895,
+        "kernel_sched_migration_cost_ns": -1,
+        "kernel_sched_latency_ns": 13718105,
     }
 
 
