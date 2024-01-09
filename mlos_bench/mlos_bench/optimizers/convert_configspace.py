@@ -151,10 +151,19 @@ def configspace_data_to_tunable_values(data: dict) -> dict:
     Remove the fields that correspond to special values in ConfigSpace.
     In particular, remove `!type__` keys and trim `!special` suffixes.
     """
-    return {
-        special_param_name_strip(k): v
-        for (k, v) in data.items() if not special_param_name_is_temp(k)
-    }
+    data = data.copy()
+    specials = [
+        special_param_name_strip(k)
+        for k in data.keys() if special_param_name_is_temp(k)
+    ]
+    for k in specials:
+        (special_name, type_name) = special_param_names(k)
+        if data[type_name] == "special":
+            data[k] = data[special_name]
+        if special_name in data:
+            del data[special_name]
+        del data[type_name]
+    return data
 
 
 def special_param_names(name: str) -> Tuple[str, str]:
