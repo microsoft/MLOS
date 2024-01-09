@@ -193,7 +193,7 @@ jobs:
         docker rm --force mlos-devcontainer || true
 
     - name: Container Registry Login
-      if: github.repository == 'microsoft/mlos' && github.ref == 'refs/heads/main'
+      if: github.repository == 'microsoft/mlos' && (github.ref == 'refs/heads/main' || github.event == 'release' || github.ref_type == 'tag')
       uses: docker/login-action@v3
       with:
         # This is the URL of the container registry, which is configured in Github
@@ -205,13 +205,22 @@ jobs:
         # other resources used.
         password: ${{ secrets.ACR_PASSWORD }}
     - name: Publish the container images
-      if: github.repository == 'microsoft/mlos' && github.ref == 'refs/heads/main'
+      if: github.repository == 'microsoft/mlos' && (github.ref == 'refs/heads/main' || github.event == 'release' || github.ref_type == 'tag')
       timeout-minutes: 15
-      # We currently only push to the :latest tag, to avoid needing to cleanup the
-      # registry manually (there's no API for that atm).
       run: |
         set -x
-        docker tag devcontainer-cli:latest ${{ secrets.ACR_LOGINURL }}/devcontainer-cli:latest
-        docker push ${{ secrets.ACR_LOGINURL }}/devcontainer-cli:latest
-        docker tag mlos-devcontainer:latest ${{ secrets.ACR_LOGINURL }}/mlos-devcontainer:latest
-        docker push ${{ secrets.ACR_LOGINURL }}/mlos-devcontainer:latest
+        image_tag=''
+        if [ "${{ github.ref }}" == 'refs/heads/main' ]; then
+          image_tag='latest'
+        elif [ "${{ github.event }}" == 'release' ] || [ "${{ github.ref_type }}" == 'tag' ]; then
+          image_tag="${{ github.ref_name }}"
+        fi
+        if [ -z "$image_tag" ]; then
+          echo "ERROR: Unhandled event condition or ref: event=${{ github.event}}, ref=${{ github.ref }}, ref_type=${{ github.ref_type }}"
+          exit 1
+        fi
+
+        docker tag devcontainer-cli:latest ${{ secrets.ACR_LOGINURL }}/devcontainer-cli:$image_tag
+        docker push ${{ secrets.ACR_LOGINURL }}/devcontainer-cli:$image_tag
+        docker tag mlos-devcontainer:latest ${{ secrets.ACR_LOGINURL }}/mlos-devcontainer:$image_tag
+        docker push ${{ secrets.ACR_LOGINURL }}/mlos-devcontainer:$image_tag
