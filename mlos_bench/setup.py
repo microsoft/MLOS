@@ -10,7 +10,7 @@ Setup instructions for the mlos_bench package.
 
 from logging import warning
 from itertools import chain
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import os
 import re
@@ -27,11 +27,14 @@ from _version import _VERSION    # pylint: disable=import-private-name
 # temp directory.
 # Similarly, we can't use a utility script outside this module, so this code has to
 # be duplicated for now.
-def _get_long_desc_from_readme(base_url: str) -> str:
+def _get_long_desc_from_readme(base_url: str) -> Optional[str]:
     pkg_dir = os.path.dirname(__file__)
+    readme_path = os.path.join(pkg_dir, 'README.md')
+    if not os.path.isfile(readme_path):
+        return None
     jsonc_re = re.compile(r'```jsonc')
     link_re = re.compile(r'\]\(([^:#)]+)(#[a-zA-Z0-9_-]+)?\)')
-    with open(os.path.join(pkg_dir, 'README.md'), mode='r', encoding='utf-8') as readme_fh:
+    with open(readme_path, mode='r', encoding='utf-8') as readme_fh:
         lines = readme_fh.readlines()
         # Tweak the lexers for local expansion by pygments instead of github's.
         lines = [link_re.sub(f"]({base_url}" + r'/\1\2)', line) for line in lines]

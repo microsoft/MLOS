@@ -34,7 +34,6 @@ for pkg in mlos_core mlos_bench; do
     mkdir -p .devcontainer/tmp/$pkg
     cp -v $pkg/setup.py .devcontainer/tmp/$pkg/setup.py
     cp -v $pkg/_version.py .devcontainer/tmp/$pkg/_version.py
-    cp -v $pkg/README.md .devcontainer/tmp/$pkg/README.md
 done
 cp -v doc/requirements.txt .devcontainer/tmp/doc.requirements.txt
 
