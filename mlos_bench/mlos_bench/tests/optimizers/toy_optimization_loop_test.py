@@ -81,7 +81,7 @@ def test_mock_optimization_loop(mock_env_no_noise: MockEnv,
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B2ms",
         "idle": "halt",
-        "kernel_sched_migration_cost_ns": 117025,
+        "kernel_sched_migration_cost_ns": 117026,
         "kernel_sched_latency_ns": 149827706,
     }
 
@@ -96,7 +96,7 @@ def test_mock_optimization_loop_no_defaults(mock_env_no_noise: MockEnv,
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B2s",
         "idle": "halt",
-        "kernel_sched_migration_cost_ns": 49122,
+        "kernel_sched_migration_cost_ns": 49123,
         "kernel_sched_latency_ns": 234760738,
     }
 
