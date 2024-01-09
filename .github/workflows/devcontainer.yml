@@ -10,8 +10,6 @@ on:
         description: Disable caching?
         default: false
         required: false
-  release:
-    types: [published]
   push:
     tags: ["v*"]
     branches: [ main ]
@@ -163,7 +161,7 @@ jobs:
         rm -f doc/build/html/htmlcov/.gitignore
 
     - name: Publish package to Test PyPi
-      if: github.event == 'release' || github.ref_type == 'tag'
+      if: github.ref_type == 'tag'
       run: |
         if [ -n "${{ secrets.PYPI_TEST_USERNAME }}" ]; then
           docker exec --user vscode --env USER=vscode --env MAKEFLAGS=-Oline \
@@ -172,7 +170,7 @@ jobs:
         fi
 
     - name: Publish package to PyPi
-      if: github.repository == 'microsoft/mlos' && (github.event == 'release' || github.ref_type == 'tag')
+      if: github.repository == 'microsoft/mlos' && github.ref_type == 'tag'
       run: |
         if [ -n "${{ secrets.PYPI_USERNAME }}" ]; then
           docker exec --user vscode --env USER=vscode --env MAKEFLAGS=-Oline \
@@ -196,7 +194,7 @@ jobs:
 
     - name: Container Registry Login
       # FIXME: testing
-      if: (github.repository == 'microsoft/mlos' || github.repository == 'bpkroth/mlos') && (github.ref == 'refs/heads/main' || github.event == 'release' || github.ref_type == 'tag')
+      if: (github.repository == 'microsoft/mlos' || github.repository == 'bpkroth/mlos') && (github.ref == 'refs/heads/main' || github.ref_type == 'tag')
       uses: docker/login-action@v3
       with:
         # This is the URL of the container registry, which is configured in Github
@@ -209,14 +207,14 @@ jobs:
         password: ${{ secrets.ACR_PASSWORD }}
     - name: Publish the container images
       # FIXME: testing
-      if: (github.repository == 'microsoft/mlos' || github.repository == 'bpkroth/mlos') && (github.ref == 'refs/heads/main' || github.event == 'release' || github.ref_type == 'tag')
+      if: (github.repository == 'microsoft/mlos' || github.repository == 'bpkroth/mlos') && (github.ref == 'refs/heads/main' || github.ref_type == 'tag')
       timeout-minutes: 15
       run: |
         set -x
         image_tag=''
         if [ "${{ github.ref }}" == 'refs/heads/main' ]; then
           image_tag='latest'
-        elif [ "${{ github.event }}" == 'release' ] || [ "${{ github.ref_type }}" == 'tag' ]; then
+        elif [ "${{ github.ref_type }}" == 'tag' ]; then
           image_tag="${{ github.ref_name }}"
         fi
         if [ -z "$image_tag" ]; then
