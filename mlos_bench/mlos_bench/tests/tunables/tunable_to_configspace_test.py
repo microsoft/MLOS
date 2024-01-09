@@ -54,7 +54,7 @@ def configuration_space() -> ConfigurationSpace:
     spaces["kernel_sched_migration_cost_ns"].default_value = 250000
     spaces[ksm_special].default_value = -1
     spaces[ksm_type].default_value = "special"
-    spaces[ksm_type].probabilities = (0.1, 0.9)
+    spaces[ksm_type].probabilities = (0.5, 0.5)  # FLAML requires distribution to be uniform
     spaces["kernel_sched_latency_ns"].default_value = 2000000
 
     spaces.add_condition(EqualsCondition(
