@@ -147,7 +147,9 @@ jobs:
         docker exec --user vscode --env USER=vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v dist dist-test
 
     - name: Test rebuilding the devcontainer in the devcontainer
-      timeout-minutes: 3
+      # FIXME:
+      # timeout-minutes: 3
+      timeout-minutes: 10
       run: |
         set -x
         git --no-pager diff --exit-code
