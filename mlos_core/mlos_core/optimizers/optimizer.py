@@ -214,6 +214,22 @@ class BaseOptimizer(metaclass=ABCMeta):
         Redefine this method in optimizers that require cleanup.
         """
 
+    def _dict_to_config(self, config: dict) -> ConfigSpace.Configuration:
+        """
+        Convert a dictionary to a valid ConfigSpace configuration.
+
+        Some optimizers (e.g., FLAML) ignore ConfigSpace conditionals when proposing new
+        configurations. We have to manually remove inactive hyperparameters such suggestions.
+        """
+        cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
+            self.optimizer_parameter_space, values=config, allow_inactive_with_values=True)
+        return ConfigSpace.Configuration(
+            self.optimizer_parameter_space, values={
+                key: cs_config[key]
+                for key in self.optimizer_parameter_space.get_active_hyperparameters(cs_config)
+            }
+        )
+
     def _from_1hot(self, config: npt.NDArray) -> pd.DataFrame:
         """
         Convert numpy array from one-hot encoding to a DataFrame

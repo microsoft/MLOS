@@ -108,9 +108,11 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
                 if getattr(self, '_pinv_matrix', None) is None:
                     self._try_generate_approx_inverse_mapping()
 
+                # Replace NaNs with zeros for inactive hyperparameters
+                config_vector = np.nan_to_num(configuration.get_array(), nan=0.0)
                 # Perform approximate reverse mapping
                 # NOTE: applying special value biasing is not possible
-                vector = self._config_scaler.inverse_transform([configuration.get_array()])[0]
+                vector = self._config_scaler.inverse_transform([config_vector])[0]
                 target_config_vector = self._pinv_matrix.dot(vector)
                 target_config = ConfigSpace.Configuration(self.target_parameter_space, vector=target_config_vector)
 

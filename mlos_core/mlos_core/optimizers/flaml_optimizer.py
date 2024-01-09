@@ -134,20 +134,11 @@ class FlamlOptimizer(BaseOptimizer):
         result: Union[dict, None]
             Dictionary with a single key, `score`, if config already evaluated; `None` otherwise.
         """
-        cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
-            self.optimizer_parameter_space, values=config, allow_inactive_with_values=True)
-        # FLAML ignores ConfigSpace conditionals when proposing new configurations.
-        # We have to manually remove inactive hyperparameters from FLAML suggestion here.
-        cs_config = ConfigSpace.Configuration(
-            self.optimizer_parameter_space, values={
-                key: cs_config[key]
-                for key in self.optimizer_parameter_space.get_active_hyperparameters(cs_config)
-            }
-        )
+        cs_config = self._dict_to_config(config)
         if cs_config in self.evaluated_samples:
             return {'score': self.evaluated_samples[cs_config].score}
 
-        self._suggested_config = dict(cs_config)  # Cleaned-up version of config
+        self._suggested_config = dict(cs_config)  # Cleaned-up version of the config
         return None  # Returning None stops the process
 
     def _get_next_config(self) -> dict:
@@ -173,7 +164,7 @@ class FlamlOptimizer(BaseOptimizer):
         points_to_evaluate: list = []
         evaluated_rewards: list = []
         if len(self.evaluated_samples) > 0:
-            points_to_evaluate = [self._config_to_dict(conf) for conf in self.evaluated_samples]
+            points_to_evaluate = [dict(self._dict_to_config(conf)) for conf in self.evaluated_samples]
             evaluated_rewards = [s.score for s in self.evaluated_samples.values()]
 
         # Warm start FLAML optimizer
@@ -193,22 +184,3 @@ class FlamlOptimizer(BaseOptimizer):
             raise RuntimeError('FLAML did not produce a suggestion')
 
         return self._suggested_config  # type: ignore[unreachable]
-
-    @staticmethod
-    def _config_to_dict(config: ConfigSpace.Configuration) -> dict:
-        """Converts a ConfigSpace.Configuration to a dictionary.
-
-        Parameters
-        ----------
-        config: ConfigSpace.Configuration
-            Configuration to be converted.
-
-        Returns
-        -------
-        result: dict
-            Dictionary representation of the configuration.
-        """
-        return {
-            k: v for (k, v) in config.items()
-            if config.config_space[k].is_legal(v)
-        }
