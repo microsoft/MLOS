@@ -82,7 +82,7 @@ def _tunable_to_configspace(
             meta=meta),
         type_name: CategoricalHyperparameter(
             name=type_name, choices=["special", "range"], default_value="special",
-            weights=[0.1, 0.9]),  # TODO: Make weights configurable
+            weights=[0.5, 0.5]),  # TODO: Make weights configurable; FLAML requires uniform weights.
     })
     cs.add_condition(EqualsCondition(cs[special_name], cs[type_name], "special"))
     cs.add_condition(EqualsCondition(cs[tunable.name], cs[type_name], "range"))
