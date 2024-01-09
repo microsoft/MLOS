@@ -47,6 +47,16 @@ jobs:
           echo COMMIT_MESSAGES_EOF
         } >> $GITHUB_OUTPUT
 
+    - name: Validate tag
+      if: github.ref_type == 'tag'
+      # Note: May need to update this for release branches in the future too.
+      run: |
+        git fetch --deepen=100
+        if ! git branch -a --contains ${{ github.ref_name }} | grep origin/main; then
+          echo "ERROR: tag ${{ github.ref_name }} doesn't appear to be included in the main branch." >&2
+          exit 1
+        fi
+
     - name: Set NO_CACHE variable based on commit messages and for nightly builds
       if: github.event_name == 'schedule' || contains(steps.get-commit-messages.outputs.COMMIT_MESSAGES, 'NO_CACHE=true') || github.event.inputs.NO_CACHE == 'true'
       run: |
