@@ -204,8 +204,7 @@ jobs:
         docker rm --force mlos-devcontainer || true
 
     - name: Container Registry Login
-      # FIXME: testing
-      if: (github.repository == 'microsoft/mlos' || github.repository == 'bpkroth/mlos') && (github.ref == 'refs/heads/main' || github.ref_type == 'tag')
+      if: (github.repository == 'microsoft/mlos') && (github.ref == 'refs/heads/main' || github.ref_type == 'tag')
       uses: docker/login-action@v3
       with:
         # This is the URL of the container registry, which is configured in Github
@@ -217,8 +216,7 @@ jobs:
         # other resources used.
         password: ${{ secrets.ACR_PASSWORD }}
     - name: Publish the container images
-      # FIXME: testing
-      if: (github.repository == 'microsoft/mlos' || github.repository == 'bpkroth/mlos') && (github.ref == 'refs/heads/main' || github.ref_type == 'tag')
+      if: (github.repository == 'microsoft/mlos') && (github.ref == 'refs/heads/main' || github.ref_type == 'tag')
       timeout-minutes: 15
       run: |
         set -x
