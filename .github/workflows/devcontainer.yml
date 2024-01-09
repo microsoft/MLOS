@@ -51,6 +51,7 @@ jobs:
       if: github.ref_type == 'tag'
       # Note: May need to update this for release branches in the future too.
       run: |
+        set -x
         git fetch --deepen=100
         if ! git branch -a --contains ${{ github.ref_name }} | grep origin/main; then
           echo "ERROR: tag ${{ github.ref_name }} doesn't appear to be included in the main branch." >&2
