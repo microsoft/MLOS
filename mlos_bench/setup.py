@@ -10,7 +10,7 @@ Setup instructions for the mlos_bench package.
 
 from logging import warning
 from itertools import chain
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import os
 import re
@@ -27,7 +27,7 @@ from _version import _VERSION    # pylint: disable=import-private-name
 # temp directory.
 # Similarly, we can't use a utility script outside this module, so this code has to
 # be duplicated for now.
-def _get_long_desc_from_readme(base_url: str) -> Optional[str]:
+def _get_long_desc_from_readme(base_url: str) -> str:
     pkg_dir = os.path.dirname(__file__)
     readme_path = os.path.join(pkg_dir, 'README.md')
     if not os.path.isfile(readme_path):

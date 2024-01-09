@@ -10,7 +10,7 @@ Setup instructions for the mlos_core package.
 
 from itertools import chain
 from logging import warning
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import os
 import re
@@ -37,7 +37,7 @@ except LookupError as e:
 # temp directory.
 # Similarly, we can't use a utility script outside this module, so this code has to
 # be duplicated for now.
-def _get_long_desc_from_readme(base_url: str) -> Optional[str]:
+def _get_long_desc_from_readme(base_url: str) -> str:
     pkg_dir = os.path.dirname(__file__)
     readme_path = os.path.join(pkg_dir, 'README.md')
     if not os.path.isfile(readme_path):
