@@ -127,9 +127,28 @@ See Also:
 - [mlos_bench/config](./mlos_bench/mlos_bench/config/) for additional configuration details.
 - [sqlite-autotuning](https://github.com/Microsoft-CISL/sqlite-autotuning) for a complete external example of using MLOS to tune `sqlite`.
 
+## Installation
+
+```sh
+# this will install just the optimizer component with SMAC support:
+pip install -U mlos-core[smac]
+
+# this will install just the optimizer component with flaml support:
+pip install -U "mlos-core[flaml]"
+
+# this will install just the optimizer component with smac and flaml support:
+pip install -U "mlos-core[smac,flaml]"
+
+# this will install both the flaml optimizer and the experiment runner with azure support:
+pip install -U "mlos-bench[flaml,azure]"
+
+# this will install both the smac optimizer and the experiment runner with ssh support:
+pip install -U "mlos-bench[smac,ssh]"
+```
+
 ## Distributing
 
-MLOS is not [*yet*](https://github.com/microsoft/MLOS/issues/547) published on `pypi`, so until them here are some instructions for installation for usage in production or other environments.
+You can also locally build and install from wheels like so:
 
 1. Build the *wheel* file(s)
 
@@ -137,25 +156,20 @@ MLOS is not [*yet*](https://github.com/microsoft/MLOS/issues/547) published on `
     make dist
     ```
 
-2. Install it (e.g. after copying it somewhere else).
+2. Install it.
 
     ```sh
     # this will install just the optimizer component with SMAC support:
-    pip install dist/mlos_core-0.2.2-py3-none-any.whl[smac]
-
-    # this will install just the optimizer component with flaml support:
-    pip install dist/mlos_core-0.2.2-py3-none-any.whl[flaml]
-
-    # this will install just the optimizer component with smac and flaml support:
-    pip install dist/mlos_core-0.2.2-py3-none-any.whl[smac,flaml]
+    pip install "dist/tmp/mlos_core-latest-py3-none-any.whl[smac]"
     ```
 
     ```sh
     # this will install both the optimizer and the experiment runner:
-    pip install dist/mlos_bench-0.2.2-py3-none-any.whl
+    pip install "dist/mlos_bench-latest-py3-none-any.whl[azure]"
     ```
 
-    > Note: exact versions may differ due to automatic versioning.
+    > Note: exact versions may differ due to automatic versioning so the `-latest-` part is a symlink.
+    > If distributing elsewhere, adjust for the current version number in the module's `dist` directory.
 
 ## See Also
 
