@@ -55,7 +55,7 @@ Simply open the project in VSCode and follow the prompts to build and open the d
     conda activate mlos
     ```
 
-## Details
+### Details
 
 [`main`](https://github.com/microsoft/MLOS/tree/main) is considered the primary development branch.
 
@@ -73,6 +73,31 @@ We expect development to follow a typical "forking" style workflow:
 3. Submit changes for inclusion as a [Pull Request on Github](https://github.com/microsoft/MLOS/pulls).
 4. PRs are associated with [Github Issues](https://github.com/microsoft/MLOS/issues) and need [MLOS-committers](https://github.com/orgs/microsoft/teams/MLOS-committers) to sign-off (in addition to other CI pipeline checks like tests and lint checks to pass).
 5. Once approved, the PR can be completed using a squash merge in order to keep a nice linear history.
+
+## Distributing
+
+You can also locally build and install from wheels like so:
+
+1. Build the *wheel* file(s)
+
+    ```sh
+    make dist
+    ```
+
+2. Install it.
+
+    ```sh
+    # this will install just the optimizer component with SMAC support:
+    pip install "dist/tmp/mlos_core-latest-py3-none-any.whl[smac]"
+    ```
+
+    ```sh
+    # this will install both the optimizer and the experiment runner:
+    pip install "dist/mlos_bench-latest-py3-none-any.whl[azure]"
+    ```
+
+    > Note: exact versions may differ due to automatic versioning so the `-latest-` part is a symlink.
+    > If distributing elsewhere, adjust for the current version number in the module's `dist` directory.
 
 ### See Also
 
