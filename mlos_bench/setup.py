@@ -27,11 +27,11 @@ from _version import _VERSION    # pylint: disable=import-private-name
 # temp directory.
 # Similarly, we can't use a utility script outside this module, so this code has to
 # be duplicated for now.
-def _get_long_desc_from_readme(base_url: str) -> str:
+def _get_long_desc_from_readme(base_url: str) -> dict:
     pkg_dir = os.path.dirname(__file__)
     readme_path = os.path.join(pkg_dir, 'README.md')
     if not os.path.isfile(readme_path):
-        return None
+        return {}
     jsonc_re = re.compile(r'```jsonc')
     link_re = re.compile(r'\]\(([^:#)]+)(#[a-zA-Z0-9_-]+)?\)')
     with open(readme_path, mode='r', encoding='utf-8') as readme_fh:
@@ -40,7 +40,10 @@ def _get_long_desc_from_readme(base_url: str) -> str:
         lines = [link_re.sub(f"]({base_url}" + r'/\1\2)', line) for line in lines]
         # Tweak source source code links.
         lines = [jsonc_re.sub(r'```json', line) for line in lines]
-        return ''.join(lines)
+        return {
+            'long_description': ''.join(lines),
+            'long_description_content_type': 'text/markdown',
+        }
 
 
 try:
@@ -115,8 +118,7 @@ setup(
     extras_require=extra_requires,
     author='Microsoft',
     license='MIT',
-    long_description=_get_long_desc_from_readme('https://github.com/microsoft/MLOS/tree/main/mlos_bench'),
-    long_description_content_type='text/markdown',
+    **_get_long_desc_from_readme('https://github.com/microsoft/MLOS/tree/main/mlos_bench'),
     author_email='mlos-maintainers@service.microsoft.com',
     description=('MLOS Bench Python interface for benchmark automation and optimization.'),
     url='https://github.com/microsoft/MLOS',
