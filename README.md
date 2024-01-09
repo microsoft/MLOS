@@ -129,7 +129,10 @@ See Also:
 
 ## Installation
 
-The MLOS modules are published to [pypi](https://pypi.org) when new tags/releases are made.
+The MLOS modules are published to [pypi](https://pypi.org) when new releases are tagged:
+
+- [mlos-core](https://pypi.org/project/mlos-core/)
+- [mlos-bench](https://pypi.org/project/mlos-bench/)
 
 To install the latest release, simply run:
 

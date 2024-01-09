@@ -2,6 +2,8 @@
 
 This [directory](./) contains the code for the `mlos-core` optimizer package.
 
+It's available for `pip install` via the pypi repository at [mlos-core](https://pypi.org/project/mlos-core/).
+
 ## Description
 
 `mlos-core` is an optimizer package, wrapping other libraries like FLAML and SMAC to use techniques like Bayesian optimization and others to identify & sample tunable configuration parameters and propose optimal parameter values with a consistent API: `suggest` and `register`.

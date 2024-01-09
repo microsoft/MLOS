@@ -4,6 +4,8 @@ This [directory](./) contains the code for the `mlos-bench` experiment runner pa
 
 It makes use of the [`mlos-core`](../mlos_core/) package for its optimizer.
 
+It's available for `pip install` via the pypi repository at [mlos-bench](https://pypi.org/project/mlos-bench/).
+
 ## Table of Contents
 
 <!-- markdownlint-disable MD007 -->
