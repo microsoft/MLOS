@@ -129,6 +129,10 @@ See Also:
 
 ## Installation
 
+The MLOS modules are published to [pypi](https://pypi.org) when new tags/releases are made.
+
+To install the latest release, simply run:
+
 ```sh
 # this will install just the optimizer component with SMAC support:
 pip install -U mlos-core[smac]
@@ -146,30 +150,7 @@ pip install -U "mlos-bench[flaml,azure]"
 pip install -U "mlos-bench[smac,ssh]"
 ```
 
-## Distributing
-
-You can also locally build and install from wheels like so:
-
-1. Build the *wheel* file(s)
-
-    ```sh
-    make dist
-    ```
-
-2. Install it.
-
-    ```sh
-    # this will install just the optimizer component with SMAC support:
-    pip install "dist/tmp/mlos_core-latest-py3-none-any.whl[smac]"
-    ```
-
-    ```sh
-    # this will install both the optimizer and the experiment runner:
-    pip install "dist/mlos_bench-latest-py3-none-any.whl[azure]"
-    ```
-
-    > Note: exact versions may differ due to automatic versioning so the `-latest-` part is a symlink.
-    > If distributing elsewhere, adjust for the current version number in the module's `dist` directory.
+Details on using a local version from git are available in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## See Also
 
