@@ -38,29 +38,32 @@ def configuration_space() -> ConfigurationSpace:
     configuration_space : ConfigurationSpace
         A new ConfigurationSpace object for testing.
     """
-    (ksm_special, ksm_type) = special_param_names("kernel_sched_migration_cost_ns")
+    (kernel_sched_migration_cost_ns_special,
+     kernel_sched_migration_cost_ns_type) = special_param_names("kernel_sched_migration_cost_ns")
 
     spaces = ConfigurationSpace(space={
         "vmSize": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"],
         "idle": ["halt", "mwait", "noidle"],
         "kernel_sched_migration_cost_ns": (0, 500000),
-        ksm_special: [-1, 0],
-        ksm_type: ["special", "range"],
+        kernel_sched_migration_cost_ns_special: [-1, 0],
+        kernel_sched_migration_cost_ns_type: ["special", "range"],
         "kernel_sched_latency_ns": (0, 1000000000),
     })
 
     spaces["vmSize"].default_value = "Standard_B4ms"
     spaces["idle"].default_value = "halt"
     spaces["kernel_sched_migration_cost_ns"].default_value = 250000
-    spaces[ksm_special].default_value = -1
-    spaces[ksm_type].default_value = "special"
-    spaces[ksm_type].probabilities = (0.5, 0.5)  # FLAML requires distribution to be uniform
+    spaces[kernel_sched_migration_cost_ns_special].default_value = -1
+    spaces[kernel_sched_migration_cost_ns_type].default_value = "special"
+    spaces[kernel_sched_migration_cost_ns_type].probabilities = (0.5, 0.5)  # FLAML requires distribution to be uniform
     spaces["kernel_sched_latency_ns"].default_value = 2000000
 
     spaces.add_condition(EqualsCondition(
-        spaces[ksm_special], spaces[ksm_type], "special"))
+        spaces[kernel_sched_migration_cost_ns_special],
+        spaces[kernel_sched_migration_cost_ns_type], "special"))
     spaces.add_condition(EqualsCondition(
-        spaces["kernel_sched_migration_cost_ns"], spaces[ksm_type], "range"))
+        spaces["kernel_sched_migration_cost_ns"],
+        spaces[kernel_sched_migration_cost_ns_type], "range"))
 
     return spaces
 
