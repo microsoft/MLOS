@@ -13,6 +13,7 @@ import ConfigSpace
 import numpy as np
 import pandas as pd
 
+from mlos_core.util import normalize_config
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
@@ -134,7 +135,7 @@ class FlamlOptimizer(BaseOptimizer):
         result: Union[dict, None]
             Dictionary with a single key, `score`, if config already evaluated; `None` otherwise.
         """
-        cs_config = self._dict_to_config(config)
+        cs_config = normalize_config(self.parameter_space, config)
         if cs_config in self.evaluated_samples:
             return {'score': self.evaluated_samples[cs_config].score}
 
@@ -164,8 +165,13 @@ class FlamlOptimizer(BaseOptimizer):
         points_to_evaluate: list = []
         evaluated_rewards: list = []
         if len(self.evaluated_samples) > 0:
-            points_to_evaluate = [dict(self._dict_to_config(conf)) for conf in self.evaluated_samples]
-            evaluated_rewards = [s.score for s in self.evaluated_samples.values()]
+            points_to_evaluate = [
+                dict(normalize_config(self.parameter_space, conf))
+                for conf in self.evaluated_samples
+            ]
+            evaluated_rewards = [
+                s.score for s in self.evaluated_samples.values()
+            ]
 
         # Warm start FLAML optimizer
         self._suggested_config = None

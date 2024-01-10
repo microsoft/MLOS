@@ -12,7 +12,7 @@ import logging
 
 import pytest
 
-from mlos_core import config_to_dataframe
+from mlos_core.util import config_to_dataframe
 from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
 from mlos_bench.optimizers.convert_configspace import tunable_values_to_configuration
 

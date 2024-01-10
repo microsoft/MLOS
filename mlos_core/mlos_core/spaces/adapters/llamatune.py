@@ -13,6 +13,8 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
+
+from mlos_core.util import normalize_config
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
 
@@ -129,12 +131,12 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
         target_configuration = ConfigSpace.Configuration(self.target_parameter_space, values=target_values_dict)
 
         orig_values_dict = self._transform(target_values_dict)
-        orig_configuration = ConfigSpace.Configuration(self.orig_parameter_space, values=orig_values_dict)
+        orig_configuration = normalize_config(self.orig_parameter_space, orig_values_dict)
 
         # Add to inverse dictionary -- needed for registering the performance later
         self._suggested_configs[orig_configuration] = target_configuration
 
-        return pd.DataFrame([orig_values_dict.values()], columns=list(self.orig_parameter_space.keys()))
+        return pd.DataFrame([list(orig_configuration.values())], columns=list(orig_configuration.keys()))
 
     def _construct_low_dim_space(self, num_low_dims: int, max_unique_values_per_param: Optional[int]) -> None:
         """Constructs the low-dimensional parameter (potentially discretized) search space.
