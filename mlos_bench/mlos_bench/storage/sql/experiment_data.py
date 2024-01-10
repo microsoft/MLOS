@@ -35,6 +35,21 @@ class ExperimentSqlData(ExperimentData):
         self._schema = schema
 
     @property
+    def objectives(self) -> Dict[str, str]:
+        with self._engine.connect() as conn:
+            objectives = conn.execute(
+                self._schema.objectives.select().where(
+                    self._schema.objectives.c.exp_id == self._exp_id,
+                ).order_by(
+                    self._schema.objectives.c.objective_target.asc(),
+                )
+            )
+            return {
+                objective.objective_target: objective.objective_direction
+                for objective in objectives.fetchall()
+            }
+
+    @property
     def trials(self) -> Dict[int, TrialData]:
         with self._engine.connect() as conn:
             cur_trials = conn.execute(
