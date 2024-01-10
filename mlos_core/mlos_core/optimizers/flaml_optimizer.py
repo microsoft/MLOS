@@ -135,7 +135,7 @@ class FlamlOptimizer(BaseOptimizer):
         result: Union[dict, None]
             Dictionary with a single key, `score`, if config already evaluated; `None` otherwise.
         """
-        cs_config = normalize_config(self.parameter_space, config)
+        cs_config = normalize_config(self.optimizer_parameter_space, config)
         if cs_config in self.evaluated_samples:
             return {'score': self.evaluated_samples[cs_config].score}
 
@@ -166,7 +166,7 @@ class FlamlOptimizer(BaseOptimizer):
         evaluated_rewards: list = []
         if len(self.evaluated_samples) > 0:
             points_to_evaluate = [
-                dict(normalize_config(self.parameter_space, conf))
+                dict(normalize_config(self.optimizer_parameter_space, conf))
                 for conf in self.evaluated_samples
             ]
             evaluated_rewards = [
