@@ -74,7 +74,7 @@ setup(
     },
     install_requires=[
         'mlos-bench==' + _VERSION,
-        'dabl>=0.2.7',
+        'dabl>=0.2.6',
     ],
     extras_require=extra_requires,
     author='Microsoft',
