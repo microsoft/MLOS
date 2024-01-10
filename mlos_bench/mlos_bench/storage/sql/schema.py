@@ -62,8 +62,21 @@ class DbSchema:
             Column("root_env_config", String(1024), nullable=False),
             Column("git_repo", String(1024), nullable=False),
             Column("git_commit", String(40), nullable=False),
+            Column("optimization_target", String(1024), nullable=True),
+            Column("optimization_direction", String(10), nullable=True),
 
             PrimaryKeyConstraint("exp_id"),
+        )
+
+        self.objectives = Table(
+            "objectives",
+            self._meta,
+            Column("exp_id"),
+            Column("optimization_target", String(1024), nullable=False),
+            Column("optimization_direction", String(4), nullable=False),
+
+            PrimaryKeyConstraint("exp_id", "optimization_target"),
+            ForeignKeyConstraint(["exp_id"], [self.experiment.c.exp_id]),
         )
 
         # A workaround for SQLAlchemy issue with autoincrement in DuckDB:
