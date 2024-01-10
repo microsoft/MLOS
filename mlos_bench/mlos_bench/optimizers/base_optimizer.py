@@ -168,6 +168,13 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         return self._opt_target
 
     @property
+    def direction(self) -> str:
+        """
+        The direction to optimize the target metric (e.g., min or max).
+        """
+        return 'min' if self.is_min else 'max'
+
+    @property
     def supports_preload(self) -> bool:
         """
         Return True if the optimizer supports pre-loading the data from previous experiments.
