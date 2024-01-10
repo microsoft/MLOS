@@ -35,13 +35,15 @@ class Experiment(Storage.Experiment):
                  trial_id: int,
                  root_env_config: str,
                  description: str,
-                 opt_target: str):
+                 opt_target: str,
+                 opt_direction: str):
         super().__init__(tunables, experiment_id, root_env_config)
         self._engine = engine
         self._schema = schema
         self._trial_id = trial_id
         self._description = description
         self._opt_target = opt_target
+        self._opt_direction = opt_direction
 
     def _setup(self) -> None:
         super()._setup()
@@ -180,6 +182,7 @@ class Experiment(Storage.Experiment):
                     trial_id=trial.trial_id,
                     config_id=trial.config_id,
                     opt_target=self._opt_target,
+                    opt_direction=self._opt_direction,
                     config=config,
                 )
 
@@ -228,6 +231,7 @@ class Experiment(Storage.Experiment):
                     trial_id=self._trial_id,
                     config_id=config_id,
                     opt_target=self._opt_target,
+                    opt_direction=self._opt_direction,
                     config=config,
                 )
                 self._trial_id += 1

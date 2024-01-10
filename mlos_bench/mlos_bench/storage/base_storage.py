@@ -83,7 +83,8 @@ class Storage(metaclass=ABCMeta):
                    trial_id: int,
                    root_env_config: str,
                    description: str,
-                   opt_target: str) -> 'Storage.Experiment':
+                   opt_target: str,
+                   opt_direction: str) -> 'Storage.Experiment':
         """
         Create a new experiment in the storage.
 
@@ -103,6 +104,8 @@ class Storage(metaclass=ABCMeta):
             Human-readable description of the experiment.
         opt_target : str
             Name of metric we're optimizing for.
+        opt_direction: str
+            Direction to optimize the metric (e.g., min or max)
 
         Returns
         -------
@@ -249,12 +252,14 @@ class Storage(metaclass=ABCMeta):
 
         def __init__(self, *,
                      tunables: TunableGroups, experiment_id: str, trial_id: int,
-                     config_id: int, opt_target: str, config: Optional[Dict[str, Any]] = None):
+                     config_id: int, opt_target: str, opt_direction: str,
+                     config: Optional[Dict[str, Any]] = None):
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
             self._config_id = config_id
             self._opt_target = opt_target
+            self._opt_direction = opt_direction
             self._config = config or {}
 
         def __repr__(self) -> str:

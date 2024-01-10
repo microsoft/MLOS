@@ -86,7 +86,8 @@ def _optimize(*,
             trial_id=trial_id,
             root_env_config=root_env_config,
             description=env.name,
-            opt_target=opt.target
+            opt_target=opt.target,
+            opt_direction=opt.direction,
          ) as exp:
 
         _LOG.info("Experiment: %s Env: %s Optimizer: %s", exp, env, opt)

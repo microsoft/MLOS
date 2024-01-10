@@ -33,4 +33,5 @@ def exp_storage_memory_sql(tunable_groups: TunableGroups) -> Storage.Experiment:
         root_env_config="environment.jsonc",
         description="pytest experiment",
         opt_target="score",
+        opt_direction="min",
     ).__enter__()
