@@ -123,7 +123,7 @@ def _optimize(*,
                 # optimizer config used.
                 "optimizer": opt.name,
                 "opt_target": opt.target,
-                "opt_direction": "min" if opt.is_min else "max",
+                "opt_direction": opt.direction,
             })
             _run(env_context, opt_context, trial, global_config)
 
