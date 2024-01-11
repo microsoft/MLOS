@@ -84,8 +84,8 @@ class Experiment(Storage.Experiment):
                 # TODO: Expand for multiple objectives.
                 conn.execute(self._schema.objectives.insert().values(
                     exp_id=self._experiment_id,
-                    objective_target=self._opt_target,
-                    objective_direction=self._opt_direction,
+                    optimization_target=self._opt_target,
+                    optimization_direction=self._opt_direction,
                 ))
             else:
                 if exp_info.trial_id is not None:
