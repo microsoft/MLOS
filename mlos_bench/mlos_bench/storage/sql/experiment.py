@@ -88,6 +88,10 @@ class Experiment(Storage.Experiment):
                     self._trial_id = exp_info.trial_id + 1
                 _LOG.info("Continue experiment: %s last trial: %s resume from: %d",
                           self._experiment_id, exp_info.trial_id, self._trial_id)
+                # TODO: Sanity check that certain critical configs (e.g.,
+                # objectives) haven't changed to be incompatible such that a new
+                # experiment should be started (possibly by prewarming with the
+                # previous one).
                 if exp_info.git_commit != self._git_commit:
                     _LOG.warning("Experiment %s git expected: %s %s",
                                  self, exp_info.git_repo, exp_info.git_commit)
