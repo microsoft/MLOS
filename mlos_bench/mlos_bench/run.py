@@ -109,7 +109,7 @@ def _optimize(*,
             tunables = opt_context.suggest()
 
             if config_id > 0:
-                tunable_values = exp.load_config(config_id)
+                tunable_values = exp.load_tunable_config(config_id)
                 tunables.assign(tunable_values)
                 _LOG.info("Load config from storage: %d", config_id)
                 if _LOG.isEnabledFor(logging.DEBUG):
