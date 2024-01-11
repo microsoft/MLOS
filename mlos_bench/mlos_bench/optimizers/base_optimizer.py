@@ -153,6 +153,8 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         """
         return self.__class__.__name__
 
+    # TODO: Expand these properties for multi-objective.
+
     @property
     def is_min(self) -> bool:
         """
