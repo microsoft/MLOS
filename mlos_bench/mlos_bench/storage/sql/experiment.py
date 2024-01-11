@@ -37,13 +37,16 @@ class Experiment(Storage.Experiment):
                  description: str,
                  opt_target: str,
                  opt_direction: str):
-        super().__init__(tunables, experiment_id, root_env_config)
+        super().__init__(
+            tunables=tunables,
+            experiment_id=experiment_id,
+            trial_id=trial_id,
+            root_env_config=root_env_config,
+            description=description,
+            opt_target=opt_target,
+            opt_direction=opt_direction)
         self._engine = engine
         self._schema = schema
-        self._trial_id = trial_id
-        self._description = description
-        self._opt_target = opt_target
-        self._opt_direction = opt_direction
 
     def _setup(self) -> None:
         super()._setup()
