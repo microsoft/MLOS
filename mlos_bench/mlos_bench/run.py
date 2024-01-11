@@ -119,6 +119,8 @@ def _optimize(*,
                 config_id = -1
 
             trial = exp.new_trial(tunables, config={
+                # Add some additional metadata to track for the trial such as the
+                # optimizer config used.
                 "optimizer": opt.name,
                 "opt_target": opt.target,
                 "opt_direction": "min" if opt.is_min else "max",
