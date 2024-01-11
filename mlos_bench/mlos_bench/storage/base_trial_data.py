@@ -80,14 +80,16 @@ class TrialData(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def config(self) -> pandas.DataFrame:
+    def tunable_config(self) -> pandas.DataFrame:
         """
-        Retrieve the trials' configuration from the storage.
+        Retrieve the trials' tunable configuration from the storage.
+
+        Note: this corresponds to the Trial object's "tunables" property.
 
         Returns
         -------
         config : pandas.DataFrame
-            A dataframe with the configuration of the current trial.
+            A dataframe with the tunable configuration of the current trial.
             It has two `str` columns, "parameter" and "value".
         """
 
@@ -124,11 +126,13 @@ class TrialData(metaclass=ABCMeta):
     @abstractmethod
     def metadata(self) -> pandas.DataFrame:
         """
-        Retrieve the trials' metadata.
+        Retrieve the trials' metadata parameters.
+
+        Note: this corresponds to the Trial object's "config" property.
 
         Returns
         -------
-        config : pandas.DataFrame
+        metadata : pandas.DataFrame
             An optional dataframe with the metadata associated with the trial.
             It has two `str` columns, "parameter" and "value".
             Returns an empty dataframe if there is no metadata.
