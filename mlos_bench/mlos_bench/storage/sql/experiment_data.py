@@ -63,22 +63,23 @@ class ExperimentSqlData(ExperimentData):
         # Experiment.
         # For now, we simply issue a warning about potentially inconsistent data.
         for trial in self.trials.values():
-            trial_objectives_df = trial.metadata[
+            trial_objs_df = trial.metadata[
                 trial.metadata["parameter"].isin(("opt_target", "opt_direction"))
             ][["parameter", "value"]]
             try:
-                opt_target = trial_objectives_df["opt_target"][0]
-                assert trial_objectives_df["opt_target"].count() == 1, \
+                opt_targets = trial_objs_df[trial_objs_df["parameter"] == "opt_target"]
+                assert len(opt_targets) == 1, \
                     "Should only be a single opt_target in the metadata params."
+                opt_target = opt_targets["value"].iloc[0]
             except KeyError:
-                # No objective target stored for us to work on, move on.
                 continue
             try:
-                opt_direction = trial_objectives_df["opt_direction"][0]
-                assert trial_objectives_df["opt_direction"].count() <= 1, \
+                opt_directions = trial_objs_df[trial_objs_df["parameter"] == "opt_direction"]
+                assert len(opt_directions) <= 1, \
                     "Should only be a single opt_direction in the metadata params."
-            except KeyError:
-                pass
+                opt_direction = opt_directions["value"].iloc[0]
+            except (KeyError, IndexError):
+                opt_direction = None
             if opt_target not in objectives:
                 objectives[opt_target] = opt_direction
             elif opt_direction != objectives[opt_target]:
