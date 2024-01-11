@@ -188,7 +188,7 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def load_config(self, config_id: int) -> Dict[str, Any]:
+        def load_tunable_config(self, config_id: int) -> Dict[str, Any]:
             """
             Load tunable values for a given config ID.
             """
@@ -282,7 +282,9 @@ class Storage(metaclass=ABCMeta):
         @property
         def tunables(self) -> TunableGroups:
             """
-            Tunable parameters of the current trial.
+            Tunable parameters of the current trial
+
+            (e.g., application Environment's "config")
             """
             return self._tunables
 
@@ -290,6 +292,11 @@ class Storage(metaclass=ABCMeta):
             """
             Produce a copy of the global configuration updated
             with the parameters of the current trial.
+
+            Note: this is not the target Environment's "config" (i.e., tunable
+            params), but rather the internal "config" which consists of a
+            combination of somewhat more static variables defined in the json config
+            files.
             """
             config = self._config.copy()
             config.update(global_config or {})
