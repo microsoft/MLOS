@@ -7,6 +7,8 @@ An interface to access the benchmark data stored in SQL DB.
 """
 from typing import Dict
 
+import logging
+
 import pandas
 from sqlalchemy import Engine
 
@@ -15,6 +17,8 @@ from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.base_trial_data import TrialData
 from mlos_bench.storage.sql.trial_data import TrialSqlData
+
+_LOG = logging.getLogger(__name__)
 
 
 class ExperimentSqlData(ExperimentData):
@@ -36,27 +40,51 @@ class ExperimentSqlData(ExperimentData):
 
     @property
     def objectives(self) -> Dict[str, str]:
+        objectives: Dict[str, str] = {}
+        # First try to lookup the objectives from the experiment metadata in the storage layer.
         if hasattr(self._schema, "objectives"):
             with self._engine.connect() as conn:
-                objectives = conn.execute(
+                objectives_db_data = conn.execute(
                     self._schema.objectives.select().where(
                         self._schema.objectives.c.exp_id == self._exp_id,
                     ).order_by(
                         self._schema.objectives.c.optimization_target.asc(),
                     )
                 )
-                return {
+                objectives = {
                     objective.optimization_target: objective.optimization_direction
-                    for objective in objectives.fetchall()
+                    for objective in objectives_db_data.fetchall()
                 }
-        else:
-            # Backwards compatibility: try and obtain the objectives from the TrialData.
-            # FIXME: convert to metadata
-            return {
-                trial.metadata["opt_target"]: trial.metadata["opt_direction"]
-                for trial in self.trials.values()
-                if trial.metadata.get("opt_target") and trial.metadata.get("opt_direction")
-            }
+        # Backwards compatibility: try and obtain the objectives from the TrialData and merge them in.
+        # NOTE: The original format of storing opt_target/opt_direction in the Trial
+        # metadata did not support multi-objectives.
+        # Nor does it make it easy to detect when a config change caused a switch in
+        # opt_direction for a given opt_target between run.py executions of an
+        # Experiment.
+        # For now, we simply issue a warning about potentially inconsistent data.
+        for trial in self.trials.values():
+            trial_objectives_df = trial.metadata[
+                trial.metadata["parameter"].isin(("opt_target", "opt_direction"))
+            ][["parameter", "value"]]
+            try:
+                opt_target = trial_objectives_df["opt_target"][0]
+                assert trial_objectives_df["opt_target"].count() == 1, \
+                    "Should only be a single opt_target in the metadata params."
+            except KeyError:
+                # No objective target stored for us to work on, move on.
+                continue
+            try:
+                opt_direction = trial_objectives_df["opt_direction"][0]
+                assert trial_objectives_df["opt_direction"].count() <= 1, \
+                    "Should only be a single opt_direction in the metadata params."
+            except KeyError:
+                pass
+            if opt_target not in objectives:
+                objectives[opt_target] = opt_direction
+            elif opt_direction != objectives[opt_target]:
+                _LOG.warning("Experiment %s has multiple trial optimization directions for optimization_target %s=%s",
+                             self, opt_target, objectives[opt_target])
+        return objectives
 
     @property
     def trials(self) -> Dict[int, TrialData]:
