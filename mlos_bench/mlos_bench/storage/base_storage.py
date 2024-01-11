@@ -259,6 +259,7 @@ class Storage(metaclass=ABCMeta):
             self._trial_id = trial_id
             self._config_id = config_id
             self._opt_target = opt_target
+            assert opt_direction in {"min", "max"}
             self._opt_direction = opt_direction
             self._config = config or {}
 
