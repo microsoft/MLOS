@@ -8,6 +8,13 @@ In general the `config` directory layout follows that of the `mlos_bench` module
 
 Full end-to-end examples are provided in the [`cli`](./cli/) directory, and typically and make use of the root [`CompositeEnvironments`](./environments/root/) to combine multiple [`Environments`](./environments/), also referencing [`Services`](./services/), [`Storage`](./storage/), and [`Optimizer`](./optimizers/) configs, into a single [`mlos_bench`](../run.py) run.
 
+## Config parameters
+
+An `Environment` configuration can have two sections, `const_args` and `tunable_params`.
+At runtime, at each trial the data from both sections will be merged and passed to the environment as a single dictionary of key/value pairs.
+The difference between `const_args` and `tunable_params` is that the former values stay constant across all trials, whereas `tunable_params` values can change from one trial to the next (e.g., when the optimizer proposes a new configuration).
+The storage system will only save the values of the `tunable_params` for each trial; we rely on git to preserve the config files along with the `const_args` values, and save the commit hash of the configs for each experiment.
+
 ## Globals
 
 As mentioned in the [mlos_bench/README.md](../../README.md), a general rule is that the parameters from the global configs like `global_config_azure.jsonc` and/or `experiment_MyAppBench.jsonc` override the corresponding parameters in other configurations.
