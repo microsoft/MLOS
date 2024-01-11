@@ -78,6 +78,11 @@ class Experiment(Storage.Experiment):
                     git_commit=self._git_commit,
                     root_env_config=self._root_env_config,
                 ))
+                # TODO: Expand for multiple objectives.
+                conn.execute(self._schema.objectives.insert().values(
+                    objective_target=self._opt_target,
+                    objective_direction=self._opt_direction,
+                ))
             else:
                 if exp_info.trial_id is not None:
                     self._trial_id = exp_info.trial_id + 1
