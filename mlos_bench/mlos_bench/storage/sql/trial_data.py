@@ -42,9 +42,11 @@ class TrialSqlData(TrialData):
         self._schema = schema
 
     @property
-    def config(self) -> pandas.DataFrame:
+    def tunable_config(self) -> pandas.DataFrame:
         """
-        Retrieve the trials' configuration from the storage.
+        Retrieve the trials' tunable configuration from the storage.
+
+        Note: this corresponds to the Trial object's "tunables" property.
         """
         with self._engine.connect() as conn:
             cur_config = conn.execute(
@@ -98,7 +100,9 @@ class TrialSqlData(TrialData):
     @property
     def metadata(self) -> pandas.DataFrame:
         """
-        Retrieve the trials' metadata.
+        Retrieve the trials' metadata params.
+
+        Note: this corresponds to the Trial object's "config" property.
         """
         with self._engine.connect() as conn:
             cur_params = conn.execute(
