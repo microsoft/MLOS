@@ -35,6 +35,31 @@ class ExperimentSqlData(ExperimentData):
         self._schema = schema
 
     @property
+    def objectives(self) -> Dict[str, str]:
+        if hasattr(self._schema, "objectives"):
+            with self._engine.connect() as conn:
+                objectives = conn.execute(
+                    self._schema.objectives.select().where(
+                        self._schema.objectives.c.exp_id == self._exp_id,
+                    ).order_by(
+                        self._schema.objectives.c.optimization_target.asc(),
+                    )
+                )
+                return {
+                    objective.optimization_target: objective.optimization_direction
+                    for objective in objectives.fetchall()
+                }
+        else:
+            # Backwards compatibility: try and obtain the objectives from the TrialData.
+            # FIXME: convert to metadata
+            return {
+                trial.metadata["opt_target"]: trial.metadata["opt_direction"]
+                for trial in self.trials.values()
+                if trial.metadata.get("opt_target") and trial.metadata.get("opt_direction")
+            }
+
+
+    @property
     def trials(self) -> Dict[int, TrialData]:
         with self._engine.connect() as conn:
             cur_trials = conn.execute(
