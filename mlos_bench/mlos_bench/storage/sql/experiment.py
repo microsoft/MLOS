@@ -91,7 +91,7 @@ class Experiment(Storage.Experiment):
         _LOG.info("Merge: %s <- %s", self._experiment_id, experiment_ids)
         raise NotImplementedError()
 
-    def load_config(self, config_id: int) -> Dict[str, Any]:
+    def load_tunable_config(self, config_id: int) -> Dict[str, Any]:
         with self._engine.connect() as conn:
             return self._get_params(conn, self._schema.config_param, config_id=config_id)
 
@@ -219,10 +219,14 @@ class Experiment(Storage.Experiment):
                     ts_start=datetime.utcnow(),
                     status='PENDING',
                 ))
+
+                # Note: config here is the framework config, not the target
+                # environment config (i.e., tunables).
                 if config is not None:
                     self._save_params(
                         conn, self._schema.trial_param, config,
                         exp_id=self._experiment_id, trial_id=self._trial_id)
+
                 trial = Trial(
                     engine=self._engine,
                     schema=self._schema,
