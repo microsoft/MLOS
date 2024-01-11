@@ -12,13 +12,15 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql.storage import SqlStorage
 
+# pylint: disable=redefined-outer-name
+
 
 @pytest.fixture
-def exp_storage_memory_sql(tunable_groups: TunableGroups) -> Storage.Experiment:
+def storage_memory_sql(tunable_groups: TunableGroups) -> SqlStorage:
     """
     Test fixture for in-memory SQLite3 storage.
     """
-    storage = SqlStorage(
+    return SqlStorage(
         tunables=tunable_groups,
         service=None,
         config={
@@ -26,8 +28,15 @@ def exp_storage_memory_sql(tunable_groups: TunableGroups) -> Storage.Experiment:
             "database": ":memory:",
         }
     )
+
+
+@pytest.fixture
+def exp_storage_memory_sql(storage_memory_sql: Storage) -> SqlStorage.Experiment:
+    """
+    Test fixture for Experiment using in-memory SQLite3 storage.
+    """
     # pylint: disable=unnecessary-dunder-call
-    return storage.experiment(
+    return storage_memory_sql.experiment(
         experiment_id="Test-001",
         trial_id=1,
         root_env_config="environment.jsonc",
