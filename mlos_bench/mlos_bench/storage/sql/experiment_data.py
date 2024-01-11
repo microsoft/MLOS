@@ -58,7 +58,6 @@ class ExperimentSqlData(ExperimentData):
                 if trial.metadata.get("opt_target") and trial.metadata.get("opt_direction")
             }
 
-
     @property
     def trials(self) -> Dict[int, TrialData]:
         with self._engine.connect() as conn:
