@@ -32,7 +32,6 @@ def _plot_optimizer_trends(exp_data: ExperimentData) -> None:
     exp_data: ExperimentData
         The experiment data to plot.
     """
-
     raise NotImplementedError("TODO")
 
 
@@ -49,7 +48,6 @@ def plot(exp_data: ExperimentData, method: MlosVizMethod = MlosVizMethod.AUTO) -
     method: MlosVizMethod
         The method to use for visualizing the experiment results.
     """
-
     _plot_optimizer_trends(exp_data)
 
     if method == MlosVizMethod.AUTO:
