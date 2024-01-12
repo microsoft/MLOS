@@ -147,7 +147,7 @@ class ExperimentSqlData(ExperimentData):
                 )
             )
             configs_df = pandas.DataFrame(
-                [(row.trial_id, row.config_id, "config." + row.param_id, row.param_value)
+                [(row.trial_id, row.config_id, self.CONFIG_COLUMN_PREFIX + row.param_id, row.param_value)
                  for row in cur_configs.fetchall()],
                 columns=['trial_id', 'config_id', 'param', 'value']
             ).pivot(
@@ -167,7 +167,7 @@ class ExperimentSqlData(ExperimentData):
                 )
             )
             results_df = pandas.DataFrame(
-                [(row.trial_id, "result." + row.metric_id, row.metric_value)
+                [(row.trial_id, self.RESULT_COLUMN_PREFIX + row.metric_id, row.metric_value)
                  for row in cur_results.fetchall()],
                 columns=['trial_id', 'metric', 'value']
             ).pivot(

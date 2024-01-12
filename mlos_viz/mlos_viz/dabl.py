@@ -21,5 +21,5 @@ def plot(exp_data: ExperimentData) -> None:
         The ExperimentData (e.g., obtained from the storage layer) to plot.
     """
     for objective in exp_data.objectives:
-        objective_column = f"results.{objective}"
+        objective_column = ExperimentData.RESULT_COLUMN_PREFIX + objective
         dabl.plot(exp_data.results, objective_column)
