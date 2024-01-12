@@ -220,7 +220,19 @@ Storage
    :template: class.rst
 
    Storage
+
+.. currentmodule:: mlos_bench.storage.base_experiment_data
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
    ExperimentData
+
+.. currentmodule:: mlos_bench.storage.base_trial_data
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
    TrialData
 
 SQL DB Storage
