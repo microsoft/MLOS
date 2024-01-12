@@ -160,7 +160,10 @@ build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES) build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp
 build/mypy.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES) build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
 
-NON_MYPY_FILES := scripts/dmypy-wrapper.sh build/conda-env.${CONDA_ENV_NAME}.build-stamp build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp setup.cfg
+NON_MYPY_FILES := scripts/dmypy-wrapper.sh setup.cfg
+NON_MYPY_FILES += build/conda-env.${CONDA_ENV_NAME}.build-stamp
+NON_MYPY_FILES += build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp
+NON_MYPY_FILES += build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
 build/mypy.%.${CONDA_ENV_NAME}.build-stamp: scripts/dmypy-wrapper.sh build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg
 	conda run -n ${CONDA_ENV_NAME} scripts/dmypy-wrapper.sh \
 		$(filter-out $(NON_MYPY_FILES),$+)
@@ -398,7 +401,9 @@ doc/source/api/mlos_viz/modules.rst: $(MLOS_VIZ_PYTHON_FILES) $(COMMON_DOC_FILES
 	rm -rf doc/source/api/mlos_viz
 	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_viz/ ../mlos_viz/ ../mlos_*/setup.py
 
-SPHINX_API_RST_FILES := doc/source/api/mlos_core/modules.rst doc/source/api/mlos_bench/modules.rst doc/source/api/mlos_viz/modules.rst
+SPHINX_API_RST_FILES := doc/source/api/mlos_core/modules.rst
+SPHINX_API_RST_FILES += doc/source/api/mlos_bench/modules.rst
+SPHINX_API_RST_FILES += doc/source/api/mlos_viz/modules.rst
 
 .PHONY: sphinx-apidoc
 sphinx-apidoc: $(SPHINX_API_RST_FILES)
