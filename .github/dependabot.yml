@@ -26,6 +26,10 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "pip"
+    directory: "/mlos_viz/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pip"
     directory: "/doc/"
     schedule:
       interval: "daily"

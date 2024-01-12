@@ -41,6 +41,20 @@ if (!($mlos_bench_whl)) {
     exit 1
 }
 
+# Build the mlos_viz wheel.
+Set-Location mlos_viz
+if (Test-Path dist) {
+    Remove-Item -Recurse -Force dist
+}
+conda run -n $env:CONDA_ENV_NAME python setup.py bdist_wheel
+Set-Location ..
+$mlos_viz_whl = (Resolve-Path mlos_viz/dist/mlos_viz-*-py3-none-any.whl | Select-Object -ExpandProperty Path)
+Write-Host "mlos_viz_whl: $mlos_viz_whl"
+if (!($mlos_viz_whl)) {
+    Write-Error "Failed to find mlos_viz wheel."
+    exit 1
+}
+
 # Setup a clean environment to test installing/using them.
 $PythonVersReq = (conda list -n $env:CONDA_ENV_NAME | Select-String -AllMatches -Pattern '^python\s+([0-9]+\.[0-9]+)[0-9.]*\s+').Matches.Groups[1].Value
 #$PythonVersReq = conda run -n $env:CONDA_ENV_NAME python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
@@ -71,10 +85,10 @@ if ($LASTEXITCODE -ne 0) {
     Write-Error "Failed to install mlos_core wheels."
     exit $LASTEXITCODE
 }
-# Install mlos_bench wheel.
-conda run -n mlos-dist-test pip install "${mlos_bench_whl}[full-tests]"
+# Install mlos_viz wheel.
+conda run -n mlos-dist-test pip install "${mlos_viz_whl}[full-tests]"
 if ($LASTEXITCODE -ne 0) {
-    Write-Error "Failed to install mlos_bench wheels."
+    Write-Error "Failed to install mlos_viz wheels."
     exit $LASTEXITCODE
 }
 
@@ -92,3 +106,6 @@ if ($LASTEXITCODE -ne 0) {
     Write-Error "Failed to run mlos_bench tests."
     exit $LASTEXITCODE
 }
+
+# Run a simple mlos_viz test.
+Write-Host "TODO: Run an mlos_viz test."

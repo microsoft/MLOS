@@ -30,11 +30,11 @@ get_python_deps() {
     python3 /tmp/conda-tmp/$pkg/setup.py egg_info --egg-base "$tmpdir/"
     cat "$tmpdir/$pkg.egg-info/requires.txt" \
         | grep -v -e '^\[' -e '^\s*$' \
-        | grep -v '^mlos-core' \
+        | grep -v '^mlos-' \
         | sort -u \
         > /tmp/conda-tmp/$pkg.requirements.txt
 }
-for pkg in mlos_core mlos_bench; do
+for pkg in mlos_core mlos_bench mlos_viz; do
     get_python_deps "$pkg"
 done
 rm -rf "$tmpdir"
