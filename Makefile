@@ -392,7 +392,7 @@ doc/source/api/mlos_bench/modules.rst: $(MLOS_BENCH_PYTHON_FILES) $(COMMON_DOC_F
 	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_bench/ ../mlos_bench/ ../mlos_*/setup.py
 	# Save the help output of the mlos_bench scripts to include in the documentation.
 	# First make sure that the latest version of mlos_bench is installed (since it uses git based tagging).
-	conda run -n ${CONDA_ENV_NAME} pip install -e mlos_core -e mlos_bench
+	conda run -n ${CONDA_ENV_NAME} pip install -e mlos_core -e mlos_bench -e mlos_viz
 	conda run -n ${CONDA_ENV_NAME} mlos_bench --help > doc/source/api/mlos_bench/mlos_bench.run.usage.txt
 	echo ".. literalinclude:: mlos_bench.run.usage.txt" >> doc/source/api/mlos_bench/mlos_bench.run.rst
 	echo "   :language: none" >> doc/source/api/mlos_bench/mlos_bench.run.rst
