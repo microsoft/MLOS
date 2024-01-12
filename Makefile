@@ -349,7 +349,12 @@ build/publish-pypi-deps.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_E
 	conda run -n ${CONDA_ENV_NAME} pip install -U twine
 	touch $@
 
-build/publish.%.py.build-stamp: build/publish-pypi-deps.${CONDA_ENV_NAME}.build-stamp build/pytest.${CONDA_ENV_NAME}.build-stamp build/dist-test.$(PYTHON_VERSION).build-stamp build/check-doc.build-stamp build/linklint-doc.build-stamp
+build/publish.%.py.build-stamp: build/publish-pypi-deps.${CONDA_ENV_NAME}.build-stamp
+build/publish.%.py.build-stamp: build/pytest.${CONDA_ENV_NAME}.build-stamp
+build/publish.%.py.build-stamp: build/dist-test.$(PYTHON_VERSION).build-stamp
+build/publish.%.py.build-stamp: build/check-doc.build-stamp
+build/publish.%.py.build-stamp: build/linklint-doc.build-stamp
+build/publish.%.py.build-stamp:
 	rm -f mlos_*/dist/*.tar.gz
 	ls mlos_*/dist/*.tar | xargs -I% gzip -k %
 	repo_name=`echo "$@" | sed -e 's|build/publish\.||' -e 's|\.py\.build-stamp||'` \
