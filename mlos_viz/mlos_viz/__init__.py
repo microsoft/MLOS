@@ -56,7 +56,7 @@ def plot(exp_data: ExperimentData, method: MlosVizMethod = MlosVizMethod.AUTO) -
         method = MlosVizMethod.DABL
 
     if MlosVizMethod.DABL:
-        import mlos_viz.dabl
+        import mlos_viz.dabl    # pylint: disable=import-outside-toplevel
         mlos_viz.dabl.plot(exp_data)
     else:
         raise NotImplementedError(f"Unhandled method: {method}")
