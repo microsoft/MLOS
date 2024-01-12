@@ -220,6 +220,8 @@ Storage
    :template: class.rst
 
    Storage
+   ExperimentData
+   TrialData
 
 SQL DB Storage
 --------------
@@ -229,3 +231,25 @@ SQL DB Storage
    :template: class.rst
 
    SqlStorage
+
+#############################
+mlos-viz API
+#############################
+
+This is a list of major functions and classes provided by `mlos_viz`.
+
+.. currentmodule:: mlos_viz
+
+.. currentmodule:: mlos_viz
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   MlosVizMethod
+
+.. currentmodule:: mlos_viz
+.. autosummary::
+   :toctree: generated/
+   :template: function.rst
+
+   plot
