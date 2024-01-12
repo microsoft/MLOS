@@ -108,4 +108,8 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # Run a simple mlos_viz test.
-Write-Host "TODO: Run an mlos_viz test."
+conda run -n mlos-dist-test python -m pytest mlos_viz/mlos_viz/tests/test_dabl_plot.py
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to run mlos_viz tests."
+    exit $LASTEXITCODE
+}
