@@ -21,6 +21,21 @@ class MlosVizMethod(Enum):
     DABL = "dabl"
 
 
+def _plot_optimizer_trends(exp_data: ExperimentData) -> None:
+    """
+    Plots the optimizer trends for the Experiment.
+
+    Intended to be used from a Jupyter notebook.
+
+    Parameters
+    ----------
+    exp_data: ExperimentData
+        The experiment data to plot.
+    """
+
+    raise NotImplementedError("TODO")
+
+
 def plot(exp_data: ExperimentData, method: MlosVizMethod = MlosVizMethod.AUTO) -> None:
     """
     Plots the results of the experiment.
@@ -34,6 +49,8 @@ def plot(exp_data: ExperimentData, method: MlosVizMethod = MlosVizMethod.AUTO) -
     method: MlosVizMethod
         The method to use for visualizing the experiment results.
     """
+
+    _plot_optimizer_trends(exp_data)
 
     if method == MlosVizMethod.AUTO:
         method = MlosVizMethod.DABL
