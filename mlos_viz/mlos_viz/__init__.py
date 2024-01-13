@@ -52,7 +52,7 @@ def _plot_optimizer_trends(exp_data: ExperimentData) -> None:
 
         plt.title("Optimizer Trends for Experiment: " + exp_data.exp_id)
         plt.grid()
-        plt.show()
+        plt.show()  # type: ignore[no-untyped-call]
 
 
 def ignore_plotter_warnings(plotter_method: MlosVizMethod = MlosVizMethod.AUTO) -> None:

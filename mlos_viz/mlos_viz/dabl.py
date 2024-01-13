@@ -35,5 +35,5 @@ def ignore_plotter_warnings() -> None:
     warnings.filterwarnings("ignore", module="dabl", category=UserWarning, message="Not plotting highly correlated")
     warnings.filterwarnings("ignore", module="dabl", category=UserWarning,
                             message="Missing values in target_col have been removed for regression")
-    from sklearn.exceptions import UndefinedMetricWarning
+    from sklearn.exceptions import UndefinedMetricWarning   # pylint: disable=import-outside-toplevel
     warnings.filterwarnings("ignore", module="sklearn", category=UndefinedMetricWarning, message="Recall is ill-defined")
