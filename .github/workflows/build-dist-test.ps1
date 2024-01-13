@@ -85,6 +85,12 @@ if ($LASTEXITCODE -ne 0) {
     Write-Error "Failed to install mlos_core wheels."
     exit $LASTEXITCODE
 }
+# Install mlos_bench wheel.
+conda run -n mlos-dist-test pip install "${mlos_bench_whl}[full-tests]"
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to install mlos_bench wheels."
+    exit $LASTEXITCODE
+}
 # Install mlos_viz wheel.
 conda run -n mlos-dist-test pip install "${mlos_viz_whl}[full-tests]"
 if ($LASTEXITCODE -ne 0) {
