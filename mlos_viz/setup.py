@@ -63,6 +63,14 @@ extra_requires: Dict[str, List[str]] = {}
 # backend integrations and additional extra features.
 extra_requires['full'] = list(set(chain(*extra_requires.values())))
 
+extra_requires['full-tests'] = extra_requires['full'] + [
+    'pytest',
+    'pytest-forked',
+    'pytest-xdist',
+    'pytest-cov',
+    'pytest-local-badge',
+]
+
 # pylint: disable=duplicate-code
 MODULE_BASE_NAME = 'mlos_viz'
 setup(
