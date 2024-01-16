@@ -9,19 +9,19 @@ Unit tests for Tunable to ConfigSpace conversion.
 import pytest
 
 from ConfigSpace import (
-    ConfigurationSpace,
     CategoricalHyperparameter,
-    UniformIntegerHyperparameter,
-    UniformFloatHyperparameter,
+    ConfigurationSpace,
     EqualsCondition,
+    UniformFloatHyperparameter,
+    UniformIntegerHyperparameter,
 )
 
 from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.convert_configspace import (
     _tunable_to_configspace,
-    tunable_groups_to_configspace,
     special_param_names,
+    tunable_groups_to_configspace,
 )
 
 # pylint: disable=redefined-outer-name

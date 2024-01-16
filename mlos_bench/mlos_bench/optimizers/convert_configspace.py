@@ -11,12 +11,12 @@ import logging
 from typing import Dict, Optional, Tuple
 
 from ConfigSpace import (
+    CategoricalHyperparameter,
     Configuration,
     ConfigurationSpace,
-    CategoricalHyperparameter,
-    UniformIntegerHyperparameter,
-    UniformFloatHyperparameter,
     EqualsCondition,
+    UniformFloatHyperparameter,
+    UniformIntegerHyperparameter,
 )
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
