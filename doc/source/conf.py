@@ -35,7 +35,7 @@ copyright = '2022, GSL'
 author = 'GSL'
 
 # The full version, including alpha/beta/rc tags
-release = '0.2.5'
+release = '0.2.6'
 
 try:
     from setuptools_scm import get_version
