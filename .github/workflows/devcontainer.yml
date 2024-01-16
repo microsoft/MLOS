@@ -221,6 +221,7 @@ jobs:
         # other resources used.
         password: ${{ secrets.ACR_PASSWORD }}
     - name: Publish the container images
+      # TODO: add cleanup step to remove old images
       if: (github.repository == 'microsoft/mlos') && (github.ref == 'refs/heads/main' || github.ref_type == 'tag')
       timeout-minutes: 15
       run: |
