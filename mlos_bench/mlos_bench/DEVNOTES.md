@@ -46,7 +46,7 @@ Note that in the config above we have three groups of parameters.
 `tunable_params` are the configuration parameters that are passed to the `.setup()` call on each trial.
 They are external to the environment, and are usually either suggested by the optimizer, or specified explicitly by the user (e.g., when benchmarking a certain configuration).
 `const_args` is a loose collection of key/value pairs that complement the `tunable_params` values.
-These values do not change from one trial to the next, but they also appear as input parameters for each `Environment.setup()` call.
+These values do not change from one trial to the next (though could change from one `mlos_bench` `run.py` to another via environment variable consumption), but they also appear as input parameters for each `Environment.setup()` call to use in their `setup` and `run` scripts, for instance.
 Other config parameters, like `seed`, are class-specific and appear as the constructor arguments during the class instantiation.
 
 ## Service
