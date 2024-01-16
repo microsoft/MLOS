@@ -122,7 +122,7 @@ def _optimize(*,
                 # Add some additional metadata to track for the trial such as the
                 # optimizer config used.
                 # TODO: Improve for supporting multi-objective
-                # (e.g., opt_target_1, opt_target_2, ...)
+                # (e.g., opt_target_1, opt_target_2, ... and opt_direction_1, opt_direction_2, ...)
                 "optimizer": opt.name,
                 "opt_target": opt.target,
                 "opt_direction": opt.direction,
