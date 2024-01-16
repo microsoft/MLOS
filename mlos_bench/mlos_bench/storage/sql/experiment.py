@@ -35,13 +35,18 @@ class Experiment(Storage.Experiment):
                  trial_id: int,
                  root_env_config: str,
                  description: str,
-                 opt_target: str):
-        super().__init__(tunables, experiment_id, root_env_config)
+                 opt_target: str,
+                 opt_direction: Optional[str]):
+        super().__init__(
+            tunables=tunables,
+            experiment_id=experiment_id,
+            trial_id=trial_id,
+            root_env_config=root_env_config,
+            description=description,
+            opt_target=opt_target,
+            opt_direction=opt_direction)
         self._engine = engine
         self._schema = schema
-        self._trial_id = trial_id
-        self._description = description
-        self._opt_target = opt_target
 
     def _setup(self) -> None:
         super()._setup()
@@ -76,11 +81,21 @@ class Experiment(Storage.Experiment):
                     git_commit=self._git_commit,
                     root_env_config=self._root_env_config,
                 ))
+                # TODO: Expand for multiple objectives.
+                conn.execute(self._schema.objectives.insert().values(
+                    exp_id=self._experiment_id,
+                    optimization_target=self._opt_target,
+                    optimization_direction=self._opt_direction,
+                ))
             else:
                 if exp_info.trial_id is not None:
                     self._trial_id = exp_info.trial_id + 1
                 _LOG.info("Continue experiment: %s last trial: %s resume from: %d",
                           self._experiment_id, exp_info.trial_id, self._trial_id)
+                # TODO: Sanity check that certain critical configs (e.g.,
+                # objectives) haven't changed to be incompatible such that a new
+                # experiment should be started (possibly by prewarming with the
+                # previous one).
                 if exp_info.git_commit != self._git_commit:
                     _LOG.warning("Experiment %s git expected: %s %s",
                                  self, exp_info.git_repo, exp_info.git_commit)
@@ -131,6 +146,8 @@ class Experiment(Storage.Experiment):
                     self._schema.trial.c.trial_id.asc(),
                 )
             )
+            # Note: this iterative approach is somewhat expensive.
+            # TODO: Look into a better bulk fetch option.
             for trial in cur_trials.fetchall():
                 tunables = self._get_params(
                     conn, self._schema.config_param, config_id=trial.config_id)
@@ -180,6 +197,7 @@ class Experiment(Storage.Experiment):
                     trial_id=trial.trial_id,
                     config_id=trial.config_id,
                     opt_target=self._opt_target,
+                    opt_direction=self._opt_direction,
                     config=config,
                 )
 
@@ -232,6 +250,7 @@ class Experiment(Storage.Experiment):
                     trial_id=self._trial_id,
                     config_id=config_id,
                     opt_target=self._opt_target,
+                    opt_direction=self._opt_direction,
                     config=config,
                 )
                 self._trial_id += 1

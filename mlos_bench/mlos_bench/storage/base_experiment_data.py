@@ -19,6 +19,9 @@ class ExperimentData(metaclass=ABCMeta):
     Base interface for accessing the stored benchmark data.
     """
 
+    RESULT_COLUMN_PREFIX = "result."
+    CONFIG_COLUMN_PREFIX = "config."
+
     def __init__(self, *, exp_id: str, description: str,
                  root_env_config: str, git_repo: str, git_commit: str):
         self._exp_id = exp_id
@@ -55,6 +58,19 @@ class ExperimentData(metaclass=ABCMeta):
 
     def __repr__(self) -> str:
         return f"Experiment :: {self._exp_id}: '{self._description}'"
+
+    @property
+    @abstractmethod
+    def objectives(self) -> Dict[str, str]:
+        """
+        Retrieve the experiment's objectives data from the storage.
+
+        Returns
+        -------
+        objectives : Dict[str, objective]
+            A dictionary of the experiment's objective names (optimization_targets)
+            and their directions (e.g., min or max).
+        """
 
     @property
     @abstractmethod

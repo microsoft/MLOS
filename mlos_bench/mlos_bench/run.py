@@ -86,7 +86,8 @@ def _optimize(*,
             trial_id=trial_id,
             root_env_config=root_env_config,
             description=env.name,
-            opt_target=opt.target
+            opt_target=opt.target,
+            opt_direction=opt.direction,
          ) as exp:
 
         _LOG.info("Experiment: %s Env: %s Optimizer: %s", exp, env, opt)
@@ -118,9 +119,13 @@ def _optimize(*,
                 config_id = -1
 
             trial = exp.new_trial(tunables, config={
+                # Add some additional metadata to track for the trial such as the
+                # optimizer config used.
+                # TODO: Improve for supporting multi-objective
+                # (e.g., opt_target_1, opt_target_2, ... and opt_direction_1, opt_direction_2, ...)
                 "optimizer": opt.name,
                 "opt_target": opt.target,
-                "opt_direction": "min" if opt.is_min else "max",
+                "opt_direction": opt.direction,
             })
             _run(env_context, opt_context, trial, global_config)
 

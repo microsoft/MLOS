@@ -153,6 +153,8 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         """
         return self.__class__.__name__
 
+    # TODO: Expand these properties for multi-objective.
+
     @property
     def is_min(self) -> bool:
         """
@@ -166,6 +168,13 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         The name of the target metric to optimize.
         """
         return self._opt_target
+
+    @property
+    def direction(self) -> str:
+        """
+        The direction to optimize the target metric (e.g., min or max).
+        """
+        return 'min' if self.is_min else 'max'
 
     @property
     def supports_preload(self) -> bool:

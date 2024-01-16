@@ -6,7 +6,7 @@ Welcome to the MLOS documentation!
 .. image:: badges/coverage.svg
    :target: htmlcov/index.html
 
-`MLOS <source_tree_docs/index.html>`_ is a project to enable autotuning for systems.
+`MLOS <source_tree_docs/index.html>`_ is a project to enable autotuning for systems via automated benchmarking including managing the storage and visualization of the results.
 
 See below for additional documentation sections.
 
@@ -15,8 +15,9 @@ See below for additional documentation sections.
    :caption: Source Tree Documentation
 
    source_tree_docs/index
-   source_tree_docs/mlos_bench/index
    source_tree_docs/mlos_core/index
+   source_tree_docs/mlos_bench/index
+   source_tree_docs/mlos_viz/index
 
 .. toctree::
    :maxdepth: 2
@@ -30,6 +31,7 @@ See below for additional documentation sections.
 
    api/mlos_core/modules
    api/mlos_bench/modules
+   api/mlos_viz/modules
 
 .. toctree::
    :maxdepth: 2
@@ -41,4 +43,4 @@ See below for additional documentation sections.
    :maxdepth: 1
    :caption: References
 
-   Github Source Tree <https://aka.ms/mlos-core/src>
+   Github Source Tree <https://github.com/microsoft/MLOS>

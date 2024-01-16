@@ -1,3 +1,9 @@
+##########################
+MLOS Package APIs Overview
+##########################
+
+This is a list of major functions and classes provided by the MLOS packages.
+
 #############################
 mlos-core API
 #############################
@@ -221,6 +227,20 @@ Storage
 
    Storage
 
+.. currentmodule:: mlos_bench.storage.base_experiment_data
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   ExperimentData
+
+.. currentmodule:: mlos_bench.storage.base_trial_data
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   TrialData
+
 SQL DB Storage
 --------------
 .. currentmodule:: mlos_bench.storage.sql.storage
@@ -229,3 +249,25 @@ SQL DB Storage
    :template: class.rst
 
    SqlStorage
+
+#############################
+mlos-viz API
+#############################
+
+This is a list of major functions and classes provided by `mlos_viz`.
+
+.. currentmodule:: mlos_viz
+
+.. currentmodule:: mlos_viz
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   MlosVizMethod
+
+.. currentmodule:: mlos_viz
+.. autosummary::
+   :toctree: generated/
+   :template: function.rst
+
+   plot

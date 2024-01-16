@@ -61,10 +61,10 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ env.CONDA }}/envs/mlos
-        key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_YML }}') }}-${{ hashFiles('mlos_core/setup.py') }}-${{ hashFiles('mlos_bench/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
+        key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_YML }}') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
         restore-keys: |
-          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_YML }}') }}-${{ hashFiles('mlos_core/setup.py') }}-${{ hashFiles('mlos_bench/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
-          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_YML }}') }}-${{ hashFiles('mlos_core/setup.py') }}-${{ hashFiles('mlos_bench/setup.py') }}-${{ env.cache_cur_date }}
+          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_YML }}') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
+          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_YML }}') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}
 
     - name: Log some environment variables for debugging
       run: |
@@ -109,7 +109,7 @@ jobs:
     # Only run the coverage checks on the devcontainer job.
     - name: Run tests
       run: |
-        conda run -n $env:CONDA_ENV_NAME pytest --junitxml=junit/test-results.xml mlos_core/ mlos_bench/
+        conda run -n $env:CONDA_ENV_NAME pytest --junitxml=junit/test-results.xml mlos_core/ mlos_bench/ mlos_viz/
 
     # Note: unlike the Makefile version, the pwsh version of these rules are all run within a single shell context, so we can
     # split commands across lines with CWD maintained (hence we also require the "cd .." here).
