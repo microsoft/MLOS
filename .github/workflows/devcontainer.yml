@@ -177,7 +177,7 @@ jobs:
         rm -f doc/build/html/htmlcov/.gitignore
 
     - name: Publish package to Test PyPi
-      if: github.event == 'release' && github.ref_type == 'tag'
+      if: github.event_name == 'release' && github.ref_type == 'tag'
       run: |
         if [ -n "${{ secrets.PYPI_TEST_USERNAME }}" ]; then
           docker exec --user vscode --env USER=vscode --env MAKEFLAGS=-Oline \
@@ -186,7 +186,7 @@ jobs:
         fi
 
     - name: Publish package to PyPi
-      if: github.repository == 'microsoft/mlos' && github.event == 'release' && github.ref_type == 'tag'
+      if: github.repository == 'microsoft/mlos' && github.event_name == 'release' && github.ref_type == 'tag'
       run: |
         if [ -n "${{ secrets.PYPI_USERNAME }}" ]; then
           docker exec --user vscode --env USER=vscode --env MAKEFLAGS=-Oline \

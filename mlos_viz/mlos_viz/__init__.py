@@ -42,8 +42,12 @@ def _plot_optimizer_trends(exp_data: ExperimentData) -> None:
         results_df = exp_data.results
         plt.rcParams["figure.figsize"] = (10, 4)
 
-        sns.scatterplot(x=results_df.trial_id, y=results_df[objective_column], alpha=0.7)  # Result of each trial
-        sns.lineplot(x=results_df.trial_id, y=results_df[objective_column].cummin())  # the best result so far (cummin)
+        sns.scatterplot(
+            x=results_df.trial_id, y=results_df[objective_column],
+            alpha=0.7, label="Trial")  # Result of each trial
+        sns.lineplot(
+            x=results_df.trial_id, y=results_df[objective_column].cummin(),
+            label="Incumbent")  # the best result so far (cummin)
 
         plt.yscale('log')
 
