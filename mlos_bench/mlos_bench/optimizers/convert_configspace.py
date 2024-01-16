@@ -184,7 +184,7 @@ def special_param_names(name: str) -> Tuple[str, str]:
     type_name : str
         The name of the hyperparameter that chooses between the regular and the special values.
     """
-    return (name + "!special", name + "!type__")
+    return (name + "!special", name + "!type")
 
 
 def special_param_name_is_temp(name: str) -> bool:
@@ -201,7 +201,7 @@ def special_param_name_is_temp(name: str) -> bool:
     is_special : bool
         True if the name corresponds to a temporary ConfigSpace hyperparameter.
     """
-    return name.endswith("__")
+    return name.endswith("!type")
 
 
 def special_param_name_strip(name: str) -> str:
