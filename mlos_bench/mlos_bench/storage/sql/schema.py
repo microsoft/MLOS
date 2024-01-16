@@ -73,7 +73,7 @@ class DbSchema:
             self._meta,
             Column("exp_id"),
             Column("optimization_target", String(1024), nullable=False),
-            Column("optimization_direction", String(4), nullable=True),
+            Column("optimization_direction", String(4), nullable=False),
             # TODO: Note: weight is not fully supported yet as currently
             # multi-objective is expected to explore each objective equally.
             # Will need to adjust the insert and return values to support this
