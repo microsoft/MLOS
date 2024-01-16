@@ -6,8 +6,10 @@
 Unit tests for mlos_viz.dabl.plot.
 """
 
+from unittest.mock import MagicMock, Mock, patch, call
 
-def test_placeholder() -> None:
-    """Placeholder test."""
-    # TODO:
-    # See Also: https://stackoverflow.com/questions/27948126/how-can-i-write-unit-tests-against-code-that-uses-matplotlib
+
+@patch("dabl.plot")
+def test_dabl_plot() -> None:
+    """Tests plotting via dabl."""
+    raise NotImplementedError("TODO")
