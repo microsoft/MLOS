@@ -59,6 +59,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         config : dict
             Python dict that represents a Tunable (e.g., deserialized from JSON)
         """
+        if '!' in name:  # TODO: Use a regex here and in JSON schema
+            raise ValueError(f"Invalid name of the tunable: {name}")
         self._name = name
         self._type = config["type"]  # required
         if self._type not in self._DTYPE:
