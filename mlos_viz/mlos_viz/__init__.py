@@ -55,6 +55,24 @@ def _plot_optimizer_trends(exp_data: ExperimentData) -> None:
         plt.show()  # type: ignore[no-untyped-call]
 
 
+def _plot_top_n_configs(exp_data: ExperimentData, top_n_configs: int = 10) -> None:
+    """
+    Plots the top-N configs along with the default config for the given ExperimentData.
+
+    Intended to be used from a Jupyter notebook.
+
+    Parameters
+    ----------
+    exp_data: ExperimentData
+        The experiment data to plot.
+    top_n_configs: int
+        The number of configs to plot.
+    """
+    assert isinstance(exp_data, ExperimentData)
+    assert isinstance(top_n_configs, int)
+    raise NotImplementedError("TODO")
+
+
 def ignore_plotter_warnings(plotter_method: MlosVizMethod = MlosVizMethod.AUTO) -> None:
     """
     Suppress some annoying warnings from third-party data visualization packages by
@@ -92,6 +110,7 @@ def plot(exp_data: ExperimentData,
         Whether or not to filter some warnings from the plotter.
     """
     _plot_optimizer_trends(exp_data)
+    _plot_top_N_configs(exp_data)
 
     if filter_warnings:
         ignore_plotter_warnings(plotter_method)
