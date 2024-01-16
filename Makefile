@@ -6,9 +6,10 @@ PYTHON_VERSION := $(shell echo "${CONDA_ENV_NAME}" | sed -r -e 's/^mlos[-]?//')
 ENV_YML := conda-envs/${CONDA_ENV_NAME}.yml
 
 # Find the non-build python files we should consider as rule dependencies.
-PYTHON_FILES := $(shell find ./ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./((mlos_core|mlos_bench)/)?build/' -e '^./doc/source/')
+PYTHON_FILES := $(shell find ./ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./(mlos_(core|bench|viz)/)?build/' -e '^./doc/source/')
 MLOS_CORE_PYTHON_FILES := $(shell find ./mlos_core/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_core/build/')
 MLOS_BENCH_PYTHON_FILES := $(shell find ./mlos_bench/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_bench/build/')
+MLOS_VIZ_PYTHON_FILES := $(shell find ./mlos_viz/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_viz/build/')
 SCRIPT_FILES := $(shell find ./ -name '*.sh' -or -name '*.ps1' -or -name '*.cmd')
 SQL_FILES := $(shell find ./ -name '*.sql')
 MD_FILES := $(shell find ./ -name '*.md' | grep -v '^./doc/')
@@ -30,7 +31,7 @@ all: check test dist dist-test doc licenseheaders
 .PHONY: conda-env
 conda-env: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 
-build/conda-env.${CONDA_ENV_NAME}.build-stamp: ${ENV_YML} mlos_core/setup.py mlos_bench/setup.py
+build/conda-env.${CONDA_ENV_NAME}.build-stamp: ${ENV_YML} mlos_core/setup.py mlos_bench/setup.py mlos_viz/setup.py
 	@echo "CONDA_SOLVER: ${CONDA_SOLVER}"
 	@echo "CONDA_EXPERIMENTAL_SOLVER: ${CONDA_EXPERIMENTAL_SOLVER}"
 	@echo "CONDA_INFO_LEVEL: ${CONDA_INFO_LEVEL}"
@@ -48,10 +49,15 @@ clean-conda-env:
 check: pycodestyle pydocstyle pylint mypy # cspell licenseheaders markdown-link-check
 
 .PHONY: pycodestyle
-pycodestyle: conda-env build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp build/pycodestyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+pycodestyle: conda-env
+pycodestyle: build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp
+pycodestyle: build/pycodestyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+pycodestyle: build/pycodestyle.mlos_viz.${CONDA_ENV_NAME}.build-stamp
+
 
 build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/pycodestyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
+build/pycodestyle.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
 
 build/pycodestyle.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg
 	# Check for decent pep8 code style with pycodestyle.
@@ -60,10 +66,15 @@ build/pycodestyle.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_N
 	touch $@
 
 .PHONY: pydocstyle
-pydocstyle: conda-env build/pydocstyle.mlos_core.${CONDA_ENV_NAME}.build-stamp build/pydocstyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+pydocstyle: conda-env
+pydocstyle: build/pydocstyle.mlos_core.${CONDA_ENV_NAME}.build-stamp
+pydocstyle: build/pydocstyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+pydocstyle: build/pydocstyle.mlos_viz.${CONDA_ENV_NAME}.build-stamp
+
 
 build/pydocstyle.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/pydocstyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
+build/pydocstyle.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
 
 build/pydocstyle.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg
 	# Check for decent pep8 doc style with pydocstyle.
@@ -74,8 +85,11 @@ build/pydocstyle.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NA
 licenseheaders: build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
 
 build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: $(PYTHON_FILES) $(SCRIPT_FILES) $(SQL_FILES) doc/mit-license.tmpl
-	# Note: to avoid makefile dependency loops, we don't touch the setup.py files as that would force the conda-env to be rebuilt.
-	conda run -n ${CONDA_ENV_NAME} licenseheaders -t doc/mit-license.tmpl -E .py .sh .ps1 .sql .cmd -x mlos_bench/setup.py mlos_core/setup.py
+	# Note: to avoid makefile dependency loops, we don't touch the setup.py
+	# files as that would force the conda-env to be rebuilt.
+	conda run -n ${CONDA_ENV_NAME} licenseheaders -t doc/mit-license.tmpl \
+		-E .py .sh .ps1 .sql .cmd \
+		-x mlos_bench/setup.py mlos_core/setup.py mlos_viz/setup.py
 	touch $@
 
 .PHONY: cspell
@@ -107,32 +121,49 @@ build/markdown-link-check-container.build-stamp:
 	touch $@
 
 .PHONY: pylint
-pylint: conda-env build/pylint.mlos_core.${CONDA_ENV_NAME}.build-stamp build/pylint.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+pylint: conda-env
+pylint: build/pylint.mlos_core.${CONDA_ENV_NAME}.build-stamp
+pylint: build/pylint.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+pylint: build/pylint.mlos_viz.${CONDA_ENV_NAME}.build-stamp
+
 
 build/pylint.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/pylint.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
+build/pylint.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
 
 build/pylint.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp .pylintrc
 	conda run -n ${CONDA_ENV_NAME} pylint -j0 $(filter-out .pylintrc,$+)
 	touch $@
 
 .PHONY: flake8
-flake8: conda-env build/flake8.mlos_core.${CONDA_ENV_NAME}.build-stamp build/flake8.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+flake8: conda-env
+flake8: build/flake8.mlos_core.${CONDA_ENV_NAME}.build-stamp
+flake8: build/flake8.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+flake8: build/flake8.mlos_viz.${CONDA_ENV_NAME}.build-stamp
 
 build/flake8.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/flake8.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
+build/flake8.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
 
 build/flake8.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg
 	conda run -n ${CONDA_ENV_NAME} flake8 -j0 $(filter-out setup.cfg,$+)
 	touch $@
 
 .PHONY: mypy
-mypy: conda-env build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+mypy: conda-env
+mypy: build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp
+mypy: build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+mypy: build/mypy.mlos_viz.${CONDA_ENV_NAME}.build-stamp
+
 
 build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES) build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp
+build/mypy.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES) build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
 
-NON_MYPY_FILES := scripts/dmypy-wrapper.sh build/conda-env.${CONDA_ENV_NAME}.build-stamp build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp setup.cfg
+NON_MYPY_FILES := scripts/dmypy-wrapper.sh setup.cfg
+NON_MYPY_FILES += build/conda-env.${CONDA_ENV_NAME}.build-stamp
+NON_MYPY_FILES += build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp
+NON_MYPY_FILES += build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
 build/mypy.%.${CONDA_ENV_NAME}.build-stamp: scripts/dmypy-wrapper.sh build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg
 	conda run -n ${CONDA_ENV_NAME} scripts/dmypy-wrapper.sh \
 		$(filter-out $(NON_MYPY_FILES),$+)
@@ -165,6 +196,16 @@ build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp:
 	echo "PYTEST_MODULES: $(PYTEST_MODULES)"
 	touch $@
 
+# Run the mlos_viz target update after mlos_bench target update.
+build/pytest.mlos_viz.${CONDA_ENV_NAME}.needs-build-stamp: build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp
+build/pytest.mlos_viz.${CONDA_ENV_NAME}.needs-build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
+build/pytest.mlos_viz.${CONDA_ENV_NAME}.needs-build-stamp: $(MLOS_VIZ_PYTHON_FILES) conftest.py setup.cfg
+build/pytest.mlos_viz.${CONDA_ENV_NAME}.needs-build-stamp:
+	# Update the PYTEST_MODULES list to include mlos_viz.
+	$(eval PYTEST_MODULES += mlos_viz)
+	echo "PYTEST_MODULES: $(PYTEST_MODULES)"
+	touch $@
+
 PYTEST_OPTIONS :=
 
 # Allow optionally skipping coverage calculations during local testing to skip up inner dev loop.
@@ -179,7 +220,10 @@ endif
 # NOTE: When run locally, the junit/test-results.xml will only include the
 # tests from the latest run, but this file is only used for upstream reporting,
 # so probably shouldn't matter.
-build/pytest.${CONDA_ENV_NAME}.build-stamp: build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp
+build/pytest.${CONDA_ENV_NAME}.build-stamp: build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp
+build/pytest.${CONDA_ENV_NAME}.build-stamp: build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp
+build/pytest.${CONDA_ENV_NAME}.build-stamp: build/pytest.mlos_viz.${CONDA_ENV_NAME}.needs-build-stamp
+build/pytest.${CONDA_ENV_NAME}.build-stamp:
 	# Make sure to update the list of modules needed everytime in case the test fails and we need to rerun it.
 	for pytest_module in $(PYTEST_MODULES); do rm -f build/pytest.$${pytest_module}.${CONDA_ENV_NAME}.needs-build-stamp; done
 	# Run pytest for the modules: $(PYTEST_MODULES)
@@ -194,7 +238,10 @@ build/pytest.${CONDA_ENV_NAME}.build-stamp: build/pytest.mlos_core.${CONDA_ENV_N
 dist: bdist_wheel
 
 .PHONY: bdist_wheel
-bdist_wheel: conda-env mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl
+bdist_wheel: conda-env
+bdist_wheel: mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl
+bdist_wheel: mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl
+bdist_wheel: mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl
 
 mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: mlos_core/dist/tmp/mlos-core-latest.tar
 mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: MODULE_NAME := mlos_core
@@ -209,6 +256,13 @@ mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl: PACKAGE_NAME := mlos-ben
 mlos_bench/dist/tmp/mlos-bench-latest.tar: mlos_bench/setup.py mlos_bench/MANIFEST.in $(MLOS_BENCH_PYTHON_FILES)
 mlos_bench/dist/tmp/mlos-bench-latest.tar: MODULE_NAME := mlos_bench
 mlos_bench/dist/tmp/mlos-bench-latest.tar: PACKAGE_NAME := mlos-bench
+
+mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl: mlos_viz/dist/tmp/mlos-viz-latest.tar
+mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl: MODULE_NAME := mlos_viz
+mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl: PACKAGE_NAME := mlos-viz
+mlos_viz/dist/tmp/mlos-bench-latest.tar: mlos_viz/setup.py mlos_viz/MANIFEST.in $(mlos_viz_PYTHON_FILES)
+mlos_viz/dist/tmp/mlos-bench-latest.tar: MODULE_NAME := mlos_viz
+mlos_viz/dist/tmp/mlos-bench-latest.tar: PACKAGE_NAME := mlos-viz
 
 %-latest.tar: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 %-latest.tar:
@@ -247,7 +301,9 @@ dist-test-env: dist build/dist-test-env.$(PYTHON_VERSION).build-stamp
 build/dist-test-env.$(PYTHON_VERSION).build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 # Use the same version of python as the one we used to build the wheels.
 build/dist-test-env.$(PYTHON_VERSION).build-stamp: PYTHON_VERS_REQ=$(shell conda list -n ${CONDA_ENV_NAME} | egrep '^python\s+' | sed -r -e 's/^python\s+//' | cut -d' ' -f1 | cut -d. -f1-2)
-build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl
+build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl
+build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl
+build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl
 	# Create a clean test environment for checking the wheel files.
 	$(MAKE) dist-test-env-clean
 	conda create -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) python=$(PYTHON_VERS_REQ)
@@ -259,6 +315,8 @@ build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_core/dist/tmp/mlos_core-
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl[full-tests]"
 	# Test that the config dir for mlos_bench got distributed.
 	test -e `conda env list | grep "mlos-dist-test-$(PYTHON_VERSION) " | awk '{ print $$2 }'`/lib/python$(PYTHON_VERS_REQ)/site-packages/mlos_bench/config/README.md
+	# Test a clean install of the mlos_viz wheel.
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl[full-tests]"
 	touch $@
 
 .PHONY: dist-test
@@ -271,10 +329,13 @@ build/dist-test.$(PYTHON_VERSION).build-stamp: $(PYTHON_FILES) build/dist-test-e
 	# Note: this will pick up the local directory and change the output if we're using PYTHONPATH=.
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip list --verbose | grep mlos-core | grep ' pip'
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip list --verbose | grep mlos-bench | grep ' pip'
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip list --verbose | grep mlos-viz | grep ' pip'
 	# Run a simple test that uses the mlos_core wheel (full tests can be checked with `make test`).
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) python3 -m pytest mlos_core/mlos_core/tests/spaces/spaces_test.py
 	# Run a simple test that uses the mlos_bench wheel (full tests can be checked with `make test`).
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) python3 -m pytest mlos_bench/mlos_bench/tests/environments/mock_env_test.py
+	# Run a simple test that uses the mlos_viz wheel (full tests can be checked with `make test`).
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) python3 -m pytest mlos_viz/mlos_viz/tests/test_dabl_plot.py
 	touch $@
 
 dist-test-clean: dist-test-env-clean
@@ -291,7 +352,12 @@ build/publish-pypi-deps.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_E
 	conda run -n ${CONDA_ENV_NAME} pip install -U twine
 	touch $@
 
-build/publish.%.py.build-stamp: build/publish-pypi-deps.${CONDA_ENV_NAME}.build-stamp build/pytest.${CONDA_ENV_NAME}.build-stamp build/dist-test.$(PYTHON_VERSION).build-stamp build/check-doc.build-stamp build/linklint-doc.build-stamp
+build/publish.%.py.build-stamp: build/publish-pypi-deps.${CONDA_ENV_NAME}.build-stamp
+build/publish.%.py.build-stamp: build/pytest.${CONDA_ENV_NAME}.build-stamp
+build/publish.%.py.build-stamp: build/dist-test.$(PYTHON_VERSION).build-stamp
+build/publish.%.py.build-stamp: build/check-doc.build-stamp
+build/publish.%.py.build-stamp: build/linklint-doc.build-stamp
+build/publish.%.py.build-stamp:
 	rm -f mlos_*/dist/*.tar.gz
 	ls mlos_*/dist/*.tar | xargs -I% gzip -k %
 	repo_name=`echo "$@" | sed -e 's|build/publish\.||' -e 's|\.py\.build-stamp||'` \
@@ -326,12 +392,18 @@ doc/source/api/mlos_bench/modules.rst: $(MLOS_BENCH_PYTHON_FILES) $(COMMON_DOC_F
 	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_bench/ ../mlos_bench/ ../mlos_*/setup.py
 	# Save the help output of the mlos_bench scripts to include in the documentation.
 	# First make sure that the latest version of mlos_bench is installed (since it uses git based tagging).
-	conda run -n ${CONDA_ENV_NAME} pip install -e mlos_core -e mlos_bench
+	conda run -n ${CONDA_ENV_NAME} pip install -e mlos_core -e mlos_bench -e mlos_viz
 	conda run -n ${CONDA_ENV_NAME} mlos_bench --help > doc/source/api/mlos_bench/mlos_bench.run.usage.txt
 	echo ".. literalinclude:: mlos_bench.run.usage.txt" >> doc/source/api/mlos_bench/mlos_bench.run.rst
 	echo "   :language: none" >> doc/source/api/mlos_bench/mlos_bench.run.rst
 
-SPHINX_API_RST_FILES := doc/source/api/mlos_core/modules.rst doc/source/api/mlos_bench/modules.rst
+doc/source/api/mlos_viz/modules.rst: $(MLOS_VIZ_PYTHON_FILES) $(COMMON_DOC_FILES)
+	rm -rf doc/source/api/mlos_viz
+	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_viz/ ../mlos_viz/ ../mlos_*/setup.py
+
+SPHINX_API_RST_FILES := doc/source/api/mlos_core/modules.rst
+SPHINX_API_RST_FILES += doc/source/api/mlos_bench/modules.rst
+SPHINX_API_RST_FILES += doc/source/api/mlos_viz/modules.rst
 
 .PHONY: sphinx-apidoc
 sphinx-apidoc: $(SPHINX_API_RST_FILES)
@@ -386,8 +458,11 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 	test -s doc/build/html/index.html
 	test -s doc/build/html/generated/mlos_core.optimizers.optimizer.BaseOptimizer.html
 	test -s doc/build/html/generated/mlos_bench.environments.Environment.html
+	test -s doc/build/html/generated/mlos_viz.plot.html
 	test -s doc/build/html/api/mlos_core/mlos_core.html
 	test -s doc/build/html/api/mlos_bench/mlos_bench.html
+	test -s doc/build/html/api/mlos_viz/mlos_viz.html
+	test -s doc/build/html/api/mlos_viz/mlos_viz.dabl.html
 	grep -q -e '--config CONFIG' doc/build/html/api/mlos_bench/mlos_bench.run.html
 	# Check doc logs for errors (but skip over some known ones) ...
 	@cat doc/build/log.txt \
@@ -440,18 +515,14 @@ clean-doc:
 clean-check:
 	rm -f build/pylint.build-stamp
 	rm -f build/pylint.${CONDA_ENV_NAME}.build-stamp
-	rm -f build/pylint.mlos_core.${CONDA_ENV_NAME}.build-stamp
-	rm -f build/pylint.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-	rm -f build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp
-	rm -f build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/pylint.mlos_*.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/mypy.mlos_*.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pycodestyle.build-stamp
 	rm -f build/pycodestyle.${CONDA_ENV_NAME}.build-stamp
-	rm -f build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp
-	rm -f build/pycodestyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/pycodestyle.mlos_*.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pydocstyle.build-stamp
 	rm -f build/pydocstyle.${CONDA_ENV_NAME}.build-stamp
-	rm -f build/pydocstyle.mlos_core.${CONDA_ENV_NAME}.build-stamp
-	rm -f build/pydocstyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/pydocstyle.mlos_*.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/licenseheaders-prereqs.${CONDA_ENV_NAME}.build-stamp
 
@@ -459,10 +530,8 @@ clean-check:
 clean-test:
 	rm -f build/pytest.build-stamp
 	rm -f build/pytest.${CONDA_ENV_NAME}.build-stamp
-	rm -f build/pytest.mlos_core.${CONDA_ENV_NAME}.build-stamp
-	rm -f build/pytest.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-	rm -f build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp
-	rm -f build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp
+	rm -f build/pytest.mlos_*.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/pytest.mlos_*.${CONDA_ENV_NAME}.needs-build-stamp
 	rm -rf .pytest_cache/
 	rm -f coverage.xml .coverage* build/.converage*
 	rm -rf htmlcov/
@@ -474,6 +543,7 @@ dist-clean:
 	rm -rf build dist
 	rm -rf mlos_core/build mlos_core/dist
 	rm -rf mlos_bench/build mlos_bench/dist
+	rm -rf mlos_viz/build mlos_viz/dist
 
 .PHONY: clean
 clean: clean-check clean-test dist-clean clean-doc clean-doc-env dist-test-clean
@@ -483,6 +553,8 @@ clean: clean-check clean-test dist-clean clean-doc clean-doc-env dist-test-clean
 	rm -rf mlos_core/mlos_core.egg-info
 	rm -rf mlos_bench.egg-info
 	rm -rf mlos_bench/mlos_bench.egg-info
+	rm -rf mlos_viz.egg-info
+	rm -rf mlos_viz/mlos_viz.egg-info
 	rm -rf __pycache__
 	find . -type d -name __pycache__ -print0 | xargs -t -r -0 rm -rf
 	find . -type f -name '*.pyc' -print0 | xargs -t -r -0 rm -f

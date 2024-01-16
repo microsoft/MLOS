@@ -17,7 +17,7 @@ cd "$scriptdir/.."
 rm -rf doc/source/source_tree_docs/
 mkdir -p doc/source/source_tree_docs/
 
-for readme_file_path in README.md mlos_core/README.md mlos_bench/README.md; do
+for readme_file_path in README.md mlos_core/README.md mlos_bench/README.md mlos_viz/README.md; do
     file_dir=$(dirname "$readme_file_path")
     mkdir -p "doc/source/source_tree_docs/$file_dir"
 
