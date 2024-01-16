@@ -27,7 +27,7 @@ _LOG = logging.getLogger(__name__)
 def _tunable_to_configspace(
         tunable: Tunable, group_name: Optional[str] = None, cost: int = 0) -> ConfigurationSpace:
     """
-    Convert a single Tunable to an equivalent ConfigSpace Hyperparameter objects,
+    Convert a single Tunable to an equivalent set of ConfigSpace Hyperparameter objects,
     wrapped in a ConfigurationSpace for composability.
 
     Parameters
