@@ -58,6 +58,19 @@ class ExperimentData(metaclass=ABCMeta):
 
     @property
     @abstractmethod
+    def objectives(self) -> Dict[str, str]:
+        """
+        Retrieve the experiment's objectives data from the storage.
+
+        Returns
+        -------
+        objectives : Dict[str, objective]
+            A dictionary of the experiment's objective names (optimization_targets)
+            and their directions (e.g., min or max).
+        """
+
+    @property
+    @abstractmethod
     def trials(self) -> Dict[int, TrialData]:
         """
         Retrieve the trials' data from the storage.
