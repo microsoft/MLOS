@@ -58,6 +58,10 @@ jobs:
           echo "ERROR: tag ${{ github.ref_name }} doesn't appear to be included in the main branch." >&2
           exit 1
         fi
+        if ! echo "${{ github.ref_name }}" | egrep -q '^v([0-9]+\.){2,3}[0-9]+$'; then
+          echo "ERROR: tag ${{ github.ref_name }} doesn't appear to be a valid version tag." >&2
+          exit 1
+        fi
 
     - name: Set NO_CACHE variable based on commit messages and for nightly builds
       if: github.event_name == 'schedule' || contains(steps.get-commit-messages.outputs.COMMIT_MESSAGES, 'NO_CACHE=true') || github.event.inputs.NO_CACHE == 'true'
