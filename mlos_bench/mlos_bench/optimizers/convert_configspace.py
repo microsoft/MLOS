@@ -27,8 +27,9 @@ _LOG = logging.getLogger(__name__)
 def _tunable_to_configspace(
         tunable: Tunable, group_name: Optional[str] = None, cost: int = 0) -> ConfigurationSpace:
     """
-    Convert a single Tunable to an equivalent ConfigSpace Hyperparameter objects,
+    Convert a single Tunable to an equivalent set of ConfigSpace Hyperparameter objects,
     wrapped in a ConfigurationSpace for composability.
+    Note: this may more than one Hyperparameter in the case of special value handling.
 
     Parameters
     ----------
@@ -149,7 +150,7 @@ def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
 def configspace_data_to_tunable_values(data: dict) -> dict:
     """
     Remove the fields that correspond to special values in ConfigSpace.
-    In particular, remove `!type__` keys and trim `!special` suffixes.
+    In particular, remove and keys suffixes added by `special_param_names`.
     """
     data = data.copy()
     specials = [
