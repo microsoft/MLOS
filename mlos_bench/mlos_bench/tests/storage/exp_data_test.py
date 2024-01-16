@@ -56,3 +56,9 @@ def test_exp_trial_data_objectives(storage_memory_sql: Storage,
         "some-other-target": "max",
         exp_storage_memory_sql.opt_target: exp_storage_memory_sql.opt_direction,
     }
+
+    trial_data_opt_new = exp.trials[trial_opt_new.trial_id]
+    assert trial_data_opt_new.metadata_dict == {
+        "opt_target": "some-other-target",
+        "opt_direction": "max",
+    }

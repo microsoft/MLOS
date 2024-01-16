@@ -7,11 +7,13 @@ Base interface for accessing the stored benchmark data.
 """
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
-from typing import Optional
+from typing import Dict, Optional
 
 import pandas
 
 from mlos_bench.environments.status import Status
+from mlos_bench.tunables.tunable import TunableValue
+from mlos_bench.util import try_parse_val
 
 
 class TrialData(metaclass=ABCMeta):
@@ -78,6 +80,21 @@ class TrialData(metaclass=ABCMeta):
         """
         return self._status
 
+    def _df_to_dict(self, dataframe: pandas.DataFrame) -> Dict[str, Optional[TunableValue]]:
+        """Utility function to convert certain key-value dataframe formats to a dict."""
+        if dataframe.columns.tolist() == ['metric', 'value']:
+            dataframe = dataframe.copy()
+            dataframe.rename(columns={'metric': 'parameter'}, inplace=True)
+        assert dataframe.columns.tolist() == ['parameter', 'value']
+        data = {}
+        for _, row in dataframe.iterrows():
+            assert isinstance(row['parameter'], str)
+            assert row['value'] is None or isinstance(row['value'], (str, int, float))
+            if row['parameter'] in data:
+                raise ValueError(f"Duplicate parameter '{row['parameter']}' in dataframe for trial {self}")
+            data[row['parameter']] = try_parse_val(row['value']) if isinstance(row['value'], str) else row['value']
+        return data
+
     @property
     @abstractmethod
     def tunable_config(self) -> pandas.DataFrame:
@@ -94,6 +111,19 @@ class TrialData(metaclass=ABCMeta):
         """
 
     @property
+    def tunable_config_dict(self) -> Dict[str, Optional[TunableValue]]:
+        """
+        Retrieve the trials' tunable configuration from the storage as a dict.
+
+        Note: this corresponds to the Trial object's "tunables" property.
+
+        Returns
+        -------
+        config : dict
+        """
+        return self._df_to_dict(self.tunable_config)
+
+    @property
     @abstractmethod
     def results(self) -> pandas.DataFrame:
         """
@@ -101,17 +131,28 @@ class TrialData(metaclass=ABCMeta):
 
         Returns
         -------
-        config : pandas.DataFrame
+        results : pandas.DataFrame
             A dataframe with the trial results.
             It has two `str` columns, "metric" and "value".
             If the trial status is not SUCCEEDED, the dataframe is empty.
         """
 
     @property
+    def results_dict(self) -> Dict[str, Optional[TunableValue]]:
+        """
+        Retrieve the trials' results from the storage as a dict.
+
+        Returns
+        -------
+        results : dict
+        """
+        return self._df_to_dict(self.results)
+
+    @property
     @abstractmethod
     def telemetry(self) -> pandas.DataFrame:
         """
-        Retrieve the trials' telemetry from the storage.
+        Retrieve the trials' telemetry from the storage as a dataframe.
 
         Returns
         -------
@@ -126,7 +167,7 @@ class TrialData(metaclass=ABCMeta):
     @abstractmethod
     def metadata(self) -> pandas.DataFrame:
         """
-        Retrieve the trials' metadata parameters.
+        Retrieve the trials' metadata parameters as a dataframe.
 
         Note: this corresponds to the Trial object's "config" property.
 
@@ -137,3 +178,16 @@ class TrialData(metaclass=ABCMeta):
             It has two `str` columns, "parameter" and "value".
             Returns an empty dataframe if there is no metadata.
         """
+
+    @property
+    def metadata_dict(self) -> dict:
+        """
+        Retrieve the trials' metadata parameters as a dict.
+
+        Note: this corresponds to the Trial object's "config" property.
+
+        Returns
+        -------
+        metadata : dict
+        """
+        return self._df_to_dict(self.metadata)
