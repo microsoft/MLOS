@@ -12,8 +12,12 @@ Full end-to-end examples are provided in the [`cli`](./cli/) directory, and typi
 
 An `Environment` configuration can have two sections, `const_args` and `tunable_params`.
 At runtime, at each trial the data from both sections will be merged and passed to the environment as a single dictionary of key/value pairs.
-The difference between `const_args` and `tunable_params` is that the former values stay constant across all trials, whereas `tunable_params` values can change from one trial to the next (e.g., when the optimizer proposes a new configuration).
-The storage system will only save the values of the `tunable_params` for each trial; we rely on git to preserve the config files along with the `const_args` values, and save the commit hash of the configs for each experiment.
+The difference between `const_args` and `tunable_params` is that the `tunable_params` values change from one trial to the next (e.g., when the optimizer proposes a new configuration), whereas values of the `const_args` usually stay constant or get their values from sources other than the optimizer.
+Having these two sections allows the user not only define which environment parameters to tune, but also customize the environment without changing the Python code or shell scripts.
+Sometimes values for the `const_args` come from outside of the Environment configuration, e.g., from global parameters (see the next section) or storage.
+To enforce the presence of such parameters, the user can declare their IDs in the `required_args` section of the configuration.
+The system will make sure that each parameter in the `required_args` has a value (either specified in the `const_args` or provided externally) and report an error if the required parameters are missing.
+The storage system will only save the values of the `tunable_params` for each trial; we rely on git to preserve the config files along with the `const_args` and `required_args` values, and save the commit hash of the configs for each experiment.
 
 ## Globals
 
