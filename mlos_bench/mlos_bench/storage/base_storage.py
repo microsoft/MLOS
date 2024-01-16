@@ -83,7 +83,8 @@ class Storage(metaclass=ABCMeta):
                    trial_id: int,
                    root_env_config: str,
                    description: str,
-                   opt_target: str) -> 'Storage.Experiment':
+                   opt_target: str,
+                   opt_direction: Optional[str]) -> 'Storage.Experiment':
         """
         Create a new experiment in the storage.
 
@@ -103,6 +104,8 @@ class Storage(metaclass=ABCMeta):
             Human-readable description of the experiment.
         opt_target : str
             Name of metric we're optimizing for.
+        opt_direction: Optional[str]
+            Direction to optimize the metric (e.g., min or max)
 
         Returns
         -------
@@ -112,15 +115,29 @@ class Storage(metaclass=ABCMeta):
         """
 
     class Experiment(metaclass=ABCMeta):
+        # pylint: disable=too-many-instance-attributes
         """
         Base interface for storing the results of the experiment.
         This class is instantiated in the `Storage.experiment()` method.
         """
 
-        def __init__(self, tunables: TunableGroups, experiment_id: str, root_env_config: str):
+        def __init__(self,
+                     *,
+                     tunables: TunableGroups,
+                     experiment_id: str,
+                     trial_id: int,
+                     root_env_config: str,
+                     description: str,
+                     opt_target: str,
+                     opt_direction: Optional[str]):
             self._tunables = tunables.copy()
+            self._trial_id = trial_id
             self._experiment_id = experiment_id
             (self._git_repo, self._git_commit, self._root_env_config) = get_git_info(root_env_config)
+            self._description = description
+            self._opt_target = opt_target
+            assert opt_direction in {None, "min", "max"}
+            self._opt_direction = opt_direction
 
         def __enter__(self) -> 'Storage.Experiment':
             """
@@ -171,6 +188,31 @@ class Storage(metaclass=ABCMeta):
             is_ok : bool
                 True if there were no exceptions during the experiment, False otherwise.
             """
+
+        @property
+        def experiment_id(self) -> str:
+            """Get the Experiment's ID"""
+            return self._experiment_id
+
+        @property
+        def trial_id(self) -> int:
+            """Get the current Trial ID"""
+            return self._trial_id
+
+        @property
+        def description(self) -> str:
+            """Get the Experiment's description"""
+            return self._description
+
+        @property
+        def opt_target(self) -> str:
+            """Get the Experiment's optimization target"""
+            return self._opt_target
+
+        @property
+        def opt_direction(self) -> Optional[str]:
+            """Get the Experiment's optimization target"""
+            return self._opt_direction
 
         @abstractmethod
         def merge(self, experiment_ids: List[str]) -> None:
@@ -249,12 +291,15 @@ class Storage(metaclass=ABCMeta):
 
         def __init__(self, *,
                      tunables: TunableGroups, experiment_id: str, trial_id: int,
-                     config_id: int, opt_target: str, config: Optional[Dict[str, Any]] = None):
+                     config_id: int, opt_target: str, opt_direction: Optional[str],
+                     config: Optional[Dict[str, Any]] = None):
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
             self._config_id = config_id
             self._opt_target = opt_target
+            assert opt_direction in {None, "min", "max"}
+            self._opt_direction = opt_direction
             self._config = config or {}
 
         def __repr__(self) -> str:
@@ -273,6 +318,20 @@ class Storage(metaclass=ABCMeta):
             ID of the current trial configuration.
             """
             return self._config_id
+
+        @property
+        def opt_target(self) -> str:
+            """
+            Get the Trial's optimization target.
+            """
+            return self._opt_target
+
+        @property
+        def opt_direction(self) -> Optional[str]:
+            """
+            Get the Trial's optimization direction (e.g., min or max)
+            """
+            return self._opt_direction
 
         @property
         def tunables(self) -> TunableGroups:

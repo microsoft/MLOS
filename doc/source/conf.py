@@ -26,16 +26,17 @@ import sphinx_rtd_theme
 
 sys.path.insert(0, os.path.abspath('../../mlos_core/mlos_core'))
 sys.path.insert(1, os.path.abspath('../../mlos_bench/mlos_bench'))
+sys.path.insert(1, os.path.abspath('../../mlos_viz/mlos_viz'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'MlosCore'
-copyright = '2022, GSL'
+copyright = '2024, GSL'
 author = 'GSL'
 
 # The full version, including alpha/beta/rc tags
-release = '0.2.5'
+release = '0.3.0'
 
 try:
     from setuptools_scm import get_version
