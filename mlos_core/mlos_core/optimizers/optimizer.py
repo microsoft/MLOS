@@ -133,11 +133,11 @@ class BaseOptimizer(metaclass=ABCMeta):
             assert len(configuration) == 1, \
                 "Suggest must return a single configuration."
             assert set(configuration.columns).issubset(set(self.optimizer_parameter_space)), \
-                "Suggest returned a configuration with the wrong number of parameters."
+                "Optimizer suggested a configuration that does not match the expected parameter space."
         if self._space_adapter:
             configuration = self._space_adapter.transform(configuration)
             assert set(configuration.columns).issubset(set(self.parameter_space)), \
-                "Space adapter transformed configuration with the wrong number of parameters."
+                "Space adapter produced a configuration that does not match the expected parameter space."
         return configuration
 
     @abstractmethod
