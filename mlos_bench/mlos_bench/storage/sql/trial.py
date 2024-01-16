@@ -29,7 +29,7 @@ class Trial(Storage.Trial):
     def __init__(self, *,
                  engine: Engine, schema: DbSchema, tunables: TunableGroups,
                  experiment_id: str, trial_id: int, config_id: int,
-                 opt_target: str, opt_direction: str,
+                 opt_target: str, opt_direction: Optional[str],
                  config: Optional[Dict[str, Any]] = None):
         super().__init__(
             tunables=tunables,
