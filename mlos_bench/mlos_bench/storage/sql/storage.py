@@ -63,7 +63,7 @@ class SqlStorage(Storage):
                    root_env_config: str,
                    description: str,
                    opt_target: str,
-                   opt_direction: str) -> Storage.Experiment:
+                   opt_direction: Optional[str]) -> Storage.Experiment:
         return Experiment(
             engine=self._engine,
             schema=self._schema,

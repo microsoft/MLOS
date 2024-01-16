@@ -84,7 +84,7 @@ class Storage(metaclass=ABCMeta):
                    root_env_config: str,
                    description: str,
                    opt_target: str,
-                   opt_direction: str) -> 'Storage.Experiment':
+                   opt_direction: Optional[str]) -> 'Storage.Experiment':
         """
         Create a new experiment in the storage.
 
@@ -104,7 +104,7 @@ class Storage(metaclass=ABCMeta):
             Human-readable description of the experiment.
         opt_target : str
             Name of metric we're optimizing for.
-        opt_direction: str
+        opt_direction: Optional[str]
             Direction to optimize the metric (e.g., min or max)
 
         Returns
@@ -129,13 +129,14 @@ class Storage(metaclass=ABCMeta):
                      root_env_config: str,
                      description: str,
                      opt_target: str,
-                     opt_direction: str):
+                     opt_direction: Optional[str]):
             self._tunables = tunables.copy()
             self._trial_id = trial_id
             self._experiment_id = experiment_id
             (self._git_repo, self._git_commit, self._root_env_config) = get_git_info(root_env_config)
             self._description = description
             self._opt_target = opt_target
+            assert opt_direction in {None, "min", "max"}
             self._opt_direction = opt_direction
 
         def __enter__(self) -> 'Storage.Experiment':
@@ -209,7 +210,7 @@ class Storage(metaclass=ABCMeta):
             return self._opt_target
 
         @property
-        def opt_direction(self) -> str:
+        def opt_direction(self) -> Optional[str]:
             """Get the Experiment's optimization target"""
             return self._opt_direction
 
@@ -290,14 +291,14 @@ class Storage(metaclass=ABCMeta):
 
         def __init__(self, *,
                      tunables: TunableGroups, experiment_id: str, trial_id: int,
-                     config_id: int, opt_target: str, opt_direction: str,
+                     config_id: int, opt_target: str, opt_direction: Optional[str],
                      config: Optional[Dict[str, Any]] = None):
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
             self._config_id = config_id
             self._opt_target = opt_target
-            assert opt_direction in {"min", "max"}
+            assert opt_direction in {None, "min", "max"}
             self._opt_direction = opt_direction
             self._config = config or {}
 
@@ -326,11 +327,11 @@ class Storage(metaclass=ABCMeta):
             return self._opt_target
 
         @property
-        def opt_direction(self) -> str:
+        def opt_direction(self) -> Optional[str]:
             """
-            Get the Trial's optimization target.
+            Get the Trial's optimization direction (e.g., min or max)
             """
-            return self._opt_target
+            return self._opt_direction
 
         @property
         def tunables(self) -> TunableGroups:

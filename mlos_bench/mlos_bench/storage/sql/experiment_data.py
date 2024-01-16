@@ -48,6 +48,7 @@ class ExperimentSqlData(ExperimentData):
                     self._schema.objectives.select().where(
                         self._schema.objectives.c.exp_id == self._exp_id,
                     ).order_by(
+                        self._schema.objectives.c.weight.desc(),
                         self._schema.objectives.c.optimization_target.asc(),
                     )
                 )

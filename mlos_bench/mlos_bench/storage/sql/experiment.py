@@ -36,7 +36,7 @@ class Experiment(Storage.Experiment):
                  root_env_config: str,
                  description: str,
                  opt_target: str,
-                 opt_direction: str):
+                 opt_direction: Optional[str]):
         super().__init__(
             tunables=tunables,
             experiment_id=experiment_id,

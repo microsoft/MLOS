@@ -11,7 +11,7 @@ from typing import List, Any
 
 from sqlalchemy import (
     Engine, MetaData, Dialect, create_mock_engine,
-    Table, Column, Sequence, Integer, String, DateTime,
+    Table, Column, Sequence, Integer, Float, String, DateTime,
     PrimaryKeyConstraint, ForeignKeyConstraint, UniqueConstraint,
 )
 
@@ -74,6 +74,11 @@ class DbSchema:
             Column("exp_id"),
             Column("optimization_target", String(1024), nullable=False),
             Column("optimization_direction", String(4), nullable=False),
+            # TODO: Note: weight is not fully supported yet as currently
+            # multi-objective is expected to explore each objective equally.
+            # Will need to adjust the insert and return values to support this
+            # eventually.
+            Column("weight", Float, nullable=True),
 
             PrimaryKeyConstraint("exp_id", "optimization_target"),
             ForeignKeyConstraint(["exp_id"], [self.experiment.c.exp_id]),
