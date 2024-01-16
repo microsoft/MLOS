@@ -11,10 +11,11 @@ on:
         default: false
         required: false
   push:
-    tags: ["v*"]
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  release:
+    types: [ published ]
   merge_group:
     types: [checks_requested]
   schedule:
@@ -55,6 +56,10 @@ jobs:
         git fetch --deepen=100
         if ! git branch -a --contains ${{ github.ref_name }} | grep origin/main; then
           echo "ERROR: tag ${{ github.ref_name }} doesn't appear to be included in the main branch." >&2
+          exit 1
+        fi
+        if ! echo "${{ github.ref_name }}" | egrep -q '^v([0-9]+\.){2,3}[0-9]+$'; then
+          echo "ERROR: tag ${{ github.ref_name }} doesn't appear to be a valid version tag." >&2
           exit 1
         fi
 
@@ -172,7 +177,7 @@ jobs:
         rm -f doc/build/html/htmlcov/.gitignore
 
     - name: Publish package to Test PyPi
-      if: github.ref_type == 'tag'
+      if: github.event == 'release' && github.ref_type == 'tag'
       run: |
         if [ -n "${{ secrets.PYPI_TEST_USERNAME }}" ]; then
           docker exec --user vscode --env USER=vscode --env MAKEFLAGS=-Oline \
@@ -181,7 +186,7 @@ jobs:
         fi
 
     - name: Publish package to PyPi
-      if: github.repository == 'microsoft/mlos' && github.ref_type == 'tag'
+      if: github.repository == 'microsoft/mlos' && github.event == 'release' && github.ref_type == 'tag'
       run: |
         if [ -n "${{ secrets.PYPI_USERNAME }}" ]; then
           docker exec --user vscode --env USER=vscode --env MAKEFLAGS=-Oline \
@@ -216,6 +221,7 @@ jobs:
         # other resources used.
         password: ${{ secrets.ACR_PASSWORD }}
     - name: Publish the container images
+      # TODO: add cleanup step to remove old images
       if: (github.repository == 'microsoft/mlos') && (github.ref == 'refs/heads/main' || github.ref_type == 'tag')
       timeout-minutes: 15
       run: |
