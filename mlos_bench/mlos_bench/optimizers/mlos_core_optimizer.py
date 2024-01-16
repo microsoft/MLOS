@@ -26,7 +26,10 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.base_optimizer import Optimizer
 
 from mlos_bench.optimizers.convert_configspace import (
-    tunable_groups_to_configspace, configspace_data_to_tunable_values, special_param_names
+    TunableValueKind,
+    configspace_data_to_tunable_values,
+    special_param_names,
+    tunable_groups_to_configspace,
 )
 
 _LOG = logging.getLogger(__name__)
@@ -143,8 +146,8 @@ class MlosCoreOptimizer(Optimizer):
                 (special_name, type_name) = special_param_names(tunable.name)
                 tunables_names += [special_name, type_name]
                 is_special = df_configs[tunable.name].apply(tunable.special.__contains__)
-                df_configs[type_name] = "range"
-                df_configs.loc[is_special, type_name] = "special"
+                df_configs[type_name] = TunableValueKind.RANGE
+                df_configs.loc[is_special, type_name] = TunableValueKind.SPECIAL
                 if tunable.type == "int":
                     # Make int column NULLABLE:
                     df_configs[tunable.name] = df_configs[tunable.name].astype("Int64")

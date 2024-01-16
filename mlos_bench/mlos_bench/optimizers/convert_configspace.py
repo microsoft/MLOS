@@ -24,6 +24,16 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 _LOG = logging.getLogger(__name__)
 
 
+class TunableValueKind:
+    """
+    Enum for the kind of the tunable value (special or not).
+    It is not a true enum because ConfigSpace wants string values.
+    """
+
+    SPECIAL = "special"
+    RANGE = "range"
+
+
 def _tunable_to_configspace(
         tunable: Tunable, group_name: Optional[str] = None, cost: int = 0) -> ConfigurationSpace:
     """
@@ -82,11 +92,13 @@ def _tunable_to_configspace(
             default_value=tunable.default if tunable.default in tunable.special else None,
             meta=meta),
         type_name: CategoricalHyperparameter(
-            name=type_name, choices=["special", "range"], default_value="special",
+            name=type_name,
+            choices=[TunableValueKind.SPECIAL, TunableValueKind.RANGE],
+            default_value=TunableValueKind.SPECIAL,
             weights=[0.5, 0.5]),  # TODO: Make weights configurable; FLAML requires uniform weights.
     })
-    cs.add_condition(EqualsCondition(cs[special_name], cs[type_name], "special"))
-    cs.add_condition(EqualsCondition(cs[tunable.name], cs[type_name], "range"))
+    cs.add_condition(EqualsCondition(cs[special_name], cs[type_name], TunableValueKind.SPECIAL))
+    cs.add_condition(EqualsCondition(cs[tunable.name], cs[type_name], TunableValueKind.RANGE))
 
     return cs
 
@@ -136,10 +148,10 @@ def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
         if tunable.special:
             (special_name, type_name) = special_param_names(tunable.name)
             if tunable.value in tunable.special:
-                values[type_name] = "special"
+                values[type_name] = TunableValueKind.SPECIAL
                 values[special_name] = tunable.value
             else:
-                values[type_name] = "range"
+                values[type_name] = TunableValueKind.RANGE
                 values[tunable.name] = tunable.value
         else:
             values[tunable.name] = tunable.value
@@ -159,7 +171,7 @@ def configspace_data_to_tunable_values(data: dict) -> dict:
     ]
     for k in specials:
         (special_name, type_name) = special_param_names(k)
-        if data[type_name] == "special":
+        if data[type_name] == TunableValueKind.SPECIAL:
             data[k] = data[special_name]
         if special_name in data:
             del data[special_name]

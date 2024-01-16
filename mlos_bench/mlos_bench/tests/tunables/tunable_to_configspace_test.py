@@ -19,6 +19,7 @@ from ConfigSpace import (
 from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.convert_configspace import (
+    TunableValueKind,
     _tunable_to_configspace,
     special_param_names,
     tunable_groups_to_configspace,
@@ -46,7 +47,7 @@ def configuration_space() -> ConfigurationSpace:
         "idle": ["halt", "mwait", "noidle"],
         "kernel_sched_migration_cost_ns": (0, 500000),
         kernel_sched_migration_cost_ns_special: [-1, 0],
-        kernel_sched_migration_cost_ns_type: ["special", "range"],
+        kernel_sched_migration_cost_ns_type: [TunableValueKind.SPECIAL, TunableValueKind.RANGE],
         "kernel_sched_latency_ns": (0, 1000000000),
     })
 
@@ -54,16 +55,16 @@ def configuration_space() -> ConfigurationSpace:
     spaces["idle"].default_value = "halt"
     spaces["kernel_sched_migration_cost_ns"].default_value = 250000
     spaces[kernel_sched_migration_cost_ns_special].default_value = -1
-    spaces[kernel_sched_migration_cost_ns_type].default_value = "special"
+    spaces[kernel_sched_migration_cost_ns_type].default_value = TunableValueKind.SPECIAL
     spaces[kernel_sched_migration_cost_ns_type].probabilities = (0.5, 0.5)  # FLAML requires distribution to be uniform
     spaces["kernel_sched_latency_ns"].default_value = 2000000
 
     spaces.add_condition(EqualsCondition(
         spaces[kernel_sched_migration_cost_ns_special],
-        spaces[kernel_sched_migration_cost_ns_type], "special"))
+        spaces[kernel_sched_migration_cost_ns_type], TunableValueKind.SPECIAL))
     spaces.add_condition(EqualsCondition(
         spaces["kernel_sched_migration_cost_ns"],
-        spaces[kernel_sched_migration_cost_ns_type], "range"))
+        spaces[kernel_sched_migration_cost_ns_type], TunableValueKind.RANGE))
 
     return spaces
 
