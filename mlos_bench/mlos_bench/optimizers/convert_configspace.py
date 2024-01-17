@@ -178,6 +178,7 @@ def configspace_data_to_tunable_values(data: dict) -> dict:
         del data[type_name]
     return data
 
+# Note: `!` characters are currently disallowed in Tunable names in order handle this logic.
 
 def special_param_names(name: str) -> Tuple[str, str]:
     """
