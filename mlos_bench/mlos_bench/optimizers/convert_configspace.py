@@ -39,7 +39,7 @@ def _tunable_to_configspace(
     """
     Convert a single Tunable to an equivalent set of ConfigSpace Hyperparameter objects,
     wrapped in a ConfigurationSpace for composability.
-    Note: this may more than one Hyperparameter in the case of special value handling.
+    Note: this may be more than one Hyperparameter in the case of special value handling.
 
     Parameters
     ----------
