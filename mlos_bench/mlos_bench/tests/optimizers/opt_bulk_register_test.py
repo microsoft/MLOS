@@ -19,39 +19,6 @@ from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
 
 
 @pytest.fixture
-def mock_configs() -> List[dict]:
-    """
-    Mock configurations of earlier experiments.
-    """
-    return [
-        {
-            'vmSize': 'Standard_B4ms',
-            'idle': 'halt',
-            'kernel_sched_migration_cost_ns': 50000,
-            'kernel_sched_latency_ns': 1000000,
-        },
-        {
-            'vmSize': 'Standard_B4ms',
-            'idle': 'halt',
-            'kernel_sched_migration_cost_ns': 40000,
-            'kernel_sched_latency_ns': 2000000,
-        },
-        {
-            'vmSize': 'Standard_B4ms',
-            'idle': 'mwait',
-            'kernel_sched_migration_cost_ns': 100000,
-            'kernel_sched_latency_ns': 3000000,
-        },
-        {
-            'vmSize': 'Standard_B2s',
-            'idle': 'mwait',
-            'kernel_sched_migration_cost_ns': 200000,
-            'kernel_sched_latency_ns': 4000000,
-        }
-    ]
-
-
-@pytest.fixture
 def mock_configs_str(mock_configs: List[dict]) -> List[dict]:
     """
     Same as `mock_config` above, but with all values converted to strings.

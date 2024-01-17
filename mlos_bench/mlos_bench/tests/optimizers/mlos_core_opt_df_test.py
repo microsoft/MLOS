@@ -1,0 +1,49 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
+"""
+Unit tests for internal methods of the `MlosCoreOptimizer`.
+"""
+
+from typing import List
+
+import pandas
+import pytest
+
+from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
+from mlos_bench.tunables.tunable_groups import TunableGroups
+
+from mlos_bench.tests import SEED
+
+# pylint: disable=redefined-outer-name, protected-access
+
+
+@pytest.fixture
+def mlos_core_optimizer(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
+    """
+    An instance of a mlos_core optimizer (FLAML-based).
+    """
+    test_opt_config = {
+        'optimizer_type': 'FLAML',
+        'max_iterations': 10,
+        'seed': SEED,
+    }
+    return MlosCoreOptimizer(tunable_groups, test_opt_config)
+
+
+def test_df(mlos_core_optimizer: MlosCoreOptimizer, mock_configs: List[dict]) -> None:
+    """
+    Test `MlosCoreOptimizer._to_df()` method on tunables that have special values.
+    """
+    df = mlos_core_optimizer._to_df(mock_configs)
+    assert isinstance(df, pandas.DataFrame)
+    assert df.shape == (4, 6)
+    assert set(df.columns) == {
+        'kernel_sched_latency_ns',
+        'kernel_sched_migration_cost_ns',
+        'kernel_sched_migration_cost_ns!type',
+        'kernel_sched_migration_cost_ns!special',
+        'idle',
+        'vmSize',
+    }
