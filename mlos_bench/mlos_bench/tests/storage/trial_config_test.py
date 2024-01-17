@@ -24,7 +24,7 @@ def test_exp_trial_pending(exp_storage_memory_sql: Storage.Experiment,
         "location": "westus2",
         "num_repeats": "100",
         "experiment_id": "Test-001",
-        "trial_id": 1,
+        "trial_id": trial.trial_id,
     }
 
 
