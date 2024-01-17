@@ -358,6 +358,18 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         return self._special
 
     @property
+    def is_special(self) -> bool:
+        """
+        Check if the current value of the tunable is special.
+
+        Returns
+        -------
+        is_special : bool
+            True if the current value of the tunable is special, False otherwise.
+        """
+        return self.value in self._special
+
+    @property
     def type(self) -> str:
         """
         Get the data type of the tunable.
