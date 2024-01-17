@@ -7,6 +7,7 @@ Test fixtures for mlos_bench storage.
 """
 
 from datetime import datetime
+from random import random
 
 import pytest
 
@@ -60,7 +61,7 @@ def exp_storage_memory_sql_with_trials(exp_storage_memory_sql: Storage.Experimen
     """
     # Add some trials to that experiment.
     # Note: these all use the same values for now.
-    for i in range(1, 3):
+    for i in range(1, 10):
         trial = exp_storage_memory_sql.new_trial(tunables=exp_storage_memory_sql.tunables.copy(), config={
             "opt_target": exp_storage_memory_sql.opt_target,
             "opt_direction": exp_storage_memory_sql.opt_direction,
@@ -70,7 +71,7 @@ def exp_storage_memory_sql_with_trials(exp_storage_memory_sql: Storage.Experimen
             (datetime.utcnow(), "some-metric", 1.0),
         ])
         trial.update(Status.SUCCEEDED, datetime.utcnow(), metrics={
-            "score": 1.0,
+            "score": 1.0 + random(),
         })
     return exp_storage_memory_sql
 

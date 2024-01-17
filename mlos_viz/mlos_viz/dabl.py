@@ -23,7 +23,9 @@ def plot(exp_data: ExperimentData) -> None:
     """
     for objective in exp_data.objectives:
         objective_column = ExperimentData.RESULT_COLUMN_PREFIX + objective
-        dabl.plot(exp_data.results, objective_column)
+        results_df = exp_data.results
+        assert objective_column in results_df.columns
+        dabl.plot(results_df, objective_column)
 
 
 def ignore_plotter_warnings() -> None:
