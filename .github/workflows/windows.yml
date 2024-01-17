@@ -58,7 +58,7 @@ jobs:
     - name: Restore cached conda environment
       id: restore-conda-cache
       if: github.event_name != 'schedule'
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ env.CONDA }}/envs/mlos
         key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_YML }}') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
