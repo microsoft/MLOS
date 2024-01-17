@@ -12,6 +12,15 @@ import pytest
 from mlos_bench.tunables.tunable import Tunable
 
 
+def test_tunable_name() -> None:
+    """
+    Check that tunable name is valid.
+    """
+    with pytest.raises(ValueError):
+        # ! characters are currently disallowed in tunable names
+        Tunable(name='test!tunable', config={"type": "float", "range": [0, 1], "default": 0})
+
+
 def test_categorical_required_params() -> None:
     """
     Check that required parameters are present for categorical tunables.

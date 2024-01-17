@@ -32,7 +32,7 @@ class TunableDict(TypedDict, total=False):
     default: TunableValue
     values: Optional[List[Optional[str]]]
     range: Optional[Union[Sequence[int], Sequence[float]]]
-    special: Optional[Union[List[int], List[str]]]
+    special: Optional[Union[List[int], List[float]]]
     meta: Dict[str, Any]
 
 
@@ -59,6 +59,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         config : dict
             Python dict that represents a Tunable (e.g., deserialized from JSON)
         """
+        if '!' in name:  # TODO: Use a regex here and in JSON schema
+            raise ValueError(f"Invalid name of the tunable: {name}")
         self._name = name
         self._type = config["type"]  # required
         if self._type not in self._DTYPE:
@@ -76,7 +78,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             assert len(config_range) == 2, f"Invalid range: {config_range}"
             config_range = (config_range[0], config_range[1])
             self._range = config_range
-        self._special = config.get("special")
+        self._special: Union[List[int], List[float]] = config.get("special") or []
         self._current_value = None
         self._sanity_check()
         self.value = self._default
@@ -92,8 +94,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
                 raise ValueError(f"Range must be None for the categorical type tunable {self}")
             if len(set(self._values)) != len(self._values):
                 raise ValueError(f"Values must be unique for the categorical type tunable {self}")
-            if self._special is not None:
-                raise ValueError(f"Special values must be None for the categorical type tunable {self}")
+            if self._special:
+                raise ValueError(f"Categorical tunable cannot have special values: {self}")
         elif self.is_numerical:
             if self._values is not None:
                 raise ValueError(f"Values must be None for the numerical type tunable {self}")
@@ -272,12 +274,24 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             return value in self._values
         elif self.is_numerical and self._range:
             if isinstance(value, (int, float)):
-                # TODO: allow special values outside of range?
-                return bool(self._range[0] <= value <= self._range[1])  # or value == self._default
+                return self.in_range(value) or value in self._special
             else:
                 raise ValueError(f"Invalid value type for tunable {self}: {value}={type(value)}")
         else:
             raise ValueError(f"Invalid parameter type: {self._type}")
+
+    def in_range(self, value: Union[int, float, str, None]) -> bool:
+        """
+        Check if the value is within the range of the tunable.
+        Do *NOT* check for special values.
+        Return False if the tunable or value is categorical or None.
+        """
+        return (
+            isinstance(value, (float, int)) and
+            self.is_numerical and
+            self._range is not None and
+            bool(self._range[0] <= value <= self._range[1])
+        )
 
     @property
     def category(self) -> Optional[str]:
@@ -330,6 +344,30 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         Get the name / string ID of the tunable.
         """
         return self._name
+
+    @property
+    def special(self) -> Union[List[int], List[float]]:
+        """
+        Get the special values of the tunable. Return an empty list if there are none.
+
+        Returns
+        -------
+        special : [int] | [float]
+            A list of special values of the tunable. Can be empty.
+        """
+        return self._special
+
+    @property
+    def is_special(self) -> bool:
+        """
+        Check if the current value of the tunable is special.
+
+        Returns
+        -------
+        is_special : bool
+            True if the current value of the tunable is special, False otherwise.
+        """
+        return self.value in self._special
 
     @property
     def type(self) -> str:

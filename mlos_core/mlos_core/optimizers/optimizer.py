@@ -15,7 +15,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
-from mlos_core import config_to_dataframe
+from mlos_core.util import config_to_dataframe
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
 
@@ -132,12 +132,12 @@ class BaseOptimizer(metaclass=ABCMeta):
             configuration = self._suggest(context)
             assert len(configuration) == 1, \
                 "Suggest must return a single configuration."
-            assert len(configuration.columns) == len(self.optimizer_parameter_space.values()), \
-                "Suggest returned a configuration with the wrong number of parameters."
+            assert set(configuration.columns).issubset(set(self.optimizer_parameter_space)), \
+                "Optimizer suggested a configuration that does not match the expected parameter space."
         if self._space_adapter:
             configuration = self._space_adapter.transform(configuration)
-            assert len(configuration.columns) == len(self.parameter_space.values()), \
-                "Space adapter transformed configuration with the wrong number of parameters."
+            assert set(configuration.columns).issubset(set(self.parameter_space)), \
+                "Space adapter produced a configuration that does not match the expected parameter space."
         return configuration
 
     @abstractmethod

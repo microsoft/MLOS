@@ -29,7 +29,7 @@ def test_tunable_groups_str(tunable_groups: TunableGroups) -> None:
                 "kernel_sched_migration_cost_ns": {
                     "type": "int",
                     "default": -1,
-                    "range": [-1, 500000],
+                    "range": [0, 500000],
                     "special": [-1]
                 }
             }

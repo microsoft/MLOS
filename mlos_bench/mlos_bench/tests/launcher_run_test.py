@@ -97,7 +97,7 @@ def test_launch_main_app_opt(root_path: str, local_exec_service: LocalExecServic
         [
             # Iteration 1: Expect first value to be the baseline
             f"^{_RE_DATE} mlos_core_optimizer\\.py:\\d+ " +
-            r"register DEBUG Score: 65\.67\d+ Dataframe:\s*$",
+            r"register DEBUG Score: 64\.88\d+ Dataframe:\s*$",
             # Iteration 2: The result may not always be deterministic
             f"^{_RE_DATE} mlos_core_optimizer\\.py:\\d+ " +
             r"register DEBUG Score: \d+\.\d+ Dataframe:\s*$",
@@ -106,6 +106,6 @@ def test_launch_main_app_opt(root_path: str, local_exec_service: LocalExecServic
             r"register DEBUG Score: \d+\.\d+ Dataframe:\s*$",
             # Final result: baseline is the optimum for the mock environment
             f"^{_RE_DATE} run\\.py:\\d+ " +
-            r"_optimize INFO Env: Mock environment best score: 65\.67\d+\s*$",
+            r"_optimize INFO Env: Mock environment best score: 64\.88\d+\s*$",
         ]
     )
