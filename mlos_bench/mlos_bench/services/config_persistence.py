@@ -14,7 +14,7 @@ import sys
 import json    # For logging only
 import logging
 
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, TYPE_CHECKING
 
 import json5    # To read configs with comments and other JSON5 syntax features
 from jsonschema import ValidationError, SchemaError
@@ -22,7 +22,6 @@ from jsonschema import ValidationError, SchemaError
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.optimizers.base_optimizer import Optimizer
-from mlos_bench.storage.base_storage import Storage
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable import TunableValue
@@ -33,6 +32,9 @@ if sys.version_info < (3, 10):
     from importlib_resources import files
 else:
     from importlib.resources import files
+
+if TYPE_CHECKING:
+    from mlos_bench.storage.base_storage import Storage
 
 
 _LOG = logging.getLogger(__name__)
@@ -268,13 +270,13 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                                        config=class_config,
                                        global_config=global_config,
                                        service=service)
-        _LOG.info("Created: %s %s", Optimizer.__name__, inst)
+        _LOG.info("Created: Optimizer %s", inst)
         return inst
 
     def build_storage(self, *,
                       service: Service,
                       config: Dict[str, Any],
-                      global_config: Optional[Dict[str, Any]] = None) -> Storage:
+                      global_config: Optional[Dict[str, Any]] = None) -> "Storage":
         """
         Instantiation of mlos_bench Storage objects.
 
@@ -293,11 +295,12 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             A new instance of the Storage class.
         """
         (class_name, class_config) = self.prepare_class_load(config, global_config)
+        from mlos_bench.storage.base_storage import Storage     # pylint: disable=import-outside-toplevel
         inst = instantiate_from_config(Storage, class_name,     # type: ignore[type-abstract]
                                        config=class_config,
                                        global_config=global_config,
                                        service=service)
-        _LOG.info("Created: %s %s", Storage.__name__, inst)
+        _LOG.info("Created: Storage %s", inst)
         return inst
 
     def build_environment(self,     # pylint: disable=too-many-arguments

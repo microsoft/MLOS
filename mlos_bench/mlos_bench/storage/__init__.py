@@ -11,5 +11,5 @@ from mlos_bench.storage.storage_factory import from_config
 
 __all__ = [
     'Storage',
-    'from_config'
+    'from_config',
 ]
