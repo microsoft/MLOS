@@ -78,6 +78,8 @@ class SqlStorage(Storage):
 
     @property
     def experiments(self) -> Dict[str, ExperimentData]:
+        # FIXME: this is somewhat expensive if only fetching a single Experiment.
+        # May need to expand the API or data structures to lazily fetch data and/or cache it.
         with self._engine.connect() as conn:
             cur_exp = conn.execute(
                 self._schema.experiment.select().order_by(

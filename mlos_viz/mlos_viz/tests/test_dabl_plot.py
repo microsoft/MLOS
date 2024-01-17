@@ -6,10 +6,10 @@
 Unit tests for mlos_viz.dabl.plot.
 """
 
-from unittest.mock import MagicMock, Mock, patch, call
+from mlos_bench.storage.base_experiment_data import ExperimentData
+from mlos_viz.dabl import plot as dabl_plot
 
 
-@patch("dabl.plot")
-def test_dabl_plot() -> None:
+def test_dabl_plot(exp_data: ExperimentData) -> None:
     """Tests plotting via dabl."""
-    raise NotImplementedError("TODO")
+    dabl_plot(exp_data)

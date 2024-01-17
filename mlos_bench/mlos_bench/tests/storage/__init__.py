@@ -11,9 +11,10 @@ from datetime import datetime
 import pytest
 
 from mlos_bench.environments.status import Status
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
+from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.storage import SqlStorage
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
 
@@ -63,3 +64,11 @@ def exp_storage_memory_sql(storage_memory_sql: Storage, tunable_groups: TunableG
                 "score": 1.0,
             })
         return exp
+
+
+@pytest.fixture
+def exp_data(storage_memory_sql: Storage, exp_storage_memory_sql: Storage.Experiment) -> ExperimentData:
+    """
+    Test fixture for ExperimentData.
+    """
+    return storage_memory_sql.experiments[exp_storage_memory_sql.experiment_id]
