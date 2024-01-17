@@ -178,12 +178,13 @@ def configspace_data_to_tunable_values(data: dict) -> dict:
         del data[type_name]
     return data
 
-# Note: `!` characters are currently disallowed in Tunable names in order handle this logic.
 
 def special_param_names(name: str) -> Tuple[str, str]:
     """
     Generate the names of the auxiliary hyperparameters that correspond
     to a tunable that can have special values.
+
+    NOTE: `!` characters are currently disallowed in Tunable names in order handle this logic.
 
     Parameters
     ----------
@@ -204,6 +205,8 @@ def special_param_name_is_temp(name: str) -> bool:
     """
     Check if name corresponds to a temporary ConfigSpace parameter.
 
+    NOTE: `!` characters are currently disallowed in Tunable names in order handle this logic.
+
     Parameters
     ----------
     name : str
@@ -220,6 +223,8 @@ def special_param_name_is_temp(name: str) -> bool:
 def special_param_name_strip(name: str) -> str:
     """
     Remove the temporary suffix from a special parameter name.
+
+    NOTE: `!` characters are currently disallowed in Tunable names in order handle this logic.
 
     Parameters
     ----------
