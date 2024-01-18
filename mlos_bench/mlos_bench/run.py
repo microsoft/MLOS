@@ -36,7 +36,8 @@ def _main() -> None:
         storage=launcher.storage,
         root_env_config=launcher.root_env_config,
         global_config=launcher.global_config,
-        do_teardown=launcher.teardown
+        do_teardown=launcher.teardown,
+        trial_config_repeat_count=launcher.trial_config_repeat_count,
     )
 
     _LOG.info("Final result: %s", result)
@@ -48,7 +49,9 @@ def _optimize(*,
               storage: Storage,
               root_env_config: str,
               global_config: Dict[str, Any],
-              do_teardown: bool) -> Tuple[Optional[float], Optional[TunableGroups]]:
+              do_teardown: bool,
+              trial_config_repeat_count: int = 1,
+              ) -> Tuple[Optional[float], Optional[TunableGroups]]:
     """
     Main optimization loop.
 
@@ -66,8 +69,13 @@ def _optimize(*,
         Global configuration parameters.
     do_teardown : bool
         If True, teardown the environment at the end of the experiment
+    trial_config_repeat_count : int
+        How many trials to repeat for the same configuration.
     """
     # pylint: disable=too-many-locals
+    if trial_config_repeat_count <= 0:
+        raise ValueError(f"Invalid trial_config_repeat_count: {trial_config_repeat_count}")
+
     if _LOG.isEnabledFor(logging.INFO):
         _LOG.info("Root Environment:\n%s", env.pprint())
 
@@ -119,16 +127,18 @@ def _optimize(*,
                                config_id, json.dumps(tunable_values, indent=2))
                 config_id = -1
 
-            trial = exp.new_trial(tunables, config={
-                # Add some additional metadata to track for the trial such as the
-                # optimizer config used.
-                # TODO: Improve for supporting multi-objective
-                # (e.g., opt_target_1, opt_target_2, ... and opt_direction_1, opt_direction_2, ...)
-                "optimizer": opt.name,
-                "opt_target": opt.target,
-                "opt_direction": opt.direction,
-            })
-            _run(env_context, opt_context, trial, global_config)
+            for repeat_i in range(1, trial_config_repeat_count + 1):
+                trial = exp.new_trial(tunables, config={
+                    # Add some additional metadata to track for the trial such as the
+                    # optimizer config used.
+                    # TODO: Improve for supporting multi-objective
+                    # (e.g., opt_target_1, opt_target_2, ... and opt_direction_1, opt_direction_2, ...)
+                    "optimizer": opt.name,
+                    "opt_target": opt.target,
+                    "opt_direction": opt.direction,
+                    "repeat_i": repeat_i,
+                })
+                _run(env_context, opt_context, trial, global_config)
 
         if do_teardown:
             env_context.teardown()

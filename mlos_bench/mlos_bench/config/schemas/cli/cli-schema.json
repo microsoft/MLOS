@@ -67,6 +67,13 @@
             "$ref": "#/$defs/json_config_path"
         },
 
+        "trial_config_repeat_count": {
+            "description": "Number of times to repeat a config.",
+            "type": "integer",
+            "minimum": 1,
+            "examples": [3, 5]
+        },
+
         "storage": {
             "description": "Path to the json config describing the storage backend to use.",
             "$ref": "#/$defs/json_config_path"

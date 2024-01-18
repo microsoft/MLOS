@@ -15,6 +15,8 @@
     "optimizer": "optimizers/one_shot_opt.jsonc",
     "storage": "storage/sqlite.jsonc",
 
+    "trial_config_repeat_count": 3,
+
     "random_init": true,
     "random_seed": 42,
 
