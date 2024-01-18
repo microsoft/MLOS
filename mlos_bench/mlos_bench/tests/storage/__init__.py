@@ -86,7 +86,8 @@ def exp_storage_memory_sql_with_trials(exp_storage_memory_sql: Storage.Experimen
             tunable_value = float(tunables.get_tunable(tunable_name)[0].numerical_value)
             trial.update(Status.SUCCEEDED, datetime.utcnow(), metrics={
                 # Give some variance on the score.
-                "score": base_score + (tunable_value / tunable_default) - 1 + random() / 10,
+                # And some influence from the tunable value.
+                "score": base_score + 10 * ((tunable_value / tunable_default) - 1) + random() / 10,
             })
     return exp_storage_memory_sql
 
