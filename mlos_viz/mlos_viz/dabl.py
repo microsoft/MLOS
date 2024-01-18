@@ -39,3 +39,7 @@ def ignore_plotter_warnings() -> None:
                             message="Missing values in target_col have been removed for regression")
     from sklearn.exceptions import UndefinedMetricWarning   # pylint: disable=import-outside-toplevel
     warnings.filterwarnings("ignore", module="sklearn", category=UndefinedMetricWarning, message="Recall is ill-defined")
+    warnings.filterwarnings("ignore", category=DeprecationWarning, module="dabl",    # but actually comes from pandas
+                            message="is_categorical_dtype is deprecated and will be removed in a future version.")
+    warnings.filterwarnings("ignore", category=DeprecationWarning, module="sklearn",
+                            message="is_sparse is deprecated and will be removed in a future version.")

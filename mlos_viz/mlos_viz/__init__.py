@@ -65,10 +65,6 @@ def plot(exp_data: ExperimentData,
         ignore_plotter_warnings(plotter_method)
 
     base.plot_optimizer_trends(exp_data)
-    top_n_config_args = {}
-    for kword in exp_data.top_n_configs.__kwdefaults__:
-        if kword in kwargs:
-            top_n_config_args[kword] = kwargs[kword]
     base.plot_top_n_configs(exp_data, **kwargs)
 
     if MlosVizMethod.DABL:

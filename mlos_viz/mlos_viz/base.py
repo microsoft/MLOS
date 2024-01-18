@@ -7,19 +7,29 @@ mlos_viz is a framework to help visualizing, explain, and gain insights from res
 from the mlos_bench framework for benchmarking and optimization automation.
 """
 
-from typing import Any, Literal, Optional, Union
+from typing import Any, Callable, Dict
 
 import warnings
 
 from importlib.metadata import version
 from matplotlib import pyplot as plt
 import seaborn as sns
-import numpy as np
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
 
 
 _SEABORN_VERS = version('seaborn')
+
+
+def get_kwarg_defaults(target: Callable, **kwargs: Any) -> Dict[str, Any]:
+    """
+    Assembles a smaller kwargs dict for the specified target function.
+    """
+    target_kwargs = {}
+    for kword in target.__kwdefaults__:
+        if kword in kwargs:
+            target_kwargs[kword] = kwargs[kword]
+    return target_kwargs
 
 
 def ignore_plotter_warnings() -> None:
@@ -85,10 +95,7 @@ def plot_top_n_configs(exp_data: ExperimentData, with_scatter_plot: bool = False
     kwargs : dict
         Remaining keyword arguments are passed along to the ExperimentData.top_n_configs.
     """
-    top_n_config_args = {}
-    for kword in exp_data.top_n_configs.__kwdefaults__:
-        if kword in kwargs:
-            top_n_config_args[kword] = kwargs[kword]
+    top_n_config_args = get_kwarg_defaults(ExperimentData.top_n_configs, **kwargs)
     (top_n_config_results_df, opt_target, opt_direction) = exp_data.top_n_configs(**top_n_config_args)
     top_n = len(top_n_config_results_df["config_id"].unique()) - 1
     target_column = ExperimentData.RESULT_COLUMN_PREFIX + opt_target
