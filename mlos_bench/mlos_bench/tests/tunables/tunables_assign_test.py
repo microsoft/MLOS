@@ -27,6 +27,15 @@ def test_tunables_assign_unknown_param(tunable_groups: TunableGroups) -> None:
         })
 
 
+def test_tunables_assign_categorical(tunable_categorical: Tunable) -> None:
+    """
+    Regular assignment for categorical tunable.
+    """
+    # Must be one of: {"Standard_B2s", "Standard_B2ms", "Standard_B4ms"}
+    tunable_categorical.value = "Standard_B4ms"
+    assert not tunable_categorical.is_special
+
+
 def test_tunables_assign_invalid_categorical(tunable_groups: TunableGroups) -> None:
     """
     Check parameter validation for categorical tunables.
@@ -80,6 +89,7 @@ def test_tunable_assign_int_to_numerical_value(tunable_int: Tunable) -> None:
     """
     tunable_int.numerical_value = 10.0
     assert tunable_int.numerical_value == 10
+    assert not tunable_int.is_special
 
 
 def test_tunable_assign_float_to_numerical_value(tunable_float: Tunable) -> None:
@@ -88,6 +98,7 @@ def test_tunable_assign_float_to_numerical_value(tunable_float: Tunable) -> None
     """
     tunable_float.numerical_value = 0.1
     assert tunable_float.numerical_value == 0.1
+    assert not tunable_float.is_special
 
 
 def test_tunable_assign_str_to_int(tunable_int: Tunable) -> None:
@@ -96,6 +107,7 @@ def test_tunable_assign_str_to_int(tunable_int: Tunable) -> None:
     """
     tunable_int.value = "10"
     assert tunable_int.value == 10      # type: ignore[comparison-overlap]
+    assert not tunable_int.is_special
 
 
 def test_tunable_assign_str_to_float(tunable_float: Tunable) -> None:
@@ -104,6 +116,7 @@ def test_tunable_assign_str_to_float(tunable_float: Tunable) -> None:
     """
     tunable_float.value = "0.5"
     assert tunable_float.value == 0.5   # type: ignore[comparison-overlap]
+    assert not tunable_float.is_special
 
 
 def test_tunable_assign_float_to_int(tunable_int: Tunable) -> None:
@@ -112,6 +125,7 @@ def test_tunable_assign_float_to_int(tunable_int: Tunable) -> None:
     """
     tunable_int.value = 10.0
     assert tunable_int.value == 10
+    assert not tunable_int.is_special
 
 
 def test_tunable_assign_float_to_int_fail(tunable_int: Tunable) -> None:
@@ -162,3 +176,40 @@ def test_tunable_assign_null_to_float(tunable_float: Tunable) -> None:
         tunable_float.value = None
     with pytest.raises(TypeError):
         tunable_float.numerical_value = None    # type: ignore[assignment]
+
+
+def test_tunable_assign_special(tunable_int: Tunable) -> None:
+    """
+    Check the assignment of a special value outside of the range (but declared `special`).
+    """
+    tunable_int.numerical_value = -1
+    assert tunable_int.numerical_value == -1
+    assert tunable_int.is_special
+
+
+def test_tunable_assign_special_fail(tunable_int: Tunable) -> None:
+    """
+    Assign a value that is neither special nor in range and fail.
+    """
+    with pytest.raises(ValueError):
+        tunable_int.numerical_value = -2
+
+
+def test_tunable_assign_special_with_coercion(tunable_int: Tunable) -> None:
+    """
+    Check the assignment of a special value outside of the range (but declared `special`).
+    Check coercion from float to int.
+    """
+    tunable_int.numerical_value = -1.0
+    assert tunable_int.numerical_value == -1
+    assert tunable_int.is_special
+
+
+def test_tunable_assign_special_with_coercion_str(tunable_int: Tunable) -> None:
+    """
+    Check the assignment of a special value outside of the range (but declared `special`).
+    Check coercion from string to int.
+    """
+    tunable_int.value = "-1"
+    assert tunable_int.numerical_value == -1
+    assert tunable_int.is_special

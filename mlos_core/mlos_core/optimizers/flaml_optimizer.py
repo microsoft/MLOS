@@ -13,6 +13,7 @@ import ConfigSpace
 import numpy as np
 import pandas as pd
 
+from mlos_core.util import normalize_config
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
@@ -134,11 +135,11 @@ class FlamlOptimizer(BaseOptimizer):
         result: Union[dict, None]
             Dictionary with a single key, `score`, if config already evaluated; `None` otherwise.
         """
-        cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(self.optimizer_parameter_space, values=config)
+        cs_config = normalize_config(self.optimizer_parameter_space, config)
         if cs_config in self.evaluated_samples:
             return {'score': self.evaluated_samples[cs_config].score}
 
-        self._suggested_config = config
+        self._suggested_config = dict(cs_config)  # Cleaned-up version of the config
         return None  # Returning None stops the process
 
     def _get_next_config(self) -> dict:
@@ -164,8 +165,13 @@ class FlamlOptimizer(BaseOptimizer):
         points_to_evaluate: list = []
         evaluated_rewards: list = []
         if len(self.evaluated_samples) > 0:
-            points_to_evaluate = [s.config for s in self.evaluated_samples.values()]
-            evaluated_rewards = [s.score for s in self.evaluated_samples.values()]
+            points_to_evaluate = [
+                dict(normalize_config(self.optimizer_parameter_space, conf))
+                for conf in self.evaluated_samples
+            ]
+            evaluated_rewards = [
+                s.score for s in self.evaluated_samples.values()
+            ]
 
         # Warm start FLAML optimizer
         self._suggested_config = None
@@ -174,8 +180,8 @@ class FlamlOptimizer(BaseOptimizer):
             config=self.flaml_parameter_space,
             mode='min',
             metric='score',
-            points_to_evaluate=list(points_to_evaluate),
-            evaluated_rewards=list(evaluated_rewards),
+            points_to_evaluate=points_to_evaluate,
+            evaluated_rewards=evaluated_rewards,
             num_samples=len(points_to_evaluate) + 1,
             low_cost_partial_config=self.low_cost_partial_config,
             verbose=0,

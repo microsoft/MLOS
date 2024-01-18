@@ -19,39 +19,6 @@ from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
 
 
 @pytest.fixture
-def mock_configs() -> List[dict]:
-    """
-    Mock configurations of earlier experiments.
-    """
-    return [
-        {
-            'vmSize': 'Standard_B4ms',
-            'idle': 'halt',
-            'kernel_sched_migration_cost_ns': 50000,
-            'kernel_sched_latency_ns': 1000000,
-        },
-        {
-            'vmSize': 'Standard_B4ms',
-            'idle': 'halt',
-            'kernel_sched_migration_cost_ns': 40000,
-            'kernel_sched_latency_ns': 2000000,
-        },
-        {
-            'vmSize': 'Standard_B4ms',
-            'idle': 'mwait',
-            'kernel_sched_migration_cost_ns': 100000,
-            'kernel_sched_latency_ns': 3000000,
-        },
-        {
-            'vmSize': 'Standard_B2s',
-            'idle': 'mwait',
-            'kernel_sched_migration_cost_ns': 200000,
-            'kernel_sched_latency_ns': 4000000,
-        }
-    ]
-
-
-@pytest.fixture
 def mock_configs_str(mock_configs: List[dict]) -> List[dict]:
     """
     Same as `mock_config` above, but with all values converted to strings.
@@ -91,7 +58,7 @@ def _test_opt_update_min(opt: Optimizer, configs: List[dict],
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B4ms",
         "idle": "mwait",
-        "kernel_sched_migration_cost_ns": 100000,
+        "kernel_sched_migration_cost_ns": -1,
         'kernel_sched_latency_ns': 3000000,
     }
 
@@ -123,7 +90,7 @@ def test_update_mock_min(mock_opt: MockOptimizer, mock_configs: List[dict],
     assert mock_opt.suggest().get_param_values() == {
         "vmSize": "Standard_B4ms",
         "idle": "halt",
-        "kernel_sched_migration_cost_ns": 13111,
+        "kernel_sched_migration_cost_ns": 13112,
         'kernel_sched_latency_ns': 796233790,
     }
 
