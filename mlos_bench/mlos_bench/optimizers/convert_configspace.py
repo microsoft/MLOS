@@ -30,6 +30,7 @@ class TunableValueKind:
     It is not a true enum because ConfigSpace wants string values.
     """
 
+    # pylint: disable=too-few-public-methods
     SPECIAL = "special"
     RANGE = "range"
 
@@ -82,7 +83,7 @@ def _tunable_to_configspace(
     # Create three hyperparameters: one for regular values,
     # one for special values, and one to choose between the two.
     (special_name, type_name) = special_param_names(tunable.name)
-    cs = ConfigurationSpace({
+    conf_space = ConfigurationSpace({
         tunable.name: hp_type(
             name=tunable.name, lower=tunable.range[0], upper=tunable.range[1],
             default_value=tunable.default if tunable.in_range(tunable.default) else None,
@@ -97,10 +98,12 @@ def _tunable_to_configspace(
             default_value=TunableValueKind.SPECIAL,
             weights=[0.5, 0.5]),  # TODO: Make weights configurable; FLAML requires uniform weights.
     })
-    cs.add_condition(EqualsCondition(cs[special_name], cs[type_name], TunableValueKind.SPECIAL))
-    cs.add_condition(EqualsCondition(cs[tunable.name], cs[type_name], TunableValueKind.RANGE))
+    conf_space.add_condition(EqualsCondition(
+        conf_space[special_name], conf_space[type_name], TunableValueKind.SPECIAL))
+    conf_space.add_condition(EqualsCondition(
+        conf_space[tunable.name], conf_space[type_name], TunableValueKind.RANGE))
 
-    return cs
+    return conf_space
 
 
 def tunable_groups_to_configspace(tunables: TunableGroups, seed: Optional[int] = None) -> ConfigurationSpace:
