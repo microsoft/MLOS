@@ -29,6 +29,7 @@ class TunableValueKind:
     Enum for the kind of the tunable value (special or not).
     It is not a true enum because ConfigSpace wants string values.
     """
+
     # pylint: disable=too-few-public-methods
     SPECIAL = "special"
     RANGE = "range"
