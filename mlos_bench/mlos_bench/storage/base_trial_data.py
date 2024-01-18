@@ -48,35 +48,35 @@ class TrialData(metaclass=ABCMeta):
     @property
     def trial_id(self) -> int:
         """
-        ID of the current trial.
+        ID of the trial.
         """
         return self._trial_id
 
     @property
     def config_id(self) -> int:
         """
-        ID of the configuration of the current trial.
+        ID of the configuration of the trial.
         """
         return self._config_id
 
     @property
     def ts_start(self) -> datetime:
         """
-        Start timestamp of the current trial (UTC).
+        Start timestamp of the trial (UTC).
         """
         return self._ts_start
 
     @property
     def ts_end(self) -> Optional[datetime]:
         """
-        End timestamp of the current trial (UTC).
+        End timestamp of the trial (UTC).
         """
         return self._ts_end
 
     @property
     def status(self) -> Status:
         """
-        Status of the current trial.
+        Status of the trial.
         """
         return self._status
 
@@ -106,7 +106,7 @@ class TrialData(metaclass=ABCMeta):
         Returns
         -------
         config : pandas.DataFrame
-            A dataframe with the tunable configuration of the current trial.
+            A dataframe with the tunable configuration of the trial.
             It has two `str` columns, "parameter" and "value".
         """
 

@@ -88,6 +88,9 @@ class ExperimentSqlData(ExperimentData):
                              self, opt_target, objectives[opt_target])
         return objectives
 
+    # TODO: provide a way to get individual data to avoid repeated bulk fetches where only small amounts of data is accessed.
+    # Or else make the TrialData object lazily populate.
+
     @property
     def trials(self) -> Dict[int, TrialData]:
         with self._engine.connect() as conn:
@@ -115,9 +118,7 @@ class ExperimentSqlData(ExperimentData):
 
     @property
     def results(self) -> pandas.DataFrame:
-
         with self._engine.connect() as conn:
-
             cur_trials = conn.execute(
                 self._schema.trial.select().where(
                     self._schema.trial.c.exp_id == self._exp_id,
