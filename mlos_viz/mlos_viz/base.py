@@ -7,13 +7,14 @@ mlos_viz is a framework to help visualizing, explain, and gain insights from res
 from the mlos_bench framework for benchmarking and optimization automation.
 """
 
-from typing import Literal, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 import warnings
 
 from importlib.metadata import version
 from matplotlib import pyplot as plt
 import seaborn as sns
+import numpy as np
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
 
@@ -69,11 +70,7 @@ def plot_optimizer_trends(exp_data: ExperimentData) -> None:
         plt.show()  # type: ignore[no-untyped-call]
 
 
-def plot_top_n_configs(exp_data: ExperimentData,
-                       top_n_configs: int = 20,
-                       objective_name: Optional[str] = None,
-                       method: Union[Literal["mean", "median"], float] = "mean",
-                       ) -> None:
+def plot_top_n_configs(exp_data: ExperimentData, with_scatter_plot: bool = False, **kwargs: Any) -> None:
     """
     Plots the top-N configs along with the default config for the given ExperimentData.
 
@@ -83,28 +80,38 @@ def plot_top_n_configs(exp_data: ExperimentData,
     ----------
     exp_data: ExperimentData
         The experiment data to plot.
-    top_n_configs : int, optional
-        How many configs to return, including the default, by default 20.
-    objective_name : str, optional
-        Which objective to use for sorting the configs, by default None to
-        automatically select the first objective.
-    method : Union[Literal["mean", "median"], float], optional
-        Which statistical method to use when sorting the config groups before determining the cutoff, by default "mean".
-        If a float is used, the value is expected to be between 0 and 1 and will be used as a percentile cutoff.
+    with_scatter_plot : bool
+        Whether to also add scatter plot to the output figure.
+    kwargs : dict
+        Remaining keyword arguments are passed along to the ExperimentData.top_n_configs.
     """
-    (top_n_config_results_df, opt_target, opt_direction) = exp_data.top_n_configs(top_n_configs=top_n_configs,
-                                                                                  objective_name=objective_name,
-                                                                                  method=method)
-    snsboxplot = sns.boxplot(
+    top_n_config_args = {}
+    for kword in exp_data.top_n_configs.__kwdefaults__:
+        if kword in kwargs:
+            top_n_config_args[kword] = kwargs[kword]
+    (top_n_config_results_df, opt_target, opt_direction) = exp_data.top_n_configs(**top_n_config_args)
+    top_n = len(top_n_config_results_df["config_id"].unique()) - 1
+    target_column = ExperimentData.RESULT_COLUMN_PREFIX + opt_target
+    (_fig, ax) = plt.subplots()
+    sns.boxplot(
         data=top_n_config_results_df,
-        y=ExperimentData.RESULT_COLUMN_PREFIX + opt_target,
+        y=target_column,
     )
+    if with_scatter_plot:
+        sns.scatterplot(
+            data=top_n_config_results_df,
+            y=target_column,
+            legend=None,
+            ax=ax,
+        )
     plt.grid()
-    xticks = plt.xticks()
-    xticks[1][0] = "default"    # default should be in the first position
-    plt.xticks(xticks[0], xticks[1])
+    (xticks, xlabels) = plt.xticks()
+    # default should be in the first position based on top_n_configs() return
+    xlabels[0] = "default"          # type: ignore[call-overload]
+    plt.xticks(xticks, xlabels)     # type: ignore[arg-type]
     plt.xlabel("Configuration")
     plt.xticks(rotation=90)
+    plt.ylabel(opt_target)
     extra_title = "(higher is better)" if opt_direction == "max" else "(lower is better)"
-    plt.title(f"Top {top_n_configs} configs {opt_target} {extra_title}")
-    plt.show()
+    plt.title(f"Top {top_n} configs {opt_target} {extra_title}")
+    plt.show()  # type: ignore[no-untyped-call]

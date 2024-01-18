@@ -8,6 +8,7 @@ from the mlos_bench framework for benchmarking and optimization automation.
 """
 
 from enum import Enum
+from typing import Any
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_viz import base
@@ -42,7 +43,8 @@ def ignore_plotter_warnings(plotter_method: MlosVizMethod = MlosVizMethod.AUTO) 
 
 def plot(exp_data: ExperimentData,
          plotter_method: MlosVizMethod = MlosVizMethod.AUTO,
-         filter_warnings: bool = True) -> None:
+         filter_warnings: bool = True,
+         **kwargs: Any) -> None:
     """
     Plots the results of the experiment.
 
@@ -56,12 +58,18 @@ def plot(exp_data: ExperimentData,
         The method to use for visualizing the experiment results.
     filter_warnings: bool
         Whether or not to filter some warnings from the plotter.
+    kwargs : dict
+        Remaining keyword arguments are passed along to the underlying plotter(s).
     """
     if filter_warnings:
         ignore_plotter_warnings(plotter_method)
 
     base.plot_optimizer_trends(exp_data)
-    base.plot_top_n_configs(exp_data)
+    top_n_config_args = {}
+    for kword in exp_data.top_n_configs.__kwdefaults__:
+        if kword in kwargs:
+            top_n_config_args[kword] = kwargs[kword]
+    base.plot_top_n_configs(exp_data, **kwargs)
 
     if MlosVizMethod.DABL:
         import mlos_viz.dabl    # pylint: disable=import-outside-toplevel
