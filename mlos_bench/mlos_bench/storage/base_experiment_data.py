@@ -115,6 +115,7 @@ class ExperimentData(metaclass=ABCMeta):
         return self.trials[1].config_id
 
     def top_n_configs(self,
+                      *,
                       top_n_configs: int = 20,
                       objective_name: Optional[str] = None,
                       method: Union[Literal["mean", "median"], float] = "mean",
