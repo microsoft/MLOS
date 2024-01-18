@@ -63,6 +63,8 @@ def plot_optimizer_trends(exp_data: ExperimentData) -> None:
         results_df = exp_data.results
         plt.rcParams["figure.figsize"] = (10, 4)
 
+        # TODO: plot by config group instead of trial.
+
         sns.scatterplot(
             x=results_df.trial_id, y=results_df[objective_column],
             alpha=0.7, label="Trial")  # Result of each trial
