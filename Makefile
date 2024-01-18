@@ -361,7 +361,7 @@ PUBLISH_DEPS += build/linklint-doc.build-stamp
 build/publish.${CONDA_ENV_NAME}.%.py.build-stamp: $(PUBLISH_DEPS)
 	rm -f mlos_*/dist/*.tar.gz
 	ls mlos_*/dist/*.tar | xargs -I% gzip -k %
-	repo_name=`echo "$@" | sed -e 's|build/publish\.||' -e 's|\.py\.build-stamp||'` \
+	repo_name=`echo "$@" | sed -r -e 's|build/publish\.[^.]+\.||' -e 's|\.py\.build-stamp||'` \
 		&& conda run -n ${CONDA_ENV_NAME} python3 -m twine upload --repository $$repo_name \
 			mlos_*/dist/mlos*-*.tar.gz mlos_*/dist/mlos*-*.whl
 	touch $@
