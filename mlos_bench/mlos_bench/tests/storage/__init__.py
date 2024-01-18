@@ -61,7 +61,11 @@ def exp_storage_memory_sql_with_trials(exp_storage_memory_sql: Storage.Experimen
     Test fixture for Experiment using in-memory SQLite3 storage.
     """
     # Add some trials to that experiment.
-    # Note: these all use the same values for now.
+    # Note: we're just fabricating some made up function for the ML libraries to try and learn.
+    base_score = 5.0
+    tunable_name = "kernel_sched_latency_ns"
+    tunable_default = exp_storage_memory_sql.tunables.get_tunable(tunable_name)[0].default
+    assert isinstance(tunable_default, int)
     config_count = 10
     repeat_count = 3
     seed = 42
@@ -77,11 +81,12 @@ def exp_storage_memory_sql_with_trials(exp_storage_memory_sql: Storage.Experimen
                 "trial_number": config_i * repeat_count + repeat_j + 1,
             })
             trial.update_telemetry(status=Status.RUNNING, metrics=[
-                (datetime.utcnow(), "some-metric", 5.0 + random()),
+                (datetime.utcnow(), "some-metric", base_score + random() / 10),
             ])
+            tunable_value = float(tunables.get_tunable(tunable_name)[0].numerical_value)
             trial.update(Status.SUCCEEDED, datetime.utcnow(), metrics={
                 # Give some variance on the score.
-                "score": 5.0 + random(),
+                "score": base_score + (tunable_value / tunable_default) - 1 + random() / 10,
             })
     return exp_storage_memory_sql
 
