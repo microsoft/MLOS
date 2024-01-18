@@ -136,7 +136,8 @@
         "tunable_params_set": {
             "type": "object",
             "patternProperties": {
-                "^.+$": {
+                "^[^!]+$": {
+                    "$comment": "`!` characters are not currently allowed in tunable parameter names.",
                     "$ref": "#/$defs/tunable_param"
                 }
             },
