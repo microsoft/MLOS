@@ -47,3 +47,37 @@ def test_df(mlos_core_optimizer: MlosCoreOptimizer, mock_configs: List[dict]) ->
         'idle',
         'vmSize',
     }
+    assert df.to_dict(orient='records') == [
+        {
+            'idle': 'halt',
+            'kernel_sched_latency_ns': 1000000,
+            'kernel_sched_migration_cost_ns': 50000,
+            'kernel_sched_migration_cost_ns!special': None,
+            'kernel_sched_migration_cost_ns!type': 'range',
+            'vmSize': 'Standard_B4ms',
+        },
+        {
+            'idle': 'halt',
+            'kernel_sched_latency_ns': 2000000,
+            'kernel_sched_migration_cost_ns': 40000,
+            'kernel_sched_migration_cost_ns!special': None,
+            'kernel_sched_migration_cost_ns!type': 'range',
+            'vmSize': 'Standard_B4ms',
+        },
+        {
+            'idle': 'mwait',
+            'kernel_sched_latency_ns': 3000000,
+            'kernel_sched_migration_cost_ns': None,  # The value is special!
+            'kernel_sched_migration_cost_ns!special': -1,
+            'kernel_sched_migration_cost_ns!type': 'special',
+            'vmSize': 'Standard_B4ms',
+        },
+        {
+            'idle': 'mwait',
+            'kernel_sched_latency_ns': 4000000,
+            'kernel_sched_migration_cost_ns': 200000,
+            'kernel_sched_migration_cost_ns!special': None,
+            'kernel_sched_migration_cost_ns!type': 'range',
+            'vmSize': 'Standard_B2s',
+        },
+    ]

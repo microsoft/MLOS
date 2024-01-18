@@ -58,7 +58,7 @@ def _test_opt_update_min(opt: Optimizer, configs: List[dict],
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B4ms",
         "idle": "mwait",
-        "kernel_sched_migration_cost_ns": 100000,
+        "kernel_sched_migration_cost_ns": -1,
         'kernel_sched_latency_ns': 3000000,
     }
 

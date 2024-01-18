@@ -38,7 +38,7 @@ def mock_configs() -> List[dict]:
         {
             'vmSize': 'Standard_B4ms',
             'idle': 'mwait',
-            'kernel_sched_migration_cost_ns': 100000,
+            'kernel_sched_migration_cost_ns': -1,  # Special value
             'kernel_sched_latency_ns': 3000000,
         },
         {
