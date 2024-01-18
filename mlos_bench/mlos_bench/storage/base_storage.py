@@ -305,7 +305,7 @@ class Storage(metaclass=ABCMeta):
             self._config = config or {}
 
         def __repr__(self) -> str:
-            return f"{self._experiment_id}:{self._trial_id}"
+            return f"{self._experiment_id}:{self._trial_id}:{self._config_id}"
 
         @property
         def trial_id(self) -> int:
