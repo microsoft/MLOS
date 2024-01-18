@@ -36,10 +36,10 @@ def test_df(mlos_core_optimizer: MlosCoreOptimizer, mock_configs: List[dict]) ->
     """
     Test `MlosCoreOptimizer._to_df()` method on tunables that have special values.
     """
-    df = mlos_core_optimizer._to_df(mock_configs)
-    assert isinstance(df, pandas.DataFrame)
-    assert df.shape == (4, 6)
-    assert set(df.columns) == {
+    df_config = mlos_core_optimizer._to_df(mock_configs)
+    assert isinstance(df_config, pandas.DataFrame)
+    assert df_config.shape == (4, 6)
+    assert set(df_config.columns) == {
         'kernel_sched_latency_ns',
         'kernel_sched_migration_cost_ns',
         'kernel_sched_migration_cost_ns!type',
@@ -47,7 +47,7 @@ def test_df(mlos_core_optimizer: MlosCoreOptimizer, mock_configs: List[dict]) ->
         'idle',
         'vmSize',
     }
-    assert df.to_dict(orient='records') == [
+    assert df_config.to_dict(orient='records') == [
         {
             'idle': 'halt',
             'kernel_sched_latency_ns': 1000000,
