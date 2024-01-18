@@ -7,7 +7,7 @@ Test fixtures for mlos_bench storage.
 """
 
 from datetime import datetime
-from random import random
+from random import random, seed as rand_seed
 
 import pytest
 
@@ -15,6 +15,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.storage import SqlStorage
+from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
@@ -61,18 +62,27 @@ def exp_storage_memory_sql_with_trials(exp_storage_memory_sql: Storage.Experimen
     """
     # Add some trials to that experiment.
     # Note: these all use the same values for now.
-    for i in range(1, 10):
-        trial = exp_storage_memory_sql.new_trial(tunables=exp_storage_memory_sql.tunables.copy(), config={
-            "opt_target": exp_storage_memory_sql.opt_target,
-            "opt_direction": exp_storage_memory_sql.opt_direction,
-            "trial_number": i,
-        })
-        trial.update_telemetry(status=Status.RUNNING, metrics=[
-            (datetime.utcnow(), "some-metric", 1.0),
-        ])
-        trial.update(Status.SUCCEEDED, datetime.utcnow(), metrics={
-            "score": 1.0 + random(),
-        })
+    config_count = 10
+    repeat_count = 3
+    seed = 42
+    rand_seed(seed)
+    opt = MockOptimizer(tunables=exp_storage_memory_sql.tunables, config={"seed": seed})
+    assert opt.start_with_defaults
+    for config_i in range(config_count):
+        tunables = opt.suggest()
+        for repeat_j in range(repeat_count):
+            trial = exp_storage_memory_sql.new_trial(tunables=tunables.copy(), config={
+                "opt_target": exp_storage_memory_sql.opt_target,
+                "opt_direction": exp_storage_memory_sql.opt_direction,
+                "trial_number": config_i * repeat_count + repeat_j + 1,
+            })
+            trial.update_telemetry(status=Status.RUNNING, metrics=[
+                (datetime.utcnow(), "some-metric", 5.0 + random()),
+            ])
+            trial.update(Status.SUCCEEDED, datetime.utcnow(), metrics={
+                # Give some variance on the score.
+                "score": 5.0 + random(),
+            })
     return exp_storage_memory_sql
 
 
