@@ -24,3 +24,5 @@ exp_data = exp_data_fixture
 
 tunable_groups_config = tunable_groups_config_fixture
 tunable_groups = tunable_groups_fixture
+
+# TODO: Validate the non-display via rcParams tweaks at upper levels works on Windows too.
