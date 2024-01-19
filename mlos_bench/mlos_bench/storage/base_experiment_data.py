@@ -7,7 +7,7 @@ Base interface for accessing the stored benchmark data.
 """
 
 from abc import ABCMeta, abstractmethod
-from typing import Dict, List, Literal, Optional, Tuple, Union
+from typing import Dict, Tuple
 
 import pandas
 
