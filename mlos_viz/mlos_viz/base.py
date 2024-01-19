@@ -24,9 +24,11 @@ _SEABORN_VERS = version('seaborn')
 def get_kwarg_defaults(target: Callable, **kwargs: Any) -> Dict[str, Any]:
     """
     Assembles a smaller kwargs dict for the specified target function.
+
+    Note: this only works with non-positional kwargs (e.g., those after a * arg).
     """
     target_kwargs = {}
-    for kword in target.__kwdefaults__:
+    for kword in target.__kwdefaults__:     # or {} # intentionally omitted for now
         if kword in kwargs:
             target_kwargs[kword] = kwargs[kword]
     return target_kwargs
