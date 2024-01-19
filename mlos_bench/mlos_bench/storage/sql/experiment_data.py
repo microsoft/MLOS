@@ -10,7 +10,7 @@ from typing import Dict
 import logging
 
 import pandas
-from sqlalchemy import Engine
+from sqlalchemy import Engine, Integer, func, and_, select
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_experiment_data import ExperimentData
@@ -119,18 +119,36 @@ class ExperimentSqlData(ExperimentData):
     @property
     def results(self) -> pandas.DataFrame:
         with self._engine.connect() as conn:
+            config_trial_group_id_subquery = self._schema.trial.select().with_only_columns(
+                self._schema.trial.c.exp_id,
+                self._schema.trial.c.config_id,
+                func.min(self._schema.trial.c.trial_id).cast(Integer).label('config_trial_group_id'),
+            ).where(
+                self._schema.trial.c.exp_id == self._exp_id,
+            ).group_by(
+                self._schema.trial.c.exp_id,
+                self._schema.trial.c.config_id,
+            ).subquery()
+
             cur_trials = conn.execute(
-                self._schema.trial.select().where(
+                select(
+                    self._schema.trial,
+                    config_trial_group_id_subquery,
+                ).where(
                     self._schema.trial.c.exp_id == self._exp_id,
+                    and_(
+                        config_trial_group_id_subquery.c.exp_id == self._schema.trial.c.exp_id,
+                        config_trial_group_id_subquery.c.config_id == self._schema.trial.c.config_id,
+                    ),
                 ).order_by(
                     self._schema.trial.c.exp_id.asc(),
                     self._schema.trial.c.trial_id.asc(),
                 )
             )
             trials_df = pandas.DataFrame(
-                [(row.trial_id, row.ts_start, row.ts_end, row.config_id, row.status)
+                [(row.trial_id, row.ts_start, row.ts_end, row.config_id, row.config_trial_group_id, row.status)
                  for row in cur_trials.fetchall()],
-                columns=['trial_id', 'ts_start', 'ts_end', 'config_id', 'status'])
+                columns=['trial_id', 'ts_start', 'ts_end', 'config_id', 'config_trial_group_id', 'status'])
 
             cur_configs = conn.execute(
                 self._schema.trial.select().with_only_columns(

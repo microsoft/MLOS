@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Optional
 
 import pandas
-from sqlalchemy import Engine
+from sqlalchemy import Engine, Integer, func
 
 from mlos_bench.storage.base_trial_data import TrialData
 from mlos_bench.environments.status import Status
@@ -42,9 +42,34 @@ class TrialSqlData(TrialData):
         self._schema = schema
 
     @property
+    def config_trial_group_id(self) -> int:
+        """
+        Retrieve the trial's config_trial_group_id from the storage.
+
+        This is a unique identifier for all trials in this experiment using a given
+        config_id, and typically defined as the the minimum trial_id for the given
+        config_id.
+        """
+        with self._engine.connect() as conn:
+            config_trial_group = conn.execute(
+                self._schema.trial.select().with_only_columns(
+                    func.min(self._schema.trial.c.trial_id).cast(Integer).label('config_trial_group_id'),
+                ).where(
+                    self._schema.trial.c.exp_id == self._exp_id,
+                    self._schema.trial.c.config_id == self._config_id,
+                ).group_by(
+                    self._schema.trial.c.exp_id,
+                    self._schema.trial.c.config_id,
+                )
+            )
+            row = config_trial_group.fetchone()
+            assert row is not None
+            return row.tuple()[0]
+
+    @property
     def tunable_config(self) -> pandas.DataFrame:
         """
-        Retrieve the trials' tunable configuration from the storage.
+        Retrieve the trial's tunable configuration from the storage.
 
         Note: this corresponds to the Trial object's "tunables" property.
         """

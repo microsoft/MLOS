@@ -97,6 +97,17 @@ class TrialData(metaclass=ABCMeta):
 
     @property
     @abstractmethod
+    def config_trial_group_id(self) -> int:
+        """
+        Retrieve the trial's config_trial_group_id from the storage.
+
+        This is a unique identifier for all trials in this experiment using a given
+        config_id, and typically defined as the the minimum trial_id for the given
+        config_id.
+        """
+
+    @property
+    @abstractmethod
     def tunable_config(self) -> pandas.DataFrame:
         """
         Retrieve the trials' tunable configuration from the storage.
