@@ -75,7 +75,7 @@ class Launcher:
         else:
             config = {}
 
-        self.trial_config_repeat_count = args.trial_config_repeat_count or config.get("trial_config_repeat_count", 1)
+        self.trial_config_repeat_count: int = args.trial_config_repeat_count or config.get("trial_config_repeat_count", 1)
 
         log_level = args.log_level or config.get("log_level", _LOG_LEVEL)
         try:
