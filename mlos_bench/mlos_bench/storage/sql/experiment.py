@@ -102,7 +102,7 @@ class Experiment(Storage.Experiment):
 
     def merge(self, experiment_ids: List[str]) -> None:
         _LOG.info("Merge: %s <- %s", self._experiment_id, experiment_ids)
-        raise NotImplementedError()
+        raise NotImplementedError("TODO")
 
     def load_tunable_config(self, config_id: int) -> Dict[str, Any]:
         with self._engine.connect() as conn:
