@@ -231,13 +231,13 @@ def test_numerical_weights(tunable_type: str) -> None:
     Instantiate a numerical tunable with weighted special values.
     """
     json_config = f"""
-    {
+    {{
         "type": "{tunable_type}",
         "range": [0, 100],
         "special": [0],
         "weights": [0.1, 0.9],
         "default": 0
-    }
+    }}
     """
     config = json.loads(json_config)
     tunable = Tunable(name='test', config=config)
@@ -252,13 +252,13 @@ def test_numerical_weights_non_normalized(tunable_type: str) -> None:
     of the special values.
     """
     json_config = f"""
-    {
+    {{
         "type": "{tunable_type}",
         "range": [0, 100],
         "special": [-1, 0],
         "weights": [10, 10, 80],
         "default": 0
-    }
+    }}
     """
     config = json.loads(json_config)
     tunable = Tunable(name='test', config=config)
@@ -272,13 +272,13 @@ def test_numerical_weights_wrong_count(tunable_type: str) -> None:
     Try to instantiate a numerical tunable with incorrect number of weights.
     """
     json_config = f"""
-    {
+    {{
         "type": "{tunable_type}",
         "range": [0, 100],
         "special": [0],
         "weights": [0.1, 0.1, 0.8],
         "default": 0
-    }
+    }}
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
@@ -291,13 +291,13 @@ def test_numerical_weights_wrong_values(tunable_type: str) -> None:
     Try to instantiate a numerical tunable with incorrect number of weights.
     """
     json_config = f"""
-    {
+    {{
         "type": "{tunable_type}",
         "range": [0, 100],
         "special": [0],
         "weights": [-1, 10],
         "default": 0
-    }
+    }}
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
