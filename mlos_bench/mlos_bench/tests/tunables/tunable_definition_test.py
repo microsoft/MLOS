@@ -246,6 +246,24 @@ def test_numerical_weights(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
+def test_numerical_weights_no_specials(tunable_type: str) -> None:
+    """
+    Raise an error if weights are specified but no special values.
+    """
+    json_config = f"""
+    {{
+        "type": "{tunable_type}",
+        "range": [0, 100],
+        "weights": [0.1, 0.9],
+        "default": 0
+    }}
+    """
+    config = json.loads(json_config)
+    with pytest.raises(ValueError):
+        Tunable(name='test', config=config)
+
+
+@pytest.mark.parametrize("tunable_type", ["int", "float"])
 def test_numerical_weights_non_normalized(tunable_type: str) -> None:
     """
     Instantiate a numerical tunable with non-normalized weights
