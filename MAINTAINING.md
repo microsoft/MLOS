@@ -8,11 +8,10 @@ Some notes for maintainers.
 
     ```sh
     git checkout -b bump-version main
-    ./scripts/update-version.sh patch   # or minor or major
+    ./scripts/update-version.sh --no-tag patch   # or minor or major
     ```
 
-    > This will create a commit and local git tag for that version.
-    > You won't be able to create a release from that, so don't push it.
+    > By default this would create a local tag, but we would have to overwrite it later, so we skip that step.
 
 2. Test it!
 
@@ -44,12 +43,14 @@ Some notes for maintainers.
     make dist-test
     ```
 
-6. Update the tag remotely.
+6. Update the tag remotely to the MLOS upstream repo.
 
     ```sh
-    git push --tags
+    git push --tags # upstream (if that's what you called your upstream git remote)
     ```
+
+7. Make a "Release" on Github.
 
     > Once this is done, the rules in [`.github/workflows/devcontainer.yml`](./.github/workflows/devcontainer.yml) will automatically publish the wheels to [pypi](https://pypi.org/project/mlos-core/) and tagged docker images to ACR.
     > \
-    > Note: This may fail if the version number is already published to pypi, in which case start from the beginning.
+    > Note: This may fail if the version number is already published to pypi, in which case start from the beginning with a new patch version.

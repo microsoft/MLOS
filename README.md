@@ -51,6 +51,10 @@ To do this this repo provides two Python modules, which can be used independentl
 
 - [`mlos-bench`](./mlos_bench/) provides a framework to help automate running benchmarks as described above.
 
+- [`mlos-viz`](./mlos_viz/) provides some simple APIs to help automate visualizing the results of benchmark experiments and their trials.
+
+    It provides a simple `plot(experiment_data)` API, where `experiment_data` is obtained from the `mlos_bench.storage` module.
+
 - [`mlos-core`](./mlos_core/) provides an abstraction around existing optimization frameworks (e.g., [FLAML](https://github.com/microsoft/FLAML), [SMAC](https://github.com/automl/SMAC3), etc.)
 
   It is intended to provide a simple, easy to consume (e.g. via `pip`), with low dependencies abstraction to
@@ -127,12 +131,17 @@ See Also:
 - [mlos_bench/config](./mlos_bench/mlos_bench/config/) for additional configuration details.
 - [sqlite-autotuning](https://github.com/Microsoft-CISL/sqlite-autotuning) for a complete external example of using MLOS to tune `sqlite`.
 
+#### `mlos-viz`
+
+For a simple example of using the `mlos_viz` module to visualize the results of an experiment, see the [`sqlite-autotuning`](https://github.com/Microsoft-CISL/sqlite-autotuning) repository, especially the [mlos_demo_sqlite_teachers.ipynb](https://github.com/Microsoft-CISL/sqlite-autotuning/blob/main/mlos_demo_sqlite_teachers.ipynb) notebook.
+
 ## Installation
 
 The MLOS modules are published to [pypi](https://pypi.org) when new releases are tagged:
 
 - [mlos-core](https://pypi.org/project/mlos-core/)
 - [mlos-bench](https://pypi.org/project/mlos-bench/)
+- [mlos-viz](https://pypi.org/project/mlos-viz/)
 
 To install the latest release, simply run:
 
@@ -151,14 +160,18 @@ pip install -U "mlos-bench[flaml,azure]"
 
 # this will install both the smac optimizer and the experiment runner with ssh support:
 pip install -U "mlos-bench[smac,ssh]"
+
+# this will install the postgres storage backend for mlos-bench
+# and mlos-viz for visualizing results:
+pip install -U "mlos-bench[postgres]" mlos-viz
 ```
 
 Details on using a local version from git are available in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## See Also
 
-- API and Examples Documentation: <https://aka.ms/mlos-core/docs>
-- Source Code Repository: <https://aka.ms/mlos-core/src>
+- API and Examples Documentation: <https://microsoft.github.io/MLOS>
+- Source Code Repository: <https://github.com/microsoft/MLOS>
 
 ### Examples
 
