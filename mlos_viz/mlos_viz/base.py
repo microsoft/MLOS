@@ -63,21 +63,30 @@ def plot_optimizer_trends(exp_data: ExperimentData) -> None:
     for objective in exp_data.objectives:
         objective_column = ExperimentData.RESULT_COLUMN_PREFIX + objective
         results_df = exp_data.results
-        plt.rcParams["figure.figsize"] = (10, 4)
+        # add a new column for the best result so far (cummin)
+        results_df["incumbent_performance"] = results_df[objective_column].cummin()
+
+        plt.rcParams["figure.figsize"] = (10, 5)
 
         # plot by config group instead of trial.
-
-        sns.violinplot(
-            x=results_df.config_trial_group_id, y=results_df[objective_column],
-            alpha=0.7, label="Config")  # Result of each trial
+        # FIXME: This doesnt' look right yet.
         sns.lineplot(
-            x=results_df.config_trial_group_id, y=results_df[objective_column].cummin(),
-            label="Incumbent")  # the best result so far (cummin)
+            data=results_df,
+            x="config_trial_group_id",
+            y="incumbent_performance",
+            alpha=0.7,
+            label="Incumbent")
+        # Result of each set of trials for a config
+        sns.boxplot(
+            data=results_df,
+            x="config_trial_group_id",
+            y=objective_column)
 
         plt.yscale('log')
+        plt.ylabel(objective)
 
         plt.xlabel("Config Trial Group")
-        plt.ylabel(objective)
+        plt.xticks(rotation=90)
 
         plt.title("Optimizer Trends for Experiment: " + exp_data.exp_id)
         plt.grid()
