@@ -98,16 +98,22 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
                 raise ValueError(f"Values must be unique for the categorical type tunable {self}")
             if self._special:
                 raise ValueError(f"Categorical tunable cannot have special values: {self}")
-            if self._weights and len(self._weights) != len(self._values):
-                raise ValueError(f"Must specify weights for all values: {self}")
+            if self._weights:
+                if len(self._weights) != len(self._values):
+                    raise ValueError(f"Must specify weights for all values: {self}")
+                if any(w < 0 for w in self._weights):
+                    raise ValueError(f"All weights must be non-negative: {self}")
         elif self.is_numerical:
             if self._values is not None:
                 raise ValueError(f"Values must be None for the numerical type tunable {self}")
             if not self._range or len(self._range) != 2 or self._range[0] >= self._range[1]:
                 raise ValueError(f"Invalid range for tunable {self}: {self._range}")
-            if self._weights and len(self._weights) != len(self._special) + 1:
-                raise ValueError("Must specify weights for all special values plus" +
-                                 f" one weight for the regular range: {self}")
+            if self._weights:
+                if len(self._weights) != len(self._special) + 1:
+                    raise ValueError("Must specify weights for all special values plus" +
+                                     f" one weight for the regular range: {self}")
+                if any(w < 0 for w in self._weights):
+                    raise ValueError(f"All weights must be non-negative: {self}")
         else:
             raise ValueError(f"Invalid parameter type for tunable {self}: {self._type}")
         if not self.is_valid(self.default):
