@@ -75,6 +75,8 @@ class Launcher:
         else:
             config = {}
 
+        self.trial_config_repeat_count = args.trial_config_repeat_count or config.get("trial_config_repeat_count", 1)
+
         log_level = args.log_level or config.get("log_level", _LOG_LEVEL)
         try:
             log_level = int(log_level)
@@ -194,6 +196,10 @@ class Launcher:
             '--optimizer', required=False,
             help='Path to the optimizer configuration file. If omitted, run' +
                  ' a single trial with default (or specified in --tunable_values).')
+
+        parser.add_argument(
+            '--trial_config_repeat_count', '--trial-config-repeat-count', required=False, type=int, default=1,
+            help='Number of times to repeat each config. Default is 1 trial per config, though more may be advised.')
 
         parser.add_argument(
             '--storage', required=False,
