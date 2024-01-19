@@ -39,7 +39,7 @@
                 "weights": {
                     "type": "array",
                     "items": {
-                        "type": "float"
+                        "type": "number"
                     }
                 }
             },
@@ -83,7 +83,7 @@
                 "weights": {
                     "type": "array",
                     "items": {
-                        "type": "float"
+                        "type": "number"
                     }
                 }
             },
@@ -127,7 +127,7 @@
                 "weights": {
                     "type": "array",
                     "items": {
-                        "type": "float"
+                        "type": "number"
                     }
                 }
             },
