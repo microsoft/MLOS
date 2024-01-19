@@ -114,6 +114,16 @@ class ExperimentData(metaclass=ABCMeta):
         # config first.
         return self.trials[1].config_id
 
+    def group_trial_by_config(self,
+                              *,
+                              objective_name: Optional[str] = None,
+                              method: Union[Literal["mean", "median"], float] = "mean",
+                              ) -> pandas.DataFrame:
+        """
+        Group the trial results by config.
+        """
+        raise NotImplementedError("TODO")
+
     def top_n_configs(self,
                       *,
                       top_n_configs: int = 20,
