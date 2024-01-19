@@ -7,6 +7,7 @@ Unit tests for loading the experiment metadata.
 """
 
 from mlos_bench.storage.base_storage import Storage
+from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
@@ -62,3 +63,25 @@ def test_exp_trial_data_objectives(storage_memory_sql: Storage,
         "opt_target": "some-other-target",
         "opt_direction": "max",
     }
+
+
+def test_exp_data_config_trial_group_id(exp_data: ExperimentData) -> None:
+    """Tests the config_trial_group_id property of ExperimentData."""
+    results_df = exp_data.results
+
+    # First three trials should use the same config.
+    trial_1_df = results_df.loc[(results_df["trial_id"] == 1)]
+    assert len(trial_1_df) == 1
+    assert trial_1_df["config_id"].iloc[0] == 1
+    assert trial_1_df["config_trial_group_id"].iloc[0] == 1
+
+    trial_2_df = results_df.loc[(results_df["trial_id"] == 2)]
+    assert len(trial_2_df) == 1
+    assert trial_2_df["config_id"].iloc[0] == 1
+    assert trial_2_df["config_trial_group_id"].iloc[0] == 1
+
+    # The fourth, should be a new config.
+    trial_4_df = results_df.loc[(results_df["trial_id"] == 4)]
+    assert len(trial_4_df) == 1
+    assert trial_4_df["config_id"].iloc[0] == 2
+    assert trial_4_df["config_trial_group_id"].iloc[0] == 4
