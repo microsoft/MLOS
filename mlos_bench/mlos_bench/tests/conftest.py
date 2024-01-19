@@ -48,7 +48,8 @@ TUNABLE_GROUPS_JSON = """
                 "description": "Idling method",
                 "type": "categorical",
                 "default": "halt",
-                "values": ["halt", "mwait", "noidle"]
+                "values": ["halt", "mwait", "noidle"],
+                "weights": [1, 1, 2]
             }
         }
     },
@@ -60,7 +61,8 @@ TUNABLE_GROUPS_JSON = """
                 "type": "int",
                 "default": -1,
                 "range": [0, 500000],
-                "special": [-1, 0]
+                "special": [-1, 0],
+                "weights": [0.25, 0.25, 0.5]
             },
             "kernel_sched_latency_ns": {
                 "description": "Initial value for the scheduler period",

@@ -9,7 +9,8 @@
                 "default": 10,
                 "range": [1, 500],
                 "meta": {"suffix": "MB"},
-                "special": [-1]
+                "special": [-1],
+                "weights": [0.1, 0.9]
             },
             "float": {
                 "description": "Float",
@@ -44,7 +45,6 @@
                 "values": [true, 1, "true"],
                 "default": true
             }
-
         }
     },
     "covariant_group_name-2": {
@@ -75,7 +75,8 @@
                 "type": "categorical",
                 "default": "yes",
                 "meta": {"quote": true},
-                "values": ["yes", "no"]
+                "values": ["yes", "no"],
+                "weights": [50, 50]
             }
         }
     }

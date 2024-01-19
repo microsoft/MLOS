@@ -35,6 +35,12 @@
                     },
                     "minItems": 1,
                     "uniqueItems": true
+                },
+                "weights": {
+                    "type": "array",
+                    "items": {
+                        "type": "float"
+                    }
                 }
             },
             "required": ["type", "default", "values"],
@@ -73,6 +79,12 @@
                         "type": "integer"
                     },
                     "uniqueItems": true
+                },
+                "weights": {
+                    "type": "array",
+                    "items": {
+                        "type": "float"
+                    }
                 }
             },
             "required": ["type", "default", "range"],
@@ -111,6 +123,12 @@
                         "type": "number"
                     },
                     "uniqueItems": true
+                },
+                "weights": {
+                    "type": "array",
+                    "items": {
+                        "type": "float"
+                    }
                 }
             },
             "required": ["type", "default", "range"],
