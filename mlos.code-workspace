@@ -2,7 +2,8 @@
     "folders": [
         {
             "path": "."
-        },
+        }
+        /*
         {
             "path": "mlos_core"
         },
@@ -12,5 +13,6 @@
         {
             "path": "mlos_viz"
         }
+        */
     ]
 }
