@@ -27,7 +27,6 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 # -- Ignore pylint complaints about pytest references to
 # `tunable_groups` fixture as both a function and a parameter.
 
-
 TUNABLE_GROUPS_JSON = """
 {
     "provision": {
@@ -49,7 +48,7 @@ TUNABLE_GROUPS_JSON = """
                 "type": "categorical",
                 "default": "halt",
                 "values": ["halt", "mwait", "noidle"],
-                "weights": [1, 1, 2]
+                "weights": [33, 33, 33]  // FLAML requires uniform weights
             }
         }
     },
@@ -62,6 +61,8 @@ TUNABLE_GROUPS_JSON = """
                 "default": -1,
                 "range": [0, 500000],
                 "special": [-1, 0],
+                // FLAML requires uniform weights, separately for
+                // specials and switching between specials and range.
                 "weights": [0.25, 0.25, 0.5]
             },
             "kernel_sched_latency_ns": {
