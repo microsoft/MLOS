@@ -27,6 +27,7 @@ It's available for `pip install` via the pypi repository at [mlos-bench](https:/
         - [Run the benchmark](#run-the-benchmark)
     - [Optimization](#optimization)
         - [Resuming interrupted experiments](#resuming-interrupted-experiments)
+    - [Analyzing Results](#analyzing-results)
 
 <!-- /TOC -->
 
@@ -210,3 +211,33 @@ Experiments sometimes get interrupted, e.g., due to errors in automation scripts
 To resume an interrupted experiment, simply run the same command as before.
 
 As mentioned above in the [importance of the `experiment_id` config](#importance-of-the-experiment-id-config) section, the `experiment_id` is used to resume interrupted experiments, reloading prior trial data for that `experiment_id`.
+
+## Analyzing Results
+
+The results of the experiment are stored in the database as specified in experiment configs (see above).
+
+After running the experiment, you can use the [`mlos-viz`](../mlos_viz/) package to analyze the results in a Jupyter notebook, for instance.
+See the [`sqlite-autotuning`](https://github.com/Microsoft-CISL/sqlite-autotuning) repository for a full example.
+
+The `mlos-viz` package uses the `ExperimentData` and `TrialData` [`mlos_bench.storage` APIs](./mlos_bench/storage/) to load the data from the database and visualize it.
+
+For example:
+
+```python
+from mlos_bench.storage import from_config
+# Specify the experiment_id used for your experiment.
+experiment_id = "YourExperimentId"
+trial_id = 1
+# Specify the path to your storage config file.
+storage = from_config(config_file="storage/sqlite.jsonc")
+# Access one of the experiments' data:
+experiment_data = storage.experiments[experiment_id]
+# Full experiment results are accessible in a data frame:
+results_data_frame = experiment_data.results
+# Individual trial results are accessible via the trials dictionary:
+trial_data = experiment_data.trials[trial_id]
+# Tunables used for the trial are accessible via the config property:
+trial_config = trial_data.config
+```
+
+See Also: <https://microsoft.github.io/MLOS> for full API documentation.
