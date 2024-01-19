@@ -256,14 +256,14 @@ def test_numerical_weights_non_normalized(tunable_type: str) -> None:
         "type": "{tunable_type}",
         "range": [0, 100],
         "special": [-1, 0],
-        "weights": [10, 10, 80],
+        "weights": [0, 10, 90],
         "default": 0
     }}
     """
     config = json.loads(json_config)
     tunable = Tunable(name='test', config=config)
     assert tunable.special == [-1, 0]
-    assert tunable.weights == [10, 10, 80]
+    assert tunable.weights == [0, 10, 90]  # Zero weights are ok
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
