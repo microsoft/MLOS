@@ -293,19 +293,19 @@ class Storage(metaclass=ABCMeta):
 
         def __init__(self, *,
                      tunables: TunableGroups, experiment_id: str, trial_id: int,
-                     config_id: int, opt_target: str, opt_direction: Optional[str],
+                     tunable_config_id: int, opt_target: str, opt_direction: Optional[str],
                      config: Optional[Dict[str, Any]] = None):
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
-            self._config_id = config_id
+            self._tunable_config_id = tunable_config_id
             self._opt_target = opt_target
             assert opt_direction in {None, "min", "max"}
             self._opt_direction = opt_direction
             self._config = config or {}
 
         def __repr__(self) -> str:
-            return f"{self._experiment_id}:{self._trial_id}:{self._config_id}"
+            return f"{self._experiment_id}:{self._trial_id}:{self._tunable_config_id}"
 
         @property
         def trial_id(self) -> int:
@@ -315,11 +315,11 @@ class Storage(metaclass=ABCMeta):
             return self._trial_id
 
         @property
-        def config_id(self) -> int:
+        def tunable_config_id(self) -> int:
             """
-            ID of the current trial configuration.
+            ID of the current trial (tunable) configuration.
             """
-            return self._config_id
+            return self._tunable_config_id
 
         @property
         def opt_target(self) -> str:

@@ -3,44 +3,55 @@
 # Licensed under the MIT License.
 #
 """
-Base interface for accessing the stored benchmark data.
+Base interface for accessing the stored benchmark experiment data.
 """
 
 from abc import ABCMeta, abstractmethod
-from typing import Dict, List, Literal, Optional, Tuple, Union
+from typing import Dict, List, Literal, Optional, Tuple, Union, TYPE_CHECKING
 
 import pandas
 
-from mlos_bench.storage.base_trial_data import TrialData
+from mlos_bench.storage.base_tunable_config_data import TunableConfigData
+
+if TYPE_CHECKING:
+    from mlos_bench.storage.base_trial_data import TrialData
+    from mlos_bench.storage.base_tunable_config_trial_group_data import TunableConfigTrialGroupData
 
 
 class ExperimentData(metaclass=ABCMeta):
     """
-    Base interface for accessing the stored benchmark data.
+    Base interface for accessing the stored experiment benchmark data.
+
+    An experiment groups together a set of trials that are run with a given set of
+    scripts and mlos_bench configuration files.
     """
 
     RESULT_COLUMN_PREFIX = "result."
     CONFIG_COLUMN_PREFIX = "config."
 
-    def __init__(self, *, exp_id: str, description: str,
-                 root_env_config: str, git_repo: str, git_commit: str):
-        self._exp_id = exp_id
+    def __init__(self, *,
+                 experiment_id: str,
+                 description: str,
+                 root_env_config: str,
+                 git_repo: str,
+                 git_commit: str):
+        self._experiment_id = experiment_id
         self._description = description
         self._root_env_config = root_env_config
         self._git_repo = git_repo
         self._git_commit = git_commit
 
     @property
-    def exp_id(self) -> str:
+    def experiment_id(self) -> str:
         """
-        ID of the current experiment.
+        ID of the experiment.
         """
-        return self._exp_id
+        return self._experiment_id
 
     @property
     def description(self) -> str:
         """
-        Description of the current experiment.
+        Description of the experiment.
         """
         return self._description
 
@@ -57,7 +68,7 @@ class ExperimentData(metaclass=ABCMeta):
         return (self._root_env_config, self._git_repo, self._git_commit)
 
     def __repr__(self) -> str:
-        return f"Experiment :: {self._exp_id}: '{self._description}'"
+        return f"Experiment :: {self._experiment_id}: '{self._description}'"
 
     @property
     @abstractmethod
@@ -74,9 +85,9 @@ class ExperimentData(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def trials(self) -> Dict[int, TrialData]:
+    def trials(self) -> Dict[int, "TrialData"]:
         """
-        Retrieve the trials' data from the storage.
+        Retrieve the experiment's trials' data from the storage.
 
         Returns
         -------
@@ -86,24 +97,32 @@ class ExperimentData(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def results(self) -> pandas.DataFrame:
+    def tunable_configs(self) -> Dict[int, TunableConfigData]:
         """
-        Retrieve all experimental results as a single DataFrame.
+        Retrieve the experiment's (tunable) configs' data from the storage.
 
         Returns
         -------
-        results : pandas.DataFrame
-            A DataFrame with configurations and results from all trials of the experiment.
-            Has columns [trial_id, config_id, ts_start, ts_end, status]
-            followed by tunable config parameters (prefixed with "config.") and
-            trial results (prefixed with "result."). The latter can be NULLs if the
-            trial was not successful.
+        trials : Dict[int, TunableConfigData]
+            A dictionary of the configs' data, keyed by (tunable) config id.
         """
 
     @property
-    def default_config_id(self) -> int:
+    @abstractmethod
+    def tunable_config_trial_groups(self) -> Dict[int, "TunableConfigTrialGroupData"]:
         """
-        Retrieves the config id of the default config for this experiment.
+        Retrieve the Experiment's (Tunable) Config Trial Group data from the storage.
+
+        Returns
+        -------
+        trials : Dict[int, TunableConfigTrialGroupData]
+            A dictionary of the trials' data, keyed by (tunable) by config id.
+        """
+
+    @property
+    def default_tunable_config_id(self) -> int:
+        """
+        Retrieves the (tunable) config id for the default tunable values for this experiment.
 
         Returns
         -------
@@ -112,17 +131,23 @@ class ExperimentData(metaclass=ABCMeta):
         # FIXME: We don't currently store the defaults in the DB, so best we can
         # currently do is rely on the fact that *by default* we run the default
         # config first.
-        return self.trials[1].config_id
+        return next(iter(self.trials.values())).tunable_config_id
 
-    def group_trial_by_config(self,
-                              *,
-                              objective_name: Optional[str] = None,
-                              method: Union[Literal["mean", "median"], float] = "mean",
-                              ) -> pandas.DataFrame:
+    @property
+    @abstractmethod
+    def results_df(self) -> pandas.DataFrame:
         """
-        Group the trial results by config.
+        Retrieve all experimental results as a single DataFrame.
+
+        Returns
+        -------
+        results : pandas.DataFrame
+            A DataFrame with configurations and results from all trials of the experiment.
+            Has columns [trial_id, tunable_config_id, tunable_config_trial_group_id, ts_start, ts_end, status]
+            followed by tunable config parameters (prefixed with "config.") and
+            trial results (prefixed with "result."). The latter can be NULLs if the
+            trial was not successful.
         """
-        raise NotImplementedError("TODO")
 
     def top_n_configs(self,
                       *,
@@ -173,14 +198,14 @@ class ExperimentData(metaclass=ABCMeta):
         opt_target_col = self.RESULT_COLUMN_PREFIX + opt_target
 
         # Start by filtering out some outliers.
-        config_results_df = self.results
-        groups = config_results_df.groupby("config_id")[opt_target_col]
+        config_results_df = self.results_df
+        groups = config_results_df.groupby("tunable_config_id")[opt_target_col]
 
         # Filter out configs whose stddev is greater than their mean.
         # But also make sure the default configs is still in results_df.
-        default_config_id = self.default_config_id
+        default_config_id = self.default_tunable_config_id
         filtered_config_results_df = config_results_df[((groups.mean().abs() > groups.std().fillna(0).abs())
-                                                       | (config_results_df["config_id"] == default_config_id))]
+                                                       | (config_results_df["tunable_config_id"] == default_config_id))]
 
         default_config_group = groups.get_group(default_config_id)
         if method == "mean":
@@ -197,7 +222,7 @@ class ExperimentData(metaclass=ABCMeta):
             filtered_config_results_df = filtered_config_results_df[(groups.mean() >= default_val)]
 
         # Now regroup and filter to the top-N.
-        grouped = config_results_df.groupby("config_id")
+        grouped = config_results_df.groupby("tunable_config_id")
         if method == "mean":
             intermediate = grouped.mean(numeric_only=True)
         elif method == "median":

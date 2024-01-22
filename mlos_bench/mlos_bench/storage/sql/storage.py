@@ -90,7 +90,7 @@ class SqlStorage(Storage):
                 exp.exp_id: ExperimentSqlData(
                     engine=self._engine,
                     schema=self._schema,
-                    exp_id=exp.exp_id,
+                    experiment_id=exp.exp_id,
                     description=exp.description,
                     root_env_config=exp.root_env_config,
                     git_repo=exp.git_repo,

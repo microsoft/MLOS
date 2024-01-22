@@ -7,43 +7,50 @@ Base interface for accessing the stored benchmark data.
 """
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, Optional, TYPE_CHECKING
 
 import pandas
 
 from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable import TunableValue
-from mlos_bench.util import try_parse_val
+from mlos_bench.storage.base_tunable_config_data import TunableConfigData
+from mlos_bench.storage.util import kv_df_to_dict
+
+if TYPE_CHECKING:
+    from mlos_bench.storage.base_tunable_config_trial_group_data import TunableConfigTrialGroupData
 
 
 class TrialData(metaclass=ABCMeta):
     """
-    Base interface for accessing the stored benchmark data.
+    Base interface for accessing the stored experiment benchmark trial data.
+
+    A trial is a single run of an experiment with a given configuration (e.g., set
+    of tunable parameters).
     """
 
     def __init__(self, *,
-                 exp_id: str,
+                 experiment_id: str,
                  trial_id: int,
-                 config_id: int,
+                 tunable_config_id: int,
                  ts_start: datetime,
                  ts_end: Optional[datetime],
                  status: Status):
-        self._exp_id = exp_id
+        self._experiment_id = experiment_id
         self._trial_id = trial_id
-        self._config_id = config_id
+        self._tunable_config_id = tunable_config_id
         self._ts_start = ts_start
         self._ts_end = ts_end
         self._status = status
 
     def __repr__(self) -> str:
-        return f"{self._exp_id}:{self._trial_id} config:{self._config_id} {self._status.name}"
+        return f"Trial :: {self._experiment_id}:{self._trial_id} cid:{self._tunable_config_id} {self._status.name}"
 
     @property
-    def exp_id(self) -> str:
+    def experiment_id(self) -> str:
         """
         ID of the experiment this trial belongs to.
         """
-        return self._exp_id
+        return self._experiment_id
 
     @property
     def trial_id(self) -> int:
@@ -51,13 +58,6 @@ class TrialData(metaclass=ABCMeta):
         ID of the trial.
         """
         return self._trial_id
-
-    @property
-    def config_id(self) -> int:
-        """
-        ID of the configuration of the trial.
-        """
-        return self._config_id
 
     @property
     def ts_start(self) -> datetime:
@@ -80,63 +80,37 @@ class TrialData(metaclass=ABCMeta):
         """
         return self._status
 
-    def _df_to_dict(self, dataframe: pandas.DataFrame) -> Dict[str, Optional[TunableValue]]:
-        """Utility function to convert certain key-value dataframe formats to a dict."""
-        if dataframe.columns.tolist() == ['metric', 'value']:
-            dataframe = dataframe.copy()
-            dataframe.rename(columns={'metric': 'parameter'}, inplace=True)
-        assert dataframe.columns.tolist() == ['parameter', 'value']
-        data = {}
-        for _, row in dataframe.iterrows():
-            assert isinstance(row['parameter'], str)
-            assert row['value'] is None or isinstance(row['value'], (str, int, float))
-            if row['parameter'] in data:
-                raise ValueError(f"Duplicate parameter '{row['parameter']}' in dataframe for trial {self}")
-            data[row['parameter']] = try_parse_val(row['value']) if isinstance(row['value'], str) else row['value']
-        return data
+    @property
+    def tunable_config_id(self) -> int:
+        """
+        ID of the (tunable) configuration of the trial.
+        """
+        return self._tunable_config_id
 
     @property
     @abstractmethod
-    def config_trial_group_id(self) -> int:
+    def tunable_config(self) -> TunableConfigData:
         """
-        Retrieve the trial's config_trial_group_id from the storage.
-
-        This is a unique identifier for all trials in this experiment using a given
-        config_id, and typically defined as the the minimum trial_id for the given
-        config_id.
-        """
-
-    @property
-    @abstractmethod
-    def tunable_config(self) -> pandas.DataFrame:
-        """
-        Retrieve the trials' tunable configuration from the storage.
+        Retrieve the trials' tunable configuration data from the storage.
 
         Note: this corresponds to the Trial object's "tunables" property.
 
         Returns
         -------
-        config : pandas.DataFrame
-            A dataframe with the tunable configuration of the trial.
-            It has two `str` columns, "parameter" and "value".
+        tunable_config : TunableConfigData
+            A TunableConfigData object.
         """
-
-    @property
-    def tunable_config_dict(self) -> Dict[str, Optional[TunableValue]]:
-        """
-        Retrieve the trials' tunable configuration from the storage as a dict.
-
-        Note: this corresponds to the Trial object's "tunables" property.
-
-        Returns
-        -------
-        config : dict
-        """
-        return self._df_to_dict(self.tunable_config)
 
     @property
     @abstractmethod
-    def results(self) -> pandas.DataFrame:
+    def tunable_config_trial_group(self) -> "TunableConfigTrialGroupData":
+        """
+        Retrieve the trial's (tunable) config trial group data from the storage.
+        """
+
+    @property
+    @abstractmethod
+    def results_df(self) -> pandas.DataFrame:
         """
         Retrieve the trials' results from the storage.
 
@@ -157,11 +131,11 @@ class TrialData(metaclass=ABCMeta):
         -------
         results : dict
         """
-        return self._df_to_dict(self.results)
+        return kv_df_to_dict(self.results_df)
 
     @property
     @abstractmethod
-    def telemetry(self) -> pandas.DataFrame:
+    def telemetry_df(self) -> pandas.DataFrame:
         """
         Retrieve the trials' telemetry from the storage as a dataframe.
 
@@ -176,7 +150,7 @@ class TrialData(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def metadata(self) -> pandas.DataFrame:
+    def metadata_df(self) -> pandas.DataFrame:
         """
         Retrieve the trials' metadata parameters as a dataframe.
 
@@ -201,4 +175,4 @@ class TrialData(metaclass=ABCMeta):
         -------
         metadata : dict
         """
-        return self._df_to_dict(self.metadata)
+        return kv_df_to_dict(self.metadata_df)
