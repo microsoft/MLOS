@@ -3,5 +3,5 @@
 # Licensed under the MIT License.
 #
 """
-Tests for mlos_bench storage.
+Test for mlos_bench sql storage.
 """
