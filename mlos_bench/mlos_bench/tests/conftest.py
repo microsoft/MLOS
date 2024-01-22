@@ -15,24 +15,19 @@ from pytest_docker.plugin import get_docker_services, Services as DockerServices
 
 import pytest
 
-from mlos_bench.tests import SEED
-
 from mlos_bench.environments.mock_env import MockEnv
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
-from mlos_bench.tests.tunable_groups import (
-    tunable_groups_config as tunable_groups_config_fixture,
-    tunable_groups as tunable_groups_fixture,
-    covariant_group as covariant_group_fixture,
-)
-
-tunable_groups_config = tunable_groups_config_fixture
-tunable_groups = tunable_groups_fixture
-covariant_group = covariant_group_fixture
+from mlos_bench.tests import SEED, tunable_groups_fixtures
 
 # pylint: disable=redefined-outer-name
 # -- Ignore pylint complaints about pytest references to
 # `tunable_groups` fixture as both a function and a parameter.
+
+# Expose some of those as local names so they can be picked up as fixtures by pytest.
+tunable_groups_config = tunable_groups_fixtures.tunable_groups_config
+tunable_groups = tunable_groups_fixtures.tunable_groups
+covariant_group = tunable_groups_fixtures.covariant_group
 
 
 @pytest.fixture
