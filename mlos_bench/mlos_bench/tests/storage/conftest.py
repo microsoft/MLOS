@@ -6,14 +6,10 @@
 Export test fixtures for mlos_bench storage.
 """
 
-from mlos_bench.tests.storage import (
-    storage_memory_sql as storage_memory_sql_fixture,
-    exp_storage_memory_sql as exp_storage_memory_sql_fixture,
-    exp_storage_memory_sql_with_trials as exp_storage_memory_sql_with_trials_fixture,
-    exp_data as exp_data_fixture,
-)
+import mlos_bench.tests.storage.fixtures as storage_fixtures
 
-storage_memory_sql = storage_memory_sql_fixture
-exp_storage_memory_sql = exp_storage_memory_sql_fixture
-exp_storage_memory_sql_with_trials = exp_storage_memory_sql_with_trials_fixture
-exp_data = exp_data_fixture
+# Expose some of those as local names so they can be picked up as fixtures by pytest.
+storage_memory_sql = storage_fixtures.storage_memory_sql
+exp_storage_memory_sql = storage_fixtures.exp_storage_memory_sql
+exp_storage_memory_sql_with_trials = storage_fixtures.exp_storage_memory_sql_with_trials
+exp_data = storage_fixtures.exp_data
