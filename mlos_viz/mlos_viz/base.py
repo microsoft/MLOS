@@ -62,7 +62,7 @@ def plot_optimizer_trends(exp_data: ExperimentData) -> None:
     # Could be useful in conducting numerical analyses of optimizer policies as well.
     for objective in exp_data.objectives:
         objective_column = ExperimentData.RESULT_COLUMN_PREFIX + objective
-        results_df = exp_data.results
+        results_df = exp_data.results_df
         # add a new column for the best result so far (cummin)
         results_df["incumbent_performance"] = results_df[objective_column].cummin()
 
@@ -88,7 +88,7 @@ def plot_optimizer_trends(exp_data: ExperimentData) -> None:
         plt.xlabel("Config Trial Group")
         plt.xticks(rotation=90)
 
-        plt.title("Optimizer Trends for Experiment: " + exp_data.exp_id)
+        plt.title("Optimizer Trends for Experiment: " + exp_data.experiment_id)
         plt.grid()
         plt.show()  # type: ignore[no-untyped-call]
 

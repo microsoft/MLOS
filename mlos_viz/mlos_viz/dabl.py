@@ -23,7 +23,7 @@ def plot(exp_data: ExperimentData) -> None:
     """
     for objective in exp_data.objectives:
         objective_column = ExperimentData.RESULT_COLUMN_PREFIX + objective
-        results_df = exp_data.results
+        results_df = exp_data.results_df
         assert objective_column in results_df.columns
         dabl.plot(X=results_df, target_col=objective_column)
 
