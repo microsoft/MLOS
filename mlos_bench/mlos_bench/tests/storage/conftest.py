@@ -6,10 +6,14 @@
 Export test fixtures for mlos_bench storage.
 """
 
-import mlos_bench.tests.storage.fixtures as storage_fixtures
+import mlos_bench.tests.storage.sql.fixtures as sql_storage_fixtures
+
+# NOTE: For future storage implementation additions, we can refactor this to use
+# lazy_fixture and parameterize the tests across fixtures but keep the test code the
+# same.
 
 # Expose some of those as local names so they can be picked up as fixtures by pytest.
-storage_memory_sql = storage_fixtures.storage_memory_sql
-exp_storage_memory_sql = storage_fixtures.exp_storage_memory_sql
-exp_storage_memory_sql_with_trials = storage_fixtures.exp_storage_memory_sql_with_trials
-exp_data = storage_fixtures.exp_data
+storage = sql_storage_fixtures.storage
+exp_storage = sql_storage_fixtures.exp_storage
+exp_storage_with_trials = sql_storage_fixtures.exp_storage_with_trials
+exp_data = sql_storage_fixtures.exp_data
