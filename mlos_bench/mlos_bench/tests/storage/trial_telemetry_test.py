@@ -47,7 +47,8 @@ def _telemetry_str(data: List[Tuple[datetime, str, Any]]
     return [(ts, key, None if val is None else str(val)) for (ts, key, val) in data]
 
 
-def test_update_telemetry(exp_storage: Storage.Experiment,
+def test_update_telemetry(storage: Storage,
+                          exp_storage: Storage.Experiment,
                           tunable_groups: TunableGroups,
                           telemetry_data: List[Tuple[datetime, str, Any]]) -> None:
     """
@@ -58,6 +59,10 @@ def test_update_telemetry(exp_storage: Storage.Experiment,
 
     trial.update_telemetry(Status.RUNNING, telemetry_data)
     assert exp_storage.load_telemetry(trial.trial_id) == _telemetry_str(telemetry_data)
+
+    # Also check that the TrialData telemetry looks right.
+    trial_data = storage.experiments[exp_storage.experiment_id].trials[trial.trial_id]
+    assert _telemetry_str([tuple(r) for r in trial_data.telemetry_df.to_numpy()]) == _telemetry_str(telemetry_data)
 
 
 def test_update_telemetry_twice(exp_storage: Storage.Experiment,

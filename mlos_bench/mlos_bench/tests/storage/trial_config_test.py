@@ -40,8 +40,8 @@ def test_exp_trial_configs(exp_storage: Storage.Experiment,
         exp_storage.new_trial(config1),
         exp_storage.new_trial(config1.copy()),  # Same values, different instance
     ]
-    assert trials1[0].config_id == trials1[1].config_id
-    assert trials1[0].config_id == trials1[2].config_id
+    assert trials1[0].tunable_config_id == trials1[1].tunable_config_id
+    assert trials1[0].tunable_config_id == trials1[2].tunable_config_id
 
     config2 = tunable_groups.copy().assign({'idle': 'halt'})
     trials2 = [
@@ -49,14 +49,14 @@ def test_exp_trial_configs(exp_storage: Storage.Experiment,
         exp_storage.new_trial(config2),
         exp_storage.new_trial(config2.copy()),  # Same values, different instance
     ]
-    assert trials2[0].config_id == trials2[1].config_id
-    assert trials2[0].config_id == trials2[2].config_id
+    assert trials2[0].tunable_config_id == trials2[1].tunable_config_id
+    assert trials2[0].tunable_config_id == trials2[2].tunable_config_id
 
-    assert trials1[0].config_id != trials2[0].config_id
+    assert trials1[0].tunable_config_id != trials2[0].tunable_config_id
 
     pending_ids = [
-        pending.config_id for pending in exp_storage.pending_trials()
+        pending.tunable_config_id for pending in exp_storage.pending_trials()
     ]
     assert len(pending_ids) == 6
     assert len(set(pending_ids)) == 2
-    assert set(pending_ids) == {trials1[0].config_id, trials2[0].config_id}
+    assert set(pending_ids) == {trials1[0].tunable_config_id, trials2[0].tunable_config_id}
