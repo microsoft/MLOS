@@ -17,6 +17,8 @@ from mlos_bench.storage.sql.storage import SqlStorage
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
+from mlos_bench.tests.storage import CONFIG_COUNT, CONFIG_TRIAL_REPEAT_COUNT
+
 # pylint: disable=redefined-outer-name
 
 
@@ -65,20 +67,19 @@ def exp_storage_with_trials(exp_storage: SqlStorage.Experiment) -> SqlStorage.Ex
     tunable_name = "kernel_sched_latency_ns"
     tunable_default = exp_storage.tunables.get_tunable(tunable_name)[0].default
     assert isinstance(tunable_default, int)
-    config_count = 10
-    repeat_count = 3
     seed = 42
     rand_seed(seed)
     opt = MockOptimizer(tunables=exp_storage.tunables, config={"seed": seed})
     assert opt.start_with_defaults
-    for config_i in range(config_count):
+    for config_i in range(CONFIG_COUNT):
         tunables = opt.suggest()
-        for repeat_j in range(repeat_count):
+        for repeat_j in range(CONFIG_TRIAL_REPEAT_COUNT):
             trial = exp_storage.new_trial(tunables=tunables.copy(), config={
                 "opt_target": exp_storage.opt_target,
                 "opt_direction": exp_storage.opt_direction,
-                "trial_number": config_i * repeat_count + repeat_j + 1,
+                "trial_number": config_i * CONFIG_TRIAL_REPEAT_COUNT + repeat_j + 1,
             })
+            assert trial.tunable_config_id == config_i + 1
             trial.update_telemetry(status=Status.RUNNING, metrics=[
                 (datetime.utcnow(), "some-metric", base_score + random() / 10),
             ])

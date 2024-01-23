@@ -10,6 +10,8 @@ from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
+from mlos_bench.tests.storage import CONFIG_COUNT, CONFIG_TRIAL_REPEAT_COUNT
+
 
 def test_load_empty_exp_data(storage: Storage, exp_storage: Storage.Experiment) -> None:
     """
@@ -65,7 +67,7 @@ def test_exp_trial_data_objectives(storage: Storage,
     }
 
 
-def test_exp_data_tunable_config_trial_group_id(exp_data: ExperimentData) -> None:
+def test_exp_data_tunable_config_trial_group_id_in_results_df(exp_data: ExperimentData) -> None:
     """Tests the tunable_config_trial_group_id property of ExperimentData.results_df"""
     results_df = exp_data.results_df
 
@@ -86,5 +88,28 @@ def test_exp_data_tunable_config_trial_group_id(exp_data: ExperimentData) -> Non
     assert trial_4_df["tunable_config_id"].iloc[0] == 2
     assert trial_4_df["tunable_config_trial_group_id"].iloc[0] == 4
 
+    # And so on ...
 
-# TODO: Check tunable_config_groups
+
+def test_exp_data_tunable_config_trial_groups(exp_data: ExperimentData) -> None:
+    """Tests the tunable_config_trial_groups property of ExperimentData"""
+    # Should be keyed by config_id.
+    assert list(exp_data.tunable_config_trial_groups.keys()) == list(range(1, CONFIG_COUNT + 1))
+    # Which should match the objects.
+    assert [config_trial_group.tunable_config_id
+            for config_trial_group in exp_data.tunable_config_trial_groups.values()
+            ] == list(range(1, CONFIG_COUNT + 1))
+    # And the tunable_config_trial_group_id should also match the minimum trial_id.
+    assert [config_trial_group.tunable_config_trial_group_id
+            for config_trial_group in exp_data.tunable_config_trial_groups.values()
+            ] == list(range(1, CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT, CONFIG_TRIAL_REPEAT_COUNT))
+
+
+def test_exp_data_tunable_configs(exp_data: ExperimentData) -> None:
+    """Tests the tunable_configs property of ExperimentData"""
+    # Should be keyed by config_id.
+    assert list(exp_data.tunable_configs.keys()) == list(range(1, CONFIG_COUNT + 1))
+    # Which should match the objects.
+    assert [config.tunable_config_id
+            for config in exp_data.tunable_configs.values()
+            ] == list(range(1, CONFIG_COUNT + 1))
