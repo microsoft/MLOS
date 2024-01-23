@@ -10,11 +10,9 @@ import pytest
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_experiment_data import ExperimentData
-from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
-def test_exp_trial_data(exp_data: ExperimentData,
-                        tunable_groups: TunableGroups) -> None:
+def test_exp_trial_data(exp_data: ExperimentData) -> None:
     """
     Check expected return values for TrialData.
     """

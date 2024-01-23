@@ -67,8 +67,25 @@ def test_exp_trial_data_objectives(storage: Storage,
     }
 
 
+def test_exp_data_results_df(exp_data: ExperimentData, tunable_groups: TunableGroups) -> None:
+    """Tests the results_df property of ExperimentData"""
+    results_df = exp_data.results_df
+    expected_trials_count = CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT
+    assert len(results_df) == expected_trials_count
+    assert len(results_df["tunable_config_id"].unique()) == CONFIG_COUNT
+    assert len(results_df["trial_id"].unique()) == expected_trials_count
+    obj_target = next(iter(exp_data.objectives))
+    assert len(results_df[ExperimentData.RESULT_COLUMN_PREFIX + obj_target]) == expected_trials_count
+    (tunable, _covariant_group) = next(iter(tunable_groups))
+    assert len(results_df[ExperimentData.CONFIG_COLUMN_PREFIX + tunable.name]) == expected_trials_count
+
+
 def test_exp_data_tunable_config_trial_group_id_in_results_df(exp_data: ExperimentData) -> None:
-    """Tests the tunable_config_trial_group_id property of ExperimentData.results_df"""
+    """
+    Tests the tunable_config_trial_group_id property of ExperimentData.results_df
+
+    See Also: test_exp_trial_data_tunable_config_trial_group_id()
+    """
     results_df = exp_data.results_df
 
     # First three trials should use the same config.
@@ -92,7 +109,11 @@ def test_exp_data_tunable_config_trial_group_id_in_results_df(exp_data: Experime
 
 
 def test_exp_data_tunable_config_trial_groups(exp_data: ExperimentData) -> None:
-    """Tests the tunable_config_trial_groups property of ExperimentData"""
+    """
+    Tests the tunable_config_trial_groups property of ExperimentData
+
+    This tests bulk loading of the tunable_config_trial_groups.
+    """
     # Should be keyed by config_id.
     assert list(exp_data.tunable_config_trial_groups.keys()) == list(range(1, CONFIG_COUNT + 1))
     # Which should match the objects.

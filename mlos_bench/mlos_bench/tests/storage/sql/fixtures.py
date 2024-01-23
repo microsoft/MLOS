@@ -69,7 +69,12 @@ def exp_storage_with_trials(exp_storage: SqlStorage.Experiment) -> SqlStorage.Ex
     assert isinstance(tunable_default, int)
     seed = 42
     rand_seed(seed)
-    opt = MockOptimizer(tunables=exp_storage.tunables, config={"seed": seed})
+    opt = MockOptimizer(tunables=exp_storage.tunables, config={
+        "seed": seed,
+        # This should be the default, so we leave it omitted for now to test the default.
+        # But the test logic relies on this (e.g., trial 1 is config 1 is the default values for the tunable params)
+        # "start_with_defaults": True,
+    })
     assert opt.start_with_defaults
     for config_i in range(CONFIG_COUNT):
         tunables = opt.suggest()
