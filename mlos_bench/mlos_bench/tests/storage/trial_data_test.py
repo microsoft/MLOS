@@ -29,4 +29,4 @@ def test_exp_trial_data(exp_data: ExperimentData) -> None:
     assert trial.results_dict["score"] == pytest.approx(5.0, rel=0.1)
     assert isinstance(trial.ts_start, datetime)
     assert isinstance(trial.ts_end, datetime)
-    # TODO: test telemetry data too
+    # Note: tests for telemetry are in test_update_telemetry()
