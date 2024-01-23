@@ -28,13 +28,14 @@ def get_trials(
     """
     from mlos_bench.storage.sql.trial_data import TrialSqlData  # pylint: disable=import-outside-toplevel
     with engine.connect() as conn:
-        # Build up sql statment.
+        # Build up sql a statement for fetching trials.
         stmt = schema.trial.select().where(
             schema.trial.c.exp_id == experiment_id,
         ).order_by(
             schema.trial.c.exp_id.asc(),
             schema.trial.c.trial_id.asc(),
         )
+        # Optionally restrict to those using a particular tunable config.
         if tunable_config_id is not None:
             stmt = stmt.where(
                 schema.trial.c.config_id == tunable_config_id,
@@ -65,7 +66,9 @@ def get_results_df(
     restricted by tunable_config_id.
     Used by both TunableConfigTrialGroupSqlData and ExperimentSqlData.
     """
+    # pylint: disable=too-many-locals
     with engine.connect() as conn:
+        # Compose a subquery to fetch the tunable_config_trial_group_id for each tunable config.
         tunable_config_group_id_stmt = schema.trial.select().with_only_columns(
             schema.trial.c.exp_id,
             schema.trial.c.config_id,
@@ -76,12 +79,14 @@ def get_results_df(
             schema.trial.c.exp_id,
             schema.trial.c.config_id,
         )
+        # Optionally restrict to those using a particular tunable config.
         if tunable_config_id is not None:
             tunable_config_group_id_stmt = tunable_config_group_id_stmt.where(
                 schema.trial.c.config_id == tunable_config_id,
             )
         tunable_config_trial_group_id_subquery = tunable_config_group_id_stmt.subquery()
 
+        # Get each trial's metadata.
         cur_trials_stmt = select(
             schema.trial,
             tunable_config_trial_group_id_subquery,
@@ -95,6 +100,7 @@ def get_results_df(
             schema.trial.c.exp_id.asc(),
             schema.trial.c.trial_id.asc(),
         )
+        # Optionally restrict to those using a particular tunable config.
         if tunable_config_id is not None:
             cur_trials_stmt = cur_trials_stmt.where(
                 schema.trial.c.config_id == tunable_config_id,
@@ -105,6 +111,7 @@ def get_results_df(
              for row in cur_trials.fetchall()],
             columns=['trial_id', 'ts_start', 'ts_end', 'tunable_config_id', 'tunable_config_trial_group_id', 'status'])
 
+        # Get each trial's config in wide format.
         configs_stmt = schema.trial.select().with_only_columns(
             schema.trial.c.trial_id,
             schema.trial.c.config_id,
@@ -133,6 +140,7 @@ def get_results_df(
             index=["trial_id", "tunable_config_id"], columns="param", values="value",
         ).apply(pandas.to_numeric, errors='ignore')
 
+        # Get each trial's results in wide format.
         results_stmt = schema.trial_result.select().with_only_columns(
             schema.trial_result.c.trial_id,
             schema.trial_result.c.metric_id,
@@ -158,5 +166,6 @@ def get_results_df(
             index="trial_id", columns="metric", values="value",
         ).apply(pandas.to_numeric, errors='ignore')
 
+        # Concat the trials, configs, and results.
         return trials_df.merge(configs_df, on=["trial_id", "tunable_config_id"], how="left") \
                         .merge(results_df, on="trial_id", how="left")
