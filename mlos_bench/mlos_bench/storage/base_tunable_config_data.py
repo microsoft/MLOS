@@ -6,7 +6,7 @@
 Base interface for accessing the stored benchmark config data.
 """
 from abc import ABCMeta, abstractmethod
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 import pandas
 
@@ -27,6 +27,11 @@ class TunableConfigData(metaclass=ABCMeta):
 
     def __repr__(self) -> str:
         return f"TunableConfig :: {self._tunable_config_id}: {self.config_dict}"
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, self.__class__):
+            return False
+        return self._tunable_config_id == other._tunable_config_id
 
     @property
     def tunable_config_id(self) -> int:

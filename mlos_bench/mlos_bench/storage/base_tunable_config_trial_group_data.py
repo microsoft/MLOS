@@ -7,7 +7,7 @@ Base interface for accessing the stored benchmark data.
 """
 
 from abc import ABCMeta, abstractmethod
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import Any, Dict, Optional, TYPE_CHECKING
 
 import pandas
 
@@ -73,6 +73,11 @@ class TunableConfigTrialGroupData(metaclass=ABCMeta):
 
     def __repr__(self) -> str:
         return f"TunableConfigTrialGroup :: {self._experiment_id} cid:{self.tunable_config_id}"
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, self.__class__):
+            return False
+        return self._tunable_config_id == other._tunable_config_id and self._experiment_id == other._experiment_id
 
     @property
     @abstractmethod

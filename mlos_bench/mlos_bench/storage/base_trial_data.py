@@ -7,7 +7,7 @@ Base interface for accessing the stored benchmark data.
 """
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import Any, Dict, Optional, TYPE_CHECKING
 
 import pandas
 
@@ -44,6 +44,11 @@ class TrialData(metaclass=ABCMeta):
 
     def __repr__(self) -> str:
         return f"Trial :: {self._experiment_id}:{self._trial_id} cid:{self._tunable_config_id} {self._status.name}"
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, self.__class__):
+            return False
+        return self._experiment_id == other._experiment_id and self._trial_id == other._trial_id
 
     @property
     def experiment_id(self) -> str:
