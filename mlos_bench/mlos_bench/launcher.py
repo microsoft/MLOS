@@ -14,11 +14,11 @@ import argparse
 import logging
 import sys
 
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.dict_templater import DictTemplater
-from mlos_bench.util import BaseTypeVar, try_parse_val
+from mlos_bench.util import try_parse_val
 
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -338,7 +338,12 @@ class Launcher:
             config = {key: val for key, val in self.global_config.items() if key in OneShotOptimizer.BASE_SUPPORTED_CONFIG_PROPS}
             return OneShotOptimizer(
                 self.tunables, config=config, service=self._parent_service)
-        optimizer = self._load(Optimizer, args_optimizer, ConfigSchema.OPTIMIZER)   # type: ignore[type-abstract]
+        class_config = self._config_loader.load_config(args_optimizer, ConfigSchema.OPTIMIZER)
+        assert isinstance(class_config, Dict)
+        optimizer = self._config_loader.build_optimizer(tunables=self.tunables,
+                                                        service=self._parent_service,
+                                                        config=class_config,
+                                                        global_config=self.global_config)
         return optimizer
 
     def _load_storage(self, args_storage: Optional[str]) -> Storage:
@@ -350,31 +355,15 @@ class Launcher:
         if args_storage is None:
             # pylint: disable=import-outside-toplevel
             from mlos_bench.storage.sql.storage import SqlStorage
-            return SqlStorage(self.tunables, service=self._parent_service,
+            return SqlStorage(service=self._parent_service,
                               config={
                                   "drivername": "sqlite",
                                   "database": ":memory:",
                                   "lazy_schema_create": True,
                               })
-        storage = self._load(Storage, args_storage, ConfigSchema.STORAGE)   # type: ignore[type-abstract]
-        return storage
-
-    def _load(self, cls: Type[BaseTypeVar], json_file_name: str, schema_type: Optional[ConfigSchema]) -> BaseTypeVar:
-        """
-        Create a new instance of class `cls` from JSON configuration.
-
-        Note: For abstract types, mypy will complain at the call site.
-        Use "# type: ignore[type-abstract]" to suppress the warning.
-        See Also: https://github.com/python/mypy/issues/4717
-        """
-        class_config = self._config_loader.load_config(json_file_name, schema_type)
+        class_config = self._config_loader.load_config(args_storage, ConfigSchema.STORAGE)
         assert isinstance(class_config, Dict)
-        ret = self._config_loader.build_generic(
-            base_cls=cls,
-            tunables=self.tunables,
-            service=self._parent_service,
-            config=class_config,
-            global_config=self.global_config
-        )
-        assert isinstance(ret, cls)
-        return ret
+        storage = self._config_loader.build_storage(service=self._parent_service,
+                                                    config=class_config,
+                                                    global_config=self.global_config)
+        return storage

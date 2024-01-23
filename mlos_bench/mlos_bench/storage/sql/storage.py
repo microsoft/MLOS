@@ -28,11 +28,10 @@ class SqlStorage(Storage):
     """
 
     def __init__(self,
-                 tunables: TunableGroups,
                  config: dict,
                  global_config: Optional[dict] = None,
                  service: Optional[Service] = None):
-        super().__init__(tunables, config, global_config, service)
+        super().__init__(config, global_config, service)
         lazy_schema_create = self._config.pop("lazy_schema_create", False)
         self._log_sql = self._config.pop("log_sql", False)
         self._url = URL.create(**self._config)
@@ -62,12 +61,13 @@ class SqlStorage(Storage):
                    trial_id: int,
                    root_env_config: str,
                    description: str,
+                   tunables: TunableGroups,
                    opt_target: str,
                    opt_direction: Optional[str]) -> Storage.Experiment:
         return Experiment(
             engine=self._engine,
             schema=self._schema,
-            tunables=self._tunables,
+            tunables=tunables,
             experiment_id=experiment_id,
             trial_id=trial_id,
             root_env_config=root_env_config,
@@ -78,6 +78,8 @@ class SqlStorage(Storage):
 
     @property
     def experiments(self) -> Dict[str, ExperimentData]:
+        # FIXME: this is somewhat expensive if only fetching a single Experiment.
+        # May need to expand the API or data structures to lazily fetch data and/or cache it.
         with self._engine.connect() as conn:
             cur_exp = conn.execute(
                 self._schema.experiment.select().order_by(

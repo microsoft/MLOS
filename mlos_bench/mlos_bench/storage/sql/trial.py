@@ -78,7 +78,6 @@ class Trial(Storage.Trial):
             except Exception:
                 conn.rollback()
                 raise
-
         return metrics
 
     def update_telemetry(self, status: Status, metrics: List[Tuple[datetime, str, Any]]) -> None:

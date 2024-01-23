@@ -47,27 +47,27 @@ def _telemetry_str(data: List[Tuple[datetime, str, Any]]
     return [(ts, key, None if val is None else str(val)) for (ts, key, val) in data]
 
 
-def test_update_telemetry(exp_storage_memory_sql: Storage.Experiment,
+def test_update_telemetry(exp_storage: Storage.Experiment,
                           tunable_groups: TunableGroups,
                           telemetry_data: List[Tuple[datetime, str, Any]]) -> None:
     """
     Make sure update_telemetry() and load_telemetry() methods work.
     """
-    trial = exp_storage_memory_sql.new_trial(tunable_groups)
-    assert exp_storage_memory_sql.load_telemetry(trial.trial_id) == []
+    trial = exp_storage.new_trial(tunable_groups)
+    assert exp_storage.load_telemetry(trial.trial_id) == []
 
     trial.update_telemetry(Status.RUNNING, telemetry_data)
-    assert exp_storage_memory_sql.load_telemetry(trial.trial_id) == _telemetry_str(telemetry_data)
+    assert exp_storage.load_telemetry(trial.trial_id) == _telemetry_str(telemetry_data)
 
 
-def test_update_telemetry_twice(exp_storage_memory_sql: Storage.Experiment,
+def test_update_telemetry_twice(exp_storage: Storage.Experiment,
                                 tunable_groups: TunableGroups,
                                 telemetry_data: List[Tuple[datetime, str, Any]]) -> None:
     """
     Make sure update_telemetry() call is idempotent.
     """
-    trial = exp_storage_memory_sql.new_trial(tunable_groups)
+    trial = exp_storage.new_trial(tunable_groups)
     trial.update_telemetry(Status.RUNNING, telemetry_data)
     trial.update_telemetry(Status.RUNNING, telemetry_data)
     trial.update_telemetry(Status.RUNNING, telemetry_data)
-    assert exp_storage_memory_sql.load_telemetry(trial.trial_id) == _telemetry_str(telemetry_data)
+    assert exp_storage.load_telemetry(trial.trial_id) == _telemetry_str(telemetry_data)

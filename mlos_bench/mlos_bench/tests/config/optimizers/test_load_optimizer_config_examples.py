@@ -45,11 +45,10 @@ def test_load_optimizer_config_examples(config_loader_service: ConfigPersistence
     assert issubclass(cls, Optimizer)
     # Make an instance of the class based on the config.
     tunable_groups = TunableGroups()
-    storage_inst = config_loader_service.build_generic(
-        base_cls=Optimizer,     # type: ignore[type-abstract]
+    optimizer_inst = config_loader_service.build_optimizer(
         tunables=tunable_groups,
         config=config,
         service=config_loader_service,
     )
-    assert storage_inst is not None
-    assert isinstance(storage_inst, cls)
+    assert optimizer_inst is not None
+    assert isinstance(optimizer_inst, cls)
