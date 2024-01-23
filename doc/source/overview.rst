@@ -220,6 +220,8 @@ Optimizer Adapters
 
 Storage
 =======
+Base Runtime Backends
+---------------------
 .. currentmodule:: mlos_bench.storage
 .. autosummary::
    :toctree: generated/
@@ -227,6 +229,24 @@ Storage
 
    Storage
 
+.. currentmodule:: mlos_bench.storage.storage_factory
+.. autosummary::
+   :toctree: generated/
+   :template: function.rst
+
+   from_config
+
+SQL DB Storage Backend
+----------------------
+.. currentmodule:: mlos_bench.storage.sql.storage
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   SqlStorage
+
+Analysis Client Access APIs
+---------------------------
 .. currentmodule:: mlos_bench.storage.base_experiment_data
 .. autosummary::
    :toctree: generated/
@@ -241,14 +261,19 @@ Storage
 
    TrialData
 
-SQL DB Storage
---------------
-.. currentmodule:: mlos_bench.storage.sql.storage
+.. currentmodule:: mlos_bench.storage.base_tunable_config_data
 .. autosummary::
    :toctree: generated/
    :template: class.rst
 
-   SqlStorage
+   TunableConfigData
+
+.. currentmodule:: mlos_bench.storage.base_tunable_config_trial_group_data
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   TunableConfigTrialGroupData
 
 #############################
 mlos-viz API

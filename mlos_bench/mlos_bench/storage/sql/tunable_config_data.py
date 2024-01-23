@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Base interface for accessing the stored benchmark config data.
+An interface to access the tunable config data stored in SQL DB.
 """
 
 import pandas
@@ -15,7 +15,7 @@ from mlos_bench.storage.sql.schema import DbSchema
 
 class TunableConfigSqlData(TunableConfigData):
     """
-    Base interface for accessing the stored experiment benchmark (tunable) config data.
+    SQL interface for accessing the stored experiment benchmark (tunable) config data.
 
     A configuration in this context is the set of tunable parameter values.
     """

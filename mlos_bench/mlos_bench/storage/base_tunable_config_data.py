@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Base interface for accessing the stored benchmark config data.
+Base interface for accessing the stored benchmark (tunable) config data.
 """
 from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, Optional

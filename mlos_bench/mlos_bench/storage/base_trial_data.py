@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Base interface for accessing the stored benchmark data.
+Base interface for accessing the stored benchmark trial data.
 """
 from abc import ABCMeta, abstractmethod
 from datetime import datetime

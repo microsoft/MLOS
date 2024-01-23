@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-An interface to access the benchmark data stored in SQL DB.
+An interface to access the experiment benchmark data stored in SQL DB.
 """
 from typing import Dict
 
@@ -26,7 +26,10 @@ _LOG = logging.getLogger(__name__)
 
 class ExperimentSqlData(ExperimentData):
     """
-    Base interface for accessing the stored benchmark data.
+    SQL interface for accessing the stored experiment benchmark data.
+
+    An experiment groups together a set of trials that are run with a given set of
+    scripts and mlos_bench configuration files.
     """
 
     def __init__(self, *,

@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Base interface for accessing the stored benchmark data.
+Base interface for accessing the stored benchmark config trial group data.
 """
 
 from abc import ABCMeta, abstractmethod
@@ -22,9 +22,9 @@ class TunableConfigTrialGroupData(metaclass=ABCMeta):
     Base interface for accessing the stored experiment benchmark tunable config
     trial group data.
 
-    A tunable config is used to define a set of tunable parameters for a given
-    experiment and can be used by one or more trial instances (e.g., for repeats),
-    which we call a (trial) config group.
+    A (tunable) config is used to define an instance of values for a set of tunable
+    parameters for a given experiment and can be used by one or more trial instances
+    (e.g., for repeats), which we call a (tunable) config trial group.
     """
 
     def __init__(self, *,
