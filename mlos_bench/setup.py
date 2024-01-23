@@ -110,7 +110,9 @@ setup(
     },
     install_requires=[
         'mlos-core==' + _VERSION,
+        'pandas>=2.2.0', 'Bottleneck>1.3.5',
         'requests',
+        'ConfigSpace>=0.7.1',
         'json5',
         'jsonschema>=4.18.0', 'referencing>=0.29.1',
         'importlib_resources;python_version<"3.10"',
