@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Sql interface for accessing the stored tunable config group benchmark data.
+An interface to access the tunable config trial group data stored in SQL DB.
 """
 
 from typing import Dict, Optional, TYPE_CHECKING
@@ -23,12 +23,12 @@ if TYPE_CHECKING:
 
 class TunableConfigTrialGroupSqlData(TunableConfigTrialGroupData):
     """
-    Base interface for accessing the stored experiment benchmark tunable config
+    SQL interface for accessing the stored experiment benchmark tunable config
     trial group data.
 
-    A tunable config is used to define a set of tunable parameters for a given
-    experiment and can be used by one or more trial instances (e.g., for repeats),
-    which we call a (trial) config group.
+    A (tunable) config is used to define an instance of values for a set of tunable
+    parameters for a given experiment and can be used by one or more trial instances
+    (e.g., for repeats), which we call a (tunable) config trial group.
     """
 
     def __init__(self, *,
