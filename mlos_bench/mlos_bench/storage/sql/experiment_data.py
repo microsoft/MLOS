@@ -129,6 +129,7 @@ class ExperimentSqlData(ExperimentData):
                 for tunable_config_trial_group in tunable_config_trial_groups.fetchall()
             }
 
+    @property
     def tunable_configs(self) -> Dict[int, TunableConfigData]:
         with self._engine.connect() as conn:
             tunable_configs = conn.execute(
