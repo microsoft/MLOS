@@ -229,6 +229,13 @@ Base Runtime Backends
 
    Storage
 
+.. currentmodule:: mlos_bench.storage.storage_factory
+.. autosummary::
+   :toctree: generated/
+   :template: function.rst
+
+   from_config
+
 SQL DB Storage Backend
 ----------------------
 .. currentmodule:: mlos_bench.storage.sql.storage
