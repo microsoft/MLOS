@@ -120,20 +120,6 @@ class ExperimentData(metaclass=ABCMeta):
         """
 
     @property
-    def default_tunable_config_id(self) -> int:
-        """
-        Retrieves the (tunable) config id for the default tunable values for this experiment.
-
-        Returns
-        -------
-        int
-        """
-        # FIXME: We don't currently store the defaults in the DB, so best we can
-        # currently do is rely on the fact that *by default* we run the default
-        # config first.
-        return next(iter(self.trials.values())).tunable_config_id
-
-    @property
     @abstractmethod
     def results_df(self) -> pandas.DataFrame:
         """
