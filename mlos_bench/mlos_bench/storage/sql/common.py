@@ -26,7 +26,7 @@ def get_trials(
     restricted by tunable_config_id.
     Used by both TunableConfigTrialGroupSqlData and ExperimentSqlData.
     """
-    from mlos_bench.storage.sql.trial_data import TrialSqlData  # pylint: disable=import-outside-toplevel
+    from mlos_bench.storage.sql.trial_data import TrialSqlData  # pylint: disable=import-outside-toplevel,cyclic-import
     with engine.connect() as conn:
         # Build up sql a statement for fetching trials.
         stmt = schema.trial.select().where(

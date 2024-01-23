@@ -15,6 +15,7 @@ from mlos_bench.storage.base_tunable_config_data import TunableConfigData
 from mlos_bench.storage.base_tunable_config_trial_group_data import TunableConfigTrialGroupData
 from mlos_bench.storage.sql import common
 from mlos_bench.storage.sql.schema import DbSchema
+from mlos_bench.storage.sql.tunable_config_data import TunableConfigSqlData
 
 if TYPE_CHECKING:
     from mlos_bench.storage.base_trial_data import TrialData
@@ -66,7 +67,6 @@ class TunableConfigTrialGroupSqlData(TunableConfigTrialGroupData):
 
     @property
     def tunable_config(self) -> TunableConfigData:
-        from mlos_bench.storage.sql.tunable_config_data import TunableConfigSqlData     # pylint: disable=import-outside-toplevel
         return TunableConfigSqlData(
             engine=self._engine,
             schema=self._schema,
