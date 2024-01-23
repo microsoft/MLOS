@@ -77,14 +77,14 @@ def plot_optimizer_trends(exp_data: ExperimentData) -> None:
         # FIXME: This doesnt' look right yet.
         sns.lineplot(
             data=results_df,
-            x="config_trial_group_id",
+            x="tunable_config_trial_group_id",
             y="incumbent_performance",
             alpha=0.7,
             label="Incumbent")
         # Result of each set of trials for a config
         sns.boxplot(
             data=results_df,
-            x="config_trial_group_id",
+            x="tunable_config_trial_group_id",
             y=objective_column)
 
         plt.yscale('log')
