@@ -14,11 +14,13 @@ from mlos_bench.tests.storage import CONFIG_TRIAL_REPEAT_COUNT
 
 def test_tunable_config_trial_group_data(exp_data: ExperimentData) -> None:
     """Test basic TunableConfigTrialGroupData properties."""
-    trial = exp_data.trials[1]
+    trial_id = 1
+    trial = exp_data.trials[trial_id]
     tunable_config_trial_group = trial.tunable_config_trial_group
     assert tunable_config_trial_group.experiment_id == exp_data.experiment_id == trial.experiment_id
     assert tunable_config_trial_group.tunable_config_id == trial.tunable_config_id
     assert tunable_config_trial_group.tunable_config == trial.tunable_config
+    assert tunable_config_trial_group == next(iter(tunable_config_trial_group.trials.values())).tunable_config_trial_group
 
 
 def test_exp_trial_data_tunable_config_trial_group_id(exp_data: ExperimentData) -> None:
@@ -79,3 +81,4 @@ def test_tunable_config_trial_group_trials(exp_data: ExperimentData) -> None:
                for trial in trials.values())
     assert all(trial.tunable_config_id == tunable_config_id
                for trial in tunable_config_trial_group.trials.values())
+    assert exp_data.trials[expected_group_id] == tunable_config_trial_group.trials[expected_group_id]

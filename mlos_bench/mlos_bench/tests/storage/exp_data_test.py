@@ -24,6 +24,12 @@ def test_load_empty_exp_data(storage: Storage, exp_storage: Storage.Experiment) 
     assert exp.objectives == {exp_storage.opt_target: exp_storage.opt_direction}
 
 
+def test_exp_data_root_env_config(exp_storage: Storage.Experiment, exp_data: ExperimentData) -> None:
+    """Tests the root_env_config property of ExperimentData"""
+    # pylint: disable=protected-access
+    assert exp_data.root_env_config == (exp_storage._root_env_config, exp_storage._git_repo, exp_storage._git_commit)
+
+
 def test_exp_trial_data_objectives(storage: Storage,
                                    exp_storage: Storage.Experiment,
                                    tunable_groups: TunableGroups) -> None:
