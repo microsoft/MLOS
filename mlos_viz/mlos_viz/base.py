@@ -66,6 +66,11 @@ def plot_optimizer_trends(exp_data: ExperimentData) -> None:
         # add a new column for the best result so far (cummin)
         results_df["incumbent_performance"] = results_df[objective_column].cummin()
 
+        # WIP:
+        incumbent_performance_df = results_df.groupby("tunable_config_trial_group_id")[objective_column].mean()
+        incumbent_performance_df = incumbent_performance_df.reset_index()
+        incumbent_performance_df["incumbent_performance"] = incumbent_performance_df[objective_column].cummin()
+
         plt.rcParams["figure.figsize"] = (10, 5)
 
         # plot by config group instead of trial.
