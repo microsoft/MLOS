@@ -89,7 +89,8 @@ setup(
         'joblib>=1.1.1',        # CVE-2022-21797: scikit-learn dependency, addressed in 1.2.0dev0, which isn't currently released
         'scipy>=1.3.2',
         'numpy>=1.24',
-        'pandas>=2.2.0', 'Bottleneck>1.3.5',
+        'pandas >= 2.2.0;python_version>="3.9"', 'Bottleneck > 1.3.5;python_version>="3.9"',
+        'pandas >= 1.0.3;python_version<"3.9"',
         'ConfigSpace>=0.7.1',
     ],
     extras_require=extra_requires,
