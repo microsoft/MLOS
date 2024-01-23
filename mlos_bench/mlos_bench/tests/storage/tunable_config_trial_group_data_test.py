@@ -12,6 +12,15 @@ from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.tests.storage import CONFIG_TRIAL_REPEAT_COUNT
 
 
+def test_tunable_config_trial_group_data(exp_data: ExperimentData) -> None:
+    """Test basic TunableConfigTrialGroupData properties."""
+    trial = exp_data.trials[1]
+    tunable_config_trial_group = trial.tunable_config_trial_group
+    assert tunable_config_trial_group.experiment_id == exp_data.experiment_id == trial.experiment_id
+    assert tunable_config_trial_group.tunable_config_id == trial.tunable_config_id
+    assert tunable_config_trial_group.tunable_config == trial.tunable_config
+
+
 def test_exp_trial_data_tunable_config_trial_group_id(exp_data: ExperimentData) -> None:
     """
     Test the TunableConfigTrialGroupData property of TrialData.

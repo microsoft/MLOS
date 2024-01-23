@@ -44,20 +44,6 @@ class TunableConfigTrialGroupSqlData(TunableConfigTrialGroupData):
         self._engine = engine
         self._schema = schema
 
-    @property
-    def experiment_id(self) -> str:
-        """
-        ID of the experiment.
-        """
-        return self._experiment_id
-
-    @property
-    def tunable_config_id(self) -> int:
-        """
-        ID of the config.
-        """
-        return self._tunable_config_id
-
     def _get_tunable_config_trial_group_id(self) -> int:
         """
         Retrieve the trial's tunable_config_trial_group_id from the storage.
