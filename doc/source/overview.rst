@@ -228,8 +228,6 @@ Base Runtime Backends
    :template: class.rst
 
    Storage
-   Storage.Experiment
-   Storage.Trial
 
 SQL DB Storage Backend
 ----------------------
