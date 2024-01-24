@@ -139,7 +139,7 @@ def plot_top_n_configs(exp_data: ExperimentData, with_scatter_plot: bool = False
         Remaining keyword arguments are passed along to the ExperimentData.top_n_configs.
     """
     top_n_config_args = get_kwarg_defaults(ExperimentData.top_n_configs, **kwargs)
-    (top_n_config_results_df, opt_target, opt_direction) = exp_data.top_n_configs(**top_n_config_args)
+    (top_n_config_results_df, top_n_config_ids, opt_target, opt_direction) = exp_data.top_n_configs(**top_n_config_args)
     top_n = len(top_n_config_results_df["config_id"].unique()) - 1
     target_column = ExperimentData.RESULT_COLUMN_PREFIX + opt_target
     (_fig, ax) = plt.subplots()

@@ -11,6 +11,7 @@ from distutils.util import strtobool    # pylint: disable=deprecated-module
 from typing import Dict, List, Literal, Optional, Tuple, Union, TYPE_CHECKING
 
 import pandas
+from scipy.stats import zscore
 
 from mlos_bench.storage.base_tunable_config_data import TunableConfigData
 
@@ -168,7 +169,7 @@ class ExperimentData(metaclass=ABCMeta):
                       top_n_configs: int = 20,
                       objective_name: Optional[str] = None,
                       method: Union[Literal["mean", "median"], float] = "mean",
-                      ) -> Tuple[pandas.DataFrame, str, str]:
+                      ) -> Tuple[pandas.DataFrame, List[int], str, str]:
         # pylint: disable=too-complex
         # pylint: disable=too-many-branches
         # pylint: disable=too-many-locals
@@ -189,7 +190,7 @@ class ExperimentData(metaclass=ABCMeta):
 
         Returns
         -------
-        (top_n_config_results_df, opt_target, opt_direction) : Tuple[pandas.DataFrame, str, str]
+        (top_n_config_results_df, top_n_config_ids, opt_target, opt_direction) : Tuple[pandas.DataFrame, List[int], str, str]
             The filtered results dataframe, the optimization target, and the optimization direction.
         """
         # Do some input checking first.
@@ -210,33 +211,53 @@ class ExperimentData(metaclass=ABCMeta):
             raise ValueError(f"Unexpected optimization direction for target {opt_target}: {opt_direction}")
 
         opt_target_col = self.RESULT_COLUMN_PREFIX + opt_target
+        config_id_col = "tunable_config_id"
+        group_id_col = "tunable_config_trial_group_id"     # first trial_id per config group
 
         # Start by filtering out some outliers.
-        config_results_df = self.results_df
-        groups = config_results_df.groupby("tunable_config_id")[opt_target_col]
+        results_df = self.results_df
 
-        # Filter out configs whose stddev is greater than their mean.
-        # But also make sure the default configs is still in results_df.
         default_config_id = self.default_tunable_config_id
-        filtered_config_results_df = config_results_df[((groups.mean().abs() > groups.std().fillna(0).abs())
-                                                       | (config_results_df["tunable_config_id"] == default_config_id))]
+        assert default_config_id is not None, "Failed to determine default config id."
 
-        default_config_group = groups.get_group(default_config_id)
+        # Filter out configs whose variance is too large.
+        # But also make sure the default configs is still in the resulting dataframe
+        # (for comparison purposes).
+
+        non_default_config_groups_perf = results_df.loc[
+            (results_df[config_id_col] != default_config_id)
+        ].groupby(config_id_col)[opt_target_col]
+        if len(non_default_config_groups_perf) == 0:
+            raise ValueError(f"Not enough data: {len(non_default_config_groups_perf)}")
+
+        non_default_config_groups_perf_zscores = zscore(non_default_config_groups_perf.var())
+        filtered_config_results_df = results_df.loc[((results_df[config_id_col] == default_config_id) | (
+            results_df[config_id_col].isin(
+                non_default_config_groups_perf_zscores[non_default_config_groups_perf_zscores < 2].index
+            ))
+        )].reset_index()
+        print(filtered_config_results_df[config_id_col].unique())
+
+        # Also, filter results that are worse than the default.
+
+        default_config_results_df = results_df.loc[results_df[config_id_col] == default_config_id]
         if method == "mean":
-            default_val = default_config_group.mean(numeric_only=True)
+            default_val = default_config_results_df[opt_target_col].mean(numeric_only=True)
         elif method == "median":
-            default_val = default_config_group.median(numeric_only=True)
+            default_val = default_config_results_df[opt_target_col].median(numeric_only=True)
         elif isinstance(method, float) and 0 < method <= 1:
-            default_val = default_config_group.quantile(method, numeric_only=True)
+            default_val = default_config_results_df[opt_target_col].quantile(method)
+        print(default_val)
 
-        # Now filter results that are worse than the default.
+        filtered_groups_perf = filtered_config_results_df.groupby(config_id_col)[opt_target_col]
+        print(filtered_groups_perf.mean())
         if opt_direction == "min":
-            filtered_config_results_df = filtered_config_results_df[(groups.mean() <= default_val)]
+            filtered_config_results_df = filtered_config_results_df.loc[(filtered_groups_perf.mean() <= default_val)]
         elif opt_direction == "max":
-            filtered_config_results_df = filtered_config_results_df[(groups.mean() >= default_val)]
+            filtered_config_results_df = filtered_config_results_df.loc[(filtered_groups_perf.mean() >= default_val)]
 
         # Now regroup and filter to the top-N.
-        grouped = config_results_df.groupby("tunable_config_id")
+        grouped = results_df.groupby(config_id_col)
         if method == "mean":
             intermediate = grouped.mean(numeric_only=True)
         elif method == "median":
@@ -245,11 +266,18 @@ class ExperimentData(metaclass=ABCMeta):
             intermediate = grouped.quantile(method, numeric_only=True)
         top_n_config_ids: List[int] = intermediate.sort_values(
             by=opt_target_col, ascending=opt_direction == "min").head(top_n_configs).index.tolist()
-        # Sort by the config ids.
-        top_n_config_ids = sorted(top_n_config_ids)
-        # Place the default config at the top of the list.
+
+        # Remove the default config if it's included. We'll add it back later.
         if default_config_id in top_n_config_ids:
             top_n_config_ids.remove(default_config_id)
+        # Get just the top-n config reults.
+        # Sort by the group ids.
+        top_n_config_results_df = filtered_config_results_df[(
+            filtered_config_results_df[config_id_col].isin(top_n_config_ids)
+        )].sort_values([group_id_col, config_id_col])
+        print(top_n_config_results_df[config_id_col].unique())
+        # Place the default config at the top of the list.
         top_n_config_ids.insert(0, default_config_id)
-        top_n_config_results = filtered_config_results_df.loc[top_n_config_ids]
-        return (top_n_config_results, opt_target, opt_direction)
+        print(default_config_results_df[config_id_col].unique())
+        top_n_config_results_df = pandas.concat([default_config_results_df, top_n_config_results_df], axis=0)
+        return (top_n_config_results_df, top_n_config_ids, opt_target, opt_direction)
