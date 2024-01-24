@@ -131,12 +131,18 @@ def _optimize(*,
                 trial = exp.new_trial(tunables, config={
                     # Add some additional metadata to track for the trial such as the
                     # optimizer config used.
+                    # Note: these values are unfortunately mutable at the moment.
+                    # Consider them as hints of what the config was the trial *started*.
+                    # It is possible that the experiment configs were changed
+                    # between resuming the experiment (since that is not currently
+                    # prevented).
                     # TODO: Improve for supporting multi-objective
                     # (e.g., opt_target_1, opt_target_2, ... and opt_direction_1, opt_direction_2, ...)
                     "optimizer": opt.name,
                     "opt_target": opt.target,
                     "opt_direction": opt.direction,
                     "repeat_i": repeat_i,
+                    "is_defaults": tunables.is_defaults,
                 })
                 _run(env_context, opt_context, trial, global_config)
 

@@ -5,12 +5,12 @@
 """
 An interface to access the experiment benchmark data stored in SQL DB.
 """
-from typing import Dict
+from typing import Dict, Optional
 
 import logging
 
 import pandas
-from sqlalchemy import Engine, Integer, func
+from sqlalchemy import Engine, Integer, String, func
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.base_trial_data import TrialData
@@ -153,6 +153,47 @@ class ExperimentSqlData(ExperimentData):
                 )
                 for tunable_config in tunable_configs.fetchall()
             }
+
+    @property
+    def default_tunable_config_id(self) -> Optional[int]:
+        """
+        Retrieves the (tunable) config id for the default tunable values for this experiment.
+
+        Note: this is by *default* the first trial executed for this experiment.
+        However, it is currently possible that the user changed the tunables config
+        in between resumptions of an experiment.
+
+        Returns
+        -------
+        int
+        """
+        with self._engine.connect() as conn:
+            query_results = conn.execute(
+                self._schema.trial_param.select().with_only_columns(
+                    func.min(self._schema.trial_param.c.trial_id).cast(Integer).label("first_trial_id_with_defaults"),
+                ).where(
+                    self._schema.trial_param.c.exp_id == self._experiment_id,
+                    self._schema.trial_param.c.param_id == "is_defaults",
+                    func.lower(self._schema.trial_param.c.param_value, type_=String).in_(["1", "true"]),
+                )
+            )
+            min_default_trial_row = query_results.fetchone()
+            if min_default_trial_row is not None:
+                # pylint: disable=protected-access  # following DeprecationWarning in sqlalchemy
+                return min_default_trial_row._tuple()[0]
+            # fallback logic - assume minimum trial_id for experiment
+            query_results = conn.execute(
+                self._schema.trial.select().with_only_columns(
+                    func.min(self._schema.trial.c.trial_id).cast(Integer).label("first_trial_id"),
+                ).where(
+                    self._schema.trial.c.exp_id == self._experiment_id,
+                )
+            )
+            min_trial_row = query_results.fetchone()
+            if min_trial_row is not None:
+                # pylint: disable=protected-access  # following DeprecationWarning in sqlalchemy
+                return min_trial_row._tuple()[0]
+            return None
 
     @property
     def results_df(self) -> pandas.DataFrame:
