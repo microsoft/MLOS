@@ -57,13 +57,21 @@ def plot_optimizer_trends(exp_data: ExperimentData) -> None:
         The experiment data to plot.
     """
     results_df = exp_data.results_df
-    groupby_column = "tunable_config_trial_group_id"
+    groupby_columns = ["tunable_config_trial_group_id", "tunable_config_id"]
+    groupby_column = ",".join(groupby_columns)
     for (objective, direction) in exp_data.objectives.items():
         objective_column = ExperimentData.RESULT_COLUMN_PREFIX + objective
         incumbent_column = objective_column + ".incumbent"
 
+        # Compose a new groupby_column for display purposes that is the
+        # concatenation of the min trial_id (the first one) of each config trial
+        # group and the config_id.
+        # Note: It's need to be a string (e.g., categorical) for boxplot and lineplot to be on the same axis anyways.
+        results_df[groupby_column] = results_df[groupby_columns].astype(str).apply(lambda x: ",".join(x), axis=1)
+        groupby_columns.append(groupby_column)
+
         # Determine the mean of each config trial group to match the box plots.
-        group_results_df = results_df.groupby(groupby_column)[objective_column].mean().reset_index()
+        group_results_df = results_df.groupby(groupby_columns)[objective_column].mean().reset_index().sort_values(groupby_columns)
         #
         # Note: technically the optimizer (usually) uses the *first* result for a
         # given config trial group before moving on to a new config (x-axis), so
@@ -72,12 +80,8 @@ def plot_optimizer_trends(exp_data: ExperimentData) -> None:
         # Here's a way to do that, though it can also be misleading if the optimizer
         # later gets a worse value for that config group as well.
         #
-        # group_results_df = results_df.sort_values([groupby_column, "trial_id"]).groupby(
-        #    groupby_column).head(1)[[groupby_column, objective_column]].reset_index()
-
-        # Needs to be a string (e.g., categorical) for boxplot and lineplot to be on the same axis.
-        results_df[groupby_column] = results_df[groupby_column].astype(str)
-        group_results_df[groupby_column] = group_results_df[groupby_column].astype(str)
+        # group_results_df = results_df.sort_values(groupby_columns + ["trial_id"]).groupby(
+        #   groupby_columns).head(1)[groupby_columns + [objective_column]].reset_index()
 
         # Calculate the incumbent (best seen so far)
         if direction == "min":
@@ -104,14 +108,14 @@ def plot_optimizer_trends(exp_data: ExperimentData) -> None:
             x=groupby_column,
             y=incumbent_column,
             alpha=0.7,
-            label="Incumbent",
+            label="Mean of Incumbent Config Trial Group",
             ax=ax,
         )
 
         plt.yscale('log')
         plt.ylabel(objective)
 
-        plt.xlabel("Config Trial Group")
+        plt.xlabel("Config Trial Group ID, Config ID")
         plt.xticks(rotation=90)
 
         plt.title("Optimizer Trends for Experiment: " + exp_data.experiment_id)
