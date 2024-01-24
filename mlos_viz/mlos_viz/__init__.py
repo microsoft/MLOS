@@ -39,7 +39,7 @@ def _plot_optimizer_trends(exp_data: ExperimentData) -> None:
     """
     for objective in exp_data.objectives:
         objective_column = ExperimentData.RESULT_COLUMN_PREFIX + objective
-        results_df = exp_data.results
+        results_df = exp_data.results_df
         plt.rcParams["figure.figsize"] = (10, 4)
 
         sns.scatterplot(
@@ -54,7 +54,7 @@ def _plot_optimizer_trends(exp_data: ExperimentData) -> None:
         plt.xlabel("Trial number")
         plt.ylabel(objective)
 
-        plt.title("Optimizer Trends for Experiment: " + exp_data.exp_id)
+        plt.title("Optimizer Trends for Experiment: " + exp_data.experiment_id)
         plt.grid()
         plt.show()  # type: ignore[no-untyped-call]
 

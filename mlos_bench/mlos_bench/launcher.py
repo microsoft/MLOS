@@ -51,6 +51,7 @@ class Launcher:
     """
 
     def __init__(self, description: str, long_text: str = "", argv: Optional[List[str]] = None):
+        # pylint: disable=too-many-statements
         _LOG.info("Launch: %s", description)
         epilog = """
             Additional --key=value pairs can be specified to augment or override values listed in --globals.
