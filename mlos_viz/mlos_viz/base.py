@@ -60,32 +60,41 @@ def plot_optimizer_trends(exp_data: ExperimentData) -> None:
     # return a specialized dataframe first?
     # e.g., incumbent results up to N-th iteration?
     # Could be useful in conducting numerical analyses of optimizer policies as well.
-    for objective in exp_data.objectives:
+    for (objective, direction) in exp_data.objectives.items():
         objective_column = ExperimentData.RESULT_COLUMN_PREFIX + objective
+        groupby_column = "tunable_config_trial_group_id"
         results_df = exp_data.results_df
-        # add a new column for the best result so far (cummin)
-        results_df["incumbent_performance"] = results_df[objective_column].cummin()
+        # Needs to be a string for boxplot and lineplot to be on the same axis.
+        results_df[groupby_column] = results_df[groupby_column].astype(str)
 
-        # WIP:
-        incumbent_performance_df = results_df.groupby("tunable_config_trial_group_id")[objective_column].mean()
-        incumbent_performance_df = incumbent_performance_df.reset_index()
-        incumbent_performance_df["incumbent_performance"] = incumbent_performance_df[objective_column].cummin()
+        # calculate the incumbent as a mean of each group to match the boxplot
+        incumbent_performance_df = results_df.groupby(groupby_column)[objective_column].mean().reset_index()
+        if direction == "min":
+            incumbent_performance_df["incumbent_performance"] = incumbent_performance_df[objective_column].cummin()
+        elif direction == "max":
+            incumbent_performance_df["incumbent_performance"] = incumbent_performance_df[objective_column].cummax()
+        else:
+            raise NotImplementedError(f"Unhandled direction {direction} for target {objective}")
 
         plt.rcParams["figure.figsize"] = (10, 5)
+        (_fig, ax) = plt.subplots()
 
-        # plot by config group instead of trial.
-        # FIXME: This doesnt' look right yet.
-        sns.lineplot(
-            data=results_df,
-            x="tunable_config_trial_group_id",
-            y="incumbent_performance",
-            alpha=0.7,
-            label="Incumbent")
         # Result of each set of trials for a config
         sns.boxplot(
             data=results_df,
-            x="tunable_config_trial_group_id",
-            y=objective_column)
+            x=groupby_column,
+            y=objective_column,
+            ax=ax,
+        )
+        # Result of the best so far.
+        ax = sns.lineplot(
+            data=incumbent_performance_df,
+            x=groupby_column,
+            y="incumbent_performance",
+            alpha=0.7,
+            label="Incumbent",
+            ax=ax,
+        )
 
         plt.yscale('log')
         plt.ylabel(objective)
