@@ -169,12 +169,19 @@ class ExperimentSqlData(ExperimentData):
         """
         with self._engine.connect() as conn:
             query_results = conn.execute(
-                self._schema.trial_param.select().with_only_columns(
-                    func.min(self._schema.trial_param.c.trial_id).cast(Integer).label("first_trial_id_with_defaults"),
+                self._schema.trial.select().with_only_columns(
+                    self._schema.trial.c.config_id.cast(Integer).label('config_id'),
                 ).where(
-                    self._schema.trial_param.c.exp_id == self._experiment_id,
-                    self._schema.trial_param.c.param_id == "is_defaults",
-                    func.lower(self._schema.trial_param.c.param_value, type_=String).in_(["1", "true"]),
+                    self._schema.trial.c.exp_id == self._experiment_id,
+                    self._schema.trial.c.trial_id.in_(
+                       self._schema.trial_param.select().with_only_columns(
+                            func.min(self._schema.trial_param.c.trial_id).cast(Integer).label("first_trial_id_with_defaults"),
+                        ).where(
+                            self._schema.trial_param.c.exp_id == self._experiment_id,
+                            self._schema.trial_param.c.param_id == "is_defaults",
+                            func.lower(self._schema.trial_param.c.param_value, type_=String).in_(["1", "true"]),
+                        ).scalar_subquery()
+                    )
                 )
             )
             min_default_trial_row = query_results.fetchone()
@@ -184,9 +191,16 @@ class ExperimentSqlData(ExperimentData):
             # fallback logic - assume minimum trial_id for experiment
             query_results = conn.execute(
                 self._schema.trial.select().with_only_columns(
-                    func.min(self._schema.trial.c.trial_id).cast(Integer).label("first_trial_id"),
+                    self._schema.trial.c.config_id.cast(Integer).label('config_id'),
                 ).where(
                     self._schema.trial.c.exp_id == self._experiment_id,
+                    self._schema.trial.c.trial_id.in_(
+                        self._schema.trial.select().with_only_columns(
+                            func.min(self._schema.trial.c.trial_id).cast(Integer).label("first_trial_id"),
+                        ).where(
+                            self._schema.trial.c.exp_id == self._experiment_id,
+                        ).scalar_subquery()
+                    )
                 )
             )
             min_trial_row = query_results.fetchone()

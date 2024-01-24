@@ -145,7 +145,7 @@ class ExperimentData(metaclass=ABCMeta):
             if strtobool(str(trial.metadata_dict.get('is_defaults', False))):
                 return trial.tunable_config_id
         # Fallback (min trial_id)
-        return trials_items[0][0]
+        return trials_items[0][1].tunable_config_id
 
     @property
     @abstractmethod
