@@ -56,25 +56,36 @@ def plot_optimizer_trends(exp_data: ExperimentData) -> None:
     exp_data: ExperimentData
         The experiment data to plot.
     """
-    # TODO: Provide a utility function in `mlos_bench` to process the results and
-    # return a specialized dataframe first?
-    # e.g., incumbent results up to N-th iteration?
-    # Could be useful in conducting numerical analyses of optimizer policies as well.
+    results_df = exp_data.results_df
+    groupby_column = "tunable_config_trial_group_id"
     for (objective, direction) in exp_data.objectives.items():
         objective_column = ExperimentData.RESULT_COLUMN_PREFIX + objective
-        groupby_column = "tunable_config_trial_group_id"
-        results_df = exp_data.results_df
-        # Needs to be a string for boxplot and lineplot to be on the same axis.
-        results_df[groupby_column] = results_df[groupby_column].astype(str)
+        incumbent_column = objective_column + ".incumbent"
 
-        # calculate the incumbent as a mean of each group to match the boxplot
-        incumbent_performance_df = results_df.groupby(groupby_column)[objective_column].mean().reset_index()
+        # Determine the mean of each config trial group to match the box plots.
+        group_results_df = results_df.groupby(groupby_column)[objective_column].mean().reset_index()
+        #
+        # Note: technically the optimizer (usually) uses the *first* result for a
+        # given config trial group before moving on to a new config (x-axis), so
+        # plotting the mean may be slightly misleading when trying to understand the
+        # actual path taken by the optimizer in case of high variance samples.
+        # Here's a way to do that, though it can also be misleading if the optimizer
+        # later gets a worse value for that config group as well.
+        #
+        # group_results_df = results_df.sort_values([groupby_column, "trial_id"]).groupby(
+        #    groupby_column).head(1)[[groupby_column, objective_column]].reset_index()
+
+        # Needs to be a string (e.g., categorical) for boxplot and lineplot to be on the same axis.
+        results_df[groupby_column] = results_df[groupby_column].astype(str)
+        group_results_df[groupby_column] = group_results_df[groupby_column].astype(str)
+
+        # Calculate the incumbent (best seen so far)
         if direction == "min":
-            incumbent_performance_df["incumbent_performance"] = incumbent_performance_df[objective_column].cummin()
+            group_results_df[incumbent_column] = group_results_df[objective_column].cummin()
         elif direction == "max":
-            incumbent_performance_df["incumbent_performance"] = incumbent_performance_df[objective_column].cummax()
+            group_results_df[incumbent_column] = group_results_df[objective_column].cummax()
         else:
-            raise NotImplementedError(f"Unhandled direction {direction} for target {objective}")
+            raise ValueError(f"Unhandled direction {direction} for target {objective}")
 
         plt.rcParams["figure.figsize"] = (10, 5)
         (_fig, ax) = plt.subplots()
@@ -86,11 +97,12 @@ def plot_optimizer_trends(exp_data: ExperimentData) -> None:
             y=objective_column,
             ax=ax,
         )
-        # Result of the best so far.
+
+        # Results of the best so far.
         ax = sns.lineplot(
-            data=incumbent_performance_df,
+            data=group_results_df,
             x=groupby_column,
-            y="incumbent_performance",
+            y=incumbent_column,
             alpha=0.7,
             label="Incumbent",
             ax=ax,
