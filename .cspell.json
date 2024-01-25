@@ -58,6 +58,7 @@
         "pylint",
         "pyplot",
         "pytest",
+        "quantile",
         "Quickstart",
         "refcnt",
         "rexec",

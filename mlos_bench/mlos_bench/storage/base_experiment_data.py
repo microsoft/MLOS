@@ -8,14 +8,17 @@ Base interface for accessing the stored benchmark experiment data.
 
 from abc import ABCMeta, abstractmethod
 from distutils.util import strtobool    # pylint: disable=deprecated-module
-from typing import Dict, List, Literal, Optional, Tuple, Union, TYPE_CHECKING
+from typing import Dict, List, Literal, Optional, Iterable, Tuple, Union, TYPE_CHECKING
+
+import re
 
 import pandas
-from scipy.stats import zscore
+from pandas.api.types import is_numeric_dtype
 
 from mlos_bench.storage.base_tunable_config_data import TunableConfigData
 
 if TYPE_CHECKING:
+    from pandas.core.groupby.generic import SeriesGroupBy
     from mlos_bench.storage.base_trial_data import TrialData
     from mlos_bench.storage.base_tunable_config_trial_group_data import TunableConfigTrialGroupData
 
@@ -163,6 +166,86 @@ class ExperimentData(metaclass=ABCMeta):
             trial results (prefixed with "result."). The latter can be NULLs if the
             trial was not successful.
         """
+
+    def augment_results_df_with_config_trial_group_stats(
+            self, requested_result_cols: Optional[Iterable[str]] = None) -> pandas.DataFrame:
+        """
+        Add a number of useful statistical measure columns to the results dataframe.
+
+        In particular, for each numeric result, we add the following columns:
+            ".p50" - the median of each config trial group results
+            ".p75" - the p75 of each config trial group results
+            ".p90" - the p90 of each config trial group results
+            ".p95" - the p95 of each config trial group results
+            ".p99" - the p95 of each config trial group results
+            ".mean" - the mean of each config trial group results
+            ".stddev" - the mean of each config trial group results
+            ".var" - the variance of each config trial group results
+            ".var_zscore" - the zscore of this group (i.e., variance relative to the stddev of all group variances)
+                This can be useful for filtering out outliers
+                (e.g., configs with high variance relative to others by restricting to abs <= 2)
+
+
+        Parameters
+        ----------
+        requested_result_cols : Optional[Iterable[str]]
+            Which results columns to augment, by default None to use all results columns.
+
+        Returns
+        -------
+        pandas.DataFrame
+            The augmented results dataframe.
+        """
+        results_df = self.results_df
+        results_groups = results_df.groupby("tunable_config_id")
+        if requested_result_cols is None:
+            result_cols = set(results_df.columns)
+        else:
+            result_cols = set(col for col in requested_result_cols if col in results_df.columns)
+            result_cols.update(set(self.RESULT_COLUMN_PREFIX + col
+                                   for col in requested_result_cols if self.RESULT_COLUMN_PREFIX in results_df.columns))
+        if len(results_groups) <= 1:
+            raise ValueError(f"Not enough data: {len(results_groups)}")
+
+        def compute_zscore_for_group_agg(
+                results_groups_perf: "SeriesGroupBy",
+                stats_df: pandas.DataFrame,
+                result_col: str,
+                agg: Union[Literal["mean"], Literal["var"], Literal["std"]]
+        ) -> None:
+            results_groups_perf_aggs = results_groups_perf.agg(agg)    # TODO: avoid recalculating?
+            # Compute the zscore of the chosen aggregate performance of each group into each row in the dataframe.
+            stats_df[result_col + f".{agg}_mean"] = results_groups_perf_aggs.mean()
+            stats_df[result_col + f".{agg}_stddev"] = results_groups_perf_aggs.std()
+            stats_df[result_col + f".{agg}_zscore"] = \
+                (stats_df[result_col + f".{agg}"] - stats_df[result_col + f".{agg}_mean"]) \
+                / stats_df[result_col + f".{agg}_stddev"]
+            stats_df.drop(columns=[result_col + ".var_" + agg for agg in ("mean", "stddev")], inplace=True)
+
+        augmented_results_df = results_df
+        for result_col in result_cols:
+            if not result_col.startswith(self.RESULT_COLUMN_PREFIX):
+                continue
+            if re.search(r"(start|end).*time", result_col, flags=re.IGNORECASE):
+                # Ignore computing variance on things like that look like timestamps.
+                continue
+            if not is_numeric_dtype(results_df[result_col]):
+                continue
+            if results_df[result_col].unique().size == 1:
+                continue
+            results_groups_perf = results_groups[result_col]
+            stats_df = pandas.DataFrame()
+            stats_df[result_col + ".mean"] = results_groups_perf.transform("mean", numeric_only=True)
+            stats_df[result_col + ".var"] = results_groups_perf.transform("var")
+            stats_df[result_col + ".stddev"] = stats_df[result_col + ".var"].apply(lambda x: x**0.5)
+
+            compute_zscore_for_group_agg(results_groups_perf, stats_df, result_col, "var")
+            quantiles = [0.50, 0.75, 0.90, 0.95, 0.99]
+            for quantile in quantiles:     # TODO: can we do this in one pass?
+                quantile_col = result_col + f".p{int(quantile*100)}"
+                stats_df[quantile_col] = results_groups_perf.transform("quantile", quantile)
+            augmented_results_df = pandas.concat([augmented_results_df, stats_df], axis=1)
+        return augmented_results_df
 
     def top_n_configs(self,
                       *,
