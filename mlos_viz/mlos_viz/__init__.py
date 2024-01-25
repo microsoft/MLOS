@@ -8,7 +8,9 @@ from the mlos_bench framework for benchmarking and optimization automation.
 """
 
 from enum import Enum
-from typing import Any
+from typing import Any, Dict, Literal, Optional
+
+import pandas
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_viz import base
@@ -41,7 +43,9 @@ def ignore_plotter_warnings(plotter_method: MlosVizMethod = MlosVizMethod.AUTO) 
         raise NotImplementedError(f"Unhandled method: {plotter_method}")
 
 
-def plot(exp_data: ExperimentData,
+def plot(exp_data: Optional[ExperimentData] = None, *,
+         results_df: Optional[pandas.DataFrame] = None,
+         objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
          plotter_method: MlosVizMethod = MlosVizMethod.AUTO,
          filter_warnings: bool = True,
          **kwargs: Any) -> None:
@@ -54,6 +58,12 @@ def plot(exp_data: ExperimentData,
     ----------
     exp_data: ExperimentData
         The experiment data to plot.
+    results_df : Optional["pandas.DataFrame"]
+        Optional results_df to plot.
+        If not provided, defaults to exp_data.results_df property.
+    objectives : Optional[Dict[str, Literal["min", "max"]]]
+        Optional objectives to plot.
+        If not provided, defaults to exp_data.objectives property.
     plotter_method: MlosVizMethod
         The method to use for visualizing the experiment results.
     filter_warnings: bool
@@ -63,12 +73,13 @@ def plot(exp_data: ExperimentData,
     """
     if filter_warnings:
         ignore_plotter_warnings(plotter_method)
+    (results_df, _obj_cols) = ExperimentData.expand_results_data_args(exp_data, results_df, objectives)
 
-    base.plot_optimizer_trends(exp_data)
-    base.plot_top_n_configs(exp_data, **kwargs)
+    base.plot_optimizer_trends(exp_data, results_df=results_df, objectives=objectives)
+    base.plot_top_n_configs(exp_data, results_df=results_df, objectives=objectives, **kwargs)
 
     if MlosVizMethod.DABL:
         import mlos_viz.dabl    # pylint: disable=import-outside-toplevel
-        mlos_viz.dabl.plot(exp_data)
+        mlos_viz.dabl.plot(exp_data, results_df=results_df, objectives=objectives)
     else:
         raise NotImplementedError(f"Unhandled method: {plotter_method}")

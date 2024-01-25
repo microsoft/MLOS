@@ -5,14 +5,20 @@
 """
 Small wrapper functions for dabl plotting functions via mlos_bench data.
 """
+from typing import Dict, Optional, Literal
+
 import warnings
 
 import dabl
+import pandas
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
 
 
-def plot(exp_data: ExperimentData) -> None:
+def plot(exp_data: Optional[ExperimentData] = None, *,
+         results_df: Optional[pandas.DataFrame] = None,
+         objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
+         ) -> None:
     """
     Plots the Experiment results data using dabl.
 
@@ -20,12 +26,16 @@ def plot(exp_data: ExperimentData) -> None:
     ----------
     exp_data : ExperimentData
         The ExperimentData (e.g., obtained from the storage layer) to plot.
+    results_df : Optional["pandas.DataFrame"]
+        Optional results_df to plot.
+        If not provided, defaults to exp_data.results_df property.
+    objectives : Optional[Dict[str, Literal["min", "max"]]]
+        Optional objectives to plot.
+        If not provided, defaults to exp_data.objectives property.
     """
-    for objective in exp_data.objectives:
-        objective_column = ExperimentData.RESULT_COLUMN_PREFIX + objective
-        results_df = exp_data.results_df
-        assert objective_column in results_df.columns
-        dabl.plot(X=results_df, target_col=objective_column)
+    (results_df, obj_cols) = ExperimentData.expand_results_data_args(exp_data, results_df, objectives)
+    for obj_col in obj_cols:
+        dabl.plot(X=results_df, target_col=obj_col)
 
 
 def ignore_plotter_warnings() -> None:

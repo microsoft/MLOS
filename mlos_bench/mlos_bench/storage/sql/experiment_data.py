@@ -5,7 +5,7 @@
 """
 An interface to access the experiment benchmark data stored in SQL DB.
 """
-from typing import Dict, Optional
+from typing import Dict, Literal, Optional
 
 import logging
 
@@ -51,8 +51,8 @@ class ExperimentSqlData(ExperimentData):
         self._schema = schema
 
     @property
-    def objectives(self) -> Dict[str, str]:
-        objectives: Dict[str, str] = {}
+    def objectives(self) -> Dict[str, Literal["min", "max"]]:
+        objectives: Dict[str, Literal["min", "max"]] = {}
         # First try to lookup the objectives from the experiment metadata in the storage layer.
         if hasattr(self._schema, "objectives"):
             with self._engine.connect() as conn:
@@ -60,6 +60,7 @@ class ExperimentSqlData(ExperimentData):
                     self._schema.objectives.select().where(
                         self._schema.objectives.c.exp_id == self._experiment_id,
                     ).order_by(
+                        # TODO: return weight as well
                         self._schema.objectives.c.weight.desc(),
                         self._schema.objectives.c.optimization_target.asc(),
                     )
@@ -98,6 +99,8 @@ class ExperimentSqlData(ExperimentData):
             elif opt_direction != objectives[opt_target]:
                 _LOG.warning("Experiment %s has multiple trial optimization directions for optimization_target %s=%s",
                              self, opt_target, objectives[opt_target])
+        for opt_tgt, opt_dir in objectives.items():
+            assert opt_dir in (None, "min", "max"), f"Unexpected opt_dir {opt_dir} for opt_tgt {opt_tgt}."
         return objectives
 
     # TODO: provide a way to get individual data to avoid repeated bulk fetches where only small amounts of data is accessed.
@@ -174,7 +177,7 @@ class ExperimentSqlData(ExperimentData):
                 ).where(
                     self._schema.trial.c.exp_id == self._experiment_id,
                     self._schema.trial.c.trial_id.in_(
-                       self._schema.trial_param.select().with_only_columns(
+                        self._schema.trial_param.select().with_only_columns(
                             func.min(self._schema.trial_param.c.trial_id).cast(Integer).label("first_trial_id_with_defaults"),
                         ).where(
                             self._schema.trial_param.c.exp_id == self._experiment_id,

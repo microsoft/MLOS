@@ -77,7 +77,7 @@ class ExperimentData(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def objectives(self) -> Dict[str, str]:
+    def objectives(self) -> Dict[str, Literal["min", "max"]]:
         """
         Retrieve the experiment's objectives data from the storage.
 
@@ -167,8 +167,11 @@ class ExperimentData(metaclass=ABCMeta):
             trial was not successful.
         """
 
-    def augment_results_df_with_config_trial_group_stats(
-            self, requested_result_cols: Optional[Iterable[str]] = None) -> pandas.DataFrame:
+    def augment_results_df_with_config_trial_group_stats(self, *,
+                                                         results_df: Optional[pandas.DataFrame] = None,
+                                                         requested_result_cols: Optional[Iterable[str]] = None,
+                                                         ) -> pandas.DataFrame:
+        # pylint: disable=too-complex
         """
         Add a number of useful statistical measure columns to the results dataframe.
 
@@ -185,9 +188,10 @@ class ExperimentData(metaclass=ABCMeta):
                 This can be useful for filtering out outliers
                 (e.g., configs with high variance relative to others by restricting to abs <= 2)
 
-
         Parameters
         ----------
+        results_df : Optional[pandas.DataFrame]
+            The results dataframe to augment, by default None to use the results_df property.
         requested_result_cols : Optional[Iterable[str]]
             Which results columns to augment, by default None to use all results columns.
 
@@ -196,16 +200,19 @@ class ExperimentData(metaclass=ABCMeta):
         pandas.DataFrame
             The augmented results dataframe.
         """
-        results_df = self.results_df
+        if results_df is None:
+            results_df = self.results_df
         results_groups = results_df.groupby("tunable_config_id")
-        if requested_result_cols is None:
-            result_cols = set(results_df.columns)
-        else:
-            result_cols = set(col for col in requested_result_cols if col in results_df.columns)
-            result_cols.update(set(self.RESULT_COLUMN_PREFIX + col
-                                   for col in requested_result_cols if self.RESULT_COLUMN_PREFIX in results_df.columns))
         if len(results_groups) <= 1:
             raise ValueError(f"Not enough data: {len(results_groups)}")
+
+        if requested_result_cols is None:
+            result_cols = set(col for col in results_df.columns if col.startswith(self.RESULT_COLUMN_PREFIX))
+        else:
+            result_cols = set(col for col in requested_result_cols
+                              if col.startswith(self.RESULT_COLUMN_PREFIX) and col in results_df.columns)
+            result_cols.update(set(self.RESULT_COLUMN_PREFIX + col for col in requested_result_cols
+                                   if self.RESULT_COLUMN_PREFIX in results_df.columns))
 
         def compute_zscore_for_group_agg(
                 results_groups_perf: "SeriesGroupBy",
@@ -247,12 +254,63 @@ class ExperimentData(metaclass=ABCMeta):
             augmented_results_df = pandas.concat([augmented_results_df, stats_df], axis=1)
         return augmented_results_df
 
+    @staticmethod
+    def expand_results_data_args(
+        exp_data: Optional["ExperimentData"] = None,
+        results_df: Optional[pandas.DataFrame] = None,
+        objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
+    ) -> Tuple[pandas.DataFrame, Dict[str, bool]]:
+        """
+        Expands some common arguments for working with results data.
+
+        Used by mlos_viz as well.
+
+        Parameters
+        ----------
+        exp_data : Optional[ExperimentData], optional
+            ExperimentData to operate on.
+        results_df : Optional[pandas.DataFrame], optional
+            Optional results_df argument.
+            Defaults to exp_data.results_df property.
+        objectives : Optional[Dict[str, Literal["min", "max"]]], optional
+            Optional objectives set to operate on.
+            Defaults to exp_data.objectives property.
+
+        Returns
+        -------
+        Tuple[pandas.DataFrame, Dict[str, bool]]
+            The results dataframe and the objectives columns in the dataframe, plus whether or not they are in ascending order.
+        """
+        # Prepare the orderby columns.
+        if results_df is None:
+            if exp_data is None:
+                raise ValueError("Must provide either exp_data or both results_df and objectives.")
+            results_df = exp_data.results_df
+
+        if objectives is None:
+            if exp_data is None:
+                raise ValueError("Must provide either exp_data or both results_df and objectives.")
+            objectives = exp_data.objectives
+        objs_cols: Dict[str, bool] = {}
+        for (opt_tgt, opt_dir) in objectives.items():
+            if opt_dir not in ["min", "max"]:
+                raise ValueError(f"Unexpected optimization direction for target {opt_tgt}: {opt_dir}")
+            ascending = opt_dir == "min"
+            if opt_tgt.startswith(ExperimentData.RESULT_COLUMN_PREFIX) and opt_tgt in results_df.columns:
+                objs_cols[opt_tgt] = ascending
+            elif ExperimentData.RESULT_COLUMN_PREFIX + opt_tgt in results_df.columns:
+                objs_cols[ExperimentData.RESULT_COLUMN_PREFIX + opt_tgt] = ascending
+            else:
+                raise UserWarning(f"{opt_tgt} is not a result column for experiment {exp_data}")
+        return (results_df, objs_cols)
+
     def top_n_configs(self,
                       *,
-                      top_n_configs: int = 20,
-                      objective_name: Optional[str] = None,
-                      method: Union[Literal["mean", "median"], float] = "mean",
-                      ) -> Tuple[pandas.DataFrame, List[int], str, str]:
+                      results_df: Optional[pandas.DataFrame] = None,
+                      top_n_configs: int = 10,
+                      objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
+                      method: Literal["mean", "p50", "p75", "p90", "p95", "p99"] = "mean",
+                      ) -> Tuple[pandas.DataFrame, List[int], Dict[str, bool]]:
         # pylint: disable=too-complex
         # pylint: disable=too-many-branches
         # pylint: disable=too-many-locals
@@ -262,43 +320,38 @@ class ExperimentData(metaclass=ABCMeta):
 
         Parameters
         ----------
+        results_df : Optional[pandas.DataFrame]
+            The results dataframe to augment, by default None to use the results_df property.
         top_n_configs : int, optional
             How many configs to return, including the default, by default 20.
-        objective_name : str, optional
-            Which objective to use for sorting the configs, by default None to
-            automatically select the first objective.
-        method : Union[Literal["mean", "median"], float], optional
+        objectives : Iterable[str], optional
+            Which result column(s) to use for sorting the configs, and in which direction ("min" or "max").
+            By default None to automatically select the experiment objectives.
+        method: Literal["mean", "median", "p50", "p75", "p90", "p95", "p99"] = "mean",
             Which statistical method to use when sorting the config groups before determining the cutoff, by default "mean".
-            If a float is used, the value is expected to be between 0 and 1 and will be used as a percentile cutoff.
 
         Returns
         -------
-        (top_n_config_results_df, top_n_config_ids, opt_target, opt_direction) : Tuple[pandas.DataFrame, List[int], str, str]
-            The filtered results dataframe, the optimization target, and the optimization direction.
+        (top_n_config_results_df, top_n_config_ids, orderby_cols) : Tuple[pandas.DataFrame, List[int], Dict[str, bool]]
+            The filtered results dataframe, the config ids, and the columns used to order the configs.
         """
         # Do some input checking first.
-        if isinstance(method, float):
-            if 0 < method or method > 1:
-                raise ValueError(f"Invalid method quantile range: {method}")
-        elif isinstance(method, str):
-            if method not in ("mean", "median"):
-                raise ValueError(f"Invalid method: {method}")
-        else:
-            raise ValueError(f"Invalid method type {type(method)} for method {method}")
+        if method not in ["mean", "median", "p50", "p75", "p90", "p95", "p99"]:
+            raise ValueError(f"Invalid method: {method}")
 
-        if objective_name is None:
-            (opt_target, opt_direction) = next(iter(self.objectives.items()))
-        else:
-            (opt_target, opt_direction) = (objective_name, self.objectives[objective_name])
-        if opt_direction not in ("min", "max"):
-            raise ValueError(f"Unexpected optimization direction for target {opt_target}: {opt_direction}")
+        # Prepare the orderby columns.
+        (results_df, objs_cols) = ExperimentData.expand_results_data_args(self, results_df=results_df, objectives=objectives)
 
-        opt_target_col = self.RESULT_COLUMN_PREFIX + opt_target
+        # Augment the results dataframe with some useful stats.
+        results_df = self.augment_results_df_with_config_trial_group_stats(
+            results_df=results_df,
+            requested_result_cols=objs_cols.keys(),
+        )
+        orderby_cols: Dict[str, bool] = {obj_col + f".{method}": ascending for (obj_col, ascending) in objs_cols.items()}
+
         config_id_col = "tunable_config_id"
         group_id_col = "tunable_config_trial_group_id"     # first trial_id per config group
-
-        # Start by filtering out some outliers.
-        results_df = self.results_df
+        trial_id_col = "trial_id"
 
         default_config_id = self.default_tunable_config_id
         assert default_config_id is not None, "Failed to determine default config id."
@@ -306,61 +359,37 @@ class ExperimentData(metaclass=ABCMeta):
         # Filter out configs whose variance is too large.
         # But also make sure the default configs is still in the resulting dataframe
         # (for comparison purposes).
-
-        non_default_config_groups_perf = results_df.loc[
-            (results_df[config_id_col] != default_config_id)
-        ].groupby(config_id_col)[opt_target_col]
-        if len(non_default_config_groups_perf) == 0:
-            raise ValueError(f"Not enough data: {len(non_default_config_groups_perf)}")
-
-        non_default_config_groups_perf_zscores = zscore(non_default_config_groups_perf.var())
-        filtered_config_results_df = results_df.loc[((results_df[config_id_col] == default_config_id) | (
-            results_df[config_id_col].isin(
-                non_default_config_groups_perf_zscores[non_default_config_groups_perf_zscores < 2].index
-            ))
-        )].reset_index()
-        print(filtered_config_results_df[config_id_col].unique())
+        for obj_col in objs_cols:
+            results_df = results_df.loc[(
+                (results_df[f"{obj_col}.var_zscore"] < 2)
+                | (results_df[config_id_col] == default_config_id)
+            )]
 
         # Also, filter results that are worse than the default.
-
         default_config_results_df = results_df.loc[results_df[config_id_col] == default_config_id]
-        if method == "mean":
-            default_val = default_config_results_df[opt_target_col].mean(numeric_only=True)
-        elif method == "median":
-            default_val = default_config_results_df[opt_target_col].median(numeric_only=True)
-        elif isinstance(method, float) and 0 < method <= 1:
-            default_val = default_config_results_df[opt_target_col].quantile(method)
-        print(default_val)
+        for (orderby_col, ascending) in orderby_cols.items():
+            default_vals = default_config_results_df[orderby_col].unique()
+            assert len(default_vals) == 1
+            default_val = default_vals[0]
+            if ascending:
+                results_df = results_df.loc[(results_df[orderby_col] <= default_val)]
+            else:
+                results_df = results_df.loc[(results_df[orderby_col] >= default_val)]
 
-        filtered_groups_perf = filtered_config_results_df.groupby(config_id_col)[opt_target_col]
-        print(filtered_groups_perf.mean())
-        if opt_direction == "min":
-            filtered_config_results_df = filtered_config_results_df.loc[(filtered_groups_perf.mean() <= default_val)]
-        elif opt_direction == "max":
-            filtered_config_results_df = filtered_config_results_df.loc[(filtered_groups_perf.mean() >= default_val)]
-
-        # Now regroup and filter to the top-N.
-        grouped = results_df.groupby(config_id_col)
-        if method == "mean":
-            intermediate = grouped.mean(numeric_only=True)
-        elif method == "median":
-            intermediate = grouped.median(numeric_only=True)
-        elif isinstance(method, float) and 0 < method <= 1:
-            intermediate = grouped.quantile(method, numeric_only=True)
-        top_n_config_ids: List[int] = intermediate.sort_values(
-            by=opt_target_col, ascending=opt_direction == "min").head(top_n_configs).index.tolist()
+        # Now regroup and filter to the top-N configs by their group performance dimensions.
+        group_results_df: pandas.DataFrame = results_df.groupby(config_id_col).first()[orderby_cols.keys()]
+        top_n_config_ids: List[int] = group_results_df.sort_values(
+            by=list(orderby_cols.keys()), ascending=list(orderby_cols.values())).head(top_n_configs).index.tolist()
 
         # Remove the default config if it's included. We'll add it back later.
         if default_config_id in top_n_config_ids:
             top_n_config_ids.remove(default_config_id)
-        # Get just the top-n config reults.
+        # Get just the top-n config results.
         # Sort by the group ids.
-        top_n_config_results_df = filtered_config_results_df[(
-            filtered_config_results_df[config_id_col].isin(top_n_config_ids)
-        )].sort_values([group_id_col, config_id_col])
-        print(top_n_config_results_df[config_id_col].unique())
+        top_n_config_results_df = results_df.loc[(
+            results_df[config_id_col].isin(top_n_config_ids)
+        )].sort_values([group_id_col, config_id_col, trial_id_col])
         # Place the default config at the top of the list.
         top_n_config_ids.insert(0, default_config_id)
-        print(default_config_results_df[config_id_col].unique())
         top_n_config_results_df = pandas.concat([default_config_results_df, top_n_config_results_df], axis=0)
-        return (top_n_config_results_df, top_n_config_ids, opt_target, opt_direction)
+        return (top_n_config_results_df, top_n_config_ids, orderby_cols)
