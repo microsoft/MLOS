@@ -206,6 +206,7 @@ def limit_top_n_configs(exp_data: Optional[ExperimentData] = None,
 
     # Prepare the orderby columns.
     (results_df, objs_cols) = expand_results_data_args(exp_data, results_df=results_df, objectives=objectives)
+    assert isinstance(results_df, pandas.DataFrame)
 
     # Augment the results dataframe with some useful stats.
     results_df = augment_results_df_with_config_trial_group_stats(
@@ -213,6 +214,10 @@ def limit_top_n_configs(exp_data: Optional[ExperimentData] = None,
         results_df=results_df,
         requested_result_cols=objs_cols.keys(),
     )
+    # Note: mypy seems to lose its mind for some reason and keeps forgetting that
+    # results_df is not None and is in fact a DataFrame, so we periodically assert
+    # it in this func for now.
+    assert results_df is not None
     orderby_cols: Dict[str, bool] = {obj_col + f".{method}": ascending for (obj_col, ascending) in objs_cols.items()}
 
     config_id_col = "tunable_config_id"
@@ -226,10 +231,12 @@ def limit_top_n_configs(exp_data: Optional[ExperimentData] = None,
     # But also make sure the default configs is still in the resulting dataframe
     # (for comparison purposes).
     for obj_col in objs_cols:
+        assert results_df is not None
         results_df = results_df.loc[(
             (results_df[f"{obj_col}.var_zscore"] < 2)
             | (results_df[config_id_col] == default_config_id)
         )]
+    assert results_df is not None
 
     # Also, filter results that are worse than the default.
     default_config_results_df = results_df.loc[results_df[config_id_col] == default_config_id]
@@ -237,12 +244,14 @@ def limit_top_n_configs(exp_data: Optional[ExperimentData] = None,
         default_vals = default_config_results_df[orderby_col].unique()
         assert len(default_vals) == 1
         default_val = default_vals[0]
+        assert results_df is not None
         if ascending:
             results_df = results_df.loc[(results_df[orderby_col] <= default_val)]
         else:
             results_df = results_df.loc[(results_df[orderby_col] >= default_val)]
 
     # Now regroup and filter to the top-N configs by their group performance dimensions.
+    assert results_df is not None
     group_results_df: pandas.DataFrame = results_df.groupby(config_id_col).first()[orderby_cols.keys()]
     top_n_config_ids: List[int] = group_results_df.sort_values(
         by=list(orderby_cols.keys()), ascending=list(orderby_cols.values())).head(top_n_configs).index.tolist()
