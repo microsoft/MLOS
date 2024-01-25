@@ -100,7 +100,7 @@ class ExperimentSqlData(ExperimentData):
                 _LOG.warning("Experiment %s has multiple trial optimization directions for optimization_target %s=%s",
                              self, opt_target, objectives[opt_target])
         for opt_tgt, opt_dir in objectives.items():
-            assert opt_dir in (None, "min", "max"), f"Unexpected opt_dir {opt_dir} for opt_tgt {opt_tgt}."
+            assert opt_dir in {None, "min", "max"}, f"Unexpected opt_dir {opt_dir} for opt_tgt {opt_tgt}."
         return objectives
 
     # TODO: provide a way to get individual data to avoid repeated bulk fetches where only small amounts of data is accessed.
@@ -116,7 +116,8 @@ class ExperimentSqlData(ExperimentData):
             tunable_config_trial_groups = conn.execute(
                 self._schema.trial.select().with_only_columns(
                     self._schema.trial.c.config_id,
-                    func.min(self._schema.trial.c.trial_id).cast(Integer).label('tunable_config_trial_group_id'),
+                    func.min(self._schema.trial.c.trial_id).cast(Integer).label(    # pylint: disable=not-callable
+                        'tunable_config_trial_group_id'),
                 ).where(
                     self._schema.trial.c.exp_id == self._experiment_id,
                 ).group_by(
@@ -178,7 +179,8 @@ class ExperimentSqlData(ExperimentData):
                     self._schema.trial.c.exp_id == self._experiment_id,
                     self._schema.trial.c.trial_id.in_(
                         self._schema.trial_param.select().with_only_columns(
-                            func.min(self._schema.trial_param.c.trial_id).cast(Integer).label("first_trial_id_with_defaults"),
+                            func.min(self._schema.trial_param.c.trial_id).cast(Integer).label(  # pylint: disable=not-callable
+                                "first_trial_id_with_defaults"),
                         ).where(
                             self._schema.trial_param.c.exp_id == self._experiment_id,
                             self._schema.trial_param.c.param_id == "is_defaults",

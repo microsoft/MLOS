@@ -52,7 +52,8 @@ class TunableConfigTrialGroupSqlData(TunableConfigTrialGroupData):
         with self._engine.connect() as conn:
             tunable_config_trial_group = conn.execute(
                 self._schema.trial.select().with_only_columns(
-                    func.min(self._schema.trial.c.trial_id).cast(Integer).label('tunable_config_trial_group_id'),
+                    func.min(self._schema.trial.c.trial_id).cast(Integer).label(    # pylint: disable=not-callable
+                        'tunable_config_trial_group_id'),
                 ).where(
                     self._schema.trial.c.exp_id == self._experiment_id,
                     self._schema.trial.c.config_id == self._tunable_config_id,

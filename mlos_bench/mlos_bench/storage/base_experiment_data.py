@@ -8,7 +8,7 @@ Base interface for accessing the stored benchmark experiment data.
 
 from abc import ABCMeta, abstractmethod
 from distutils.util import strtobool    # pylint: disable=deprecated-module
-from typing import Dict, List, Literal, Optional, Iterable, Tuple, Union, TYPE_CHECKING
+from typing import Dict, Literal, Optional, Tuple, TYPE_CHECKING
 
 import pandas
 
