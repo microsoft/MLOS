@@ -14,6 +14,7 @@ import pandas
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_viz import base
+from mlos_viz.util import expand_results_data_args
 
 
 class MlosVizMethod(Enum):
@@ -73,7 +74,7 @@ def plot(exp_data: Optional[ExperimentData] = None, *,
     """
     if filter_warnings:
         ignore_plotter_warnings(plotter_method)
-    (results_df, _obj_cols) = ExperimentData.expand_results_data_args(exp_data, results_df, objectives)
+    (results_df, _obj_cols) = expand_results_data_args(exp_data, results_df, objectives)
 
     base.plot_optimizer_trends(exp_data, results_df=results_df, objectives=objectives)
     base.plot_top_n_configs(exp_data, results_df=results_df, objectives=objectives, **kwargs)

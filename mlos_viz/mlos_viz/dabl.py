@@ -14,6 +14,8 @@ import pandas
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
 
+from mlos_viz.util import expand_results_data_args
+
 
 def plot(exp_data: Optional[ExperimentData] = None, *,
          results_df: Optional[pandas.DataFrame] = None,
@@ -33,7 +35,7 @@ def plot(exp_data: Optional[ExperimentData] = None, *,
         Optional objectives to plot.
         If not provided, defaults to exp_data.objectives property.
     """
-    (results_df, obj_cols) = ExperimentData.expand_results_data_args(exp_data, results_df, objectives)
+    (results_df, obj_cols) = expand_results_data_args(exp_data, results_df, objectives)
     for obj_col in obj_cols:
         dabl.plot(X=results_df, target_col=obj_col)
 
