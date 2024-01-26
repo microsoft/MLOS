@@ -85,18 +85,33 @@ def augment_results_df_with_config_trial_group_stats(exp_data: Optional[Experime
     """
     Add a number of useful statistical measure columns to the results dataframe.
 
-    In particular, for each numeric result, we add the following columns:
-        ".p50" - the median of each config trial group results
-        ".p75" - the p75 of each config trial group results
-        ".p90" - the p90 of each config trial group results
-        ".p95" - the p95 of each config trial group results
-        ".p99" - the p95 of each config trial group results
-        ".mean" - the mean of each config trial group results
-        ".stddev" - the mean of each config trial group results
-        ".var" - the variance of each config trial group results
-        ".var_zscore" - the zscore of this group (i.e., variance relative to the stddev of all group variances)
-            This can be useful for filtering out outliers
-            (e.g., configs with high variance relative to others by restricting to abs <= 2)
+    In particular, for each numeric result, we add the following columns for each
+    requested result column:
+
+    - ".p50": the median of each config trial group results
+
+    - ".p75": the p75 of each config trial group results
+
+    - ".p90": the p90 of each config trial group results
+
+    - ".p95": the p95 of each config trial group results
+
+    - ".p99": the p95 of each config trial group results
+
+    - ".mean": the mean of each config trial group results
+
+    - ".stddev": the mean of each config trial group results
+
+    - ".var": the variance of each config trial group results
+
+    - ".var_zscore": the zscore of this group (i.e., variance relative to the stddev
+      of all group variances).
+    This can be useful for filtering out outliers (e.g., configs with high
+    variance relative to others by restricting to abs < 2 to remove those two
+    standard deviations from the mean).
+
+    Additionally, we add a "tunable_config_trial_group_size" column that indicates
+    the number of trials using a particular config.
 
     Parameters
     ----------
@@ -105,7 +120,8 @@ def augment_results_df_with_config_trial_group_stats(exp_data: Optional[Experime
     results_df : Optional[pandas.DataFrame]
         The results dataframe to augment, by default None to use the results_df property.
     requested_result_cols : Optional[Iterable[str]]
-        Which results columns to augment, by default None to use all results columns.
+        Which results columns to augment, by default None to use all results columns
+        that look numeric.
 
     Returns
     -------
