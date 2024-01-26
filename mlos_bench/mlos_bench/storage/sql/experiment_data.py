@@ -5,7 +5,7 @@
 """
 An interface to access the experiment benchmark data stored in SQL DB.
 """
-from typing import Dict
+from typing import Dict, Optional
 
 import logging
 
