@@ -15,7 +15,7 @@ from typing import List
 import pytest
 
 from mlos_bench.launcher import Launcher
-from mlos_bench.optimizers import MockOptimizer
+from mlos_bench.optimizers import OneShotOptimizer, MlosCoreOptimizer
 from mlos_bench.os_environ import environ
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.util import path_join
@@ -100,9 +100,11 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     env_config = launcher.config_loader.load_config(env_conf_path, ConfigSchema.ENVIRONMENT)
     assert check_class_name(launcher.environment, env_config['class'])
     # Check that the optimizer looks right.
-    assert isinstance(launcher.optimizer, MockOptimizer)
+    assert isinstance(launcher.optimizer, OneShotOptimizer)
     # Check that the optimizer got initialized with defaults.
     assert launcher.optimizer.tunable_params.is_defaults()
+    assert launcher.trial_config_repeat_count == 1  # default when left unspecified
+    assert launcher.optimizer.max_iterations == 1   # value for OneShotOptimizer
 
 
 def test_launcher_args_parse_2(config_paths: List[str]) -> None:
@@ -120,15 +122,17 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
         environ['USER'] = environ['USERNAME']
 
     config_file = 'cli/test-cli-config.jsonc'
+    globals_file = 'globals/global_test_config.jsonc'
     cli_args = ' '.join([f"--config-path {config_path}" for config_path in config_paths]) + \
         f' --config {config_file}' + \
         ' --service services/remote/mock/mock_auth_service.jsonc' + \
         ' --service services/remote/mock/mock_remote_exec_service.jsonc' + \
-        ' --globals globals/global_test_config.jsonc' + \
+        f' --globals {globals_file}' + \
         ' --experiment_id MockeryExperiment' + \
         ' --no-teardown' + \
         ' --random-init' + \
-        ' --random-seed 1234'
+        ' --random-seed 1234' + \
+        ' --trial-config-repeat-count 3'
     launcher = Launcher(description=__name__, argv=cli_args.split())
     # Check that the parent service
     assert isinstance(launcher.service, SupportsAuth)
@@ -157,7 +161,18 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     assert check_class_name(launcher.environment, env_config['class'])
 
     # Check that the optimizer looks right.
-    assert isinstance(launcher.optimizer, MockOptimizer)
+    assert isinstance(launcher.optimizer, MlosCoreOptimizer)
+    opt_config_file = config['optimizer']
+    opt_config = launcher.config_loader.load_config(opt_config_file, ConfigSchema.OPTIMIZER)
+    globals_file_config = launcher.config_loader.load_config(globals_file, ConfigSchema.GLOBALS)
+    assert launcher.trial_config_repeat_count == 3
+    # The actual global_config gets overwritten as a part of processing, so to test
+    # this we read the original value out of the source files.
+    orig_max_iters = globals_file_config.get('max_iterations', opt_config.get('config', {}).get('max_iterations', 100))
+    assert launcher.optimizer.max_iterations \
+        == launcher.trial_config_repeat_count * orig_max_iters \
+        == launcher.global_config['max_iterations']
+
     # Check that the optimizer got initialized with random values instead of the defaults.
     # Note: the environment doesn't get updated until suggest() is called to
     # return these values in run.py.

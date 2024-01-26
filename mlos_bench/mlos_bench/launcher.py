@@ -76,7 +76,7 @@ class Launcher:
         else:
             config = {}
 
-        self.trial_config_repeat_count = args.trial_config_repeat_count or config.get("trial_config_repeat_count", 1)
+        self.trial_config_repeat_count: int = args.trial_config_repeat_count or config.get("trial_config_repeat_count", 1)
 
         log_level = args.log_level or config.get("log_level", _LOG_LEVEL)
         try:
@@ -333,6 +333,8 @@ class Launcher:
         in the --optimizer command line option. If config file not specified,
         create a one-shot optimizer to run a single benchmark trial.
         """
+        if 'max_iterations' in self.global_config:
+            self.global_config['max_iterations'] *= self.trial_config_repeat_count
         if args_optimizer is None:
             # global_config may contain additional properties, so we need to
             # strip those out before instantiating the basic oneshot optimizer.
@@ -340,6 +342,8 @@ class Launcher:
             return OneShotOptimizer(
                 self.tunables, config=config, service=self._parent_service)
         class_config = self._config_loader.load_config(args_optimizer, ConfigSchema.OPTIMIZER)
+        if 'max_iterations' in class_config:
+            class_config['max_iterations'] *= self.trial_config_repeat_count
         assert isinstance(class_config, Dict)
         optimizer = self._config_loader.build_optimizer(tunables=self.tunables,
                                                         service=self._parent_service,
