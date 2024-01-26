@@ -144,6 +144,7 @@ def augment_results_df_with_config_trial_group_stats(exp_data: Optional[Experime
         stats_df.drop(columns=[result_col + ".var_" + agg for agg in ("mean", "stddev")], inplace=True)
 
     augmented_results_df = results_df
+    augmented_results_df["tunable_config_trial_group_size"] = results_groups["trial_id"].transform("count")
     for result_col in result_cols:
         if not result_col.startswith(ExperimentData.RESULT_COLUMN_PREFIX):
             continue
@@ -232,8 +233,13 @@ def limit_top_n_configs(exp_data: Optional[ExperimentData] = None,
     # (for comparison purposes).
     for obj_col in objs_cols:
         assert results_df is not None
+        if method == "mean":
+            singletons_mask = results_df["tunable_config_trial_group_size"] == 1
+        else:
+            singletons_mask = results_df["tunable_config_trial_group_size"] > 1
         results_df = results_df.loc[(
-            (results_df[f"{obj_col}.var_zscore"] < 2)
+            (results_df[f"{obj_col}.var_zscore"].abs() < 2)
+            | (singletons_mask)
             | (results_df[config_id_col] == default_config_id)
         )]
     assert results_df is not None
