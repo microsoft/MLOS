@@ -15,14 +15,16 @@ from mlos_bench.storage.base_experiment_data import ExperimentData
 
 from mlos_viz import MlosVizMethod, plot
 
+from mlos_viz.tests import BASE_MATPLOTLIB_SHOW_PATCH, SEABORN_BOXPLOT_PATCH
+
 
 def test_auto_method_type() -> None:
     """Ensure the AUTO method is what we expect."""
     assert MlosVizMethod.AUTO.value == MlosVizMethod.DABL.value
 
 
-@patch("mlos_viz.base.plt.show")
-@patch("dabl.plot.supervised.sns.boxplot")
+@patch(BASE_MATPLOTLIB_SHOW_PATCH)
+@patch(SEABORN_BOXPLOT_PATCH)
 def test_plot(mock_show: Mock, mock_boxplot: Mock, exp_data: ExperimentData) -> None:
     """Tests core plot() API."""
     # For now, just ensure that no errors are thrown.

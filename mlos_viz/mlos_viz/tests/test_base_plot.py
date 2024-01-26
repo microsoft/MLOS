@@ -14,8 +14,10 @@ from mlos_bench.storage.base_experiment_data import ExperimentData
 
 from mlos_viz.base import ignore_plotter_warnings, plot_optimizer_trends, plot_top_n_configs
 
+from mlos_viz.tests import BASE_MATPLOTLIB_SHOW_PATCH
 
-@patch("mlos_viz.base.plt.show")
+
+@patch(BASE_MATPLOTLIB_SHOW_PATCH)
 def test_plot_optimizer_trends(mock_show: Mock, exp_data: ExperimentData) -> None:
     """Tests plotting optimizer trends."""
     # For now, just ensure that no errors are thrown.
@@ -27,7 +29,7 @@ def test_plot_optimizer_trends(mock_show: Mock, exp_data: ExperimentData) -> Non
     assert mock_show.call_count == 1
 
 
-@patch("mlos_viz.base.plt.show")
+@patch(BASE_MATPLOTLIB_SHOW_PATCH)
 def test_plot_top_n_configs(mock_show: Mock, exp_data: ExperimentData) -> None:
     """Tests plotting top N configs."""
     # For now, just ensure that no errors are thrown.

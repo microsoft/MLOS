@@ -14,8 +14,10 @@ from mlos_bench.storage.base_experiment_data import ExperimentData
 
 from mlos_viz import dabl
 
+from mlos_viz.tests import SEABORN_BOXPLOT_PATCH
 
-@patch("dabl.plot.supervised.sns.boxplot")
+
+@patch(SEABORN_BOXPLOT_PATCH, create=True)
 def test_dabl_plot(mock_boxplot: Mock, exp_data: ExperimentData) -> None:
     """Tests plotting via dabl."""
     # For now, just ensure that no errors are thrown.
