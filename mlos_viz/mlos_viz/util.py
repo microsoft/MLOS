@@ -59,4 +59,4 @@ def expand_results_data_args(
             objs_cols[ExperimentData.RESULT_COLUMN_PREFIX + opt_tgt] = ascending
         else:
             raise UserWarning(f"{opt_tgt} is not a result column for experiment {exp_data}")
-    return (results_df, objs_cols)
+    return (results_df.copy(), objs_cols.copy())
