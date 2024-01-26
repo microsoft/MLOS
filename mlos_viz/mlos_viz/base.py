@@ -105,10 +105,10 @@ def augment_results_df_with_config_trial_group_stats(exp_data: Optional[Experime
     - ".var": the variance of each config trial group results
 
     - ".var_zscore": the zscore of this group (i.e., variance relative to the stddev
-      of all group variances).
-    This can be useful for filtering out outliers (e.g., configs with high
-    variance relative to others by restricting to abs < 2 to remove those two
-    standard deviations from the mean).
+      of all group variances). This can be useful for filtering out outliers (e.g.,
+      configs with high variance relative to others by restricting to abs < 2 to
+      remove those two standard deviations from the mean variance across all config
+      trial groups).
 
     Additionally, we add a "tunable_config_trial_group_size" column that indicates
     the number of trials using a particular config.
