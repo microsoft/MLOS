@@ -118,6 +118,16 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         return False  # Do not suppress exceptions
 
     @property
+    def max_iterations(self) -> int:
+        """
+        The maximum number of iterations (trials) to run.
+
+        Note: this may or may not be the same as the number of configurations.
+        See Also: Launcher.trial_config_repeat_count.
+        """
+        return self._max_iter
+
+    @property
     def seed(self) -> int:
         """
         The random seed for the optimizer.
