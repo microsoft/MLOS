@@ -51,8 +51,8 @@ def ignore_plotter_warnings() -> None:
 
 
 def _add_groupby_desc_column(results_df: pandas.DataFrame,
-                            groupby_columns: Optional[List[str]] = None,
-                            ) -> Tuple[pandas.DataFrame, List[str], str]:
+                             groupby_columns: Optional[List[str]] = None,
+                             ) -> Tuple[pandas.DataFrame, List[str], str]:
     """
     Adds a group descriptor column to the results_df.
 
