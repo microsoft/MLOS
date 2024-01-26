@@ -35,7 +35,7 @@ class Trial(Storage.Trial):
             tunables=tunables,
             experiment_id=experiment_id,
             trial_id=trial_id,
-            config_id=config_id,
+            tunable_config_id=config_id,
             opt_target=opt_target,
             opt_direction=opt_direction,
             config=config,
@@ -78,7 +78,6 @@ class Trial(Storage.Trial):
             except Exception:
                 conn.rollback()
                 raise
-
         return metrics
 
     def update_telemetry(self, status: Status, metrics: List[Tuple[datetime, str, Any]]) -> None:

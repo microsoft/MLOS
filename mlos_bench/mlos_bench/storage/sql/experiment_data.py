@@ -3,33 +3,45 @@
 # Licensed under the MIT License.
 #
 """
-An interface to access the benchmark data stored in SQL DB.
+An interface to access the experiment benchmark data stored in SQL DB.
 """
 from typing import Dict
 
 import logging
 
 import pandas
-from sqlalchemy import Engine
+from sqlalchemy import Engine, Integer, func
 
-from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_experiment_data import ExperimentData
-from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.base_trial_data import TrialData
-from mlos_bench.storage.sql.trial_data import TrialSqlData
+from mlos_bench.storage.base_tunable_config_data import TunableConfigData
+from mlos_bench.storage.base_tunable_config_trial_group_data import TunableConfigTrialGroupData
+from mlos_bench.storage.sql import common
+from mlos_bench.storage.sql.schema import DbSchema
+from mlos_bench.storage.sql.tunable_config_data import TunableConfigSqlData
+from mlos_bench.storage.sql.tunable_config_trial_group_data import TunableConfigTrialGroupSqlData
 
 _LOG = logging.getLogger(__name__)
 
 
 class ExperimentSqlData(ExperimentData):
     """
-    Base interface for accessing the stored benchmark data.
+    SQL interface for accessing the stored experiment benchmark data.
+
+    An experiment groups together a set of trials that are run with a given set of
+    scripts and mlos_bench configuration files.
     """
 
-    def __init__(self, *, engine: Engine, schema: DbSchema, exp_id: str,
-                 description: str, root_env_config: str, git_repo: str, git_commit: str):
+    def __init__(self, *,
+                 engine: Engine,
+                 schema: DbSchema,
+                 experiment_id: str,
+                 description: str,
+                 root_env_config: str,
+                 git_repo: str,
+                 git_commit: str):
         super().__init__(
-            exp_id=exp_id,
+            experiment_id=experiment_id,
             description=description,
             root_env_config=root_env_config,
             git_repo=git_repo,
@@ -46,7 +58,7 @@ class ExperimentSqlData(ExperimentData):
             with self._engine.connect() as conn:
                 objectives_db_data = conn.execute(
                     self._schema.objectives.select().where(
-                        self._schema.objectives.c.exp_id == self._exp_id,
+                        self._schema.objectives.c.exp_id == self._experiment_id,
                     ).order_by(
                         self._schema.objectives.c.weight.desc(),
                         self._schema.objectives.c.optimization_target.asc(),
@@ -64,8 +76,8 @@ class ExperimentSqlData(ExperimentData):
         # Experiment.
         # For now, we simply issue a warning about potentially inconsistent data.
         for trial in self.trials.values():
-            trial_objs_df = trial.metadata[
-                trial.metadata["parameter"].isin(("opt_target", "opt_direction"))
+            trial_objs_df = trial.metadata_df[
+                trial.metadata_df["parameter"].isin(("opt_target", "opt_direction"))
             ][["parameter", "value"]]
             try:
                 opt_targets = trial_objs_df[trial_objs_df["parameter"] == "opt_target"]
@@ -88,92 +100,60 @@ class ExperimentSqlData(ExperimentData):
                              self, opt_target, objectives[opt_target])
         return objectives
 
+    # TODO: provide a way to get individual data to avoid repeated bulk fetches where only small amounts of data is accessed.
+    # Or else make the TrialData object lazily populate.
+
     @property
     def trials(self) -> Dict[int, TrialData]:
+        return common.get_trials(self._engine, self._schema, self._experiment_id)
+
+    @property
+    def tunable_config_trial_groups(self) -> Dict[int, TunableConfigTrialGroupData]:
         with self._engine.connect() as conn:
-            cur_trials = conn.execute(
-                self._schema.trial.select().where(
-                    self._schema.trial.c.exp_id == self._exp_id,
-                ).order_by(
-                    self._schema.trial.c.exp_id.asc(),
-                    self._schema.trial.c.trial_id.asc(),
+            tunable_config_trial_groups = conn.execute(
+                self._schema.trial.select().with_only_columns(
+                    self._schema.trial.c.config_id,
+                    func.min(self._schema.trial.c.trial_id).cast(Integer).label('tunable_config_trial_group_id'),
+                ).where(
+                    self._schema.trial.c.exp_id == self._experiment_id,
+                ).group_by(
+                    self._schema.trial.c.exp_id,
+                    self._schema.trial.c.config_id,
                 )
             )
             return {
-                trial.trial_id: TrialSqlData(
+                tunable_config_trial_group.config_id: TunableConfigTrialGroupSqlData(
                     engine=self._engine,
                     schema=self._schema,
-                    exp_id=self._exp_id,
-                    trial_id=trial.trial_id,
-                    config_id=trial.config_id,
-                    ts_start=trial.ts_start,
-                    ts_end=trial.ts_end,
-                    status=Status[trial.status],
+                    experiment_id=self._experiment_id,
+                    tunable_config_id=tunable_config_trial_group.config_id,
+                    tunable_config_trial_group_id=tunable_config_trial_group.tunable_config_trial_group_id,
                 )
-                for trial in cur_trials.fetchall()
+                for tunable_config_trial_group in tunable_config_trial_groups.fetchall()
             }
 
     @property
-    def results(self) -> pandas.DataFrame:
-
+    def tunable_configs(self) -> Dict[int, TunableConfigData]:
         with self._engine.connect() as conn:
-
-            cur_trials = conn.execute(
-                self._schema.trial.select().where(
-                    self._schema.trial.c.exp_id == self._exp_id,
-                ).order_by(
-                    self._schema.trial.c.exp_id.asc(),
-                    self._schema.trial.c.trial_id.asc(),
-                )
-            )
-            trials_df = pandas.DataFrame(
-                [(row.trial_id, row.ts_start, row.ts_end, row.config_id, row.status)
-                 for row in cur_trials.fetchall()],
-                columns=['trial_id', 'ts_start', 'ts_end', 'config_id', 'status'])
-
-            cur_configs = conn.execute(
+            tunable_configs = conn.execute(
                 self._schema.trial.select().with_only_columns(
-                    self._schema.trial.c.trial_id,
+                    self._schema.trial.c.config_id.cast(Integer).label('config_id'),
+                ).where(
+                    self._schema.trial.c.exp_id == self._experiment_id,
+                ).group_by(
+                    self._schema.trial.c.exp_id,
                     self._schema.trial.c.config_id,
-                    self._schema.config_param.c.param_id,
-                    self._schema.config_param.c.param_value,
-                ).where(
-                    self._schema.trial.c.exp_id == self._exp_id,
-                ).join(
-                    self._schema.config_param,
-                    self._schema.config_param.c.config_id == self._schema.trial.c.config_id,
-                    isouter=True
-                ).order_by(
-                    self._schema.trial.c.trial_id,
                 )
             )
-            configs_df = pandas.DataFrame(
-                [(row.trial_id, row.config_id, self.CONFIG_COLUMN_PREFIX + row.param_id, row.param_value)
-                 for row in cur_configs.fetchall()],
-                columns=['trial_id', 'config_id', 'param', 'value']
-            ).pivot(
-                index=["trial_id", "config_id"], columns="param", values="value",
-            ).apply(pandas.to_numeric, errors='ignore')
-
-            cur_results = conn.execute(
-                self._schema.trial_result.select().with_only_columns(
-                    self._schema.trial_result.c.trial_id,
-                    self._schema.trial_result.c.metric_id,
-                    self._schema.trial_result.c.metric_value,
-                ).where(
-                    self._schema.trial_result.c.exp_id == self._exp_id,
-                ).order_by(
-                    self._schema.trial_result.c.trial_id,
-                    self._schema.trial_result.c.metric_id,
+            return {
+                tunable_config.config_id: TunableConfigSqlData(
+                    engine=self._engine,
+                    schema=self._schema,
+                    tunable_config_id=tunable_config.config_id,
                 )
-            )
-            results_df = pandas.DataFrame(
-                [(row.trial_id, self.RESULT_COLUMN_PREFIX + row.metric_id, row.metric_value)
-                 for row in cur_results.fetchall()],
-                columns=['trial_id', 'metric', 'value']
-            ).pivot(
-                index="trial_id", columns="metric", values="value",
-            ).apply(pandas.to_numeric, errors='ignore')
+                for tunable_config in tunable_configs.fetchall()
+            }
 
-            return trials_df.merge(configs_df, on=["trial_id", "config_id"], how="left") \
-                            .merge(results_df, on="trial_id", how="left")
+    @property
+    def results_df(self) -> pandas.DataFrame:
+        return common.get_results_df(self._engine, self._schema, self._experiment_id)

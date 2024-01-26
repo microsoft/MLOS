@@ -30,7 +30,6 @@ class Storage(metaclass=ABCMeta):
     """
 
     def __init__(self,
-                 tunables: TunableGroups,
                  config: Dict[str, Any],
                  global_config: Optional[dict] = None,
                  service: Optional[Service] = None):
@@ -39,15 +38,11 @@ class Storage(metaclass=ABCMeta):
 
         Parameters
         ----------
-        tunables : TunableGroups
-            Tunable parameters of the environment. We need them to validate the
-            configurations of merged-in experiments and restored/pending trials.
         config : dict
             Free-format key/value pairs of configuration parameters.
         """
         _LOG.debug("Storage config: %s", config)
         self._validate_json_config(config)
-        self._tunables = tunables.copy()
         self._service = service
         self._config = config.copy()
         self._global_config = global_config or {}
@@ -83,6 +78,7 @@ class Storage(metaclass=ABCMeta):
                    trial_id: int,
                    root_env_config: str,
                    description: str,
+                   tunables: TunableGroups,
                    opt_target: str,
                    opt_direction: Optional[str]) -> 'Storage.Experiment':
         """
@@ -102,6 +98,7 @@ class Storage(metaclass=ABCMeta):
             A path to the root JSON configuration file of the benchmarking environment.
         description : str
             Human-readable description of the experiment.
+        tunables : TunableGroups
         opt_target : str
             Name of metric we're optimizing for.
         opt_direction: Optional[str]
@@ -205,6 +202,11 @@ class Storage(metaclass=ABCMeta):
             return self._description
 
         @property
+        def tunables(self) -> TunableGroups:
+            """Get the Experiment's tunables"""
+            return self._tunables
+
+        @property
         def opt_target(self) -> str:
             """Get the Experiment's optimization target"""
             return self._opt_target
@@ -271,7 +273,7 @@ class Storage(metaclass=ABCMeta):
             Parameters
             ----------
             tunables : TunableGroups
-                Tunable parameters of the experiment.
+                Tunable parameters to use for the trial.
             config : dict
                 Key/value pairs of additional non-tunable parameters of the trial.
 
@@ -291,19 +293,19 @@ class Storage(metaclass=ABCMeta):
 
         def __init__(self, *,
                      tunables: TunableGroups, experiment_id: str, trial_id: int,
-                     config_id: int, opt_target: str, opt_direction: Optional[str],
+                     tunable_config_id: int, opt_target: str, opt_direction: Optional[str],
                      config: Optional[Dict[str, Any]] = None):
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
-            self._config_id = config_id
+            self._tunable_config_id = tunable_config_id
             self._opt_target = opt_target
             assert opt_direction in {None, "min", "max"}
             self._opt_direction = opt_direction
             self._config = config or {}
 
         def __repr__(self) -> str:
-            return f"{self._experiment_id}:{self._trial_id}"
+            return f"{self._experiment_id}:{self._trial_id}:{self._tunable_config_id}"
 
         @property
         def trial_id(self) -> int:
@@ -313,11 +315,11 @@ class Storage(metaclass=ABCMeta):
             return self._trial_id
 
         @property
-        def config_id(self) -> int:
+        def tunable_config_id(self) -> int:
             """
-            ID of the current trial configuration.
+            ID of the current trial (tunable) configuration.
             """
-            return self._config_id
+            return self._tunable_config_id
 
         @property
         def opt_target(self) -> str:

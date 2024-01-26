@@ -94,6 +94,7 @@ def _optimize(*,
             trial_id=trial_id,
             root_env_config=root_env_config,
             description=env.name,
+            tunables=env.tunable_params,
             opt_target=opt.target,
             opt_direction=opt.direction,
          ) as exp:

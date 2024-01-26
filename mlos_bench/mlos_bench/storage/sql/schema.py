@@ -52,6 +52,7 @@ class DbSchema:
         """
         _LOG.info("Create the DB schema for: %s", engine)
         self._engine = engine
+        # TODO: bind for automatic schema updates?
         self._meta = MetaData()
 
         self.experiment = Table(
