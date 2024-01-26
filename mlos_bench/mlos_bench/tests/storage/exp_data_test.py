@@ -140,3 +140,8 @@ def test_exp_data_tunable_configs(exp_data: ExperimentData) -> None:
     assert [config.tunable_config_id
             for config in exp_data.tunable_configs.values()
             ] == list(range(1, CONFIG_COUNT + 1))
+
+
+def test_exp_data_default_config_id(exp_data: ExperimentData) -> None:
+    """Tests the default_tunable_config_id property of ExperimentData"""
+    assert exp_data.default_tunable_config_id == 1
