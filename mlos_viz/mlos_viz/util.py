@@ -59,4 +59,9 @@ def expand_results_data_args(
             objs_cols[ExperimentData.RESULT_COLUMN_PREFIX + opt_tgt] = ascending
         else:
             raise UserWarning(f"{opt_tgt} is not a result column for experiment {exp_data}")
+    # Note: these copies are important to avoid issues with downstream consumers.
+    # It is more efficient to copy the dataframe than to go back to the original data source.
+    # TODO: However, it should be possible to later fixup the downstream consumers
+    # (which are currently still internal to mlos-viz) to make their own data
+    # sources if necessary.  That will of course need tests.
     return (results_df.copy(), objs_cols.copy())
