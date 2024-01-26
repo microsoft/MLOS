@@ -8,7 +8,7 @@ Unit tests for mlos_viz.
 
 import sys
 
-import seaborn  # pylint: disable=unused-import     # (used by patch)
+import seaborn  # pylint: disable=unused-import     # (used by patch)   # noqa: unused
 
 
 BASE_MATPLOTLIB_SHOW_PATCH = "mlos_viz.base.plt.show"
