@@ -26,7 +26,7 @@ from mlos_viz.util import expand_results_data_args
 _SEABORN_VERS = version('seaborn')
 
 
-def get_kwarg_defaults(target: Callable, **kwargs: Any) -> Dict[str, Any]:
+def _get_kwarg_defaults(target: Callable, **kwargs: Any) -> Dict[str, Any]:
     """
     Assembles a smaller kwargs dict for the specified target function.
 
@@ -50,7 +50,7 @@ def ignore_plotter_warnings() -> None:
                                 message="is_categorical_dtype is deprecated and will be removed in a future version.")
 
 
-def add_groupby_desc_column(results_df: pandas.DataFrame,
+def _add_groupby_desc_column(results_df: pandas.DataFrame,
                             groupby_columns: Optional[List[str]] = None,
                             ) -> Tuple[pandas.DataFrame, List[str], str]:
     """
@@ -313,7 +313,7 @@ def plot_optimizer_trends(
         If not provided, defaults to exp_data.objectives property.
     """
     (results_df, obj_cols) = expand_results_data_args(exp_data, results_df, objectives)
-    (results_df, groupby_columns, groupby_column) = add_groupby_desc_column(results_df)
+    (results_df, groupby_columns, groupby_column) = _add_groupby_desc_column(results_df)
 
     for (objective_column, ascending) in obj_cols.items():
         incumbent_column = objective_column + ".incumbent"
@@ -398,14 +398,14 @@ def plot_top_n_configs(exp_data: Optional[ExperimentData] = None,
         Remaining keyword arguments are passed along to the limit_top_n_configs function.
     """
     (results_df, _obj_cols) = expand_results_data_args(exp_data, results_df, objectives)
-    top_n_config_args = get_kwarg_defaults(limit_top_n_configs, **kwargs)
+    top_n_config_args = _get_kwarg_defaults(limit_top_n_configs, **kwargs)
     if "results_df" not in top_n_config_args:
         top_n_config_args["results_df"] = results_df
     if "objectives" not in top_n_config_args:
         top_n_config_args["objectives"] = objectives
     (top_n_config_results_df, _top_n_config_ids, orderby_cols) = limit_top_n_configs(exp_data=exp_data, **top_n_config_args)
 
-    (top_n_config_results_df, _groupby_columns, groupby_column) = add_groupby_desc_column(top_n_config_results_df)
+    (top_n_config_results_df, _groupby_columns, groupby_column) = _add_groupby_desc_column(top_n_config_results_df)
     top_n = len(top_n_config_results_df[groupby_column].unique()) - 1
 
     for (orderby_col, ascending) in orderby_cols.items():
