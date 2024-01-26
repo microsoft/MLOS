@@ -63,8 +63,6 @@ class DbSchema:
             Column("root_env_config", String(1024), nullable=False),
             Column("git_repo", String(1024), nullable=False),
             Column("git_commit", String(40), nullable=False),
-            Column("optimization_target", String(1024), nullable=True),
-            Column("optimization_direction", String(10), nullable=True),
 
             PrimaryKeyConstraint("exp_id"),
         )
