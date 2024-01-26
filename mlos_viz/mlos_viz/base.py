@@ -322,8 +322,7 @@ def plot_optimizer_trends(
         else:
             group_results_df[incumbent_column] = group_results_df[objective_column].cummax()
 
-        plt.rcParams["figure.figsize"] = (10, 5)
-        (_fig, axis) = plt.subplots()
+        (_fig, axis) = plt.subplots(figsize=(15, 5))
 
         # Result of each set of trials for a config
         sns.boxplot(
@@ -347,7 +346,7 @@ def plot_optimizer_trends(
         plt.ylabel(objective_column.replace(ExperimentData.RESULT_COLUMN_PREFIX, ""))
 
         plt.xlabel("Config Trial Group ID, Config ID")
-        plt.xticks(rotation=90)
+        plt.xticks(rotation=90, fontsize=8)
 
         plt.title("Optimizer Trends for Experiment: " + exp_data.experiment_id if exp_data is not None else "")
         plt.grid()
