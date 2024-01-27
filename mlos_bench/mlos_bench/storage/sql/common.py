@@ -138,7 +138,8 @@ def get_results_df(
             columns=['trial_id', 'tunable_config_id', 'param', 'value']
         ).pivot(
             index=["trial_id", "tunable_config_id"], columns="param", values="value",
-        ).apply(pandas.to_numeric, errors='ignore')
+        )
+        configs_df = configs_df.apply(pandas.to_numeric, errors='coerce').fillna(configs_df)    # type: ignore[assignment]  # (fp)
 
         # Get each trial's results in wide format.
         results_stmt = schema.trial_result.select().with_only_columns(
@@ -164,7 +165,8 @@ def get_results_df(
             columns=['trial_id', 'metric', 'value']
         ).pivot(
             index="trial_id", columns="metric", values="value",
-        ).apply(pandas.to_numeric, errors='ignore')
+        )
+        results_df = results_df.apply(pandas.to_numeric, errors='coerce').fillna(results_df)    # type: ignore[assignment]  # (fp)
 
         # Concat the trials, configs, and results.
         return trials_df.merge(configs_df, on=["trial_id", "tunable_config_id"], how="left") \
