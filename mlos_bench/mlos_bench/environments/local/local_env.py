@@ -193,7 +193,7 @@ class LocalEnv(ScriptEnv):
             _LOG.info("Local results have (metric,value) header and %d rows: assume long format", len(data))
             data = pandas.DataFrame([data.value.to_list()], columns=data.metric.to_list())
             # Try to convert string metrics to numbers.
-            data = data.apply(pandas.to_numeric, errors="ignore")   # type: ignore[assignment]  # (false positive)
+            data = data.apply(pandas.to_numeric, errors='coerce').fillna(data)    # type: ignore[assignment]  # (false positive)
         elif len(data) == 1:
             _LOG.info("Local results have 1 row: assume wide format")
         else:

@@ -138,7 +138,7 @@ class MlosCoreOptimizer(Optimizer):
             if tunable.name in missing_cols:
                 df_configs[tunable.name] = tunable.default
             else:
-                df_configs[tunable.name].fillna(tunable.default, inplace=True)
+                df_configs.fillna({tunable.name: tunable.default}, inplace=True)
             # External data can have incorrect types (e.g., all strings).
             df_configs[tunable.name] = df_configs[tunable.name].astype(tunable.dtype)
             # Add columns for tunables with special values.
