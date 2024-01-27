@@ -18,5 +18,3 @@ exp_data = sql_storage_fixtures.exp_data
 
 tunable_groups_config = tunable_groups_fixtures.tunable_groups_config
 tunable_groups = tunable_groups_fixtures.tunable_groups
-
-# TODO: Validate the non-display via rcParams tweaks at upper levels works on Windows too.
