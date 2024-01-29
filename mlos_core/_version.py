@@ -7,4 +7,4 @@ Version number for the mlos_core package.
 """
 
 # NOTE: This should be managed by bumpversion.
-_VERSION = '0.4.0'
+_VERSION = '0.4.1'

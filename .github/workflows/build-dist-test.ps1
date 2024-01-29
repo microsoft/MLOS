@@ -114,6 +114,8 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # Run a simple mlos_viz test.
+# To do that, we need the fixtures from mlos_bench, so make those available too.
+$env:PYTHONPATH = "mlos_bench"
 conda run -n mlos-dist-test python -m pytest mlos_viz/mlos_viz/tests/test_dabl_plot.py
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Failed to run mlos_viz tests."

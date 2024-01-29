@@ -8,13 +8,13 @@ from the mlos_bench framework for benchmarking and optimization automation.
 """
 
 from enum import Enum
+from typing import Any, Dict, Literal, Optional
 
-import warnings
-
-from matplotlib import pyplot as plt
-import seaborn as sns
+import pandas
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
+from mlos_viz import base
+from mlos_viz.util import expand_results_data_args
 
 
 class MlosVizMethod(Enum):
@@ -22,41 +22,8 @@ class MlosVizMethod(Enum):
     What method to use for visualizing the experiment results.
     """
 
-    AUTO = "dabl"   # use dabl as the current default
     DABL = "dabl"
-
-
-def _plot_optimizer_trends(exp_data: ExperimentData) -> None:
-    """
-    Plots the optimizer trends for the Experiment.
-
-    Intended to be used from a Jupyter notebook.
-
-    Parameters
-    ----------
-    exp_data: ExperimentData
-        The experiment data to plot.
-    """
-    for objective in exp_data.objectives:
-        objective_column = ExperimentData.RESULT_COLUMN_PREFIX + objective
-        results_df = exp_data.results_df
-        plt.rcParams["figure.figsize"] = (10, 4)
-
-        sns.scatterplot(
-            x=results_df.trial_id, y=results_df[objective_column],
-            alpha=0.7, label="Trial")  # Result of each trial
-        sns.lineplot(
-            x=results_df.trial_id, y=results_df[objective_column].cummin(),
-            label="Incumbent")  # the best result so far (cummin)
-
-        plt.yscale('log')
-
-        plt.xlabel("Trial number")
-        plt.ylabel(objective)
-
-        plt.title("Optimizer Trends for Experiment: " + exp_data.experiment_id)
-        plt.grid()
-        plt.show()  # type: ignore[no-untyped-call]
+    AUTO = DABL     # use dabl as the current default
 
 
 def ignore_plotter_warnings(plotter_method: MlosVizMethod = MlosVizMethod.AUTO) -> None:
@@ -69,8 +36,7 @@ def ignore_plotter_warnings(plotter_method: MlosVizMethod = MlosVizMethod.AUTO) 
     plotter_method: MlosVizMethod
         The method to use for visualizing the experiment results.
     """
-    warnings.filterwarnings("ignore", category=FutureWarning)
-
+    base.ignore_plotter_warnings()
     if plotter_method == MlosVizMethod.DABL:
         import mlos_viz.dabl    # pylint: disable=import-outside-toplevel
         mlos_viz.dabl.ignore_plotter_warnings()
@@ -78,9 +44,12 @@ def ignore_plotter_warnings(plotter_method: MlosVizMethod = MlosVizMethod.AUTO) 
         raise NotImplementedError(f"Unhandled method: {plotter_method}")
 
 
-def plot(exp_data: ExperimentData,
+def plot(exp_data: Optional[ExperimentData] = None, *,
+         results_df: Optional[pandas.DataFrame] = None,
+         objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
          plotter_method: MlosVizMethod = MlosVizMethod.AUTO,
-         filter_warnings: bool = True) -> None:
+         filter_warnings: bool = True,
+         **kwargs: Any) -> None:
     """
     Plots the results of the experiment.
 
@@ -90,18 +59,28 @@ def plot(exp_data: ExperimentData,
     ----------
     exp_data: ExperimentData
         The experiment data to plot.
+    results_df : Optional["pandas.DataFrame"]
+        Optional results_df to plot.
+        If not provided, defaults to exp_data.results_df property.
+    objectives : Optional[Dict[str, Literal["min", "max"]]]
+        Optional objectives to plot.
+        If not provided, defaults to exp_data.objectives property.
     plotter_method: MlosVizMethod
         The method to use for visualizing the experiment results.
     filter_warnings: bool
         Whether or not to filter some warnings from the plotter.
+    kwargs : dict
+        Remaining keyword arguments are passed along to the underlying plotter(s).
     """
-    _plot_optimizer_trends(exp_data)
-
     if filter_warnings:
         ignore_plotter_warnings(plotter_method)
+    (results_df, _obj_cols) = expand_results_data_args(exp_data, results_df, objectives)
+
+    base.plot_optimizer_trends(exp_data, results_df=results_df, objectives=objectives)
+    base.plot_top_n_configs(exp_data, results_df=results_df, objectives=objectives, **kwargs)
 
     if MlosVizMethod.DABL:
         import mlos_viz.dabl    # pylint: disable=import-outside-toplevel
-        mlos_viz.dabl.plot(exp_data)
+        mlos_viz.dabl.plot(exp_data, results_df=results_df, objectives=objectives)
     else:
         raise NotImplementedError(f"Unhandled method: {plotter_method}")
