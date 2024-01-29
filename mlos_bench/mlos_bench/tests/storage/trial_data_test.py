@@ -26,7 +26,7 @@ def test_exp_trial_data(exp_data: ExperimentData) -> None:
     assert trial.status == Status.SUCCEEDED
     assert trial.metadata_dict["trial_number"] == trial_id
     assert list(trial.results_dict.keys()) == ["score"]
-    assert trial.results_dict["score"] == pytest.approx(5.0, rel=0.1)
+    assert trial.results_dict["score"] == pytest.approx(0.0, abs=0.1)
     assert isinstance(trial.ts_start, datetime)
     assert isinstance(trial.ts_end, datetime)
     # Note: tests for telemetry are in test_update_telemetry()

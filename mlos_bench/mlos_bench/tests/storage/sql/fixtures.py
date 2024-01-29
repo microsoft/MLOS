@@ -63,10 +63,14 @@ def exp_storage_with_trials(exp_storage: SqlStorage.Experiment) -> SqlStorage.Ex
     """
     # Add some trials to that experiment.
     # Note: we're just fabricating some made up function for the ML libraries to try and learn.
-    base_score = 5.0
+    base_score = 10.0
     tunable_name = "kernel_sched_latency_ns"
-    tunable_default = exp_storage.tunables.get_tunable(tunable_name)[0].default
+    tunable = exp_storage.tunables.get_tunable(tunable_name)[0]
+    tunable_default = tunable.default
     assert isinstance(tunable_default, int)
+    tunable_min = tunable.range[0]
+    tunable_max = tunable.range[1]
+    tunable_range = tunable_max - tunable_min
     seed = 42
     rand_seed(seed)
     opt = MockOptimizer(tunables=exp_storage.tunables, config={
@@ -85,14 +89,15 @@ def exp_storage_with_trials(exp_storage: SqlStorage.Experiment) -> SqlStorage.Ex
                 "trial_number": config_i * CONFIG_TRIAL_REPEAT_COUNT + repeat_j + 1,
             })
             assert trial.tunable_config_id == config_i + 1
-            trial.update_telemetry(status=Status.RUNNING, metrics=[
-                (datetime.utcnow(), "some-metric", base_score + random() / 10),
-            ])
             tunable_value = float(tunables.get_tunable(tunable_name)[0].numerical_value)
+            tunable_value_norm = base_score * (tunable_value - tunable_min) / tunable_range
+            trial.update_telemetry(status=Status.RUNNING, metrics=[
+                (datetime.utcnow(), "some-metric", tunable_value_norm + random() / 100),
+            ])
             trial.update(Status.SUCCEEDED, datetime.utcnow(), metrics={
                 # Give some variance on the score.
                 # And some influence from the tunable value.
-                "score": base_score + 10 * ((tunable_value / tunable_default) - 1) + random() / 10,
+                "score": tunable_value_norm + random() / 100
             })
     return exp_storage
 
