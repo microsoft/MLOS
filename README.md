@@ -21,6 +21,7 @@ MLOS is a project to enable autotuning for systems.
         - [Usage Examples](#usage-examples)
             - [mlos-core](#mlos-core)
             - [mlos-bench](#mlos-bench)
+            - [mlos-viz](#mlos-viz)
     - [Installation](#installation)
     - [See Also](#see-also)
         - [Examples](#examples)
@@ -172,6 +173,10 @@ Details on using a local version from git are available in [CONTRIBUTING.md](./C
 
 - API and Examples Documentation: <https://microsoft.github.io/MLOS>
 - Source Code Repository: <https://github.com/microsoft/MLOS>
+
+- Demo Video:
+
+  [![demo video](https://aka.ms/MLOS/demo-video-preview-image)](https://aka.ms/MLOS/demo-video)
 
 ### Examples
 
