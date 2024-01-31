@@ -46,6 +46,10 @@ To accomplish this, the general flow involves
 
 > Source: [LlamaTune: VLDB 2022](https://arxiv.org/abs/2203.05128)
 
+For a brief overview of some of the features and capabilities of MLOS, please see the following video:
+
+[![demo video](https://aka.ms/MLOS/demo-video-preview-image)](https://aka.ms/MLOS/demo-video)
+
 ## Organization
 
 To do this this repo provides two Python modules, which can be used independently or in combination:
@@ -173,10 +177,6 @@ Details on using a local version from git are available in [CONTRIBUTING.md](./C
 
 - API and Examples Documentation: <https://microsoft.github.io/MLOS>
 - Source Code Repository: <https://github.com/microsoft/MLOS>
-
-- Demo Video:
-
-  [![demo video](https://aka.ms/MLOS/demo-video-preview-image)](https://aka.ms/MLOS/demo-video)
 
 ### Examples
 
