@@ -85,6 +85,9 @@
                     "items": {
                         "type": "number"
                     }
+                },
+                "range_weight": {
+                    "type": "number"
                 }
             },
             "required": ["type", "default", "range"],
@@ -129,6 +132,9 @@
                     "items": {
                         "type": "number"
                     }
+                },
+                "range_weight": {
+                    "type": "number"
                 }
             },
             "required": ["type", "default", "range"],
