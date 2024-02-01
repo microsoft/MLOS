@@ -21,6 +21,7 @@ MLOS is a project to enable autotuning for systems.
         - [Usage Examples](#usage-examples)
             - [mlos-core](#mlos-core)
             - [mlos-bench](#mlos-bench)
+            - [mlos-viz](#mlos-viz)
     - [Installation](#installation)
     - [See Also](#see-also)
         - [Examples](#examples)
@@ -44,6 +45,10 @@ To accomplish this, the general flow involves
 <img src="./doc/source/_static/llamatune-loop.png" style="width:700px" alt="optimization loop" />
 
 > Source: [LlamaTune: VLDB 2022](https://arxiv.org/abs/2203.05128)
+
+For a brief overview of some of the features and capabilities of MLOS, please see the following video:
+
+[![demo video](https://aka.ms/MLOS/demo-video-preview-image)](https://aka.ms/MLOS/demo-video)
 
 ## Organization
 
