@@ -387,11 +387,17 @@ COMMON_DOC_FILES := build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp doc/source/*
 
 doc/source/api/mlos_core/modules.rst: $(MLOS_CORE_PYTHON_FILES) $(COMMON_DOC_FILES)
 	rm -rf doc/source/api/mlos_core
-	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_core/ ../mlos_core/ ../mlos_*/setup.py
+	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M \
+		-o source/api/mlos_core/ \
+		../mlos_core/ \
+		../mlos_core/setup.py ../mlos_core/mlos_core/tests/
 
 doc/source/api/mlos_bench/modules.rst: $(MLOS_BENCH_PYTHON_FILES) $(COMMON_DOC_FILES)
 	rm -rf doc/source/api/mlos_bench
-	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_bench/ ../mlos_bench/ ../mlos_*/setup.py
+	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M \
+		-o source/api/mlos_bench/ \
+		../mlos_bench/ \
+		../mlos_bench/setup.py ../mlos_bench/mlos_bench/tests/
 	# Save the help output of the mlos_bench scripts to include in the documentation.
 	# First make sure that the latest version of mlos_bench is installed (since it uses git based tagging).
 	conda run -n ${CONDA_ENV_NAME} pip install -e mlos_core -e mlos_bench -e mlos_viz
@@ -401,7 +407,10 @@ doc/source/api/mlos_bench/modules.rst: $(MLOS_BENCH_PYTHON_FILES) $(COMMON_DOC_F
 
 doc/source/api/mlos_viz/modules.rst: $(MLOS_VIZ_PYTHON_FILES) $(COMMON_DOC_FILES)
 	rm -rf doc/source/api/mlos_viz
-	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_viz/ ../mlos_viz/ ../mlos_*/setup.py
+	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M \
+		-o source/api/mlos_viz/ \
+		../mlos_viz/ \
+		../mlos_viz/setup.py ../mlos_viz/mlos_viz/tests/
 
 SPHINX_API_RST_FILES := doc/source/api/mlos_core/modules.rst
 SPHINX_API_RST_FILES += doc/source/api/mlos_bench/modules.rst
