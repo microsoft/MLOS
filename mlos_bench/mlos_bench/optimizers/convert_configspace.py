@@ -96,9 +96,9 @@ def _tunable_to_configspace(
     # Compute the probabilities of switching between regular and special values.
     special_weights: Optional[List[float]] = None
     switch_weights = [0.5, 0.5]  # FLAML requires uniform weights.
-    if tunable.weights:
+    if tunable.weights and tunable.range_weight is not None:
         special_weights = _normalize_weights(tunable.weights)
-        switch_weights = _normalize_weights([sum(tunable.weights), tunable.range_weight or 0])
+        switch_weights = _normalize_weights([sum(tunable.weights), tunable.range_weight])
 
     # Create three hyperparameters: one for regular values,
     # one for special values, and one to choose between the two.
