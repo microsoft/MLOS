@@ -176,6 +176,12 @@ jobs:
         # Make sure we can publish the coverage report.
         rm -f doc/build/html/htmlcov/.gitignore
 
+    - uses: actions/upload-artifact@v4
+      if: github.ref == 'refs/heads/main'
+      with:
+        name: docs
+        path: doc/build/html
+
     - name: Publish package to Test PyPi
       if: github.event_name == 'release' && github.ref_type == 'tag'
       run: |
@@ -193,14 +199,6 @@ jobs:
             --env TWINE_USERNAME=${{ secrets.PYPI_USERNAME }} --env TWINE_PASSWORD=${{ secrets.PYPI_PASSWORD }} \
             mlos-devcontainer make CONDA_INFO_LEVEL=-v publish-pypi
         fi
-
-    - name: Deploy to GitHub pages
-      if: github.ref == 'refs/heads/main'
-      uses: JamesIves/github-pages-deploy-action@v4
-      with:
-        branch: gh-pages
-        folder: doc/build/html
-        clean: true
 
     - name: Cleanup the devcontainer
       run: |
@@ -241,3 +239,40 @@ jobs:
         docker push ${{ secrets.ACR_LOGINURL }}/devcontainer-cli:$image_tag
         docker tag mlos-devcontainer:latest ${{ secrets.ACR_LOGINURL }}/mlos-devcontainer:$image_tag
         docker push ${{ secrets.ACR_LOGINURL }}/mlos-devcontainer:$image_tag
+
+  DeployDocs:
+    if: github.ref == 'refs/heads/main'
+    needs: DevContainer
+    runs-on: ubuntu-latest
+
+    # Required for github-pages-deploy-action to push to the gh-pages branch.
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/download-artifact@v4
+      with:
+        name: docs
+        path: doc/build/html
+
+    - name: Check docs
+      run: |
+        set -x
+        # Check that the docs are not empty.
+        if [ ! -d doc/build/html ]; then
+          echo "ERROR: No docs found in doc/build/html" >&2
+          exit 1
+        fi
+        if [ ! -f doc/build/html/index.html ]; then
+          echo "ERROR: No index.html found in doc/build/html" >&2
+          exit 1
+        fi
+
+    - name: Deploy to GitHub pages
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages
+        folder: doc/build/html
+        clean: true
