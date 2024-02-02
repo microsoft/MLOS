@@ -248,6 +248,43 @@ def test_numerical_weights(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
+def test_numerical_quantization(tunable_type: str) -> None:
+    """
+    Instantiate a numerical tunable with quantization.
+    """
+    json_config = f"""
+    {{
+        "type": "{tunable_type}",
+        "range": [0, 100],
+        "quantization": 10,
+        "default": 0
+    }}
+    """
+    config = json.loads(json_config)
+    tunable = Tunable(name='test', config=config)
+    assert tunable.quantization == 10
+    assert not tunable.is_log
+
+
+@pytest.mark.parametrize("tunable_type", ["int", "float"])
+def test_numerical_log(tunable_type: str) -> None:
+    """
+    Instantiate a numerical tunable with log scale.
+    """
+    json_config = f"""
+    {{
+        "type": "{tunable_type}",
+        "range": [0, 100],
+        "log": true,
+        "default": 0
+    }}
+    """
+    config = json.loads(json_config)
+    tunable = Tunable(name='test', config=config)
+    assert tunable.is_log
+
+
+@pytest.mark.parametrize("tunable_type", ["int", "float"])
 def test_numerical_weights_no_specials(tunable_type: str) -> None:
     """
     Raise an error if weights are specified but no special values.
@@ -376,6 +413,24 @@ def test_numerical_weights_wrong_values(tunable_type: str) -> None:
         "special": [0],
         "weights": [-1],
         "range_weight": 10,
+        "default": 0
+    }}
+    """
+    config = json.loads(json_config)
+    with pytest.raises(ValueError):
+        Tunable(name='test', config=config)
+
+
+@pytest.mark.parametrize("tunable_type", ["int", "float"])
+def test_numerical_quantization_wrong(tunable_type: str) -> None:
+    """
+    Instantiate a numerical tunable with invalid number of quantization points.
+    """
+    json_config = f"""
+    {{
+        "type": "{tunable_type}",
+        "range": [0, 100],
+        "quantization": 0,
         "default": 0
     }}
     """
