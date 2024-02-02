@@ -10,7 +10,7 @@
                 "range": [1, 500],
                 "meta": {"suffix": "MB"},
                 "special": [-1],
-                "weights": [0.1],
+                "special_weights": [0.1],
                 "range_weight": 0.9
             },
             "float": {
