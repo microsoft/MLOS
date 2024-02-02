@@ -132,7 +132,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             if self._quantization is not None:
                 raise ValueError(f"Categorical tunable cannot have quantization parameter: {self}")
             if self._distribution is not None:
-                raise ValueError(f"Categoricals do not support `distribution`: {self}")
+                raise ValueError(f"Categorical parameters do not support `distribution`: {self}")
             if self._weights:
                 if len(self._weights) != len(self._values):
                     raise ValueError(f"Must specify weights for all values: {self}")
