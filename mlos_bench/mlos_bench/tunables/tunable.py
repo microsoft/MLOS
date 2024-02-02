@@ -47,7 +47,7 @@ class TunableDict(TypedDict, total=False):
     log: Optional[bool]
     distribution: Optional[DistributionDict]
     special: Optional[Union[List[int], List[float]]]
-    weights: Optional[List[float]]
+    values_weights: Optional[List[float]]
     special_weights: Optional[List[float]]
     range_weight: Optional[float]
     meta: Dict[str, Any]
@@ -105,7 +105,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             self._range = config_range
         self._special: Union[List[int], List[float]] = config.get("special") or []
         self._weights: List[float] = (
-            config.get("weights") or config.get("special_weights") or []
+            config.get("values_weights") or config.get("special_weights") or []
         )
         self._range_weight: Optional[float] = config.get("range_weight")
         self._current_value = None

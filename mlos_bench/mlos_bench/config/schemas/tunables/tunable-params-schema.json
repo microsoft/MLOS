@@ -53,7 +53,7 @@
                     "minItems": 1,
                     "uniqueItems": true
                 },
-                "weights": {
+                "values_weights": {
                     "type": "array",
                     "items": {
                         "type": "number"
@@ -118,7 +118,7 @@
             },
             "required": ["type", "default", "range"],
             "not": {
-                "required": ["values", "weights"]
+                "required": ["values", "values_weights"]
             },
             "$comment": "TODO: add check that default is in range",
             "unevaluatedProperties": false
@@ -174,7 +174,7 @@
             },
             "required": ["type", "default", "range"],
             "not": {
-                "required": ["values", "weights"]
+                "required": ["values", "values_weights"]
             },
             "$comment": "TODO: add check that default is in range",
             "unevaluatedProperties": false
