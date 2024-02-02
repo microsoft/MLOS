@@ -95,7 +95,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         self._distribution_params: Dict[str, float] = {}
         distr = config.get("distribution")
         if distr:
-            self._distribution = distr.get("type")
+            self._distribution = distr["type"]  # required
             self._distribution_params = distr.get("params") or {}
         config_range = config.get("range")
         if config_range is not None:
@@ -144,7 +144,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
                 raise ValueError(f"Number of quantization points is <= 1: {self}")
             if self._distribution is not None and self._distribution not in {"uniform", "normal", "beta"}:
                 raise ValueError(f"Invalid distribution: {self}")
-            if self._distribution_params is not None and self._distribution is None:
+            if self._distribution_params and self._distribution is None:
                 raise ValueError(f"Must specify the distribution: {self}")
             if self._weights:
                 if self._range_weight is None:
