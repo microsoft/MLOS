@@ -13,6 +13,23 @@
                 }
             }
         },
+        "tunable_param_distribution": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": ["uniform", "normal", "beta"]
+                },
+                "params": {
+                    "type": "object",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 1
+                }
+            },
+            "required": ["type"]
+        },
         "tunable_param_categorical": {
             "type": "object",
             "properties": {
@@ -45,7 +62,7 @@
             },
             "required": ["type", "default", "values"],
             "not": {
-                "required": ["range", "special"]
+                "required": ["range", "special", "log", "quantization", "distribution", "range_weight"]
             },
             "$comment": "TODO: add check that default is in values",
             "unevaluatedProperties": false
@@ -78,6 +95,9 @@
                 },
                 "log": {
                     "type": "boolean"
+                },
+                "distribution": {
+                    "$ref": "#/$defs/tunable_param_distribution"
                 },
                 "special": {
                     "type": "array",
@@ -131,6 +151,9 @@
                 },
                 "log": {
                     "type": "boolean"
+                },
+                "distribution": {
+                    "$ref": "#/$defs/tunable_param_distribution"
                 },
                 "special": {
                     "type": "array",
