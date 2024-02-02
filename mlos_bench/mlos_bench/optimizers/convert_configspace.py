@@ -8,14 +8,13 @@ Functions to convert TunableGroups to ConfigSpace for use with the mlos_core opt
 
 import logging
 
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from ConfigSpace import (
     Beta,
     CategoricalHyperparameter,
     Configuration,
     ConfigurationSpace,
-    Distribution,
     EqualsCondition,
     Float,
     Integer,
@@ -87,8 +86,8 @@ def _tunable_to_configspace(
     else:
         raise TypeError(f"Invalid Parameter Type: {tunable.type}")
 
-    distribution: Distribution
-    if tunable.distribution is None or tunable.distribution == "uniform":
+    distribution: Union[Uniform, Normal, Beta, None]
+    if tunable.distribution == "uniform":
         distribution = Uniform()
     elif tunable.distribution == "normal":
         distribution = Normal(
@@ -100,19 +99,20 @@ def _tunable_to_configspace(
             alpha=tunable.distribution_params["alpha"],
             beta=tunable.distribution_params["beta"]
         )
-    else:
+    elif tunable.distribution is not None:
         raise TypeError(f"Invalid Distribution Type: {tunable.distribution}")
 
     if not tunable.special:
         return ConfigurationSpace({
             tunable.name: hp_type(
                 name=tunable.name,
-                bounds=(0, 100),  # tunable.range,
+                bounds=tunable.range,  # Must match hp_type
                 log=tunable.is_log,
                 q=tunable.quantization,
                 distribution=distribution,
-                default=tunable.default if tunable.in_range(tunable.default) else None,
-                meta=meta)
+                # default=tunable.default if tunable.in_range(tunable.default) else None,
+                meta=meta
+            )
         })
 
     # Compute the probabilities of switching between regular and special values.
