@@ -235,7 +235,7 @@ def test_numerical_weights(tunable_type: str) -> None:
         "type": "{tunable_type}",
         "range": [0, 100],
         "special": [0],
-        "weights": [0.1],
+        "special_weights": [0.1],
         "range_weight": 0.9,
         "default": 0
     }}
@@ -287,13 +287,13 @@ def test_numerical_log(tunable_type: str) -> None:
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
 def test_numerical_weights_no_specials(tunable_type: str) -> None:
     """
-    Raise an error if weights are specified but no special values.
+    Raise an error if special_weights are specified but no special values.
     """
     json_config = f"""
     {{
         "type": "{tunable_type}",
         "range": [0, 100],
-        "weights": [0.1, 0.9],
+        "special_weights": [0.1, 0.9],
         "default": 0
     }}
     """
@@ -313,7 +313,7 @@ def test_numerical_weights_non_normalized(tunable_type: str) -> None:
         "type": "{tunable_type}",
         "range": [0, 100],
         "special": [-1, 0],
-        "weights": [0, 10],
+        "special_weights": [0, 10],
         "range_weight": 90,
         "default": 0
     }}
@@ -335,7 +335,7 @@ def test_numerical_weights_wrong_count(tunable_type: str) -> None:
         "type": "{tunable_type}",
         "range": [0, 100],
         "special": [0],
-        "weights": [0.1, 0.1, 0.8],
+        "special_weights": [0.1, 0.1, 0.8],
         "range_weight": 0.1,
         "default": 0
     }}
@@ -355,7 +355,7 @@ def test_numerical_weights_no_range_weight(tunable_type: str) -> None:
         "type": "{tunable_type}",
         "range": [0, 100],
         "special": [0, -1],
-        "weights": [0.1, 0.2],
+        "special_weights": [0.1, 0.2],
         "default": 0
     }}
     """
@@ -411,7 +411,7 @@ def test_numerical_weights_wrong_values(tunable_type: str) -> None:
         "type": "{tunable_type}",
         "range": [0, 100],
         "special": [0],
-        "weights": [-1],
+        "special_weights": [-1],
         "range_weight": 10,
         "default": 0
     }}

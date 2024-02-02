@@ -62,7 +62,7 @@
             },
             "required": ["type", "default", "values"],
             "not": {
-                "required": ["range", "special", "log", "quantization", "distribution", "range_weight"]
+                "required": ["range", "special_weight", "range_weight", "log", "quantization", "distribution"]
             },
             "$comment": "TODO: add check that default is in values",
             "unevaluatedProperties": false
@@ -106,7 +106,7 @@
                     },
                     "uniqueItems": true
                 },
-                "weights": {
+                "special_weights": {
                     "type": "array",
                     "items": {
                         "type": "number"
@@ -118,7 +118,7 @@
             },
             "required": ["type", "default", "range"],
             "not": {
-                "required": ["values"]
+                "required": ["values", "weights"]
             },
             "$comment": "TODO: add check that default is in range",
             "unevaluatedProperties": false
@@ -162,7 +162,7 @@
                     },
                     "uniqueItems": true
                 },
-                "weights": {
+                "special_weights": {
                     "type": "array",
                     "items": {
                         "type": "number"
@@ -174,7 +174,7 @@
             },
             "required": ["type", "default", "range"],
             "not": {
-                "required": ["values"]
+                "required": ["values", "weights"]
             },
             "$comment": "TODO: add check that default is in range",
             "unevaluatedProperties": false
