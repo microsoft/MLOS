@@ -79,13 +79,6 @@ def _tunable_to_configspace(
                 meta=meta)
         })
 
-    if tunable.type == "int":
-        hp_type = Integer
-    elif tunable.type == "float":
-        hp_type = Float
-    else:
-        raise TypeError(f"Invalid Parameter Type: {tunable.type}")
-
     distribution: Union[Uniform, Normal, Beta, None]
     if tunable.distribution == "uniform":
         distribution = Uniform()
@@ -102,18 +95,35 @@ def _tunable_to_configspace(
     elif tunable.distribution is not None:
         raise TypeError(f"Invalid Distribution Type: {tunable.distribution}")
 
+    if tunable.type == "int":
+        range_hp = Integer(
+            name=tunable.name,
+            bounds=(int(tunable.range[0]), int(tunable.range[1])),
+            log=tunable.is_log,
+            q=tunable.quantization,
+            distribution=distribution,
+            default=(int(tunable.default)
+                     if tunable.in_range(tunable.default) and tunable.default is not None
+                     else None),
+            meta=meta
+        )
+    elif tunable.type == "float":
+        range_hp = Float(
+            name=tunable.name,
+            bounds=tunable.range,
+            log=tunable.is_log,
+            q=tunable.quantization,
+            distribution=distribution,
+            default=(float(tunable.default)
+                     if tunable.in_range(tunable.default) and tunable.default is not None
+                     else None),
+            meta=meta
+        )
+    else:
+        raise TypeError(f"Invalid Parameter Type: {tunable.type}")
+
     if not tunable.special:
-        return ConfigurationSpace({
-            tunable.name: hp_type(
-                name=tunable.name,
-                bounds=tunable.range,  # Must match hp_type
-                log=tunable.is_log,
-                q=tunable.quantization,
-                distribution=distribution,
-                # default=tunable.default if tunable.in_range(tunable.default) else None,
-                meta=meta
-            )
-        })
+        return ConfigurationSpace({tunable.name: range_hp})
 
     # Compute the probabilities of switching between regular and special values.
     special_weights: Optional[List[float]] = None
@@ -126,15 +136,7 @@ def _tunable_to_configspace(
     # one for special values, and one to choose between the two.
     (special_name, type_name) = special_param_names(tunable.name)
     conf_space = ConfigurationSpace({
-        tunable.name: hp_type(
-            name=tunable.name,
-            bounds=tunable.range,
-            log=tunable.is_log,
-            q=tunable.quantization,
-            distribution=distribution,
-            default=tunable.default if tunable.in_range(tunable.default) else None,
-            meta=meta
-        ),
+        tunable.name: range_hp,
         special_name: CategoricalHyperparameter(
             name=special_name,
             choices=tunable.special,
