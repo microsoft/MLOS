@@ -54,7 +54,7 @@ TUNABLE_GROUPS_JSON = """
                 "special": [-1, 0],
                 // FLAML requires uniform weights, separately for
                 // specials and switching between specials and range.
-                "weights": [0.25, 0.25],
+                "special_weights": [0.25, 0.25],
                 "range_weight": 0.5,
                 "log": false
             },

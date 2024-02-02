@@ -45,7 +45,7 @@
             },
             "required": ["type", "default", "values"],
             "not": {
-                "required": ["range", "special"]
+                "required": ["range", "special", "special_weights", "range_weight"]
             },
             "$comment": "TODO: add check that default is in values",
             "unevaluatedProperties": false
@@ -86,7 +86,7 @@
                     },
                     "uniqueItems": true
                 },
-                "weights": {
+                "special_weights": {
                     "type": "array",
                     "items": {
                         "type": "number"
@@ -98,7 +98,7 @@
             },
             "required": ["type", "default", "range"],
             "not": {
-                "required": ["values"]
+                "required": ["values", "weights"]
             },
             "$comment": "TODO: add check that default is in range",
             "unevaluatedProperties": false
@@ -139,7 +139,7 @@
                     },
                     "uniqueItems": true
                 },
-                "weights": {
+                "special_weights": {
                     "type": "array",
                     "items": {
                         "type": "number"
@@ -151,7 +151,7 @@
             },
             "required": ["type", "default", "range"],
             "not": {
-                "required": ["values"]
+                "required": ["values", "weights"]
             },
             "$comment": "TODO: add check that default is in range",
             "unevaluatedProperties": false
