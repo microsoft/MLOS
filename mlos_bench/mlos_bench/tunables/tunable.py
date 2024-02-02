@@ -9,13 +9,24 @@ import copy
 import collections
 import logging
 
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Type, TypedDict, Union
+from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Type, TypedDict, Union
 
 _LOG = logging.getLogger(__name__)
 
 
 """A tunable parameter value type alias."""
 TunableValue = Union[int, float, Optional[str]]
+
+DistributionName = Literal["uniform", "normal", "beta"]
+
+
+class DistributionDict(TypedDict, total=False):
+    """
+    A typed dict for tunable parameters' distributions.
+    """
+
+    type: DistributionName
+    params: Optional[Dict[str, float]]
 
 
 class TunableDict(TypedDict, total=False):
@@ -34,6 +45,7 @@ class TunableDict(TypedDict, total=False):
     range: Optional[Union[Sequence[int], Sequence[float]]]
     quantization: Optional[int]
     log: Optional[bool]
+    distribution: Optional[DistributionDict]
     special: Optional[Union[List[int], List[float]]]
     weights: Optional[List[float]]
     range_weight: Optional[float]
@@ -79,6 +91,12 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         self._range: Optional[Union[Tuple[int, int], Tuple[float, float]]] = None
         self._quantization: Optional[int] = config.get("quantization")
         self._log: Optional[bool] = config.get("log")
+        self._distribution: Optional[DistributionName] = None
+        self._distribution_params: Dict[str, float] = {}
+        distr = config.get("distribution")
+        if distr:
+            self._distribution = distr.get("type")
+            self._distribution_params = distr.get("params") or {}
         config_range = config.get("range")
         if config_range is not None:
             assert len(config_range) == 2, f"Invalid range: {config_range}"
@@ -110,6 +128,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
                 raise ValueError(f"Categorical tunable cannot have log parameter: {self}")
             if self._quantization is not None:
                 raise ValueError(f"Categorical tunable cannot have quantization parameter: {self}")
+            if self._distribution is not None:
+                raise ValueError(f"Categoricals do not support `distribution`: {self}")
             if self._weights:
                 if len(self._weights) != len(self._values):
                     raise ValueError(f"Must specify weights for all values: {self}")
@@ -122,6 +142,10 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
                 raise ValueError(f"Invalid range for tunable {self}: {self._range}")
             if self._quantization is not None and self._quantization <= 1:
                 raise ValueError(f"Number of quantization points is <= 1: {self}")
+            if self._distribution is not None and self._distribution not in {"uniform", "normal", "beta"}:
+                raise ValueError(f"Invalid distribution: {self}")
+            if self._distribution_params is not None and self._distribution is None:
+                raise ValueError(f"Must specify the distribution: {self}")
             if self._weights:
                 if self._range_weight is None:
                     raise ValueError(f"Must specify weight for the range: {self}")
@@ -518,6 +542,31 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         """
         assert self.is_numerical
         return self._log
+
+    @property
+    def distribution(self) -> Optional[DistributionName]:
+        """
+        Get the name of the distribution (uniform, normal, or beta) if specified.
+
+        Returns
+        -------
+        distribution : str
+            Name of the distribution (uniform, normal, or beta) or None.
+        """
+        return self._distribution
+
+    @property
+    def distribution_params(self) -> Dict[str, float]:
+        """
+        Get the parameters of the distribution, if specified.
+
+        Returns
+        -------
+        distribution_params : Dict[str, float]
+            Parameters of the distribution or None.
+        """
+        assert self._distribution is not None
+        return self._distribution_params
 
     @property
     def categories(self) -> List[Optional[str]]:
