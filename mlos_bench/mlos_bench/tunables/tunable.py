@@ -90,7 +90,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         self._meta: Dict[str, Any] = config.get("meta", {})
         self._range: Optional[Union[Tuple[int, int], Tuple[float, float]]] = None
         self._quantization: Optional[int] = config.get("quantization")
-        self._log: Optional[bool] = config.get("log")
+        self._log: bool = bool(config.get("log"))
         self._distribution: Optional[DistributionName] = None
         self._distribution_params: Dict[str, float] = {}
         distr = config.get("distribution")
@@ -124,7 +124,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
                 raise ValueError(f"Categorical tunable cannot have special values: {self}")
             if self._range_weight is not None:
                 raise ValueError(f"Categorical tunable cannot have range_weight: {self}")
-            if self._log is not None:
+            if self._log:
                 raise ValueError(f"Categorical tunable cannot have log parameter: {self}")
             if self._quantization is not None:
                 raise ValueError(f"Categorical tunable cannot have quantization parameter: {self}")
@@ -531,7 +531,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         return self._quantization
 
     @property
-    def is_log(self) -> Optional[bool]:
+    def is_log(self) -> bool:
         """
         Check if numeric tunable is log scale.
 
