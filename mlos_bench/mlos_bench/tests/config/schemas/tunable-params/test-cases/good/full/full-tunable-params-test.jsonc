@@ -77,7 +77,7 @@
                 "default": "yes",
                 "meta": {"quote": true},
                 "values": ["yes", "no"],
-                "weights": [50, 50]
+                "values_weights": [50, 50]
             }
         }
     }

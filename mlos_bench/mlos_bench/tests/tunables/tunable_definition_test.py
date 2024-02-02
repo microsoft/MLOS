@@ -45,7 +45,7 @@ def test_categorical_weights() -> None:
     {
         "type": "categorical",
         "values": ["foo", "bar", "baz"],
-        "weights": [25, 25, 50],
+        "values_weights": [25, 25, 50],
         "default": "foo"
     }
     """
@@ -62,7 +62,7 @@ def test_categorical_weights_wrong_count() -> None:
     {
         "type": "categorical",
         "values": ["foo", "bar", "baz"],
-        "weights": [50, 50],
+        "values_weights": [50, 50],
         "default": "foo"
     }
     """
@@ -79,7 +79,7 @@ def test_categorical_weights_wrong_values() -> None:
     {
         "type": "categorical",
         "values": ["foo", "bar", "baz"],
-        "weights": [-1, 50, 50],
+        "values_weights": [-1, 50, 50],
         "default": "foo"
     }
     """

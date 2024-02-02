@@ -39,7 +39,7 @@ TUNABLE_GROUPS_JSON = """
                 "type": "categorical",
                 "default": "halt",
                 "values": ["halt", "mwait", "noidle"],
-                "weights": [33, 33, 33]  // FLAML requires uniform weights
+                "values_weights": [33, 33, 33]  // FLAML requires uniform weights
             }
         }
     },
