@@ -79,7 +79,7 @@ def _tunable_to_configspace(
                 meta=meta)
         })
 
-    distribution: Union[Uniform, Normal, Beta, None]
+    distribution: Union[Uniform, Normal, Beta, None] = None
     if tunable.distribution == "uniform":
         distribution = Uniform()
     elif tunable.distribution == "normal":
