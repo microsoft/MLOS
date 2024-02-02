@@ -73,6 +73,12 @@
                     "minItems": 2,
                     "maxItems": 2
                 },
+                "quantization": {
+                    "type": "number"
+                },
+                "log": {
+                    "type": "boolean"
+                },
                 "special": {
                     "type": "array",
                     "items": {
@@ -119,6 +125,12 @@
                     },
                     "minItems": 2,
                     "maxItems": 2
+                },
+                "quantization": {
+                    "type": "number"
+                },
+                "log": {
+                    "type": "boolean"
                 },
                 "special": {
                     "type": "array",
