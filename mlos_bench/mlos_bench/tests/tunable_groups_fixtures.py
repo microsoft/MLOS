@@ -55,13 +55,15 @@ TUNABLE_GROUPS_JSON = """
                 // FLAML requires uniform weights, separately for
                 // specials and switching between specials and range.
                 "weights": [0.25, 0.25],
-                "range_weight": 0.5
+                "range_weight": 0.5,
+                "log": false
             },
             "kernel_sched_latency_ns": {
                 "description": "Initial value for the scheduler period",
                 "type": "int",
                 "default": 2000000,
-                "range": [0, 1000000000]
+                "range": [0, 1000000000],
+                "log": false
             }
         }
     }
