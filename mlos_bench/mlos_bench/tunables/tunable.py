@@ -53,7 +53,7 @@ class TunableDict(TypedDict, total=False):
     meta: Dict[str, Any]
 
 
-class Tunable:  # pylint: disable=too-many-instance-attributes
+class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-methods
     """
     A tunable parameter definition and its current value.
     """
@@ -116,6 +116,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         """
         Check if the status of the Tunable is valid, and throw ValueError if it is not.
         """
+        # pylint: disable=too-complex,too-many-branches
         if self.is_categorical:
             if not (self._values and isinstance(self._values, collections.abc.Iterable)):
                 raise ValueError(f"Must specify values for the categorical type tunable {self}")
