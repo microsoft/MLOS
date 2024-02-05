@@ -1,3 +1,5 @@
+#
+# Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
 """
@@ -299,11 +301,14 @@ def test_optimizer_type_defs(optimizer_class: Type[BaseOptimizer]) -> None:
 
 
 @pytest.mark.parametrize(('optimizer_type', 'kwargs'), [
-    # Default optimizer
-    (None, {}),
     # Enumerate all supported Optimizers
     *[(member, {}) for member in OptimizerType],
     # Optimizer with non-empty kwargs argument
+    (OptimizerType.SMAC, {
+        # Test with default config.
+        'use_default_config': True,
+        # 'n_random_init': 10,
+    }),
 ])
 def test_mixed_input_space_types(optimizer_type: OptimizerType, kwargs: Optional[dict]) -> None:
     """
@@ -323,17 +328,11 @@ def test_mixed_input_space_types(optimizer_type: OptimizerType, kwargs: Optional
     input_space.add_hyperparameter(CS.UniformIntegerHyperparameter(name='x', lower=0, upper=5))
     input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='y', lower=0.0, upper=5.0))
 
-    if optimizer_type is None:
-        optimizer: BaseOptimizer = OptimizerFactory.create(
-            parameter_space=input_space,
-            optimizer_kwargs=kwargs,
-        )
-    else:
-        optimizer: BaseOptimizer = OptimizerFactory.create(
-            parameter_space=input_space,
-            optimizer_type=optimizer_type,
-            optimizer_kwargs=kwargs,
-        )
+    optimizer: BaseOptimizer = OptimizerFactory.create(
+        parameter_space=input_space,
+        optimizer_type=optimizer_type,
+        optimizer_kwargs=kwargs,
+    )
 
     with pytest.raises(ValueError, match="No observations"):
         optimizer.get_best_observation()
@@ -345,12 +344,8 @@ def test_mixed_input_space_types(optimizer_type: OptimizerType, kwargs: Optional
         suggestion = optimizer.suggest()
         assert isinstance(suggestion, pd.DataFrame)
         assert (suggestion.columns == ['x', 'y']).all()
-        # Build suggestion mapping to cooperate with Configuration, note that
-        # doing a .iloc[0].to_dict() will cause pandas convert all numeric types
-        # to float64
-        tmp_suggest = {'x': suggestion['x'].values[0], 'y': suggestion['y'].values[0]}
         # check that suggestion is in the space
-        configuration = CS.Configuration(optimizer.parameter_space, tmp_suggest)
+        configuration = CS.Configuration(optimizer.parameter_space, suggestion.iloc[0].to_dict())
         # Raises an error if outside of configuration space
         configuration.is_valid_configuration()
         observation = objective(suggestion)
