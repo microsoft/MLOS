@@ -35,11 +35,17 @@
                     },
                     "minItems": 1,
                     "uniqueItems": true
+                },
+                "values_weights": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
                 }
             },
             "required": ["type", "default", "values"],
             "not": {
-                "required": ["range", "special"]
+                "required": ["range", "special", "special_weights", "range_weight"]
             },
             "$comment": "TODO: add check that default is in values",
             "unevaluatedProperties": false
@@ -73,11 +79,20 @@
                         "type": "integer"
                     },
                     "uniqueItems": true
+                },
+                "special_weights": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "range_weight": {
+                    "type": "number"
                 }
             },
             "required": ["type", "default", "range"],
             "not": {
-                "required": ["values"]
+                "required": ["values", "values_weights"]
             },
             "$comment": "TODO: add check that default is in range",
             "unevaluatedProperties": false
@@ -111,11 +126,20 @@
                         "type": "number"
                     },
                     "uniqueItems": true
+                },
+                "special_weights": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "range_weight": {
+                    "type": "number"
                 }
             },
             "required": ["type", "default", "range"],
             "not": {
-                "required": ["values"]
+                "required": ["values", "values_weights"]
             },
             "$comment": "TODO: add check that default is in range",
             "unevaluatedProperties": false

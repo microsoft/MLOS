@@ -51,12 +51,14 @@ def configuration_space() -> ConfigurationSpace:
         "kernel_sched_latency_ns": (0, 1000000000),
     })
 
+    # NOTE: FLAML requires distribution to be uniform
     spaces["vmSize"].default_value = "Standard_B4ms"
     spaces["idle"].default_value = "halt"
     spaces["kernel_sched_migration_cost_ns"].default_value = 250000
     spaces[kernel_sched_migration_cost_ns_special].default_value = -1
+    spaces[kernel_sched_migration_cost_ns_special].probabilities = (0.5, 0.5)
     spaces[kernel_sched_migration_cost_ns_type].default_value = TunableValueKind.SPECIAL
-    spaces[kernel_sched_migration_cost_ns_type].probabilities = (0.5, 0.5)  # FLAML requires distribution to be uniform
+    spaces[kernel_sched_migration_cost_ns_type].probabilities = (0.5, 0.5)
     spaces["kernel_sched_latency_ns"].default_value = 2000000
 
     spaces.add_condition(EqualsCondition(

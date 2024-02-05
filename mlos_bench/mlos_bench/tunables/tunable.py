@@ -33,6 +33,9 @@ class TunableDict(TypedDict, total=False):
     values: Optional[List[Optional[str]]]
     range: Optional[Union[Sequence[int], Sequence[float]]]
     special: Optional[Union[List[int], List[float]]]
+    values_weights: Optional[List[float]]
+    special_weights: Optional[List[float]]
+    range_weight: Optional[float]
     meta: Dict[str, Any]
 
 
@@ -79,6 +82,10 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             config_range = (config_range[0], config_range[1])
             self._range = config_range
         self._special: Union[List[int], List[float]] = config.get("special") or []
+        self._weights: List[float] = (
+            config.get("values_weights") or config.get("special_weights") or []
+        )
+        self._range_weight: Optional[float] = config.get("range_weight")
         self._current_value = None
         self._sanity_check()
         self.value = self._default
@@ -96,11 +103,27 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
                 raise ValueError(f"Values must be unique for the categorical type tunable {self}")
             if self._special:
                 raise ValueError(f"Categorical tunable cannot have special values: {self}")
+            if self._range_weight is not None:
+                raise ValueError(f"Categorical tunable cannot have range_weight: {self}")
+            if self._weights:
+                if len(self._weights) != len(self._values):
+                    raise ValueError(f"Must specify weights for all values: {self}")
+                if any(w < 0 for w in self._weights):
+                    raise ValueError(f"All weights must be non-negative: {self}")
         elif self.is_numerical:
             if self._values is not None:
                 raise ValueError(f"Values must be None for the numerical type tunable {self}")
             if not self._range or len(self._range) != 2 or self._range[0] >= self._range[1]:
                 raise ValueError(f"Invalid range for tunable {self}: {self._range}")
+            if self._weights:
+                if self._range_weight is None:
+                    raise ValueError(f"Must specify weight for the range: {self}")
+                if len(self._weights) != len(self._special):
+                    raise ValueError("Must specify weights for all special values {self}")
+                if any(w < 0 for w in self._weights + [self._range_weight]):
+                    raise ValueError(f"All weights must be non-negative: {self}")
+            elif self._range_weight is not None:
+                raise ValueError(f"Must specify both weights and range_weight or none: {self}")
         else:
             raise ValueError(f"Invalid parameter type for tunable {self}: {self._type}")
         if not self.is_valid(self.default):
@@ -368,6 +391,32 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             True if the current value of the tunable is special, False otherwise.
         """
         return self.value in self._special
+
+    @property
+    def weights(self) -> Optional[List[float]]:
+        """
+        Get the weights of the categories or special values of the tunable.
+        Return None if there are none.
+
+        Returns
+        -------
+        weights : [float]
+            A list of weights or None.
+        """
+        return self._weights
+
+    @property
+    def range_weight(self) -> Optional[float]:
+        """
+        Get weight of the range of the numeric tunable.
+        Return None if there are no weights or a tunable is categorical.
+
+        Returns
+        -------
+        weight : float
+            Weight of the range or None.
+        """
+        return self._range_weight
 
     @property
     def type(self) -> str:

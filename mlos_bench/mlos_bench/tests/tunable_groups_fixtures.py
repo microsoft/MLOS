@@ -38,7 +38,8 @@ TUNABLE_GROUPS_JSON = """
                 "description": "Idling method",
                 "type": "categorical",
                 "default": "halt",
-                "values": ["halt", "mwait", "noidle"]
+                "values": ["halt", "mwait", "noidle"],
+                "values_weights": [33, 33, 33]  // FLAML requires uniform weights
             }
         }
     },
@@ -50,7 +51,11 @@ TUNABLE_GROUPS_JSON = """
                 "type": "int",
                 "default": -1,
                 "range": [0, 500000],
-                "special": [-1, 0]
+                "special": [-1, 0],
+                // FLAML requires uniform weights, separately for
+                // specials and switching between specials and range.
+                "special_weights": [0.25, 0.25],
+                "range_weight": 0.5
             },
             "kernel_sched_latency_ns": {
                 "description": "Initial value for the scheduler period",

@@ -8,7 +8,7 @@ Functions to convert TunableGroups to ConfigSpace for use with the mlos_core opt
 
 import logging
 
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from ConfigSpace import (
     CategoricalHyperparameter,
@@ -33,6 +33,14 @@ class TunableValueKind:
     # pylint: disable=too-few-public-methods
     SPECIAL = "special"
     RANGE = "range"
+
+
+def _normalize_weights(weights: List[float]) -> List[float]:
+    """
+    Helper function for normalizing weights to probabilities.
+    """
+    total = sum(weights)
+    return [w / total for w in weights]
 
 
 def _tunable_to_configspace(
@@ -61,8 +69,11 @@ def _tunable_to_configspace(
     if tunable.type == "categorical":
         return ConfigurationSpace({
             tunable.name: CategoricalHyperparameter(
-                name=tunable.name, choices=tunable.categories,
-                default_value=tunable.default, meta=meta)
+                name=tunable.name,
+                choices=tunable.categories,
+                weights=_normalize_weights(tunable.weights) if tunable.weights else None,
+                default_value=tunable.default,
+                meta=meta)
         })
 
     if tunable.type == "int":
@@ -75,28 +86,44 @@ def _tunable_to_configspace(
     if not tunable.special:
         return ConfigurationSpace({
             tunable.name: hp_type(
-                name=tunable.name, lower=tunable.range[0], upper=tunable.range[1],
+                name=tunable.name,
+                lower=tunable.range[0],
+                upper=tunable.range[1],
                 default_value=tunable.default if tunable.in_range(tunable.default) else None,
                 meta=meta)
         })
+
+    # Compute the probabilities of switching between regular and special values.
+    special_weights: Optional[List[float]] = None
+    switch_weights = [0.5, 0.5]  # FLAML requires uniform weights.
+    if tunable.weights and tunable.range_weight is not None:
+        special_weights = _normalize_weights(tunable.weights)
+        switch_weights = _normalize_weights([sum(tunable.weights), tunable.range_weight])
 
     # Create three hyperparameters: one for regular values,
     # one for special values, and one to choose between the two.
     (special_name, type_name) = special_param_names(tunable.name)
     conf_space = ConfigurationSpace({
         tunable.name: hp_type(
-            name=tunable.name, lower=tunable.range[0], upper=tunable.range[1],
+            name=tunable.name,
+            lower=tunable.range[0],
+            upper=tunable.range[1],
             default_value=tunable.default if tunable.in_range(tunable.default) else None,
-            meta=meta),
+            meta=meta
+        ),
         special_name: CategoricalHyperparameter(
-            name=special_name, choices=tunable.special,
+            name=special_name,
+            choices=tunable.special,
+            weights=special_weights,
             default_value=tunable.default if tunable.default in tunable.special else None,
-            meta=meta),
+            meta=meta
+        ),
         type_name: CategoricalHyperparameter(
             name=type_name,
             choices=[TunableValueKind.SPECIAL, TunableValueKind.RANGE],
+            weights=switch_weights,
             default_value=TunableValueKind.SPECIAL,
-            weights=[0.5, 0.5]),  # TODO: Make weights configurable; FLAML requires uniform weights.
+        ),
     })
     conf_space.add_condition(EqualsCondition(
         conf_space[special_name], conf_space[type_name], TunableValueKind.SPECIAL))
