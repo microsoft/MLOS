@@ -335,6 +335,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
             List of ConfigSpace configurations.
         """
         return [
-            ConfigSpace.Configuration(self.optimizer_parameter_space, values=config.to_dict())
-            for (_, config) in configurations.iterrows()
+            ConfigSpace.Configuration(self.optimizer_parameter_space, values=config._asdict())
+            for config in configurations.itertuples(index=False)
         ]
