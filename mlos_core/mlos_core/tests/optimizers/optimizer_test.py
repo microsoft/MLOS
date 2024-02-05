@@ -298,3 +298,62 @@ def test_optimizer_type_defs(optimizer_class: Type[BaseOptimizer]) -> None:
     """
     optimizer_type_classes = {member.value for member in OptimizerType}
     assert optimizer_class in optimizer_type_classes
+
+
+@pytest.mark.parametrize(('optimizer_type', 'kwargs'), [
+    # Enumerate all supported Optimizers
+    *[(member, {}) for member in OptimizerType],
+    # Optimizer with non-empty kwargs argument
+    (OptimizerType.SMAC, {
+        # Test with default config.
+        'use_default_config': True,
+        # 'n_random_init': 10,
+    }),
+])
+def test_mixed_input_space_types(optimizer_type: OptimizerType, kwargs: Optional[dict]) -> None:
+    """
+    Toy problem to test the optimizers.
+    """
+    max_iterations = 10
+    if kwargs is None:
+        kwargs = {}
+
+    def objective(point: pd.DataFrame) -> pd.Series:
+        # mix of hyperparameters, optimal is to select the highest possible
+        ret: pd.Series = point["x"] + point["y"]
+        return ret
+
+    input_space = CS.ConfigurationSpace(seed=2169)
+    # add a mix of numeric datatypes
+    input_space.add_hyperparameter(CS.UniformIntegerHyperparameter(name='x', lower=0, upper=5))
+    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='y', lower=0.0, upper=5.0))
+
+    optimizer: BaseOptimizer = OptimizerFactory.create(
+        parameter_space=input_space,
+        optimizer_type=optimizer_type,
+        optimizer_kwargs=kwargs,
+    )
+
+    with pytest.raises(ValueError, match="No observations"):
+        optimizer.get_best_observation()
+
+    with pytest.raises(ValueError, match="No observations"):
+        optimizer.get_observations()
+
+    for _ in range(max_iterations):
+        suggestion = optimizer.suggest()
+        assert isinstance(suggestion, pd.DataFrame)
+        assert (suggestion.columns == ['x', 'y']).all()
+        # check that suggestion is in the space
+        configuration = CS.Configuration(optimizer.parameter_space, suggestion.iloc[0].to_dict())
+        # Raises an error if outside of configuration space
+        configuration.is_valid_configuration()
+        observation = objective(suggestion)
+        assert isinstance(observation, pd.Series)
+        optimizer.register(suggestion, observation)
+
+    best_observation = optimizer.get_best_observation()
+    assert isinstance(best_observation, pd.DataFrame)
+
+    all_observations = optimizer.get_observations()
+    assert isinstance(all_observations, pd.DataFrame)
