@@ -34,7 +34,7 @@ def test_convert_numerical_distributions(tunable_type: str,
                 "tunable_param": {
                     "type": tunable_type,
                     "range": [0, 10],
-                    "special_values": [0],
+                    "special": [0],
                     "special_weights": [0.2],
                     "range_weight": 0.8,
                     "distribution": {
