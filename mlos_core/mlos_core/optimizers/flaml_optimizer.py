@@ -86,14 +86,13 @@ class FlamlOptimizer(BaseOptimizer):
         """
         if context is not None:
             raise NotImplementedError()
-        for config, score in zip(configurations.itertuples(index=False), scores):
-            config = config._asdict()
+        for (_, config), score in zip(configurations.astype('O').iterrows(), scores):
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
-                self.optimizer_parameter_space, values=config)
+                self.optimizer_parameter_space, values=config.to_dict())
             if cs_config in self.evaluated_samples:
                 warn(f"Configuration {config} was already registered", UserWarning)
 
-            self.evaluated_samples[cs_config] = EvaluatedSample(config=config, score=score)
+            self.evaluated_samples[cs_config] = EvaluatedSample(config=config.to_dict(), score=score)
 
     def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         """Suggests a new configuration.
