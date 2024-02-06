@@ -91,7 +91,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         self._meta: Dict[str, Any] = config.get("meta", {})
         self._range: Optional[Union[Tuple[int, int], Tuple[float, float]]] = None
         self._quantization: Union[int, None] = config.get("quantization")
-        self._log: bool = bool(config.get("log", False))
+        self._log: Optional[bool] = config.get("log")
         self._distribution: Optional[DistributionName] = None
         self._distribution_params: Dict[str, float] = {}
         distr = config.get("distribution")
@@ -555,7 +555,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             True if numeric tunable is log scale, False if linear.
         """
         assert self.is_numerical
-        return self._log
+        return bool(self._log)
 
     @property
     def distribution(self) -> Optional[DistributionName]:
