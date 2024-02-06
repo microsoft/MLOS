@@ -89,6 +89,8 @@ def _tunable_to_configspace(
                 name=tunable.name,
                 lower=tunable.range[0],
                 upper=tunable.range[1],
+                log=tunable.is_log,
+                q=tunable.quantization,
                 default_value=tunable.default if tunable.in_range(tunable.default) else None,
                 meta=meta)
         })
@@ -108,6 +110,8 @@ def _tunable_to_configspace(
             name=tunable.name,
             lower=tunable.range[0],
             upper=tunable.range[1],
+            log=tunable.is_log,
+            q=tunable.quantization,
             default_value=tunable.default if tunable.in_range(tunable.default) else None,
             meta=meta
         ),
