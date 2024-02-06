@@ -24,8 +24,7 @@
         },
         "quantization": {
             "description": "The number of buckets to quantize the range into.\nSee Also:\nhttps://automl.github.io/ConfigSpace/main/api/hyperparameters.html#module-ConfigSpace.api.types.float,\nhttps://automl.github.io/ConfigSpace/main/api/hyperparameters.html#module-ConfigSpace.api.types.integer",
-            "$comment": "type left unspecified here",
-            "minimum": 1
+            "$comment": "type left unspecified here"
         },
         "log_scale": {
             "description": "Whether to use log instead of linear scale for the range search.",
@@ -115,7 +114,8 @@
                 },
                 "quantization": {
                     "$ref": "#/$defs/quantization",
-                    "type": "integer"
+                    "type": "integer",
+                    "exclusiveMinimum": 1
                 },
                 "log": {
                     "$ref": "#/$defs/log_scale"
@@ -161,7 +161,8 @@
                 },
                 "quantization": {
                     "$ref": "#/$defs/quantization",
-                    "type": "number"
+                    "type": "number",
+                    "exclusiveMinimum": 0
                 },
                 "log": {
                     "$ref": "#/$defs/log_scale"
