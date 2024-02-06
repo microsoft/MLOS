@@ -129,6 +129,9 @@
                         "type": "integer"
                     }
                 },
+                "distribution": {
+                    "$ref": "#/$defs/tunable_param_distribution"
+                },
                 "quantization": {
                     "$ref": "#/$defs/quantization",
                     "type": "integer",
