@@ -7,8 +7,6 @@ Unit tests for converting tunable parameters with explicitly
 specified distributions to ConfigSpace.
 """
 
-from typing import Optional
-
 import pytest
 
 from ConfigSpace import (
