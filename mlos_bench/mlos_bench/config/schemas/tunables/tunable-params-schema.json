@@ -15,7 +15,6 @@
                 }
             }
         },
-<<<<<<< HEAD
         "tunable_param_distribution": {
             "type": "object",
             "properties": {
@@ -33,8 +32,6 @@
             },
             "required": ["type"]
         },
-||||||| 5d18329c3
-=======
         "numeric_range": {
             "description": "Two element array representing the lower and upper bounds of the range.",
             "type": "array",
@@ -74,7 +71,6 @@
             "type": "number",
             "minimum": 0
         },
->>>>>>> sergiym/tunable/quant_log
         "tunable_param_categorical": {
             "type": "object",
             "properties": {
@@ -131,55 +127,6 @@
                     "$ref": "#/$defs/numeric_range",
                     "items": {
                         "type": "integer"
-<<<<<<< HEAD
-                    },
-                    "minItems": 2,
-                    "maxItems": 2
-                },
-                "quantization": {
-                    "type": "number"
-                },
-                "log": {
-                    "type": "boolean"
-                },
-                "distribution": {
-                    "$ref": "#/$defs/tunable_param_distribution"
-                },
-                "special": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    },
-                    "uniqueItems": true
-                },
-                "special_weights": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-||||||| 5d18329c3
-                    },
-                    "minItems": 2,
-                    "maxItems": 2
-                },
-                "quantization": {
-                    "type": "number"
-                },
-                "log": {
-                    "type": "boolean"
-                },
-                "special": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    },
-                    "uniqueItems": true
-                },
-                "special_weights": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-=======
->>>>>>> sergiym/tunable/quant_log
                     }
                 },
                 "quantization": {
@@ -224,61 +171,13 @@
                     "type": "number"
                 },
                 "range": {
-<<<<<<< HEAD
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    },
-                    "minItems": 2,
-                    "maxItems": 2
-                },
-                "quantization": {
-                    "type": "number"
-                },
-                "log": {
-                    "type": "boolean"
-                },
-                "distribution": {
-                    "$ref": "#/$defs/tunable_param_distribution"
-                },
-                "special": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    },
-                    "uniqueItems": true
-                },
-                "special_weights": {
-                    "type": "array",
-||||||| 5d18329c3
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    },
-                    "minItems": 2,
-                    "maxItems": 2
-                },
-                "quantization": {
-                    "type": "number"
-                },
-                "log": {
-                    "type": "boolean"
-                },
-                "special": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    },
-                    "uniqueItems": true
-                },
-                "special_weights": {
-                    "type": "array",
-=======
                     "$ref": "#/$defs/numeric_range",
->>>>>>> sergiym/tunable/quant_log
                     "items": {
                         "type": "number"
                     }
+                },
+                "distribution": {
+                    "$ref": "#/$defs/tunable_param_distribution"
                 },
                 "quantization": {
                     "$ref": "#/$defs/quantization",

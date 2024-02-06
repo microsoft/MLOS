@@ -43,7 +43,7 @@ class TunableDict(TypedDict, total=False):
     default: TunableValue
     values: Optional[List[Optional[str]]]
     range: Optional[Union[Sequence[int], Sequence[float]]]
-    quantization: Optional[Union[int, float]]
+    quantization: Union[int, None]  # float
     log: Optional[bool]
     distribution: Optional[DistributionDict]
     special: Optional[Union[List[int], List[float]]]
@@ -90,8 +90,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             self._values = [str(v) if v is not None else v for v in self._values]
         self._meta: Dict[str, Any] = config.get("meta", {})
         self._range: Optional[Union[Tuple[int, int], Tuple[float, float]]] = None
-        self._quantization: Optional[Union[int, float]] = config.get("quantization")
-        self._log: Optional[bool] = config.get("log")
+        self._quantization: Union[int, None] = config.get("quantization")
+        self._log: bool = bool(config.get("log", False))
         self._distribution: Optional[DistributionName] = None
         self._distribution_params: Dict[str, float] = {}
         distr = config.get("distribution")
@@ -532,13 +532,13 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._range
 
     @property
-    def quantization(self) -> Optional[Union[int, float]]:
+    def quantization(self) -> Union[int, None]:  # float
         """
         Get the number of quantization points, if specified.
 
         Returns
         -------
-        quantization : int, float, None
+        quantization : int | None
             Number of quantization points or None.
         """
         assert self.is_numerical
