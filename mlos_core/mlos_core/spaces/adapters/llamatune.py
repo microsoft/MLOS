@@ -90,8 +90,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
     def inverse_transform(self, configurations: pd.DataFrame) -> pd.DataFrame:
         target_configurations = []
         for config in configurations.itertuples(index=False):
-            config = config._asdict()
-            configuration = ConfigSpace.Configuration(self.orig_parameter_space, values=config)
+            configuration = ConfigSpace.Configuration(
+                self.orig_parameter_space, values=config._asdict())
 
             target_config = self._suggested_configs.get(configuration, None)
             # NOTE: HeSBO is a non-linear projection method, and does not inherently support inverse projection
