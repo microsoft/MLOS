@@ -74,7 +74,8 @@
                     "maxItems": 2
                 },
                 "quantization": {
-                    "type": "number"
+                    "type": "number",
+                    "minimum": 1,
                 },
                 "log": {
                     "type": "boolean"
