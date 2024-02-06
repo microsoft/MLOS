@@ -65,12 +65,14 @@
                     "$ref": "#/$defs/tunable_param_meta"
                 },
                 "type": {
+                    "description": "A categorical type tunable.",
                     "const": "categorical"
                 },
                 "default": {
                     "type": ["string", "number", "boolean"]
                 },
                 "values": {
+                    "description": "List of values for this categorical type tunable",
                     "type": "array",
                     "items": {
                         "type": ["string", "number", "boolean"]
@@ -99,6 +101,7 @@
                     "$ref": "#/$defs/tunable_param_meta"
                 },
                 "type": {
+                    "description": "An integer type tunable.",
                     "const": "int"
                 },
                 "default": {
@@ -144,6 +147,7 @@
                     "$ref": "#/$defs/tunable_param_meta"
                 },
                 "type": {
+                    "description": "A continuous numerical type tunable.",
                     "const": "float"
                 },
                 "default": {
