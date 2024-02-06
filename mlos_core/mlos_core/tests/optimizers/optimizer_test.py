@@ -307,7 +307,7 @@ def test_optimizer_type_defs(optimizer_class: Type[BaseOptimizer]) -> None:
     *[(member, {}) for member in OptimizerType],
     # Optimizer with non-empty kwargs argument
 ])
-def test_mixed_input_space_types(optimizer_type: OptimizerType, kwargs: Optional[dict]) -> None:
+def test_mixed_input_space_types(optimizer_type: Optional[OptimizerType], kwargs: Optional[dict]) -> None:
     """
     Toy problem to test the optimizers.
     """
@@ -326,12 +326,12 @@ def test_mixed_input_space_types(optimizer_type: OptimizerType, kwargs: Optional
     input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='y', lower=0.0, upper=5.0))
 
     if optimizer_type is None:
-        optimizer: BaseOptimizer = OptimizerFactory.create(
+        optimizer = OptimizerFactory.create(
             parameter_space=input_space,
             optimizer_kwargs=kwargs,
         )
     else:
-        optimizer: BaseOptimizer = OptimizerFactory.create(
+        optimizer = OptimizerFactory.create(
             parameter_space=input_space,
             optimizer_type=optimizer_type,
             optimizer_kwargs=kwargs,
