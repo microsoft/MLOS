@@ -77,14 +77,14 @@ def test_numerical_distribution_beta(tunable_type: str) -> None:
         "distribution": {
             "type": "beta",
             "params": {
-                "alpha": 0.1,
-                "beta": 0.8
+                "alpha": 2,
+                "beta": 5
             }
         },
         "default": 0
     })
     assert tunable.distribution == "beta"
-    assert tunable.distribution_params == {"alpha": 0.1, "beta": 0.8}
+    assert tunable.distribution_params == {"alpha": 2, "beta": 5}
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])

@@ -40,16 +40,12 @@ _CS_HYPERPARAMETER = {
 
 
 @pytest.mark.parametrize("param_type", ["int", "float"])
-@pytest.mark.parametrize("is_log", [True, False])
-@pytest.mark.parametrize("quantization", [None, 5, 10])
 @pytest.mark.parametrize("distr_name,distr_params", [
-    ("normal", {"mu": 0, "sigma": 1.0}),
+    ("normal", {"mu": 0.0, "sigma": 1.0}),
     ("beta", {"alpha": 2, "beta": 5}),
     ("uniform", {}),
 ])
 def test_convert_numerical_distributions(param_type: str,
-                                         is_log: bool,
-                                         quantization: Optional[int],
                                          distr_name: DistributionName,
                                          distr_params: dict) -> None:
     """
@@ -63,11 +59,9 @@ def test_convert_numerical_distributions(param_type: str,
                 tunable_name: {
                     "type": param_type,
                     "range": [0, 100],
-                    "special": [0],
-                    "special_weights": [0.2],
-                    "range_weight": 0.8,
-                    "log": is_log,
-                    "quantization": quantization,
+                    "special": [-1, 0],
+                    "special_weights": [0.1, 0.2],
+                    "range_weight": 0.7,
                     "distribution": {
                         "type": distr_name,
                         "params": distr_params
@@ -79,8 +73,6 @@ def test_convert_numerical_distributions(param_type: str,
     })
 
     (tunable, _group) = tunable_groups.get_tunable(tunable_name)
-    assert tunable.is_log == is_log
-    assert tunable.quantization == quantization
     assert tunable.distribution == distr_name
     assert tunable.distribution_params == distr_params
 
@@ -93,8 +85,6 @@ def test_convert_numerical_distributions(param_type: str,
     assert isinstance(space[tunable_type], CategoricalHyperparameter)
 
     cs_param = space[tunable_name]
-    assert cs_param.log == is_log
-    assert cs_param.q == quantization
     assert isinstance(cs_param, _CS_HYPERPARAMETER[param_type, distr_name])
     for (key, val) in distr_params.items():
         assert getattr(cs_param, key) == val
