@@ -128,7 +128,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
                 raise ValueError(f"Categorical tunable cannot have special values: {self}")
             if self._range_weight is not None:
                 raise ValueError(f"Categorical tunable cannot have range_weight: {self}")
-            if self._log:
+            if self._log is not None:
                 raise ValueError(f"Categorical tunable cannot have log parameter: {self}")
             if self._quantization is not None:
                 raise ValueError(f"Categorical tunable cannot have quantization parameter: {self}")
