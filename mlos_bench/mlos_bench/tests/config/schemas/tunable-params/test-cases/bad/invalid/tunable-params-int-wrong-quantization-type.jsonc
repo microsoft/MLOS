@@ -6,7 +6,7 @@
                 "type": "int",
                 "default": 10,
                 "range": [1, 500],
-                "quantization": 0
+                "quantization": "yes"  // <-- this is invalid
             }
         }
     }
