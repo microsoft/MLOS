@@ -85,7 +85,7 @@ def _tunable_to_configspace(
     elif tunable.distribution == "normal":
         distribution = Normal(
             mu=tunable.distribution_params["mu"],
-            sigma=tunable.distribution_params["std"]
+            sigma=tunable.distribution_params["sigma"]
         )
     elif tunable.distribution == "beta":
         distribution = Beta(

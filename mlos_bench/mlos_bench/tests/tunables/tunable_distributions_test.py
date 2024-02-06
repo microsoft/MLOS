@@ -57,13 +57,13 @@ def test_numerical_distribution_normal(tunable_type: str) -> None:
             "type": "normal",
             "params": {
                 "mu": 0,
-                "std": 1.0
+                "sigma": 1.0
             }
         },
         "default": 0
     })
     assert tunable.distribution == "normal"
-    assert tunable.distribution_params == {"mu": 0, "std": 1.0}
+    assert tunable.distribution_params == {"mu": 0, "sigma": 1.0}
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
