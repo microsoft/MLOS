@@ -44,6 +44,11 @@
                                 "type": {
                                     "description": "Use a uniform distribution for sampling from the numerical range.",
                                     "const": "uniform"
+                                },
+                                "params": {
+                                    "description": "(null) parameters for the uniform distribution",
+                                    "type": "object",
+                                    "unevaluatedProperties": false
                                 }
                             },
                             "required": ["type"],
