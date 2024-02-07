@@ -354,6 +354,7 @@ def test_mixed_numeric_type_input_space_types(optimizer_type: Optional[Optimizer
         test_configuration = CS.Configuration(optimizer.parameter_space, suggestion.astype('O').iloc[0].to_dict())
         # Raises an error if outside of configuration space
         test_configuration.is_valid_configuration()
+        # Test registering the suggested configuration with a score.
         observation = objective(suggestion)
         assert isinstance(observation, pd.Series)
         optimizer.register(suggestion, observation)
