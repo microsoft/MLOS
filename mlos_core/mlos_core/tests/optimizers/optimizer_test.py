@@ -309,7 +309,7 @@ def test_optimizer_type_defs(optimizer_class: Type[BaseOptimizer]) -> None:
 ])
 def test_mixed_numeric_type_input_space_types(optimizer_type: Optional[OptimizerType], kwargs: Optional[dict]) -> None:
     """
-    Toy problem to test the optimizers.
+    Toy problem to test the optimizers with mixed numeric types to ensure that original dtypes are retained.
     """
     max_iterations = 10
     if kwargs is None:
