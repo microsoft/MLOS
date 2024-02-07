@@ -336,5 +336,5 @@ class SmacOptimizer(BaseBayesianOptimizer):
         """
         return [
             ConfigSpace.Configuration(self.optimizer_parameter_space, values=config.to_dict())
-            for (_, config) in configurations.iterrows()
+            for (_, config) in configurations.astype('O').iterrows()
         ]
