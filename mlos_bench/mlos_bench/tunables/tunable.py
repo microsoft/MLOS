@@ -560,7 +560,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._quantization
 
     @property
-    def is_log(self) -> bool:
+    def is_log(self) -> Optional[bool]:
         """
         Check if numeric tunable is log scale.
 
@@ -570,7 +570,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             True if numeric tunable is log scale, False if linear.
         """
         assert self.is_numerical
-        return bool(self._log)
+        return self._log
 
     @property
     def distribution(self) -> Optional[DistributionName]:
