@@ -32,6 +32,8 @@ class TunableDict(TypedDict, total=False):
     default: TunableValue
     values: Optional[List[Optional[str]]]
     range: Optional[Union[Sequence[int], Sequence[float]]]
+    quantization: Optional[Union[int, float]]
+    log: Optional[bool]
     special: Optional[Union[List[int], List[float]]]
     values_weights: Optional[List[float]]
     special_weights: Optional[List[float]]
@@ -76,6 +78,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             self._values = [str(v) if v is not None else v for v in self._values]
         self._meta: Dict[str, Any] = config.get("meta", {})
         self._range: Optional[Union[Tuple[int, int], Tuple[float, float]]] = None
+        self._quantization: Optional[Union[int, float]] = config.get("quantization")
+        self._log: Optional[bool] = config.get("log")
         config_range = config.get("range")
         if config_range is not None:
             assert len(config_range) == 2, f"Invalid range: {config_range}"
@@ -91,6 +95,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         self.value = self._default
 
     def _sanity_check(self) -> None:
+        # pylint: disable=too-complex,too-many-branches
         """
         Check if the status of the Tunable is valid, and throw ValueError if it is not.
         """
@@ -105,6 +110,10 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
                 raise ValueError(f"Categorical tunable cannot have special values: {self}")
             if self._range_weight is not None:
                 raise ValueError(f"Categorical tunable cannot have range_weight: {self}")
+            if self._log is not None:
+                raise ValueError(f"Categorical tunable cannot have log parameter: {self}")
+            if self._quantization is not None:
+                raise ValueError(f"Categorical tunable cannot have quantization parameter: {self}")
             if self._weights:
                 if len(self._weights) != len(self._values):
                     raise ValueError(f"Must specify weights for all values: {self}")
@@ -115,6 +124,17 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
                 raise ValueError(f"Values must be None for the numerical type tunable {self}")
             if not self._range or len(self._range) != 2 or self._range[0] >= self._range[1]:
                 raise ValueError(f"Invalid range for tunable {self}: {self._range}")
+            if self._quantization is not None:
+                if self.dtype == int:
+                    if not isinstance(self._quantization, int):
+                        raise ValueError(f"Quantization of a int param should be an int: {self}")
+                    if self._quantization <= 1:
+                        raise ValueError(f"Number of quantization points is <= 1: {self}")
+                if self.dtype == float:
+                    if not isinstance(self._quantization, (float, int)):
+                        raise ValueError(f"Quantization of a float param should be a float or int: {self}")
+                    if self._quantization <= 0:
+                        raise ValueError(f"Number of quantization points is <= 0: {self}")
             if self._weights:
                 if self._range_weight is None:
                     raise ValueError(f"Must specify weight for the range: {self}")
@@ -138,6 +158,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         string : str
             A human-readable version of the Tunable.
         """
+        # TODO? Add weights, specials, quantization, distribution?
         if self.is_categorical:
             return f"{self._name}[{self._type}]({self._values}:{self._default})={self._current_value}"
         return f"{self._name}[{self._type}]({self._range}:{self._default})={self._current_value}"
@@ -416,6 +437,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         weight : float
             Weight of the range or None.
         """
+        assert self.is_numerical
+        assert self._special
+        assert self._weights
         return self._range_weight
 
     @property
@@ -482,6 +506,32 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         assert self.is_numerical
         assert self._range is not None
         return self._range
+
+    @property
+    def quantization(self) -> Optional[Union[int, float]]:
+        """
+        Get the number of quantization points, if specified.
+
+        Returns
+        -------
+        quantization : int, float, None
+            Number of quantization points or None.
+        """
+        assert self.is_numerical
+        return self._quantization
+
+    @property
+    def is_log(self) -> Optional[bool]:
+        """
+        Check if numeric tunable is log scale.
+
+        Returns
+        -------
+        log : bool
+            True if numeric tunable is log scale, False if linear.
+        """
+        assert self.is_numerical
+        return self._log
 
     @property
     def categories(self) -> List[Optional[str]]:

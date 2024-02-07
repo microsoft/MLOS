@@ -1,0 +1,13 @@
+{
+    "covariant_group_name-1": {
+        "cost": 1,
+        "params": {
+            "int": {
+                "type": "int",
+                "default": 10,
+                "range": [1, 500],
+                "quantization": 1   // <-- should be greater than 1
+            }
+        }
+    }
+}

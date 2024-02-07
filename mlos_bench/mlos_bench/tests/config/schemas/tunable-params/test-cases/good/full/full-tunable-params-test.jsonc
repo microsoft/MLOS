@@ -11,7 +11,9 @@
                 "meta": {"suffix": "MB"},
                 "special": [-1],
                 "special_weights": [0.1],
-                "range_weight": 0.9
+                "range_weight": 0.9,
+                "quantization": 50,
+                "log": true
             },
             "float": {
                 "description": "Float",
@@ -19,7 +21,9 @@
                 "default": 10.1,
                 "meta": {"scale": 1000, "prefix": "/proc/var/random/", "base": 2.71828},
                 "range": [1.1, 111.1],
-                "special": [-1.1]
+                "special": [-1.1],
+                "quantization": 10,
+                "log": false
             },
             "cat": {
                 "description": "Cat",
