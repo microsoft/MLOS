@@ -121,7 +121,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         elif self.is_numerical:
             self._sanity_check_numerical()
         else:
-            raise ValueError(f"Invalid type for tunable {self}: {self._type}")
+            raise ValueError(f"Invalid parameter type for tunable {self}: {self._type}")
         if not self.is_valid(self.default):
             raise ValueError(f"Invalid default value for tunable {self}: {self.default}")
 
