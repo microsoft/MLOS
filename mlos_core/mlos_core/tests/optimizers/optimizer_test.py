@@ -23,7 +23,7 @@ from mlos_core.optimizers import (
 from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer, SmacOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterType
 
-from mlos_core.tests import get_all_concrete_subclasses
+from mlos_core.tests import get_all_concrete_subclasses, SEED
 
 
 _LOG = logging.getLogger(__name__)
@@ -76,7 +76,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
         ret: npt.ArrayLike = (6 * x - 2)**2 * np.sin(12 * x - 4)
         return ret
     # Emukit doesn't allow specifying a random state, so we set the global seed.
-    np.random.seed(42)
+    np.random.seed(SEED)
     optimizer = optimizer_class(parameter_space=configuration_space, **kwargs)
 
     with pytest.raises(ValueError, match="No observations"):
@@ -320,7 +320,7 @@ def test_mixed_numeric_type_input_space_types(optimizer_type: Optional[Optimizer
         ret: pd.Series = point["x"] + point["y"]
         return ret
 
-    input_space = CS.ConfigurationSpace(seed=2169)
+    input_space = CS.ConfigurationSpace(seed=SEED)
     # add a mix of numeric datatypes
     input_space.add_hyperparameter(CS.UniformIntegerHyperparameter(name='x', lower=0, upper=5))
     input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='y', lower=0.0, upper=5.0))
@@ -347,14 +347,13 @@ def test_mixed_numeric_type_input_space_types(optimizer_type: Optional[Optimizer
         suggestion = optimizer.suggest()
         assert isinstance(suggestion, pd.DataFrame)
         assert (suggestion.columns == ['x', 'y']).all()
-        # Build suggestion mapping to cooperate with Configuration, note that
-        # doing a .iloc[0].to_dict() will cause pandas convert all numeric types
-        # to float64
-        tmp_suggest = {'x': suggestion['x'].values[0], 'y': suggestion['y'].values[0]}
-        # check that suggestion is in the space
-        configuration = CS.Configuration(optimizer.parameter_space, tmp_suggest)
+        # Check suggestion values are the expected dtype
+        assert isinstance(suggestion['x'].iloc[0], np.integer)
+        assert isinstance(suggestion['y'].iloc[0], np.floating)
+        # Check that suggestion is in the space
+        test_configuration = CS.Configuration(optimizer.parameter_space, suggestion.astype('O').iloc[0].to_dict())
         # Raises an error if outside of configuration space
-        configuration.is_valid_configuration()
+        test_configuration.is_valid_configuration()
         observation = objective(suggestion)
         assert isinstance(observation, pd.Series)
         optimizer.register(suggestion, observation)
