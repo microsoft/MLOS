@@ -16,21 +16,99 @@
             }
         },
         "tunable_param_distribution": {
-            "type": "object",
-            "properties": {
-                "type": {
-                    "type": "string",
-                    "enum": ["uniform", "normal", "beta"]
-                },
-                "params": {
+            "description": "Distribution config to use when sampling from numerical range.",
+            "allOf": [
+                {
+                    "description": "Distribution config to use when sampling from numerical range.",
                     "type": "object",
-                    "items": {
-                        "type": "number"
+                    "properties": {
+                        "type": {
+                            "description": "Which distribution to use when sampling from the numerical range.",
+                            "$comment": "The possible distribution types. Full match must be below. This is just for IDE help.",
+                            "enum": ["uniform", "beta", "normal"]
+                        },
+                        "params": {
+                            "description": "Per distribution type configuration parameters",
+                            "$comment": "Stub. Full match should be below.",
+                            "type": "object",
+                            "minItems": 1
+                        }
                     },
-                    "minItems": 1
+                    "required": ["type"]
+                },
+                {
+                    "oneOf": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "description": "Use a uniform distribution for sampling from the numerical range.",
+                                    "const": "uniform"
+                                }
+                            },
+                            "required": ["type"],
+                            "unevaluatedProperties": false
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "description": "Use a beta distribution for sampling from the numerical range.",
+                                    "const": "beta"
+                                },
+                                "params": {
+                                    "description": "Parameters for the beta distribution",
+                                    "type": "object",
+                                    "properties": {
+                                        "alpha": {
+                                            "description": "The alpha shape parameter for the beta distribution.",
+                                            "type": "number",
+                                            "exclusiveMinimum": 0
+                                        },
+                                        "beta": {
+                                            "description": "The beta shape parameter for the beta distribution.",
+                                            "type": "number",
+                                            "exclusiveMinimum": 0
+                                        }
+                                    },
+                                    "required": ["alpha", "beta"],
+                                    "unevaluatedProperties": false
+                                }
+                            },
+                            "required": ["type", "params"],
+                            "unevaluatedProperties": false
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "description": "Use a normal distribution for sampling from the numerical range.",
+                                    "const": "normal"
+                                },
+                                "params": {
+                                    "description": "Parameters for the normal distribution",
+                                    "type": "object",
+                                    "properties": {
+                                        "mu": {
+                                            "description": "The mean of the normal distribution.",
+                                            "type": "number"
+                                        },
+                                        "sigma": {
+                                            "description": "The standard deviation of the normal distribution.",
+                                            "type": "number",
+                                            "exclusiveMinimum": 0
+                                        }
+                                    },
+                                    "required": ["mu", "sigma"],
+                                    "unevaluatedProperties": false
+                                }
+                            },
+                            "required": ["type", "params"],
+                            "unevaluatedProperties": false
+                        }
+                    ]
                 }
-            },
-            "required": ["type"]
+            ]
         },
         "numeric_range": {
             "description": "Two element array representing the lower and upper bounds of the range.",
