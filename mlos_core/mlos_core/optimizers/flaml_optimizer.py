@@ -86,7 +86,7 @@ class FlamlOptimizer(BaseOptimizer):
         """
         if context is not None:
             raise NotImplementedError()
-        for (_, config), score in zip(configurations.iterrows(), scores):
+        for (_, config), score in zip(configurations.astype('O').iterrows(), scores):
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
                 self.optimizer_parameter_space, values=config.to_dict())
             if cs_config in self.evaluated_samples:

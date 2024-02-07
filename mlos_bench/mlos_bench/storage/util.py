@@ -30,7 +30,7 @@ def kv_df_to_dict(dataframe: pandas.DataFrame) -> Dict[str, Optional[TunableValu
         dataframe.rename(columns={'metric': 'parameter'}, inplace=True)
     assert dataframe.columns.tolist() == ['parameter', 'value']
     data = {}
-    for _, row in dataframe.iterrows():
+    for _, row in dataframe.astype('O').iterrows():
         assert isinstance(row['parameter'], str)
         assert row['value'] is None or isinstance(row['value'], (str, int, float))
         if row['parameter'] in data:
