@@ -8,15 +8,18 @@ Functions to convert TunableGroups to ConfigSpace for use with the mlos_core opt
 
 import logging
 
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from ConfigSpace import (
+    Beta,
     CategoricalHyperparameter,
     Configuration,
     ConfigurationSpace,
     EqualsCondition,
-    UniformFloatHyperparameter,
-    UniformIntegerHyperparameter,
+    Float,
+    Integer,
+    Normal,
+    Uniform,
 )
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -76,24 +79,51 @@ def _tunable_to_configspace(
                 meta=meta)
         })
 
+    distribution: Union[Uniform, Normal, Beta, None] = None
+    if tunable.distribution == "uniform":
+        distribution = Uniform()
+    elif tunable.distribution == "normal":
+        distribution = Normal(
+            mu=tunable.distribution_params["mu"],
+            sigma=tunable.distribution_params["sigma"]
+        )
+    elif tunable.distribution == "beta":
+        distribution = Beta(
+            alpha=tunable.distribution_params["alpha"],
+            beta=tunable.distribution_params["beta"]
+        )
+    elif tunable.distribution is not None:
+        raise TypeError(f"Invalid Distribution Type: {tunable.distribution}")
+
     if tunable.type == "int":
-        hp_type = UniformIntegerHyperparameter
+        range_hp = Integer(
+            name=tunable.name,
+            bounds=(int(tunable.range[0]), int(tunable.range[1])),
+            log=bool(tunable.is_log),
+            q=int(tunable.quantization) if tunable.quantization is not None else None,
+            distribution=distribution,
+            default=(int(tunable.default)
+                     if tunable.in_range(tunable.default) and tunable.default is not None
+                     else None),
+            meta=meta
+        )
     elif tunable.type == "float":
-        hp_type = UniformFloatHyperparameter
+        range_hp = Float(
+            name=tunable.name,
+            bounds=tunable.range,
+            log=bool(tunable.is_log),
+            q=tunable.quantization,     # type: ignore[arg-type]
+            distribution=distribution,  # type: ignore[arg-type]
+            default=(float(tunable.default)
+                     if tunable.in_range(tunable.default) and tunable.default is not None
+                     else None),
+            meta=meta
+        )
     else:
-        raise TypeError(f"Undefined Parameter Type: {tunable.type}")
+        raise TypeError(f"Invalid Parameter Type: {tunable.type}")
 
     if not tunable.special:
-        return ConfigurationSpace({
-            tunable.name: hp_type(
-                name=tunable.name,
-                lower=tunable.range[0],
-                upper=tunable.range[1],
-                log=tunable.is_log,
-                q=tunable.quantization,
-                default_value=tunable.default if tunable.in_range(tunable.default) else None,
-                meta=meta)
-        })
+        return ConfigurationSpace({tunable.name: range_hp})
 
     # Compute the probabilities of switching between regular and special values.
     special_weights: Optional[List[float]] = None
@@ -106,15 +136,7 @@ def _tunable_to_configspace(
     # one for special values, and one to choose between the two.
     (special_name, type_name) = special_param_names(tunable.name)
     conf_space = ConfigurationSpace({
-        tunable.name: hp_type(
-            name=tunable.name,
-            lower=tunable.range[0],
-            upper=tunable.range[1],
-            log=tunable.is_log,
-            q=tunable.quantization,
-            default_value=tunable.default if tunable.in_range(tunable.default) else None,
-            meta=meta
-        ),
+        tunable.name: range_hp,
         special_name: CategoricalHyperparameter(
             name=special_name,
             choices=tunable.special,

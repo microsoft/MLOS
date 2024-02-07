@@ -15,12 +15,113 @@
                 }
             }
         },
+        "tunable_param_distribution": {
+            "description": "Distribution config to use when sampling from numerical range.",
+            "allOf": [
+                {
+                    "description": "Distribution config to use when sampling from numerical range.",
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "description": "Which distribution to use when sampling from the numerical range.",
+                            "$comment": "The possible distribution types. Full match must be below. This is just for IDE help.",
+                            "enum": ["uniform", "beta", "normal"]
+                        },
+                        "params": {
+                            "description": "Per distribution type configuration parameters",
+                            "$comment": "Stub. Full match should be below.",
+                            "type": "object",
+                            "minItems": 1
+                        }
+                    },
+                    "required": ["type"]
+                },
+                {
+                    "oneOf": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "description": "Use a uniform distribution for sampling from the numerical range.",
+                                    "const": "uniform"
+                                },
+                                "params": {
+                                    "description": "(null) parameters for the uniform distribution",
+                                    "type": "object",
+                                    "unevaluatedProperties": false
+                                }
+                            },
+                            "required": ["type"],
+                            "unevaluatedProperties": false
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "description": "Use a beta distribution for sampling from the numerical range.",
+                                    "const": "beta"
+                                },
+                                "params": {
+                                    "description": "Parameters for the beta distribution",
+                                    "type": "object",
+                                    "properties": {
+                                        "alpha": {
+                                            "description": "The alpha shape parameter for the beta distribution.",
+                                            "type": "number",
+                                            "exclusiveMinimum": 0
+                                        },
+                                        "beta": {
+                                            "description": "The beta shape parameter for the beta distribution.",
+                                            "type": "number",
+                                            "exclusiveMinimum": 0
+                                        }
+                                    },
+                                    "required": ["alpha", "beta"],
+                                    "unevaluatedProperties": false
+                                }
+                            },
+                            "required": ["type", "params"],
+                            "unevaluatedProperties": false
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "description": "Use a normal distribution for sampling from the numerical range.",
+                                    "const": "normal"
+                                },
+                                "params": {
+                                    "description": "Parameters for the normal distribution",
+                                    "type": "object",
+                                    "properties": {
+                                        "mu": {
+                                            "description": "The mean of the normal distribution.",
+                                            "type": "number"
+                                        },
+                                        "sigma": {
+                                            "description": "The standard deviation of the normal distribution.",
+                                            "type": "number",
+                                            "exclusiveMinimum": 0
+                                        }
+                                    },
+                                    "required": ["mu", "sigma"],
+                                    "unevaluatedProperties": false
+                                }
+                            },
+                            "required": ["type", "params"],
+                            "unevaluatedProperties": false
+                        }
+                    ]
+                }
+            ]
+        },
         "numeric_range": {
             "description": "Two element array representing the lower and upper bounds of the range.",
             "type": "array",
             "$comment": "items type left unspecified here",
             "minItems": 2,
-            "maxItems": 2
+            "maxItems": 2,
+            "uniqueItems": true
         },
         "quantization": {
             "description": "The number of buckets to quantize the range into.\nSee Also:\nhttps://automl.github.io/ConfigSpace/main/api/hyperparameters.html#module-ConfigSpace.api.types.float,\nhttps://automl.github.io/ConfigSpace/main/api/hyperparameters.html#module-ConfigSpace.api.types.integer",
@@ -85,7 +186,7 @@
             },
             "required": ["type", "default", "values"],
             "not": {
-                "required": ["range", "special", "special_weights", "range_weight"]
+                "required": ["range", "special", "special_weights", "range_weight", "log", "quantization", "distribution"]
             },
             "$comment": "TODO: add check that default is in values",
             "unevaluatedProperties": false
@@ -111,6 +212,9 @@
                     "items": {
                         "type": "integer"
                     }
+                },
+                "distribution": {
+                    "$ref": "#/$defs/tunable_param_distribution"
                 },
                 "quantization": {
                     "$ref": "#/$defs/quantization",
@@ -158,6 +262,9 @@
                     "items": {
                         "type": "number"
                     }
+                },
+                "distribution": {
+                    "$ref": "#/$defs/tunable_param_distribution"
                 },
                 "quantization": {
                     "$ref": "#/$defs/quantization",

@@ -3,7 +3,7 @@
         "cost": 1,
         "description": "Covariant group description",
         "params": {
-            "int": {
+            "beta-int": {
                 "description": "Int",
                 "type": "int",
                 "default": 10,
@@ -13,9 +13,35 @@
                 "special_weights": [0.1],
                 "range_weight": 0.9,
                 "quantization": 50,
+                "distribution": {
+                    "type": "beta",
+                    "params": {
+                        "alpha": 0.1,
+                        "beta": 0.1
+                    }
+                },
                 "log": true
             },
-            "float": {
+            "normal-int": {
+                "description": "Int",
+                "type": "int",
+                "default": 10,
+                "range": [1, 500],
+                "meta": {"suffix": "MB"},
+                "special": [-1],
+                "special_weights": [0.1],
+                "range_weight": 0.9,
+                "quantization": 50,
+                "distribution": {
+                    "type": "normal",
+                    "params": {
+                        "mu": 0,
+                        "sigma": 0.1
+                    }
+                },
+                "log": true
+            },
+            "uniform-float": {
                 "description": "Float",
                 "type": "float",
                 "default": 10.1,
@@ -23,6 +49,9 @@
                 "range": [1.1, 111.1],
                 "special": [-1.1],
                 "quantization": 10,
+                "distribution": {
+                    "type": "uniform"
+                },
                 "log": false
             },
             "cat": {
