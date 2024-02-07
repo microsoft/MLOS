@@ -37,7 +37,8 @@
             "type": "array",
             "$comment": "items type left unspecified here",
             "minItems": 2,
-            "maxItems": 2
+            "maxItems": 2,
+            "uniqueItems": true
         },
         "quantization": {
             "description": "The number of buckets to quantize the range into.\nSee Also:\nhttps://automl.github.io/ConfigSpace/main/api/hyperparameters.html#module-ConfigSpace.api.types.float,\nhttps://automl.github.io/ConfigSpace/main/api/hyperparameters.html#module-ConfigSpace.api.types.integer",
@@ -102,7 +103,7 @@
             },
             "required": ["type", "default", "values"],
             "not": {
-                "required": ["range", "special_weight", "range_weight", "log", "quantization", "distribution"]
+                "required": ["range", "special", "special_weight", "range_weight", "log", "quantization", "distribution"]
             },
             "$comment": "TODO: add check that default is in values",
             "unevaluatedProperties": false
