@@ -43,7 +43,7 @@ class TunableDict(TypedDict, total=False):
     default: TunableValue
     values: Optional[List[Optional[str]]]
     range: Optional[Union[Sequence[int], Sequence[float]]]
-    quantization: Union[int, None]  # float
+    quantization: Union[int, float, None]
     log: Optional[bool]
     distribution: Optional[DistributionDict]
     special: Optional[Union[List[int], List[float]]]
@@ -76,7 +76,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         config : dict
             Python dict that represents a Tunable (e.g., deserialized from JSON)
         """
-        if '!' in name:  # TODO: Use a regex here and in JSON schema
+        if not isinstance(name, str) or '!' in name:  # TODO: Use a regex here and in JSON schema
             raise ValueError(f"Invalid name of the tunable: {name}")
         self._name = name
         self._type = config["type"]  # required
@@ -90,7 +90,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             self._values = [str(v) if v is not None else v for v in self._values]
         self._meta: Dict[str, Any] = config.get("meta", {})
         self._range: Optional[Union[Tuple[int, int], Tuple[float, float]]] = None
-        self._quantization: Union[int, None] = config.get("quantization")
+        self._quantization: Union[int, float, None] = config.get("quantization")
         self._log: Optional[bool] = config.get("log")
         self._distribution: Optional[DistributionName] = None
         self._distribution_params: Dict[str, float] = {}
@@ -163,10 +163,6 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             raise ValueError(f"Values must be None for the numerical type tunable {self}")
         if not self._range or len(self._range) != 2 or self._range[0] >= self._range[1]:
             raise ValueError(f"Invalid range for tunable {self}: {self._range}")
-        if self._distribution is not None and self._distribution not in {"uniform", "normal", "beta"}:
-            raise ValueError(f"Invalid distribution: {self}")
-        if self._distribution_params and self._distribution is None:
-            raise ValueError(f"Must specify the distribution: {self}")
         if self._quantization is not None:
             if self.dtype == int:
                 if not isinstance(self._quantization, int):
@@ -178,6 +174,10 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
                     raise ValueError(f"Quantization of a float param should be a float or int: {self}")
                 if self._quantization <= 0:
                     raise ValueError(f"Number of quantization points is <= 0: {self}")
+        if self._distribution is not None and self._distribution not in {"uniform", "normal", "beta"}:
+            raise ValueError(f"Invalid distribution: {self}")
+        if self._distribution_params and self._distribution is None:
+            raise ValueError(f"Must specify the distribution: {self}")
         if self._weights:
             if self._range_weight is None:
                 raise ValueError(f"Must specify weight for the range: {self}")
@@ -547,7 +547,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._range
 
     @property
-    def quantization(self) -> Union[int, None]:  # float
+    def quantization(self) -> Union[int, float, None]:
         """
         Get the number of quantization points, if specified.
 
