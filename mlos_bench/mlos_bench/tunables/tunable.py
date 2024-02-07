@@ -129,7 +129,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         """
         Check if the status of the categorical Tunable is valid, and throw ValueError if it is not.
         """
-        # pylint: disable:too-complex
+        # pylint: disable=too-complex
         assert self.is_categorical
         if not (self._values and isinstance(self._values, collections.abc.Iterable)):
             raise ValueError(f"Must specify values for the categorical type tunable {self}")
@@ -157,7 +157,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         """
         Check if the status of the numerical Tunable is valid, and throw ValueError if it is not.
         """
-        # pylint: disable:too-complex,too-many-branches
+        # pylint: disable=too-complex,too-many-branches
         assert self.is_numerical
         if self._values is not None:
             raise ValueError(f"Values must be None for the numerical type tunable {self}")
