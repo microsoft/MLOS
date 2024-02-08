@@ -390,7 +390,7 @@ class Storage(metaclass=ABCMeta):
             return {self._opt_target: metrics} if isinstance(metrics, (float, int)) else metrics
 
         @abstractmethod
-        def update_telemetry(self, status: Status,
+        def update_telemetry(self, status: Status, timestamp: datetime,
                              metrics: List[Tuple[datetime, str, Any]]) -> None:
             """
             Save the experiment's telemetry data and intermediate status.
@@ -399,6 +399,8 @@ class Storage(metaclass=ABCMeta):
             ----------
             status : Status
                 Current status of the trial.
+            timestamp: datetime
+                Timestamp of the status (but not the metrics).
             metrics : List[Tuple[datetime, str, Any]]
                 Telemetry data.
             """

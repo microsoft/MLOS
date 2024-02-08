@@ -184,12 +184,15 @@ def _run(env: Environment, opt: Optimizer, trial: Storage.Trial, global_config: 
     # In async mode (TODO), poll the environment for status and telemetry
     # and update the storage with the intermediate results.
     (_, telemetry) = env.status()
+
+    # FIXME: Use the actual timestamp from the trial.
+    timestamp = datetime.utcnow()
+
     # Use the status from `.run()` as it is the final status of the experiment.
     # TODO: Use the `.status()` output in async mode.
-    trial.update_telemetry(status, telemetry)
+    trial.update_telemetry(status, timestamp, telemetry)
 
-    # FIXME: Use the actual timestamp from the benchmark.
-    trial.update(status, datetime.utcnow(), results)
+    trial.update(status, timestamp, results)
     # Filter out non-numeric scores from the optimizer.
     scores = results if not isinstance(results, dict) \
         else {k: float(v) for (k, v) in results.items() if isinstance(v, (int, float))}
