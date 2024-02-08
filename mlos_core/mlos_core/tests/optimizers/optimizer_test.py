@@ -307,7 +307,7 @@ def test_optimizer_type_defs(optimizer_class: Type[BaseOptimizer]) -> None:
     *[(member, {}) for member in OptimizerType],
     # Optimizer with non-empty kwargs argument
 ])
-def test_mixed_numeric_type_input_space_types(optimizer_type: Optional[OptimizerType], kwargs: Optional[dict]) -> None:
+def test_mixed_numerics_type_input_space_types(optimizer_type: Optional[OptimizerType], kwargs: Optional[dict]) -> None:
     """
     Toy problem to test the optimizers with mixed numeric types to ensure that original dtypes are retained.
     """
