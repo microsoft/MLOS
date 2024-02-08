@@ -144,6 +144,19 @@ class DbSchema:
                                  [self.trial.c.exp_id, self.trial.c.trial_id]),
         )
 
+        self.trial_status = Table(
+            "trial_status",
+            self._meta,
+            Column("exp_id", String(255), nullable=False),
+            Column("trial_id", Integer, nullable=False),
+            Column("ts", DateTime, nullable=False, default="now"),
+            Column("status", String(16), nullable=False),
+
+            UniqueConstraint("exp_id", "trial_id", "ts"),
+            ForeignKeyConstraint(["exp_id", "trial_id"],
+                                 [self.trial.c.exp_id, self.trial.c.trial_id]),
+        )
+
         self.trial_result = Table(
             "trial_result",
             self._meta,
