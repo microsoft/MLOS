@@ -178,17 +178,14 @@ def _run(env: Environment, opt: Optimizer, trial: Storage.Trial, global_config: 
         opt.register(trial.tunables, Status.FAILED)
         return
 
-    (status, results) = env.run()  # Block and wait for the final result.
+    (status, timestamp, results) = env.run()  # Block and wait for the final result.
     _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
 
     # In async mode (TODO), poll the environment for status and telemetry
     # and update the storage with the intermediate results.
-    (_, telemetry) = env.status()
+    (_status, _timestamp, telemetry) = env.status()
 
-    # FIXME: Use the actual timestamp from the trial.
-    timestamp = datetime.utcnow()
-
-    # Use the status from `.run()` as it is the final status of the experiment.
+    # Use the status and timestamp from `.run()` as it is the final status of the experiment.
     # TODO: Use the `.status()` output in async mode.
     trial.update_telemetry(status, timestamp, telemetry)
 
