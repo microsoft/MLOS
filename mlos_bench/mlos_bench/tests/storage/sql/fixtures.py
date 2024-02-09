@@ -123,7 +123,6 @@ def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: str) -> SqlStorage.
 
 @pytest.fixture
 def exp_storage_with_trials(exp_storage: SqlStorage.Experiment) -> SqlStorage.Experiment:
-    # pylint: disable=too-many-locals
     """
     Test fixture for Experiment using in-memory SQLite3 storage.
     """
