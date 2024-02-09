@@ -130,7 +130,6 @@ def exp_storage_with_trials(exp_storage: SqlStorage.Experiment) -> SqlStorage.Ex
 
 @pytest.fixture
 def mixed_numerics_exp_storage_with_trials(mixed_numerics_exp_storage: SqlStorage.Experiment) -> SqlStorage.Experiment:
-    # pylint: disable=too-many-locals
     """
     Test fixture for Experiment using in-memory SQLite3 storage.
     """
