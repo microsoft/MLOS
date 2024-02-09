@@ -78,7 +78,6 @@ def mixed_numerics_exp_storage(storage: SqlStorage, mixed_numerics_tunable_group
 
 
 def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: str) -> SqlStorage.Experiment:
-    # pylint: disable=too-many-locals
     """
     Generates data by doing a simulated run of the given experiment.
     """
