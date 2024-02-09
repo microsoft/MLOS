@@ -108,3 +108,36 @@ def covariant_group(tunable_groups: TunableGroups) -> CovariantTunableGroup:
     """
     (_, covariant_group) = next(iter(tunable_groups))
     return covariant_group
+
+
+@pytest.fixture
+def mixed_numerics_tunable_groups() -> TunableGroups:
+    """
+    A test fixture with mixed numeric tunable groups to test type conversions.
+
+    Returns
+    -------
+    tunable_groups : TunableGroups
+        A new TunableGroups object for testing.
+    """
+    tunables = TunableGroups({
+        "mix-numerics": {
+            "cost": 1,
+            "params": {
+                "int": {
+                    "description": "An integer",
+                    "type": "int",
+                    "default": 0,
+                    "range": [0, 100],
+                },
+                "float": {
+                    "description": "A float",
+                    "type": "float",
+                    "default": 0,
+                    "range": [0, 1],
+                },
+            }
+        },
+    })
+    tunables.reset()
+    return tunables

@@ -27,6 +27,7 @@ from mlos_bench.tests import SEED, tunable_groups_fixtures
 # Expose some of those as local names so they can be picked up as fixtures by pytest.
 tunable_groups_config = tunable_groups_fixtures.tunable_groups_config
 tunable_groups = tunable_groups_fixtures.tunable_groups
+mixed_numerics_tunable_groups = tunable_groups_fixtures.mixed_numerics_tunable_groups
 covariant_group = tunable_groups_fixtures.covariant_group
 
 
