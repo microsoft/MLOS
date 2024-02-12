@@ -18,6 +18,9 @@ jobs:
   Linux:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+
     # Test multiple versions of python.
     strategy:
       fail-fast: false
