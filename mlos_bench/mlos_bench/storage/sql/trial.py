@@ -10,7 +10,7 @@ import logging
 from datetime import datetime
 from typing import List, Optional, Tuple, Union, Dict, Any
 
-from sqlalchemy import Engine, Connection
+from sqlalchemy import Engine
 from sqlalchemy.exc import IntegrityError
 
 from mlos_bench.environments.status import Status
@@ -49,7 +49,6 @@ class Trial(Storage.Trial):
         metrics = super().update(status, timestamp, metrics)
         with self._engine.begin() as conn:
             try:
-                self._update_status(conn, status, timestamp)
                 cur_status = conn.execute(
                     self._schema.trial.update().where(
                         self._schema.trial.c.exp_id == self._experiment_id,
@@ -88,34 +87,15 @@ class Trial(Storage.Trial):
         # and we need to keep `.update_telemetry()` idempotent; hence a loop instead of
         # a bulk upsert.
         # See Also: comments in <https://github.com/microsoft/MLOS/pull/466>
-        with self._engine.begin() as conn:
-            self._update_status(conn, status, timestamp)
-        for (metric_ts, metric_id, metric_value) in metrics:
+        for (metric_ts, key, val) in metrics:
             with self._engine.begin() as conn:
                 try:
                     conn.execute(self._schema.trial_telemetry.insert().values(
                         exp_id=self._experiment_id,
                         trial_id=self._trial_id,
                         ts=metric_ts,
-                        metric_id=metric_id,
-                        metric_value=None if metric_value is None else str(metric_value),
+                        metric_id=key,
+                        metric_value=None if val is None else str(val),
                     ))
                 except IntegrityError as ex:
-                    _LOG.warning("Record already exists: %s :: %s",
-                                 (metric_ts, metric_id, metric_value), ex)
-
-    def _update_status(self, conn: Connection, status: Status, timestamp: datetime) -> None:
-        """
-        Insert a new status record into the database.
-        This call is idempotent.
-        """
-        try:
-            conn.execute(self._schema.trial_status.insert().values(
-                exp_id=self._experiment_id,
-                trial_id=self._trial_id,
-                ts=timestamp,
-                status=status.name,
-            ))
-        except IntegrityError as ex:
-            _LOG.warning("Status with that timestamp already exists: %s %s :: %s",
-                         self, timestamp, ex)
+                    _LOG.warning("Record already exists: %s :: %s", (metric_ts, key, val), ex)
