@@ -54,7 +54,7 @@ def exp_storage(storage: SqlStorage, tunable_groups: TunableGroups) -> SqlStorag
         opt_target=opt_target,
         opt_direction=opt_direction,
     ) as exp:
-        return exp
+        yield exp
 
 
 @pytest.fixture
@@ -74,7 +74,7 @@ def mixed_numerics_exp_storage(storage: SqlStorage, mixed_numerics_tunable_group
         opt_target=opt_target,
         opt_direction=opt_direction,
     ) as exp:
-        return exp
+        yield exp
 
 
 def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: str) -> SqlStorage.Experiment:
