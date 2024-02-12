@@ -59,6 +59,8 @@ def exp_storage(
         opt_direction=opt_direction,
     ) as exp:
         yield exp
+    # pylint: disable=protected-access
+    assert not exp._in_context
 
 
 @pytest.fixture
@@ -82,6 +84,8 @@ def mixed_numerics_exp_storage(
         opt_direction=opt_direction,
     ) as exp:
         yield exp
+    # pylint: disable=protected-access
+    assert not exp._in_context
 
 
 def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: str) -> SqlStorage.Experiment:
