@@ -94,6 +94,8 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
             # Allow for recursive variable expansion as we do with global params and const_args.
             deploy_params = DictTemplater(self.config['deploymentTemplateParameters']).expand_vars(extra_source_dict=global_config)
             self._deploy_params = merge_parameters(dest=deploy_params, source=global_config)
+        else:
+            _LOG.info("No deploymentTemplatePath provided. Deployment services will be unavailable.")
 
     @property
     def deploy_params(self) -> dict:
