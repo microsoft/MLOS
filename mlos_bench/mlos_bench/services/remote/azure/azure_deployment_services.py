@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Base class for certain Azure Services classes.
+Base class for certain Azure Services classes that do deployments.
 """
 
 import abc
@@ -25,9 +25,9 @@ from mlos_bench.util import check_required_params, merge_parameters
 _LOG = logging.getLogger(__name__)
 
 
-class AzureService(Service, metaclass=abc.ABCMeta):
+class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
     """
-    Helper methods to manage Azure resources via REST APIs.
+    Helper methods to manage and deploy Azure resources via REST APIs.
     """
 
     _POLL_INTERVAL = 4     # seconds
@@ -73,8 +73,6 @@ class AzureService(Service, metaclass=abc.ABCMeta):
         check_required_params(self.config, [
             "subscription",
             "resourceGroup",
-            "deploymentTemplatePath",
-            "deploymentTemplateParameters",
         ])
 
         # These parameters can come from command line as strings, so conversion is needed.
@@ -84,15 +82,18 @@ class AzureService(Service, metaclass=abc.ABCMeta):
         self._total_retries = int(self.config.get("requestTotalRetries", self._REQUEST_TOTAL_RETRIES))
         self._backoff_factor = float(self.config.get("requestBackoffFactor", self._REQUEST_RETRY_BACKOFF_FACTOR))
 
-        # TODO: Provide external schema validation?
-        template = self.config_loader_service.load_config(
-            self.config['deploymentTemplatePath'], schema_type=None)
-        assert template is not None and isinstance(template, dict)
-        self._deploy_template = template
+        self._deploy_template = {}
+        self._deploy_params = {}
+        if self.config.get("deploymentTemplatePath") is not None:
+            # TODO: Provide external schema validation?
+            template = self.config_loader_service.load_config(
+                self.config['deploymentTemplatePath'], schema_type=None)
+            assert template is not None and isinstance(template, dict)
+            self._deploy_template = template
 
-        # Allow for recursive variable expansion as we do with global params and const_args.
-        deploy_params = DictTemplater(self.config['deploymentTemplateParameters']).expand_vars(extra_source_dict=global_config)
-        self._deploy_params = merge_parameters(dest=deploy_params, source=global_config)
+            # Allow for recursive variable expansion as we do with global params and const_args.
+            deploy_params = DictTemplater(self.config['deploymentTemplateParameters']).expand_vars(extra_source_dict=global_config)
+            self._deploy_params = merge_parameters(dest=deploy_params, source=global_config)
 
     @property
     def deploy_params(self) -> dict:
