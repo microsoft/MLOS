@@ -16,6 +16,8 @@ jobs:
   # Check in-repo markdown links
   markdown-link-check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 5
     steps:
     - uses: actions/checkout@v4
