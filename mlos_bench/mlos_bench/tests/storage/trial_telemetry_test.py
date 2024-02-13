@@ -57,7 +57,7 @@ def test_update_telemetry(storage: Storage,
     trial = exp_storage.new_trial(tunable_groups)
     assert exp_storage.load_telemetry(trial.trial_id) == []
 
-    trial.update_telemetry(Status.RUNNING, telemetry_data)
+    trial.update_telemetry(Status.RUNNING, datetime.utcnow(), telemetry_data)
     assert exp_storage.load_telemetry(trial.trial_id) == _telemetry_str(telemetry_data)
 
     # Also check that the TrialData telemetry looks right.
@@ -72,7 +72,8 @@ def test_update_telemetry_twice(exp_storage: Storage.Experiment,
     Make sure update_telemetry() call is idempotent.
     """
     trial = exp_storage.new_trial(tunable_groups)
-    trial.update_telemetry(Status.RUNNING, telemetry_data)
-    trial.update_telemetry(Status.RUNNING, telemetry_data)
-    trial.update_telemetry(Status.RUNNING, telemetry_data)
+    timestamp = datetime.utcnow()
+    trial.update_telemetry(Status.RUNNING, timestamp, telemetry_data)
+    trial.update_telemetry(Status.RUNNING, timestamp, telemetry_data)
+    trial.update_telemetry(Status.RUNNING, timestamp, telemetry_data)
     assert exp_storage.load_telemetry(trial.trial_id) == _telemetry_str(telemetry_data)

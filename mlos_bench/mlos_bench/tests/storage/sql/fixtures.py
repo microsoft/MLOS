@@ -120,10 +120,11 @@ def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: str) -> SqlStorage.
             assert trial.tunable_config_id == config_i + 1
             tunable_value = float(tunables.get_tunable(tunable_name)[0].numerical_value)
             tunable_value_norm = base_score * (tunable_value - tunable_min) / tunable_range
-            trial.update_telemetry(status=Status.RUNNING, metrics=[
-                (datetime.utcnow(), "some-metric", tunable_value_norm + random() / 100),
+            timestamp = datetime.utcnow()
+            trial.update_telemetry(status=Status.RUNNING, timestamp=timestamp, metrics=[
+                (timestamp, "some-metric", tunable_value_norm + random() / 100),
             ])
-            trial.update(Status.SUCCEEDED, datetime.utcnow(), metrics={
+            trial.update(Status.SUCCEEDED, timestamp, metrics={
                 # Give some variance on the score.
                 # And some influence from the tunable value.
                 "score": tunable_value_norm + random() / 100

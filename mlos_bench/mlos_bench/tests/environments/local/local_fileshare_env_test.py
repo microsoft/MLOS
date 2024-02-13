@@ -81,7 +81,7 @@ def test_local_fileshare_env(tunable_groups: TunableGroups,
     """
     with local_fileshare_env as env_context:
         assert env_context.setup(tunable_groups)
-        (status, _) = env_context.run()
+        (status, _ts, _output) = env_context.run()
         assert status.is_succeeded()
         assert mock_fileshare_service.get_upload() == [
             ("grub.cfg", "EXP_ID/222/input/grub.cfg"),

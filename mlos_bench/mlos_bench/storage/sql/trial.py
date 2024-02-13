@@ -80,21 +80,22 @@ class Trial(Storage.Trial):
                 raise
         return metrics
 
-    def update_telemetry(self, status: Status, metrics: List[Tuple[datetime, str, Any]]) -> None:
-        super().update_telemetry(status, metrics)
+    def update_telemetry(self, status: Status, timestamp: datetime,
+                         metrics: List[Tuple[datetime, str, Any]]) -> None:
+        super().update_telemetry(status, timestamp, metrics)
         # NOTE: Not every SQLAlchemy dialect supports `Insert.on_conflict_do_nothing()`
         # and we need to keep `.update_telemetry()` idempotent; hence a loop instead of
         # a bulk upsert.
         # See Also: comments in <https://github.com/microsoft/MLOS/pull/466>
-        for (timestamp, key, val) in metrics:
+        for (metric_ts, key, val) in metrics:
             with self._engine.begin() as conn:
                 try:
                     conn.execute(self._schema.trial_telemetry.insert().values(
                         exp_id=self._experiment_id,
                         trial_id=self._trial_id,
-                        ts=timestamp,
+                        ts=metric_ts,
                         metric_id=key,
                         metric_value=None if val is None else str(val),
                     ))
                 except IntegrityError as ex:
-                    _LOG.warning("Record already exists: %s :: %s", (timestamp, key, val), ex)
+                    _LOG.warning("Record already exists: %s :: %s", (metric_ts, key, val), ex)
