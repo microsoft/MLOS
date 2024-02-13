@@ -174,12 +174,18 @@ class Experiment(Storage.Experiment):
             for (key, val) in params.items()
         ])
 
-    def pending_trials(self) -> Iterator[Storage.Trial]:
-        _LOG.info("Retrieve pending trials for: %s", self._experiment_id)
+    def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator['Storage.Trial']:
+        _LOG.info("Retrieve pending trials for: %s @ %s", self._experiment_id, timestamp)
+        if running:
+            pending_status = ['READY', 'RUNNING']
+        else:
+            pending_status = ['PENDING']
         with self._engine.connect() as conn:
             cur_trials = conn.execute(self._schema.trial.select().where(
                 self._schema.trial.c.exp_id == self._experiment_id,
-                self._schema.trial.c.ts_end.is_(None)
+                self._schema.trial.c.ts_start <= timestamp,
+                self._schema.trial.c.ts_end.is_(None),
+                self._schema.trial.c.status.in_(pending_status),
             ))
             for trial in cur_trials.fetchall():
                 tunables = self._get_params(

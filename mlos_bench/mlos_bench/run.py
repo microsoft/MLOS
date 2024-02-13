@@ -108,7 +108,7 @@ def _optimize(*,
             (configs, scores, status) = exp.load()
             opt_context.bulk_register(configs, scores, status)
             # Complete any pending trials.
-            for trial in exp.pending_trials():
+            for trial in exp.pending_trials(datetime.utcnow(), running=True):
                 _run(env_context, opt_context, trial, global_config)
         else:
             _LOG.warning("Skip pending trials and warm-up: %s", opt)

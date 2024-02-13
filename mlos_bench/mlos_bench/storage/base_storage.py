@@ -259,9 +259,23 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def pending_trials(self) -> Iterator['Storage.Trial']:
+        def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator['Storage.Trial']:
             """
-            Return an iterator over the pending trial runs for this experiment.
+            Return an iterator over the pending trials that are scheduled to run
+            on or before the specified timestamp.
+
+            Parameters
+            ----------
+            timestamp : datetime
+                The time in UTC to check for scheduled trials.
+            running : bool
+                If True, include the trials that are already running.
+                Otherwise, return only the scheduled trials.
+
+            Returns
+            -------
+            trials : Iterator[Storage.Trial]
+                An iterator over the scheduled (and maybe running) trials.
             """
 
         @abstractmethod
