@@ -177,7 +177,7 @@ class Experiment(Storage.Experiment):
     def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator['Storage.Trial']:
         _LOG.info("Retrieve pending trials for: %s @ %s", self._experiment_id, timestamp)
         if running:
-            pending_status = ['READY', 'RUNNING']
+            pending_status = ['PENDING', 'READY', 'RUNNING']
         else:
             pending_status = ['PENDING']
         with self._engine.connect() as conn:
