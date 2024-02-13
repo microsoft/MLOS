@@ -227,7 +227,7 @@ class Experiment(Storage.Experiment):
             config_id=config_id)
         return config_id
 
-    def new_trial(self, tunables: TunableGroups,
+    def new_trial(self, tunables: TunableGroups, ts_start: Optional[datetime] = None,
                   config: Optional[Dict[str, Any]] = None) -> Storage.Trial:
         _LOG.debug("Create trial: %s:%d", self._experiment_id, self._trial_id)
         with self._engine.begin() as conn:
@@ -237,7 +237,7 @@ class Experiment(Storage.Experiment):
                     exp_id=self._experiment_id,
                     trial_id=self._trial_id,
                     config_id=config_id,
-                    ts_start=datetime.utcnow(),
+                    ts_start=ts_start or datetime.utcnow(),
                     status='PENDING',
                 ))
 

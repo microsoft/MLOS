@@ -279,7 +279,7 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def new_trial(self, tunables: TunableGroups,
+        def new_trial(self, tunables: TunableGroups, ts_start: Optional[datetime] = None,
                       config: Optional[Dict[str, Any]] = None) -> 'Storage.Trial':
             """
             Create a new experiment run in the storage.
@@ -288,6 +288,8 @@ class Storage(metaclass=ABCMeta):
             ----------
             tunables : TunableGroups
                 Tunable parameters to use for the trial.
+            ts_start : Optional[datetime]
+                Timestamp of the trial start (can be in the future).
             config : dict
                 Key/value pairs of additional non-tunable parameters of the trial.
 
