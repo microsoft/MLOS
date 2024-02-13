@@ -176,7 +176,7 @@ class Experiment(Storage.Experiment):
             for (key, val) in params.items()
         ])
 
-    def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator['Storage.Trial']:
+    def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator[Storage.Trial]:
         _LOG.info("Retrieve pending trials for: %s @ %s", self._experiment_id, timestamp)
         if running:
             pending_status = ['PENDING', 'READY', 'RUNNING']
