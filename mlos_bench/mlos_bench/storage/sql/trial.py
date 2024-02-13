@@ -90,19 +90,18 @@ class Trial(Storage.Trial):
         # See Also: comments in <https://github.com/microsoft/MLOS/pull/466>
         with self._engine.begin() as conn:
             self._update_status(conn, status, timestamp)
-        for (metric_ts, metric_id, metric_value) in metrics:
+        for (metric_ts, key, val) in metrics:
             with self._engine.begin() as conn:
                 try:
                     conn.execute(self._schema.trial_telemetry.insert().values(
                         exp_id=self._experiment_id,
                         trial_id=self._trial_id,
                         ts=metric_ts,
-                        metric_id=metric_id,
-                        metric_value=None if metric_value is None else str(metric_value),
+                        metric_id=key,
+                        metric_value=None if val is None else str(val),
                     ))
                 except IntegrityError as ex:
-                    _LOG.warning("Record already exists: %s :: %s",
-                                 (metric_ts, metric_id, metric_value), ex)
+                    _LOG.warning("Record already exists: %s :: %s", (metric_ts, key, val), ex)
 
     def _update_status(self, conn: Connection, status: Status, timestamp: datetime) -> None:
         """
