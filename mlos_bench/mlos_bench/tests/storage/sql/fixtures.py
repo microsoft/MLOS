@@ -8,6 +8,7 @@ Test fixtures for mlos_bench storage.
 
 from datetime import datetime
 from random import random, seed as rand_seed
+from typing import Generator
 
 import pytest
 
@@ -38,7 +39,10 @@ def storage() -> SqlStorage:
 
 
 @pytest.fixture
-def exp_storage(storage: SqlStorage, tunable_groups: TunableGroups) -> SqlStorage.Experiment:
+def exp_storage(
+    storage: SqlStorage,
+    tunable_groups: TunableGroups,
+) -> Generator[SqlStorage.Experiment, None, None]:
     """
     Test fixture for Experiment using in-memory SQLite3 storage.
     Note: It has already entered the context upon return.
@@ -54,11 +58,16 @@ def exp_storage(storage: SqlStorage, tunable_groups: TunableGroups) -> SqlStorag
         opt_target=opt_target,
         opt_direction=opt_direction,
     ) as exp:
-        return exp
+        yield exp
+    # pylint: disable=protected-access
+    assert not exp._in_context
 
 
 @pytest.fixture
-def mixed_numerics_exp_storage(storage: SqlStorage, mixed_numerics_tunable_groups: TunableGroups) -> SqlStorage.Experiment:
+def mixed_numerics_exp_storage(
+    storage: SqlStorage,
+    mixed_numerics_tunable_groups: TunableGroups,
+) -> Generator[SqlStorage.Experiment, None, None]:
     """
     Test fixture for an Experiment with mixed numerics tunables using in-memory SQLite3 storage.
     Note: It has already entered the context upon return.
@@ -74,7 +83,9 @@ def mixed_numerics_exp_storage(storage: SqlStorage, mixed_numerics_tunable_group
         opt_target=opt_target,
         opt_direction=opt_direction,
     ) as exp:
-        return exp
+        yield exp
+    # pylint: disable=protected-access
+    assert not exp._in_context
 
 
 def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: str) -> SqlStorage.Experiment:

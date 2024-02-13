@@ -135,6 +135,7 @@ class Storage(metaclass=ABCMeta):
             self._opt_target = opt_target
             assert opt_direction in {None, "min", "max"}
             self._opt_direction = opt_direction
+            self._in_context = False
 
         def __enter__(self) -> 'Storage.Experiment':
             """
@@ -143,7 +144,9 @@ class Storage(metaclass=ABCMeta):
             Override the `_setup` method to add custom context initialization.
             """
             _LOG.debug("Starting experiment: %s", self)
+            assert not self._in_context
             self._setup()
+            self._in_context = True
             return self
 
         def __exit__(self, exc_type: Optional[Type[BaseException]],
@@ -161,7 +164,9 @@ class Storage(metaclass=ABCMeta):
                 assert exc_type and exc_val
                 _LOG.warning("Finishing experiment: %s", self,
                              exc_info=(exc_type, exc_val, exc_tb))
+            assert self._in_context
             self._teardown(is_ok)
+            self._in_context = False
             return False  # Do not suppress exceptions
 
         def __repr__(self) -> str:
