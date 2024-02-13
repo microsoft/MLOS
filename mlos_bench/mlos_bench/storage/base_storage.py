@@ -251,11 +251,26 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
+        def load(self, last_trial_id: int = -1,
+                 opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
             """
             Load (tunable values, benchmark scores, status) to warm-up the optimizer.
-            This call returns data from ALL merged-in experiments and attempts
-            to impute the missing tunable values.
+
+            If `last_trial_id` is present, load only the data from the (completed) trials
+            that were scheduled *after* the given trial ID. Otherwise, return data from ALL
+            merged-in experiments and attempt to impute the missing tunable values.
+
+            Parameters
+            ----------
+            last_trial_id : int
+                (Optional) Trial ID to start from.
+            opt_target : Optional[str]
+                Name of the optimization target.
+
+            Returns
+            -------
+            (configs, scores, status) : Tuple[List[dict], List[Optional[float]], List[Status]]
+                Tunable values, benchmark scores, and status of the trials.
             """
 
         @abstractmethod

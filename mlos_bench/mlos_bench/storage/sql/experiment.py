@@ -122,7 +122,8 @@ class Experiment(Storage.Experiment):
             return [(row.ts, row.metric_id, row.metric_value)
                     for row in cur_telemetry.fetchall()]
 
-    def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
+    def load(self, last_trial_id: int = -1,
+             opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
         opt_target = opt_target or self._opt_target
         (configs, scores, status) = ([], [], [])
         with self._engine.connect() as conn:
@@ -139,6 +140,7 @@ class Experiment(Storage.Experiment):
                     ), isouter=True
                 ).where(
                     self._schema.trial.c.exp_id == self._experiment_id,
+                    self._schema.trial.c.trial_id > last_trial_id,
                     self._schema.trial.c.status.in_(['SUCCEEDED', 'FAILED', 'TIMED_OUT']),
                     (self._schema.trial_result.c.metric_id.is_(None) |
                      (self._schema.trial_result.c.metric_id == opt_target)),
