@@ -185,7 +185,8 @@ class Experiment(Storage.Experiment):
         with self._engine.connect() as conn:
             cur_trials = conn.execute(self._schema.trial.select().where(
                 self._schema.trial.c.exp_id == self._experiment_id,
-                self._schema.trial.c.ts_start <= timestamp,
+                (self._schema.trial.c.ts_start.is_(None) |
+                 (self._schema.trial.c.ts_start <= timestamp)),
                 self._schema.trial.c.ts_end.is_(None),
                 self._schema.trial.c.status.in_(pending_status),
             ))
@@ -239,7 +240,7 @@ class Experiment(Storage.Experiment):
                     exp_id=self._experiment_id,
                     trial_id=self._trial_id,
                     config_id=config_id,
-                    ts_start=ts_start or datetime.utcnow(),
+                    ts_start=ts_start,  # None = schedule ASAP
                     status='PENDING',
                 ))
 

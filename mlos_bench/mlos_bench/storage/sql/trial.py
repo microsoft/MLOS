@@ -48,8 +48,8 @@ class Trial(Storage.Trial):
                ) -> Optional[Dict[str, Any]]:
         metrics = super().update(status, timestamp, metrics)
         with self._engine.begin() as conn:
+            self._update_status(conn, status, timestamp)
             try:
-                self._update_status(conn, status, timestamp)
                 cur_status = conn.execute(
                     self._schema.trial.update().where(
                         self._schema.trial.c.exp_id == self._experiment_id,

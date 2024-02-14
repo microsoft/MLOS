@@ -106,7 +106,7 @@ class DbSchema:
             Column("exp_id", String(255), nullable=False),
             Column("trial_id", Integer, nullable=False),
             Column("config_id", Integer, nullable=False),
-            Column("ts_start", DateTime, nullable=False, default="now"),
+            Column("ts_start", DateTime),  # NULL = schedule ASAP
             Column("ts_end", DateTime),
             # Should match the text IDs of `mlos_bench.environments.Status` enum:
             Column("status", String(16), nullable=False),
