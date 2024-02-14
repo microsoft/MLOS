@@ -46,6 +46,9 @@ class DbSchema:
     A class to define and create the DB schema.
     """
 
+    _LEN_ID = 255
+    _LEN_VALUE = 255
+
     def __init__(self, engine: Engine):
         """
         Declare the SQLAlchemy schema for the database.
@@ -58,7 +61,7 @@ class DbSchema:
         self.experiment = Table(
             "experiment",
             self._meta,
-            Column("exp_id", String(255), nullable=False),
+            Column("exp_id", String(self._LEN_ID), nullable=False),
             Column("description", String(1024)),
             Column("root_env_config", String(1024), nullable=False),
             Column("git_repo", String(1024), nullable=False),
@@ -71,7 +74,7 @@ class DbSchema:
             "objectives",
             self._meta,
             Column("exp_id"),
-            Column("optimization_target", String(1024), nullable=False),
+            Column("optimization_target", String(self._LEN_ID), nullable=False),
             Column("optimization_direction", String(4), nullable=False),
             # TODO: Note: weight is not fully supported yet as currently
             # multi-objective is expected to explore each objective equally.
@@ -103,7 +106,7 @@ class DbSchema:
         self.trial = Table(
             "trial",
             self._meta,
-            Column("exp_id", String(255), nullable=False),
+            Column("exp_id", String(self._LEN_ID), nullable=False),
             Column("trial_id", Integer, nullable=False),
             Column("config_id", Integer, nullable=False),
             Column("ts_start", DateTime, nullable=False, default="now"),
@@ -122,8 +125,8 @@ class DbSchema:
             "config_param",
             self._meta,
             Column("config_id", Integer, nullable=False),
-            Column("param_id", String(255), nullable=False),
-            Column("param_value", String(255)),
+            Column("param_id", String(self._LEN_ID), nullable=False),
+            Column("param_value", String(self._LEN_VALUE)),
 
             PrimaryKeyConstraint("config_id", "param_id"),
             ForeignKeyConstraint(["config_id"], [self.config.c.config_id]),
@@ -134,10 +137,10 @@ class DbSchema:
         self.trial_param = Table(
             "trial_param",
             self._meta,
-            Column("exp_id", String(255), nullable=False),
+            Column("exp_id", String(self._LEN_ID), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("param_id", String(255), nullable=False),
-            Column("param_value", String(255)),
+            Column("param_id", String(self._LEN_ID), nullable=False),
+            Column("param_value", String(self._LEN_VALUE)),
 
             PrimaryKeyConstraint("exp_id", "trial_id", "param_id"),
             ForeignKeyConstraint(["exp_id", "trial_id"],
@@ -147,10 +150,10 @@ class DbSchema:
         self.trial_result = Table(
             "trial_result",
             self._meta,
-            Column("exp_id", String(255), nullable=False),
+            Column("exp_id", String(self._LEN_ID), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("metric_id", String(255), nullable=False),
-            Column("metric_value", String(255)),
+            Column("metric_id", String(self._LEN_ID), nullable=False),
+            Column("metric_value", String(self._LEN_VALUE)),
 
             PrimaryKeyConstraint("exp_id", "trial_id", "metric_id"),
             ForeignKeyConstraint(["exp_id", "trial_id"],
@@ -160,11 +163,11 @@ class DbSchema:
         self.trial_telemetry = Table(
             "trial_telemetry",
             self._meta,
-            Column("exp_id", String(255), nullable=False),
+            Column("exp_id", String(self._LEN_ID), nullable=False),
             Column("trial_id", Integer, nullable=False),
             Column("ts", DateTime, nullable=False, default="now"),
-            Column("metric_id", String(255), nullable=False),
-            Column("metric_value", String(255)),
+            Column("metric_id", String(self._LEN_ID), nullable=False),
+            Column("metric_value", String(self._LEN_VALUE)),
 
             UniqueConstraint("exp_id", "trial_id", "ts", "metric_id"),
             ForeignKeyConstraint(["exp_id", "trial_id"],
