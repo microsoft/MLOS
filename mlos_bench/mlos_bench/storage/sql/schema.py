@@ -46,8 +46,8 @@ class DbSchema:
     A class to define and create the DB schema.
     """
 
-    _LEN_ID = 255
-    _LEN_VALUE = 255
+    _LEN_ID = 512
+    _LEN_VALUE = 1024
 
     def __init__(self, engine: Engine):
         """
