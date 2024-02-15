@@ -48,7 +48,8 @@ class DbSchema:
 
     # Default string column sizes.
     _ID_LEN = 512
-    _VALUE_LEN = 1024
+    _PARAM_VALUE_LEN = 1024
+    _METRIC_VALUE_LEN = 255
 
     def __init__(self, engine: Engine):
         """
@@ -59,7 +60,8 @@ class DbSchema:
 
         # Override default column lengths on a per driver basis.
         self._id_len = self._ID_LEN
-        self._value_len = self._VALUE_LEN
+        self._param_value_len = self._PARAM_VALUE_LEN
+        self._metric_value_len = self._METRIC_VALUE_LEN
         if any(driver in self._engine.url.drivername.lower() for driver in ("mysql", "mariadb")):
             self._id_len = 255
 
@@ -70,8 +72,8 @@ class DbSchema:
             "experiment",
             self._meta,
             Column("exp_id", String(self._id_len), nullable=False),
-            Column("description", String(self._value_len)),
-            Column("root_env_config", String(self._value_len), nullable=False),
+            Column("description", String(1024)),
+            Column("root_env_config", String(1024), nullable=False),
             Column("git_repo", String(1024), nullable=False),
             Column("git_commit", String(40), nullable=False),
 
@@ -134,7 +136,7 @@ class DbSchema:
             self._meta,
             Column("config_id", Integer, nullable=False),
             Column("param_id", String(self._id_len), nullable=False),
-            Column("param_value", String(self._value_len)),
+            Column("param_value", String(self._param_value_len)),
 
             PrimaryKeyConstraint("config_id", "param_id"),
             ForeignKeyConstraint(["config_id"], [self.config.c.config_id]),
@@ -148,7 +150,7 @@ class DbSchema:
             Column("exp_id", String(self._id_len), nullable=False),
             Column("trial_id", Integer, nullable=False),
             Column("param_id", String(self._id_len), nullable=False),
-            Column("param_value", String(self._value_len)),
+            Column("param_value", String(self._param_value_len)),
 
             PrimaryKeyConstraint("exp_id", "trial_id", "param_id"),
             ForeignKeyConstraint(["exp_id", "trial_id"],
@@ -161,7 +163,7 @@ class DbSchema:
             Column("exp_id", String(self._id_len), nullable=False),
             Column("trial_id", Integer, nullable=False),
             Column("metric_id", String(self._id_len), nullable=False),
-            Column("metric_value", String(self._value_len)),
+            Column("metric_value", String(self._metric_value_len)),
 
             PrimaryKeyConstraint("exp_id", "trial_id", "metric_id"),
             ForeignKeyConstraint(["exp_id", "trial_id"],
@@ -175,7 +177,7 @@ class DbSchema:
             Column("trial_id", Integer, nullable=False),
             Column("ts", DateTime, nullable=False, default="now"),
             Column("metric_id", String(self._id_len), nullable=False),
-            Column("metric_value", String(self._value_len)),
+            Column("metric_value", String(self._metric_value_len)),
 
             UniqueConstraint("exp_id", "trial_id", "ts", "metric_id"),
             ForeignKeyConstraint(["exp_id", "trial_id"],
