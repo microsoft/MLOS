@@ -7,6 +7,7 @@ Unit tests for scheduling trials for some future time.
 """
 from datetime import datetime, timedelta
 
+from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -29,6 +30,8 @@ def test_schedule_trial(exp_storage: Storage.Experiment,
     trial_1h = exp_storage.new_trial(tunable_groups, timestamp + timedelta_1hr, config)
     # Schedule 2 hours in the future:
     trial_2h = exp_storage.new_trial(tunable_groups, timestamp + timedelta_1hr * 2, config)
+
+    # Scheduler side: get trials ready to run at certain timestamps:
 
     # Pretend 1 minute has passed, get trials scheduled to run:
     pending_ids = set(t.trial_id for t in exp_storage.pending_trials(
@@ -56,3 +59,22 @@ def test_schedule_trial(exp_storage: Storage.Experiment,
         trial_1h.trial_id,
         trial_2h.trial_id,
     }
+
+    # Optimizer side: get trials completed after some known trial:
+
+    # No completed trials yet:
+    assert exp_storage.load() == ([], [], [])
+
+    trial_now1.update(Status.SUCCEEDED, timestamp + timedelta_1min, metrics={"score": 1.0})
+    trial_now2.update(Status.FAILED, timestamp + timedelta_1min)
+    trial_1h.update(Status.SUCCEEDED, timestamp + timedelta_1hr * 2, metrics={"score": 1.0})
+
+    # Three trials completed:
+    (trial_configs, _scores, trial_status) = exp_storage.load()
+    assert len(trial_configs) == 3
+    assert trial_status == [Status.SUCCEEDED, Status.FAILED, Status.SUCCEEDED]
+
+    # Get only trials completed after trial_now2:
+    (trial_configs, _scores, trial_status) = exp_storage.load(last_trial_id=trial_now2.trial_id)
+    assert len(trial_configs) == 1
+    assert trial_status == [Status.SUCCEEDED]
