@@ -256,7 +256,8 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def load(self, last_trial_id: int = -1,
+        def load(self,
+                 last_trial_id: int = -1,
                  opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
             """
             Load (tunable values, benchmark scores, status) to warm-up the optimizer.
