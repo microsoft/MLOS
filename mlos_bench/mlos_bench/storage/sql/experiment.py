@@ -122,7 +122,8 @@ class Experiment(Storage.Experiment):
             return [(row.ts, row.metric_id, row.metric_value)
                     for row in cur_telemetry.fetchall()]
 
-    def load(self, last_trial_id: int = -1,
+    def load(self,
+             last_trial_id: int = -1,
              opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
         opt_target = opt_target or self._opt_target
         (configs, scores, status) = ([], [], [])
