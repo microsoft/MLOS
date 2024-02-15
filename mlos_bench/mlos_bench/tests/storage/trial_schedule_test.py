@@ -30,7 +30,7 @@ def test_schedule_trial(exp_storage: Storage.Experiment,
     # Schedule 2 hours in the future:
     trial_2h = exp_storage.new_trial(tunable_groups, timestamp + timedelta_1hr * 2, config)
 
-    # Get trials scheduled to run in 1 minute:
+    # Pretend 1 minute has passed, get trials scheduled to run:
     pending_ids = set(t.trial_id for t in exp_storage.pending_trials(
         timestamp + timedelta_1min, running=False))
     assert pending_ids == {
