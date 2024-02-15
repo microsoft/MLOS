@@ -240,7 +240,7 @@ class Experiment(Storage.Experiment):
                     exp_id=self._experiment_id,
                     trial_id=self._trial_id,
                     config_id=config_id,
-                    ts_start=ts_start,  # None = schedule ASAP
+                    ts_start=ts_start or datetime.utcnow(),
                     status='PENDING',
                 ))
 
