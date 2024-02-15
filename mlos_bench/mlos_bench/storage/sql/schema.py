@@ -46,8 +46,9 @@ class DbSchema:
     A class to define and create the DB schema.
     """
 
-    _LEN_ID = 512
-    _LEN_VALUE = 1024
+    # Default string column sizes.
+    _ID_LEN = 512
+    _VALUE_LEN = 1024
 
     def __init__(self, engine: Engine):
         """
@@ -55,15 +56,22 @@ class DbSchema:
         """
         _LOG.info("Create the DB schema for: %s", engine)
         self._engine = engine
-        # TODO: bind for automatic schema updates?
+
+        # Override default column lengths on a per driver basis.
+        self._id_len = self._ID_LEN
+        self._value_len = self._VALUE_LEN
+        if any(driver in self._engine.url.drivername.lower() for driver in ("mysql", "mariadb")):
+            self._id_len = 255
+
+        # TODO: bind for automatic schema updates? (#649)
         self._meta = MetaData()
 
         self.experiment = Table(
             "experiment",
             self._meta,
-            Column("exp_id", String(self._LEN_ID), nullable=False),
-            Column("description", String(1024)),
-            Column("root_env_config", String(1024), nullable=False),
+            Column("exp_id", String(self._id_len), nullable=False),
+            Column("description", String(self._value_len)),
+            Column("root_env_config", String(self._value_len), nullable=False),
             Column("git_repo", String(1024), nullable=False),
             Column("git_commit", String(40), nullable=False),
 
@@ -74,7 +82,7 @@ class DbSchema:
             "objectives",
             self._meta,
             Column("exp_id"),
-            Column("optimization_target", String(self._LEN_ID), nullable=False),
+            Column("optimization_target", String(self._id_len), nullable=False),
             Column("optimization_direction", String(4), nullable=False),
             # TODO: Note: weight is not fully supported yet as currently
             # multi-objective is expected to explore each objective equally.
@@ -106,7 +114,7 @@ class DbSchema:
         self.trial = Table(
             "trial",
             self._meta,
-            Column("exp_id", String(self._LEN_ID), nullable=False),
+            Column("exp_id", String(self._id_len), nullable=False),
             Column("trial_id", Integer, nullable=False),
             Column("config_id", Integer, nullable=False),
             Column("ts_start", DateTime, nullable=False, default="now"),
@@ -125,8 +133,8 @@ class DbSchema:
             "config_param",
             self._meta,
             Column("config_id", Integer, nullable=False),
-            Column("param_id", String(self._LEN_ID), nullable=False),
-            Column("param_value", String(self._LEN_VALUE)),
+            Column("param_id", String(self._id_len), nullable=False),
+            Column("param_value", String(self._value_len)),
 
             PrimaryKeyConstraint("config_id", "param_id"),
             ForeignKeyConstraint(["config_id"], [self.config.c.config_id]),
@@ -137,10 +145,10 @@ class DbSchema:
         self.trial_param = Table(
             "trial_param",
             self._meta,
-            Column("exp_id", String(self._LEN_ID), nullable=False),
+            Column("exp_id", String(self._id_len), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("param_id", String(self._LEN_ID), nullable=False),
-            Column("param_value", String(self._LEN_VALUE)),
+            Column("param_id", String(self._id_len), nullable=False),
+            Column("param_value", String(self._value_len)),
 
             PrimaryKeyConstraint("exp_id", "trial_id", "param_id"),
             ForeignKeyConstraint(["exp_id", "trial_id"],
@@ -150,10 +158,10 @@ class DbSchema:
         self.trial_result = Table(
             "trial_result",
             self._meta,
-            Column("exp_id", String(self._LEN_ID), nullable=False),
+            Column("exp_id", String(self._id_len), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("metric_id", String(self._LEN_ID), nullable=False),
-            Column("metric_value", String(self._LEN_VALUE)),
+            Column("metric_id", String(self._id_len), nullable=False),
+            Column("metric_value", String(self._value_len)),
 
             PrimaryKeyConstraint("exp_id", "trial_id", "metric_id"),
             ForeignKeyConstraint(["exp_id", "trial_id"],
@@ -163,11 +171,11 @@ class DbSchema:
         self.trial_telemetry = Table(
             "trial_telemetry",
             self._meta,
-            Column("exp_id", String(self._LEN_ID), nullable=False),
+            Column("exp_id", String(self._id_len), nullable=False),
             Column("trial_id", Integer, nullable=False),
             Column("ts", DateTime, nullable=False, default="now"),
-            Column("metric_id", String(self._LEN_ID), nullable=False),
-            Column("metric_value", String(self._LEN_VALUE)),
+            Column("metric_id", String(self._id_len), nullable=False),
+            Column("metric_value", String(self._value_len)),
 
             UniqueConstraint("exp_id", "trial_id", "ts", "metric_id"),
             ForeignKeyConstraint(["exp_id", "trial_id"],
