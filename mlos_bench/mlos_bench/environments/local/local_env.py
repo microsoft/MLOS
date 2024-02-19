@@ -217,7 +217,7 @@ class LocalEnv(ScriptEnv):
         return data
 
 
-    _MIN_TS = datetime(2000, 1, 1, 0, 0, 0, tzinfo=pytz.UTC)
+    _MIN_TS = datetime(2024, 1, 1, 0, 0, 0, tzinfo=pytz.UTC)
 
 
     def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
