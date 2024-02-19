@@ -101,9 +101,9 @@ def test_from_1hot_series(configuration_space: CS.ConfigurationSpace,
     Toy problem to test one-hot decoding of series.
     """
     optimizer = SmacOptimizer(parameter_space=configuration_space)
-    df = optimizer._from_1hot(one_hot_series)
-    assert df.shape[0] == 1, f"Unexpected number of rows ({df.shape[0]} != 1)"
-    assert df.iloc[0].to_dict() == series.to_dict()
+    one_hot_df = optimizer._from_1hot(one_hot_series)
+    assert one_hot_df.shape[0] == 1, f"Unexpected number of rows ({one_hot_df.shape[0]} != 1)"
+    assert one_hot_df.iloc[0].to_dict() == series.to_dict()
 
 
 def test_round_trip_data_frame(configuration_space: CS.ConfigurationSpace, data_frame: pd.DataFrame) -> None:
