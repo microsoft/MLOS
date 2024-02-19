@@ -24,11 +24,15 @@ from mlos_bench.tests import requires_docker, requires_ssh, check_socket, resolv
 from mlos_bench.tests.services.remote.ssh import SshTestServerInfo, ALT_TEST_SERVER_NAME, SSH_TEST_SERVER_NAME
 
 
-try:
-    if version("pytest-lazy-fixture") and version("pytest") >= "8.0.0":
-        raise UserWarning("pytest-lazy-fixture conflicts with pytest>=8.0.0.  Please remove it.")
-except PackageNotFoundError:
-    pass
+if version("pytest") >= "8.0.0":
+    try:
+        # We replaced pytest-lazy-fixture with pytest-lazy-fixtures:
+        # https://github.com/TvoroG/pytest-lazy-fixture/issues/65
+        if version("pytest-lazy-fixture"):
+            raise UserWarning("pytest-lazy-fixture conflicts with pytest>=8.0.0.  Please remove it.")
+    except PackageNotFoundError:
+        # OK: pytest-lazy-fixture not installed
+        pass
 
 
 @requires_docker
