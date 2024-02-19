@@ -11,7 +11,6 @@ import logging
 import sys
 
 from datetime import datetime
-import pytz
 from tempfile import TemporaryDirectory
 from contextlib import nullcontext
 
@@ -19,6 +18,7 @@ from types import TracebackType
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Type, Union
 from typing_extensions import Literal
 
+import pytz
 import pandas
 
 from mlos_bench.environments.status import Status

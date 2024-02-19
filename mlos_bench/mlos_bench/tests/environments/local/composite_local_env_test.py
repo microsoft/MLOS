@@ -5,9 +5,9 @@
 """
 Unit tests for the composition of several LocalEnv benchmark environments.
 """
-import pytz
 import sys
 from datetime import datetime, timedelta
+import pytz
 
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.tests.environments import check_env_success

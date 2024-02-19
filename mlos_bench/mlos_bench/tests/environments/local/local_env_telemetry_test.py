@@ -92,7 +92,7 @@ def test_local_env_telemetry_no_header(tunable_groups: TunableGroups) -> None:
     )
 
 
-@pytest.mark.filterwarnings("ignore:.*(Could not infer format, so each element will be parsed individually, falling back to `dateutil`).*:UserWarning::0")
+@pytest.mark.filterwarnings("ignore:.*(Could not infer format, so each element will be parsed individually, falling back to `dateutil`).*:UserWarning::0")  # pylint: disable=line-too-long # noqa
 def test_local_env_telemetry_wrong_header(tunable_groups: TunableGroups) -> None:
     """
     Read the telemetry data with incorrect header.
