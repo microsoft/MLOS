@@ -8,6 +8,8 @@ Unit tests for telemetry and status of LocalEnv benchmark environment.
 from datetime import datetime, timedelta
 import pytz
 
+import pytest
+
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.tests.environments import check_env_success, check_env_fail_telemetry
 from mlos_bench.tests.environments.local import create_local_env
@@ -90,6 +92,7 @@ def test_local_env_telemetry_no_header(tunable_groups: TunableGroups) -> None:
     )
 
 
+@pytest.mark.filterwarnings("ignore:.*(Could not infer format, so each element will be parsed individually, falling back to `dateutil`).*:UserWarning::0")
 def test_local_env_telemetry_wrong_header(tunable_groups: TunableGroups) -> None:
     """
     Read the telemetry data with incorrect header.
