@@ -75,12 +75,12 @@ extra_requires: Dict[str, List[str]] = {    # pylint: disable=consider-using-nam
 extra_requires['full'] = list(set(chain(*extra_requires.values())))
 
 extra_requires['full-tests'] = extra_requires['full'] + [
-    'pytest<8.0.0',     # FIXME: https://github.com/TvoroG/pytest-lazy-fixture/issues/65
+    'pytest',
     'pytest-forked',
     'pytest-xdist',
     'pytest-cov',
     'pytest-local-badge',
-    'pytest-lazy-fixture',
+    'pytest-lazy-fixtures',
     'pytest-docker',
     'fasteners',
 ]
