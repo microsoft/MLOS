@@ -11,6 +11,7 @@ import logging
 import sys
 
 from datetime import datetime
+import pytz
 from tempfile import TemporaryDirectory
 from contextlib import nullcontext
 
@@ -215,6 +216,10 @@ class LocalEnv(ScriptEnv):
             data.rename(str.rstrip, axis='columns', inplace=True)
         return data
 
+
+    _MIN_TS = datetime(2000, 1, 1, 0, 0, 0, tzinfo=pytz.UTC)
+
+
     def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
 
         (status, timestamp, _) = super().status()
@@ -229,8 +234,13 @@ class LocalEnv(ScriptEnv):
             # TODO: Use the timestamp of the CSV file as our status timestamp?
 
             # FIXME: We should not be assuming that the only output file type is a CSV.
+
             data = self._normalize_columns(
-                pandas.read_csv(fname, index_col=False, parse_dates=[0]))
+                pandas.read_csv(fname, index_col=False))
+            date_col = pandas.to_datetime(data.iloc[:, 0], utc=True)
+            if date_col.le(self._MIN_TS).any():
+                raise ValueError(f"Invalid date range in the telemetry data: {date_col}")
+            data.iloc[:, 0] = date_col
 
             expected_col_names = ["timestamp", "metric", "value"]
             if len(data.columns) != len(expected_col_names):
@@ -239,7 +249,13 @@ class LocalEnv(ScriptEnv):
             if list(data.columns) != expected_col_names:
                 # Assume no header - this is ok for telemetry data.
                 data = pandas.read_csv(
-                    fname, index_col=False, parse_dates=[0], names=expected_col_names)
+                    fname, index_col=False, names=expected_col_names)
+                date_col = pandas.to_datetime(data.iloc[:, 0], utc=True)
+                if date_col.isna().any():
+                    raise ValueError(f"Invalid date format in the telemetry data: {date_col}")
+                if date_col.le(self._MIN_TS).any():
+                    raise ValueError(f"Invalid date range in the telemetry data: {date_col}")
+                data.iloc[:, 0] = date_col
 
         except FileNotFoundError as ex:
             _LOG.warning("Telemetry CSV file not found: %s :: %s", self._read_telemetry_file, ex)
