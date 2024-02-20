@@ -32,7 +32,6 @@ dependencies:
     - types-colorama
     - types-jsonschema
     - types-pygments
-    - types-pytest-lazy-fixture
     - types-requests
     - types-setuptools
     - pyarrow
