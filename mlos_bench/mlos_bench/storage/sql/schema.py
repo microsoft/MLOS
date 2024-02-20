@@ -41,6 +41,7 @@ class DbSchema:
     """
     A class to define and create the DB schema.
     """
+
     # This class is internal to SqlStorage and is mostly a struct
     # for all DB tables, so it's ok to disable the warnings.
     # pylint: disable=too-many-instance-attributes
