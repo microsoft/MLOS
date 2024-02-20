@@ -6,6 +6,9 @@
 Unit tests for telemetry and status of LocalEnv benchmark environment.
 """
 from datetime import datetime, timedelta
+import pytz
+
+import pytest
 
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.tests.environments import check_env_success, check_env_fail_telemetry
@@ -16,12 +19,12 @@ def test_local_env_telemetry(tunable_groups: TunableGroups) -> None:
     """
     Produce benchmark and telemetry data in a local script and read it.
     """
-    ts1 = datetime.utcnow()
+    ts1 = datetime.utcnow().astimezone(pytz.UTC)
     ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=1)
 
-    time_str1 = ts1.strftime("%Y-%m-%d %H:%M:%S")
-    time_str2 = ts2.strftime("%Y-%m-%d %H:%M:%S")
+    time_str1 = ts1.strftime("%Y-%m-%d %H:%M:%S %z")
+    time_str2 = ts2.strftime("%Y-%m-%d %H:%M:%S %z")
 
     local_env = create_local_env(tunable_groups, {
         "run": [
@@ -60,12 +63,12 @@ def test_local_env_telemetry_no_header(tunable_groups: TunableGroups) -> None:
     """
     Read the telemetry data with no header.
     """
-    ts1 = datetime.utcnow()
+    ts1 = datetime.utcnow().astimezone(pytz.UTC)
     ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=1)
 
-    time_str1 = ts1.strftime("%Y-%m-%d %H:%M:%S")
-    time_str2 = ts2.strftime("%Y-%m-%d %H:%M:%S")
+    time_str1 = ts1.strftime("%Y-%m-%d %H:%M:%S %z")
+    time_str2 = ts2.strftime("%Y-%m-%d %H:%M:%S %z")
 
     local_env = create_local_env(tunable_groups, {
         "run": [
@@ -89,16 +92,17 @@ def test_local_env_telemetry_no_header(tunable_groups: TunableGroups) -> None:
     )
 
 
+@pytest.mark.filterwarnings("ignore:.*(Could not infer format, so each element will be parsed individually, falling back to `dateutil`).*:UserWarning::0")  # pylint: disable=line-too-long # noqa
 def test_local_env_telemetry_wrong_header(tunable_groups: TunableGroups) -> None:
     """
     Read the telemetry data with incorrect header.
     """
-    ts1 = datetime.utcnow()
+    ts1 = datetime.utcnow().astimezone(pytz.UTC)
     ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=1)
 
-    time_str1 = ts1.strftime("%Y-%m-%d %H:%M:%S")
-    time_str2 = ts2.strftime("%Y-%m-%d %H:%M:%S")
+    time_str1 = ts1.strftime("%Y-%m-%d %H:%M:%S %z")
+    time_str2 = ts2.strftime("%Y-%m-%d %H:%M:%S %z")
 
     local_env = create_local_env(tunable_groups, {
         "run": [
@@ -119,12 +123,12 @@ def test_local_env_telemetry_invalid(tunable_groups: TunableGroups) -> None:
     """
     Fail when the telemetry data has wrong format.
     """
-    ts1 = datetime.utcnow()
+    ts1 = datetime.utcnow().astimezone(pytz.UTC)
     ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=1)
 
-    time_str1 = ts1.strftime("%Y-%m-%d %H:%M:%S")
-    time_str2 = ts2.strftime("%Y-%m-%d %H:%M:%S")
+    time_str1 = ts1.strftime("%Y-%m-%d %H:%M:%S %z")
+    time_str2 = ts2.strftime("%Y-%m-%d %H:%M:%S %z")
 
     local_env = create_local_env(tunable_groups, {
         "run": [
