@@ -8,7 +8,7 @@ Contains the BaseOptimizer abstract class.
 
 import collections
 from abc import ABCMeta, abstractmethod
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import ConfigSpace
 import numpy as np
@@ -237,7 +237,7 @@ class BaseOptimizer(metaclass=ABCMeta):
                     j += 1
         return pd.DataFrame(df_dict)
 
-    def _to_1hot(self, config: pd.DataFrame) -> npt.NDArray:
+    def _to_1hot(self, config: Union[pd.DataFrame, pd.Series]) -> npt.NDArray:
         """
         Convert pandas DataFrame to one-hot-encoded numpy array.
         """
@@ -253,10 +253,14 @@ class BaseOptimizer(metaclass=ABCMeta):
             j = 0
             for param in self.optimizer_parameter_space.values():
                 if config.ndim > 1:
+                    assert isinstance(config, pd.DataFrame)
                     col = config.columns.get_loc(param.name)
+                    assert isinstance(col, int)
                     val = config.iloc[i, col]
                 else:
+                    assert isinstance(config, pd.Series)
                     col = config.index.get_loc(param.name)
+                    assert isinstance(col, int)
                     val = config.iloc[col]
                 if isinstance(param, ConfigSpace.CategoricalHyperparameter):
                     offset = param.choices.index(val)
