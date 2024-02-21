@@ -37,10 +37,11 @@ class Status(enum.Enum):
     def is_completed(self) -> bool:
         """
         Check if the status of the benchmark/environment is
-        one of {SUCCEEDED, FAILED, TIMED_OUT}.
+        one of {SUCCEEDED, CANCELED, FAILED, TIMED_OUT}.
         """
         return self in {
             Status.SUCCEEDED,
+            Status.CANCELED,
             Status.FAILED,
             Status.TIMED_OUT,
         }
