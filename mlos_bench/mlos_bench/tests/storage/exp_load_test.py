@@ -28,7 +28,7 @@ def test_exp_pending_empty(exp_storage: Storage.Experiment) -> None:
     """
     Try to retrieve pending experiments from the empty storage.
     """
-    trials = list(exp_storage.pending_trials())
+    trials = list(exp_storage.pending_trials(datetime.utcnow(), running=True))
     assert not trials
 
 
@@ -38,7 +38,7 @@ def test_exp_trial_pending(exp_storage: Storage.Experiment,
     Start a trial and check that it is pending.
     """
     trial = exp_storage.new_trial(tunable_groups)
-    (pending,) = list(exp_storage.pending_trials())
+    (pending,) = list(exp_storage.pending_trials(datetime.utcnow(), running=True))
     assert pending.trial_id == trial.trial_id
     assert pending.tunables == tunable_groups
 
@@ -55,7 +55,10 @@ def test_exp_trial_pending_many(exp_storage: Storage.Experiment,
         exp_storage.new_trial(config2).trial_id,
         exp_storage.new_trial(config2).trial_id,  # Submit same config twice
     }
-    pending_ids = {pending.trial_id for pending in exp_storage.pending_trials()}
+    pending_ids = {
+        pending.trial_id
+        for pending in exp_storage.pending_trials(datetime.utcnow(), running=True)
+    }
     assert len(pending_ids) == 3
     assert trial_ids == pending_ids
 
@@ -67,7 +70,7 @@ def test_exp_trial_pending_fail(exp_storage: Storage.Experiment,
     """
     trial = exp_storage.new_trial(tunable_groups)
     trial.update(Status.FAILED, datetime.utcnow())
-    trials = list(exp_storage.pending_trials())
+    trials = list(exp_storage.pending_trials(datetime.utcnow(), running=True))
     assert not trials
 
 
@@ -78,7 +81,7 @@ def test_exp_trial_success(exp_storage: Storage.Experiment,
     """
     trial = exp_storage.new_trial(tunable_groups)
     trial.update(Status.SUCCEEDED, datetime.utcnow(), 99.9)
-    trials = list(exp_storage.pending_trials())
+    trials = list(exp_storage.pending_trials(datetime.utcnow(), running=True))
     assert not trials
 
 
@@ -127,7 +130,7 @@ def test_exp_trial_pending_3(exp_storage: Storage.Experiment,
     trial_fail.update(Status.FAILED, datetime.utcnow())
     trial_succ.update(Status.SUCCEEDED, datetime.utcnow(), score)
 
-    (pending,) = list(exp_storage.pending_trials())
+    (pending,) = list(exp_storage.pending_trials(datetime.utcnow(), running=True))
     assert pending.trial_id == trial_pend.trial_id
 
     (configs, scores, status) = exp_storage.load()

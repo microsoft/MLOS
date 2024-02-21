@@ -256,21 +256,51 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
+        def load(self,
+                 last_trial_id: int = -1,
+                 opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
             """
             Load (tunable values, benchmark scores, status) to warm-up the optimizer.
-            This call returns data from ALL merged-in experiments and attempts
-            to impute the missing tunable values.
+
+            If `last_trial_id` is present, load only the data from the (completed) trials
+            that were scheduled *after* the given trial ID. Otherwise, return data from ALL
+            merged-in experiments and attempt to impute the missing tunable values.
+
+            Parameters
+            ----------
+            last_trial_id : int
+                (Optional) Trial ID to start from.
+            opt_target : Optional[str]
+                Name of the optimization target.
+
+            Returns
+            -------
+            (configs, scores, status) : Tuple[List[dict], List[Optional[float]], List[Status]]
+                Tunable values, benchmark scores, and status of the trials.
             """
 
         @abstractmethod
-        def pending_trials(self) -> Iterator['Storage.Trial']:
+        def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator['Storage.Trial']:
             """
-            Return an iterator over the pending trial runs for this experiment.
+            Return an iterator over the pending trials that are scheduled to run
+            on or before the specified timestamp.
+
+            Parameters
+            ----------
+            timestamp : datetime
+                The time in UTC to check for scheduled trials.
+            running : bool
+                If True, include the trials that are already running.
+                Otherwise, return only the scheduled trials.
+
+            Returns
+            -------
+            trials : Iterator[Storage.Trial]
+                An iterator over the scheduled (and maybe running) trials.
             """
 
         @abstractmethod
-        def new_trial(self, tunables: TunableGroups,
+        def new_trial(self, tunables: TunableGroups, ts_start: Optional[datetime] = None,
                       config: Optional[Dict[str, Any]] = None) -> 'Storage.Trial':
             """
             Create a new experiment run in the storage.
@@ -279,6 +309,8 @@ class Storage(metaclass=ABCMeta):
             ----------
             tunables : TunableGroups
                 Tunable parameters to use for the trial.
+            ts_start : Optional[datetime]
+                Timestamp of the trial start (can be in the future).
             config : dict
                 Key/value pairs of additional non-tunable parameters of the trial.
 
