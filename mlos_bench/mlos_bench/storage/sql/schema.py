@@ -153,10 +153,10 @@ class DbSchema:
         self.trial_status = Table(
             "trial_status",
             self._meta,
-            Column("exp_id", String(255), nullable=False),
+            Column("exp_id", String(self._ID_LEN), nullable=False),
             Column("trial_id", Integer, nullable=False),
             Column("ts", DateTime, nullable=False, default="now"),
-            Column("status", String(16), nullable=False),
+            Column("status", String(self._STATUS_LEN), nullable=False),
 
             UniqueConstraint("exp_id", "trial_id", "ts"),
             ForeignKeyConstraint(["exp_id", "trial_id"],
