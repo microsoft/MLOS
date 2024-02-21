@@ -7,9 +7,18 @@ Unit tests for scheduling trials for some future time.
 """
 from datetime import datetime, timedelta
 
+from typing import Iterator, Set
+
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
+
+
+def _trial_ids(trials: Iterator[Storage.Trial]) -> Set[int]:
+    """
+    Extract trial IDs from a list of trials.
+    """
+    return set(t.trial_id for t in trials)
 
 
 def test_schedule_trial(exp_storage: Storage.Experiment,
@@ -34,16 +43,16 @@ def test_schedule_trial(exp_storage: Storage.Experiment,
     # Scheduler side: get trials ready to run at certain timestamps:
 
     # Pretend 1 minute has passed, get trials scheduled to run:
-    pending_ids = set(t.trial_id for t in exp_storage.pending_trials(
-        timestamp + timedelta_1min, running=False))
+    pending_ids = _trial_ids(
+        exp_storage.pending_trials(timestamp + timedelta_1min, running=False))
     assert pending_ids == {
         trial_now1.trial_id,
         trial_now2.trial_id,
     }
 
     # Get trials scheduled to run within the next 1 hour:
-    pending_ids = set(t.trial_id for t in exp_storage.pending_trials(
-        timestamp + timedelta_1hr, running=False))
+    pending_ids = _trial_ids(
+        exp_storage.pending_trials(timestamp + timedelta_1hr, running=False))
     assert pending_ids == {
         trial_now1.trial_id,
         trial_now2.trial_id,
@@ -51,8 +60,8 @@ def test_schedule_trial(exp_storage: Storage.Experiment,
     }
 
     # Get trials scheduled to run within the next 3 hours:
-    pending_ids = set(t.trial_id for t in exp_storage.pending_trials(
-        timestamp + timedelta_1hr * 3, running=False))
+    pending_ids = _trial_ids(
+        exp_storage.pending_trials(timestamp + timedelta_1hr * 3, running=False))
     assert pending_ids == {
         trial_now1.trial_id,
         trial_now2.trial_id,
@@ -65,11 +74,39 @@ def test_schedule_trial(exp_storage: Storage.Experiment,
     # No completed trials yet:
     assert exp_storage.load() == ([], [], [])
 
-    trial_now1.update(Status.SUCCEEDED, timestamp + timedelta_1min, metrics={"score": 1.0})
-    trial_now2.update(Status.FAILED, timestamp + timedelta_1min)
+    # Update the status of some trials:
+    trial_now1.update(Status.RUNNING, timestamp + timedelta_1min)
+    trial_now2.update(Status.RUNNING, timestamp + timedelta_1min)
+
+    # Still no completed trials:
+    assert exp_storage.load() == ([], [], [])
+
+    # Get trials scheduled to run within the next 3 hours:
+    pending_ids = _trial_ids(
+        exp_storage.pending_trials(timestamp + timedelta_1hr * 3, running=False))
+    assert pending_ids == {
+        trial_1h.trial_id,
+        trial_2h.trial_id,
+    }
+
+    # Get trials scheduled to run OR running within the next 3 hours:
+    pending_ids = _trial_ids(
+        exp_storage.pending_trials(timestamp + timedelta_1hr * 3, running=True))
+    assert pending_ids == {
+        trial_now1.trial_id,
+        trial_now2.trial_id,
+        trial_1h.trial_id,
+        trial_2h.trial_id,
+    }
+
+    # Mark some trials completed after 2 minutes:
+    trial_now1.update(Status.SUCCEEDED, timestamp + timedelta_1min * 2, metrics={"score": 1.0})
+    trial_now2.update(Status.FAILED, timestamp + timedelta_1min * 2)
+
+    # Another one completes after 2 hours:
     trial_1h.update(Status.SUCCEEDED, timestamp + timedelta_1hr * 2, metrics={"score": 1.0})
 
-    # Three trials completed:
+    # Check that three trials have completed so far:
     (trial_configs, _scores, trial_status) = exp_storage.load()
     assert len(trial_configs) == 3
     assert trial_status == [Status.SUCCEEDED, Status.FAILED, Status.SUCCEEDED]
