@@ -96,10 +96,8 @@ def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: str) -> SqlStorage.
     # Note: we're just fabricating some made up function for the ML libraries to try and learn.
     base_score = 10.0
     tunable = exp.tunables.get_tunable(tunable_name)[0]
-    tunable_default = tunable.default
-    assert isinstance(tunable_default, int)
-    tunable_min = tunable.range[0]
-    tunable_max = tunable.range[1]
+    assert isinstance(tunable.default, int)
+    (tunable_min, tunable_max) = tunable.range
     tunable_range = tunable_max - tunable_min
     rand_seed(SEED)
     opt = MockOptimizer(tunables=exp.tunables, config={

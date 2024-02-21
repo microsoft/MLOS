@@ -112,7 +112,7 @@ class DbSchema:
             Column("exp_id", String(self._ID_LEN), nullable=False),
             Column("trial_id", Integer, nullable=False),
             Column("config_id", Integer, nullable=False),
-            Column("ts_start", DateTime, nullable=False, default="now"),
+            Column("ts_start", DateTime, nullable=False),
             Column("ts_end", DateTime),
             # Should match the text IDs of `mlos_bench.environments.Status` enum:
             Column("status", String(self._STATUS_LEN), nullable=False),
@@ -146,6 +146,19 @@ class DbSchema:
             Column("param_value", String(self._PARAM_VALUE_LEN)),
 
             PrimaryKeyConstraint("exp_id", "trial_id", "param_id"),
+            ForeignKeyConstraint(["exp_id", "trial_id"],
+                                 [self.trial.c.exp_id, self.trial.c.trial_id]),
+        )
+
+        self.trial_status = Table(
+            "trial_status",
+            self._meta,
+            Column("exp_id", String(255), nullable=False),
+            Column("trial_id", Integer, nullable=False),
+            Column("ts", DateTime, nullable=False, default="now"),
+            Column("status", String(16), nullable=False),
+
+            UniqueConstraint("exp_id", "trial_id", "ts"),
             ForeignKeyConstraint(["exp_id", "trial_id"],
                                  [self.trial.c.exp_id, self.trial.c.trial_id]),
         )
