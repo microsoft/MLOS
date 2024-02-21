@@ -109,8 +109,8 @@ def _optimize(*,
             opt_context.bulk_register(configs, scores, status)
             # Complete any pending trials.
             for trial in exp.pending_trials(datetime.utcnow(), running=True):
-                (status, score) = _run(env_context, trial, global_config)
-                opt_context.register(trial.tunables, status, score)
+                (trial_status, trial_score) = _run(env_context, trial, global_config)
+                opt_context.register(trial.tunables, trial_status, trial_score)
         else:
             _LOG.warning("Skip pending trials and warm-up: %s", opt)
 
@@ -145,8 +145,8 @@ def _optimize(*,
                     "repeat_i": repeat_i,
                     "is_defaults": tunables.is_defaults,
                 })
-                (status, score) = _run(env_context, trial, global_config)
-                opt_context.register(trial.tunables, status, score)
+                (trial_status, trial_score) = _run(env_context, trial, global_config)
+                opt_context.register(trial.tunables, trial_status, trial_score)
 
         if do_teardown:
             env_context.teardown()
@@ -169,6 +169,11 @@ def _run(env: Environment, trial: Storage.Trial,
         A storage system to persist the experiment data.
     global_config : dict
         Global configuration parameters.
+
+    Returns
+    -------
+    (trial_status, trial_score) : (Status, Optional[Dict[str, float]])
+        Status and results of the trial.
     """
     _LOG.info("Trial: %s", trial)
 
