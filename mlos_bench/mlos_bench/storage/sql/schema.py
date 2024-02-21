@@ -17,10 +17,6 @@ from sqlalchemy import (
 
 _LOG = logging.getLogger(__name__)
 
-# This class is internal to SqlStorage and is mostly a struct
-# for all DB tables, so it's ok to disable the warnings.
-# pylint: disable=too-many-instance-attributes
-
 
 class _DDL:
     """
@@ -46,19 +42,29 @@ class DbSchema:
     A class to define and create the DB schema.
     """
 
+    # This class is internal to SqlStorage and is mostly a struct
+    # for all DB tables, so it's ok to disable the warnings.
+    # pylint: disable=too-many-instance-attributes
+
+    # Common string column sizes.
+    _ID_LEN = 512
+    _PARAM_VALUE_LEN = 1024
+    _METRIC_VALUE_LEN = 255
+    _STATUS_LEN = 16
+
     def __init__(self, engine: Engine):
         """
         Declare the SQLAlchemy schema for the database.
         """
         _LOG.info("Create the DB schema for: %s", engine)
         self._engine = engine
-        # TODO: bind for automatic schema updates?
+        # TODO: bind for automatic schema updates? (#649)
         self._meta = MetaData()
 
         self.experiment = Table(
             "experiment",
             self._meta,
-            Column("exp_id", String(255), nullable=False),
+            Column("exp_id", String(self._ID_LEN), nullable=False),
             Column("description", String(1024)),
             Column("root_env_config", String(1024), nullable=False),
             Column("git_repo", String(1024), nullable=False),
@@ -71,7 +77,7 @@ class DbSchema:
             "objectives",
             self._meta,
             Column("exp_id"),
-            Column("optimization_target", String(1024), nullable=False),
+            Column("optimization_target", String(self._ID_LEN), nullable=False),
             Column("optimization_direction", String(4), nullable=False),
             # TODO: Note: weight is not fully supported yet as currently
             # multi-objective is expected to explore each objective equally.
@@ -103,13 +109,13 @@ class DbSchema:
         self.trial = Table(
             "trial",
             self._meta,
-            Column("exp_id", String(255), nullable=False),
+            Column("exp_id", String(self._ID_LEN), nullable=False),
             Column("trial_id", Integer, nullable=False),
             Column("config_id", Integer, nullable=False),
             Column("ts_start", DateTime, nullable=False),
             Column("ts_end", DateTime),
             # Should match the text IDs of `mlos_bench.environments.Status` enum:
-            Column("status", String(16), nullable=False),
+            Column("status", String(self._STATUS_LEN), nullable=False),
 
             PrimaryKeyConstraint("exp_id", "trial_id"),
             ForeignKeyConstraint(["exp_id"], [self.experiment.c.exp_id]),
@@ -122,8 +128,8 @@ class DbSchema:
             "config_param",
             self._meta,
             Column("config_id", Integer, nullable=False),
-            Column("param_id", String(255), nullable=False),
-            Column("param_value", String(255)),
+            Column("param_id", String(self._ID_LEN), nullable=False),
+            Column("param_value", String(self._PARAM_VALUE_LEN)),
 
             PrimaryKeyConstraint("config_id", "param_id"),
             ForeignKeyConstraint(["config_id"], [self.config.c.config_id]),
@@ -134,10 +140,10 @@ class DbSchema:
         self.trial_param = Table(
             "trial_param",
             self._meta,
-            Column("exp_id", String(255), nullable=False),
+            Column("exp_id", String(self._ID_LEN), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("param_id", String(255), nullable=False),
-            Column("param_value", String(255)),
+            Column("param_id", String(self._ID_LEN), nullable=False),
+            Column("param_value", String(self._PARAM_VALUE_LEN)),
 
             PrimaryKeyConstraint("exp_id", "trial_id", "param_id"),
             ForeignKeyConstraint(["exp_id", "trial_id"],
@@ -147,10 +153,10 @@ class DbSchema:
         self.trial_status = Table(
             "trial_status",
             self._meta,
-            Column("exp_id", String(255), nullable=False),
+            Column("exp_id", String(self._ID_LEN), nullable=False),
             Column("trial_id", Integer, nullable=False),
             Column("ts", DateTime, nullable=False, default="now"),
-            Column("status", String(16), nullable=False),
+            Column("status", String(self._STATUS_LEN), nullable=False),
 
             UniqueConstraint("exp_id", "trial_id", "ts"),
             ForeignKeyConstraint(["exp_id", "trial_id"],
@@ -160,10 +166,10 @@ class DbSchema:
         self.trial_result = Table(
             "trial_result",
             self._meta,
-            Column("exp_id", String(255), nullable=False),
+            Column("exp_id", String(self._ID_LEN), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("metric_id", String(255), nullable=False),
-            Column("metric_value", String(255)),
+            Column("metric_id", String(self._ID_LEN), nullable=False),
+            Column("metric_value", String(self._METRIC_VALUE_LEN)),
 
             PrimaryKeyConstraint("exp_id", "trial_id", "metric_id"),
             ForeignKeyConstraint(["exp_id", "trial_id"],
@@ -173,11 +179,11 @@ class DbSchema:
         self.trial_telemetry = Table(
             "trial_telemetry",
             self._meta,
-            Column("exp_id", String(255), nullable=False),
+            Column("exp_id", String(self._ID_LEN), nullable=False),
             Column("trial_id", Integer, nullable=False),
             Column("ts", DateTime, nullable=False, default="now"),
-            Column("metric_id", String(255), nullable=False),
-            Column("metric_value", String(255)),
+            Column("metric_id", String(self._ID_LEN), nullable=False),
+            Column("metric_value", String(self._METRIC_VALUE_LEN)),
 
             UniqueConstraint("exp_id", "trial_id", "ts", "metric_id"),
             ForeignKeyConstraint(["exp_id", "trial_id"],
