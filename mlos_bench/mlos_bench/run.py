@@ -109,7 +109,8 @@ def _optimize(*,
             opt_context.bulk_register(configs, scores, status)
             # Complete any pending trials.
             for trial in exp.pending_trials(datetime.utcnow(), running=True):
-                _run(env_context, opt_context, trial, global_config)
+                (status, score) = _run(env_context, trial, global_config)
+                opt_context.register(trial.tunables, status, score)
         else:
             _LOG.warning("Skip pending trials and warm-up: %s", opt)
 
@@ -144,7 +145,8 @@ def _optimize(*,
                     "repeat_i": repeat_i,
                     "is_defaults": tunables.is_defaults,
                 })
-                _run(env_context, opt_context, trial, global_config)
+                (status, score) = _run(env_context, trial, global_config)
+                opt_context.register(trial.tunables, status, score)
 
         if do_teardown:
             env_context.teardown()
@@ -154,7 +156,8 @@ def _optimize(*,
     return (best_score, best_config)
 
 
-def _run(env: Environment, opt: Optimizer, trial: Storage.Trial, global_config: Dict[str, Any]) -> None:
+def _run(env: Environment, trial: Storage.Trial,
+         global_config: Dict[str, Any]) -> Tuple[Status, Optional[Dict[str, float]]]:
     """
     Run a single trial.
 
@@ -162,8 +165,6 @@ def _run(env: Environment, opt: Optimizer, trial: Storage.Trial, global_config: 
     ----------
     env : Environment
         Benchmarking environment context to run the optimization on.
-    opt : Optimizer
-        An interface to mlos_core optimizers.
     storage : Storage
         A storage system to persist the experiment data.
     global_config : dict
@@ -175,8 +176,7 @@ def _run(env: Environment, opt: Optimizer, trial: Storage.Trial, global_config: 
         _LOG.warning("Setup failed: %s :: %s", env, trial.tunables)
         # FIXME: Use the actual timestamp from the environment.
         trial.update(Status.FAILED, datetime.utcnow())
-        opt.register(trial.tunables, Status.FAILED)
-        return
+        return (Status.FAILED, None)
 
     (status, timestamp, results) = env.run()  # Block and wait for the final result.
     _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
@@ -193,7 +193,7 @@ def _run(env: Environment, opt: Optimizer, trial: Storage.Trial, global_config: 
     # Filter out non-numeric scores from the optimizer.
     scores = results if not isinstance(results, dict) \
         else {k: float(v) for (k, v) in results.items() if isinstance(v, (int, float))}
-    opt.register(trial.tunables, status, scores)
+    return (status, scores)
 
 
 if __name__ == "__main__":
