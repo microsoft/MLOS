@@ -30,7 +30,7 @@ def _main() -> None:
 
     launcher = Launcher("mlos_bench", "Systems autotuning and benchmarking tool")
 
-    result = _optimize(
+    result = _optimization_loop(
         env=launcher.environment,
         opt=launcher.optimizer,
         storage=launcher.storage,
@@ -43,15 +43,15 @@ def _main() -> None:
     _LOG.info("Final result: %s", result)
 
 
-def _optimize(*,
-              env: Environment,
-              opt: Optimizer,
-              storage: Storage,
-              root_env_config: str,
-              global_config: Dict[str, Any],
-              do_teardown: bool,
-              trial_config_repeat_count: int = 1,
-              ) -> Tuple[Optional[float], Optional[TunableGroups]]:
+def _optimization_loop(*,
+                       env: Environment,
+                       opt: Optimizer,
+                       storage: Storage,
+                       root_env_config: str,
+                       global_config: Dict[str, Any],
+                       do_teardown: bool,
+                       trial_config_repeat_count: int = 1,
+                       ) -> Tuple[Optional[float], Optional[TunableGroups]]:
     """
     Main optimization loop.
 
@@ -109,7 +109,7 @@ def _optimize(*,
             opt_context.bulk_register(configs, scores, status)
             # Complete any pending trials.
             for trial in exp.pending_trials(datetime.utcnow(), running=True):
-                (trial_status, trial_score) = _run(env_context, trial, global_config)
+                (trial_status, trial_score) = _run_trial(env_context, trial, global_config)
                 opt_context.register(trial.tunables, trial_status, trial_score)
         else:
             _LOG.warning("Skip pending trials and warm-up: %s", opt)
@@ -145,7 +145,7 @@ def _optimize(*,
                     "repeat_i": repeat_i,
                     "is_defaults": tunables.is_defaults,
                 })
-                (trial_status, trial_score) = _run(env_context, trial, global_config)
+                (trial_status, trial_score) = _run_trial(env_context, trial, global_config)
                 opt_context.register(trial.tunables, trial_status, trial_score)
 
         if do_teardown:
@@ -156,8 +156,54 @@ def _optimize(*,
     return (best_score, best_config)
 
 
-def _run(env: Environment, trial: Storage.Trial,
-         global_config: Dict[str, Any]) -> Tuple[Status, Optional[Dict[str, float]]]:
+def _scheduler(*, exp: Storage.Experiment, env_context: Environment,
+               global_config: Dict[str, Any], running: bool = False) -> None:
+    """
+    Scheduler part of the loop. Check for pending trials in the queue and run them.
+    """
+    for trial in exp.pending_trials(datetime.utcnow(), running=running):
+        _run_trial(env_context, trial, global_config)
+
+
+def _optimizer(exp: Storage.Experiment, opt_context: Optimizer,
+               *, last_trial_id: int = -1, trial_config_repeat_count: int = 1) -> None:
+    """
+    Optimizer part of the loop. Load the results of the executed trials
+    into the optimizer, suggest new configurations, and add them to the queue.
+    """
+    (configs, scores, status) = exp.load(last_trial_id)
+    opt_context.bulk_register(configs, scores, status)
+
+    tunables = opt_context.suggest()
+    _schedule_trial(exp, opt_context, tunables, trial_config_repeat_count)
+
+
+def _schedule_trial(exp: Storage.Experiment, opt: Optimizer,
+                    tunables: TunableGroups, trial_config_repeat_count: int = 1) -> None:
+    """
+    Add one configuration to the queue of trials.
+    """
+    for repeat_i in range(1, trial_config_repeat_count + 1):
+        exp.new_trial(tunables, config={
+            # Add some additional metadata to track for the trial such as the
+            # optimizer config used.
+            # Note: these values are unfortunately mutable at the moment.
+            # Consider them as hints of what the config was the trial *started*.
+            # It is possible that the experiment configs were changed
+            # between resuming the experiment (since that is not currently
+            # prevented).
+            # TODO: Improve for supporting multi-objective
+            # (e.g., opt_target_1, opt_target_2, ... and opt_direction_1, opt_direction_2, ...)
+            "optimizer": opt.name,
+            "opt_target": opt.target,
+            "opt_direction": opt.direction,
+            "repeat_i": repeat_i,
+            "is_defaults": tunables.is_defaults,
+        })
+
+
+def _run_trial(env: Environment, trial: Storage.Trial,
+               global_config: Dict[str, Any]) -> Tuple[Status, Optional[Dict[str, float]]]:
     """
     Run a single trial.
 
