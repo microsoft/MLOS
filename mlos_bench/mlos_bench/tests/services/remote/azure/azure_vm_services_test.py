@@ -146,6 +146,20 @@ def test_vm_operation_status(mock_requests: MagicMock,
     assert status == operation_status
 
 
+@pytest.mark.parametrize(
+    ("operation_name", "accepts_params"), [
+        ("provision_host", True),
+    ])
+def test_vm_operation_invalid(azure_vm_service_remote_exec_only: AzureVMService,
+                              operation_name: str,
+                              accepts_params: bool) -> None:
+    """
+    Test VM operation status for an incomplete service config.
+    """
+    operation = getattr(azure_vm_service_remote_exec_only, operation_name)
+    with pytest.raises(ValueError):
+        (_, _) = operation({"vmName": "test-vm"}) if accepts_params else operation()
+
 @patch("mlos_bench.services.remote.azure.azure_deployment_services.time.sleep")
 @patch("mlos_bench.services.remote.azure.azure_deployment_services.requests.Session")
 def test_wait_vm_operation_ready(mock_session: MagicMock, mock_sleep: MagicMock,

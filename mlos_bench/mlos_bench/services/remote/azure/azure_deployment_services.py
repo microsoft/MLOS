@@ -410,6 +410,8 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
             parameters extracted from the response JSON, or {} if the status is FAILED.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        if not self._deploy_template:
+            raise ValueError(f"Missing deployment template: {self}")
         params = self._set_default_params(params)
         config = merge_parameters(dest=self.config.copy(), source=params, required_keys=["deploymentName"])
         _LOG.info("Deploy: %s :: %s", config["deploymentName"], params)
