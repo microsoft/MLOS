@@ -240,7 +240,7 @@ def test_wait_vm_operation_retry(mock_getconn: MagicMock,
         (404, Status.FAILED),
     ])
 @patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
-def test_remote_exec_status(mock_requests: MagicMock, azure_vm_service: AzureVMService,
+def test_remote_exec_status(mock_requests: MagicMock, azure_vm_service_remote_exec_only: AzureVMService,
                             http_status_code: int, operation_status: Status) -> None:
     """
     Test waiting for completion of the remote execution on Azure.
@@ -254,14 +254,14 @@ def test_remote_exec_status(mock_requests: MagicMock, azure_vm_service: AzureVMS
     })
     mock_requests.post.return_value = mock_response
 
-    status, _ = azure_vm_service.remote_exec(script, config={"vmName": "test-vm"}, env_params={})
+    status, _ = azure_vm_service_remote_exec_only.remote_exec(script, config={"vmName": "test-vm"}, env_params={})
 
     assert status == operation_status
 
 
 @patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
 def test_remote_exec_headers_output(mock_requests: MagicMock,
-                                    azure_vm_service: AzureVMService) -> None:
+                                    azure_vm_service_remote_exec_only: AzureVMService) -> None:
     """
     Check if HTTP headers from the remote execution on Azure are correct.
     """
@@ -279,7 +279,7 @@ def test_remote_exec_headers_output(mock_requests: MagicMock,
     })
     mock_requests.post.return_value = mock_response
 
-    _, cmd_output = azure_vm_service.remote_exec(script, config={"vmName": "test-vm"}, env_params={
+    _, cmd_output = azure_vm_service_remote_exec_only.remote_exec(script, config={"vmName": "test-vm"}, env_params={
         "param_1": 123,
         "param_2": "abc",
     })
@@ -315,7 +315,7 @@ def test_remote_exec_headers_output(mock_requests: MagicMock,
         (Status.PENDING, {}, {}),
         (Status.FAILED, {}, {}),
     ])
-def test_get_remote_exec_results(azure_vm_service: AzureVMService, operation_status: Status,
+def test_get_remote_exec_results(azure_vm_service_remote_exec_only: AzureVMService, operation_status: Status,
                                  wait_output: dict, results_output: dict) -> None:
     """
     Test getting the results of the remote execution on Azure.
@@ -325,9 +325,9 @@ def test_get_remote_exec_results(azure_vm_service: AzureVMService, operation_sta
     mock_wait_host_operation = MagicMock()
     mock_wait_host_operation.return_value = (operation_status, wait_output)
     # azure_vm_service.wait_host_operation = mock_wait_host_operation
-    setattr(azure_vm_service, "wait_host_operation", mock_wait_host_operation)
+    setattr(azure_vm_service_remote_exec_only, "wait_host_operation", mock_wait_host_operation)
 
-    status, cmd_output = azure_vm_service.get_remote_exec_results(params)
+    status, cmd_output = azure_vm_service_remote_exec_only.get_remote_exec_results(params)
 
     assert status == operation_status
     assert mock_wait_host_operation.call_args[0][0] == params
