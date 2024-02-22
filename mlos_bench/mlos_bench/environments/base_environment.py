@@ -378,7 +378,7 @@ class Environment(metaclass=abc.ABCMeta):
         assert self._in_context
         self._is_ready = False
 
-    def run(self) -> Tuple[Status, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
         """
         Execute the run script for this environment.
 
@@ -387,30 +387,32 @@ class Environment(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        (status, output) : (Status, dict)
-            A pair of (Status, output) values, where `output` is a dict
+        (status, timestamp, output) : (Status, datetime, dict)
+            3-tuple of (Status, timestamp, output) values, where `output` is a dict
             with the results or None if the status is not COMPLETED.
             If run script is a benchmark, then the score is usually expected to
             be in the `score` field.
         """
         # Make sure we create a context before invoking setup/run/status/teardown
         assert self._in_context
-        (status, _) = self.status()
-        return (status, None)
+        (status, timestamp, _) = self.status()
+        return (status, timestamp, None)
 
-    def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
+    def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
         """
         Check the status of the benchmark environment.
 
         Returns
         -------
-        (benchmark_status, telemetry) : (Status, list)
-            A pair of (benchmark status, telemetry) values.
+        (benchmark_status, timestamp, telemetry) : (Status, datetime, list)
+            3-tuple of (benchmark status, timestamp, telemetry) values.
+            `timestamp` is UTC time stamp of the status; it's current time by default.
             `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
         """
         # Make sure we create a context before invoking setup/run/status/teardown
         assert self._in_context
+        timestamp = datetime.utcnow()
         if self._is_ready:
-            return (Status.READY, [])
+            return (Status.READY, timestamp, [])
         _LOG.warning("Environment not ready: %s", self)
-        return (Status.PENDING, [])
+        return (Status.PENDING, timestamp, [])

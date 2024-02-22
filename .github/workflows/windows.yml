@@ -19,6 +19,9 @@ jobs:
   Windows:
     runs-on: windows-latest
 
+    permissions:
+      contents: read
+
     defaults:
       run:
         shell: pwsh

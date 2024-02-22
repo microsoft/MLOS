@@ -108,7 +108,7 @@ def _optimize(*,
             (configs, scores, status) = exp.load()
             opt_context.bulk_register(configs, scores, status)
             # Complete any pending trials.
-            for trial in exp.pending_trials():
+            for trial in exp.pending_trials(datetime.utcnow(), running=True):
                 _run(env_context, opt_context, trial, global_config)
         else:
             _LOG.warning("Skip pending trials and warm-up: %s", opt)
@@ -178,18 +178,18 @@ def _run(env: Environment, opt: Optimizer, trial: Storage.Trial, global_config: 
         opt.register(trial.tunables, Status.FAILED)
         return
 
-    (status, results) = env.run()  # Block and wait for the final result.
+    (status, timestamp, results) = env.run()  # Block and wait for the final result.
     _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
 
     # In async mode (TODO), poll the environment for status and telemetry
     # and update the storage with the intermediate results.
-    (_, telemetry) = env.status()
-    # Use the status from `.run()` as it is the final status of the experiment.
-    # TODO: Use the `.status()` output in async mode.
-    trial.update_telemetry(status, telemetry)
+    (_status, _timestamp, telemetry) = env.status()
 
-    # FIXME: Use the actual timestamp from the benchmark.
-    trial.update(status, datetime.utcnow(), results)
+    # Use the status and timestamp from `.run()` as it is the final status of the experiment.
+    # TODO: Use the `.status()` output in async mode.
+    trial.update_telemetry(status, timestamp, telemetry)
+
+    trial.update(status, timestamp, results)
     # Filter out non-numeric scores from the optimizer.
     scores = results if not isinstance(results, dict) \
         else {k: float(v) for (k, v) in results.items() if isinstance(v, (int, float))}

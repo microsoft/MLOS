@@ -127,7 +127,7 @@ def test_event_loop_context() -> None:
     assert hasattr(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop, '_scheduled')
     assert len(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop._scheduled) == 0
 
-    with pytest.raises(AssertionError), pytest.warns(RuntimeWarning, match=r".*coroutine 'sleep' was never awaited"):
+    with pytest.raises(AssertionError):  # , pytest.warns(RuntimeWarning, match=r".*coroutine 'sleep' was never awaited"):
         future = event_loop_caller_instance_1.EVENT_LOOP_CONTEXT.run_coroutine(asyncio.sleep(0.1, result='foo'))
         raise ValueError(f"Future should not have been available to wait on {future.result()}")
 

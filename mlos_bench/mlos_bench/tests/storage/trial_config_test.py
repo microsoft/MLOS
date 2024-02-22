@@ -5,6 +5,7 @@
 """
 Unit tests for saving and retrieving additional parameters of pending trials.
 """
+from datetime import datetime
 
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -16,8 +17,8 @@ def test_exp_trial_pending(exp_storage: Storage.Experiment,
     Schedule a trial and check that it is pending and has the right configuration.
     """
     config = {"location": "westus2", "num_repeats": 100}
-    trial = exp_storage.new_trial(tunable_groups, config)
-    (pending,) = list(exp_storage.pending_trials())
+    trial = exp_storage.new_trial(tunable_groups, config=config)
+    (pending,) = list(exp_storage.pending_trials(datetime.utcnow(), running=True))
     assert pending.trial_id == trial.trial_id
     assert pending.tunables == tunable_groups
     assert pending.config() == {
@@ -55,7 +56,8 @@ def test_exp_trial_configs(exp_storage: Storage.Experiment,
     assert trials1[0].tunable_config_id != trials2[0].tunable_config_id
 
     pending_ids = [
-        pending.tunable_config_id for pending in exp_storage.pending_trials()
+        pending.tunable_config_id
+        for pending in exp_storage.pending_trials(datetime.utcnow(), running=True)
     ]
     assert len(pending_ids) == 6
     assert len(set(pending_ids)) == 2

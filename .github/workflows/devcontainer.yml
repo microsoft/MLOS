@@ -25,6 +25,9 @@ jobs:
   DevContainer:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+
     # Here we only test a single (latest) version of python.
 
     env:

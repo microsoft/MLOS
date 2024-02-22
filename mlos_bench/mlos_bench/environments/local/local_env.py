@@ -18,6 +18,7 @@ from types import TracebackType
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Type, Union
 from typing_extensions import Literal
 
+import pytz
 import pandas
 
 from mlos_bench.environments.status import Status
@@ -152,19 +153,19 @@ class LocalEnv(ScriptEnv):
 
         return self._is_ready
 
-    def run(self) -> Tuple[Status, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
         """
         Run a script in the local scheduler environment.
 
         Returns
         -------
-        (status, output) : (Status, dict)
-            A pair of (Status, output) values, where `output` is a dict
+        (status, timestamp, output) : (Status, datetime, dict)
+            3-tuple of (Status, timestamp, output) values, where `output` is a dict
             with the results or None if the status is not COMPLETED.
             If run script is a benchmark, then the score is usually expected to
             be in the `score` field.
         """
-        (status, _) = result = super().run()
+        (status, timestamp, _) = result = super().run()
         if not status.is_ready():
             return result
 
@@ -174,13 +175,13 @@ class LocalEnv(ScriptEnv):
         if self._script_run:
             (return_code, output) = self._local_exec(self._script_run, self._temp_dir)
             if return_code != 0:
-                return (Status.FAILED, None)
+                return (Status.FAILED, timestamp, None)
             stdout_data = self._extract_stdout_results(output.get("stdout", ""))
 
         # FIXME: We should not be assuming that the only output file type is a CSV.
         if not self._read_results_file:
             _LOG.debug("Not reading the data at: %s", self)
-            return (Status.SUCCEEDED, stdout_data)
+            return (Status.SUCCEEDED, timestamp, stdout_data)
 
         data = self._normalize_columns(pandas.read_csv(
             self._config_loader_service.resolve_path(
@@ -201,7 +202,7 @@ class LocalEnv(ScriptEnv):
 
         stdout_data.update(data.iloc[-1].to_dict())
         _LOG.info("Local run complete: %s ::\n%s", self, stdout_data)
-        return (Status.SUCCEEDED, stdout_data)
+        return (Status.SUCCEEDED, timestamp, stdout_data)
 
     @staticmethod
     def _normalize_columns(data: pandas.DataFrame) -> pandas.DataFrame:
@@ -215,20 +216,55 @@ class LocalEnv(ScriptEnv):
             data.rename(str.rstrip, axis='columns', inplace=True)
         return data
 
-    def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
+    # All timestamps in the telemetry data must be greater than this date
+    # (a very rough approximation for the start of this feature).
+    _MIN_TS = datetime(2024, 1, 1, 0, 0, 0, tzinfo=pytz.UTC)
 
-        (status, _) = super().status()
+    @staticmethod
+    def _datetime_parser(datetime_col: pandas.Series) -> pandas.Series:
+        """
+        Attempt to convert a column to a datetime format.
+
+        Parameters
+        ----------
+        datetime_col : pandas.Series
+            The column to convert.
+
+        Returns
+        -------
+        pandas.Series
+            The converted datetime column.
+
+        Raises
+        ------
+        ValueError
+            On parse errors.
+        """
+        new_datetime_col = pandas.to_datetime(datetime_col, utc=True)
+        if new_datetime_col.isna().any():
+            raise ValueError(f"Invalid date format in the telemetry data: {datetime_col}")
+        if new_datetime_col.le(LocalEnv._MIN_TS).any():
+            raise ValueError(f"Invalid date range in the telemetry data: {datetime_col}")
+        return new_datetime_col
+
+    def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
+
+        (status, timestamp, _) = super().status()
         if not (self._is_ready and self._read_telemetry_file):
-            return (status, [])
+            return (status, timestamp, [])
 
         assert self._temp_dir is not None
         try:
             fname = self._config_loader_service.resolve_path(
                 self._read_telemetry_file, extra_paths=[self._temp_dir])
 
+            # TODO: Use the timestamp of the CSV file as our status timestamp?
+
             # FIXME: We should not be assuming that the only output file type is a CSV.
+
             data = self._normalize_columns(
-                pandas.read_csv(fname, index_col=False, parse_dates=[0]))
+                pandas.read_csv(fname, index_col=False))
+            data.iloc[:, 0] = self._datetime_parser(data.iloc[:, 0])
 
             expected_col_names = ["timestamp", "metric", "value"]
             if len(data.columns) != len(expected_col_names):
@@ -237,15 +273,16 @@ class LocalEnv(ScriptEnv):
             if list(data.columns) != expected_col_names:
                 # Assume no header - this is ok for telemetry data.
                 data = pandas.read_csv(
-                    fname, index_col=False, parse_dates=[0], names=expected_col_names)
+                    fname, index_col=False, names=expected_col_names)
+                data.iloc[:, 0] = self._datetime_parser(data.iloc[:, 0])
 
         except FileNotFoundError as ex:
             _LOG.warning("Telemetry CSV file not found: %s :: %s", self._read_telemetry_file, ex)
-            return (status, [])
+            return (status, timestamp, [])
 
         _LOG.debug("Read telemetry data:\n%s", data)
         col_dtypes: Mapping[int, Type] = {0: datetime}
-        return (status, [
+        return (status, timestamp, [
             (pandas.Timestamp(ts).to_pydatetime(), metric, value)
             for (ts, metric, value) in data.to_records(index=False, column_dtypes=col_dtypes)
         ])

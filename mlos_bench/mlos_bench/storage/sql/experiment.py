@@ -122,7 +122,9 @@ class Experiment(Storage.Experiment):
             return [(row.ts, row.metric_id, row.metric_value)
                     for row in cur_telemetry.fetchall()]
 
-    def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
+    def load(self,
+             last_trial_id: int = -1,
+             opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
         opt_target = opt_target or self._opt_target
         (configs, scores, status) = ([], [], [])
         with self._engine.connect() as conn:
@@ -139,6 +141,7 @@ class Experiment(Storage.Experiment):
                     ), isouter=True
                 ).where(
                     self._schema.trial.c.exp_id == self._experiment_id,
+                    self._schema.trial.c.trial_id > last_trial_id,
                     self._schema.trial.c.status.in_(['SUCCEEDED', 'FAILED', 'TIMED_OUT']),
                     (self._schema.trial_result.c.metric_id.is_(None) |
                      (self._schema.trial_result.c.metric_id == opt_target)),
@@ -174,12 +177,19 @@ class Experiment(Storage.Experiment):
             for (key, val) in params.items()
         ])
 
-    def pending_trials(self) -> Iterator[Storage.Trial]:
-        _LOG.info("Retrieve pending trials for: %s", self._experiment_id)
+    def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator[Storage.Trial]:
+        _LOG.info("Retrieve pending trials for: %s @ %s", self._experiment_id, timestamp)
+        if running:
+            pending_status = ['PENDING', 'READY', 'RUNNING']
+        else:
+            pending_status = ['PENDING']
         with self._engine.connect() as conn:
             cur_trials = conn.execute(self._schema.trial.select().where(
                 self._schema.trial.c.exp_id == self._experiment_id,
-                self._schema.trial.c.ts_end.is_(None)
+                (self._schema.trial.c.ts_start.is_(None) |
+                 (self._schema.trial.c.ts_start <= timestamp)),
+                self._schema.trial.c.ts_end.is_(None),
+                self._schema.trial.c.status.in_(pending_status),
             ))
             for trial in cur_trials.fetchall():
                 tunables = self._get_params(
@@ -221,7 +231,7 @@ class Experiment(Storage.Experiment):
             config_id=config_id)
         return config_id
 
-    def new_trial(self, tunables: TunableGroups,
+    def new_trial(self, tunables: TunableGroups, ts_start: Optional[datetime] = None,
                   config: Optional[Dict[str, Any]] = None) -> Storage.Trial:
         _LOG.debug("Create trial: %s:%d", self._experiment_id, self._trial_id)
         with self._engine.begin() as conn:
@@ -231,7 +241,7 @@ class Experiment(Storage.Experiment):
                     exp_id=self._experiment_id,
                     trial_id=self._trial_id,
                     config_id=config_id,
-                    ts_start=datetime.utcnow(),
+                    ts_start=ts_start or datetime.utcnow(),
                     status='PENDING',
                 ))
 
