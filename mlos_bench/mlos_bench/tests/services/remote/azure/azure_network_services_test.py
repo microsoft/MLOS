@@ -66,7 +66,7 @@ def test_wait_network_deployment_retry(mock_getconn: MagicMock,
         (401, Status.SUCCEEDED),
         (404, Status.SUCCEEDED),
     ])
-@patch("mlos_bench.services.remote.azure.azure_services.requests")
+@patch("mlos_bench.services.remote.azure.azure_deployment_services.requests")
 # pylint: disable=too-many-arguments
 def test_network_operation_status(mock_requests: MagicMock,
                                   azure_network_service: AzureNetworkService,
