@@ -168,6 +168,8 @@ class Experiment(Storage.Experiment):
     @staticmethod
     def _save_params(conn: Connection, table: Table,
                      params: Dict[str, Any], **kwargs: Any) -> None:
+        if not params:
+            return
         conn.execute(table.insert(), [
             {
                 **kwargs,
