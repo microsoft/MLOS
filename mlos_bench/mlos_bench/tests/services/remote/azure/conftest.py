@@ -81,6 +81,21 @@ def azure_vm_service(azure_auth_service: AzureAuthService) -> AzureVMService:
 
 
 @pytest.fixture
+def azure_vm_service_remote_exec_only(azure_auth_service: AzureAuthService) -> AzureVMService:
+    """
+    Creates a dummy Azure VM service with no deployment template.
+    """
+    return AzureVMService(config={
+        "subscription": "TEST_SUB",
+        "resourceGroup": "TEST_RG",
+        "pollInterval": 1,
+        "pollTimeout": 2,
+    }, global_config={
+        "vmName": "test-vm",  # Should come from the upper-level config
+    }, parent=azure_auth_service)
+
+
+@pytest.fixture
 def azure_fileshare(config_persistence_service: ConfigPersistenceService) -> AzureFileShareService:
     """
     Creates a dummy AzureFileShareService for tests that require it.

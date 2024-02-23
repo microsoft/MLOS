@@ -1,10 +1,10 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/azure/azure-service-subschema.json",
-    "title": "mlos_bench Azure Base Service config",
-    "description": "Base config schema for an mlos_bench Azure Service",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/azure/azure-deployment-service-subschema.json",
+    "title": "mlos_bench Azure Base Deployment Service config",
+    "description": "Base config schema for an mlos_bench Azure Deployment Services",
     "$defs": {
-        "azure_service_config": {
+        "azure_deployment_service_config": {
             "type": "object",
             "allOf": [
                 {
@@ -21,8 +21,8 @@
                             "type": "string"
                         },
                         "deploymentTemplatePath": {
-                            "description": "Path to an ARM template file.",
-                            "type": "string",
+                            "description": "Path to an ARM template file, or null if it should be skipped.",
+                            "type": ["string", "null"],
                             "pattern": "[.]json[c]?$"
                         },
                         "deploymentTemplateParameters": {
@@ -49,10 +49,7 @@
                             },
                             "minProperties": 1
                         }
-                    },
-                    "required": [
-                        "deploymentTemplatePath"
-                    ]
+                    }
                 }
             ]
         }
