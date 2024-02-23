@@ -26,7 +26,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 _LOG = logging.getLogger(__name__)
 
 
-def _main() -> None:
+def _main() -> Tuple[Optional[float], Optional[TunableGroups]]:
 
     launcher = Launcher("mlos_bench", "Systems autotuning and benchmarking tool")
 
@@ -41,6 +41,7 @@ def _main() -> None:
     )
 
     _LOG.info("Final result: %s", result)
+    return result
 
 
 def _optimization_loop(*,
