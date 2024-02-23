@@ -89,7 +89,7 @@ def azure_vm_service_remote_exec_only(azure_auth_service: AzureAuthService) -> A
         "subscription": "TEST_SUB",
         "resourceGroup": "TEST_RG",
         "pollInterval": 1,
-        "pollTimeout": 2
+        "pollTimeout": 2,
     }, global_config={
         "vmName": "test-vm",  # Should come from the upper-level config
     }, parent=azure_auth_service)
