@@ -23,6 +23,7 @@ def test_local_env_stdout(tunable_groups: TunableGroups) -> None:
             "echo 'latency,111'",
             "echo 'throughput,222'",
             "echo 'score,0.999'",
+            "echo 'a,0,b,1'",
         ],
         "results_stdout_pattern": r"(\w+),([0-9.]+)",
     })
@@ -33,6 +34,35 @@ def test_local_env_stdout(tunable_groups: TunableGroups) -> None:
             "latency": 111.0,
             "throughput": 222.0,
             "score": 0.999,
+            "a": 0,
+            "b": 1,
+        },
+        expected_telemetry=[],
+    )
+
+
+def test_local_env_stdout_anchored(tunable_groups: TunableGroups) -> None:
+    """
+    Print benchmark results to stdout and capture them in the LocalEnv.
+    """
+    local_env = create_local_env(tunable_groups, {
+        "run": [
+            "echo 'Benchmark results:'",  # This line should be ignored
+            "echo 'latency,111'",
+            "echo 'throughput,222'",
+            "echo 'score,0.999'",
+            "echo 'a,0,b,1'",   # This line should be ignored in the case of anchored pattern
+        ],
+        "results_stdout_pattern": r"^(\w+),([0-9.]+)$",
+    })
+
+    check_env_success(
+        local_env, tunable_groups,
+        expected_results={
+            "latency": 111.0,
+            "throughput": 222.0,
+            "score": 0.999,
+            # a, b are missing here
         },
         expected_telemetry=[],
     )
