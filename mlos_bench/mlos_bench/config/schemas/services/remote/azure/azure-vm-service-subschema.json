@@ -15,7 +15,7 @@
             "type": "object",
             "allOf": [
                 {
-                    "$ref": "./azure-service-subschema.json#/$defs/azure_service_config"
+                    "$ref": "./azure-deployment-service-subschema.json#/$defs/azure_deployment_service_config"
                 },
                 {
                     "properties": {
@@ -34,5 +34,5 @@
             "unevaluatedProperties": false
         }
     },
-    "required": ["class", "config"]
+    "required": ["class"]
 }

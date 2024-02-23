@@ -1,8 +1,0 @@
-{
-    "class": "mlos_bench.services.remote.azure.AzureVMService",
-    "config": {
-        // "deploymentTemplatePath": "some/path/to/deployment/template.jsonc", // <-- missing
-        "subscription": "subscription-id",
-        "resourceGroup": "rg"
-    }
-}

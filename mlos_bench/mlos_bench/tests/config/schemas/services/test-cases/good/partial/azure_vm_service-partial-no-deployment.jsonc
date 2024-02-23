@@ -1,0 +1,5 @@
+{
+    "class": "mlos_bench.services.remote.azure.AzureVMService"
+    // This version can only support remote exec when subscription, resourceGroup,
+    // and vmName are in the parameters for ther environment.
+}
