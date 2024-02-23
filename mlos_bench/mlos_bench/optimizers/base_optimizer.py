@@ -289,6 +289,9 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         if status.is_succeeded():
             assert score is not None
             if isinstance(score, dict):
+                if self._opt_target not in score:
+                    raise ValueError(f"Missing expected optimization target metric '{self._opt_target}' "
+                                     + f"in results for iteration {self._iter}: {score}")
                 score = score[self._opt_target]
             return float(score) * self._opt_sign
         assert score is None

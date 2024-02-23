@@ -15,7 +15,11 @@
             "type": "object",
             "allOf": [
                 {
-                    "$ref": "./azure-service-subschema.json#/$defs/azure_service_config"
+                    "$ref": "./azure-deployment-service-subschema.json#/$defs/azure_deployment_service_config"
+                },
+                {
+                    "$comment": "Unlike VM service, which can still do remote exec, network service needs a deployment template.",
+                    "required": ["deploymentTemplatePath"]
                 }
             ],
             "unevaluatedProperties": false
