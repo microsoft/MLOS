@@ -29,4 +29,4 @@ def test_main_bench() -> None:
         do_teardown=launcher.teardown,
         trial_config_repeat_count=launcher.trial_config_repeat_count,
     )
-    assert pytest.approx(score, 1e-6) == 65.67
+    assert pytest.approx(score, 1e-6) == 65.6742

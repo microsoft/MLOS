@@ -161,7 +161,7 @@ def _optimizer(exp: Storage.Experiment, opt_context: Optimizer,
     Optimizer part of the loop. Load the results of the executed trials
     into the optimizer, suggest new configurations, and add them to the queue.
     """
-    (configs, scores, status) = exp.load(last_trial_id)
+    (configs, scores, status) = exp.load(last_trial_id - 1)
     opt_context.bulk_register(configs, scores, status, is_warm_up)
 
     tunables = opt_context.suggest()
