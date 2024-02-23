@@ -106,7 +106,7 @@ def _optimization_loop(*,
             # Complete trials that are pending or in-progress.
             _scheduler(exp, env_context, global_config, running=True)
             # Load past trials data into the optimizer
-            last_trial_id = _optimizer(exp, opt_context)
+            last_trial_id = _optimizer(exp, opt_context, is_warm_up=True)
         else:
             _LOG.warning("Skip pending trials and warm-up: %s", opt)
 
@@ -155,13 +155,14 @@ def _scheduler(exp: Storage.Experiment, env_context: Environment,
 
 
 def _optimizer(exp: Storage.Experiment, opt_context: Optimizer,
-               last_trial_id: int = -1, trial_config_repeat_count: int = 1) -> int:
+               last_trial_id: int = -1, trial_config_repeat_count: int = 1,
+               is_warm_up: bool = False) -> int:
     """
     Optimizer part of the loop. Load the results of the executed trials
     into the optimizer, suggest new configurations, and add them to the queue.
     """
     (configs, scores, status) = exp.load(last_trial_id)
-    opt_context.bulk_register(configs, scores, status)
+    opt_context.bulk_register(configs, scores, status, is_warm_up)
 
     tunables = opt_context.suggest()
     return _schedule_trial(exp, opt_context, tunables, trial_config_repeat_count)
