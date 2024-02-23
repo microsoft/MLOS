@@ -36,6 +36,9 @@ class TunableGroups:
         for (name, group_config) in config.items():
             self._add_group(CovariantTunableGroup(name, group_config))
 
+    def __bool__(self) -> bool:
+        return bool(self._index)
+
     def __eq__(self, other: object) -> bool:
         """
         Check if two TunableGroups are equal.
