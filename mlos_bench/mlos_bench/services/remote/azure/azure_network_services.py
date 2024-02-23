@@ -68,7 +68,8 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
             ])
         )
         if not self._deploy_template:
-            raise ValueError("AzureNetworkService requires a deployment template.")
+            raise ValueError("AzureNetworkService requires a deployment template:\n"
+                             + f"config={config}\nglobal_config={global_config}")
 
     def _set_default_params(self, params: dict) -> dict:    # pylint: disable=no-self-use
         # Try and provide a semi sane default for the deploymentName if not provided
