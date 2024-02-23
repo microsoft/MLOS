@@ -64,6 +64,31 @@ def exp_storage(
 
 
 @pytest.fixture
+def exp_storage_no_tunables(
+    storage: SqlStorage,
+) -> Generator[SqlStorage.Experiment, None, None]:
+    """
+    Test fixture for Experiment using in-memory SQLite3 storage.
+    Note: It has already entered the context upon return.
+    """
+    opt_target = "score"
+    opt_direction = "min"
+    empty_config: dict = {}
+    with storage.experiment(
+        experiment_id="Test-001",
+        trial_id=1,
+        root_env_config="environment.jsonc",
+        description="pytest experiment",
+        tunables=TunableGroups(empty_config),
+        opt_target=opt_target,
+        opt_direction=opt_direction,
+    ) as exp:
+        yield exp
+    # pylint: disable=protected-access
+    assert not exp._in_context
+
+
+@pytest.fixture
 def mixed_numerics_exp_storage(
     storage: SqlStorage,
     mixed_numerics_tunable_groups: TunableGroups,
