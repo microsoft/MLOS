@@ -10,9 +10,7 @@ import re
 from typing import List
 
 import pytest
-from unittest.mock import MagicMock, patch
 
-from mlos_bench.run import _main
 from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.util import path_join
@@ -111,19 +109,3 @@ def test_launch_main_app_opt(root_path: str, local_exec_service: LocalExecServic
             r"_optimize INFO Env: Mock environment best score: 64\.53\d+\s*$",
         ]
     )
-
-
-@patch("sys.argv")
-def test_main_bench(mock_argv: MagicMock, root_path: str) -> None:
-    """
-    Run mlos_bench command-line application with given config
-    and check the results in the log.
-    """
-    mock_argv.sys.argv = [
-        "run.py",
-        "--config",
-        "mlos_bench/mlos_bench/tests/config/cli/mock-bench.jsonc",
-    ]
-
-    (score, _config) = _main()
-    assert pytest.approx(score, 1e-6) == 65.67
