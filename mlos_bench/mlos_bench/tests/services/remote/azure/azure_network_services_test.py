@@ -13,6 +13,7 @@ import requests.exceptions as requests_ex
 
 from mlos_bench.environments.status import Status
 
+from mlos_bench.services.remote.azure.azure_auth import AzureAuthService
 from mlos_bench.services.remote.azure.azure_network_services import AzureNetworkService
 
 from mlos_bench.tests.services.remote.azure import make_httplib_json_response
@@ -87,3 +88,25 @@ def test_network_operation_status(mock_requests: MagicMock,
         (status, _) = operation({}) if accepts_params else operation()
     (status, _) = operation({"vnetName": "test-vnet"}) if accepts_params else operation()
     assert status == operation_status
+
+
+@pytest.fixture
+def test_azure_network_service_no_deployment_template(azure_auth_service: AzureAuthService) -> None:
+    """
+    Tests creating a network services without a deployment template (should fail).
+    """
+    with pytest.raises(ValueError):
+        _ = AzureNetworkService(config={
+            "deploymentTemplatePath": None,
+            "deploymentTemplateParameters": {
+                "location": "westus2",
+            },
+        }, parent=azure_auth_service)
+
+    with pytest.raises(ValueError):
+        _ = AzureNetworkService(config={
+            # "deploymentTemplatePath": None,
+            "deploymentTemplateParameters": {
+                "location": "westus2",
+            },
+        }, parent=azure_auth_service)
