@@ -73,9 +73,6 @@ def _optimization_loop(*,
     trial_config_repeat_count : int
         How many trials to repeat for the same configuration.
     """
-    if trial_config_repeat_count <= 0:
-        raise ValueError(f"Invalid trial_config_repeat_count: {trial_config_repeat_count}")
-
     if _LOG.isEnabledFor(logging.INFO):
         _LOG.info("Root Environment:\n%s", env.pprint())
 
