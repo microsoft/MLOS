@@ -79,10 +79,6 @@ def _optimization_loop(*,
     if _LOG.isEnabledFor(logging.INFO):
         _LOG.info("Root Environment:\n%s", env.pprint())
 
-    experiment_id = global_config["experiment_id"].strip()
-    trial_id = int(global_config["trial_id"])
-    config_id = int(global_config.get("config_id", -1))
-
     # Start new or resume the existing experiment. Verify that the
     # experiment configuration is compatible with the previous runs.
     # If the `merge` config parameter is present, merge in the data
@@ -90,8 +86,8 @@ def _optimization_loop(*,
     with env as env_context, \
          opt as opt_context, \
          storage.experiment(
-            experiment_id=experiment_id,
-            trial_id=trial_id,
+            experiment_id=global_config["experiment_id"].strip(),
+            trial_id=int(global_config["trial_id"]),
             root_env_config=root_env_config,
             description=env.name,
             tunables=env.tunable_params,
@@ -110,6 +106,7 @@ def _optimization_loop(*,
         else:
             _LOG.warning("Skip pending trials and warm-up: %s", opt)
 
+        config_id = int(global_config.get("config_id", -1))
         if config_id > 0:
             tunables = _load_config(exp, env_context, config_id)
             last_trial_id = _schedule_trial(exp, opt_context, tunables,
