@@ -23,7 +23,7 @@ from mlos_bench.run import _optimization_loop
             "--config", "mlos_bench/mlos_bench/tests/config/cli/mock-opt.jsonc",
             "--trial_config_repeat_count", "3",
             "--max_iterations", "3",
-        ], 64.8847),
+        ], 64.2758),
     ]
 )
 def test_main_bench(argv: List[str], expected_score: float) -> None:

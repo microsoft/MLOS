@@ -99,7 +99,7 @@ def _optimization_loop(*,
             # Complete trials that are pending or in-progress.
             _scheduler(exp, env_context, global_config, running=True)
             # Load past trials data into the optimizer
-            _optimizer(exp, opt_context, is_warm_up=True)
+            last_trial_id = _optimizer(exp, opt_context, is_warm_up=True)
         else:
             _LOG.warning("Skip pending trials and warm-up: %s", opt)
 
@@ -113,7 +113,7 @@ def _optimization_loop(*,
             # TODO: In the future, _scheduler and _optimizer
             # can be run in parallel in two independent loops.
             _scheduler(exp, env_context, global_config)
-            _optimizer(exp, opt_context, last_trial_id, trial_config_repeat_count)
+            last_trial_id = _optimizer(exp, opt_context, last_trial_id, trial_config_repeat_count)
 
         if do_teardown:
             env_context.teardown()
