@@ -99,23 +99,21 @@ def _optimization_loop(*,
             # Complete trials that are pending or in-progress.
             _scheduler(exp, env_context, global_config, running=True)
             # Load past trials data into the optimizer
-            last_trial_id = _optimizer(exp, opt_context, is_warm_up=True)
+            _optimizer(exp, opt_context, is_warm_up=True)
         else:
             _LOG.warning("Skip pending trials and warm-up: %s", opt)
 
         config_id = int(global_config.get("config_id", -1))
         if config_id > 0:
             tunables = _load_config(exp, env_context, config_id)
-            last_trial_id = _schedule_trial(exp, opt_context, tunables,
-                                            trial_config_repeat_count)
+            _schedule_trial(exp, opt_context, tunables, trial_config_repeat_count)
 
         # Now run new trials until the optimizer is done.
         while opt_context.not_converged():
             # TODO: In the future, _scheduler and _optimizer
             # can be run in parallel in two independent loops.
             _scheduler(exp, env_context, global_config)
-            last_trial_id = _optimizer(exp, opt_context, last_trial_id,
-                                       trial_config_repeat_count)
+            _optimizer(exp, opt_context, last_trial_id, trial_config_repeat_count)
 
         if do_teardown:
             env_context.teardown()
@@ -154,20 +152,22 @@ def _optimizer(exp: Storage.Experiment, opt_context: Optimizer,
     """
     Optimizer part of the loop. Load the results of the executed trials
     into the optimizer, suggest new configurations, and add them to the queue.
+    Return the last trial ID processed by the optimizer.
     """
-    (configs, scores, status) = exp.load(last_trial_id - 1)
+    (trial_ids, configs, scores, status) = exp.load(last_trial_id)
     opt_context.bulk_register(configs, scores, status, is_warm_up)
 
     tunables = opt_context.suggest()
-    return _schedule_trial(exp, opt_context, tunables, trial_config_repeat_count)
+    _schedule_trial(exp, opt_context, tunables, trial_config_repeat_count)
+
+    return max(trial_ids, default=last_trial_id)
 
 
 def _schedule_trial(exp: Storage.Experiment, opt: Optimizer,
-                    tunables: TunableGroups, trial_config_repeat_count: int = 1) -> int:
+                    tunables: TunableGroups, trial_config_repeat_count: int = 1) -> None:
     """
     Add a configuration to the queue of trials.
     """
-    last_trial_id = -1
     for repeat_i in range(1, trial_config_repeat_count + 1):
         trial = exp.new_trial(tunables, config={
             # Add some additional metadata to track for the trial such as the
@@ -185,9 +185,6 @@ def _schedule_trial(exp: Storage.Experiment, opt: Optimizer,
             "repeat_i": repeat_i,
             "is_defaults": tunables.is_defaults,
         })
-        last_trial_id = trial.trial_id
-
-    return last_trial_id
 
 
 def _run_trial(env: Environment, trial: Storage.Trial,

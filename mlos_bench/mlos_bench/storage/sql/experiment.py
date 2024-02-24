@@ -124,9 +124,10 @@ class Experiment(Storage.Experiment):
 
     def load(self,
              last_trial_id: int = -1,
-             opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
+             opt_target: Optional[str] = None
+             ) -> Tuple[List[int], List[dict], List[Optional[float]], List[Status]]:
         opt_target = opt_target or self._opt_target
-        (configs, scores, status) = ([], [], [])
+        (trial_ids, configs, scores, status) = ([], [], [], [])
         with self._engine.connect() as conn:
             cur_trials = conn.execute(
                 self._schema.trial.select().with_only_columns(
@@ -154,10 +155,11 @@ class Experiment(Storage.Experiment):
             for trial in cur_trials.fetchall():
                 tunables = self._get_params(
                     conn, self._schema.config_param, config_id=trial.config_id)
+                trial_ids.append(trial.trial_id)
                 configs.append(tunables)
                 scores.append(None if trial.metric_value is None else float(trial.metric_value))
                 status.append(Status[trial.status])
-            return (configs, scores, status)
+            return (trial_ids, configs, scores, status)
 
     @staticmethod
     def _get_params(conn: Connection, table: Table, **kwargs: Any) -> Dict[str, Any]:
