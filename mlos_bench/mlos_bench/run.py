@@ -169,7 +169,7 @@ def _schedule_trial(exp: Storage.Experiment, opt: Optimizer,
     Add a configuration to the queue of trials.
     """
     for repeat_i in range(1, trial_config_repeat_count + 1):
-        trial = exp.new_trial(tunables, config={
+        exp.new_trial(tunables, config={
             # Add some additional metadata to track for the trial such as the
             # optimizer config used.
             # Note: these values are unfortunately mutable at the moment.
