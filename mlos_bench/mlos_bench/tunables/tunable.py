@@ -11,6 +11,8 @@ import logging
 
 from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Type, TypedDict, Union
 
+import numpy as np
+
 _LOG = logging.getLogger(__name__)
 
 
@@ -554,17 +556,54 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._range
 
     @property
+    def span(self) -> Union[int, float]:
+        """
+        Gets the span of the range.
+
+        Note: this does not take quantization into account.
+
+        Returns
+        -------
+        Union[int, float]
+            Either count of the number of elements (categorical) or max - min.
+        """
+        if self.is_categorical:
+            return len(self.categories)
+        assert self.is_numerical
+        return self._range[1] - self._range[0]
+
+    @property
     def quantization(self) -> Optional[Union[int, float]]:
         """
-        Get the number of quantization points, if specified.
+        Get the quantization factor, if specified.
 
         Returns
         -------
         quantization : int, float, None
-            Number of quantization points or None.
+            The quantization factor, or None.
         """
+        if self.is_categorical:
+            return None
         assert self.is_numerical
         return self._quantization
+
+    @property
+    def cardinality(self) -> Union[int, np.inf]:
+        """
+        Gets the cardinality of elements in this tunable, or else infinity.
+
+        If the tunable has quantization set, this
+
+        Returns
+        -------
+        cardinality :
+            Either the number of points in the
+        """
+        if not self.quantization:
+            if self.type == "float":
+                return np.inf
+            return self.span
+        return int(self.span / self.quantization)
 
     @property
     def is_log(self) -> Optional[bool]:
