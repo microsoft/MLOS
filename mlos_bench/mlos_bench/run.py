@@ -97,9 +97,9 @@ def _optimization_loop(*,
         last_trial_id = -1
         if opt_context.supports_preload:
             # Complete trials that are pending or in-progress.
-            _scheduler(exp, env_context, global_config, running=True)
+            _run_schedule(exp, env_context, global_config, running=True)
             # Load past trials data into the optimizer
-            last_trial_id = _optimizer(exp, opt_context, is_warm_up=True)
+            last_trial_id = _get_optimizer_suggestions(exp, opt_context, is_warm_up=True)
         else:
             _LOG.warning("Skip pending trials and warm-up: %s", opt)
 
@@ -112,8 +112,8 @@ def _optimization_loop(*,
         while opt_context.not_converged():
             # TODO: In the future, _scheduler and _optimizer
             # can be run in parallel in two independent loops.
-            _scheduler(exp, env_context, global_config)
-            last_trial_id = _optimizer(exp, opt_context, last_trial_id, trial_config_repeat_count)
+            _run_schedule(exp, env_context, global_config)
+            last_trial_id = _get_optimizer_suggestions(exp, opt_context, last_trial_id, trial_config_repeat_count)
 
         if do_teardown:
             env_context.teardown()
@@ -137,8 +137,8 @@ def _load_config(exp: Storage.Experiment, env_context: Environment,
     return tunables
 
 
-def _scheduler(exp: Storage.Experiment, env_context: Environment,
-               global_config: Dict[str, Any], running: bool = False) -> None:
+def _run_schedule(exp: Storage.Experiment, env_context: Environment,
+                  global_config: Dict[str, Any], running: bool = False) -> None:
     """
     Scheduler part of the loop. Check for pending trials in the queue and run them.
     """
@@ -146,9 +146,9 @@ def _scheduler(exp: Storage.Experiment, env_context: Environment,
         _run_trial(env_context, trial, global_config)
 
 
-def _optimizer(exp: Storage.Experiment, opt_context: Optimizer,
-               last_trial_id: int = -1, trial_config_repeat_count: int = 1,
-               is_warm_up: bool = False) -> int:
+def _get_optimizer_suggestions(exp: Storage.Experiment, opt_context: Optimizer,
+                               last_trial_id: int = -1, trial_config_repeat_count: int = 1,
+                               is_warm_up: bool = False) -> int:
     """
     Optimizer part of the loop. Load the results of the executed trials
     into the optimizer, suggest new configurations, and add them to the queue.
