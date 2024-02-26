@@ -64,14 +64,14 @@ def test_exp_trial_configs(exp_storage: Storage.Experiment,
     assert set(pending_ids) == {trials1[0].tunable_config_id, trials2[0].tunable_config_id}
 
 
-def test_exp_trial_no_config(exp_storage_no_tunables: Storage.Experiment) -> None:
+def test_exp_trial_no_config(exp_no_tunables_storage: Storage.Experiment) -> None:
     """
     Schedule a trial that has an empty tunable groups config.
     """
     empty_config: dict = {}
     tunable_groups = TunableGroups(config=empty_config)
-    trial = exp_storage_no_tunables.new_trial(tunable_groups, config=empty_config)
-    (pending,) = exp_storage_no_tunables.pending_trials(datetime.utcnow(), running=True)
+    trial = exp_no_tunables_storage.new_trial(tunable_groups, config=empty_config)
+    (pending,) = exp_no_tunables_storage.pending_trials(datetime.utcnow(), running=True)
     assert pending.trial_id == trial.trial_id
     assert pending.tunables == tunable_groups
     assert pending.config() == {
