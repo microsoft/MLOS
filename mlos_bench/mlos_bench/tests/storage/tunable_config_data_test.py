@@ -25,6 +25,15 @@ def test_trial_data_tunable_config_data(exp_data: ExperimentData,
     assert trial.tunable_config_trial_group.tunable_config == tunable_config
 
 
+def test_trial_data_no_tunables_config_data(exp_no_tunables_data: ExperimentData) -> None:
+    """
+    Check expected return values for TunableConfigData.
+    """
+    empty_config: dict = {}
+    for _trial_id, trial in exp_no_tunables_data.trials.items():
+        assert trial.tunable_config.config_dict == empty_config
+
+
 def test_mixed_numerics_exp_trial_data(
         mixed_numerics_exp_data: ExperimentData,
         mixed_numerics_tunable_groups: TunableGroups) -> None:

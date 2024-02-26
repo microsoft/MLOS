@@ -8,7 +8,7 @@ Test fixtures for mlos_bench storage.
 
 from datetime import datetime
 from random import random, seed as rand_seed
-from typing import Generator
+from typing import Generator, Optional
 
 import pytest
 
@@ -64,7 +64,7 @@ def exp_storage(
 
 
 @pytest.fixture
-def exp_storage_no_tunables(
+def exp_no_tunables_storage(
     storage: SqlStorage,
 ) -> Generator[SqlStorage.Experiment, None, None]:
     """
@@ -75,10 +75,10 @@ def exp_storage_no_tunables(
     opt_direction = "min"
     empty_config: dict = {}
     with storage.experiment(
-        experiment_id="Test-001",
+        experiment_id="Test-003",
         trial_id=1,
         root_env_config="environment.jsonc",
-        description="pytest experiment",
+        description="pytest experiment - no tunables",
         tunables=TunableGroups(empty_config),
         opt_target=opt_target,
         opt_direction=opt_direction,
@@ -113,17 +113,18 @@ def mixed_numerics_exp_storage(
     assert not exp._in_context
 
 
-def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: str) -> SqlStorage.Experiment:
+def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: Optional[str]) -> SqlStorage.Experiment:
     """
     Generates data by doing a simulated run of the given experiment.
     """
     # Add some trials to that experiment.
     # Note: we're just fabricating some made up function for the ML libraries to try and learn.
     base_score = 10.0
-    tunable = exp.tunables.get_tunable(tunable_name)[0]
-    assert isinstance(tunable.default, int)
-    (tunable_min, tunable_max) = tunable.range
-    tunable_range = tunable_max - tunable_min
+    if tunable_name:
+        tunable = exp.tunables.get_tunable(tunable_name)[0]
+        assert isinstance(tunable.default, int)
+        (tunable_min, tunable_max) = tunable.range
+        tunable_range = tunable_max - tunable_min
     rand_seed(SEED)
     opt = MockOptimizer(tunables=exp.tunables, config={
         "seed": SEED,
@@ -140,9 +141,15 @@ def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: str) -> SqlStorage.
                 "opt_direction": exp.opt_direction,
                 "trial_number": config_i * CONFIG_TRIAL_REPEAT_COUNT + repeat_j + 1,
             })
-            assert trial.tunable_config_id == config_i + 1
-            tunable_value = float(tunables.get_tunable(tunable_name)[0].numerical_value)
-            tunable_value_norm = base_score * (tunable_value - tunable_min) / tunable_range
+            if exp.tunables:
+                assert trial.tunable_config_id == config_i + 1
+            else:
+                assert trial.tunable_config_id == 1
+            if tunable_name:
+                tunable_value = float(tunables.get_tunable(tunable_name)[0].numerical_value)
+                tunable_value_norm = base_score * (tunable_value - tunable_min) / tunable_range
+            else:
+                tunable_value_norm = 0
             timestamp = datetime.utcnow()
             trial.update_telemetry(status=Status.RUNNING, timestamp=timestamp, metrics=[
                 (timestamp, "some-metric", tunable_value_norm + random() / 100),
@@ -164,6 +171,15 @@ def exp_storage_with_trials(exp_storage: SqlStorage.Experiment) -> SqlStorage.Ex
 
 
 @pytest.fixture
+def exp_no_tunables_storage_with_trials(exp_no_tunables_storage: SqlStorage.Experiment) -> SqlStorage.Experiment:
+    """
+    Test fixture for Experiment using in-memory SQLite3 storage.
+    """
+    assert not exp_no_tunables_storage.tunables
+    return _dummy_run_exp(exp_no_tunables_storage, tunable_name=None)
+
+
+@pytest.fixture
 def mixed_numerics_exp_storage_with_trials(mixed_numerics_exp_storage: SqlStorage.Experiment) -> SqlStorage.Experiment:
     """
     Test fixture for Experiment using in-memory SQLite3 storage.
@@ -178,6 +194,14 @@ def exp_data(storage: SqlStorage, exp_storage_with_trials: SqlStorage.Experiment
     Test fixture for ExperimentData.
     """
     return storage.experiments[exp_storage_with_trials.experiment_id]
+
+
+@pytest.fixture
+def exp_no_tunables_data(storage: SqlStorage, exp_no_tunables_storage_with_trials: SqlStorage.Experiment) -> ExperimentData:
+    """
+    Test fixture for ExperimentData with no tunable configs.
+    """
+    return storage.experiments[exp_no_tunables_storage_with_trials.experiment_id]
 
 
 @pytest.fixture
