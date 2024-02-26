@@ -47,17 +47,10 @@ class MlosCoreOptimizer(Optimizer):
                  service: Optional[Service] = None):
         super().__init__(tunables, config, global_config, service)
 
-        seed = config.get("seed")
-        seed = None if seed is None else int(seed)
-
-        space = tunable_groups_to_configspace(tunables, seed)
-        _LOG.debug("ConfigSpace: %s", space)
-
         opt_type = getattr(OptimizerType, self._config.pop(
             'optimizer_type', DEFAULT_OPTIMIZER_TYPE.name))
 
         if opt_type == OptimizerType.SMAC:
-
             output_directory = self._config.get('output_directory')
             if output_directory is not None:
                 # If output_directory is specified, turn it into an absolute path.
@@ -81,7 +74,7 @@ class MlosCoreOptimizer(Optimizer):
             space_adapter_type = getattr(SpaceAdapterType, space_adapter_type)
 
         self._opt: BaseOptimizer = OptimizerFactory.create(
-            parameter_space=space,
+            parameter_space=self._config_space,
             optimizer_type=opt_type,
             optimizer_kwargs=self._config,
             space_adapter_type=space_adapter_type,
