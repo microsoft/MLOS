@@ -75,6 +75,6 @@ def test_exp_trial_no_config(exp_no_tunables_storage: Storage.Experiment) -> Non
     assert pending.trial_id == trial.trial_id
     assert pending.tunables == tunable_groups
     assert pending.config() == {
-        "experiment_id": "Test-001",
+        "experiment_id": "Test-003",
         "trial_id": trial.trial_id,
     }
