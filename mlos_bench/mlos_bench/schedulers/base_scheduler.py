@@ -47,6 +47,7 @@ class Scheduler(metaclass=ABCMeta):
         self._trial_id = int(config["trial_id"])
         self._trial_config_repeat_count: int = config.get("trial_config_repeat_count", 1)
         self._do_teardown = bool(config.get("teardown", True))
+        self._last_trial_id = -1
 
         self.experiment: Optional[Storage.Experiment] = None
         self.environment = environment
@@ -97,7 +98,7 @@ class Scheduler(metaclass=ABCMeta):
         self.experiment = None
         return False  # Do not suppress exceptions
 
-    def start(self) -> Tuple[Optional[float], Optional[TunableGroups]]:
+    def start(self) -> None:
         """
         Start the optimization loop.
         """
@@ -107,30 +108,31 @@ class Scheduler(metaclass=ABCMeta):
         if _LOG.isEnabledFor(logging.INFO):
             _LOG.info("Root Environment:\n%s", self.environment.pprint())
 
-            last_trial_id = -1
-            if self.optimizer.supports_preload:
-                # Complete trials that are pending or in-progress.
-                self._run_schedule(running=True)
-                # Load past trials data into the optimizer
-                last_trial_id = self._get_optimizer_suggestions(is_warm_up=True)
-            else:
-                _LOG.warning("Skip pending trials and warm-up: %s", self.optimizer)
+        self._last_trial_id = -1
+        if self.optimizer.supports_preload:
+            # Complete trials that are pending or in-progress.
+            self._run_schedule(running=True)
+            # Load past trials data into the optimizer
+            self._last_trial_id = self._get_optimizer_suggestions(is_warm_up=True)
+        else:
+            _LOG.warning("Skip pending trials and warm-up: %s", self.optimizer)
 
-            config_id = int(self.global_config.get("config_id", -1))
-            if config_id > 0:
-                tunables = self._load_config(config_id)
-                self._schedule_trial(tunables)
+        config_id = int(self.global_config.get("config_id", -1))
+        if config_id > 0:
+            tunables = self._load_config(config_id)
+            self._schedule_trial(tunables)
 
-            # Now run new trials until the optimizer is done.
-            while self.optimizer.not_converged():
-                # TODO: In the future, _scheduler and _optimizer
-                # can be run in parallel in two independent loops.
-                self._run_schedule()
-                last_trial_id = self._get_optimizer_suggestions(last_trial_id)
+        # Now run new trials until the optimizer is done.
+        while self.optimizer.not_converged():
+            # TODO: In the future, _scheduler and _optimizer
+            # can be run in parallel in two independent loops.
+            self._run_schedule()
+            self._last_trial_id = self._get_optimizer_suggestions(self._last_trial_id)
 
-            if self._do_teardown:
-                self.environment.teardown()
+        if self._do_teardown:
+            self.environment.teardown()
 
+    def get_best_observation(self) -> Tuple[Optional[float], Optional[TunableGroups]]:
         (best_score, best_config) = self.optimizer.get_best_observation()
         _LOG.info("Env: %s best score: %s", self.environment, best_score)
         return (best_score, best_config)
@@ -194,23 +196,9 @@ class Scheduler(metaclass=ABCMeta):
         for trial in self.experiment.pending_trials(datetime.utcnow(), running=running):
             self._run_trial(trial)
 
-    def _run_trial(self, trial: Storage.Trial) -> Tuple[Status, Optional[Dict[str, float]]]:
+    def _run_trial(self, trial: Storage.Trial) -> None:
         """
-        Run a single trial.
-
-        Parameters
-        ----------
-        env : Environment
-            Benchmarking environment context to run the optimization on.
-        storage : Storage
-            A storage system to persist the experiment data.
-        global_config : dict
-            Global configuration parameters.
-
-        Returns
-        -------
-        (trial_status, trial_score) : (Status, Optional[Dict[str, float]])
-            Status and results of the trial.
+        Set up and run a single trial. Save the results in the storage.
         """
         _LOG.info("Trial: %s", trial)
         assert self.experiment is not None
@@ -219,7 +207,7 @@ class Scheduler(metaclass=ABCMeta):
             _LOG.warning("Setup failed: %s :: %s", self.environment, trial.tunables)
             # FIXME: Use the actual timestamp from the environment.
             trial.update(Status.FAILED, datetime.utcnow())
-            return (Status.FAILED, None)
+            return
 
         (status, timestamp, results) = self.environment.run()  # Block and wait for the final result.
         _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
@@ -233,7 +221,3 @@ class Scheduler(metaclass=ABCMeta):
         trial.update_telemetry(status, timestamp, telemetry)
 
         trial.update(status, timestamp, results)
-        # Filter out non-numeric scores from the optimizer.
-        scores = results if not isinstance(results, dict) \
-            else {k: float(v) for (k, v) in results.items() if isinstance(v, (int, float))}
-        return (status, scores)
