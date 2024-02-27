@@ -51,6 +51,10 @@ class Scheduler(metaclass=ABCMeta):
         assert self.experiment is None
         self.environment.__enter__()
         self.optimizer.__enter__()
+        # Start new or resume the existing experiment. Verify that the
+        # experiment configuration is compatible with the previous runs.
+        # If the `merge` config parameter is present, merge in the data
+        # from other experiments and check for compatibility.
         self.experiment = self.storage.experiment(
             experiment_id=self.global_config["experiment_id"].strip(),
             trial_id=int(self.global_config["trial_id"]),
@@ -82,6 +86,44 @@ class Scheduler(metaclass=ABCMeta):
         self.experiment = None
         return False  # Do not suppress exceptions
 
+    def start(self) -> Tuple[Optional[float], Optional[TunableGroups]]:
+        """
+        Start the optimization loop.
+        """
+        assert self.experiment is not None
+        _LOG.info("START: Experiment: %s Env: %s Optimizer: %s",
+                  self.experiment, self.environment, self.optimizer)
+        if _LOG.isEnabledFor(logging.INFO):
+            _LOG.info("Root Environment:\n%s", self.environment.pprint())
+
+            last_trial_id = -1
+            if self.optimizer.supports_preload:
+                # Complete trials that are pending or in-progress.
+                self._run_schedule(running=True)
+                # Load past trials data into the optimizer
+                last_trial_id = self._get_optimizer_suggestions(is_warm_up=True)
+            else:
+                _LOG.warning("Skip pending trials and warm-up: %s", self.optimizer)
+
+            config_id = int(self.global_config.get("config_id", -1))
+            if config_id > 0:
+                tunables = self._load_config(config_id)
+                self._schedule_trial(tunables)
+
+            # Now run new trials until the optimizer is done.
+            while self.optimizer.not_converged():
+                # TODO: In the future, _scheduler and _optimizer
+                # can be run in parallel in two independent loops.
+                self._run_schedule()
+                last_trial_id = self._get_optimizer_suggestions(last_trial_id)
+
+            if self._do_teardown:
+                self.environment.teardown()
+
+        (best_score, best_config) = self.optimizer.get_best_observation()
+        _LOG.info("Env: %s best score: %s", self.environment, best_score)
+        return (best_score, best_config)
+
     def _load_config(self, config_id: int) -> TunableGroups:
         """
         Load the existing tunable configuration from the storage.
@@ -94,14 +136,6 @@ class Scheduler(metaclass=ABCMeta):
             _LOG.debug("Config %d ::\n%s",
                     config_id, json.dumps(tunable_values, indent=2))
         return tunables
-
-    def _run_schedule(self, running: bool = False) -> None:
-        """
-        Scheduler part of the loop. Check for pending trials in the queue and run them.
-        """
-        assert self.experiment is not None
-        for trial in self.experiment.pending_trials(datetime.utcnow(), running=running):
-            self._run_trial(trial)
 
     def _get_optimizer_suggestions(self, last_trial_id: int = -1, is_warm_up: bool = False) -> int:
         """
@@ -140,6 +174,14 @@ class Scheduler(metaclass=ABCMeta):
                 "repeat_i": repeat_i,
                 "is_defaults": tunables.is_defaults,
             })
+
+    def _run_schedule(self, running: bool = False) -> None:
+        """
+        Scheduler part of the loop. Check for pending trials in the queue and run them.
+        """
+        assert self.experiment is not None
+        for trial in self.experiment.pending_trials(datetime.utcnow(), running=running):
+            self._run_trial(trial)
 
     def _run_trial(self, trial: Storage.Trial) -> Tuple[Status, Optional[Dict[str, float]]]:
         """
