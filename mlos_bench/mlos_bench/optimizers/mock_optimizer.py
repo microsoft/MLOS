@@ -42,15 +42,17 @@ class MockOptimizer(Optimizer):
         self._best_score: Optional[float] = None
 
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
-                      status: Optional[Sequence[Status]] = None) -> bool:
-        if not super().bulk_register(configs, scores, status):
+                      status: Optional[Sequence[Status]] = None, is_warm_up: bool = False) -> bool:
+        if not super().bulk_register(configs, scores, status, is_warm_up):
             return False
         if status is None:
             status = [Status.SUCCEEDED] * len(configs)
         for (params, score, trial_status) in zip(configs, scores, status):
             tunables = self._tunables.copy().assign(params)
             self.register(tunables, trial_status, None if score is None else float(score))
-            self._iter -= 1  # Do not advance the iteration counter during warm-up.
+            if is_warm_up:
+                # Do not advance the iteration counter during warm-up.
+                self._iter -= 1
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
             _LOG.debug("Warm-up end: %s = %s", self.target, score)

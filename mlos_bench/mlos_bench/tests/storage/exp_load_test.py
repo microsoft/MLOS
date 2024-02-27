@@ -18,7 +18,8 @@ def test_exp_load_empty(exp_storage: Storage.Experiment) -> None:
     """
     Try to retrieve old experimental data from the empty storage.
     """
-    (configs, scores, status) = exp_storage.load()
+    (trial_ids, configs, scores, status) = exp_storage.load()
+    assert not trial_ids
     assert not configs
     assert not scores
     assert not status
@@ -93,6 +94,7 @@ def test_exp_trial_update_categ(exp_storage: Storage.Experiment,
     trial = exp_storage.new_trial(tunable_groups)
     trial.update(Status.SUCCEEDED, datetime.utcnow(), {"score": 99.9, "benchmark": "test"})
     assert exp_storage.load() == (
+        [trial.trial_id],
         [{
             'idle': 'halt',
             'kernel_sched_latency_ns': '2000000',
@@ -133,7 +135,8 @@ def test_exp_trial_pending_3(exp_storage: Storage.Experiment,
     (pending,) = list(exp_storage.pending_trials(datetime.utcnow(), running=True))
     assert pending.trial_id == trial_pend.trial_id
 
-    (configs, scores, status) = exp_storage.load()
+    (trial_ids, configs, scores, status) = exp_storage.load()
+    assert trial_ids == [trial_fail.trial_id, trial_succ.trial_id]
     assert len(configs) == 2
     assert scores == [None, score]
     assert status == [Status.FAILED, Status.SUCCEEDED]

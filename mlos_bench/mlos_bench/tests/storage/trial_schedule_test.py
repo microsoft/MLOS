@@ -72,14 +72,14 @@ def test_schedule_trial(exp_storage: Storage.Experiment,
     # Optimizer side: get trials completed after some known trial:
 
     # No completed trials yet:
-    assert exp_storage.load() == ([], [], [])
+    assert exp_storage.load() == ([], [], [], [])
 
     # Update the status of some trials:
     trial_now1.update(Status.RUNNING, timestamp + timedelta_1min)
     trial_now2.update(Status.RUNNING, timestamp + timedelta_1min)
 
     # Still no completed trials:
-    assert exp_storage.load() == ([], [], [])
+    assert exp_storage.load() == ([], [], [], [])
 
     # Get trials scheduled to run within the next 3 hours:
     pending_ids = _trial_ids(
@@ -107,11 +107,13 @@ def test_schedule_trial(exp_storage: Storage.Experiment,
     trial_1h.update(Status.SUCCEEDED, timestamp + timedelta_1hr * 2, metrics={"score": 1.0})
 
     # Check that three trials have completed so far:
-    (trial_configs, _scores, trial_status) = exp_storage.load()
-    assert len(trial_configs) == 3
+    (trial_ids, trial_configs, trial_scores, trial_status) = exp_storage.load()
+    assert trial_ids == [trial_now1.trial_id, trial_now2.trial_id, trial_1h.trial_id]
+    assert len(trial_configs) == len(trial_scores) == 3
     assert trial_status == [Status.SUCCEEDED, Status.FAILED, Status.SUCCEEDED]
 
     # Get only trials completed after trial_now2:
-    (trial_configs, _scores, trial_status) = exp_storage.load(last_trial_id=trial_now2.trial_id)
-    assert len(trial_configs) == 1
+    (trial_ids, trial_configs, trial_scores, trial_status) = exp_storage.load(last_trial_id=trial_now2.trial_id)
+    assert trial_ids == [trial_1h.trial_id]
+    assert len(trial_configs) == len(trial_scores) == 1
     assert trial_status == [Status.SUCCEEDED]

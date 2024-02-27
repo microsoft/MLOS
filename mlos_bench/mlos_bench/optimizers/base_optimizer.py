@@ -195,7 +195,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
 
     @abstractmethod
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
-                      status: Optional[Sequence[Status]] = None) -> bool:
+                      status: Optional[Sequence[Status]] = None, is_warm_up: bool = False) -> bool:
         """
         Pre-load the optimizer with the bulk data from previous experiments.
 
@@ -207,13 +207,16 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             Benchmark results from experiments that correspond to `configs`.
         status : Optional[Sequence[float]]
             Status of the experiments that correspond to `configs`.
+        is_warm_up : bool
+            True for the initial load, False for subsequent calls.
 
         Returns
         -------
         is_not_empty : bool
             True if there is data to register, false otherwise.
         """
-        _LOG.info("Warm-up the optimizer with: %d configs, %d scores, %d status values",
+        _LOG.info("%s the optimizer with: %d configs, %d scores, %d status values",
+                  "Warm-up" if is_warm_up else "Load",
                   len(configs or []), len(scores or []), len(status or []))
         if len(configs or []) != len(scores or []):
             raise ValueError("Numbers of configs and scores do not match.")

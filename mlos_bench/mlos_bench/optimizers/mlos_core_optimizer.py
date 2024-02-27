@@ -99,8 +99,8 @@ class MlosCoreOptimizer(Optimizer):
         return f"{self.__class__.__name__}:{self._opt.__class__.__name__}"
 
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
-                      status: Optional[Sequence[Status]] = None) -> bool:
-        if not super().bulk_register(configs, scores, status):
+                      status: Optional[Sequence[Status]] = None, is_warm_up: bool = False) -> bool:
+        if not super().bulk_register(configs, scores, status, is_warm_up):
             return False
         df_configs = self._to_df(configs)  # Impute missing values, if necessary
         df_scores = pd.Series(scores, dtype=float) * self._opt_sign
@@ -111,6 +111,8 @@ class MlosCoreOptimizer(Optimizer):
             df_configs = df_configs[df_status_completed]
             df_scores = df_scores[df_status_completed]
         self._opt.register(df_configs, df_scores)
+        if not is_warm_up:
+            self._iter += len(df_scores)
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
             _LOG.debug("Warm-up end: %s = %s", self.target, score)
