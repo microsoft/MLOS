@@ -1,0 +1,186 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
+"""
+Base class for the optimization loop scheduling policies.
+"""
+
+import json
+import logging
+from datetime import datetime
+
+from abc import ABCMeta, abstractmethod
+from types import TracebackType
+from typing import Any, Dict, Optional, Tuple, Type
+from typing_extensions import Literal
+
+from mlos_bench.environments.base_environment import Environment
+from mlos_bench.environments.status import Status
+from mlos_bench.optimizers.base_optimizer import Optimizer
+from mlos_bench.storage.base_storage import Storage
+from mlos_bench.tunables.tunable_groups import TunableGroups
+
+_LOG = logging.getLogger(__name__)
+
+
+class Scheduler(metaclass=ABCMeta):
+
+    def __init__(self, *,
+                 environment: Environment,
+                 optimizer: Optimizer,
+                 storage: Storage,
+                 root_env_config: str,
+                 global_config: Dict[str, Any]):
+        """"
+        Initialize the scheduler.
+        """
+        self.environment = environment
+        self.optimizer = optimizer
+        self.storage = storage
+        self.root_env_config = root_env_config
+        self.global_config = global_config
+        self.experiment: Optional[Storage.Experiment] = None
+        self._trial_config_repeat_count = 1  # TODO: Make this configurable.
+
+    def __enter__(self) -> 'Scheduler':
+        """
+        Enter the scheduler's context.
+        """
+        _LOG.debug("Optimizer START :: %s", self)
+        assert self.experiment is None
+        self.environment.__enter__()
+        self.optimizer.__enter__()
+        self.experiment = self.storage.experiment(
+            experiment_id=self.global_config["experiment_id"].strip(),
+            trial_id=int(self.global_config["trial_id"]),
+            root_env_config=self.root_env_config,
+            description=self.environment.name,
+            tunables=self.environment.tunable_params,
+            opt_target=self.optimizer.target,
+            opt_direction=self.optimizer.direction,
+         ).__enter__()
+        self._in_context = True
+        return self
+
+    def __exit__(self,
+                 ex_type: Optional[Type[BaseException]],
+                 ex_val: Optional[BaseException],
+                 ex_tb: Optional[TracebackType]) -> Literal[False]:
+        """
+        Exit the context of the scheduler.
+        """
+        if ex_val is None:
+            _LOG.debug("Scheduler END :: %s", self)
+        else:
+            assert ex_type and ex_val
+            _LOG.warning("Scheduler END :: %s", self, exc_info=(ex_type, ex_val, ex_tb))
+        assert self.experiment is not None
+        self.experiment.__exit__(ex_type, ex_val, ex_tb)
+        self.optimizer.__exit__(ex_type, ex_val, ex_tb)
+        self.environment.__exit__(ex_type, ex_val, ex_tb)
+        self.experiment = None
+        return False  # Do not suppress exceptions
+
+    def _load_config(self, config_id: int) -> TunableGroups:
+        """
+        Load the existing tunable configuration from the storage.
+        """
+        assert self.experiment is not None
+        tunable_values = self.experiment.load_tunable_config(config_id)
+        tunables = self.environment.tunable_params.assign(tunable_values)
+        _LOG.info("Load config from storage: %d", config_id)
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("Config %d ::\n%s",
+                    config_id, json.dumps(tunable_values, indent=2))
+        return tunables
+
+    def _run_schedule(self, running: bool = False) -> None:
+        """
+        Scheduler part of the loop. Check for pending trials in the queue and run them.
+        """
+        assert self.experiment is not None
+        for trial in self.experiment.pending_trials(datetime.utcnow(), running=running):
+            self._run_trial(trial)
+
+    def _get_optimizer_suggestions(self, last_trial_id: int = -1, is_warm_up: bool = False) -> int:
+        """
+        Optimizer part of the loop. Load the results of the executed trials
+        into the optimizer, suggest new configurations, and add them to the queue.
+        Return the last trial ID processed by the optimizer.
+        """
+        assert self.experiment is not None
+        (trial_ids, configs, scores, status) = self.experiment.load(last_trial_id)
+        self.optimizer.bulk_register(configs, scores, status, is_warm_up)
+
+        tunables = self.optimizer.suggest()
+        self._schedule_trial(tunables)
+
+        return max(trial_ids, default=last_trial_id)
+
+    def _schedule_trial(self, tunables: TunableGroups) -> None:
+        """
+        Add a configuration to the queue of trials.
+        """
+        assert self.experiment is not None
+        for repeat_i in range(1, self._trial_config_repeat_count + 1):
+            self.experiment.new_trial(tunables, config={
+                # Add some additional metadata to track for the trial such as the
+                # optimizer config used.
+                # Note: these values are unfortunately mutable at the moment.
+                # Consider them as hints of what the config was the trial *started*.
+                # It is possible that the experiment configs were changed
+                # between resuming the experiment (since that is not currently
+                # prevented).
+                # TODO: Improve for supporting multi-objective
+                # (e.g., opt_target_1, opt_target_2, ... and opt_direction_1, opt_direction_2, ...)
+                "optimizer": self.optimizer.name,
+                "opt_target": self.optimizer.target,
+                "opt_direction": self.optimizer.direction,
+                "repeat_i": repeat_i,
+                "is_defaults": tunables.is_defaults,
+            })
+
+    def _run_trial(self, trial: Storage.Trial) -> Tuple[Status, Optional[Dict[str, float]]]:
+        """
+        Run a single trial.
+
+        Parameters
+        ----------
+        env : Environment
+            Benchmarking environment context to run the optimization on.
+        storage : Storage
+            A storage system to persist the experiment data.
+        global_config : dict
+            Global configuration parameters.
+
+        Returns
+        -------
+        (trial_status, trial_score) : (Status, Optional[Dict[str, float]])
+            Status and results of the trial.
+        """
+        _LOG.info("Trial: %s", trial)
+        assert self.experiment is not None
+
+        if not self.environment.setup(trial.tunables, trial.config(self.global_config)):
+            _LOG.warning("Setup failed: %s :: %s", self.environment, trial.tunables)
+            # FIXME: Use the actual timestamp from the environment.
+            trial.update(Status.FAILED, datetime.utcnow())
+            return (Status.FAILED, None)
+
+        (status, timestamp, results) = self.environment.run()  # Block and wait for the final result.
+        _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
+
+        # In async mode (TODO), poll the environment for status and telemetry
+        # and update the storage with the intermediate results.
+        (_status, _timestamp, telemetry) = self.environment.status()
+
+        # Use the status and timestamp from `.run()` as it is the final status of the experiment.
+        # TODO: Use the `.status()` output in async mode.
+        trial.update_telemetry(status, timestamp, telemetry)
+
+        trial.update(status, timestamp, results)
+        # Filter out non-numeric scores from the optimizer.
+        scores = results if not isinstance(results, dict) \
+            else {k: float(v) for (k, v) in results.items() if isinstance(v, (int, float))}
+        return (status, scores)
