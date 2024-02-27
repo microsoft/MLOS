@@ -195,7 +195,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
 
     @abstractmethod
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
-                      status: Optional[Sequence[Status]] = None, is_warm_up: bool = True) -> bool:
+                      status: Optional[Sequence[Status]] = None, is_warm_up: bool = False) -> bool:
         """
         Pre-load the optimizer with the bulk data from previous experiments.
 

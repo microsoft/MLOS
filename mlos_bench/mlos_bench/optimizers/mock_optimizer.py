@@ -42,7 +42,7 @@ class MockOptimizer(Optimizer):
         self._best_score: Optional[float] = None
 
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
-                      status: Optional[Sequence[Status]] = None, is_warm_up: bool = True) -> bool:
+                      status: Optional[Sequence[Status]] = None, is_warm_up: bool = False) -> bool:
         if not super().bulk_register(configs, scores, status, is_warm_up):
             return False
         if status is None:

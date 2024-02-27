@@ -99,7 +99,7 @@ class MlosCoreOptimizer(Optimizer):
         return f"{self.__class__.__name__}:{self._opt.__class__.__name__}"
 
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
-                      status: Optional[Sequence[Status]] = None, is_warm_up: bool = True) -> bool:
+                      status: Optional[Sequence[Status]] = None, is_warm_up: bool = False) -> bool:
         if not super().bulk_register(configs, scores, status, is_warm_up):
             return False
         df_configs = self._to_df(configs)  # Impute missing values, if necessary
