@@ -20,6 +20,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.util import merge_parameters
 
 _LOG = logging.getLogger(__name__)
 
@@ -27,21 +28,31 @@ _LOG = logging.getLogger(__name__)
 class Scheduler(metaclass=ABCMeta):
 
     def __init__(self, *,
+                 config: Dict[str, Any],
+                 global_config: Dict[str, Any],
                  environment: Environment,
                  optimizer: Optimizer,
                  storage: Storage,
-                 root_env_config: str,
-                 global_config: Dict[str, Any]):
-        """"
-        Initialize the scheduler.
+                 root_env_config: str):
         """
+        Create a new instance of the scheduler. The constructor of this
+        and the derived classes is called by the persistence service
+        after reading the class JSON configuration. Other objects like
+        the Environment and Optimizer are provided by the Launcher.
+        """
+        self.global_config = global_config
+        config = merge_parameters(dest=config.copy(), source=global_config)
+
+        self._experiment_id = config["experiment_id"].strip()
+        self._trial_id = int(config["trial_id"])
+        self._trial_config_repeat_count: int = config.get("trial_config_repeat_count", 1)
+        self._do_teardown = bool(config.get("teardown", True))
+
+        self.experiment: Optional[Storage.Experiment] = None
         self.environment = environment
         self.optimizer = optimizer
         self.storage = storage
-        self.root_env_config = root_env_config
-        self.global_config = global_config
-        self.experiment: Optional[Storage.Experiment] = None
-        self._trial_config_repeat_count = 1  # TODO: Make this configurable.
+        self._root_env_config = root_env_config
 
     def __enter__(self) -> 'Scheduler':
         """
@@ -56,9 +67,9 @@ class Scheduler(metaclass=ABCMeta):
         # If the `merge` config parameter is present, merge in the data
         # from other experiments and check for compatibility.
         self.experiment = self.storage.experiment(
-            experiment_id=self.global_config["experiment_id"].strip(),
-            trial_id=int(self.global_config["trial_id"]),
-            root_env_config=self.root_env_config,
+            experiment_id=self._experiment_id,
+            trial_id=self._trial_id,
+            root_env_config=self._root_env_config,
             description=self.environment.name,
             tunables=self.environment.tunable_params,
             opt_target=self.optimizer.target,
