@@ -27,8 +27,11 @@ def _main(argv: Optional[List[str]] = None) -> Tuple[Optional[float], Optional[T
 
     scheduler = SyncScheduler(
         config={
-            "teardown": launcher.teardown,
+            "experiment_id": "UNDEFINED - override from global config",
+            "trial_id": 0,    # Override from global config
+            "config_id": -1,  # Override from global config
             "trial_config_repeat_count": launcher.trial_config_repeat_count,
+            "teardown": launcher.teardown,
         },
         global_config=launcher.global_config,
         environment=launcher.environment,
