@@ -160,6 +160,7 @@ class Scheduler(metaclass=ABCMeta):
         """
         assert self.experiment is not None
         (trial_ids, configs, scores, status) = self.experiment.load(last_trial_id)
+        _LOG.info("QUEUE: Update the optimizer with trial results: %s", trial_ids)
         self.optimizer.bulk_register(configs, scores, status, is_warm_up)
 
         tunables = self.optimizer.suggest()
@@ -197,7 +198,8 @@ class Scheduler(metaclass=ABCMeta):
         A wrapper for the `Experiment.new_trial` method.
         """
         assert self.experiment is not None
-        self.experiment.new_trial(tunables, ts_start, config)
+        trial = self.experiment.new_trial(tunables, ts_start, config)
+        _LOG.info("QUEUE: Add new trial: %s", trial)
 
     def _run_schedule(self, running: bool = False) -> None:
         """
@@ -211,12 +213,13 @@ class Scheduler(metaclass=ABCMeta):
         """
         Set up and run a single trial. Save the results in the storage.
         """
-        _LOG.info("Trial: %s", trial)
         assert self.experiment is not None
+        _LOG.info("QUEUE: Execute trial: %s", trial)
 
         if not self.environment.setup(trial.tunables, trial.config(self.global_config)):
             _LOG.warning("Setup failed: %s :: %s", self.environment, trial.tunables)
             # FIXME: Use the actual timestamp from the environment.
+            _LOG.info("QUEUE: Update trial results: %s :: %s", trial, Status.FAILED)
             trial.update(Status.FAILED, datetime.utcnow())
             return
 
@@ -232,3 +235,4 @@ class Scheduler(metaclass=ABCMeta):
         trial.update_telemetry(status, timestamp, telemetry)
 
         trial.update(status, timestamp, results)
+        _LOG.info("QUEUE: Update trial results: %s :: %s %s", trial, status, results)
