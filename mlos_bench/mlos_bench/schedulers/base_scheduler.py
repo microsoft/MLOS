@@ -26,6 +26,10 @@ _LOG = logging.getLogger(__name__)
 
 
 class Scheduler(metaclass=ABCMeta):
+    # pylint: disable=too-many-instance-attributes
+    """
+    Base class for the optimization loop scheduling policies.
+    """
 
     def __init__(self, *,
                  config: Dict[str, Any],
@@ -76,7 +80,6 @@ class Scheduler(metaclass=ABCMeta):
             opt_target=self.optimizer.target,
             opt_direction=self.optimizer.direction,
          ).__enter__()
-        self._in_context = True
         return self
 
     def __exit__(self,
@@ -133,6 +136,9 @@ class Scheduler(metaclass=ABCMeta):
             self.environment.teardown()
 
     def get_best_observation(self) -> Tuple[Optional[float], Optional[TunableGroups]]:
+        """
+        Get the best observation from the optimizer.
+        """
         (best_score, best_config) = self.optimizer.get_best_observation()
         _LOG.info("Env: %s best score: %s", self.environment, best_score)
         return (best_score, best_config)
