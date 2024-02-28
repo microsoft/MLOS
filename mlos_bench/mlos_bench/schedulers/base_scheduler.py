@@ -101,6 +101,12 @@ class Scheduler(metaclass=ABCMeta):
         self.experiment = None
         return False  # Do not suppress exceptions
 
+    def context(self) -> 'Scheduler':
+        """
+        Return the current context.
+        """
+        return self
+
     @abstractmethod
     def start(self) -> None:
         """
