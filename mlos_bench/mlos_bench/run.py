@@ -44,8 +44,9 @@ def _main(argv: Optional[List[str]] = None) -> Tuple[Optional[float], Optional[T
     with scheduler.context() as scheduler_context:
         scheduler_context.start()
 
-    result = scheduler.get_best_observation()
-    _LOG.info("Final result: %s", result)
+    (score, _config) = result = scheduler.get_best_observation()
+    # NOTE: This log line is used in test_launch_main_app_* unit tests:
+    _LOG.info("Final score: %s", score)
     return result
 
 
