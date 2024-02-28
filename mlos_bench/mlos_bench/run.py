@@ -25,6 +25,7 @@ def _main(argv: Optional[List[str]] = None) -> Tuple[Optional[float], Optional[T
 
     launcher = Launcher("mlos_bench", "Systems autotuning and benchmarking tool", argv=argv)
 
+    # TODO: Instantiate Scheduler from JSON config
     scheduler = SyncScheduler(
         config={
             "experiment_id": "UNDEFINED - override from global config",
