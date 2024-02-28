@@ -49,6 +49,7 @@ class Scheduler(metaclass=ABCMeta):
 
         self._experiment_id = config["experiment_id"].strip()
         self._trial_id = int(config["trial_id"])
+        self._config_id = int(config.get("config_id", -1))
         self._trial_config_repeat_count: int = config.get("trial_config_repeat_count", 1)
         self._do_teardown = bool(config.get("teardown", True))
         self._last_trial_id = -1
@@ -120,9 +121,8 @@ class Scheduler(metaclass=ABCMeta):
         else:
             _LOG.warning("Skip pending trials and warm-up: %s", self.optimizer)
 
-        config_id = int(self.global_config.get("config_id", -1))
-        if config_id > 0:
-            tunables = self._load_config(config_id)
+        if self._config_id > 0:
+            tunables = self._load_config(self._config_id)
             self._schedule_trial(tunables)
 
         # Now run new trials until the optimizer is done.
@@ -175,9 +175,8 @@ class Scheduler(metaclass=ABCMeta):
         """
         Add a configuration to the queue of trials.
         """
-        assert self.experiment is not None
         for repeat_i in range(1, self._trial_config_repeat_count + 1):
-            self.experiment.new_trial(tunables, config={
+            self._add_trial_to_queue(tunables, config={
                 # Add some additional metadata to track for the trial such as the
                 # optimizer config used.
                 # Note: these values are unfortunately mutable at the moment.
@@ -193,6 +192,16 @@ class Scheduler(metaclass=ABCMeta):
                 "repeat_i": repeat_i,
                 "is_defaults": tunables.is_defaults,
             })
+
+    def _add_trial_to_queue(self, tunables: TunableGroups,
+                            ts_start: Optional[datetime] = None,
+                            config: Optional[Dict[str, Any]] = None) -> None:
+        """
+        Add a configuration to the queue of trials.
+        A wrapper for the `Experiment.new_trial` method.
+        """
+        assert self.experiment is not None
+        self.experiment.new_trial(tunables, ts_start, config)
 
     def _run_schedule(self, running: bool = False) -> None:
         """
