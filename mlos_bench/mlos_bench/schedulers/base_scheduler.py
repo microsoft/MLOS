@@ -52,7 +52,6 @@ class Scheduler(metaclass=ABCMeta):
         self._config_id = int(config.get("config_id", -1))
         self._trial_config_repeat_count: int = config.get("trial_config_repeat_count", 1)
         self._do_teardown = bool(config.get("teardown", True))
-        self._last_trial_id = -1
 
         self.experiment: Optional[Storage.Experiment] = None
         self.environment = environment
@@ -112,25 +111,19 @@ class Scheduler(metaclass=ABCMeta):
         if _LOG.isEnabledFor(logging.INFO):
             _LOG.info("Root Environment:\n%s", self.environment.pprint())
 
-        self._last_trial_id = -1
-        if self.optimizer.supports_preload:
-            # Complete trials that are pending or in-progress.
-            self._run_schedule(running=True)
-            # Load past trials data into the optimizer
-            self._last_trial_id = self._get_optimizer_suggestions(is_warm_up=True)
-        else:
-            _LOG.warning("Skip pending trials and warm-up: %s", self.optimizer)
-
         if self._config_id > 0:
             tunables = self._load_config(self._config_id)
             self._schedule_trial(tunables)
 
-        # Now run new trials until the optimizer is done.
+        last_trial_id = -1
+        is_warm_up = self.optimizer.supports_preload
+        if not is_warm_up:
+            _LOG.warning("Skip pending trials and warm-up: %s", self.optimizer)
+
         while self.optimizer.not_converged():
-            # TODO: In the future, _scheduler and _optimizer
-            # can be run in parallel in two independent loops.
-            self._run_schedule()
-            self._last_trial_id = self._get_optimizer_suggestions(self._last_trial_id)
+            self._run_schedule(is_warm_up)
+            last_trial_id = self._get_optimizer_suggestions(last_trial_id, is_warm_up)
+            is_warm_up = False
 
         if self._do_teardown:
             self.environment.teardown()
