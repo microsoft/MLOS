@@ -101,6 +101,7 @@ class Scheduler(metaclass=ABCMeta):
         self.experiment = None
         return False  # Do not suppress exceptions
 
+    @abstractmethod
     def start(self) -> None:
         """
         Start the optimization loop.
@@ -115,16 +116,12 @@ class Scheduler(metaclass=ABCMeta):
             tunables = self._load_config(self._config_id)
             self._schedule_trial(tunables)
 
-        last_trial_id = -1
-        is_warm_up = self.optimizer.supports_preload
-        if not is_warm_up:
-            _LOG.warning("Skip pending trials and warm-up: %s", self.optimizer)
-
-        while self.optimizer.not_converged():
-            self._run_schedule(is_warm_up)
-            last_trial_id = self._get_optimizer_suggestions(last_trial_id, is_warm_up)
-            is_warm_up = False
-
+    def _teardown(self) -> None:
+        """
+        Tear down the environment.
+        Call this method at the end of the `.start()` implementation (?).
+        """
+        assert self.experiment is not None
         if self._do_teardown:
             self.environment.teardown()
 
