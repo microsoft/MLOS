@@ -81,7 +81,7 @@ def test_launch_main_app_bench(root_path: str, local_exec_service: LocalExecServ
         "--config mlos_bench/mlos_bench/tests/config/cli/mock-bench.jsonc",
         [
             f"^{_RE_DATE} run\\.py:\\d+ " +
-            r"_optimize INFO Env: Mock environment best score: 65\.67\d+\s*$",
+            r"_optimization_loop INFO Env: Mock environment best score: 65\.67\d+\s*$",
         ]
     )
 
@@ -97,15 +97,15 @@ def test_launch_main_app_opt(root_path: str, local_exec_service: LocalExecServic
         [
             # Iteration 1: Expect first value to be the baseline
             f"^{_RE_DATE} mlos_core_optimizer\\.py:\\d+ " +
-            r"register DEBUG Score: 64\.88\d+ Dataframe:\s*$",
+            r"bulk_register DEBUG Warm-up end: score = 64\.88\d+$",
             # Iteration 2: The result may not always be deterministic
             f"^{_RE_DATE} mlos_core_optimizer\\.py:\\d+ " +
-            r"register DEBUG Score: \d+\.\d+ Dataframe:\s*$",
+            r"bulk_register DEBUG Warm-up end: score = \d+\.\d+$",
             # Iteration 3: non-deterministic (depends on the optimizer)
             f"^{_RE_DATE} mlos_core_optimizer\\.py:\\d+ " +
-            r"register DEBUG Score: \d+\.\d+ Dataframe:\s*$",
+            r"bulk_register DEBUG Warm-up end: score = \d+\.\d+$",
             # Final result: baseline is the optimum for the mock environment
             f"^{_RE_DATE} run\\.py:\\d+ " +
-            r"_optimize INFO Env: Mock environment best score: 64\.53\d+\s*$",
+            r"_optimization_loop INFO Env: Mock environment best score: 64\.27\d+\s*$",
         ]
     )
