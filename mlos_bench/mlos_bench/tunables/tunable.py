@@ -587,6 +587,24 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._quantization
 
     @property
+    def quantized_values(self) -> Optional[Union[Sequence[int], Sequence[float]]]:
+        """
+        Get a sequence of quanitized values for this tunable.
+
+        Returns
+        -------
+        Optional[Union[Sequence[int], Sequence[float]]]
+            If the Tunable is quantizable, returns a sequence of those elements,
+            else None (e.g., for unquantized float type tunables).
+        """
+        if self.type == "float":
+            if not self._quantization:
+                return None
+            return np.linspace(start=self._range[0], stop=self._range[1], num=self.cardinality, endpoint=True)
+        assert self.type == "int", f"Unhandled tunable type: {self}"
+        return range(self._range[0], self._range[1] + 1, self._quantization or 1)
+
+    @property
     def cardinality(self) -> Union[int, np.inf]:
         """
         Gets the cardinality of elements in this tunable, or else infinity.
@@ -602,8 +620,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             return len(self.categories)
         if not self.quantization and self.type == "float":
             return np.inf
-        quantization = self.quantization or 1
-        return int(self.span / quantization) + 1
+        q_factor = self.quantization or 1
+        return int(self.span / q_factor) + 1
 
     @property
     def is_log(self) -> Optional[bool]:
@@ -657,6 +675,21 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         assert self.is_categorical
         assert self._values is not None
         return self._values
+
+    @property
+    def values(self) -> Optional[Union[Sequence[Optional[str]], Sequence[int], Sequence[float]]]:
+        """
+        Gets the categories or quantized values for this tunable.
+
+        Returns
+        -------
+        Optional[Union[Sequence[Optional[str]], Sequence[int], Sequence[float]]]
+            Categories or quantized values.
+        """
+        if self.is_categorical:
+            return self.categories
+        assert self.is_numerical
+        return self.quantized_values
 
     @property
     def meta(self) -> Dict[str, Any]:
