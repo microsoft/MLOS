@@ -119,7 +119,7 @@ class Environment(metaclass=abc.ABCMeta):
         self._is_ready = False
         self._in_context = False
         self._const_args: Dict[str, TunableValue] = config.get("const_args", {})
-        self._results = None
+        self._results: Optional[Dict[str, TunableValue]] = None
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Environment: '%s' Service: %s", name,

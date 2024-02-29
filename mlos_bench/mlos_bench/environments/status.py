@@ -23,6 +23,16 @@ class Status(enum.Enum):
     FAILED = 6
     TIMED_OUT = 7
 
+    def is_in_setup(self) -> bool:
+        """
+        Check if the status of the benchmark/environment is in the setup phase
+        (i.e., it has no results or telemetry yet).
+        """
+        return self in {
+            Status.PENDING,
+            Status.READY,
+        }
+
     def is_good(self) -> bool:
         """
         Check if the status of the benchmark/environment is good.
@@ -57,6 +67,12 @@ class Status(enum.Enum):
         Check if the status of the benchmark/environment is READY.
         """
         return self == Status.READY
+
+    def is_running(self) -> bool:
+        """
+        Check if the status of the benchmark/environment is RUNNING.
+        """
+        return self == Status.RUNNING
 
     def is_succeeded(self) -> bool:
         """

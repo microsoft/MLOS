@@ -9,7 +9,7 @@ Scheduler-side environment to mock the benchmark results.
 import random
 import logging
 from datetime import datetime
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy
 
@@ -62,22 +62,17 @@ class MockEnv(Environment):
         self._metrics = self.config.get("metrics", ["score"])
         self._is_ready = True
 
-    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> bool:
         """
-        Produce mock benchmark data for one experiment.
+        Submit a new experiment to the environment.
 
         Returns
         -------
-        (status, timestamp, output) : (Status, datetime, dict)
-            3-tuple of (Status, timestamp, output) values, where `output` is a dict
-            with the results or None if the status is not COMPLETED.
-            The keys of the `output` dict are the names of the metrics
-            specified in the config; by default it's just one metric
-            named "score". All output metrics have the same value.
+        is_success : bool
+            True if operation is successful, false otherwise.
         """
-        (status, timestamp, _) = result = super().run()
-        if not status.is_ready():
-            return result
+        if not super().run():
+            return False
 
         # Simple convex function of all tunable parameters.
         score = numpy.mean(numpy.square([
@@ -90,7 +85,45 @@ class MockEnv(Environment):
         if self._range:
             score = self._range[0] + score * (self._range[1] - self._range[0])
 
-        return (Status.SUCCEEDED, timestamp, {metric: score for metric in self._metrics})
+        self._results = {metric: score for metric in self._metrics}
+        return True
+
+    def results(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
+        """
+        Produce mock benchmark data for one experiment.
+
+        Returns
+        -------
+        (status, timestamp, output) : (Status, datetime, dict)
+            3-tuple of (Status, timestamp, output) values, where `output` is a dict
+            with the results or None if the status is not COMPLETED.
+            The keys of the `output` dict are the names of the metrics
+            specified in the config; by default it's just one metric
+            named "score". All output metrics have the same value.
+        """
+        (status, timestamp, metrics) = result = super().results()
+        if not status.is_running():
+            return result
+        return (Status.SUCCEEDED, timestamp, metrics)
+
+    def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
+        """
+        Check the status of the benchmark environment.
+
+        Returns
+        -------
+        (benchmark_status, timestamp, telemetry) : (Status, datetime, list)
+            3-tuple of (benchmark status, timestamp, telemetry) values.
+            `timestamp` is UTC time stamp of the status; it's current time by default.
+            `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
+        """
+        # Make sure we create a context before invoking setup/run/status/teardown
+        assert self._in_context
+        timestamp = datetime.utcnow()
+        if self._is_ready:
+            return (Status.READY, timestamp, [])
+        _LOG.warning("Environment not ready: %s", self)
+        return (Status.PENDING, timestamp, [])
 
     @staticmethod
     def _normalized(tunable: Tunable) -> float:

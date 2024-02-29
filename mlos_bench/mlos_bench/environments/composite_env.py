@@ -179,9 +179,24 @@ class CompositeEnv(Environment):
             env_context.teardown()
         super().teardown()
 
-    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> bool:
         """
         Submit a new experiment to the environment.
+
+        Returns
+        -------
+        is_success : bool
+            True if operation is successful, false otherwise.
+        """
+        _LOG.info("Run: %s :: %s", self, self._children)
+        is_success = super().run() and all(
+            env_context.run() for env_context in self._child_contexts)
+        _LOG.info("Run: %s submitted successfully: %s", self, is_success)
+        return is_success
+
+    def results(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
+        """
+        Get the results of the trial launched by `.run()` call.
         Return the result of the *last* child environment if successful,
         or the status of the last failed environment otherwise.
 
@@ -193,24 +208,29 @@ class CompositeEnv(Environment):
             If run script is a benchmark, then the score is usually expected to
             be in the `score` field.
         """
-        _LOG.info("Run: %s", self._children)
-        (status, timestamp, metrics) = super().run()
-        if not status.is_ready():
+        _LOG.info("Get results: %s", self._children)
+        (status, timestamp, metrics) = super().results()
+        if status.is_in_setup():
+            _LOG.debug("Env not ready: %s :: %s", self, status)
+            return (status, timestamp, metrics)
+        if status.is_completed():
+            _LOG.debug("Env run completed: %s", self)
             return (status, timestamp, metrics)
 
         joint_metrics = {}
         for env_context in self._child_contexts:
-            _LOG.debug("Child env. run: %s", env_context)
-            (status, timestamp, metrics) = env_context.run()
-            _LOG.debug("Child env. run results: %s :: %s %s", env_context, status, metrics)
+            _LOG.debug("Get results: %s", env_context)
+            (status, timestamp, metrics) = env_context.results()
+            _LOG.debug("Get results: %s :: %s %s", env_context, status, metrics)
             if not status.is_good():
-                _LOG.info("Run failed: %s :: %s", self, status)
+                _LOG.info("Get results failed: %s :: %s", self, status)
                 return (status, timestamp, None)
             joint_metrics.update(metrics or {})
 
-        _LOG.info("Run completed: %s :: %s %s", self, status, joint_metrics)
+        self._results = joint_metrics
+        _LOG.info("Run completed: %s :: %s %s", self, status, self._results)
         # Return the status and the timestamp of the last child environment.
-        return (status, timestamp, joint_metrics)
+        return (status, timestamp, self._results)
 
     def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
         """
