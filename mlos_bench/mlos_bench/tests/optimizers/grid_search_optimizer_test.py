@@ -114,3 +114,17 @@ def test_grid_search(grid_search_opt: GridSearchOptimizer,
     # The next suggestion should be a different element in the grid search.
     suggestion = grid_search_opt.suggest()
     assert suggestion.get_param_values() != grid_search_tunables.restore_defaults().get_param_values()
+    grid_search_opt.register(suggestion, Status.SUCCEEDED, score)
+    assert HashableDict(suggestion.get_param_values()) not in grid_search_opt.configs
+
+    # Try to empty the rest of the grid.
+    for i in range(len(grid_search_tunables_grid) - 2):
+        suggestion = grid_search_opt.suggest()
+        grid_search_opt.register(suggestion, Status.SUCCEEDED, score)
+
+    # The grid search should be empty now.
+    assert grid_search_opt.configs == set()
+
+
+# TODO: Test multiple suggest and registers out of order.
+# TODO: Test not starting with the defaults.
