@@ -7,6 +7,7 @@ Unit tests for checking tunable size properties.
 """
 
 import numpy as np
+import pytest
 
 from mlos_bench.tunables.tunable import Tunable
 
@@ -21,7 +22,7 @@ def test_tunable_int_size_props() -> None:
             "default": 3,
         })
     assert tunable.span == 4
-    assert tunable.cardinality == 4
+    assert tunable.cardinality == 5
 
 
 def test_tunable_float_size_props() -> None:
@@ -46,7 +47,8 @@ def test_tunable_categorical_size_props() -> None:
             "values": ["a", "b", "c"],
             "default": "a",
         })
-    assert tunable.span == 3
+    with pytest.raises(AssertionError):
+        _ = tunable.span
     assert tunable.cardinality == 3
 
 
@@ -61,7 +63,7 @@ def test_tunable_quantized_int_size_props() -> None:
             "quantization": 100
         })
     assert tunable.span == 900
-    assert tunable.cardinality == 9
+    assert tunable.cardinality == 10
 
 
 def test_tunable_quantized_float_size_props() -> None:
@@ -75,4 +77,4 @@ def test_tunable_quantized_float_size_props() -> None:
             "quantization": .1
         })
     assert tunable.span == 1
-    assert tunable.cardinality == 10
+    assert tunable.cardinality == 11

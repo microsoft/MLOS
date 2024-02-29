@@ -362,6 +362,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         is_valid : bool
             True if the value is valid, False otherwise.
         """
+        # FIXME: quantization check?
         if self.is_categorical and self._values:
             return value in self._values
         elif self.is_numerical and self._range:
@@ -565,10 +566,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         Returns
         -------
         Union[int, float]
-            Either count of the number of elements (categorical) or max - min.
+            (max - min) for numerical tunables.
         """
-        if self.is_categorical:
-            return len(self.categories)
         assert self.is_numerical
         return self._range[1] - self._range[0]
 
@@ -599,11 +598,12 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         cardinality :
             Either the number of points in the
         """
-        if not self.quantization:
-            if self.type == "float":
-                return np.inf
-            return self.span
-        return int(self.span / self.quantization)
+        if self.is_categorical:
+            return len(self.categories)
+        if not self.quantization and self.type == "float":
+            return np.inf
+        quantization = self.quantization or 1
+        return int(self.span / quantization) + 1
 
     @property
     def is_log(self) -> Optional[bool]:
