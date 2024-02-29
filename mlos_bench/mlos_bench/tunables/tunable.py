@@ -9,9 +9,10 @@ import copy
 import collections
 import logging
 
-from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Type, TypedDict, Union
+from typing import Any, Dict, Iterable, List, Literal, Optional, Sequence, Tuple, Type, TypedDict, Union
 
 import numpy as np
+import numpy.typing as npt
 
 _LOG = logging.getLogger(__name__)
 
@@ -568,8 +569,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         Union[int, float]
             (max - min) for numerical tunables.
         """
-        assert self.is_numerical
-        return self._range[1] - self._range[0]
+        num_range = self.range
+        return num_range[1] - num_range[0]
 
     @property
     def quantization(self) -> Optional[Union[int, float]]:
@@ -583,26 +584,26 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         """
         if self.is_categorical:
             return None
-        assert self.is_numerical
         return self._quantization
 
     @property
-    def quantized_values(self) -> Optional[Union[Sequence[int], Sequence[float]]]:
+    def quantized_values(self) -> Optional[Union[Iterable[int], Iterable[float]]]:
         """
         Get a sequence of quanitized values for this tunable.
 
         Returns
         -------
-        Optional[Union[Sequence[int], Sequence[float]]]
+        Optional[Union[Iterable[int], Iterable[float]]]
             If the Tunable is quantizable, returns a sequence of those elements,
             else None (e.g., for unquantized float type tunables).
         """
+        num_range = self.range
         if self.type == "float":
             if not self._quantization:
                 return None
-            return np.linspace(start=self._range[0], stop=self._range[1], num=self.cardinality, endpoint=True)
+            return np.linspace(start=num_range[0], stop=num_range[1], num=self.cardinality, endpoint=True)
         assert self.type == "int", f"Unhandled tunable type: {self}"
-        return range(self._range[0], self._range[1] + 1, self._quantization or 1)
+        return range(int(num_range[0]), int(num_range[1]) + 1, int(self._quantization or 1))
 
     @property
     def cardinality(self) -> Union[int, np.inf]:
@@ -613,7 +614,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
         Returns
         -------
-        cardinality :
+        cardinality : int, np.inf
             Either the number of points in the
         """
         if self.is_categorical:
@@ -677,13 +678,13 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._values
 
     @property
-    def values(self) -> Optional[Union[Sequence[Optional[str]], Sequence[int], Sequence[float]]]:
+    def values(self) -> Optional[Union[Iterable[Optional[str]], Iterable[int], Iterable[float]]]:
         """
         Gets the categories or quantized values for this tunable.
 
         Returns
         -------
-        Optional[Union[Sequence[Optional[str]], Sequence[int], Sequence[float]]]
+        Optional[Union[Iterable[Optional[str]], Iterable[int], Iterable[float]]]
             Categories or quantized values.
         """
         if self.is_categorical:

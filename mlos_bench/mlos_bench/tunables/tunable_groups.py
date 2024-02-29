@@ -171,6 +171,9 @@ class TunableGroups:
         """
         return ((group.get_tunable(name), group) for (name, group) in self._index.items())
 
+    def __len__(self) -> int:
+        return len(self._index)
+
     def get_tunable(self, tunable: Union[str, Tunable]) -> Tuple[Tunable, CovariantTunableGroup]:
         """
         Access the entire Tunable (not just its value) and its covariant group.

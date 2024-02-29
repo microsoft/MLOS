@@ -8,27 +8,19 @@ Mock optimizer for mlos_bench.
 
 import logging
 
-from typing import Dict, List, Optional, Sequence, Tuple, Union
+from typing import Dict, Set, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from ConfigSpace.util import generate_grid
 
 from mlos_bench.environments.status import Status
+from mlos_bench.hashable_dict import HashableDict
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.optimizers.convert_configspace import configspace_data_to_tunable_values
 from mlos_bench.services.base_service import Service
 
 _LOG = logging.getLogger(__name__)
-
-
-class HashableDict(dict):
-    """
-    Simple hashable dict implementation.
-    """
-
-    def __hash__(self) -> int:
-        return hash(tuple(sorted(self.items())))
 
 
 class GridSearchOptimizer(Optimizer):
@@ -76,15 +68,15 @@ class GridSearchOptimizer(Optimizer):
         }
 
     @property
-    def configs(self) -> List[dict]:
+    def configs(self) -> Set[dict]:
         """
         The remaining set of configs in this grid search optimizer.
 
         Returns
         -------
-        List[dict]
+        Set[dict]
         """
-        return list(self._configs.keys())
+        return set(self._configs.keys())
 
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
                       status: Optional[Sequence[Status]] = None, is_warm_up: bool = False) -> bool:
