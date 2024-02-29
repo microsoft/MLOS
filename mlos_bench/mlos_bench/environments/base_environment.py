@@ -119,6 +119,7 @@ class Environment(metaclass=abc.ABCMeta):
         self._is_ready = False
         self._in_context = False
         self._const_args: Dict[str, TunableValue] = config.get("const_args", {})
+        self._results = None
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Environment: '%s' Service: %s", name,
@@ -378,12 +379,29 @@ class Environment(metaclass=abc.ABCMeta):
         assert self._in_context
         self._is_ready = False
 
-    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> bool:
         """
         Execute the run script for this environment.
 
         For instance, this may start a new experiment, download results, reconfigure
         the environment, etc. Details are configurable via the environment config.
+
+        Returns
+        -------
+        is_success : bool
+            True if operation is successful, false otherwise.
+        """
+        # Make sure we create a context before invoking setup/run/status/teardown
+        assert self._in_context
+        self._results = None
+        (status, _timestamp, _telemetry) = self.status()
+        return status.is_good()
+
+    def results(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
+        """
+        Get the results of the trial launched by `.run()` call.
+        If called outside of `.run()` context or when `.run()` is in progress,
+        return the status and the timestamp of the last `.status()` call.
 
         Returns
         -------
@@ -393,10 +411,9 @@ class Environment(metaclass=abc.ABCMeta):
             If run script is a benchmark, then the score is usually expected to
             be in the `score` field.
         """
-        # Make sure we create a context before invoking setup/run/status/teardown
         assert self._in_context
         (status, timestamp, _) = self.status()
-        return (status, timestamp, None)
+        return (status, timestamp, self._results)
 
     def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
         """
