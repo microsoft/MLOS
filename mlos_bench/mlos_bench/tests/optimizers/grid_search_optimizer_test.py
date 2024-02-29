@@ -13,6 +13,7 @@ import math
 
 import pytest
 
+from mlos_bench.environments.status import Status
 from mlos_bench.hashable_dict import HashableDict
 from mlos_bench.optimizers.grid_search_optimizer import GridSearchOptimizer
 from mlos_bench.tunables.tunable import TunableValue
@@ -88,3 +89,28 @@ def test_grid_search_grid(grid_search_opt: GridSearchOptimizer,
     assert expected_grid_size > len(grid_search_tunables)
     assert len(grid_search_tunables_grid) == expected_grid_size
     assert grid_search_opt.configs == grid_search_tunables_grid
+
+
+def test_grid_search(grid_search_opt: GridSearchOptimizer,
+                     grid_search_tunables: TunableGroups,
+                     grid_search_tunables_grid: Set[Dict[str, TunableValue]]) -> None:
+    """
+    Make sure that grid search optimizer initializes and works correctly.
+    """
+    score = 1.0
+    suggestion = grid_search_opt.suggest()
+
+    # First suggestion should be the defaults.
+    assert suggestion.get_param_values() == grid_search_tunables.restore_defaults().get_param_values()
+    # But that shouldn't be the first element in the grid search.
+    assert suggestion.get_param_values() != next(iter(grid_search_tunables_grid))
+
+    # Register a score for that suggestion.
+    grid_search_opt.register(suggestion, Status.SUCCEEDED, score)
+
+    # Registering the config should have removed that config from the grid search.
+    assert grid_search_opt.configs == grid_search_tunables_grid - {HashableDict(suggestion.get_param_values())}
+
+    # The next suggestion should be a different element in the grid search.
+    suggestion = grid_search_opt.suggest()
+    assert suggestion.get_param_values() != grid_search_tunables.restore_defaults().get_param_values()
