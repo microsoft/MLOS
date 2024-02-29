@@ -41,8 +41,9 @@ def _main(argv: Optional[List[str]] = None) -> Tuple[Optional[float], Optional[T
         root_env_config=launcher.root_env_config,
     )
 
-    with scheduler.context() as scheduler_context:
+    with scheduler as scheduler_context:
         scheduler_context.start()
+        scheduler_context.teardown()
 
     (score, _config) = result = scheduler.get_best_observation()
     # NOTE: This log line is used in test_launch_main_app_* unit tests:
