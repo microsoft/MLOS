@@ -48,7 +48,7 @@ class GridSearchOptimizer(Optimizer):
             cardinality = tunable.cardinality
             if cardinality == np.inf:
                 raise ValueError(f"Unquantized tunables are not supported for grid search: {self.tunable_params}")
-            size *= cardinality
+            size *= int(cardinality)
         if cardinality > 10000:
             _LOG.warning("Large number of config points requested for grid search: %s", self.tunable_params)
 
