@@ -6,7 +6,7 @@
 Hashable dictionary implementation.
 """
 
-from typing import Any, Dict
+from typing import Any, Dict, Tuple, Union
 
 from mlos_bench.tunables.tunable import TunableValue, TunableValueTypeTuple
 
@@ -36,7 +36,22 @@ class HashableTunableValuesDict(Dict[str, TunableValue]):
     def __delitem__(self, __key: str) -> None:
         raise NotImplementedError("HashableTunableValuesDict is immutable")
 
-    def __setitem__(self, __key: str, __value: int | float | str | None) -> None:
+    def __setitem__(self, __key: str, __value: Union[int, float, str, None]) -> None:
+        raise NotImplementedError("HashableTunableValuesDict is immutable")
+
+    def clear(self) -> None:
+        raise NotImplementedError("HashableTunableValuesDict is immutable")
+
+    def pop(self, __key: str, __default: Any = ...) -> Any:
+        raise NotImplementedError("HashableTunableValuesDict is immutable")
+
+    def popitem(self) -> Tuple[str, TunableValue]:
+        raise NotImplementedError("HashableTunableValuesDict is immutable")
+
+    def update(self, __m: Dict[str, TunableValue], **kwargs: TunableValue) -> None:     # type: ignore[override]
+        raise NotImplementedError("HashableTunableValuesDict is immutable")
+
+    def setdefault(self, __key: str, __default: Any = ...) -> Any:
         raise NotImplementedError("HashableTunableValuesDict is immutable")
 
     def __hash__(self) -> int:  # type: ignore[override]
