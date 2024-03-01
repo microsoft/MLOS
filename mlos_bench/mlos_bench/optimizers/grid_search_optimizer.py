@@ -58,7 +58,7 @@ class GridSearchOptimizer(Optimizer):
         Order is given by ConfigSpace, but preserved by dict ordering semantics.
         """
         return {
-            configspace_data_to_tunable_values(dict(config)): None
+            HashableTunableValuesDict(configspace_data_to_tunable_values(dict(config))): None
             for config in
             generate_grid(self.config_space, {
                 tunable.name: int(tunable.cardinality)
