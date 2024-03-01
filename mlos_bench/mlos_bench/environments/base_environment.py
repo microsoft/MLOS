@@ -289,9 +289,10 @@ class Environment(metaclass=abc.ABCMeta):
         params : Dict[str, Union[int, float, str]]
             Free-format dictionary that contains the new environment configuration.
         """
-        return tunables.get_param_values(
-            group_names=list(self._tunable_params.get_covariant_group_names()),
-            into_params=self._const_args.copy())
+        params = self._const_args.copy()
+        params.update(tunables.get_param_values(
+            group_names=self._tunable_params.get_covariant_group_names()))
+        return params
 
     @property
     def tunable_params(self) -> TunableGroups:

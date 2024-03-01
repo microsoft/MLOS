@@ -234,8 +234,7 @@ class TunableGroups:
             tunables._add_group(self._tunable_groups[name])
         return tunables
 
-    def get_param_values(self, group_names: Optional[Iterable[str]] = None,
-                         into_params: Optional[Dict[str, TunableValue]] = None) -> HashableTunableValuesDict:
+    def get_param_values(self, group_names: Optional[Iterable[str]] = None) -> HashableTunableValuesDict:
         """
         Get the current values of the tunables that belong to the specified covariance groups.
 
@@ -244,8 +243,6 @@ class TunableGroups:
         group_names : list of str or None
             IDs of the covariant tunable groups.
             Select parameters from all groups if omitted.
-        into_params : dict
-            An optional dict to copy the parameters and their values into.
 
         Returns
         -------
@@ -254,8 +251,7 @@ class TunableGroups:
         """
         if group_names is None:
             group_names = self.get_covariant_group_names()
-        if into_params is None:
-            into_params = {}
+        into_params: dict = {}
         for name in group_names:
             into_params.update(self._tunable_groups[name].get_tunable_values_dict())
         return HashableTunableValuesDict(into_params)
