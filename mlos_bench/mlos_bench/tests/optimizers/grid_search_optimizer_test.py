@@ -10,6 +10,7 @@ from typing import Dict, Set, List
 
 import itertools
 import math
+import random
 
 import pytest
 
@@ -52,14 +53,14 @@ def grid_search_tunables_config() -> dict:
 
 
 @pytest.fixture
-def grid_search_tunables_grid_set(grid_search_tunables: TunableGroups) -> Set[HashableTunableValuesDict]:
+def grid_search_tunables_grid(grid_search_tunables: TunableGroups) -> List[HashableTunableValuesDict]:
     """
     Test fixture for grid from tunable groups.
     Used to check that the grids are the same (ignoring order).
     """
     tunables_params_values = [tunable.values for tunable, _group in grid_search_tunables if tunable.values is not None]
     tunable_names = tuple(tunable.name for tunable, _group in grid_search_tunables)
-    return {HashableTunableValuesDict(zip(tunable_names, combo)) for combo in itertools.product(*tunables_params_values)}
+    return [HashableTunableValuesDict(zip(tunable_names, combo)) for combo in itertools.product(*tunables_params_values)]
 
 
 @pytest.fixture
@@ -81,22 +82,23 @@ def grid_search_opt(grid_search_tunables: TunableGroups) -> GridSearchOptimizer:
 
 def test_grid_search_grid(grid_search_opt: GridSearchOptimizer,
                           grid_search_tunables: TunableGroups,
-                          grid_search_tunables_grid_set: Set[HashableTunableValuesDict]) -> None:
+                          grid_search_tunables_grid: List[HashableTunableValuesDict]) -> None:
     """
     Make sure that grid search optimizer initializes and works correctly.
     """
     expected_grid_size = math.prod(tunable.cardinality for tunable, _group in grid_search_tunables)
     assert expected_grid_size > len(grid_search_tunables)
-    assert len(grid_search_tunables_grid_set) == expected_grid_size
-    assert set(grid_search_opt.pending_configs) == grid_search_tunables_grid_set
+    assert len(grid_search_tunables_grid) == expected_grid_size
+    assert set(grid_search_opt.pending_configs) == set(grid_search_tunables_grid)
 
 
 def test_grid_search(grid_search_opt: GridSearchOptimizer,
                      grid_search_tunables: TunableGroups,
-                     grid_search_tunables_grid_set: Set[HashableTunableValuesDict]) -> None:
+                     grid_search_tunables_grid: List[HashableTunableValuesDict]) -> None:
     """
     Make sure that grid search optimizer initializes and works correctly.
     """
+    grid_search_tunables_grid_set = set(grid_search_tunables_grid)
     score = 1.0
     status = Status.SUCCEEDED
     suggestion = grid_search_opt.suggest()
@@ -105,7 +107,7 @@ def test_grid_search(grid_search_opt: GridSearchOptimizer,
     # First suggestion should be the defaults.
     assert suggestion.get_param_values() == default_config
     # But that shouldn't be the first element in the grid search.
-    assert suggestion.get_param_values() != next(iter(grid_search_tunables_grid_set))
+    assert suggestion.get_param_values() != next(iter(grid_search_tunables_grid))
     # The suggestion should no longer be in the pending_configs.
     assert suggestion.get_param_values() not in grid_search_opt.pending_configs
     # But it should be in the suggested_configs now.
@@ -122,9 +124,11 @@ def test_grid_search(grid_search_opt: GridSearchOptimizer,
     # The next suggestion should be a different element in the grid search.
     suggestion = grid_search_opt.suggest()
     assert suggestion.get_param_values() != default_config
-    grid_search_opt.register(suggestion, status, score)
     assert suggestion.get_param_values() not in grid_search_opt.pending_configs
     assert suggestion.get_param_values() in grid_search_opt.suggested_configs
+    grid_search_opt.register(suggestion, status, score)
+    assert suggestion.get_param_values() not in grid_search_opt.pending_configs
+    assert suggestion.get_param_values() not in grid_search_opt.suggested_configs
 
     grid_search_tunables_grid_set.remove(suggestion.get_param_values())
     assert set(grid_search_opt.pending_configs) == grid_search_tunables_grid_set
@@ -139,5 +143,55 @@ def test_grid_search(grid_search_opt: GridSearchOptimizer,
     assert not grid_search_opt.suggested_configs
 
 
-# TODO: Test multiple suggest and registers out of order.
-# TODO: Test not starting with the defaults.
+def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
+    """
+    Make sure that grid search optimizer works correctly when suggest and register
+    are called out of order.
+    """
+    score = 1.0
+    status = Status.SUCCEEDED
+    suggest_count = 10
+    suggested = [grid_search_opt.suggest() for _ in range(suggest_count)]
+    suggested_shuffled = suggested.copy()
+    random.shuffle(suggested_shuffled)
+    assert suggested != suggested_shuffled
+
+    for suggestion in suggested_shuffled:
+        assert suggestion.get_param_values() not in set(grid_search_opt.pending_configs)
+        assert suggestion.get_param_values() in grid_search_opt.suggested_configs
+        grid_search_opt.register(suggestion, status, score)
+        assert suggestion.get_param_values() not in grid_search_opt.suggested_configs
+
+    best_score, best_config = grid_search_opt.get_best_observation()
+    assert best_score == score
+
+    # test re-register with higher score
+    best_suggestion = suggested_shuffled[0]
+    assert best_suggestion.get_param_values() not in set(grid_search_opt.pending_configs)
+    assert best_suggestion.get_param_values() not in grid_search_opt.suggested_configs
+    best_suggestion_score = score - 1 if grid_search_opt.direction == "min" else score + 1
+    grid_search_opt.register(best_suggestion, status, best_suggestion_score)
+    assert best_suggestion.get_param_values() not in grid_search_opt.suggested_configs
+
+    best_score, best_config = grid_search_opt.get_best_observation()
+    assert best_score == best_suggestion_score
+    assert best_config == best_suggestion
+
+    # Check bulk register
+    suggested = [grid_search_opt.suggest() for _ in range(suggest_count)]
+    assert all(suggestion.get_param_values() not in grid_search_opt.pending_configs for suggestion in suggested)
+    assert all(suggestion.get_param_values() in grid_search_opt.suggested_configs for suggestion in suggested)
+
+    # Those new suggestions also shouldn't be in the set of previously suggested configs.
+    assert all(suggestion.get_param_values() not in suggested_shuffled for suggestion in suggested)
+
+    grid_search_opt.bulk_register([suggestion.get_param_values() for suggestion in suggested],
+                                  [score] * len(suggested),
+                                  [status] * len(suggested))
+
+    assert all(suggestion.get_param_values() not in grid_search_opt.pending_configs for suggestion in suggested)
+    assert all(suggestion.get_param_values() not in grid_search_opt.suggested_configs for suggestion in suggested)
+
+    best_score, best_config = grid_search_opt.get_best_observation()
+    assert best_score == best_suggestion_score
+    assert best_config == best_suggestion

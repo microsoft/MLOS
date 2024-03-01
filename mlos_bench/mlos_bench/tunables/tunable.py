@@ -606,12 +606,18 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         if self.type == "float":
             if not self._quantization:
                 return None
-            return np.linspace(start=num_range[0], stop=num_range[1], num=self.cardinality, endpoint=True, dtype=float)
+            # Be sure to return python types instead of numpy types.
+            cardinality = self.cardinality
+            assert isinstance(cardinality, int)
+            return (float(x) for x in np.linspace(start=num_range[0],
+                                                  stop=num_range[1],
+                                                  num=cardinality,
+                                                  endpoint=True))
         assert self.type == "int", f"Unhandled tunable type: {self}"
         return range(int(num_range[0]), int(num_range[1]) + 1, int(self._quantization or 1))
 
     @property
-    def cardinality(self) -> Union[int, np.inf]:
+    def cardinality(self) -> Union[int, float]:
         """
         Gets the cardinality of elements in this tunable, or else infinity.
 
@@ -619,8 +625,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
         Returns
         -------
-        cardinality : int, np.inf
-            Either the number of points in the
+        cardinality : int, float
+            Either the number of points in the tunable or else infinity.
         """
         if self.is_categorical:
             return len(self.categories)
