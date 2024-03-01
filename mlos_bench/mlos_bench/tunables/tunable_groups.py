@@ -246,7 +246,7 @@ class TunableGroups:
         Returns
         -------
         into_params : Dict[str, TunableValue]
-            Flat (hashable) dict of all parameters and their values from given covariance groups.
+            Flat dict of all parameters and their values from given covariance groups.
         """
         if group_names is None:
             group_names = self.get_covariant_group_names()
