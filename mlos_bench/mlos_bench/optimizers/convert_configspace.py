@@ -235,7 +235,7 @@ def configspace_data_to_tunable_values(data: dict) -> HashableTunableValuesDict:
             del data[special_name]
         del data[type_name]
     # May need to convert numpy values to regular types.
-    # data = {k: try_parse_val(v) for k, v in data.items()}
+    data = {k: try_parse_val(v) for k, v in data.items()}
     return HashableTunableValuesDict(data)
 
 
