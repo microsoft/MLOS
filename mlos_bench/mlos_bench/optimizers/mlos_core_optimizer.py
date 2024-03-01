@@ -178,5 +178,7 @@ class MlosCoreOptimizer(Optimizer):
             return (None, None)
         params = configspace_data_to_tunable_values(df_config.iloc[0].to_dict())
         _LOG.debug("Best observation: %s", params)
-        score = params.pop("score") * self._opt_sign  # mlos_core always uses the `score` column
+        score = params.pop("score")
+        assert score is not None
+        score = float(score) * self._opt_sign  # mlos_core always uses the `score` column
         return (score, self._tunables.copy().assign(params))
