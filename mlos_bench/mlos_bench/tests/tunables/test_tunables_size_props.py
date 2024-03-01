@@ -93,5 +93,5 @@ def test_tunable_quantized_float_size_props() -> None:
     assert tunable.span == 1
     assert tunable.cardinality == 11
     expected = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-    assert pytest.approx(tunable.quantized_values, 0.0001) == expected
-    assert pytest.approx(tunable.values, 0.0001) == expected
+    assert pytest.approx(list(tunable.quantized_values or []), 0.0001) == expected
+    assert pytest.approx(list(tunable.values or []), 0.0001) == expected
