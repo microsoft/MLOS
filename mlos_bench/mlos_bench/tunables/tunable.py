@@ -12,7 +12,6 @@ import logging
 from typing import Any, Dict, Iterable, List, Literal, Optional, Sequence, Tuple, Type, TypedDict, Union
 
 import numpy as np
-import numpy.typing as npt
 
 _LOG = logging.getLogger(__name__)
 

@@ -9,6 +9,7 @@ import copy
 
 from typing import Dict, Iterable, Union
 
+from mlos_bench.tunables.hashable_tunable_values_dict import HashableTunableValuesDict
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 
 
@@ -179,15 +180,15 @@ class CovariantTunableGroup:
         """
         return self._tunables.keys()
 
-    def get_tunable_values_dict(self) -> Dict[str, TunableValue]:
+    def get_tunable_values_dict(self) -> HashableTunableValuesDict:
         """
         Get current values of all tunables in the group as a dict.
 
         Returns
         -------
-        tunables : Dict[str, TunableValue]
+        tunables : HashableTunableValuesDict
         """
-        return {name: tunable.value for (name, tunable) in self._tunables.items()}
+        return HashableTunableValuesDict({name: tunable.value for (name, tunable) in self._tunables.items()})
 
     def __repr__(self) -> str:
         """
