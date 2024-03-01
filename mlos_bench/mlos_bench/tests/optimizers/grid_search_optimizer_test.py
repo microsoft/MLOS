@@ -6,7 +6,7 @@
 Unit tests for grid search mlos_bench optimizer.
 """
 
-from typing import Dict, Set, List
+from typing import List
 
 import itertools
 import math

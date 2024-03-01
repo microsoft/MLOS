@@ -11,12 +11,11 @@ import logging
 from abc import ABCMeta, abstractmethod
 from distutils.util import strtobool    # pylint: disable=deprecated-module
 
-import ConfigSpace as CS
-from ConfigSpace import ConfigurationSpace
-
 from types import TracebackType
 from typing import Dict, Optional, Sequence, Tuple, Type, Union
 from typing_extensions import Literal
+
+from ConfigSpace import ConfigurationSpace
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.base_service import Service

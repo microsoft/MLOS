@@ -29,7 +29,6 @@ from mlos_bench.optimizers.convert_configspace import (
     TunableValueKind,
     configspace_data_to_tunable_values,
     special_param_names,
-    tunable_groups_to_configspace,
 )
 
 _LOG = logging.getLogger(__name__)
