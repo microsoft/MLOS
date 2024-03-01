@@ -117,9 +117,10 @@ class GridSearchOptimizer(Optimizer):
             self._start_with_defaults = False
             tunables = tunables.restore_defaults()
             default_config = tunables.get_param_values()
+            default_config_values = tuple(default_config.values())
             # Move the default from the pending to the suggested set.
-            del self._pending_configs[default_config]
-            self._suggested_configs.add(default_config)
+            del self._pending_configs[default_config_values]
+            self._suggested_configs.add(default_config_values)
         else:
             # Select the first item from the pending configs.
             next_config_values = next(iter(self._pending_configs.keys()))

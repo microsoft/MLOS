@@ -88,7 +88,7 @@ def test_grid_search_grid(grid_search_opt: GridSearchOptimizer,
     """
     expected_grid_size = math.prod(tunable.cardinality for tunable, _group in grid_search_tunables)
     assert expected_grid_size > len(grid_search_tunables)
-    assert len(grid_search_tunables_grid) == expected_grid_size
+    assert len(list(grid_search_tunables_grid)) == expected_grid_size
     assert set(grid_search_opt.pending_configs) == set(grid_search_tunables_grid)
 
 
@@ -116,7 +116,7 @@ def test_grid_search(grid_search_opt: GridSearchOptimizer,
     # Register a score for that suggestion.
     grid_search_opt.register(suggestion, status, score)
     # Now it shouldn't be in the suggested_configs.
-    assert len(grid_search_opt.suggested_configs) == 0
+    assert len(list(grid_search_opt.suggested_configs)) == 0
 
     grid_search_tunables_grid_set.remove(default_config)
     assert set(grid_search_opt.pending_configs) == grid_search_tunables_grid_set
