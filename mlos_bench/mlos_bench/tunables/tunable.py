@@ -22,6 +22,12 @@ TunableValue = Union[int, float, Optional[str]]
 """Tunable value type."""
 TunableValueType = Union[Type[int], Type[float], Type[str]]
 
+"""
+Tunable value type tuple.
+For checking with isinstance()
+"""
+TunableValueTypeTuple = (int, float, str, type(None))
+
 """The string name of a tunable value type."""
 TunableValueTypeName = Literal["int", "float", "categorical"]
 
