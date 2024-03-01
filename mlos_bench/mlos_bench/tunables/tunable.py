@@ -606,7 +606,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         if self.type == "float":
             if not self._quantization:
                 return None
-            return np.linspace(start=num_range[0], stop=num_range[1], num=self.cardinality, endpoint=True)
+            return np.linspace(start=num_range[0], stop=num_range[1], num=self.cardinality, endpoint=True, dtype=float)
         assert self.type == "int", f"Unhandled tunable type: {self}"
         return range(int(num_range[0]), int(num_range[1]) + 1, int(self._quantization or 1))
 
