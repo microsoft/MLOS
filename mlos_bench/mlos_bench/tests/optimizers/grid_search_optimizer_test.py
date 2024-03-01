@@ -28,28 +28,28 @@ def grid_search_tunables_config() -> dict:
     Test fixture for grid search optimizer tunables config.
     """
     return {
-            "grid": {
-                "cost": 1,
-                "params": {
-                    "cat": {
-                        "type": "categorical",
-                        "values": ["a", "b", "c"],
-                        "default": "a",
-                    },
-                    "int": {
-                        "type": "int",
-                        "range": [1, 3],
-                        "default": 2,
-                    },
-                    "float": {
-                        "type": "float",
-                        "range": [0, 1],
-                        "default": 0.5,
-                        "quantization": 0.25,
-                    },
+        "grid": {
+            "cost": 1,
+            "params": {
+                "cat": {
+                    "type": "categorical",
+                    "values": ["a", "b", "c"],
+                    "default": "a",
+                },
+                "int": {
+                    "type": "int",
+                    "range": [1, 3],
+                    "default": 2,
+                },
+                "float": {
+                    "type": "float",
+                    "range": [0, 1],
+                    "default": 0.5,
+                    "quantization": 0.25,
                 },
             },
-        }
+        },
+    }
 
 
 @pytest.fixture
