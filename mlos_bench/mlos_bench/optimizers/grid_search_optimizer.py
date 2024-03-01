@@ -8,13 +8,13 @@ Mock optimizer for mlos_bench.
 
 import logging
 
-from typing import Dict, Set, Optional, Sequence, Tuple, Union
+from typing import Dict, Iterable, Set, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from ConfigSpace.util import generate_grid
 
 from mlos_bench.environments.status import Status
-from mlos_bench.hashable_dict import HashableDict
+from mlos_bench.tunables.hashable_tunable_values_dict import HashableTunableValuesDict
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.optimizers.convert_configspace import configspace_data_to_tunable_values
@@ -36,9 +36,9 @@ class GridSearchOptimizer(Optimizer):
         super().__init__(tunables, config, global_config, service)
 
         self._sanity_check()
-        self._configs = self._get_grid()
-        assert self._configs
-        self._suggested_config: HashableDict = HashableDict({})
+        self._pending_configs = self._get_grid()
+        assert self._pending_configs
+        self._suggested_configs: Set[HashableTunableValuesDict] = set()
         self._best_config: Optional[TunableGroups] = None
         self._best_score: Optional[float] = None
 
@@ -52,13 +52,13 @@ class GridSearchOptimizer(Optimizer):
         if cardinality > 10000:
             _LOG.warning("Large number of config points requested for grid search: %s", self.tunable_params)
 
-    def _get_grid(self) -> Dict[HashableDict, None]:
+    def _get_grid(self) -> Dict[HashableTunableValuesDict, None]:
         """
         Gets a grid of configs to try.
         Order is given by ConfigSpace, but preserved by dict ordering semantics.
         """
         return {
-            HashableDict(configspace_data_to_tunable_values(config.get_dictionary())): None
+            configspace_data_to_tunable_values(config.get_dictionary()): None
             for config in
             generate_grid(self.config_space, {
                 tunable.name: tunable.cardinality
@@ -68,15 +68,26 @@ class GridSearchOptimizer(Optimizer):
         }
 
     @property
-    def configs(self) -> Set[dict]:
+    def pending_configs(self) -> Iterable[HashableTunableValuesDict]:
         """
-        The remaining set of configs in this grid search optimizer.
+        Gets the set of pending configs in this grid search optimizer.
 
         Returns
         -------
-        Set[dict]
+        List[HashableTunableValuesDict]
         """
-        return set(self._configs.keys())
+        return self._pending_configs.keys()
+
+    @property
+    def suggested_configs(self) -> Set[HashableTunableValuesDict]:
+        """
+        Gets the set of configs that have been suggested but not yet registered.
+
+        Returns
+        -------
+        Set[HashableTunableValuesDict]
+        """
+        return self._suggested_configs
 
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
                       status: Optional[Sequence[Status]] = None, is_warm_up: bool = False) -> bool:
@@ -95,51 +106,6 @@ class GridSearchOptimizer(Optimizer):
             _LOG.debug("Warm-up end: %s = %s", self.target, score)
         return True
 
-    def _advance_suggested_config(self) -> dict:
-        """
-        Advance to the next available config in the grid.
-
-        Note: bulk registration may have removed some configs from the grid in an
-        async order, we cannot maintain a single iterator, hence the somewhat
-        ineffecient scanning.
-
-        Returns
-        -------
-        dict
-            The next config suggestion, or an empty dict if no more are available.
-        """
-        empty_config = HashableDict({})
-        if not self._suggested_config:
-            # None currently selected, pick the first available one.
-            self._suggested_config = next(iter(self._configs, empty_config))
-            return self._suggested_config
-        # else, find the currently selected config.
-        configs_iter = iter(self._configs)
-        while config := next(configs_iter, empty_config):
-            if config == self._suggested_config:
-                # Pick the one after the one we were on.
-                self._suggested_config = next(configs_iter, empty_config)
-                break
-        if not self._suggested_config:
-            # We reached the end.  Try and start over from the begining, if there is one.
-            self._suggested_config = next(iter(self._configs, empty_config))
-        return self._suggested_config
-
-    def _remove_config(self, config_to_remove: dict) -> None:
-        """
-        Remove a config from the grid and reset the suggested config pointer.
-        """
-        # Fallback in case there's no config before it.
-        # This way we start from the first config again.
-        predecessor = HashableDict({})
-        for config in self._configs:
-            # Find the config to remove and the one before it.
-            if config == config_to_remove:
-                del self._configs[config]
-                self._suggested_config = predecessor
-                break
-            predecessor = config
-
     def suggest(self) -> TunableGroups:
         """
         Generate the next grid search suggestion.
@@ -149,9 +115,17 @@ class GridSearchOptimizer(Optimizer):
             _LOG.info("Use default values for the first trial")
             self._start_with_defaults = False
             tunables = tunables.restore_defaults()
-            self._suggested_config = HashableDict(tunables.get_param_values())
+            default_config = tunables.get_param_values()
+            # Move the default from the pending to the suggested set.
+            del self._pending_configs[default_config]
+            self._suggested_configs.add(default_config)
         else:
-            tunables.assign(self._advance_suggested_config())
+            # Select the first item from the pending configs.
+            next_config = next(iter(self._pending_configs.keys()))
+            tunables.assign(next_config)
+            # Move it to the suggested set.
+            self._suggested_configs.add(next_config)
+            del self._pending_configs[next_config]
         _LOG.info("Iteration %d :: Suggest: %s", self._iter, tunables)
         return tunables
 
@@ -164,7 +138,10 @@ class GridSearchOptimizer(Optimizer):
             self._best_score = registered_score
             self._best_config = tunables.copy()
         self._iter += 1
-        self._remove_config(tunables.get_param_values())
+        try:
+            self._suggested_configs.remove(tunables.get_param_values())
+        except KeyError:
+            pass
         return registered_score
 
     def get_best_observation(self) -> Union[Tuple[float, TunableGroups], Tuple[None, None]]:
