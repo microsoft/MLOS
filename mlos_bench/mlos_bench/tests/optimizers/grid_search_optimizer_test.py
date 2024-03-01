@@ -6,7 +6,7 @@
 Unit tests for grid search mlos_bench optimizer.
 """
 
-from typing import List
+from typing import Dict, Iterable
 
 import itertools
 import math
@@ -15,8 +15,8 @@ import random
 import pytest
 
 from mlos_bench.environments.status import Status
-from mlos_bench.tunables.hashable_tunable_values_dict import HashableTunableValuesDict
 from mlos_bench.optimizers.grid_search_optimizer import GridSearchOptimizer
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
@@ -53,14 +53,14 @@ def grid_search_tunables_config() -> dict:
 
 
 @pytest.fixture
-def grid_search_tunables_grid(grid_search_tunables: TunableGroups) -> List[HashableTunableValuesDict]:
+def grid_search_tunables_grid(grid_search_tunables: TunableGroups) -> Iterable[Dict[str, TunableValue]]:
     """
     Test fixture for grid from tunable groups.
     Used to check that the grids are the same (ignoring order).
     """
     tunables_params_values = [tunable.values for tunable, _group in grid_search_tunables if tunable.values is not None]
     tunable_names = tuple(tunable.name for tunable, _group in grid_search_tunables)
-    return [HashableTunableValuesDict(zip(tunable_names, combo)) for combo in itertools.product(*tunables_params_values)]
+    return (dict(zip(tunable_names, combo)) for combo in itertools.product(*tunables_params_values))
 
 
 @pytest.fixture
@@ -82,7 +82,7 @@ def grid_search_opt(grid_search_tunables: TunableGroups) -> GridSearchOptimizer:
 
 def test_grid_search_grid(grid_search_opt: GridSearchOptimizer,
                           grid_search_tunables: TunableGroups,
-                          grid_search_tunables_grid: List[HashableTunableValuesDict]) -> None:
+                          grid_search_tunables_grid: Iterable[Dict[str, TunableValue]]) -> None:
     """
     Make sure that grid search optimizer initializes and works correctly.
     """
@@ -94,7 +94,7 @@ def test_grid_search_grid(grid_search_opt: GridSearchOptimizer,
 
 def test_grid_search(grid_search_opt: GridSearchOptimizer,
                      grid_search_tunables: TunableGroups,
-                     grid_search_tunables_grid: List[HashableTunableValuesDict]) -> None:
+                     grid_search_tunables_grid: Iterable[Dict[str, TunableValue]]) -> None:
     """
     Make sure that grid search optimizer initializes and works correctly.
     """

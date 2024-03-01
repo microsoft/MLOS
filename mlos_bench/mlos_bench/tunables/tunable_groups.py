@@ -10,7 +10,6 @@ import copy
 from typing import Dict, Generator, Iterable, Mapping, Optional, Tuple, Union
 
 from mlos_bench.config.schemas import ConfigSchema
-from mlos_bench.tunables.hashable_tunable_values_dict import HashableTunableValuesDict
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
 
@@ -234,7 +233,7 @@ class TunableGroups:
             tunables._add_group(self._tunable_groups[name])
         return tunables
 
-    def get_param_values(self, group_names: Optional[Iterable[str]] = None) -> HashableTunableValuesDict:
+    def get_param_values(self, group_names: Optional[Iterable[str]] = None) -> Dict[str, TunableValue]:
         """
         Get the current values of the tunables that belong to the specified covariance groups.
 
@@ -246,7 +245,7 @@ class TunableGroups:
 
         Returns
         -------
-        into_params : HashableTunableValuesDict
+        into_params : Dict[str, TunableValue]
             Flat (hashable) dict of all parameters and their values from given covariance groups.
         """
         if group_names is None:
@@ -254,7 +253,7 @@ class TunableGroups:
         into_params: dict = {}
         for name in group_names:
             into_params.update(self._tunable_groups[name].get_tunable_values_dict())
-        return HashableTunableValuesDict(into_params)
+        return into_params
 
     def is_updated(self, group_names: Optional[Iterable[str]] = None) -> bool:
         """
