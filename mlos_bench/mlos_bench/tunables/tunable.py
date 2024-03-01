@@ -31,6 +31,9 @@ TunableValueTypeTuple = (int, float, str, type(None))
 """The string name of a tunable value type."""
 TunableValueTypeName = Literal["int", "float", "categorical"]
 
+"""Tunable values dictionary type"""
+TunableValuesDict = Dict[str, TunableValue]
+
 """Tunable value distribution type"""
 DistributionName = Literal["uniform", "normal", "beta"]
 
