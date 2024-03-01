@@ -73,7 +73,7 @@ class MlosCoreOptimizer(Optimizer):
             space_adapter_type = getattr(SpaceAdapterType, space_adapter_type)
 
         self._opt: BaseOptimizer = OptimizerFactory.create(
-            parameter_space=self._config_space,
+            parameter_space=self.config_space,
             optimizer_type=opt_type,
             optimizer_kwargs=self._config,
             space_adapter_type=space_adapter_type,
