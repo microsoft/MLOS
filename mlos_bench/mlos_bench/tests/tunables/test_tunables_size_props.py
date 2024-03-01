@@ -27,8 +27,8 @@ def test_tunable_int_size_props() -> None:
     assert tunable.span == 4
     assert tunable.cardinality == 5
     expected = [1, 2, 3, 4, 5]
-    assert list(tunable.quantized_values) == expected
-    assert list(tunable.values) == expected
+    assert list(tunable.quantized_values or []) == expected
+    assert list(tunable.values or []) == expected
 
 
 def test_tunable_float_size_props() -> None:
@@ -76,8 +76,8 @@ def test_tunable_quantized_int_size_props() -> None:
     assert tunable.span == 900
     assert tunable.cardinality == 10
     expected = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
-    assert list(tunable.quantized_values) == expected
-    assert list(tunable.values) == expected
+    assert list(tunable.quantized_values or []) == expected
+    assert list(tunable.values or []) == expected
 
 
 def test_tunable_quantized_float_size_props() -> None:
