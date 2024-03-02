@@ -116,9 +116,11 @@ class Environment(metaclass=abc.ABCMeta):
         self.config = config
         self._service = service
         self._service_context: Optional[Service] = None
-        self._is_ready = False
         self._in_context = False
         self._const_args: Dict[str, TunableValue] = config.get("const_args", {})
+
+        self._status = Status.PENDING
+        self._timestamp = datetime.utcnow()  # Timestamp of the last status update
         self._results: Optional[Dict[str, TunableValue]] = None
 
         if _LOG.isEnabledFor(logging.DEBUG):
@@ -294,6 +296,21 @@ class Environment(metaclass=abc.ABCMeta):
             group_names=list(self._tunable_params.get_covariant_group_names()),
             into_params=self._const_args.copy())
 
+    def _update(self, status: Status, timestamp: Optional[datetime] = None) -> None:
+        """
+        Helper function to update status/timestamp/results of the environment.
+
+        Parameters
+        ----------
+        status : Status
+            New status of the environment.
+        timestamp : datetime
+            New timestamp of the environment status.
+            Use current UTC timestamp if omitted.
+        """
+        self._status = status
+        self._timestamp = timestamp or datetime.utcnow()
+
     @property
     def tunable_params(self) -> TunableGroups:
         """
@@ -377,7 +394,8 @@ class Environment(metaclass=abc.ABCMeta):
         _LOG.info("Teardown %s", self)
         # Make sure we create a context before invoking setup/run/status/teardown
         assert self._in_context
-        self._is_ready = False
+        self._update(Status.PENDING)
+        self._results = None
 
     def run(self) -> bool:
         """
@@ -393,9 +411,11 @@ class Environment(metaclass=abc.ABCMeta):
         """
         # Make sure we create a context before invoking setup/run/status/teardown
         assert self._in_context
+        if not self._status.is_ready():
+            return False
+        self._update(Status.PENDING)
         self._results = None
-        (status, _timestamp, _telemetry) = self.status()
-        return status.is_good()
+        return True
 
     def results(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
         """
@@ -412,24 +432,39 @@ class Environment(metaclass=abc.ABCMeta):
             be in the `score` field.
         """
         assert self._in_context
-        (status, timestamp, _) = self.status()
+        (status, timestamp) = self.status()
         return (status, timestamp, self._results)
 
-    def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
+    def status(self) -> Tuple[Status, datetime]:
         """
         Check the status of the benchmark environment.
 
         Returns
         -------
-        (benchmark_status, timestamp, telemetry) : (Status, datetime, list)
-            3-tuple of (benchmark status, timestamp, telemetry) values.
+        (benchmark_status, timestamp) : (Status, datetime)
+            A pair of (benchmark status, timestamp) values.
             `timestamp` is UTC time stamp of the status; it's current time by default.
-            `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
         """
         # Make sure we create a context before invoking setup/run/status/teardown
         assert self._in_context
-        timestamp = datetime.utcnow()
-        if self._is_ready:
-            return (Status.READY, timestamp, [])
-        _LOG.warning("Environment not ready: %s", self)
-        return (Status.PENDING, timestamp, [])
+        return (self._status, self._timestamp)
+
+    def telemetry(self, timestamp: Optional[datetime] = None) -> List[Tuple[datetime, str, Any]]:
+        """
+        Get the telemetry data of the environment, if there is any.
+
+        Parameters
+        ----------
+        timestamp : datetime
+            UTC timestamp watermark of the telemetry data.
+            If specified, return telemetry with timestamps greater than the given one.
+            If None (default), return all telemetry data available.
+
+        Returns
+        -------
+        telemetry : List[Tuple[datetime, str, Any]]
+            A list (maybe empty) of (timestamp, metric, value) triplets.
+        """
+        # Make sure we create a context before invoking setup/run/status/teardown
+        assert self._in_context
+        return []

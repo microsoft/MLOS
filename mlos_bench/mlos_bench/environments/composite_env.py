@@ -6,6 +6,7 @@
 Composite benchmark environment.
 """
 
+import itertools
 import logging
 from datetime import datetime
 
@@ -164,9 +165,11 @@ class CompositeEnv(Environment):
             false otherwise.
         """
         assert self._in_context
-        self._is_ready = super().setup(tunables, global_config) and all(
+        _LOG.info("Setup: %s :: %s", self, self._children)
+        is_success = super().setup(tunables, global_config) and all(
             env_context.setup(tunables, global_config) for env_context in self._child_contexts)
-        return self._is_ready
+        _LOG.info("Setup: %s completed successfully: %s", self, is_success)
+        return is_success
 
     def teardown(self) -> None:
         """
@@ -175,6 +178,7 @@ class CompositeEnv(Environment):
         The environments are being torn down in the reverse order.
         """
         assert self._in_context
+        _LOG.info("Tear down: %s :: %s", self, self._children)
         for env_context in reversed(self._child_contexts):
             env_context.teardown()
         super().teardown()
@@ -188,6 +192,7 @@ class CompositeEnv(Environment):
         is_success : bool
             True if operation is successful, false otherwise.
         """
+        assert self._in_context
         _LOG.info("Run: %s :: %s", self, self._children)
         is_success = super().run() and all(
             env_context.run() for env_context in self._child_contexts)
@@ -213,14 +218,12 @@ class CompositeEnv(Environment):
         if status.is_in_setup():
             _LOG.debug("Env not ready: %s :: %s", self, status)
             return (status, timestamp, metrics)
-        if status.is_completed():
-            _LOG.debug("Env run completed: %s", self)
-            return (status, timestamp, metrics)
 
         joint_metrics = {}
         for env_context in self._child_contexts:
             _LOG.debug("Get results: %s", env_context)
             (status, timestamp, metrics) = env_context.results()
+            self._update(status, timestamp)
             _LOG.debug("Get results: %s :: %s %s", env_context, status, metrics)
             if not status.is_good():
                 _LOG.info("Get results failed: %s :: %s", self, status)
@@ -232,31 +235,48 @@ class CompositeEnv(Environment):
         # Return the status and the timestamp of the last child environment.
         return (status, timestamp, self._results)
 
-    def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
+    def status(self) -> Tuple[Status, datetime]:
         """
         Check the status of the benchmark environment.
 
         Returns
         -------
-        (benchmark_status, timestamp, telemetry) : (Status, datetime, list)
-            3-tuple of (benchmark status, timestamp, telemetry) values.
+        (benchmark_status, timestamp) : (Status, datetime)
+            A pair of (benchmark status, timestamp) values.
             `timestamp` is UTC time stamp of the status; it's current time by default.
-            `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
         """
-        (status, timestamp, telemetry) = super().status()
-        if not status.is_ready():
-            return (status, timestamp, telemetry)
+        (status, timestamp) = super().status()
+        if status.is_in_setup():
+            _LOG.debug("Env not ready: %s :: %s", self, status)
+            return (status, timestamp)
 
-        joint_telemetry = []
-        final_status = None
         for env_context in self._child_contexts:
-            (status, timestamp, telemetry) = env_context.status()
-            _LOG.debug("Child env. status: %s :: %s", env_context, status)
-            joint_telemetry.extend(telemetry)
-            if not status.is_good() and final_status is None:
-                final_status = status
+            _LOG.debug("Get status: %s", env_context)
+            (status, timestamp) = env_context.status()
+            self._update(status, timestamp)
+            _LOG.debug("Get status: %s :: %s %s", env_context, status)
+            if not status.is_good():
+                _LOG.info("Get failed status: %s :: %s", self, status)
+                break
 
-        final_status = final_status or status
-        _LOG.info("Final status: %s :: %s", self, final_status)
-        # Return the status and the timestamp of the last child environment or the first failed child environment.
-        return (final_status, timestamp, joint_telemetry)
+        return (status, timestamp)
+
+    def telemetry(self, timestamp: Optional[datetime] = None) -> List[Tuple[datetime, str, Any]]:
+        """
+        Get the telemetry data of the environment, if there is any.
+
+        Parameters
+        ----------
+        timestamp : datetime
+            UTC timestamp watermark of the telemetry data.
+            If specified, return telemetry with timestamps greater than the given one.
+            If None (default), return all telemetry data available.
+
+        Returns
+        -------
+        telemetry : List[Tuple[datetime, str, Any]]
+            A list (maybe empty) of (timestamp, metric, value) triplets.
+        """
+        return super().telemetry(timestamp) + list(itertools.chain(
+            *[env_context.telemetry(timestamp) for env_context in self._child_contexts]
+        ))

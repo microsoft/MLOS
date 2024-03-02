@@ -64,9 +64,16 @@ class Status(enum.Enum):
 
     def is_ready(self) -> bool:
         """
-        Check if the status of the benchmark/environment is READY.
+        Check if the environment is ready to execute the next trial,
+        i.e., one of {READY, SUCCEEDED, CANCELED, FAILED, TIMED_OUT}.
         """
-        return self == Status.READY
+        return self in {
+            Status.READY,
+            Status.SUCCEEDED,
+            Status.CANCELED,
+            Status.FAILED,
+            Status.TIMED_OUT,
+        }
 
     def is_running(self) -> bool:
         """
