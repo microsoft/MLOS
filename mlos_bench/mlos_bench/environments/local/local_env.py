@@ -147,27 +147,23 @@ class LocalEnv(ScriptEnv):
 
         if self._script_setup:
             (return_code, _output) = self._local_exec(self._script_setup, self._temp_dir)
-            self._is_ready = bool(return_code == 0)
-        else:
-            self._is_ready = True
+            if return_code != 0:
+                return False
 
-        return self._is_ready
+        self._update(Status.READY)
+        return True
 
-    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> bool:
         """
-        Run a script in the local scheduler environment.
+        Submit a new experiment to the environment.
 
         Returns
         -------
-        (status, timestamp, output) : (Status, datetime, dict)
-            3-tuple of (Status, timestamp, output) values, where `output` is a dict
-            with the results or None if the status is not COMPLETED.
-            If run script is a benchmark, then the score is usually expected to
-            be in the `score` field.
+        is_success : bool
+            True if operation is successful, false otherwise.
         """
-        (status, timestamp, _) = result = super().run()
-        if not status.is_ready():
-            return result
+        if not super().run():
+            return False
 
         assert self._temp_dir is not None
 
@@ -175,13 +171,15 @@ class LocalEnv(ScriptEnv):
         if self._script_run:
             (return_code, output) = self._local_exec(self._script_run, self._temp_dir)
             if return_code != 0:
-                return (Status.FAILED, timestamp, None)
+                self._update(Status.FAILED)
+                return False
             stdout_data = self._extract_stdout_results(output.get("stdout", ""))
 
         # FIXME: We should not be assuming that the only output file type is a CSV.
         if not self._read_results_file:
             _LOG.debug("Not reading the data at: %s", self)
-            return (Status.SUCCEEDED, timestamp, stdout_data)
+            self._update(Status.SUCCEEDED)
+            return True
 
         data = self._normalize_columns(pandas.read_csv(
             self._config_loader_service.resolve_path(
@@ -202,7 +200,10 @@ class LocalEnv(ScriptEnv):
 
         stdout_data.update(data.iloc[-1].to_dict())
         _LOG.info("Local run complete: %s ::\n%s", self, stdout_data)
-        return (Status.SUCCEEDED, timestamp, stdout_data)
+
+        self._results = stdout_data
+        self._update(Status.SUCCEEDED)
+        return True
 
     @staticmethod
     def _normalize_columns(data: pandas.DataFrame) -> pandas.DataFrame:
@@ -247,8 +248,22 @@ class LocalEnv(ScriptEnv):
             raise ValueError(f"Invalid date range in the telemetry data: {datetime_col}")
         return new_datetime_col
 
-    def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
+    def telemetry(self, timestamp: Optional[datetime] = None) -> List[Tuple[datetime, str, Any]]:
+        """
+        Get the telemetry data of the environment, if there is any.
 
+        Parameters
+        ----------
+        timestamp : datetime
+            UTC timestamp watermark of the telemetry data.
+            If specified, return telemetry with timestamps greater than the given one.
+            If None (default), return all telemetry data available.
+
+        Returns
+        -------
+        telemetry : List[Tuple[datetime, str, Any]]
+            A list (maybe empty) of (timestamp, metric, value) triplets.
+        """
         (status, timestamp, _) = super().status()
         if not (self._is_ready and self._read_telemetry_file):
             return (status, timestamp, [])
