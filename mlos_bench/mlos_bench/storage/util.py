@@ -10,7 +10,7 @@ from typing import Dict, Optional
 
 import pandas
 
-from mlos_bench.tunables.tunable import TunableValue
+from mlos_bench.tunables.tunable import TunableValue, TunableValueTypeTuple
 from mlos_bench.util import try_parse_val
 
 
@@ -32,7 +32,7 @@ def kv_df_to_dict(dataframe: pandas.DataFrame) -> Dict[str, Optional[TunableValu
     data = {}
     for _, row in dataframe.astype('O').iterrows():
         assert isinstance(row['parameter'], str)
-        assert row['value'] is None or isinstance(row['value'], (str, int, float))
+        assert isinstance(row['value'], TunableValueTypeTuple)
         if row['parameter'] in data:
             raise ValueError(f"Duplicate parameter '{row['parameter']}' in dataframe")
         data[row['parameter']] = try_parse_val(row['value']) if isinstance(row['value'], str) else row['value']
