@@ -7,4 +7,4 @@ Version number for the mlos_bench package.
 """
 
 # NOTE: This should be managed by bumpversion.
-_VERSION = '0.5.0'
+_VERSION = '0.5.1'
