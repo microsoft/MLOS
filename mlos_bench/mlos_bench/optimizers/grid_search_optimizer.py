@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Mock optimizer for mlos_bench.
+Grid search optimizer for mlos_bench.
 """
 
 import logging
@@ -11,6 +11,7 @@ import logging
 from typing import Dict, Iterable, Set, Optional, Sequence, Tuple, Union
 
 import numpy as np
+import ConfigSpace
 from ConfigSpace.util import generate_grid
 
 from mlos_bench.environments.status import Status
@@ -35,13 +36,21 @@ class GridSearchOptimizer(Optimizer):
                  service: Optional[Service] = None):
         super().__init__(tunables, config, global_config, service)
 
-        self._sanity_check()
-        self._tunable_names = tuple(tunable.name for (tunable, _group) in self._tunables)
-        self._pending_configs = self._get_grid()
-        assert self._pending_configs
-        self._suggested_configs: Set[Tuple[TunableValue, ...]] = set()
         self._best_config: Optional[TunableGroups] = None
         self._best_score: Optional[float] = None
+
+        # Track the grid as a set of tuples of tunable values and reconstruct the
+        # dicts as necessary.
+        # Note: this is not the most effecient way to do this, but avoids
+        # introducing a new data structure for hashable dicts.
+        # See https://github.com/microsoft/MLOS/pull/690 for further discussion.
+
+        self._sanity_check()
+        # The ordered set of pending configs that have not yet been suggested.
+        self._config_keys, self._pending_configs = self._get_grid()
+        assert self._pending_configs
+        # A set of suggested configs that have not yet been registered.
+        self._suggested_configs: Set[Tuple[TunableValue, ...]] = set()
 
     def _sanity_check(self) -> None:
         size = 1
@@ -50,23 +59,30 @@ class GridSearchOptimizer(Optimizer):
             if cardinality == np.inf:
                 raise ValueError(f"Unquantized tunables are not supported for grid search: {self.tunable_params}")
             size *= int(cardinality)
-        if cardinality > 10000:
-            _LOG.warning("Large number of config points requested for grid search: %s", self.tunable_params)
+        if size > 10000:
+            _LOG.warning("Large number %d of config points requested for grid search: %s", size, self.tunable_params)
 
-    def _get_grid(self) -> Dict[Tuple[TunableValue, ...], None]:
+    def _get_grid(self) -> Tuple[Tuple[str, ...], Dict[Tuple[TunableValue, ...], None]]:
         """
         Gets a grid of configs to try.
+
         Order is given by ConfigSpace, but preserved by dict ordering semantics.
         """
-        return {
-            tuple(configspace_data_to_tunable_values(dict(config)).values()): None
+        # Since we are using ConfigSpace to generate the grid, but only tracking the
+        # values as (ordered) tuples, we also need to use its ordering on column
+        # names instead of the order given by TunableGroups.
+        configs = [
+            configspace_data_to_tunable_values(dict(config))
             for config in
             generate_grid(self.config_space, {
                 tunable.name: int(tunable.cardinality)
                 for (tunable, _group) in self._tunables
                 if tunable.quantization or tunable.type == "int"
             })
-        }
+        ]
+        names = set(tuple(configs.keys()) for configs in configs)
+        assert len(names) == 1
+        return names.pop(), {tuple(configs.values()): None for configs in configs}
 
     @property
     def pending_configs(self) -> Iterable[Dict[str, TunableValue]]:
@@ -75,9 +91,10 @@ class GridSearchOptimizer(Optimizer):
 
         Returns
         -------
-        List[Dict[str, TunableValue]]
+        Iterable[Dict[str, TunableValue]]
         """
-        return (dict(zip(self._tunable_names, config)) for config in self._pending_configs.keys())
+        # See NOTEs above.
+        return (dict(zip(self._config_keys, config)) for config in self._pending_configs.keys())
 
     @property
     def suggested_configs(self) -> Iterable[Dict[str, TunableValue]]:
@@ -88,7 +105,8 @@ class GridSearchOptimizer(Optimizer):
         -------
         Iterable[Dict[str, TunableValue]]
         """
-        return (dict(zip(self._tunable_names, config)) for config in self._pending_configs.keys())
+        # See NOTEs above.
+        return (dict(zip(self._config_keys, config)) for config in self._suggested_configs)
 
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
                       status: Optional[Sequence[Status]] = None, is_warm_up: bool = False) -> bool:
@@ -116,15 +134,23 @@ class GridSearchOptimizer(Optimizer):
             _LOG.info("Use default values for the first trial")
             self._start_with_defaults = False
             tunables = tunables.restore_defaults()
-            default_config = tunables.get_param_values()
-            default_config_values = tuple(default_config.values())
+            # Need to index based on ConfigSpace dict ordering.
+            default_config = dict(self.config_space.get_default_configuration())
+            assert tunables.get_param_values() == default_config
             # Move the default from the pending to the suggested set.
+            default_config_values = tuple(default_config.values())
             del self._pending_configs[default_config_values]
             self._suggested_configs.add(default_config_values)
         else:
             # Select the first item from the pending configs.
-            next_config_values = next(iter(self._pending_configs.keys()))
-            next_config = dict(zip(self._tunable_names, next_config_values))
+            if not self._pending_configs and self._iter <= self._max_iter:
+                _LOG.info("No more pending configs to suggest. Restarting grid.")
+                self._config_keys, self._pending_configs = self._get_grid()
+            try:
+                next_config_values = next(iter(self._pending_configs.keys()))
+            except StopIteration as exc:
+                raise ValueError("No more pending configs to suggest.") from exc
+            next_config = dict(zip(self._config_keys, next_config_values))
             tunables.assign(next_config)
             # Move it to the suggested set.
             self._suggested_configs.add(next_config_values)
@@ -142,10 +168,18 @@ class GridSearchOptimizer(Optimizer):
             self._best_config = tunables.copy()
         self._iter += 1
         try:
-            self._suggested_configs.remove(tunables.get_param_values().values())
+            config = dict(ConfigSpace.Configuration(self.config_space, values=tunables.get_param_values()))
+            self._suggested_configs.remove(tuple(config.values()))
         except KeyError:
-            pass
+            _LOG.warning("Attempted to remove missing config (previously registered?) from suggested set: %s", tunables)
         return registered_score
+
+    def not_converged(self) -> bool:
+        if self._iter > self._max_iter:
+            if bool(self._pending_configs):
+                _LOG.warning("Exceeded max iterations, but still have %d pending configs: %s",
+                             len(self._pending_configs), list(self._pending_configs.keys()))
+        return self._iter <= self._max_iter and bool(self._pending_configs)
 
     def get_best_observation(self) -> Union[Tuple[float, TunableGroups], Tuple[None, None]]:
         if self._best_score is None:

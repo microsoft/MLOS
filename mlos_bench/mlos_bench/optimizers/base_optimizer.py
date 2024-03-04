@@ -122,6 +122,16 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         return False  # Do not suppress exceptions
 
     @property
+    def current_iteration(self) -> int:
+        """
+        The current number of iterations (trials) registered.
+
+        Note: this may or may not be the same as the number of configurations.
+        See Also: Launcher.trial_config_repeat_count.
+        """
+        return self._iter
+
+    @property
     def max_iterations(self) -> int:
         """
         The maximum number of iterations (trials) to run.
