@@ -39,6 +39,9 @@ class TunableGroups:
     def __bool__(self) -> bool:
         return bool(self._index)
 
+    def __len__(self) -> int:
+        return len(self._index)
+
     def __eq__(self, other: object) -> bool:
         """
         Check if two TunableGroups are equal.
@@ -170,9 +173,6 @@ class TunableGroups:
             of an instance of the Tunable parameter and covariant group it belongs to.
         """
         return ((group.get_tunable(name), group) for (name, group) in self._index.items())
-
-    def __len__(self) -> int:
-        return len(self._index)
 
     def get_tunable(self, tunable: Union[str, Tunable]) -> Tuple[Tunable, CovariantTunableGroup]:
         """
