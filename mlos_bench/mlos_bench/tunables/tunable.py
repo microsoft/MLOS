@@ -9,7 +9,9 @@ import copy
 import collections
 import logging
 
-from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Type, TypedDict, Union
+from typing import Any, Dict, Iterable, List, Literal, Optional, Sequence, Tuple, Type, TypedDict, Union
+
+import numpy as np
 
 _LOG = logging.getLogger(__name__)
 
@@ -17,6 +19,22 @@ _LOG = logging.getLogger(__name__)
 """A tunable parameter value type alias."""
 TunableValue = Union[int, float, Optional[str]]
 
+"""Tunable value type."""
+TunableValueType = Union[Type[int], Type[float], Type[str]]
+
+"""
+Tunable value type tuple.
+For checking with isinstance()
+"""
+TunableValueTypeTuple = (int, float, str, type(None))
+
+"""The string name of a tunable value type."""
+TunableValueTypeName = Literal["int", "float", "categorical"]
+
+"""Tunable values dictionary type"""
+TunableValuesDict = Dict[str, TunableValue]
+
+"""Tunable value distribution type"""
 DistributionName = Literal["uniform", "normal", "beta"]
 
 
@@ -38,7 +56,7 @@ class TunableDict(TypedDict, total=False):
     These are the types expected to be received from the json config.
     """
 
-    type: str
+    type: TunableValueTypeName
     description: Optional[str]
     default: TunableValue
     values: Optional[List[Optional[str]]]
@@ -59,7 +77,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     """
 
     # Maps tunable types to their corresponding Python types by name.
-    _DTYPE: Dict[str, Type] = {
+    _DTYPE: Dict[TunableValueTypeName, TunableValueType] = {
         "int": int,
         "float": float,
         "categorical": str,
@@ -79,7 +97,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         if not isinstance(name, str) or '!' in name:  # TODO: Use a regex here and in JSON schema
             raise ValueError(f"Invalid name of the tunable: {name}")
         self._name = name
-        self._type = config["type"]  # required
+        self._type: TunableValueTypeName = config["type"]  # required
         if self._type not in self._DTYPE:
             raise ValueError(f"Invalid parameter type: {self._type}")
         self._description = config.get("description")
@@ -482,7 +500,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._range_weight
 
     @property
-    def type(self) -> str:
+    def type(self) -> TunableValueTypeName:
         """
         Get the data type of the tunable.
 
@@ -494,7 +512,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._type
 
     @property
-    def dtype(self) -> Type:
+    def dtype(self) -> TunableValueType:
         """
         Get the actual Python data type of the tunable.
 
