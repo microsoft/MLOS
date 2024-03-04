@@ -9,7 +9,9 @@ import copy
 import collections
 import logging
 
-from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Type, TypedDict, Union
+from typing import Any, Dict, Iterable, List, Literal, Optional, Sequence, Tuple, Type, TypedDict, Union
+
+import numpy as np
 
 _LOG = logging.getLogger(__name__)
 
@@ -353,6 +355,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         is_valid : bool
             True if the value is valid, False otherwise.
         """
+        # FIXME: quantization check?
         if self.is_categorical and self._values:
             return value in self._values
         elif self.is_numerical and self._range:
@@ -547,17 +550,77 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._range
 
     @property
+    def span(self) -> Union[int, float]:
+        """
+        Gets the span of the range.
+
+        Note: this does not take quantization into account.
+
+        Returns
+        -------
+        Union[int, float]
+            (max - min) for numerical tunables.
+        """
+        num_range = self.range
+        return num_range[1] - num_range[0]
+
+    @property
     def quantization(self) -> Optional[Union[int, float]]:
         """
-        Get the number of quantization points, if specified.
+        Get the quantization factor, if specified.
 
         Returns
         -------
         quantization : int, float, None
-            Number of quantization points or None.
+            The quantization factor, or None.
         """
-        assert self.is_numerical
+        if self.is_categorical:
+            return None
         return self._quantization
+
+    @property
+    def quantized_values(self) -> Optional[Union[Iterable[int], Iterable[float]]]:
+        """
+        Get a sequence of quanitized values for this tunable.
+
+        Returns
+        -------
+        Optional[Union[Iterable[int], Iterable[float]]]
+            If the Tunable is quantizable, returns a sequence of those elements,
+            else None (e.g., for unquantized float type tunables).
+        """
+        num_range = self.range
+        if self.type == "float":
+            if not self._quantization:
+                return None
+            # Be sure to return python types instead of numpy types.
+            cardinality = self.cardinality
+            assert isinstance(cardinality, int)
+            return (float(x) for x in np.linspace(start=num_range[0],
+                                                  stop=num_range[1],
+                                                  num=cardinality,
+                                                  endpoint=True))
+        assert self.type == "int", f"Unhandled tunable type: {self}"
+        return range(int(num_range[0]), int(num_range[1]) + 1, int(self._quantization or 1))
+
+    @property
+    def cardinality(self) -> Union[int, float]:
+        """
+        Gets the cardinality of elements in this tunable, or else infinity.
+
+        If the tunable has quantization set, this
+
+        Returns
+        -------
+        cardinality : int, float
+            Either the number of points in the tunable or else infinity.
+        """
+        if self.is_categorical:
+            return len(self.categories)
+        if not self.quantization and self.type == "float":
+            return np.inf
+        q_factor = self.quantization or 1
+        return int(self.span / q_factor) + 1
 
     @property
     def is_log(self) -> Optional[bool]:
@@ -611,6 +674,21 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         assert self.is_categorical
         assert self._values is not None
         return self._values
+
+    @property
+    def values(self) -> Optional[Union[Iterable[Optional[str]], Iterable[int], Iterable[float]]]:
+        """
+        Gets the categories or quantized values for this tunable.
+
+        Returns
+        -------
+        Optional[Union[Iterable[Optional[str]], Iterable[int], Iterable[float]]]
+            Categories or quantized values.
+        """
+        if self.is_categorical:
+            return self.categories
+        assert self.is_numerical
+        return self.quantized_values
 
     @property
     def meta(self) -> Dict[str, Any]:
