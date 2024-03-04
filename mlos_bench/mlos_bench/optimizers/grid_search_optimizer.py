@@ -61,6 +61,8 @@ class GridSearchOptimizer(Optimizer):
             size *= int(cardinality)
         if size > 10000:
             _LOG.warning("Large number %d of config points requested for grid search: %s", size, self.tunable_params)
+        if size > self._max_iter:
+            _LOG.warning("Grid search size %d, is greater than max iterations %d", size, self._max_iter)
 
     def _get_grid(self) -> Tuple[Tuple[str, ...], Dict[Tuple[TunableValue, ...], None]]:
         """
