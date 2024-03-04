@@ -15,10 +15,13 @@ from types import TracebackType
 from typing import Dict, Optional, Sequence, Tuple, Type, Union
 from typing_extensions import Literal
 
+from ConfigSpace import ConfigurationSpace
+
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.optimizers.convert_configspace import tunable_groups_to_configspace
 
 _LOG = logging.getLogger(__name__)
 
@@ -60,6 +63,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._config = config.copy()
         self._global_config = global_config or {}
         self._tunables = tunables
+        self._config_space: Optional[ConfigurationSpace] = None
         self._service = service
         self._seed = int(config.get("seed", 42))
         self._in_context = False
@@ -118,6 +122,16 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         return False  # Do not suppress exceptions
 
     @property
+    def current_iteration(self) -> int:
+        """
+        The current number of iterations (trials) registered.
+
+        Note: this may or may not be the same as the number of configurations.
+        See Also: Launcher.trial_config_repeat_count.
+        """
+        return self._iter
+
+    @property
     def max_iterations(self) -> int:
         """
         The maximum number of iterations (trials) to run.
@@ -146,7 +160,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     @property
     def tunable_params(self) -> TunableGroups:
         """
-        Get the configuration space of the optimizer.
+        Get the tunable parameters of the optimizer as TunableGroups.
 
         Returns
         -------
@@ -154,6 +168,21 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             A collection of covariant groups of tunable parameters.
         """
         return self._tunables
+
+    @property
+    def config_space(self) -> ConfigurationSpace:
+        """
+        Get the tunable parameters of the optimizer as a ConfigurationSpace.
+
+        Returns
+        -------
+        ConfigurationSpace
+            The ConfigSpace representation of the tunable parameters.
+        """
+        if self._config_space is None:
+            self._config_space = tunable_groups_to_configspace(self._tunables, self._seed)
+            _LOG.debug("ConfigSpace: %s", self._config_space)
+        return self._config_space
 
     @property
     def name(self) -> str:
