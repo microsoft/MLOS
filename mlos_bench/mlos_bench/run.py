@@ -25,10 +25,14 @@ def _main(argv: Optional[List[str]] = None) -> Tuple[Optional[float], Optional[T
 
     launcher = Launcher("mlos_bench", "Systems autotuning and benchmarking tool", argv=argv)
 
+    # TODO: Instantiate Scheduler from JSON config
     scheduler = SyncScheduler(
         config={
-            "teardown": launcher.teardown,
+            "experiment_id": "UNDEFINED - override from global config",
+            "trial_id": 0,    # Override from global config
+            "config_id": -1,  # Override from global config
             "trial_config_repeat_count": launcher.trial_config_repeat_count,
+            "teardown": launcher.teardown,
         },
         global_config=launcher.global_config,
         environment=launcher.environment,
@@ -37,11 +41,13 @@ def _main(argv: Optional[List[str]] = None) -> Tuple[Optional[float], Optional[T
         root_env_config=launcher.root_env_config,
     )
 
-    with scheduler.context() as scheduler_context:
+    with scheduler as scheduler_context:
         scheduler_context.start()
+        scheduler_context.teardown()
 
-    result = scheduler.get_best_observation()
-    _LOG.info("Final result: %s", result)
+    (score, _config) = result = scheduler.get_best_observation()
+    # NOTE: This log line is used in test_launch_main_app_* unit tests:
+    _LOG.info("Final score: %s", score)
     return result
 
 

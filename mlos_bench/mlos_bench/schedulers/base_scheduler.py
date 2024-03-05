@@ -16,7 +16,6 @@ from typing import Any, Dict, Optional, Tuple, Type
 from typing_extensions import Literal
 
 from mlos_bench.environments.base_environment import Environment
-from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -101,12 +100,6 @@ class Scheduler(metaclass=ABCMeta):
         self.experiment = None
         return False  # Do not suppress exceptions
 
-    def context(self) -> 'Scheduler':
-        """
-        Return the current context.
-        """
-        return self
-
     @abstractmethod
     def start(self) -> None:
         """
@@ -119,13 +112,13 @@ class Scheduler(metaclass=ABCMeta):
             _LOG.info("Root Environment:\n%s", self.environment.pprint())
 
         if self._config_id > 0:
-            tunables = self._load_config(self._config_id)
-            self._schedule_trial(tunables)
+            tunables = self.load_config(self._config_id)
+            self.schedule_trial(tunables)
 
-    def _teardown(self) -> None:
+    def teardown(self) -> None:
         """
         Tear down the environment.
-        Call this method at the end of the `.start()` implementation (?).
+        Call it after the completion of the `.start()` in the scheduler context.
         """
         assert self.experiment is not None
         if self._do_teardown:
@@ -139,7 +132,7 @@ class Scheduler(metaclass=ABCMeta):
         _LOG.info("Env: %s best score: %s", self.environment, best_score)
         return (best_score, best_config)
 
-    def _load_config(self, config_id: int) -> TunableGroups:
+    def load_config(self, config_id: int) -> TunableGroups:
         """
         Load the existing tunable configuration from the storage.
         """
@@ -160,14 +153,15 @@ class Scheduler(metaclass=ABCMeta):
         """
         assert self.experiment is not None
         (trial_ids, configs, scores, status) = self.experiment.load(last_trial_id)
+        _LOG.info("QUEUE: Update the optimizer with trial results: %s", trial_ids)
         self.optimizer.bulk_register(configs, scores, status, is_warm_up)
 
         tunables = self.optimizer.suggest()
-        self._schedule_trial(tunables)
+        self.schedule_trial(tunables)
 
         return max(trial_ids, default=last_trial_id)
 
-    def _schedule_trial(self, tunables: TunableGroups) -> None:
+    def schedule_trial(self, tunables: TunableGroups) -> None:
         """
         Add a configuration to the queue of trials.
         """
@@ -197,7 +191,8 @@ class Scheduler(metaclass=ABCMeta):
         A wrapper for the `Experiment.new_trial` method.
         """
         assert self.experiment is not None
-        self.experiment.new_trial(tunables, ts_start, config)
+        trial = self.experiment.new_trial(tunables, ts_start, config)
+        _LOG.info("QUEUE: Add new trial: %s", trial)
 
     def _run_schedule(self, running: bool = False) -> None:
         """
@@ -205,30 +200,12 @@ class Scheduler(metaclass=ABCMeta):
         """
         assert self.experiment is not None
         for trial in self.experiment.pending_trials(datetime.utcnow(), running=running):
-            self._run_trial(trial)
+            self.run_trial(trial)
 
-    def _run_trial(self, trial: Storage.Trial) -> None:
+    @abstractmethod
+    def run_trial(self, trial: Storage.Trial) -> None:
         """
         Set up and run a single trial. Save the results in the storage.
         """
-        _LOG.info("Trial: %s", trial)
         assert self.experiment is not None
-
-        if not self.environment.setup(trial.tunables, trial.config(self.global_config)):
-            _LOG.warning("Setup failed: %s :: %s", self.environment, trial.tunables)
-            # FIXME: Use the actual timestamp from the environment.
-            trial.update(Status.FAILED, datetime.utcnow())
-            return
-
-        (status, timestamp, results) = self.environment.run()  # Block and wait for the final result.
-        _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
-
-        # In async mode (TODO), poll the environment for status and telemetry
-        # and update the storage with the intermediate results.
-        (_status, _timestamp, telemetry) = self.environment.status()
-
-        # Use the status and timestamp from `.run()` as it is the final status of the experiment.
-        # TODO: Use the `.status()` output in async mode.
-        trial.update_telemetry(status, timestamp, telemetry)
-
-        trial.update(status, timestamp, results)
+        _LOG.info("QUEUE: Execute trial: %s", trial)
