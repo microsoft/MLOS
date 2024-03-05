@@ -360,6 +360,13 @@ class Storage(metaclass=ABCMeta):
             return self._tunable_config_id
 
         @property
+        def trial_runner_id(self) -> Optional[int]:
+            """
+            ID of the TrialRunner this trial is assigned to.
+            """
+            return self._config.get("trial_runner_id")
+
+        @property
         def opt_target(self) -> str:
             """
             Get the Trial's optimization target.

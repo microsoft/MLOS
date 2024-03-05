@@ -34,16 +34,19 @@ class TrialData(metaclass=ABCMeta):
                  tunable_config_id: int,
                  ts_start: datetime,
                  ts_end: Optional[datetime],
-                 status: Status):
+                 status: Status,
+                 trial_runner_id: Optional[int] = None):
         self._experiment_id = experiment_id
         self._trial_id = trial_id
         self._tunable_config_id = tunable_config_id
         self._ts_start = ts_start
         self._ts_end = ts_end
         self._status = status
+        self._trial_runner_id = trial_runner_id
 
     def __repr__(self) -> str:
-        return f"Trial :: {self._experiment_id}:{self._trial_id} cid:{self._tunable_config_id} {self._status.name}"
+        return f"Trial :: {self._experiment_id}:{self._trial_id} cid:{self._tunable_config_id} " \
+            + f"rid:{self._trial_runner_id} {self._status.name}"
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, self.__class__):
@@ -63,6 +66,15 @@ class TrialData(metaclass=ABCMeta):
         ID of the trial.
         """
         return self._trial_id
+
+    @property
+    def trial_runner_id(self) -> Optional[int]:
+        """
+        ID of the TrialRunner.
+        """
+        if not self._trial_runner_id:
+            self._trial_runner_id = self.metadata_dict.get("trial_runner_id")
+        return self._trial_runner_id
 
     @property
     def ts_start(self) -> datetime:
