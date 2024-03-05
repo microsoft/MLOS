@@ -23,6 +23,7 @@ from ConfigSpace import (
 )
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.util import try_parse_val
 
 _LOG = logging.getLogger(__name__)
 
@@ -215,7 +216,7 @@ def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
     return Configuration(configspace, values=values)
 
 
-def configspace_data_to_tunable_values(data: dict) -> dict:
+def configspace_data_to_tunable_values(data: dict) -> Dict[str, TunableValue]:
     """
     Remove the fields that correspond to special values in ConfigSpace.
     In particular, remove and keys suffixes added by `special_param_names`.
@@ -232,6 +233,8 @@ def configspace_data_to_tunable_values(data: dict) -> dict:
         if special_name in data:
             del data[special_name]
         del data[type_name]
+    # May need to convert numpy values to regular types.
+    data = {k: try_parse_val(v) for k, v in data.items()}
     return data
 
 
