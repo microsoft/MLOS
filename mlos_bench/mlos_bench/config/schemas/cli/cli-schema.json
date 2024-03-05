@@ -74,6 +74,13 @@
             "examples": [3, 5]
         },
 
+        "trial_runners": {
+            "description": "Number of trial runners to run in parallel. Individual TrialRunners can be identified in configs with $trial_runner_id.",
+            "type": "integer",
+            "minimum": 1,
+            "examples": [1, 3, 5, 10]
+        },
+
         "storage": {
             "description": "Path to the json config describing the storage backend to use.",
             "$ref": "#/$defs/json_config_path"

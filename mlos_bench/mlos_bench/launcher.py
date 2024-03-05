@@ -23,6 +23,7 @@ from mlos_bench.util import try_parse_val
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.environments.base_environment import Environment
+from mlos_bench.trial_runner import TrialRunner
 
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
@@ -82,6 +83,12 @@ class Launcher:
         if self.trial_config_repeat_count <= 0:
             raise ValueError(f"Invalid trial_config_repeat_count: {self.trial_config_repeat_count}")
 
+        self.num_trial_runners: int = (
+            args.trial_runners or config.get("trial_runners", 1)
+        )
+        if self.num_trial_runners <= 0:
+            raise ValueError(f"Invalid trial_runners: {self.num_trial_runners}")
+
         log_level = args.log_level or config.get("log_level", _LOG_LEVEL)
         try:
             log_level = int(log_level)
@@ -127,12 +134,21 @@ class Launcher:
                          " Run `mlos_bench --help` and consult `README.md` for more info.")
         self.root_env_config = self._config_loader.resolve_path(env_path)
 
-        self.environment: Environment = self._config_loader.load_environment(
-            self.root_env_config, TunableGroups(), self.global_config, service=self._parent_service)
-        _LOG.info("Init environment: %s", self.environment)
+        self.trial_runners: List[TrialRunner] = []
+        for trial_runner_id in range(0, self.num_trial_runners):
+            # Create a new global config for each Environment with a unique trial_runner_id for it.
+            global_config = self.global_config.copy()
+            global_config["trial_runner_id"] = trial_runner_id
+            env = self._config_loader.load_environment(
+                self.root_env_config, TunableGroups(), global_config, service=self._parent_service)
+            self.trial_runners[trial_runner_id] = TrialRunner(trial_runner_id, env)
+        _LOG.info("Init %d trial runners for environments: %s",
+                  self.trial_runners, list(trial_runner.environment for trial_runner in self.trial_runners))
 
-        # NOTE: Init tunable values *after* the Environment, but *before* the Optimizer
+        # NOTE: Init tunable values *after* the Environment(s), but *before* the Optimizer
+        # TODO: should we assign the same or different tunables for all TrialRunner Environments?
         self.tunables = self._init_tunable_values(
+            self.trial_runners[0].environment,
             args.random_init or config.get("random_init", False),
             config.get("random_seed") if args.random_seed is None else args.random_seed,
             config.get("tunable_values", []) + (args.tunable_values or [])
@@ -205,6 +221,11 @@ class Launcher:
         parser.add_argument(
             '--trial_config_repeat_count', '--trial-config-repeat-count', required=False, type=int, default=1,
             help='Number of times to repeat each config. Default is 1 trial per config, though more may be advised.')
+
+        parser.add_argument(
+            '--trial_runners', '--trial-runners', required=False, type=int, default=1,
+            help='Number of trial runners to run in parallel. '
+            + 'Individual TrialRunners can be identified in configs with $trial_runner_id.')
 
         parser.add_argument(
             '--storage', required=False,
@@ -307,13 +328,13 @@ class Launcher:
             global_config["config_path"] = config_path
         return global_config
 
-    def _init_tunable_values(self, random_init: bool, seed: Optional[int],
+    def _init_tunable_values(self, env: Environment, random_init: bool, seed: Optional[int],
                              args_tunables: Optional[str]) -> TunableGroups:
         """
         Initialize the tunables and load key/value pairs of the tunable values
         from given JSON files, if specified.
         """
-        tunables = self.environment.tunable_params
+        tunables = env.tunable_params
         _LOG.debug("Init tunables: default = %s", tunables)
 
         if random_init:
@@ -321,6 +342,8 @@ class Launcher:
                 tunables=tunables, service=None,
                 config={"start_with_defaults": False, "seed": seed}).suggest()
             _LOG.debug("Init tunables: random = %s", tunables)
+
+        # TODO: should we assign the same or different tunables for all TrialRunner Environments?
 
         if args_tunables is not None:
             for data_file in args_tunables:

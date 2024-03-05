@@ -14,13 +14,14 @@ See `--help` output for details.
 import json
 import logging
 from datetime import datetime
-from typing import Optional, Tuple, Dict, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 from mlos_bench.launcher import Launcher
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.environments.status import Status
+from mlos_bench.trial_runner import TrialRunner
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -31,7 +32,7 @@ def _main() -> Tuple[Optional[float], Optional[TunableGroups]]:
     launcher = Launcher("mlos_bench", "Systems autotuning and benchmarking tool")
 
     result = _optimization_loop(
-        env=launcher.environment,
+        trial_runners=launcher.trial_runners,
         opt=launcher.optimizer,
         storage=launcher.storage,
         root_env_config=launcher.root_env_config,
@@ -45,7 +46,7 @@ def _main() -> Tuple[Optional[float], Optional[TunableGroups]]:
 
 
 def _optimization_loop(*,
-                       env: Environment,
+                       trial_runners: List[TrialRunner],
                        opt: Optimizer,
                        storage: Storage,
                        root_env_config: str,
@@ -58,10 +59,10 @@ def _optimization_loop(*,
 
     Parameters
     ----------
-    env : Environment
-        benchmarking environment to run the optimization on.
+    trial_runners : List[TrialRunner]
+        TrialRunner (benchmarking Environment) to run the optimization Trials on.
     opt : Optimizer
-        An interface to mlos_core optimizers.
+        An interface to mlos_core or other optimizers.
     storage : Storage
         A storage system to persist the experiment data.
     root_env_config : str
@@ -80,8 +81,9 @@ def _optimization_loop(*,
     # experiment configuration is compatible with the previous runs.
     # If the `merge` config parameter is present, merge in the data
     # from other experiments and check for compatibility.
-    with env as env_context, \
-         opt as opt_context, \
+    env = trial_runners[0].environment
+# HERE: continue replacing env context with trial_runners ...
+    with opt as opt_context, \
          storage.experiment(
             experiment_id=global_config["experiment_id"].strip(),
             trial_id=int(global_config["trial_id"]),
