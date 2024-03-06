@@ -29,7 +29,6 @@ from mlos_bench.optimizers.convert_configspace import (
     TunableValueKind,
     configspace_data_to_tunable_values,
     special_param_names,
-    tunable_groups_to_configspace,
 )
 
 _LOG = logging.getLogger(__name__)
@@ -47,17 +46,10 @@ class MlosCoreOptimizer(Optimizer):
                  service: Optional[Service] = None):
         super().__init__(tunables, config, global_config, service)
 
-        seed = config.get("seed")
-        seed = None if seed is None else int(seed)
-
-        space = tunable_groups_to_configspace(tunables, seed)
-        _LOG.debug("ConfigSpace: %s", space)
-
         opt_type = getattr(OptimizerType, self._config.pop(
             'optimizer_type', DEFAULT_OPTIMIZER_TYPE.name))
 
         if opt_type == OptimizerType.SMAC:
-
             output_directory = self._config.get('output_directory')
             if output_directory is not None:
                 # If output_directory is specified, turn it into an absolute path.
@@ -81,7 +73,7 @@ class MlosCoreOptimizer(Optimizer):
             space_adapter_type = getattr(SpaceAdapterType, space_adapter_type)
 
         self._opt: BaseOptimizer = OptimizerFactory.create(
-            parameter_space=space,
+            parameter_space=self.config_space,
             optimizer_type=opt_type,
             optimizer_kwargs=self._config,
             space_adapter_type=space_adapter_type,
@@ -186,5 +178,7 @@ class MlosCoreOptimizer(Optimizer):
             return (None, None)
         params = configspace_data_to_tunable_values(df_config.iloc[0].to_dict())
         _LOG.debug("Best observation: %s", params)
-        score = params.pop("score") * self._opt_sign  # mlos_core always uses the `score` column
+        score = params.pop("score")
+        assert score is not None
+        score = float(score) * self._opt_sign  # mlos_core always uses the `score` column
         return (score, self._tunables.copy().assign(params))
