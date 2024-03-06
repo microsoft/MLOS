@@ -12,14 +12,14 @@ from datetime import datetime
 
 from abc import ABCMeta, abstractmethod
 from types import TracebackType
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Iterable, Optional, Tuple, Type
 from typing_extensions import Literal
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.trial_runner import TrialRunner
+from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.util import merge_parameters
 
 _LOG = logging.getLogger(__name__)
@@ -59,6 +59,7 @@ class Scheduler(metaclass=ABCMeta):
         self._optimizer = optimizer
         self._storage = storage
         self._root_env_config = root_env_config
+        self._current_trial_runner_idx = 0
 
     @property
     def experiment(self) -> Optional[Storage.Experiment]:
@@ -66,14 +67,19 @@ class Scheduler(metaclass=ABCMeta):
         return self._experiment
 
     @property
-    def environment(self) -> Environment:
-        """Gets the Environment."""
-        return self._trial_runners[0]
+    def root_environment(self) -> Environment:
+        """Gets the root Environment from the first TrialRunner."""
+        return self._trial_runners[0].environment
 
     @property
     def trial_runners(self) -> List[TrialRunner]:
         """Gets the list of Trial Runners."""
         return self._trial_runners
+
+    @property
+    def environments(self) -> Iterable[Environment]:
+        """Gets the Environment from the TrialRunners."""
+        return (trial_runner.environment for trial_runner in self._trial_runners)
 
     @property
     def optimizer(self) -> Optimizer:
@@ -100,8 +106,8 @@ class Scheduler(metaclass=ABCMeta):
             experiment_id=self._experiment_id,
             trial_id=self._trial_id,
             root_env_config=self._root_env_config,
-            description=self._trial_runners[0].environment.name,
-            tunables=self._trial_runners[0].environment.tunable_params,
+            description=self.root_environment.name,
+            tunables=self.root_environment.tunable_params,
             opt_target=self._optimizer.target,
             opt_direction=self._optimizer.direction,
         ).__enter__()
@@ -132,43 +138,44 @@ class Scheduler(metaclass=ABCMeta):
         """
         assert self.experiment is not None
         _LOG.info("START: Experiment: %s Env: %s Optimizer: %s",
-                  self._experiment, self._environment, self.optimizer)
+                  self._experiment, self.root_environment, self.optimizer)
         if _LOG.isEnabledFor(logging.INFO):
-            _LOG.info("Root Environment:\n%s", self.environment.pprint())
+            _LOG.info("Root Environment:\n%s", self.root_environment.pprint())
 
         if self._config_id > 0:
-            tunables = self.load_config(self._config_id)
+            tunables = self.load_tunable_config(self._config_id)
             self.schedule_trial(tunables)
 
     def teardown(self) -> None:
         """
-        Tear down the environment.
+        Tear down the Environment(s).
         Call it after the completion of the `.start()` in the scheduler context.
         """
         assert self.experiment is not None
         if self._do_teardown:
-            self.environment.teardown()
+            for trial_runner in self.trial_runners:
+                trial_runner.teardown()
 
     def get_best_observation(self) -> Tuple[Optional[float], Optional[TunableGroups]]:
         """
         Get the best observation from the optimizer.
         """
         (best_score, best_config) = self.optimizer.get_best_observation()
-        _LOG.info("Env: %s best score: %s", self.environment, best_score)
+        _LOG.info("Env: %s best score: %s", self.root_environment, best_score)
         return (best_score, best_config)
 
-    def load_config(self, config_id: int) -> TunableGroups:
+    def load_tunable_config(self, config_id: int) -> TunableGroups:
         """
         Load the existing tunable configuration from the storage.
         """
         assert self.experiment is not None
         tunable_values = self.experiment.load_tunable_config(config_id)
-        tunables = self.environment.tunable_params.assign(tunable_values)
+        for environment in self.environments:
+            tunables = environment.tunable_params.assign(tunable_values)
         _LOG.info("Load config from storage: %d", config_id)
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Config %d ::\n%s",
-                    config_id, json.dumps(tunable_values, indent=2))
-        return tunables
+            _LOG.debug("Config %d ::\n%s", config_id, json.dumps(tunable_values, indent=2))
+        return tunables.copy()
 
     def _get_optimizer_suggestions(self, last_trial_id: int = -1, is_warm_up: bool = False) -> int:
         """
@@ -190,6 +197,9 @@ class Scheduler(metaclass=ABCMeta):
         """
         Add a configuration to the queue of trials.
         """
+        # TODO: Alternative scheduling policies may prefer to expand repeats over
+        # time as well as space, or adjust the number of repeats (budget) of a given
+        # trial based on whether initial results are promising.
         for repeat_i in range(1, self._trial_config_repeat_count + 1):
             self._add_trial_to_queue(tunables, config={
                 # Add some additional metadata to track for the trial such as the
@@ -206,13 +216,16 @@ class Scheduler(metaclass=ABCMeta):
                 "opt_direction": self.optimizer.direction,
                 "repeat_i": repeat_i,
                 "is_defaults": tunables.is_defaults,
+                "trial_runner_id": self._trial_runners[self._current_trial_runner_idx].trial_runner_id,
             })
+            # Rotate which TrialRunner the Trial is assigned to.
+            self._current_trial_runner_idx = (self._current_trial_runner_idx + 1) % len(self._trial_runners)
 
     def _add_trial_to_queue(self, tunables: TunableGroups,
                             ts_start: Optional[datetime] = None,
                             config: Optional[Dict[str, Any]] = None) -> None:
         """
-        Add a configuration to the queue of trials.
+        Add a configuration to the queue of trials in the Storage backend.
         A wrapper for the `Experiment.new_trial` method.
         """
         assert self.experiment is not None

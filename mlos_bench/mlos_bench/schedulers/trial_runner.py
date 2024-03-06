@@ -115,3 +115,11 @@ class TrialRunner:
         scores = results if not isinstance(results, dict) \
             else {k: float(v) for (k, v) in results.items() if isinstance(v, (int, float))}
         return (status, scores)
+
+    def teardown(self) -> None:
+        """
+        Tear down the Environment.
+        Call it after the completion of one (or more) `.run()` in the TrialRunner context.
+        """
+        assert self._in_context
+        self._env.teardown()
