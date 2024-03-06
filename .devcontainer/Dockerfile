@@ -1,7 +1,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM mcr.microsoft.com/devcontainers/miniconda:3 AS base
+# Workaround a broken upstream devcontainer image that somehow adjusts the LD_LIBRARY_PATH incorrectly for conda envs.
+#FROM mcr.microsoft.com/devcontainers/miniconda:3 AS base
+FROM mcr.microsoft.com/devcontainers/miniconda:0.203.6-3 AS base
 
 # Add some additional packages for the devcontainer terminal environment.
 USER root
