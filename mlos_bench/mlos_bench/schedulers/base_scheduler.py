@@ -78,7 +78,7 @@ class Scheduler(metaclass=ABCMeta):
             tunables=self.environment.tunable_params,
             opt_target=self.optimizer.target,
             opt_direction=self.optimizer.direction,
-         ).__enter__()
+        ).__enter__()
         return self
 
     def __exit__(self,
@@ -141,8 +141,7 @@ class Scheduler(metaclass=ABCMeta):
         tunables = self.environment.tunable_params.assign(tunable_values)
         _LOG.info("Load config from storage: %d", config_id)
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Config %d ::\n%s",
-                    config_id, json.dumps(tunable_values, indent=2))
+            _LOG.debug("Config %d ::\n%s", config_id, json.dumps(tunable_values, indent=2))
         return tunables
 
     def _get_optimizer_suggestions(self, last_trial_id: int = -1, is_warm_up: bool = False) -> int:
