@@ -320,6 +320,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             if self.is_categorical and value is None:
                 coerced_value = None
             else:
+                assert value is not None
                 coerced_value = self.dtype(value)
         except Exception:
             _LOG.error("Impossible conversion: %s %s <- %s %s",
