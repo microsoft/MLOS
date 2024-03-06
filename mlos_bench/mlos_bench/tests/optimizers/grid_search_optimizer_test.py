@@ -79,7 +79,10 @@ def grid_search_opt(grid_search_tunables: TunableGroups,
     """
     assert len(grid_search_tunables) == 3
     max_iterations = len(grid_search_tunables_grid) * 2 - 3
-    return GridSearchOptimizer(tunables=grid_search_tunables, config={"max_iterations": max_iterations})
+    return GridSearchOptimizer(tunables=grid_search_tunables, config={
+        "max_iterations": max_iterations,
+        "optimization_direction": "max",
+    })
 
 
 def test_grid_search_grid(grid_search_opt: GridSearchOptimizer,
