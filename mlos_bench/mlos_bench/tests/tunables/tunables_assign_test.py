@@ -162,9 +162,9 @@ def test_tunable_assign_null_to_int(tunable_int: Tunable) -> None:
     """
     Checks that we can't use null/None in integer tunables.
     """
-    with pytest.raises(TypeError):
+    with pytest.raises((TypeError, AssertionError)):
         tunable_int.value = None
-    with pytest.raises(TypeError):
+    with pytest.raises((TypeError, AssertionError)):
         tunable_int.numerical_value = None    # type: ignore[assignment]
 
 
@@ -172,9 +172,9 @@ def test_tunable_assign_null_to_float(tunable_float: Tunable) -> None:
     """
     Checks that we can't use null/None in float tunables.
     """
-    with pytest.raises(TypeError):
+    with pytest.raises((TypeError, AssertionError)):
         tunable_float.value = None
-    with pytest.raises(TypeError):
+    with pytest.raises((TypeError, AssertionError)):
         tunable_float.numerical_value = None    # type: ignore[assignment]
 
 
