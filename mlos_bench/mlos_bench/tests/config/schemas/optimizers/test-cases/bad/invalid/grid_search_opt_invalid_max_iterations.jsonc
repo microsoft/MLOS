@@ -1,0 +1,6 @@
+{
+    "class": "mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer",
+    "config": {
+        "max_iterations": null,
+    }
+}
