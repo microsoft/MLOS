@@ -209,7 +209,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         return self._opt_target
 
     @property
-    def direction(self) -> str:
+    def direction(self) -> Literal['min', 'max']:
         """
         The direction to optimize the target metric (e.g., min or max).
         """

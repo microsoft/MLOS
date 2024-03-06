@@ -9,7 +9,7 @@ Unit tests for checking tunable parameters' distributions.
 import json5 as json
 import pytest
 
-from mlos_bench.tunables.tunable import Tunable
+from mlos_bench.tunables.tunable import Tunable, TunableValueTypeName
 
 
 def test_categorical_distribution() -> None:
@@ -28,7 +28,7 @@ def test_categorical_distribution() -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_distribution_uniform(tunable_type: str) -> None:
+def test_numerical_distribution_uniform(tunable_type: TunableValueTypeName) -> None:
     """
     Create a numeric Tunable with explicit uniform distribution.
     """
@@ -46,7 +46,7 @@ def test_numerical_distribution_uniform(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_distribution_normal(tunable_type: str) -> None:
+def test_numerical_distribution_normal(tunable_type: TunableValueTypeName) -> None:
     """
     Create a numeric Tunable with explicit Gaussian distribution specified.
     """
@@ -67,7 +67,7 @@ def test_numerical_distribution_normal(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_distribution_beta(tunable_type: str) -> None:
+def test_numerical_distribution_beta(tunable_type: TunableValueTypeName) -> None:
     """
     Create a numeric Tunable with explicit Beta distribution specified.
     """
