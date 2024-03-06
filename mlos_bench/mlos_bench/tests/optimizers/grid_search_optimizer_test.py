@@ -78,6 +78,8 @@ def grid_search_opt(grid_search_tunables: TunableGroups,
     Test fixture for grid search optimizer.
     """
     assert len(grid_search_tunables) == 3
+    # Test the convergence logic by controlling the number of iterations to be not a
+    # multiple of the number of elements in the grid.
     max_iterations = len(grid_search_tunables_grid) * 2 - 3
     return GridSearchOptimizer(tunables=grid_search_tunables, config={
         "max_iterations": max_iterations,
