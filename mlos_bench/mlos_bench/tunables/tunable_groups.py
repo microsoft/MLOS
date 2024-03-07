@@ -39,6 +39,9 @@ class TunableGroups:
     def __bool__(self) -> bool:
         return bool(self._index)
 
+    def __len__(self) -> int:
+        return len(self._index)
+
     def __eq__(self, other: object) -> bool:
         """
         Check if two TunableGroups are equal.
