@@ -16,6 +16,8 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
+  - pandas
+  - pyarrow
   - swig
   - libpq
   - python=3.10
@@ -34,7 +36,6 @@ dependencies:
     - types-pygments
     - types-requests
     - types-setuptools
-    - pyarrow
     - "--editable ../mlos_core[full-tests]"
     - "--editable ../mlos_bench[full-tests]"
     - "--editable ../mlos_viz[full-tests]"

@@ -19,6 +19,8 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
+  - pandas
+  - pyarrow
   - swig
   - libpq
   - python

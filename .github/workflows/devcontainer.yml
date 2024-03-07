@@ -84,7 +84,7 @@ jobs:
         echo "EVENT_NAME: ${{ github.event_name }}"
         echo "BEFORE: ${{ github.event.before }}"
         echo "AFTER: ${{ github.event.after }}"
-        # echo 'COMMIT_MESSAGES: ${{ steps.get-commit-messages.outputs.COMMIT_MESSAGES }}'
+        # echo "COMMIT_MESSAGES: `cat /tmp/commit_messages.txt`"
         echo "COMMIT_SHA: ${{ github.sha }}"
         echo "git log -1 ${{ github.sha }}: $(git log -1 ${{ github.sha }})"
         echo "Manual Trigger Input Tags: ${{ github.event.inputs.tags }}"
