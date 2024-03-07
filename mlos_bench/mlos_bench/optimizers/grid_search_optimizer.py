@@ -121,7 +121,7 @@ class GridSearchOptimizer(Optimizer):
                 self._iter -= 1
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
-            _LOG.debug("Warm-up end: %s = %s", self.target, score)
+            _LOG.debug("%s end: %s = %s", "Warm-up" if is-warm_up else "Update", self.target, score)
         return True
 
     def suggest(self) -> TunableGroups:
