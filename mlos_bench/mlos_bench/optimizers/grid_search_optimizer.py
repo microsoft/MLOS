@@ -53,7 +53,7 @@ class GridSearchOptimizer(Optimizer):
         self._suggested_configs: Set[Tuple[TunableValue, ...]] = set()
 
     def _sanity_check(self) -> None:
-        size = np.prod(tunable.cardinality for (tunable, _group) in self._tunables)
+        size = np.prod([tunable.cardinality for (tunable, _group) in self._tunables])
         if size == np.inf:
             raise ValueError(f"Unquantized tunables are not supported for grid search: {self._tunables}")
         if size > 10000:
@@ -121,7 +121,7 @@ class GridSearchOptimizer(Optimizer):
                 self._iter -= 1
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
-            _LOG.debug("%s end: %s = %s", "Warm-up" if is-warm_up else "Update", self.target, score)
+            _LOG.debug("%s end: %s = %s", "Warm-up" if is_warm_up else "Update", self.target, score)
         return True
 
     def suggest(self) -> TunableGroups:
