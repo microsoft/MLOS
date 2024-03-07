@@ -10,8 +10,7 @@ from typing import List
 
 import pytest
 
-from mlos_bench.launcher import Launcher
-from mlos_bench.run import _optimization_loop
+from mlos_bench.run import _main
 
 
 @pytest.mark.parametrize(
@@ -23,21 +22,12 @@ from mlos_bench.run import _optimization_loop
             "--config", "mlos_bench/mlos_bench/tests/config/cli/mock-opt.jsonc",
             "--trial_config_repeat_count", "3",
             "--max_iterations", "3",
-        ], 64.2758),
+        ], 64.53897),
     ]
 )
 def test_main_bench(argv: List[str], expected_score: float) -> None:
     """
     Run mlos_bench optimization loop with given config and check the results.
     """
-    launcher = Launcher("mlos_bench", "TEST RUN", argv=argv)
-    (score, _config) = _optimization_loop(
-        env=launcher.environment,
-        opt=launcher.optimizer,
-        storage=launcher.storage,
-        root_env_config=launcher.root_env_config,
-        global_config=launcher.global_config,
-        do_teardown=launcher.teardown,
-        trial_config_repeat_count=launcher.trial_config_repeat_count,
-    )
+    (score, _config) = _main(argv)
     assert pytest.approx(score, 1e-6) == expected_score
