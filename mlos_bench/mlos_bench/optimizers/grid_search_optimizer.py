@@ -178,7 +178,8 @@ class GridSearchOptimizer(Optimizer):
             if bool(self._pending_configs):
                 _LOG.warning("Exceeded max iterations, but still have %d pending configs: %s",
                              len(self._pending_configs), list(self._pending_configs.keys()))
-        return self._iter <= self._max_iter and bool(self._pending_configs)
+            return False
+        return bool(self._pending_configs)
 
     def get_best_observation(self) -> Union[Tuple[float, TunableGroups], Tuple[None, None]]:
         if self._best_score is None:
