@@ -200,7 +200,11 @@ def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
     suggest_count = 10
     suggested = [grid_search_opt.suggest() for _ in range(suggest_count)]
     suggested_shuffled = suggested.copy()
-    random.shuffle(suggested_shuffled)
+    # Try to ensure the shuffled list is different.
+    for _ in range(3):
+        random.shuffle(suggested_shuffled)
+        if suggested_shuffled != suggested:
+            break
     assert suggested != suggested_shuffled
 
     for suggestion in suggested_shuffled:
