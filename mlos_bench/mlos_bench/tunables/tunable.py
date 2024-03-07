@@ -9,7 +9,9 @@ import copy
 import collections
 import logging
 
-from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Type, TypedDict, Union
+from typing import Any, Dict, Iterable, List, Literal, Optional, Sequence, Tuple, Type, TypedDict, Union
+
+import numpy as np
 
 _LOG = logging.getLogger(__name__)
 
@@ -17,6 +19,22 @@ _LOG = logging.getLogger(__name__)
 """A tunable parameter value type alias."""
 TunableValue = Union[int, float, Optional[str]]
 
+"""Tunable value type."""
+TunableValueType = Union[Type[int], Type[float], Type[str]]
+
+"""
+Tunable value type tuple.
+For checking with isinstance()
+"""
+TunableValueTypeTuple = (int, float, str, type(None))
+
+"""The string name of a tunable value type."""
+TunableValueTypeName = Literal["int", "float", "categorical"]
+
+"""Tunable values dictionary type"""
+TunableValuesDict = Dict[str, TunableValue]
+
+"""Tunable value distribution type"""
 DistributionName = Literal["uniform", "normal", "beta"]
 
 
@@ -38,7 +56,7 @@ class TunableDict(TypedDict, total=False):
     These are the types expected to be received from the json config.
     """
 
-    type: str
+    type: TunableValueTypeName
     description: Optional[str]
     default: TunableValue
     values: Optional[List[Optional[str]]]
@@ -59,7 +77,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     """
 
     # Maps tunable types to their corresponding Python types by name.
-    _DTYPE: Dict[str, Type] = {
+    _DTYPE: Dict[TunableValueTypeName, TunableValueType] = {
         "int": int,
         "float": float,
         "categorical": str,
@@ -79,7 +97,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         if not isinstance(name, str) or '!' in name:  # TODO: Use a regex here and in JSON schema
             raise ValueError(f"Invalid name of the tunable: {name}")
         self._name = name
-        self._type = config["type"]  # required
+        self._type: TunableValueTypeName = config["type"]  # required
         if self._type not in self._DTYPE:
             raise ValueError(f"Invalid parameter type: {self._type}")
         self._description = config.get("description")
@@ -302,6 +320,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             if self.is_categorical and value is None:
                 coerced_value = None
             else:
+                assert value is not None
                 coerced_value = self.dtype(value)
         except Exception:
             _LOG.error("Impossible conversion: %s %s <- %s %s",
@@ -353,6 +372,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         is_valid : bool
             True if the value is valid, False otherwise.
         """
+        # FIXME: quantization check?
         if self.is_categorical and self._values:
             return value in self._values
         elif self.is_numerical and self._range:
@@ -482,7 +502,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._range_weight
 
     @property
-    def type(self) -> str:
+    def type(self) -> TunableValueTypeName:
         """
         Get the data type of the tunable.
 
@@ -494,7 +514,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._type
 
     @property
-    def dtype(self) -> Type:
+    def dtype(self) -> TunableValueType:
         """
         Get the actual Python data type of the tunable.
 
@@ -547,17 +567,77 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._range
 
     @property
+    def span(self) -> Union[int, float]:
+        """
+        Gets the span of the range.
+
+        Note: this does not take quantization into account.
+
+        Returns
+        -------
+        Union[int, float]
+            (max - min) for numerical tunables.
+        """
+        num_range = self.range
+        return num_range[1] - num_range[0]
+
+    @property
     def quantization(self) -> Optional[Union[int, float]]:
         """
-        Get the number of quantization points, if specified.
+        Get the quantization factor, if specified.
 
         Returns
         -------
         quantization : int, float, None
-            Number of quantization points or None.
+            The quantization factor, or None.
         """
-        assert self.is_numerical
+        if self.is_categorical:
+            return None
         return self._quantization
+
+    @property
+    def quantized_values(self) -> Optional[Union[Iterable[int], Iterable[float]]]:
+        """
+        Get a sequence of quanitized values for this tunable.
+
+        Returns
+        -------
+        Optional[Union[Iterable[int], Iterable[float]]]
+            If the Tunable is quantizable, returns a sequence of those elements,
+            else None (e.g., for unquantized float type tunables).
+        """
+        num_range = self.range
+        if self.type == "float":
+            if not self._quantization:
+                return None
+            # Be sure to return python types instead of numpy types.
+            cardinality = self.cardinality
+            assert isinstance(cardinality, int)
+            return (float(x) for x in np.linspace(start=num_range[0],
+                                                  stop=num_range[1],
+                                                  num=cardinality,
+                                                  endpoint=True))
+        assert self.type == "int", f"Unhandled tunable type: {self}"
+        return range(int(num_range[0]), int(num_range[1]) + 1, int(self._quantization or 1))
+
+    @property
+    def cardinality(self) -> Union[int, float]:
+        """
+        Gets the cardinality of elements in this tunable, or else infinity.
+
+        If the tunable has quantization set, this
+
+        Returns
+        -------
+        cardinality : int, float
+            Either the number of points in the tunable or else infinity.
+        """
+        if self.is_categorical:
+            return len(self.categories)
+        if not self.quantization and self.type == "float":
+            return np.inf
+        q_factor = self.quantization or 1
+        return int(self.span / q_factor) + 1
 
     @property
     def is_log(self) -> Optional[bool]:
@@ -611,6 +691,21 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         assert self.is_categorical
         assert self._values is not None
         return self._values
+
+    @property
+    def values(self) -> Optional[Union[Iterable[Optional[str]], Iterable[int], Iterable[float]]]:
+        """
+        Gets the categories or quantized values for this tunable.
+
+        Returns
+        -------
+        Optional[Union[Iterable[Optional[str]], Iterable[int], Iterable[float]]]
+            Categories or quantized values.
+        """
+        if self.is_categorical:
+            return self.categories
+        assert self.is_numerical
+        return self.quantized_values
 
     @property
     def meta(self) -> Dict[str, Any]:

@@ -9,7 +9,7 @@ Unit tests for checking tunable definition rules.
 import json5 as json
 import pytest
 
-from mlos_bench.tunables.tunable import Tunable
+from mlos_bench.tunables.tunable import Tunable, TunableValueTypeName
 
 
 def test_tunable_name() -> None:
@@ -135,7 +135,7 @@ def test_categorical_tunable_disallow_repeats() -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_tunable_disallow_null_default(tunable_type: str) -> None:
+def test_numerical_tunable_disallow_null_default(tunable_type: TunableValueTypeName) -> None:
     """
     Disallow null values as default for numerical tunables.
     """
@@ -148,7 +148,7 @@ def test_numerical_tunable_disallow_null_default(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_tunable_disallow_out_of_range(tunable_type: str) -> None:
+def test_numerical_tunable_disallow_out_of_range(tunable_type: TunableValueTypeName) -> None:
     """
     Disallow out of range values as default for numerical tunables.
     """
@@ -161,7 +161,7 @@ def test_numerical_tunable_disallow_out_of_range(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_tunable_wrong_params(tunable_type: str) -> None:
+def test_numerical_tunable_wrong_params(tunable_type: TunableValueTypeName) -> None:
     """
     Disallow values param for numerical tunables.
     """
@@ -175,7 +175,7 @@ def test_numerical_tunable_wrong_params(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_tunable_required_params(tunable_type: str) -> None:
+def test_numerical_tunable_required_params(tunable_type: TunableValueTypeName) -> None:
     """
     Disallow null values param for numerical tunables.
     """
@@ -192,7 +192,7 @@ def test_numerical_tunable_required_params(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_tunable_invalid_range(tunable_type: str) -> None:
+def test_numerical_tunable_invalid_range(tunable_type: TunableValueTypeName) -> None:
     """
     Disallow invalid range param for numerical tunables.
     """
@@ -209,7 +209,7 @@ def test_numerical_tunable_invalid_range(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_tunable_reversed_range(tunable_type: str) -> None:
+def test_numerical_tunable_reversed_range(tunable_type: TunableValueTypeName) -> None:
     """
     Disallow reverse range param for numerical tunables.
     """
@@ -226,7 +226,7 @@ def test_numerical_tunable_reversed_range(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_weights(tunable_type: str) -> None:
+def test_numerical_weights(tunable_type: TunableValueTypeName) -> None:
     """
     Instantiate a numerical tunable with weighted special values.
     """
@@ -248,7 +248,7 @@ def test_numerical_weights(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_quantization(tunable_type: str) -> None:
+def test_numerical_quantization(tunable_type: TunableValueTypeName) -> None:
     """
     Instantiate a numerical tunable with quantization.
     """
@@ -267,7 +267,7 @@ def test_numerical_quantization(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_log(tunable_type: str) -> None:
+def test_numerical_log(tunable_type: TunableValueTypeName) -> None:
     """
     Instantiate a numerical tunable with log scale.
     """
@@ -285,7 +285,7 @@ def test_numerical_log(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_weights_no_specials(tunable_type: str) -> None:
+def test_numerical_weights_no_specials(tunable_type: TunableValueTypeName) -> None:
     """
     Raise an error if special_weights are specified but no special values.
     """
@@ -303,7 +303,7 @@ def test_numerical_weights_no_specials(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_weights_non_normalized(tunable_type: str) -> None:
+def test_numerical_weights_non_normalized(tunable_type: TunableValueTypeName) -> None:
     """
     Instantiate a numerical tunable with non-normalized weights
     of the special values.
@@ -326,7 +326,7 @@ def test_numerical_weights_non_normalized(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_weights_wrong_count(tunable_type: str) -> None:
+def test_numerical_weights_wrong_count(tunable_type: TunableValueTypeName) -> None:
     """
     Try to instantiate a numerical tunable with incorrect number of weights.
     """
@@ -346,7 +346,7 @@ def test_numerical_weights_wrong_count(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_weights_no_range_weight(tunable_type: str) -> None:
+def test_numerical_weights_no_range_weight(tunable_type: TunableValueTypeName) -> None:
     """
     Try to instantiate a numerical tunable with weights but no range_weight.
     """
@@ -365,7 +365,7 @@ def test_numerical_weights_no_range_weight(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_range_weight_no_weights(tunable_type: str) -> None:
+def test_numerical_range_weight_no_weights(tunable_type: TunableValueTypeName) -> None:
     """
     Try to instantiate a numerical tunable with specials but no range_weight.
     """
@@ -384,7 +384,7 @@ def test_numerical_range_weight_no_weights(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_range_weight_no_specials(tunable_type: str) -> None:
+def test_numerical_range_weight_no_specials(tunable_type: TunableValueTypeName) -> None:
     """
     Try to instantiate a numerical tunable with specials but no range_weight.
     """
@@ -402,7 +402,7 @@ def test_numerical_range_weight_no_specials(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_weights_wrong_values(tunable_type: str) -> None:
+def test_numerical_weights_wrong_values(tunable_type: TunableValueTypeName) -> None:
     """
     Try to instantiate a numerical tunable with incorrect number of weights.
     """
@@ -422,7 +422,7 @@ def test_numerical_weights_wrong_values(tunable_type: str) -> None:
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_quantization_wrong(tunable_type: str) -> None:
+def test_numerical_quantization_wrong(tunable_type: TunableValueTypeName) -> None:
     """
     Instantiate a numerical tunable with invalid number of quantization points.
     """
