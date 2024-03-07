@@ -53,14 +53,11 @@ class GridSearchOptimizer(Optimizer):
         self._suggested_configs: Set[Tuple[TunableValue, ...]] = set()
 
     def _sanity_check(self) -> None:
-        size = 1
-        for (tunable, _group) in self._tunables:
-            cardinality = tunable.cardinality
-            if cardinality == np.inf:
-                raise ValueError(f"Unquantized tunables are not supported for grid search: {self.tunable_params}")
-            size *= int(cardinality)
+        size = np.prod(tunable.cardinality for (tunable, _group) in self._tunables)
+        if size == np.inf:
+            raise ValueError(f"Unquantized tunables are not supported for grid search: {self._tunables}")
         if size > 10000:
-            _LOG.warning("Large number %d of config points requested for grid search: %s", size, self.tunable_params)
+            _LOG.warning("Large number %d of config points requested for grid search: %s", size, self._tunables)
         if size > self._max_iter:
             _LOG.warning("Grid search size %d, is greater than max iterations %d", size, self._max_iter)
 
