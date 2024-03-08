@@ -9,7 +9,7 @@ Mock optimizer for mlos_bench.
 import random
 import logging
 
-from typing import Callable, Dict, Optional, Sequence, Tuple, Union
+from typing import Callable, Dict, Optional, Sequence
 
 from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable import Tunable, TunableValue

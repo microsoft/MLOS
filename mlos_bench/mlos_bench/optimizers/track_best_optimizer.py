@@ -7,7 +7,7 @@ Mock optimizer for mlos_bench.
 """
 
 import logging
-
+from abc import ABCMeta
 from typing import Optional, Tuple, Union
 
 from mlos_bench.environments.status import Status
@@ -19,7 +19,7 @@ from mlos_bench.services.base_service import Service
 _LOG = logging.getLogger(__name__)
 
 
-class TrackBestOptimizer(Optimizer):
+class TrackBestOptimizer(Optimizer, metaclass=ABCMeta):
     """
     Base Optimizer class that keeps track of the best score and configuration.
     """
