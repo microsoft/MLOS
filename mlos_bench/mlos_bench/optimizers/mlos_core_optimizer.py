@@ -103,7 +103,7 @@ class MlosCoreOptimizer(Optimizer):
             df_configs = df_configs[df_status_completed]
             df_scores = df_scores[df_status_completed]
         self._opt.register(df_configs, df_scores)
-        if not is_warm_up:
+        if is_warm_up:
             self._iter += len(df_scores)
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
@@ -169,7 +169,6 @@ class MlosCoreOptimizer(Optimizer):
             df_config = self._to_df([tunables.get_param_values()])
             _LOG.debug("Score: %s Dataframe:\n%s", score, df_config)
             self._opt.register(df_config, pd.Series([score], dtype=float))
-        self._iter += 1
         return score
 
     def get_best_observation(self) -> Union[Tuple[float, TunableGroups], Tuple[None, None]]:
