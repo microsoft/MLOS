@@ -8,7 +8,6 @@ Mock optimizer for mlos_bench.
 
 import logging
 
-from abc import abstractmethod
 from typing import Optional, Tuple, Union
 
 from mlos_bench.environments.status import Status
@@ -34,7 +33,6 @@ class TrackBestOptimizer(Optimizer):
         self._best_config: Optional[TunableGroups] = None
         self._best_score: Optional[float] = None
 
-    @abstractmethod
     def register(self, tunables: TunableGroups, status: Status,
                  score: Optional[Union[float, dict]] = None) -> Optional[float]:
         registered_score = super().register(tunables, status, score)
