@@ -49,7 +49,11 @@ class Scheduler(metaclass=ABCMeta):
         self._experiment_id = config["experiment_id"].strip()
         self._trial_id = int(config["trial_id"])
         self._config_id = int(config.get("config_id", -1))
+
         self._trial_config_repeat_count: int = config.get("trial_config_repeat_count", 1)
+        if self._trial_config_repeat_count <= 0:
+            raise ValueError(f"Invalid trial_config_repeat_count: {self._trial_config_repeat_count}")
+
         self._do_teardown = bool(config.get("teardown", True))
 
         self.experiment: Optional[Storage.Experiment] = None
