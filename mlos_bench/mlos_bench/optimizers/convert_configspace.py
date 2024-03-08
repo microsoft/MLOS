@@ -101,7 +101,7 @@ def _tunable_to_configspace(
             name=tunable.name,
             bounds=(int(tunable.range[0]), int(tunable.range[1])),
             log=bool(tunable.is_log),
-            q=nullable(int, tunable.quantization)
+            q=nullable(int, tunable.quantization),
             distribution=distribution,
             default=(int(tunable.default)
                      if tunable.in_range(tunable.default) and tunable.default is not None
