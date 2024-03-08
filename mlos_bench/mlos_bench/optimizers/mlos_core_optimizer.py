@@ -103,7 +103,7 @@ class MlosCoreOptimizer(Optimizer):
             df_configs = df_configs[df_status_completed]
             df_scores = df_scores[df_status_completed]
         self._opt.register(df_configs, df_scores)
-        if is_warm_up:
+        if not is_warm_up:
             self._iter += len(df_scores)
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
