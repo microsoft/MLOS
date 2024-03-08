@@ -95,7 +95,7 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     assert path_join(launcher.global_config["pathVarWithEnvVarRef"], abs_path=True) \
         == path_join(os.getcwd(), "foo", abs_path=True)
     assert launcher.global_config["varWithEnvVarRef"] == f'user:{getuser()}'
-    assert launcher.teardown
+    assert launcher.global_config["teardown"] is True
     # Check that the environment that got loaded looks to be of the right type.
     env_config = launcher.config_loader.load_config(env_conf_path, ConfigSchema.ENVIRONMENT)
     assert check_class_name(launcher.environment, env_config['class'])
@@ -103,7 +103,6 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     assert isinstance(launcher.optimizer, OneShotOptimizer)
     # Check that the optimizer got initialized with defaults.
     assert launcher.optimizer.tunable_params.is_defaults()
-    assert launcher.trial_config_repeat_count == 1  # default when left unspecified
     assert launcher.optimizer.max_iterations == 1   # value for OneShotOptimizer
 
 
@@ -150,7 +149,7 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     assert path_join(launcher.global_config["pathVarWithEnvVarRef"], abs_path=True) \
         == path_join(os.getcwd(), "foo", abs_path=True)
     assert launcher.global_config["varWithEnvVarRef"] == f'user:{getuser()}'
-    assert not launcher.teardown
+    assert launcher.global_config["teardown"] is False
 
     config = launcher.config_loader.load_config(config_file, ConfigSchema.CLI)
     assert launcher.config_loader.config_paths == [path_join(path, abs_path=True) for path in config_paths + config['config_path']]
@@ -165,13 +164,11 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     opt_config_file = config['optimizer']
     opt_config = launcher.config_loader.load_config(opt_config_file, ConfigSchema.OPTIMIZER)
     globals_file_config = launcher.config_loader.load_config(globals_file, ConfigSchema.GLOBALS)
-    assert launcher.trial_config_repeat_count == 3
+    assert launcher.global_config["trial_config_repeat_count"] == 3
     # The actual global_config gets overwritten as a part of processing, so to test
     # this we read the original value out of the source files.
     orig_max_iters = globals_file_config.get('max_iterations', opt_config.get('config', {}).get('max_iterations', 100))
-    assert launcher.optimizer.max_iterations \
-        == launcher.trial_config_repeat_count * orig_max_iters \
-        == launcher.global_config['max_iterations']
+    assert orig_max_iters == launcher.optimizer.max_iterations
 
     # Check that the optimizer got initialized with random values instead of the defaults.
     # Note: the environment doesn't get updated until suggest() is called to
