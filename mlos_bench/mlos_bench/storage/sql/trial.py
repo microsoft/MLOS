@@ -17,6 +17,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql.schema import DbSchema
+from mlos_bench.util import nullable
 
 _LOG = logging.getLogger(__name__)
 
@@ -75,7 +76,7 @@ class Trial(Storage.Trial):
                                 "exp_id": self._experiment_id,
                                 "trial_id": self._trial_id,
                                 "metric_id": key,
-                                "metric_value": None if val is None else str(val),
+                                "metric_value": nullable(str, val),
                             }
                             for (key, val) in metrics.items()
                         ]))
@@ -119,7 +120,7 @@ class Trial(Storage.Trial):
                         trial_id=self._trial_id,
                         ts=metric_ts,
                         metric_id=key,
-                        metric_value=None if val is None else str(val),
+                        metric_value=nullable(str, val),
                     ))
                 except IntegrityError as ex:
                     _LOG.warning("Record already exists: %s :: %s", (metric_ts, key, val), ex)

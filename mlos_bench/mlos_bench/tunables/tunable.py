@@ -11,6 +11,8 @@ import logging
 
 from typing import Any, Dict, Iterable, List, Literal, Optional, Sequence, Tuple, Type, TypedDict, Union
 
+from mlos_bench.util import nullable
+
 import numpy as np
 
 _LOG = logging.getLogger(__name__)
@@ -402,7 +404,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         Get the current value of the tunable as a number.
         """
         if self.is_categorical:
-            return None if self._current_value is None else str(self._current_value)
+            return nullable(str, self._current_value)
         else:
             raise ValueError("Cannot get categorical values for a numerical tunable.")
 
