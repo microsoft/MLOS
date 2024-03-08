@@ -11,9 +11,9 @@ import logging
 
 from typing import Any, Dict, Iterable, List, Literal, Optional, Sequence, Tuple, Type, TypedDict, Union
 
-from mlos_bench.util import nullable
-
 import numpy as np
+
+from mlos_bench.util import nullable
 
 _LOG = logging.getLogger(__name__)
 
