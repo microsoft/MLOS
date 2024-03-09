@@ -44,7 +44,8 @@ class Scheduler(metaclass=ABCMeta):
         the Environment and Optimizer are provided by the Launcher.
         """
         self.global_config = global_config
-        config = merge_parameters(dest=config.copy(), source=global_config)
+        config = merge_parameters(dest=config.copy(), source=global_config,
+                                  required_keys=["experiment_id", "trial_id"])
 
         self._experiment_id = config["experiment_id"].strip()
         self._trial_id = int(config["trial_id"])
