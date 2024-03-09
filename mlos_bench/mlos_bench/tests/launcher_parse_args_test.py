@@ -180,7 +180,7 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     # See Also: #495
 
     assert isinstance(launcher.scheduler, SyncScheduler)
-    assert launcher.scheduler._trial_config_repeat_count == 3  # pylint: disable:protected-access
+    assert launcher.scheduler._trial_config_repeat_count == 3  # pylint: disable=protected-access
 
     # Check that the value from the file is overridden by the CLI arg.
     assert config['random_seed'] == 42
