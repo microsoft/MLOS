@@ -22,7 +22,6 @@ from jsonschema import ValidationError, SchemaError
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.optimizers.base_optimizer import Optimizer
-from mlos_bench.schedulers.base_scheduler import Scheduler
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable import TunableValue
@@ -326,7 +325,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             A new instance of the Scheduler.
         """
         (class_name, class_config) = self.prepare_class_load(config, global_config)
-        inst = instantiate_from_config(Scheduler, class_name,     # type: ignore[type-abstract]
+        from mlos_bench.schedulers.base_scheduler import Scheduler  # pylint: disable=import-outside-toplevel
+        inst = instantiate_from_config(Scheduler, class_name,  # type: ignore[type-abstract]
                                        config=class_config,
                                        global_config=global_config,
                                        service=service)
