@@ -101,9 +101,15 @@ class Launcher:
             args_rest,
             {key: val for (key, val) in config.items() if key not in vars(args)},
         )
-        self.global_config["teardown"] = bool(
-            args.teardown if args.teardown is not None else config.get("teardown", True)
-        )
+
+        self.global_config.setdefault("teardown", bool(
+            args.teardown if args.teardown is not None
+            else config.get("teardown", True)
+        ))
+        self.global_config.setdefault("trial_config_repeat_count", int(
+            args.trial_config_repeat_count if args.trial_config_repeat_count is not None
+            else config.get("trial_config_repeat_count", 1)
+        ))
         # experiment_id is generally taken from --globals files, but we also allow overriding it on the CLI.
         # It's useful to keep it there explicitly mostly for the --help output.
         if args.experiment_id:
@@ -236,6 +242,10 @@ class Launcher:
             '--no_teardown', '--no-teardown', required=False, default=None,
             dest='teardown', action='store_false',
             help='Disable teardown of the environment after the benchmark.')
+
+        parser.add_argument(
+            '--trial_config_repeat_count', '--trial-config-repeat-count', required=False, type=int, default=1,
+            help='Number of times to repeat each config. Default is 1 trial per config, though more may be advised.')
 
         parser.add_argument(
             '--experiment_id', '--experiment-id', required=False, default=None,

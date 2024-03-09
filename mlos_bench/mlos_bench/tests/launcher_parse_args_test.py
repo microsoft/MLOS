@@ -19,6 +19,7 @@ from mlos_bench.optimizers import OneShotOptimizer, MlosCoreOptimizer
 from mlos_bench.os_environ import environ
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.util import path_join
+from mlos_bench.schedulers import SyncScheduler
 from mlos_bench.services.types import (
     SupportsAuth,
     SupportsConfigLoading,
@@ -164,7 +165,6 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     opt_config_file = config['optimizer']
     opt_config = launcher.config_loader.load_config(opt_config_file, ConfigSchema.OPTIMIZER)
     globals_file_config = launcher.config_loader.load_config(globals_file, ConfigSchema.GLOBALS)
-    assert launcher.global_config["trial_config_repeat_count"] == 3
     # The actual global_config gets overwritten as a part of processing, so to test
     # this we read the original value out of the source files.
     orig_max_iters = globals_file_config.get('max_iterations', opt_config.get('config', {}).get('max_iterations', 100))
@@ -178,6 +178,9 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     # TODO: Add a check that this flows through and replaces other seed config
     # values through the stack.
     # See Also: #495
+
+    assert isinstance(launcher.scheduler, SyncScheduler)
+    assert launcher.scheduler._trial_config_repeat_count == 3  # pylint: disable:protected-access
 
     # Check that the value from the file is overridden by the CLI arg.
     assert config['random_seed'] == 42
