@@ -138,7 +138,7 @@ def test_load_cli_config_examples_via_launcher(config_loader_service: ConfigPers
 
     # TODO: Check that the log_file handler is set correctly.
 
-    assert launcher.global_config["teardown"] == config.get('teardown', True)
+    assert launcher.teardown == config.get('teardown', True)
 
     # Note: Testing of "globals" processing handled in launcher_parse_args_test.py
 
