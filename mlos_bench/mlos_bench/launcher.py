@@ -408,7 +408,7 @@ class Launcher:
                 storage=self.storage,
                 root_env_config=self.root_env_config,
             )
-        class_config = self._config_loader.load_config(args_scheduler, ConfigSchema.STORAGE)
+        class_config = self._config_loader.load_config(args_scheduler, ConfigSchema.SCHEDULER)
         assert isinstance(class_config, Dict)
         return self._config_loader.build_scheduler(service=self._parent_service,
                                                    config=class_config,
