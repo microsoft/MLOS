@@ -241,7 +241,7 @@ class Launcher:
             help='Disable teardown of the environment after the benchmark.')
 
         parser.add_argument(
-            '--trial_config_repeat_count', '--trial-config-repeat-count', required=False, type=int, default=1,
+            '--trial_config_repeat_count', '--trial-config-repeat-count', required=False, type=int,
             help='Number of times to repeat each config. Default is 1 trial per config, though more may be advised.')
 
         parser.add_argument(
