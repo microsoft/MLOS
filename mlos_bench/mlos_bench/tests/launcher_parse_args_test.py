@@ -96,7 +96,7 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     assert path_join(launcher.global_config["pathVarWithEnvVarRef"], abs_path=True) \
         == path_join(os.getcwd(), "foo", abs_path=True)
     assert launcher.global_config["varWithEnvVarRef"] == f'user:{getuser()}'
-    assert launcher.global_config["teardown"] is True
+    assert launcher.teardown is True
     # Check that the environment that got loaded looks to be of the right type.
     env_config = launcher.config_loader.load_config(env_conf_path, ConfigSchema.ENVIRONMENT)
     assert check_class_name(launcher.environment, env_config['class'])
@@ -150,7 +150,7 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     assert path_join(launcher.global_config["pathVarWithEnvVarRef"], abs_path=True) \
         == path_join(os.getcwd(), "foo", abs_path=True)
     assert launcher.global_config["varWithEnvVarRef"] == f'user:{getuser()}'
-    assert launcher.global_config["teardown"] is False
+    assert launcher.teardown is False
 
     config = launcher.config_loader.load_config(config_file, ConfigSchema.CLI)
     assert launcher.config_loader.config_paths == [path_join(path, abs_path=True) for path in config_paths + config['config_path']]
