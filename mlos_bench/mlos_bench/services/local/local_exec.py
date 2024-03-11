@@ -195,8 +195,10 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
         cmd = [token for subcmd in subcmds for token in subcmd]
 
         env: Dict[str, str] = {}
+        # Need to include at least some basic environment variables to run the script.
+        env["PATH"] = environ["PATH"]
         if env_params:
-            env = {key: str(val) for (key, val) in env_params.items()}
+            env.update({key: str(val) for (key, val) in env_params.items()})
 
         if sys.platform == 'win32':
             # A hack to run Python on Windows with env variables set:
