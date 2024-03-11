@@ -95,6 +95,9 @@ class Launcher:
 
         self._parent_service: Service = LocalExecService(parent=self._config_loader)
 
+        self.teardown = bool(
+            args.teardown if args.teardown is not None else config.get("teardown", True)
+        )
         self.global_config = self._load_config(
             config.get("globals", []) + (args.globals or []),
             (args.config_path or []) + config.get("config_path", []),
@@ -147,10 +150,6 @@ class Launcher:
 
         self.scheduler = self._load_scheduler(args.scheduler or config.get("scheduler"))
         _LOG.info("Init scheduler: %s", self.scheduler)
-
-        self.teardown = bool(
-            args.teardown if args.teardown is not None else config.get("teardown", True)
-        )
 
     @property
     def config_loader(self) -> ConfigPersistenceService:
