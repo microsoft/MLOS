@@ -206,6 +206,10 @@ class Launcher:
                  ' a single trial with default (or specified in --tunable_values).')
 
         parser.add_argument(
+            '--trial_config_repeat_count', '--trial-config-repeat-count', required=False, type=int,
+            help='Number of times to repeat each config. Default is 1 trial per config, though more may be advised.')
+
+        parser.add_argument(
             '--scheduler', required=False,
             help='Path to the scheduler configuration file. By default, use' +
                  ' a single-threaded synchronous scheduler.')
@@ -239,10 +243,6 @@ class Launcher:
             '--no_teardown', '--no-teardown', required=False, default=None,
             dest='teardown', action='store_false',
             help='Disable teardown of the environment after the benchmark.')
-
-        parser.add_argument(
-            '--trial_config_repeat_count', '--trial-config-repeat-count', required=False, type=int,
-            help='Number of times to repeat each config. Default is 1 trial per config, though more may be advised.')
 
         parser.add_argument(
             '--experiment_id', '--experiment-id', required=False, default=None,
@@ -347,7 +347,7 @@ class Launcher:
         """
         if args_optimizer is None:
             # global_config may contain additional properties, so we need to
-            # strip those out before instantiating the basic one-shot optimizer.
+            # strip those out before instantiating the basic oneshot optimizer.
             config = {key: val for key, val in self.global_config.items() if key in OneShotOptimizer.BASE_SUPPORTED_CONFIG_PROPS}
             return OneShotOptimizer(
                 self.tunables, config=config, service=self._parent_service)
