@@ -42,6 +42,21 @@ class Scheduler(metaclass=ABCMeta):
         and the derived classes is called by the persistence service
         after reading the class JSON configuration. Other objects like
         the Environment and Optimizer are provided by the Launcher.
+
+        Parameters
+        ----------
+        config : dict
+            The configuration for the scheduler.
+        global_config : dict
+            he global configuration for the experiment.
+        environment : Environment
+            The environment to benchmark/optimize.
+        optimizer : Optimizer
+            The optimizer to use.
+        storage : Storage
+            The storage to use.
+        root_env_config : str
+            Path to the root environment configuration.
         """
         self.global_config = global_config
         config = merge_parameters(dest=config.copy(), source=global_config,

@@ -305,20 +305,29 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         return inst
 
     def build_scheduler(self, *,
-                        service: Service,
                         config: Dict[str, Any],
-                        global_config: Optional[Dict[str, Any]] = None) -> "Scheduler":
+                        global_config: Dict[str, Any],
+                        environment: Environment,
+                        optimizer: Optimizer,
+                        storage: "Storage",
+                        root_env_config: str) -> "Scheduler":
         """
         Instantiation of mlos_bench Scheduler.
 
         Parameters
         ----------
-        service: Service
-            An optional service object (e.g., providing methods to load config files, etc.)
         config : dict
             Configuration of the class to instantiate, as loaded from JSON.
         global_config : dict
-            Global configuration parameters (optional).
+            Global configuration parameters.
+        environment : Environment
+            The environment to benchmark/optimize.
+        optimizer : Optimizer
+            The optimizer to use.
+        storage : Storage
+            The storage to use.
+        root_env_config : str
+            Path to the root environment configuration.
 
         Returns
         -------
@@ -330,7 +339,10 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         inst = instantiate_from_config(Scheduler, class_name,  # type: ignore[type-abstract]
                                        config=class_config,
                                        global_config=global_config,
-                                       service=service)
+                                       environment=environment,
+                                       optimizer=optimizer,
+                                       storage=storage,
+                                       root_env_config=root_env_config)
         _LOG.info("Created: Scheduler %s", inst)
         return inst
 

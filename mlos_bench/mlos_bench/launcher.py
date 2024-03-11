@@ -108,13 +108,12 @@ class Launcher:
         # It's useful to keep it there explicitly mostly for the --help output.
         if args.experiment_id:
             self.global_config['experiment_id'] = args.experiment_id
+        # trial_config_repeat_count is a scheduler property but it's convenient to set it via command line
+        if args.trial_config_repeat_count:
+            self.global_config["trial_config_repeat_count"] = args.trial_config_repeat_count
         # Ensure that the trial_id is present since it gets used by some other
         # configs but is typically controlled by the run optimize loop.
         self.global_config.setdefault('trial_id', 1)
-        # trial_config_repeat_count is a scheduler property but it's convenient to set it via command line
-        self.global_config.setdefault("trial_config_repeat_count", int(
-            args.trial_config_repeat_count or config.get("trial_config_repeat_count", 1)
-        ))
         self.global_config = DictTemplater(self.global_config).expand_vars(use_os_env=True)
         assert isinstance(self.global_config, dict)
 
@@ -411,6 +410,11 @@ class Launcher:
             )
         class_config = self._config_loader.load_config(args_scheduler, ConfigSchema.SCHEDULER)
         assert isinstance(class_config, Dict)
-        return self._config_loader.build_scheduler(service=self._parent_service,
-                                                   config=class_config,
-                                                   global_config=self.global_config)
+        return self._config_loader.build_scheduler(
+            config=class_config,
+            global_config=self.global_config,
+            environment=self.environment,
+            optimizer=self.optimizer,
+            storage=self.storage,
+            root_env_config=self.root_env_config,
+        )
