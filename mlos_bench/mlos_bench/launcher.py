@@ -95,9 +95,6 @@ class Launcher:
 
         self._parent_service: Service = LocalExecService(parent=self._config_loader)
 
-        self.teardown = bool(
-            args.teardown if args.teardown is not None else config.get("teardown", True)
-        )
         self.global_config = self._load_config(
             config.get("globals", []) + (args.globals or []),
             (args.config_path or []) + config.get("config_path", []),
@@ -114,6 +111,7 @@ class Launcher:
         # Ensure that the trial_id is present since it gets used by some other
         # configs but is typically controlled by the run optimize loop.
         self.global_config.setdefault('trial_id', 1)
+
         self.global_config = DictTemplater(self.global_config).expand_vars(use_os_env=True)
         assert isinstance(self.global_config, dict)
 
@@ -147,6 +145,7 @@ class Launcher:
         self.storage = self._load_storage(args.storage or config.get("storage"))
         _LOG.info("Init storage: %s", self.storage)
 
+        self.teardown: bool = bool(args.teardown) if args.teardown is not None else bool(config.get("teardown", True))
         self.scheduler = self._load_scheduler(args.scheduler or config.get("scheduler"))
         _LOG.info("Init scheduler: %s", self.scheduler)
 
