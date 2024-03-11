@@ -35,6 +35,7 @@ else:
 
 if TYPE_CHECKING:
     from mlos_bench.storage.base_storage import Storage
+    from mlos_bench.schedulers.base_scheduler import Scheduler
 
 
 _LOG = logging.getLogger(__name__)
