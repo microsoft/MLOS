@@ -161,7 +161,7 @@ def test_load_cli_config_examples_via_launcher(config_loader_service: ConfigPers
 
     assert isinstance(launcher.scheduler, Scheduler)
     if "scheduler" in config:
-        scheduler_config = launcher.config_loader.load_config(config["scheduler"], ConfigSchema.STORAGE)
+        scheduler_config = launcher.config_loader.load_config(config["scheduler"], ConfigSchema.SCHEDULER)
         assert check_class_name(launcher.scheduler, scheduler_config["class"])
 
     # TODO: Check that the launcher assigns the tunables values as expected.
