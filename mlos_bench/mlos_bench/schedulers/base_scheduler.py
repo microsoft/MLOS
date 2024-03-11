@@ -78,11 +78,24 @@ class Scheduler(metaclass=ABCMeta):
         self.storage = storage
         self._root_env_config = root_env_config
 
+        _LOG.debug("Scheduler instantiated: %s :: %s", self, config)
+
+    def __repr__(self) -> str:
+        """
+        Produce a human-readable version of the Scheduler (mostly for logging).
+
+        Returns
+        -------
+        string : str
+            A human-readable version of the Scheduler.
+        """
+        return self.__class__.__name__
+
     def __enter__(self) -> 'Scheduler':
         """
         Enter the scheduler's context.
         """
-        _LOG.debug("Optimizer START :: %s", self)
+        _LOG.debug("Scheduler START :: %s", self)
         assert self.experiment is None
         self.environment.__enter__()
         self.optimizer.__enter__()
