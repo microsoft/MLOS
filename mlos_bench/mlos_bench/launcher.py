@@ -101,24 +101,19 @@ class Launcher:
             args_rest,
             {key: val for (key, val) in config.items() if key not in vars(args)},
         )
-
-        self.global_config.setdefault("teardown", bool(
-            args.teardown if args.teardown is not None
-            else config.get("teardown", True)
-        ))
-        self.global_config.setdefault("trial_config_repeat_count", int(
-            args.trial_config_repeat_count if args.trial_config_repeat_count is not None
-            else config.get("trial_config_repeat_count", 1)
-        ))
         # experiment_id is generally taken from --globals files, but we also allow overriding it on the CLI.
         # It's useful to keep it there explicitly mostly for the --help output.
         if args.experiment_id:
             self.global_config['experiment_id'] = args.experiment_id
-        self.global_config = DictTemplater(self.global_config).expand_vars(use_os_env=True)
-        assert isinstance(self.global_config, dict)
         # Ensure that the trial_id is present since it gets used by some other
         # configs but is typically controlled by the run optimize loop.
         self.global_config.setdefault('trial_id', 1)
+        # trial_config_repeat_count is a scheduler property but it's convenient to set it via command line
+        self.global_config.setdefault("trial_config_repeat_count", int(
+            args.trial_config_repeat_count or config.get("trial_config_repeat_count", 1)
+        ))
+        self.global_config = DictTemplater(self.global_config).expand_vars(use_os_env=True)
+        assert isinstance(self.global_config, dict)
 
         # --service cli args should override the config file values.
         service_files: List[str] = config.get("services", []) + (args.service or [])
@@ -152,6 +147,10 @@ class Launcher:
 
         self.scheduler = self._load_scheduler(args.scheduler or config.get("scheduler"))
         _LOG.info("Init scheduler: %s", self.scheduler)
+
+        self.teardown = bool(
+            args.teardown if args.teardown is not None else config.get("teardown", True)
+        )
 
     @property
     def config_loader(self) -> ConfigPersistenceService:
@@ -390,6 +389,9 @@ class Launcher:
         command line parameter.
         Create a simple synchronous single-threaded scheduler if omitted.
         """
+        # Set `teardown` for scheduler only to prevent conflicts with other configs.
+        global_config = self.global_config.copy()
+        global_config.setdefault("teardown", self.teardown)
         if args_scheduler is None:
             # pylint: disable=import-outside-toplevel
             from mlos_bench.schedulers.sync_scheduler import SyncScheduler
@@ -400,7 +402,7 @@ class Launcher:
                     "trial_id": 0,
                     "config_id": -1,
                     "trial_config_repeat_count": 1,
-                    "teardown": False,
+                    "teardown": self.teardown,
                 },
                 global_config=self.global_config,
                 environment=self.environment,
