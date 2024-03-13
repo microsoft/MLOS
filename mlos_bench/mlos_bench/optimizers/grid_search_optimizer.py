@@ -17,7 +17,7 @@ from ConfigSpace.util import generate_grid
 from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.optimizers.base_optimizer import Optimizer
+from mlos_bench.optimizers.track_best_optimizer import TrackBestOptimizer
 from mlos_bench.optimizers.convert_configspace import configspace_data_to_tunable_values
 from mlos_bench.services.base_service import Service
 from mlos_bench.util import nullable
@@ -25,7 +25,7 @@ from mlos_bench.util import nullable
 _LOG = logging.getLogger(__name__)
 
 
-class GridSearchOptimizer(Optimizer):
+class GridSearchOptimizer(TrackBestOptimizer):
     """
     Grid search optimizer.
     """
@@ -42,7 +42,7 @@ class GridSearchOptimizer(Optimizer):
 
         # Track the grid as a set of tuples of tunable values and reconstruct the
         # dicts as necessary.
-        # Note: this is not the most effecient way to do this, but avoids
+        # Note: this is not the most efficient way to do this, but avoids
         # introducing a new data structure for hashable dicts.
         # See https://github.com/microsoft/MLOS/pull/690 for further discussion.
 
@@ -161,12 +161,6 @@ class GridSearchOptimizer(Optimizer):
     def register(self, tunables: TunableGroups, status: Status,
                  score: Optional[Union[float, dict]] = None) -> Optional[float]:
         registered_score = super().register(tunables, status, score)
-        if status.is_succeeded() and (
-            self._best_score is None or (registered_score is not None and registered_score < self._best_score)
-        ):
-            self._best_score = registered_score
-            self._best_config = tunables.copy()
-        self._iter += 1
         try:
             config = dict(ConfigSpace.Configuration(self.config_space, values=tunables.get_param_values()))
             self._suggested_configs.remove(tuple(config.values()))
@@ -181,9 +175,3 @@ class GridSearchOptimizer(Optimizer):
                              len(self._pending_configs), list(self._pending_configs.keys()))
             return False
         return bool(self._pending_configs)
-
-    def get_best_observation(self) -> Union[Tuple[float, TunableGroups], Tuple[None, None]]:
-        if self._best_score is None:
-            return (None, None)
-        assert self._best_config is not None
-        return (self._best_score * self._opt_sign, self._best_config)
