@@ -28,16 +28,17 @@ class SyncScheduler(Scheduler):
         super().start()
 
         last_trial_id = -1
-        is_warm_up = self.optimizer.supports_preload
-        if not is_warm_up:
+        if self.optimizer.supports_preload:
+            # Finish pending/running trials before warming up the optimizer.
+            _LOG.info("Run pending trials")
+            self._run_schedule(running=True)
+        else:
             _LOG.warning("Skip pending trials and warm-up: %s", self.optimizer)
 
         while self.optimizer.not_converged():
-            _LOG.info("Optimization loop: %s Last trial ID: %d",
-                      "Warm-up" if is_warm_up else "Run", last_trial_id)
-            self._run_schedule(is_warm_up)
+            _LOG.info("Optimization loop: Last trial ID: %d", last_trial_id)
             last_trial_id = self._get_optimizer_suggestions(last_trial_id)
-            is_warm_up = False
+            self._run_schedule()
 
     def run_trial(self, trial: Storage.Trial) -> None:
         """

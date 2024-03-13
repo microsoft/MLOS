@@ -71,7 +71,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         experiment_id = self._global_config.get('experiment_id')
         self.experiment_id = str(experiment_id).strip() if experiment_id else None
 
-        self._iter = 1
+        self._iter = 0
         # If False, use the optimizer to suggest the initial configuration;
         # if True (default), use the already initialized values for the first iteration.
         self._start_with_defaults: bool = bool(
@@ -267,8 +267,8 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             These are the same tunables we pass to the constructor,
             but with the values set to the next suggestion.
         """
-        _LOG.debug("Iteration %d :: Suggest", self._iter)
         self._iter += 1
+        _LOG.debug("Iteration %d :: Suggest", self._iter)
         return self._tunables.copy()
 
     @abstractmethod
