@@ -40,17 +40,14 @@ class MockOptimizer(TrackBestOptimizer):
         }
 
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
-                      status: Optional[Sequence[Status]] = None, is_warm_up: bool = False) -> bool:
-        if not super().bulk_register(configs, scores, status, is_warm_up):
+                      status: Optional[Sequence[Status]] = None) -> bool:
+        if not super().bulk_register(configs, scores, status):
             return False
         if status is None:
             status = [Status.SUCCEEDED] * len(configs)
         for (params, score, trial_status) in zip(configs, scores, status):
             tunables = self._tunables.copy().assign(params)
             self.register(tunables, trial_status, None if score is None else float(score))
-            if is_warm_up:
-                # Do not advance the iteration counter during warm-up.
-                self._iter -= 1
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
             _LOG.debug("Warm-up end: %s = %s", self.target, score)
@@ -60,12 +57,12 @@ class MockOptimizer(TrackBestOptimizer):
         """
         Generate the next (random) suggestion.
         """
-        tunables = self._tunables.copy()
+        tunables = super().suggest()
         if self._start_with_defaults:
             _LOG.info("Use default values for the first trial")
             self._start_with_defaults = False
         else:
             for (tunable, _group) in tunables:
                 tunable.value = self._random[tunable.type](tunable)
-        _LOG.info("Iteration %d :: Suggest: %s", self._iter, tunables)
+        _LOG.info("Iteration %d :: Suggest: %s", self._iter - 1, tunables)
         return tunables

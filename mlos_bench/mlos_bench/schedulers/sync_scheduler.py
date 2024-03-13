@@ -36,7 +36,7 @@ class SyncScheduler(Scheduler):
             _LOG.info("Optimization loop: %s Last trial ID: %d",
                       "Warm-up" if is_warm_up else "Run", last_trial_id)
             self._run_schedule(is_warm_up)
-            last_trial_id = self._get_optimizer_suggestions(last_trial_id, is_warm_up)
+            last_trial_id = self._get_optimizer_suggestions(last_trial_id)
             is_warm_up = False
 
     def run_trial(self, trial: Storage.Trial) -> None:

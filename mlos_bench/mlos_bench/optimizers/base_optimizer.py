@@ -224,7 +224,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
 
     @abstractmethod
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
-                      status: Optional[Sequence[Status]] = None, is_warm_up: bool = False) -> bool:
+                      status: Optional[Sequence[Status]] = None) -> bool:
         """
         Pre-load the optimizer with the bulk data from previous experiments.
 
@@ -236,16 +236,13 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             Benchmark results from experiments that correspond to `configs`.
         status : Optional[Sequence[float]]
             Status of the experiments that correspond to `configs`.
-        is_warm_up : bool
-            True for the initial load, False for subsequent calls.
 
         Returns
         -------
         is_not_empty : bool
             True if there is data to register, false otherwise.
         """
-        _LOG.info("%s the optimizer with: %d configs, %d scores, %d status values",
-                  "Warm-up" if is_warm_up else "Load",
+        _LOG.info("Update the optimizer with: %d configs, %d scores, %d status values",
                   len(configs or []), len(scores or []), len(status or []))
         if len(configs or []) != len(scores or []):
             raise ValueError("Numbers of configs and scores do not match.")
@@ -261,6 +258,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     def suggest(self) -> TunableGroups:
         """
         Generate the next suggestion.
+        Base class' implementation increments the iteration count.
 
         Returns
         -------
@@ -269,13 +267,15 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             These are the same tunables we pass to the constructor,
             but with the values set to the next suggestion.
         """
+        _LOG.debug("Iteration %d :: Suggest", self._iter)
+        self._iter += 1
+        return self._tunables.copy()
 
     @abstractmethod
     def register(self, tunables: TunableGroups, status: Status,
                  score: Optional[Union[float, Dict[str, float]]] = None) -> Optional[float]:
         """
         Register the observation for the given configuration.
-        Base class' implementations logs and increments the iteration count.
 
         Parameters
         ----------
@@ -295,7 +295,6 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         """
         _LOG.info("Iteration %d :: Register: %s = %s score: %s",
                   self._iter, tunables, status, score)
-        self._iter += 1
         if status.is_succeeded() == (score is None):  # XOR
             raise ValueError("Status and score must be consistent.")
         return self._get_score(status, score)

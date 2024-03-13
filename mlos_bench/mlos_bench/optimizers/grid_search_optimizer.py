@@ -108,27 +108,24 @@ class GridSearchOptimizer(TrackBestOptimizer):
         return (dict(zip(self._config_keys, config)) for config in self._suggested_configs)
 
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
-                      status: Optional[Sequence[Status]] = None, is_warm_up: bool = False) -> bool:
-        if not super().bulk_register(configs, scores, status, is_warm_up):
+                      status: Optional[Sequence[Status]] = None) -> bool:
+        if not super().bulk_register(configs, scores, status):
             return False
         if status is None:
             status = [Status.SUCCEEDED] * len(configs)
         for (params, score, trial_status) in zip(configs, scores, status):
             tunables = self._tunables.copy().assign(params)
             self.register(tunables, trial_status, None if score is None else float(score))
-            if is_warm_up:
-                # Do not advance the iteration counter during warm-up.
-                self._iter -= 1
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
-            _LOG.debug("%s end: %s = %s", "Warm-up" if is_warm_up else "Update", self.target, score)
+            _LOG.debug("Update end: %s = %s", self.target, score)
         return True
 
     def suggest(self) -> TunableGroups:
         """
         Generate the next grid search suggestion.
         """
-        tunables = self._tunables.copy()
+        tunables = super().suggest()
         if self._start_with_defaults:
             _LOG.info("Use default values for the first trial")
             self._start_with_defaults = False

@@ -144,7 +144,7 @@ class Scheduler(metaclass=ABCMeta):
             _LOG.debug("Config %d ::\n%s", config_id, json.dumps(tunable_values, indent=2))
         return tunables
 
-    def _get_optimizer_suggestions(self, last_trial_id: int = -1, is_warm_up: bool = False) -> int:
+    def _get_optimizer_suggestions(self, last_trial_id: int = -1) -> int:
         """
         Optimizer part of the loop. Load the results of the executed trials
         into the optimizer, suggest new configurations, and add them to the queue.
@@ -153,7 +153,7 @@ class Scheduler(metaclass=ABCMeta):
         assert self.experiment is not None
         (trial_ids, configs, scores, status) = self.experiment.load(last_trial_id)
         _LOG.info("QUEUE: Update the optimizer with trial results: %s", trial_ids)
-        self.optimizer.bulk_register(configs, scores, status, is_warm_up)
+        self.optimizer.bulk_register(configs, scores, status)
 
         tunables = self.optimizer.suggest()
         self.schedule_trial(tunables)
