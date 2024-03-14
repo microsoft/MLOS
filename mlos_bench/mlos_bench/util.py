@@ -13,7 +13,11 @@ import json
 import logging
 import importlib
 import subprocess
-from typing import Any, Dict, Iterable, Mapping, Optional, Tuple, Type, TypeVar, TYPE_CHECKING, Union
+
+from typing import (
+    Any, Callable, Dict, Iterable, Mapping, Optional,
+    Tuple, Type, TypeVar, TYPE_CHECKING, Union,
+)
 
 _LOG = logging.getLogger(__name__)
 
@@ -279,3 +283,22 @@ def try_parse_val(val: Optional[str]) -> Optional[Union[int, float, str]]:
             return val_float
     except ValueError:
         return str(val)
+
+
+def nullable(func: Callable, value: Optional[Any]) -> Optional[Any]:
+    """
+    Poor man's Maybe monad: apply the function to the value if it's not None.
+
+    Parameters
+    ----------
+    func : Callable
+        Function to apply to the value.
+    value : Optional[Any]
+        Value to apply the function to.
+
+    Returns
+    -------
+    value : Optional[Any]
+        The result of the function application or None if the value is None.
+    """
+    return None if value is None else func(value)
