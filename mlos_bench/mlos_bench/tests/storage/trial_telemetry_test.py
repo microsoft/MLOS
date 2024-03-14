@@ -13,6 +13,7 @@ import pytest
 from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
+from mlos_bench.util import nullable
 
 # pylint: disable=redefined-outer-name
 
@@ -44,7 +45,7 @@ def _telemetry_str(data: List[Tuple[datetime, str, Any]]
     """
     Convert telemetry values to strings.
     """
-    return [(ts, key, None if val is None else str(val)) for (ts, key, val) in data]
+    return [(ts, key, nullable(str, val)) for (ts, key, val) in data]
 
 
 def test_update_telemetry(storage: Storage,

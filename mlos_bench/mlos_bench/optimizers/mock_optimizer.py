@@ -17,6 +17,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 from mlos_bench.optimizers.track_best_optimizer import TrackBestOptimizer
 from mlos_bench.services.base_service import Service
+from mlos_bench.util import nullable
 
 _LOG = logging.getLogger(__name__)
 
@@ -47,7 +48,7 @@ class MockOptimizer(TrackBestOptimizer):
             status = [Status.SUCCEEDED] * len(configs)
         for (params, score, trial_status) in zip(configs, scores, status):
             tunables = self._tunables.copy().assign(params)
-            self.register(tunables, trial_status, None if score is None else float(score))
+            self.register(tunables, trial_status, nullable(float, score))
             if is_warm_up:
                 # Do not advance the iteration counter during warm-up.
                 self._iter -= 1
