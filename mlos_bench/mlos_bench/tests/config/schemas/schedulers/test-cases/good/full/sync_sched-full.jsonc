@@ -1,0 +1,11 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/schedulers/scheduler-schema.json",
+    "class": "mlos_bench.schedulers.sync_scheduler.SyncScheduler",
+    "config": {
+        "trial_config_repeat_count": 3,
+        "teardown": false,
+        "experiment_id": "MyExperimentName",
+        "config_id": 1,
+        "trial_id": 1
+    }
+}
