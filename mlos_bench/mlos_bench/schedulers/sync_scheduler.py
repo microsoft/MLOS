@@ -45,6 +45,8 @@ class SyncScheduler(Scheduler):
         """
         super().run_trial(trial)
 
+        trial_runner = self._trial_runners[trial.trial_runner_id]
+
         if not self.environment.setup(trial.tunables, trial.config(self.global_config)):
             _LOG.warning("Setup failed: %s :: %s", self.environment, trial.tunables)
             # FIXME: Use the actual timestamp from the environment.

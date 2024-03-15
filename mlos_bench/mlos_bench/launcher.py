@@ -55,6 +55,7 @@ class Launcher:
 
     def __init__(self, description: str, long_text: str = "", argv: Optional[List[str]] = None):
         # pylint: disable=too-many-statements
+        # pylint: disable=too-complex
         _LOG.info("Launch: %s", description)
         epilog = """
             Additional --key=value pairs can be specified to augment or override values listed in --globals.
@@ -79,18 +80,6 @@ class Launcher:
         else:
             config = {}
 
-        self.trial_config_repeat_count: int = (
-            args.trial_config_repeat_count or config.get("trial_config_repeat_count", 1)
-        )
-        if self.trial_config_repeat_count <= 0:
-            raise ValueError(f"Invalid trial_config_repeat_count: {self.trial_config_repeat_count}")
-
-        self.num_trial_runners: int = (
-            args.trial_runners or config.get("trial_runners", 1)
-        )
-        if self.num_trial_runners <= 0:
-            raise ValueError(f"Invalid trial_runners: {self.num_trial_runners}")
-
         log_level = args.log_level or config.get("log_level", _LOG_LEVEL)
         try:
             log_level = int(log_level)
@@ -112,15 +101,21 @@ class Launcher:
             config.get("globals", []) + (args.globals or []),
             (args.config_path or []) + config.get("config_path", []),
             args_rest,
+            # Prime the global config with the command line args and the config file.
             {key: val for (key, val) in config.items() if key not in vars(args)},
         )
         # experiment_id is generally taken from --globals files, but we also allow overriding it on the CLI.
         # It's useful to keep it there explicitly mostly for the --help output.
         if args.experiment_id:
-            self.global_config['experiment_id'] = args.experiment_id
+            self.global_config["experiment_id"] = args.experiment_id
         # trial_config_repeat_count is a scheduler property but it's convenient to set it via command line
         if args.trial_config_repeat_count:
             self.global_config["trial_config_repeat_count"] = args.trial_config_repeat_count
+        self.global_config.setdefault("num_trial_runners", 1)
+        if args.num_trial_runners:
+            self.global_config["num_trial_runners"] = args.num_trial_runners
+        if self.global_config["num_trial_runners"] <= 0:
+            raise ValueError(f"Invalid num_trial_runners: {self.global_config['num_trial_runners']}")
         # Ensure that the trial_id is present since it gets used by some other
         # configs but is typically controlled by the run optimize loop.
         self.global_config.setdefault('trial_id', 1)
@@ -141,7 +136,7 @@ class Launcher:
         self.root_env_config = self._config_loader.resolve_path(env_path)
 
         self.trial_runners: List[TrialRunner] = []
-        for trial_runner_id in range(0, self.num_trial_runners):
+        for trial_runner_id in range(0, self.global_config["num_trial_runners"]):
             # Create a new global config for each Environment with a unique trial_runner_id for it.
             global_config = self.global_config.copy()
             global_config["trial_runner_id"] = trial_runner_id

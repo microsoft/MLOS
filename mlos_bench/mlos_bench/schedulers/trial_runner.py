@@ -6,7 +6,8 @@
 Simple class to run an individual Trial on a given Environment.
 """
 
-from typing import Any, Dict, Literal, Optional, Tuple
+from types import TracebackType
+from typing import Any, Dict, Literal, Optional, Tuple, Type
 
 from datetime import datetime
 import logging
@@ -52,21 +53,22 @@ class TrialRunner:
         """
         return self._env
 
-    # TODO: improve context mangement support
-
     def __enter__(self) -> "TrialRunner":
         assert not self._in_context
-        # TODO: Improve logging.
-        self._event_loop_context.enter()
+        _LOG.debug("TrialRunner START :: %s", self)
+        # TODO: self._event_loop_context.enter()
         self._env.__enter__()
         self._in_context = True
         return self
 
-    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> Literal[False]:
+    def __exit__(self,
+                 ex_type: Optional[Type[BaseException]],
+                 ex_val: Optional[BaseException],
+                 ex_tb: Optional[TracebackType]) -> Literal[False]:
         assert self._in_context
-        # TODO: Improve logging.
-        self._env.__exit__(exc_type, exc_value, traceback)
-        self._event_loop_context.exit()
+        _LOG.debug("TrialRunner END :: %s", self)
+        self._env.__exit__(ex_type, ex_val, ex_tb)
+        # TODO: self._event_loop_context.exit()
         self._in_context = False
         return False  # Do not suppress exceptions
 

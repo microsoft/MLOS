@@ -42,22 +42,23 @@ class Scheduler(metaclass=ABCMeta):
         Create a new instance of the scheduler. The constructor of this
         and the derived classes is called by the persistence service
         after reading the class JSON configuration. Other objects like
-        the Environment and Optimizer are provided by the Launcher.
+        the TrialRunner(s) and their Environment(s) and Optimizer are
+        provided by the Launcher.
 
         Parameters
         ----------
         config : dict
-            The configuration for the scheduler.
+            The configuration for the Scheduler.
         global_config : dict
             he global configuration for the experiment.
-        environment : Environment
-            The environment to benchmark/optimize.
+        trial_runner : List[TrialRunner]
+            The set of TrialRunner(s) (and associated Environment(s)) to benchmark/optimize.
         optimizer : Optimizer
-            The optimizer to use.
+            The Optimizer to use.
         storage : Storage
             The storage to use.
         root_env_config : str
-            Path to the root environment configuration.
+            Path to the root Environment configuration.
         """
         self.global_config = global_config
         config = merge_parameters(dest=config.copy(), source=global_config,
@@ -81,6 +82,8 @@ class Scheduler(metaclass=ABCMeta):
         self._root_env_config = root_env_config
         self._current_trial_runner_idx = 0
 
+        _LOG.debug("Scheduler instantiated: %s :: %s", self, config)
+
     @property
     def experiment(self) -> Optional[Storage.Experiment]:
         """Gets the Experiment Storage."""
@@ -88,7 +91,13 @@ class Scheduler(metaclass=ABCMeta):
 
     @property
     def root_environment(self) -> Environment:
-        """Gets the root Environment from the first TrialRunner."""
+        """
+        Gets the root (prototypical) Environment from the first TrialRunner.
+
+        Note: This all TrialRunners have the same Environment config and are made
+        unique by their use of the unique trial_runner_id assigned to each
+        TrialRunner's Environment's global_config.
+        """
         return self._trial_runners[0].environment
 
     @property
@@ -110,8 +119,6 @@ class Scheduler(metaclass=ABCMeta):
     def storage(self) -> Storage:
         """Gets the Storage."""
         return self._storage
-
-        _LOG.debug("Scheduler instantiated: %s :: %s", self, config)
 
     def __repr__(self) -> str:
         """
@@ -167,7 +174,7 @@ class Scheduler(metaclass=ABCMeta):
     @abstractmethod
     def start(self) -> None:
         """
-        Start the optimization loop.
+        Start the scheduling loop.
         """
         assert self.experiment is not None
         _LOG.info("START: Experiment: %s Env: %s Optimizer: %s",
@@ -270,6 +277,7 @@ class Scheduler(metaclass=ABCMeta):
         Scheduler part of the loop. Check for pending trials in the queue and run them.
         """
         assert self.experiment is not None
+        # TODO: allow overriding in order to implement parallelized TrialRunners.
         for trial in self.experiment.pending_trials(datetime.utcnow(), running=running):
             self.run_trial(trial)
 
