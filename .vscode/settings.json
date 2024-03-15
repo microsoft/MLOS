@@ -70,6 +70,15 @@
         },
         {
             "fileMatch": [
+                "mlos_bench/mlos_bench/tests/config/schemas/schedulers/test-cases/**/*.jsonc",
+                "mlos_bench/mlos_bench/tests/config/schemas/schedulers/test-cases/**/*.json",
+                "mlos_bench/mlos_bench/config/schedulers/**/*.jsonc",
+                "mlos_bench/mlos_bench/config/schedulers/**/*.json"
+            ],
+            "url": "./mlos_bench/mlos_bench/config/schemas/schedulers/scheduler-schema.json"
+        },
+        {
+            "fileMatch": [
                 "mlos_bench/mlos_bench/tests/config/schemas/storage/test-cases/**/*.jsonc",
                 "mlos_bench/mlos_bench/tests/config/schemas/storage/test-cases/**/*.json",
                 "mlos_bench/mlos_bench/config/storage/**/*.jsonc",

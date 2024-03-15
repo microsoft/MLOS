@@ -16,7 +16,6 @@ from typing import List, Optional, Tuple
 
 from mlos_bench.launcher import Launcher
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.schedulers.sync_scheduler import SyncScheduler
 
 _LOG = logging.getLogger(__name__)
 
@@ -25,27 +24,11 @@ def _main(argv: Optional[List[str]] = None) -> Tuple[Optional[float], Optional[T
 
     launcher = Launcher("mlos_bench", "Systems autotuning and benchmarking tool", argv=argv)
 
-    # TODO: Instantiate Scheduler from JSON config
-    scheduler = SyncScheduler(
-        config={
-            "experiment_id": "UNDEFINED - override from global config",
-            "trial_id": 0,    # Override from global config
-            "config_id": -1,  # Override from global config
-            "trial_config_repeat_count": launcher.trial_config_repeat_count,
-            "teardown": launcher.teardown,
-        },
-        global_config=launcher.global_config,
-        trial_runners=launcher.trial_runners,
-        optimizer=launcher.optimizer,
-        storage=launcher.storage,
-        root_env_config=launcher.root_env_config,
-    )
-
-    with scheduler as scheduler_context:
+    with launcher.scheduler as scheduler_context:
         scheduler_context.start()
         scheduler_context.teardown()
 
-    (score, _config) = result = scheduler.get_best_observation()
+    (score, _config) = result = launcher.scheduler.get_best_observation()
     # NOTE: This log line is used in test_launch_main_app_* unit tests:
     _LOG.info("Final score: %s", score)
     return result

@@ -24,12 +24,13 @@ _LOG = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from mlos_bench.environments.base_environment import Environment
     from mlos_bench.optimizers.base_optimizer import Optimizer
+    from mlos_bench.schedulers.base_scheduler import Scheduler
     from mlos_bench.services.base_service import Service
     from mlos_bench.storage.base_storage import Storage
 
 # BaseTypeVar is a generic with a constraint of the three base classes.
-BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Service", "Storage")
-BaseTypes = Union["Environment", "Optimizer", "Service", "Storage"]
+BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Scheduler", "Service", "Storage")
+BaseTypes = Union["Environment", "Optimizer", "Scheduler", "Service", "Storage"]
 
 
 def preprocess_dynamic_configs(*, dest: dict, source: Optional[dict] = None) -> dict:

@@ -23,6 +23,7 @@ from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.services.base_service import Service
+from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -35,6 +36,7 @@ else:
 
 if TYPE_CHECKING:
     from mlos_bench.storage.base_storage import Storage
+    from mlos_bench.schedulers.base_scheduler import Scheduler
 
 
 _LOG = logging.getLogger(__name__)
@@ -301,6 +303,48 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                                        global_config=global_config,
                                        service=service)
         _LOG.info("Created: Storage %s", inst)
+        return inst
+
+    def build_scheduler(self, *,
+                        config: Dict[str, Any],
+                        global_config: Dict[str, Any],
+                        trial_runners: List[TrialRunner],
+                        optimizer: Optimizer,
+                        storage: "Storage",
+                        root_env_config: str) -> "Scheduler":
+        """
+        Instantiation of mlos_bench Scheduler.
+
+        Parameters
+        ----------
+        config : dict
+            Configuration of the class to instantiate, as loaded from JSON.
+        global_config : dict
+            Global configuration parameters.
+        trial_runners : List[TrialRunner]
+            The TrialRunners (Environments) to use.
+        optimizer : Optimizer
+            The optimizer to use.
+        storage : Storage
+            The storage to use.
+        root_env_config : str
+            Path to the root environment configuration.
+
+        Returns
+        -------
+        inst : Scheduler
+            A new instance of the Scheduler.
+        """
+        (class_name, class_config) = self.prepare_class_load(config, global_config)
+        from mlos_bench.schedulers.base_scheduler import Scheduler  # pylint: disable=import-outside-toplevel
+        inst = instantiate_from_config(Scheduler, class_name,  # type: ignore[type-abstract]
+                                       config=class_config,
+                                       global_config=global_config,
+                                       trial_runners=trial_runners,
+                                       optimizer=optimizer,
+                                       storage=storage,
+                                       root_env_config=root_env_config)
+        _LOG.info("Created: Scheduler %s", inst)
         return inst
 
     def build_environment(self,     # pylint: disable=too-many-arguments

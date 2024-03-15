@@ -1,0 +1,6 @@
+{
+    "class": "mlos_bench.schedulers.sync_scheduler.SyncScheduler",
+    "config": {
+        "extra": "unsupported"
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "class": "mlos_bench.schedulers.SyncScheduler",
+    "config": {
+        "trial_config_repeat_count": 0
+    }
+}
