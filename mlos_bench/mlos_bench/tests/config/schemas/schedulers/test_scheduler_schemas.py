@@ -7,7 +7,6 @@ Tests for schedulers schema validation.
 """
 
 from os import path
-from typing import Optional
 
 import pytest
 
