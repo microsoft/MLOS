@@ -148,7 +148,7 @@ class Scheduler(metaclass=ABCMeta):
 
     def teardown(self) -> None:
         """
-        Tear down the Environment(s).
+        Tear down the TrialRunners/Environment(s).
         Call it after the completion of the `.start()` in the scheduler context.
         """
         assert self.experiment is not None

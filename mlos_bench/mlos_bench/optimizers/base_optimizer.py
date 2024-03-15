@@ -209,7 +209,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         return self._opt_target
 
     @property
-    def direction(self) -> str:
+    def direction(self) -> Literal['min', 'max']:
         """
         The direction to optimize the target metric (e.g., min or max).
         """
@@ -275,6 +275,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
                  score: Optional[Union[float, Dict[str, float]]] = None) -> Optional[float]:
         """
         Register the observation for the given configuration.
+        Base class' implementations logs and increments the iteration count.
 
         Parameters
         ----------
@@ -294,6 +295,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         """
         _LOG.info("Iteration %d :: Register: %s = %s score: %s",
                   self._iter, tunables, status, score)
+        self._iter += 1
         if status.is_succeeded() == (score is None):  # XOR
             raise ValueError("Status and score must be consistent.")
         return self._get_score(status, score)

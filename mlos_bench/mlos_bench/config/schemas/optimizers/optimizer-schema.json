@@ -64,6 +64,8 @@
             "enum": [
                 "mlos_bench.optimizers.MlosCoreOptimizer",
                 "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+                "mlos_bench.optimizers.GridSearchOptimizer",
+                "mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer",
                 "mlos_bench.optimizers.MockOptimizer",
                 "mlos_bench.optimizers.mock_optimizer.MockOptimizer",
                 "mlos_bench.optimizers.OneShotOptimizer",
@@ -125,6 +127,32 @@
                     }
                 },
                 "$comment": "Set 'else' to false to prevent it to defaulting to a valid document match."
+            },
+            "else": false
+        },
+
+        {
+            "$comment": "extensions to the 'config' object properties when the mock optimizer is being used",
+            "if": {
+                "properties": {
+                    "class": {
+                        "enum": [
+                            "mlos_bench.optimizers.GridSearchOptimizer",
+                            "mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer"
+                        ]
+                    }
+                },
+                "required": ["class"]
+            },
+            "then": {
+                "properties": {
+                    "config": {
+                        "type": "object",
+                        "allOf": [{ "$ref": "#/$defs/config_base_optimizer" }],
+                        "$comment": "disallow other properties",
+                        "unevaluatedProperties": false
+                    }
+                }
             },
             "else": false
         },

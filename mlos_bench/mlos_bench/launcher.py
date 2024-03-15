@@ -23,7 +23,7 @@ from mlos_bench.util import try_parse_val
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.environments.base_environment import Environment
-from mlos_bench.trial_runner import TrialRunner
+from mlos_bench.schedulers.trial_runner import TrialRunner
 
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer

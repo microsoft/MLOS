@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-    A simple single-threaded synchronous optimization loop implementation.
+A simple single-threaded synchronous optimization loop implementation.
 """
 
 import logging

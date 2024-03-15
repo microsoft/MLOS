@@ -17,6 +17,7 @@ from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.tunables import Tunable, TunableGroups, TunableValue
+from mlos_bench.util import nullable
 
 _LOG = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ class MockEnv(Environment):
         super().__init__(name=name, config=config, global_config=global_config,
                          tunables=tunables, service=service)
         seed = self.config.get("seed")
-        self._random = random.Random(seed) if seed is not None else None
+        self._random = nullable(random.Random, seed)
         self._range = self.config.get("range")
         self._metrics = self.config.get("metrics", ["score"])
         self._is_ready = True
