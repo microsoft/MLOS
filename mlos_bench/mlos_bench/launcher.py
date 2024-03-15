@@ -211,7 +211,7 @@ class Launcher:
         parser.add_argument(
             '--scheduler', required=False,
             help='Path to the scheduler configuration file. By default, use' +
-                 ' a single-threaded synchronous scheduler.')
+                 ' a single worker synchronous scheduler.')
 
         parser.add_argument(
             '--storage', required=False,
