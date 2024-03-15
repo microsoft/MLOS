@@ -20,6 +20,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.track_best_optimizer import TrackBestOptimizer
 from mlos_bench.optimizers.convert_configspace import configspace_data_to_tunable_values
 from mlos_bench.services.base_service import Service
+from mlos_bench.util import nullable
 
 _LOG = logging.getLogger(__name__)
 
@@ -115,7 +116,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
             status = [Status.SUCCEEDED] * len(configs)
         for (params, score, trial_status) in zip(configs, scores, status):
             tunables = self._tunables.copy().assign(params)
-            self.register(tunables, trial_status, None if score is None else float(score))
+            self.register(tunables, trial_status, nullable(float, score))
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
             _LOG.debug("Update end: %s = %s", self.target, score)

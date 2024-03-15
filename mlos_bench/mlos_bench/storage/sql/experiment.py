@@ -18,6 +18,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.sql.trial import Trial
+from mlos_bench.util import nullable
 
 _LOG = logging.getLogger(__name__)
 
@@ -157,7 +158,7 @@ class Experiment(Storage.Experiment):
                     conn, self._schema.config_param, config_id=trial.config_id)
                 trial_ids.append(trial.trial_id)
                 configs.append(tunables)
-                scores.append(None if trial.metric_value is None else float(trial.metric_value))
+                scores.append(nullable(float, trial.metric_value))
                 status.append(Status[trial.status])
             return (trial_ids, configs, scores, status)
 
@@ -176,7 +177,7 @@ class Experiment(Storage.Experiment):
             {
                 **kwargs,
                 "param_id": key,
-                "param_value": None if val is None else str(val)
+                "param_value": nullable(str, val)
             }
             for (key, val) in params.items()
         ])
