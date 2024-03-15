@@ -254,11 +254,11 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             self._start_with_defaults = False
         return has_data
 
-    @abstractmethod
     def suggest(self) -> TunableGroups:
         """
         Generate the next suggestion.
-        Base class' implementation increments the iteration count.
+        Base class' implementation increments the iteration count
+        and returns the current values of the tunables.
 
         Returns
         -------
@@ -335,7 +335,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         Return True if not converged, False otherwise.
         Base implementation just checks the iteration count.
         """
-        return self._iter <= self._max_iter
+        return self._iter < self._max_iter
 
     @abstractmethod
     def get_best_observation(self) -> Union[Tuple[float, TunableGroups], Tuple[None, None]]:
