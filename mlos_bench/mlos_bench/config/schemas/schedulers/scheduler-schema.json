@@ -13,13 +13,13 @@
             "type": "object",
             "properties": {
                 "experiment_id": {
-                    "$ref": "./common-defs-subschemas.json#/$defs/experiment_id"
+                    "$ref": "../cli/common-defs-subschemas.json#/$defs/experiment_id"
                 },
                 "trial_id": {
-                    "$ref": "./common-defs-subschemas.json#/$defs/trial_id"
+                    "$ref": "../cli/common-defs-subschemas.json#/$defs/trial_id"
                 },
                 "config_id": {
-                    "$ref": "./common-defs-subschemas.json#/$defs/config_id"
+                    "$ref": "../cli/common-defs-subschemas.json#/$defs/config_id"
                 },
                 "teardown": {
                     "description": "Whether to teardown the experiment after running it.",
