@@ -398,19 +398,6 @@ class Environment(metaclass=abc.ABCMeta):
         (status, timestamp, _) = self.status()
         return (status, timestamp, None)
 
-    async def async_status_poll(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
-        """
-        Run a command to check the status of the benchmark environment.
-
-        Returns
-        -------
-        (benchmark_status, timestamp, telemetry) : (Status, datetime, list)
-            3-tuple of (benchmark status, timestamp, telemetry) values.
-            `timestamp` is UTC time stamp of the status; it's current time by default.
-            `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
-        """
-        raise NotImplementedError("TODO")
-
     def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
         """
         Check the status of the benchmark environment.

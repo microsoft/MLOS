@@ -255,7 +255,6 @@ class LocalEnv(ScriptEnv):
 
         assert self._temp_dir is not None
         try:
-            # TODO: support multiple telemetry files
             fname = self._config_loader_service.resolve_path(
                 self._read_telemetry_file, extra_paths=[self._temp_dir])
 

@@ -76,17 +76,9 @@
                     "description": "The command lines to execute for the run phase.",
                     "$ref": "#/$defs/command_lines"
                 },
-                "status": {
-                    "description": "The command lines (or scripts) to execute for (async) status polling checks.",
-                    "$ref": "#/$defs/command_lines"
-                },
                 "teardown": {
                     "description": "The command lines to execute for the teardown phase.",
                     "$ref": "#/$defs/command_lines"
-                },
-                "status_stdout_pattern": {
-                    "description": "A regex to parse the stdout of the status phase for results.",
-                    "type": "string"
                 },
                 "results_stdout_pattern": {
                     "description": "A regex to parse the stdout of the run phase for results.",
