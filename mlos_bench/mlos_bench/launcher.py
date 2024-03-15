@@ -34,6 +34,8 @@ from mlos_bench.services.base_service import Service
 from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 
+from mlos_bench.schedulers.base_scheduler import Scheduler
+
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 
 
@@ -76,12 +78,6 @@ class Launcher:
         else:
             config = {}
 
-        self.trial_config_repeat_count: int = (
-            args.trial_config_repeat_count or config.get("trial_config_repeat_count", 1)
-        )
-        if self.trial_config_repeat_count <= 0:
-            raise ValueError(f"Invalid trial_config_repeat_count: {self.trial_config_repeat_count}")
-
         log_level = args.log_level or config.get("log_level", _LOG_LEVEL)
         try:
             log_level = int(log_level)
@@ -109,11 +105,15 @@ class Launcher:
         # It's useful to keep it there explicitly mostly for the --help output.
         if args.experiment_id:
             self.global_config['experiment_id'] = args.experiment_id
-        self.global_config = DictTemplater(self.global_config).expand_vars(use_os_env=True)
-        assert isinstance(self.global_config, dict)
+        # trial_config_repeat_count is a scheduler property but it's convenient to set it via command line
+        if args.trial_config_repeat_count:
+            self.global_config["trial_config_repeat_count"] = args.trial_config_repeat_count
         # Ensure that the trial_id is present since it gets used by some other
         # configs but is typically controlled by the run optimize loop.
         self.global_config.setdefault('trial_id', 1)
+
+        self.global_config = DictTemplater(self.global_config).expand_vars(use_os_env=True)
+        assert isinstance(self.global_config, dict)
 
         # --service cli args should override the config file values.
         service_files: List[str] = config.get("services", []) + (args.service or [])
@@ -146,6 +146,8 @@ class Launcher:
         _LOG.info("Init storage: %s", self.storage)
 
         self.teardown: bool = bool(args.teardown) if args.teardown is not None else bool(config.get("teardown", True))
+        self.scheduler = self._load_scheduler(args.scheduler or config.get("scheduler"))
+        _LOG.info("Init scheduler: %s", self.scheduler)
 
     @property
     def config_loader(self) -> ConfigPersistenceService:
@@ -203,8 +205,13 @@ class Launcher:
                  ' a single trial with default (or specified in --tunable_values).')
 
         parser.add_argument(
-            '--trial_config_repeat_count', '--trial-config-repeat-count', required=False, type=int, default=1,
+            '--trial_config_repeat_count', '--trial-config-repeat-count', required=False, type=int,
             help='Number of times to repeat each config. Default is 1 trial per config, though more may be advised.')
+
+        parser.add_argument(
+            '--scheduler', required=False,
+            help='Path to the scheduler configuration file. By default, use' +
+                 ' a single worker synchronous scheduler.')
 
         parser.add_argument(
             '--storage', required=False,
@@ -337,8 +344,6 @@ class Launcher:
         in the --optimizer command line option. If config file not specified,
         create a one-shot optimizer to run a single benchmark trial.
         """
-        if 'max_iterations' in self.global_config:
-            self.global_config['max_iterations'] *= self.trial_config_repeat_count
         if args_optimizer is None:
             # global_config may contain additional properties, so we need to
             # strip those out before instantiating the basic oneshot optimizer.
@@ -346,8 +351,6 @@ class Launcher:
             return OneShotOptimizer(
                 self.tunables, config=config, service=self._parent_service)
         class_config = self._config_loader.load_config(args_optimizer, ConfigSchema.OPTIMIZER)
-        if 'max_iterations' in class_config:
-            class_config['max_iterations'] *= self.trial_config_repeat_count
         assert isinstance(class_config, Dict)
         optimizer = self._config_loader.build_optimizer(tunables=self.tunables,
                                                         service=self._parent_service,
@@ -376,3 +379,41 @@ class Launcher:
                                                     config=class_config,
                                                     global_config=self.global_config)
         return storage
+
+    def _load_scheduler(self, args_scheduler: Optional[str]) -> Scheduler:
+        """
+        Instantiate the Scheduler object from JSON file provided in the --scheduler
+        command line parameter.
+        Create a simple synchronous single-threaded scheduler if omitted.
+        """
+        # Set `teardown` for scheduler only to prevent conflicts with other configs.
+        global_config = self.global_config.copy()
+        global_config.setdefault("teardown", self.teardown)
+        if args_scheduler is None:
+            # pylint: disable=import-outside-toplevel
+            from mlos_bench.schedulers.sync_scheduler import SyncScheduler
+            return SyncScheduler(
+                # All config values can be overridden from global config
+                config={
+                    "experiment_id": "UNDEFINED - override from global config",
+                    "trial_id": 0,
+                    "config_id": -1,
+                    "trial_config_repeat_count": 1,
+                    "teardown": self.teardown,
+                },
+                global_config=self.global_config,
+                environment=self.environment,
+                optimizer=self.optimizer,
+                storage=self.storage,
+                root_env_config=self.root_env_config,
+            )
+        class_config = self._config_loader.load_config(args_scheduler, ConfigSchema.SCHEDULER)
+        assert isinstance(class_config, Dict)
+        return self._config_loader.build_scheduler(
+            config=class_config,
+            global_config=self.global_config,
+            environment=self.environment,
+            optimizer=self.optimizer,
+            storage=self.storage,
+            root_env_config=self.root_env_config,
+        )

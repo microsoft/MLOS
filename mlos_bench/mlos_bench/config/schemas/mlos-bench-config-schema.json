@@ -48,6 +48,11 @@
                 "$ref": "./optimizers/optimizer-schema.json"
             },
             {
+                "description": "scheduler config",
+                "type": "object",
+                "$ref": "./schedulers/scheduler-schema.json"
+            },
+            {
                 "description": "service config",
                 "type": "object",
                 "$ref": "./services/service-schema.json"
