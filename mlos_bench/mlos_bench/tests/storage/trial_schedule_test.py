@@ -5,7 +5,7 @@
 """
 Unit tests for scheduling trials for some future time.
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from typing import Iterator, Set
 
@@ -26,7 +26,7 @@ def test_schedule_trial(exp_storage: Storage.Experiment,
     """
     Schedule several trials for future execution and retrieve them later at certain timestamps.
     """
-    timestamp = datetime.utcnow()
+    timestamp = datetime.now(UTC)
     timedelta_1min = timedelta(minutes=1)
     timedelta_1hr = timedelta(hours=1)
     config = {"location": "westus2", "num_repeats": 10}

@@ -7,7 +7,7 @@ A simple single-threaded synchronous optimization loop implementation.
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, UTC
 
 from mlos_bench.environments.status import Status
 from mlos_bench.schedulers.base_scheduler import Scheduler
@@ -49,7 +49,7 @@ class SyncScheduler(Scheduler):
             _LOG.warning("Setup failed: %s :: %s", self.environment, trial.tunables)
             # FIXME: Use the actual timestamp from the environment.
             _LOG.info("QUEUE: Update trial results: %s :: %s", trial, Status.FAILED)
-            trial.update(Status.FAILED, datetime.utcnow())
+            trial.update(Status.FAILED, datetime.now(UTC))
             return
 
         (status, timestamp, results) = self.environment.run()  # Block and wait for the final result.

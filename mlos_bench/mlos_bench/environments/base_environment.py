@@ -9,7 +9,7 @@ A hierarchy of benchmark environments.
 import abc
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, UTC
 from types import TracebackType
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Type, TYPE_CHECKING, Union
 from typing_extensions import Literal
@@ -411,7 +411,7 @@ class Environment(metaclass=abc.ABCMeta):
         """
         # Make sure we create a context before invoking setup/run/status/teardown
         assert self._in_context
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(UTC)
         if self._is_ready:
             return (Status.READY, timestamp, [])
         _LOG.warning("Environment not ready: %s", self)

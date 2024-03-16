@@ -5,7 +5,7 @@
 """
 Unit tests for saving and restoring the telemetry data.
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Any, List, Optional, Tuple
 
 import pytest
@@ -28,7 +28,7 @@ def telemetry_data() -> List[Tuple[datetime, str, Any]]:
     List[Tuple[datetime, str, str]]
         A list of (timestamp, metric_id, metric_value)
     """
-    timestamp1 = datetime.utcnow()
+    timestamp1 = datetime.now(UTC)
     timestamp2 = timestamp1 + timedelta(seconds=1)
     return sorted([
         (timestamp1, "cpu_load", 10.1),
@@ -58,7 +58,7 @@ def test_update_telemetry(storage: Storage,
     trial = exp_storage.new_trial(tunable_groups)
     assert exp_storage.load_telemetry(trial.trial_id) == []
 
-    trial.update_telemetry(Status.RUNNING, datetime.utcnow(), telemetry_data)
+    trial.update_telemetry(Status.RUNNING, datetime.now(UTC), telemetry_data)
     assert exp_storage.load_telemetry(trial.trial_id) == _telemetry_str(telemetry_data)
 
     # Also check that the TrialData telemetry looks right.
@@ -73,7 +73,7 @@ def test_update_telemetry_twice(exp_storage: Storage.Experiment,
     Make sure update_telemetry() call is idempotent.
     """
     trial = exp_storage.new_trial(tunable_groups)
-    timestamp = datetime.utcnow()
+    timestamp = datetime.now(UTC)
     trial.update_telemetry(Status.RUNNING, timestamp, telemetry_data)
     trial.update_telemetry(Status.RUNNING, timestamp, telemetry_data)
     trial.update_telemetry(Status.RUNNING, timestamp, telemetry_data)

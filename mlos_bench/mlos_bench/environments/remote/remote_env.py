@@ -9,7 +9,7 @@ e.g. Application Environment
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, Iterable, Optional, Tuple
 
 from mlos_bench.environments.status import Status
@@ -174,5 +174,5 @@ class RemoteEnv(ScriptEnv):
             (status, output) = self._remote_exec_service.get_remote_exec_results(output)
         _LOG.debug("Status: %s :: %s", status, output)
         # FIXME: get the timestamp from the remote environment!
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(UTC)
         return (status, timestamp, output)

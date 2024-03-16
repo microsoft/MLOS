@@ -5,7 +5,7 @@
 """
 Unit tests for telemetry and status of LocalEnv benchmark environment.
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import pytz
 
 import pytest
@@ -19,7 +19,7 @@ def test_local_env_telemetry(tunable_groups: TunableGroups) -> None:
     """
     Produce benchmark and telemetry data in a local script and read it.
     """
-    ts1 = datetime.utcnow().astimezone(pytz.UTC)
+    ts1 = datetime.now(UTC).astimezone(pytz.UTC)
     ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=1)
 
@@ -63,7 +63,7 @@ def test_local_env_telemetry_no_header(tunable_groups: TunableGroups) -> None:
     """
     Read the telemetry data with no header.
     """
-    ts1 = datetime.utcnow().astimezone(pytz.UTC)
+    ts1 = datetime.now(UTC).astimezone(pytz.UTC)
     ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=1)
 
@@ -97,7 +97,7 @@ def test_local_env_telemetry_wrong_header(tunable_groups: TunableGroups) -> None
     """
     Read the telemetry data with incorrect header.
     """
-    ts1 = datetime.utcnow().astimezone(pytz.UTC)
+    ts1 = datetime.now(UTC).astimezone(pytz.UTC)
     ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=1)
 
@@ -123,7 +123,7 @@ def test_local_env_telemetry_invalid(tunable_groups: TunableGroups) -> None:
     """
     Fail when the telemetry data has wrong format.
     """
-    ts1 = datetime.utcnow().astimezone(pytz.UTC)
+    ts1 = datetime.now(UTC).astimezone(pytz.UTC)
     ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=1)
 

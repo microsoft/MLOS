@@ -6,9 +6,9 @@
 A collection Service functions for managing VMs on Azure.
 """
 
-import datetime
 import logging
 from base64 import b64decode
+from datetime import datetime, UTC
 from typing import Any, Callable, Dict, List, Optional, Union
 
 import azure.identity as azure_id
@@ -60,7 +60,7 @@ class AzureAuthService(Service, SupportsAuth):
         self._req_interval = float(self.config.get("tokenRequestInterval", self._REQ_INTERVAL))
 
         self._access_token = "RENEW *NOW*"
-        self._token_expiration_ts = datetime.datetime.utcnow()  # Typically, some future timestamp.
+        self._token_expiration_ts = datetime.now(UTC)  # Typically, some future timestamp.
 
         # Login as ourselves
         self._cred: Union[azure_id.AzureCliCredential, azure_id.CertificateCredential]
@@ -113,12 +113,12 @@ class AzureAuthService(Service, SupportsAuth):
         if "spClientId" in self.config:
             self._init_sp()
 
-        ts_diff = (self._token_expiration_ts - datetime.datetime.utcnow()).total_seconds()
+        ts_diff = (self._token_expiration_ts - datetime.now(UTC)).total_seconds()
         _LOG.debug("Time to renew the token: %.2f sec.", ts_diff)
         if ts_diff < self._req_interval:
             _LOG.debug("Request new accessToken")
             res = self._cred.get_token("https://management.azure.com/.default")
-            self._token_expiration_ts = datetime.datetime.utcfromtimestamp(res.expires_on)
+            self._token_expiration_ts = datetime.fromtimestamp(res.expires_on, tz=UTC)
             self._access_token = res.token
             _LOG.info("Got new accessToken. Expiration time: %s", self._token_expiration_ts)
         return self._access_token

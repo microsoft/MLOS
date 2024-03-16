@@ -8,7 +8,7 @@ Base class for the optimization loop scheduling policies.
 
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, UTC
 
 from abc import ABCMeta, abstractmethod
 from types import TracebackType
@@ -231,7 +231,7 @@ class Scheduler(metaclass=ABCMeta):
         Scheduler part of the loop. Check for pending trials in the queue and run them.
         """
         assert self.experiment is not None
-        for trial in self.experiment.pending_trials(datetime.utcnow(), running=running):
+        for trial in self.experiment.pending_trials(datetime.now(UTC), running=running):
             self.run_trial(trial)
 
     @abstractmethod

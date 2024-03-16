@@ -8,7 +8,7 @@ Saving and restoring the benchmark data using SQLAlchemy.
 
 import logging
 import hashlib
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Optional, Tuple, List, Dict, Iterator, Any
 
 from sqlalchemy import Engine, Connection, Table, column, func
@@ -246,7 +246,7 @@ class Experiment(Storage.Experiment):
                     exp_id=self._experiment_id,
                     trial_id=self._trial_id,
                     config_id=config_id,
-                    ts_start=ts_start or datetime.utcnow(),
+                    ts_start=ts_start or datetime.now(UTC),
                     status='PENDING',
                 ))
 
