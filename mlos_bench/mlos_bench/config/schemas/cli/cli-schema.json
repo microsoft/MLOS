@@ -57,6 +57,11 @@
             "uniqueItems": true
         },
 
+        "scheduler": {
+            "description": "Path to the json config of scheduler to use for running the experiments.",
+            "$ref": "#/$defs/json_config_path"
+        },
+
         "environment": {
             "description": "Path to the json config describing the environment to run the benchmark in.",
             "$ref": "#/$defs/json_config_path"
