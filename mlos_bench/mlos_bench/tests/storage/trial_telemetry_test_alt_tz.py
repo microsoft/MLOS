@@ -13,8 +13,6 @@ from typing import Optional
 
 import pytest
 
-# pylint: disable=redefined-outer-name
-
 
 @pytest.mark.skipif(sys.platform == 'win32', reason="sh-like shell only")
 @pytest.mark.parametrize(("tz_name"), [None, "America/Chicago", "America/Los_Angeles", "UTC"])
