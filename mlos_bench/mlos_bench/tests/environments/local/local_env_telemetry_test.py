@@ -24,6 +24,7 @@ def _format_str(zone_info: Optional[tzinfo]) -> str:
     return "%Y-%m-%d %H:%M:%S"
 
 
+# FIXME: This fails with zone_info = None when run with `TZ="America/Chicago pytest -n0 ...`
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_local_env_telemetry(tunable_groups: TunableGroups, zone_info: Optional[tzinfo]) -> None:
     """
@@ -70,6 +71,7 @@ def test_local_env_telemetry(tunable_groups: TunableGroups, zone_info: Optional[
     )
 
 
+# FIXME: This fails with zone_info = None when run with `TZ="America/Chicago pytest -n0 ...`
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_local_env_telemetry_no_header(tunable_groups: TunableGroups, zone_info: Optional[tzinfo]) -> None:
     """
