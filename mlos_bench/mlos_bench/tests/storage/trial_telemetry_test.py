@@ -10,7 +10,6 @@ from typing import Any, List, Optional, Tuple
 from zoneinfo import ZoneInfo
 
 import pytest
-from pytest_lazy_fixtures.lazy_fixture import lf as lazy_fixture
 
 from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -41,27 +40,14 @@ def zoned_telemetry_data(zone_info: Optional[tzinfo]) -> List[Tuple[datetime, st
     ])
 
 
-@pytest.fixture
-def telemetry_data_implicit_local() -> List[Tuple[datetime, str, Any]]:
-    """Telemetry data with implicit (i.e., missing) local timezone info."""
-    return zoned_telemetry_data(zone_info=None)
-
-
-@pytest.fixture
-def telemetry_data_utc() -> List[Tuple[datetime, str, Any]]:
-    """Telemetry data with explicit UTC timezone info."""
-    return zoned_telemetry_data(zone_info=UTC)
-
-
-@pytest.fixture
-def telemetry_data_explicit() -> List[Tuple[datetime, str, Any]]:
-    """Telemetry data with explicit UTC timezone info."""
-    zone_info = ZoneInfo("America/Chicago")
-    assert zone_info.utcoffset(datetime.now(UTC)) != timedelta(hours=0)
-    return zoned_telemetry_data(zone_info)
-
-
-ZONE_INFO: List[Optional[tzinfo]] = [UTC, ZoneInfo("America/Chicago"), None]
+ZONE_INFO: List[Optional[tzinfo]] = [
+    # Explicit time zones.
+    UTC,
+    ZoneInfo("America/Chicago"),
+    ZoneInfo("America/Los_Angeles"),
+    # Implicit local time zone.
+    None,
+]
 
 
 def _telemetry_str(data: List[Tuple[datetime, str, Any]]
@@ -73,20 +59,15 @@ def _telemetry_str(data: List[Tuple[datetime, str, Any]]
     return [(ts.astimezone(UTC), key, nullable(str, val)) for (ts, key, val) in data]
 
 
-@pytest.mark.parametrize(("telemetry_data"), [
-    (lazy_fixture("telemetry_data_implicit_local")),
-    (lazy_fixture("telemetry_data_utc")),
-    (lazy_fixture("telemetry_data_explicit")),
-])
 @pytest.mark.parametrize(("origin_zone_info"), ZONE_INFO)
 def test_update_telemetry(storage: Storage,
                           exp_storage: Storage.Experiment,
                           tunable_groups: TunableGroups,
-                          telemetry_data: List[Tuple[datetime, str, Any]],
                           origin_zone_info: Optional[tzinfo]) -> None:
     """
     Make sure update_telemetry() and load_telemetry() methods work.
     """
+    telemetry_data = zoned_telemetry_data(origin_zone_info)
     trial = exp_storage.new_trial(tunable_groups)
     assert exp_storage.load_telemetry(trial.trial_id) == []
 
@@ -100,19 +81,14 @@ def test_update_telemetry(storage: Storage,
     assert _telemetry_str(trial_telemetry_data) == _telemetry_str(telemetry_data)
 
 
-@pytest.mark.parametrize(("telemetry_data"), [
-    (lazy_fixture("telemetry_data_implicit_local")),
-    (lazy_fixture("telemetry_data_utc")),
-    (lazy_fixture("telemetry_data_explicit")),
-])
 @pytest.mark.parametrize(("origin_zone_info"), ZONE_INFO)
 def test_update_telemetry_twice(exp_storage: Storage.Experiment,
                                 tunable_groups: TunableGroups,
-                                telemetry_data: List[Tuple[datetime, str, Any]],
                                 origin_zone_info: Optional[tzinfo]) -> None:
     """
     Make sure update_telemetry() call is idempotent.
     """
+    telemetry_data = zoned_telemetry_data(origin_zone_info)
     trial = exp_storage.new_trial(tunable_groups)
     timestamp = datetime.now(origin_zone_info)
     trial.update_telemetry(Status.RUNNING, timestamp, telemetry_data)
