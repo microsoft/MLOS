@@ -6,9 +6,11 @@
 Test fixtures for mlos_bench storage.
 """
 
-from datetime import datetime, UTC
+from datetime import datetime
 from random import random, seed as rand_seed
 from typing import Generator, Optional
+
+from pytz import UTC
 
 import pytest
 

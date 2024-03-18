@@ -6,10 +6,11 @@
 Base interface for accessing the stored benchmark trial data.
 """
 from abc import ABCMeta, abstractmethod
-from datetime import datetime, UTC
+from datetime import datetime
 from typing import Any, Dict, Optional, TYPE_CHECKING
 
 import pandas
+from pytz import UTC
 
 from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable import TunableValue

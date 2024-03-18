@@ -5,9 +5,10 @@
 """
 Unit tests for saving and restoring the telemetry data.
 """
-from datetime import datetime, timedelta, tzinfo, UTC
+from datetime import datetime, timedelta, tzinfo
 from typing import Any, List, Optional, Tuple
-from zoneinfo import ZoneInfo
+
+from pytz import UTC
 
 import pytest
 
@@ -15,6 +16,8 @@ from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.util import nullable
+
+from mlos_bench.tests import ZONE_INFO
 
 # pylint: disable=redefined-outer-name
 
@@ -38,16 +41,6 @@ def zoned_telemetry_data(zone_info: Optional[tzinfo]) -> List[Tuple[datetime, st
         (timestamp2, "memory", 40),
         (timestamp2, "setup", "prod"),
     ])
-
-
-ZONE_INFO: List[Optional[tzinfo]] = [
-    # Explicit time zones.
-    UTC,
-    ZoneInfo("America/Chicago"),
-    ZoneInfo("America/Los_Angeles"),
-    # Implicit local time zone.
-    None,
-]
 
 
 def _telemetry_str(data: List[Tuple[datetime, str, Any]]

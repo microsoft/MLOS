@@ -8,8 +8,10 @@ Saving and restoring the benchmark data using SQLAlchemy.
 
 import logging
 import hashlib
-from datetime import datetime, UTC
+from datetime import datetime
 from typing import Optional, Tuple, List, Dict, Iterator, Any
+
+from pytz import UTC
 
 from sqlalchemy import Engine, Connection, Table, column, func
 

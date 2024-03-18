@@ -6,8 +6,8 @@
 Unit tests for the composition of several LocalEnv benchmark environments.
 """
 import sys
-from datetime import datetime, timedelta, UTC
-import pytz
+from datetime import datetime, timedelta
+from pytz import UTC
 
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.tests.environments import check_env_success
@@ -23,7 +23,7 @@ def test_composite_env(tunable_groups: TunableGroups) -> None:
     can be used in the shell_envs by its children.
     See Also: http://github.com/microsoft/MLOS/issues/501
     """
-    ts1 = datetime.now(UTC).astimezone(pytz.UTC)
+    ts1 = datetime.now(UTC)
     ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=2)
 

@@ -8,12 +8,14 @@ Base class for the optimization loop scheduling policies.
 
 import json
 import logging
-from datetime import datetime, UTC
+from datetime import datetime
 
 from abc import ABCMeta, abstractmethod
 from types import TracebackType
 from typing import Any, Dict, Optional, Tuple, Type
 from typing_extensions import Literal
+
+from pytz import UTC
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.optimizers.base_optimizer import Optimizer

@@ -5,7 +5,9 @@
 """
 Unit tests for saving and retrieving additional parameters of pending trials.
 """
-from datetime import datetime, UTC
+from datetime import datetime
+
+from pytz import UTC
 
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups

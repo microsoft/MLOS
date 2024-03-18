@@ -9,10 +9,12 @@ A hierarchy of benchmark environments.
 import abc
 import json
 import logging
-from datetime import datetime, UTC
+from datetime import datetime
 from types import TracebackType
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Type, TYPE_CHECKING, Union
 from typing_extensions import Literal
+
+from pytz import UTC
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.dict_templater import DictTemplater

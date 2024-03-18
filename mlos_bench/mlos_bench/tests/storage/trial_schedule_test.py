@@ -5,9 +5,11 @@
 """
 Unit tests for scheduling trials for some future time.
 """
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta
 
 from typing import Iterator, Set
+
+from pytz import UTC
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_storage import Storage

@@ -7,7 +7,9 @@ A simple single-threaded synchronous optimization loop implementation.
 """
 
 import logging
-from datetime import datetime, UTC
+from datetime import datetime
+
+from pytz import UTC
 
 from mlos_bench.environments.status import Status
 from mlos_bench.schedulers.base_scheduler import Scheduler

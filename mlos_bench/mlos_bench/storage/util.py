@@ -6,9 +6,10 @@
 Utility functions for the storage subsystem.
 """
 
-from datetime import datetime, UTC
+from datetime import datetime
 from typing import Dict, Literal, Optional
 
+from pytz import UTC
 import pandas
 
 from mlos_bench.tunables.tunable import TunableValue, TunableValueTypeTuple

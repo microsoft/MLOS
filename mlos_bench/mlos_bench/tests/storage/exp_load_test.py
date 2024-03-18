@@ -5,7 +5,9 @@
 """
 Unit tests for the storage subsystem.
 """
-from datetime import datetime, UTC
+from datetime import datetime
+
+from pytz import UTC
 
 import pytest
 

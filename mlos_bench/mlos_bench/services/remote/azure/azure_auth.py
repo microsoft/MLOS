@@ -8,8 +8,10 @@ A collection Service functions for managing VMs on Azure.
 
 import logging
 from base64 import b64decode
-from datetime import datetime, UTC
+from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Union
+
+from pytz import UTC
 
 import azure.identity as azure_id
 from azure.keyvault.secrets import SecretClient

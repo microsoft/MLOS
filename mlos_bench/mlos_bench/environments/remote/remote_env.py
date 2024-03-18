@@ -9,8 +9,10 @@ e.g. Application Environment
 """
 
 import logging
-from datetime import datetime, UTC
+from datetime import datetime
 from typing import Dict, Iterable, Optional, Tuple
+
+from pytz import UTC
 
 from mlos_bench.environments.status import Status
 from mlos_bench.environments.script_env import ScriptEnv
