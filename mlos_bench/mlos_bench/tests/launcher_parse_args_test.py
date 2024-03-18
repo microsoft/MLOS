@@ -73,6 +73,7 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     cli_args = '--config-paths ' + ' '.join(config_paths) + \
         ' --service services/remote/mock/mock_auth_service.jsonc' + \
         ' --service services/remote/mock/mock_remote_exec_service.jsonc' + \
+        ' --scheduler schedulers/sync_scheduler.jsonc' + \
         f' --environment {env_conf_path}' + \
         ' --globals globals/global_test_config.jsonc' + \
         ' --globals globals/global_test_extra_config.jsonc' \
@@ -105,6 +106,9 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     # Check that the optimizer got initialized with defaults.
     assert launcher.optimizer.tunable_params.is_defaults()
     assert launcher.optimizer.max_iterations == 1   # value for OneShotOptimizer
+    # Check that we pick up the right scheduler config:
+    assert isinstance(launcher.scheduler, SyncScheduler)
+    assert launcher.scheduler._trial_config_repeat_count == 3  # pylint: disable=protected-access
 
 
 def test_launcher_args_parse_2(config_paths: List[str]) -> None:
@@ -132,7 +136,7 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
         ' --no-teardown' + \
         ' --random-init' + \
         ' --random-seed 1234' + \
-        ' --trial-config-repeat-count 3'
+        ' --trial-config-repeat-count 5'
     launcher = Launcher(description=__name__, argv=cli_args.split())
     # Check that the parent service
     assert isinstance(launcher.service, SupportsAuth)
@@ -181,8 +185,9 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     # values through the stack.
     # See Also: #495
 
+    # Check that CLI parameter overrides JSON config:
     assert isinstance(launcher.scheduler, SyncScheduler)
-    assert launcher.scheduler._trial_config_repeat_count == 3  # pylint: disable=protected-access
+    assert launcher.scheduler._trial_config_repeat_count == 5  # pylint: disable=protected-access
 
     # Check that the value from the file is overridden by the CLI arg.
     assert config['random_seed'] == 42
