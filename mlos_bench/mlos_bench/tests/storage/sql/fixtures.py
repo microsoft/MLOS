@@ -34,6 +34,7 @@ def storage() -> SqlStorage:
         config={
             "drivername": "sqlite",
             "database": ":memory:",
+            # "database": "mlos_bench.pytest.db",
         }
     )
 

@@ -14,6 +14,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.base_trial_data import TrialData
 from mlos_bench.storage.sql.schema import DbSchema
+from mlos_bench.storage.util import utcify_timestamp, utcify_nullable_timestamp
 
 
 def get_trials(
@@ -48,8 +49,8 @@ def get_trials(
                 experiment_id=experiment_id,
                 trial_id=trial.trial_id,
                 config_id=trial.config_id,
-                ts_start=trial.ts_start,
-                ts_end=trial.ts_end,
+                ts_start=utcify_timestamp(trial.ts_start, origin="utc"),
+                ts_end=utcify_nullable_timestamp(trial.ts_end, origin="utc"),
                 status=Status[trial.status],
             )
             for trial in trials.fetchall()
@@ -107,9 +108,23 @@ def get_results_df(
             )
         cur_trials = conn.execute(cur_trials_stmt)
         trials_df = pandas.DataFrame(
-            [(row.trial_id, row.ts_start, row.ts_end, row.config_id, row.tunable_config_trial_group_id, row.status)
-             for row in cur_trials.fetchall()],
-            columns=['trial_id', 'ts_start', 'ts_end', 'tunable_config_id', 'tunable_config_trial_group_id', 'status'])
+            [(
+                row.trial_id,
+                utcify_timestamp(row.ts_start, origin="utc"),
+                utcify_nullable_timestamp(row.ts_end, origin="utc"),
+                row.config_id,
+                row.tunable_config_trial_group_id,
+                row.status,
+            ) for row in cur_trials.fetchall()],
+            columns=[
+                'trial_id',
+                'ts_start',
+                'ts_end',
+                'tunable_config_id',
+                'tunable_config_trial_group_id',
+                'status',
+            ]
+        )
 
         # Get each trial's config in wide format.
         configs_stmt = schema.trial.select().with_only_columns(
