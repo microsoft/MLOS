@@ -30,6 +30,8 @@ def utcify_timestamp(timestamp: datetime, *, origin: Literal["utc", "local"]) ->
         In the case of loading data from storage, where we intentionally convert all
         timestamps to UTC, this can help us retrieve the original timezone when the
         storage backend doesn't explicitly store it.
+        In the case of receiving data from a client or other source, this can help us
+        convert the timestamp to UTC if it's not already.
 
     Returns
     -------
