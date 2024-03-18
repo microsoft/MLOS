@@ -186,8 +186,8 @@ class Experiment(Storage.Experiment):
         ])
 
     def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator[Storage.Trial]:
+        timestamp = utcify_timestamp(timestamp, origin="local")
         _LOG.info("Retrieve pending trials for: %s @ %s", self._experiment_id, timestamp)
-        timestamp = timestamp.astimezone(UTC) if timestamp.tzinfo else timestamp.replace(tzinfo=UTC)
         if running:
             pending_status = ['PENDING', 'READY', 'RUNNING']
         else:
