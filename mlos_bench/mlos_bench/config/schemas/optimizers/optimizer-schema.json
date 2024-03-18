@@ -22,8 +22,8 @@
                     "enum": ["min", "max"],
                     "example": "min"
                 },
-                "max_iterations": {
-                    "description": "The maximum number of additional (in the case of merging experiment data or resuming experiments) iterations to run when we launch the app.",
+                "max_suggestions": {
+                    "description": "The maximum number of additional (in the case of merging experiment data or resuming experiments) suggestions/trials to run when we launch the app.",
                     "type": "integer",
                     "minimum": 0,
                     "example": 100

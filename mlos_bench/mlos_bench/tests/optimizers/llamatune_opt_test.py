@@ -31,7 +31,7 @@ def llamatune_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
                 "num_low_dims": 2,
             },
             "optimization_target": "score",
-            "max_iterations": 10,
+            "max_suggestions": 10,
             "optimizer_type": "SMAC",
             "seed": SEED,
             # "start_with_defaults": False,

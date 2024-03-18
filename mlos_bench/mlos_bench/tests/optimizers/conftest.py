@@ -61,7 +61,7 @@ def mock_opt_no_defaults(tunable_groups: TunableGroups) -> MockOptimizer:
         config={
             "optimization_target": "score",
             "optimization_direction": "min",
-            "max_iterations": 5,
+            "max_suggestions": 5,
             "start_with_defaults": False,
             "seed": SEED
         },
@@ -79,7 +79,7 @@ def mock_opt(tunable_groups: TunableGroups) -> MockOptimizer:
         config={
             "optimization_target": "score",
             "optimization_direction": "min",
-            "max_iterations": 5,
+            "max_suggestions": 5,
             "seed": SEED
         },
     )
@@ -96,7 +96,7 @@ def mock_opt_max(tunable_groups: TunableGroups) -> MockOptimizer:
         config={
             "optimization_target": "score",
             "optimization_direction": "max",
-            "max_iterations": 10,
+            "max_suggestions": 10,
             "seed": SEED
         },
     )
@@ -113,7 +113,7 @@ def flaml_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "optimization_target": "score",
             "optimization_direction": "min",
-            "max_iterations": 15,
+            "max_suggestions": 15,
             "optimizer_type": "FLAML",
             "seed": SEED,
         },
@@ -131,7 +131,7 @@ def flaml_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "optimization_target": "score",
             "optimization_direction": "max",
-            "max_iterations": 15,
+            "max_suggestions": 15,
             "optimizer_type": "FLAML",
             "seed": SEED,
         },
@@ -157,7 +157,7 @@ def smac_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "optimization_target": "score",
             "optimization_direction": "min",
-            "max_iterations": SMAC_ITERATIONS,
+            "max_suggestions": SMAC_ITERATIONS,
             "optimizer_type": "SMAC",
             "seed": SEED,
             "output_directory": None,
@@ -179,7 +179,7 @@ def smac_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "optimization_target": "score",
             "optimization_direction": "max",
-            "max_iterations": SMAC_ITERATIONS,
+            "max_suggestions": SMAC_ITERATIONS,
             "optimizer_type": "SMAC",
             "seed": SEED,
             "output_directory": None,

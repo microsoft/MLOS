@@ -82,7 +82,7 @@ def grid_search_opt(grid_search_tunables: TunableGroups,
     # multiple of the number of elements in the grid.
     max_iterations = len(grid_search_tunables_grid) * 2 - 3
     return GridSearchOptimizer(tunables=grid_search_tunables, config={
-        "max_iterations": max_iterations,
+        "max_suggestions": max_iterations,
         "optimization_direction": "max",
     })
 
@@ -161,7 +161,7 @@ def test_grid_search(grid_search_opt: GridSearchOptimizer,
     assert all(config in grid_search_tunables_grid for config in grid_search_opt.pending_configs)
     assert all(config in list(grid_search_opt.pending_configs) for config in grid_search_tunables_grid)
 
-    # FIXME: Should we consider not_converged as the "max_iterations", an empty grid, or both?
+    # FIXME: Should we consider not_converged as the "max_suggestions", an empty grid, or both?
 
     # Try to empty the rest of the grid.
     while grid_search_opt.not_converged():
