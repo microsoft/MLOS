@@ -29,7 +29,6 @@ def test_trial_telemetry_alt_tz(tz_name: Optional[str]) -> None:
         env["TZ"] = tz_name
     cmd = run(
         [sys.executable, "-m", "pytest", "-n0", f"{os.path.dirname(__file__)}/trial_telemetry_test.py"],
-        # , "-k", "implicit_local"],
         env=env,
         check=True,
     )
