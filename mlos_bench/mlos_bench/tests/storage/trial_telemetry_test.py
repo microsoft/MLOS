@@ -63,7 +63,9 @@ def test_update_telemetry(storage: Storage,
 
     # Also check that the TrialData telemetry looks right.
     trial_data = storage.experiments[exp_storage.experiment_id].trials[trial.trial_id]
-    assert _telemetry_str([tuple(r) for r in trial_data.telemetry_df.to_numpy()]) == _telemetry_str(telemetry_data)
+    trial_telemetry_df = trial_data.telemetry_df
+    trial_telemetry_data = [tuple(r) for r in trial_telemetry_df.to_numpy()]
+    assert _telemetry_str(trial_telemetry_data) == _telemetry_str(telemetry_data)
 
 
 def test_update_telemetry_twice(exp_storage: Storage.Experiment,

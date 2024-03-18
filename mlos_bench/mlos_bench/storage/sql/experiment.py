@@ -18,6 +18,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.sql.trial import Trial
+from mlos_bench.storage.util import utcify_timestamp
 from mlos_bench.util import nullable
 
 _LOG = logging.getLogger(__name__)
@@ -120,7 +121,9 @@ class Experiment(Storage.Experiment):
                     self._schema.trial_telemetry.c.metric_id,
                 )
             )
-            return [(row.ts, row.metric_id, row.metric_value)
+            # Not all storage backends store the original zone info.
+            # We try to ensure data is entered in UTC and augment it on return again here.
+            return [(utcify_timestamp(row.ts, origin="utc"), row.metric_id, row.metric_value)
                     for row in cur_telemetry.fetchall()]
 
     def load(self,
@@ -184,6 +187,7 @@ class Experiment(Storage.Experiment):
 
     def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator[Storage.Trial]:
         _LOG.info("Retrieve pending trials for: %s @ %s", self._experiment_id, timestamp)
+        timestamp = timestamp.astimezone(UTC) if timestamp.tzinfo else timestamp.replace(tzinfo=UTC)
         if running:
             pending_status = ['PENDING', 'READY', 'RUNNING']
         else:
@@ -238,7 +242,8 @@ class Experiment(Storage.Experiment):
 
     def new_trial(self, tunables: TunableGroups, ts_start: Optional[datetime] = None,
                   config: Optional[Dict[str, Any]] = None) -> Storage.Trial:
-        _LOG.debug("Create trial: %s:%d", self._experiment_id, self._trial_id)
+        ts_start = utcify_timestamp(ts_start or datetime.now(UTC), origin="local")
+        _LOG.debug("Create trial: %s:%d @ %s", self._experiment_id, self._trial_id, ts_start)
         with self._engine.begin() as conn:
             try:
                 config_id = self._get_config_id(conn, tunables)
@@ -246,7 +251,7 @@ class Experiment(Storage.Experiment):
                     exp_id=self._experiment_id,
                     trial_id=self._trial_id,
                     config_id=config_id,
-                    ts_start=ts_start or datetime.now(UTC),
+                    ts_start=ts_start,
                     status='PENDING',
                 ))
 
