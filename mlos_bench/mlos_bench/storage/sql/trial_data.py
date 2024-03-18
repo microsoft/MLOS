@@ -5,7 +5,7 @@
 """
 An interface to access the benchmark trial data stored in SQL DB.
 """
-from datetime import datetime, UTC
+from datetime import datetime
 from typing import Optional, TYPE_CHECKING
 
 import pandas
