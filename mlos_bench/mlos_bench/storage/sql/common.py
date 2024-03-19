@@ -14,7 +14,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.base_trial_data import TrialData
 from mlos_bench.storage.sql.schema import DbSchema
-from mlos_bench.storage.util import utcify_timestamp, utcify_nullable_timestamp
+from mlos_bench.util import utcify_timestamp, utcify_nullable_timestamp
 
 
 def get_trials(

@@ -17,8 +17,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql.schema import DbSchema
-from mlos_bench.storage.util import utcify_timestamp
-from mlos_bench.util import nullable
+from mlos_bench.util import nullable, utcify_timestamp
 
 _LOG = logging.getLogger(__name__)
 

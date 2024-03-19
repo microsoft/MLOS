@@ -16,7 +16,7 @@ from mlos_bench.storage.base_tunable_config_data import TunableConfigData
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.sql.tunable_config_data import TunableConfigSqlData
-from mlos_bench.storage.util import utcify_timestamp
+from mlos_bench.util import utcify_timestamp
 
 if TYPE_CHECKING:
     from mlos_bench.storage.base_tunable_config_trial_group_data import TunableConfigTrialGroupData
