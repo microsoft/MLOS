@@ -232,7 +232,7 @@ class LocalEnv(ScriptEnv):
 
             data = self._normalize_columns(
                 pandas.read_csv(fname, index_col=False))
-            data.iloc[:, 0] = datetime_parser(data.iloc[:, 0])
+            data.iloc[:, 0] = datetime_parser(data.iloc[:, 0], origin="local")
 
             expected_col_names = ["timestamp", "metric", "value"]
             if len(data.columns) != len(expected_col_names):
@@ -242,7 +242,7 @@ class LocalEnv(ScriptEnv):
                 # Assume no header - this is ok for telemetry data.
                 data = pandas.read_csv(
                     fname, index_col=False, names=expected_col_names)
-                data.iloc[:, 0] = datetime_parser(data.iloc[:, 0])
+                data.iloc[:, 0] = datetime_parser(data.iloc[:, 0], origin="local")
 
         except FileNotFoundError as ex:
             _LOG.warning("Telemetry CSV file not found: %s :: %s", self._read_telemetry_file, ex)

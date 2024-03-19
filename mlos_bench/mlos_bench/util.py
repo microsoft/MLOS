@@ -359,7 +359,7 @@ def utcify_nullable_timestamp(timestamp: Optional[datetime], *, origin: Literal[
 _MIN_TS = datetime(2024, 1, 1, 0, 0, 0, tzinfo=pytz.UTC)
 
 
-def datetime_parser(datetime_col: pandas.Series, origin: Literal["utc", "local"]) -> pandas.Series:
+def datetime_parser(datetime_col: pandas.Series, *, origin: Literal["utc", "local"]) -> pandas.Series:
     """
     Attempt to convert a pandas column to a datetime format.
 
@@ -382,7 +382,7 @@ def datetime_parser(datetime_col: pandas.Series, origin: Literal["utc", "local"]
         On parse errors.
     """
     new_datetime_col = pandas.to_datetime(datetime_col, utc=False)
-    # If timezone data is missing, assume the local timezone.
+    # If timezone data is missing, assume the provided origin timezone.
     if new_datetime_col.dt.tz is None:
         if origin == "local":
             tzinfo = datetime.now().astimezone().tzinfo
@@ -395,7 +395,7 @@ def datetime_parser(datetime_col: pandas.Series, origin: Literal["utc", "local"]
     # And convert it to UTC.
     new_datetime_col = new_datetime_col.dt.tz_convert('UTC')
     if new_datetime_col.isna().any():
-        raise ValueError(f"Invalid date format in the telemetry data: {datetime_col}")
+        raise ValueError(f"Invalid date format in the data: {datetime_col}")
     if new_datetime_col.le(_MIN_TS).any():
-        raise ValueError(f"Invalid date range in the telemetry data: {datetime_col}")
+        raise ValueError(f"Invalid date range in the data: {datetime_col}")
     return new_datetime_col
