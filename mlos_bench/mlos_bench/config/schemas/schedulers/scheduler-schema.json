@@ -25,6 +25,12 @@
                     "description": "Whether to teardown the experiment after running it.",
                     "type": "boolean"
                 },
+                "max_trials": {
+                    "description": "Max. number of trials to run. Use -1 or 0 for unlimited.",
+                    "type": "integer",
+                    "minimum": -1,
+                    "examples": [50, -1]
+                },
                 "trial_config_repeat_count": {
                     "description": "Number of times to repeat a config.",
                     "type": "integer",
