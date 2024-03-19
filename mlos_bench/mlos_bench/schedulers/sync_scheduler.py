@@ -32,7 +32,7 @@ class SyncScheduler(Scheduler):
         if not is_warm_up:
             _LOG.warning("Skip pending trials and warm-up: %s", self.optimizer)
 
-        while self.optimizer.not_converged():
+        while self.not_converged():
             _LOG.info("Optimization loop: %s Last trial ID: %d",
                       "Warm-up" if is_warm_up else "Run", last_trial_id)
             self._run_schedule(is_warm_up)

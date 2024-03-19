@@ -6,6 +6,7 @@
 
     "config": {
         "trial_config_repeat_count": 3,
+        "max_trials": 100,
         "teardown": false
     }
 }

@@ -65,6 +65,8 @@ class Scheduler(metaclass=ABCMeta):
         self._experiment_id = config["experiment_id"].strip()
         self._trial_id = int(config["trial_id"])
         self._config_id = int(config.get("config_id", -1))
+        self._max_trials = int(config.get("max_trials", -1))
+        self._trial_count = 0
 
         self._trial_config_repeat_count = int(config.get("trial_config_repeat_count", 1))
         if self._trial_config_repeat_count <= 0:
@@ -234,10 +236,20 @@ class Scheduler(metaclass=ABCMeta):
         for trial in self.experiment.pending_trials(datetime.utcnow(), running=running):
             self.run_trial(trial)
 
+    def not_converged(self) -> bool:
+        """
+        Check the stopping conditions.
+        By default, stop when the optimizer converges or max limit of trials reached.
+        """
+        return self.optimizer.not_converged() and (
+            self._trial_count < self._max_trials or self._max_trials <= 0
+        )
+
     @abstractmethod
     def run_trial(self, trial: Storage.Trial) -> None:
         """
         Set up and run a single trial. Save the results in the storage.
         """
         assert self.experiment is not None
-        _LOG.info("QUEUE: Execute trial: %s", trial)
+        self._trial_count += 1
+        _LOG.info("QUEUE: Execute trial # %d/%d :: %s", self._trial_count, self._max_trials, trial)
