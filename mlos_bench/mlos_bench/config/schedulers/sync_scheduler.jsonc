@@ -6,7 +6,7 @@
 
     "config": {
         "trial_config_repeat_count": 3,
-        "max_trials": 100,
+        "max_trials": -1,  // Limited only in hte Optimizer logic/config.
         "teardown": false
     }
 }
