@@ -22,7 +22,7 @@
     "pathVarWithEnvVarRef": "$CUSTOM_PATH_FROM_ENV/foo",
     "varWithEnvVarRef": "user:$USER",
 
-    // Override the default value of the "max_iterations" parameter
+    // Override the default value of the "max_suggestions" parameter
     // of the optimizer when running local tests:
-    "max_iterations": 5
+    "max_suggestions": 5
 }

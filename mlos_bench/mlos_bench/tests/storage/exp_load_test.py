@@ -5,13 +5,17 @@
 """
 Unit tests for the storage subsystem.
 """
-from datetime import datetime
+from datetime import datetime, tzinfo
+from typing import Optional
+
+from pytz import UTC
 
 import pytest
 
 from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
+from mlos_bench.tests import ZONE_INFO
 
 
 def test_exp_load_empty(exp_storage: Storage.Experiment) -> None:
@@ -29,23 +33,27 @@ def test_exp_pending_empty(exp_storage: Storage.Experiment) -> None:
     """
     Try to retrieve pending experiments from the empty storage.
     """
-    trials = list(exp_storage.pending_trials(datetime.utcnow(), running=True))
+    trials = list(exp_storage.pending_trials(datetime.now(UTC), running=True))
     assert not trials
 
 
+@pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_exp_trial_pending(exp_storage: Storage.Experiment,
-                           tunable_groups: TunableGroups) -> None:
+                           tunable_groups: TunableGroups,
+                           zone_info: Optional[tzinfo]) -> None:
     """
     Start a trial and check that it is pending.
     """
     trial = exp_storage.new_trial(tunable_groups)
-    (pending,) = list(exp_storage.pending_trials(datetime.utcnow(), running=True))
+    (pending,) = list(exp_storage.pending_trials(datetime.now(zone_info), running=True))
     assert pending.trial_id == trial.trial_id
     assert pending.tunables == tunable_groups
 
 
+@pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_exp_trial_pending_many(exp_storage: Storage.Experiment,
-                                tunable_groups: TunableGroups) -> None:
+                                tunable_groups: TunableGroups,
+                                zone_info: Optional[tzinfo]) -> None:
     """
     Start THREE trials and check that both are pending.
     """
@@ -58,41 +66,47 @@ def test_exp_trial_pending_many(exp_storage: Storage.Experiment,
     }
     pending_ids = {
         pending.trial_id
-        for pending in exp_storage.pending_trials(datetime.utcnow(), running=True)
+        for pending in exp_storage.pending_trials(datetime.now(zone_info), running=True)
     }
     assert len(pending_ids) == 3
     assert trial_ids == pending_ids
 
 
+@pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_exp_trial_pending_fail(exp_storage: Storage.Experiment,
-                                tunable_groups: TunableGroups) -> None:
+                                tunable_groups: TunableGroups,
+                                zone_info: Optional[tzinfo]) -> None:
     """
     Start a trial, fail it, and and check that it is NOT pending.
     """
     trial = exp_storage.new_trial(tunable_groups)
-    trial.update(Status.FAILED, datetime.utcnow())
-    trials = list(exp_storage.pending_trials(datetime.utcnow(), running=True))
+    trial.update(Status.FAILED, datetime.now(zone_info))
+    trials = list(exp_storage.pending_trials(datetime.now(zone_info), running=True))
     assert not trials
 
 
+@pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_exp_trial_success(exp_storage: Storage.Experiment,
-                           tunable_groups: TunableGroups) -> None:
+                           tunable_groups: TunableGroups,
+                           zone_info: Optional[tzinfo]) -> None:
     """
     Start a trial, finish it successfully, and and check that it is NOT pending.
     """
     trial = exp_storage.new_trial(tunable_groups)
-    trial.update(Status.SUCCEEDED, datetime.utcnow(), 99.9)
-    trials = list(exp_storage.pending_trials(datetime.utcnow(), running=True))
+    trial.update(Status.SUCCEEDED, datetime.now(zone_info), 99.9)
+    trials = list(exp_storage.pending_trials(datetime.now(zone_info), running=True))
     assert not trials
 
 
+@pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_exp_trial_update_categ(exp_storage: Storage.Experiment,
-                                tunable_groups: TunableGroups) -> None:
+                                tunable_groups: TunableGroups,
+                                zone_info: Optional[tzinfo]) -> None:
     """
     Update the trial with multiple metrics, some of which are categorical.
     """
     trial = exp_storage.new_trial(tunable_groups)
-    trial.update(Status.SUCCEEDED, datetime.utcnow(), {"score": 99.9, "benchmark": "test"})
+    trial.update(Status.SUCCEEDED, datetime.now(zone_info), {"score": 99.9, "benchmark": "test"})
     assert exp_storage.load() == (
         [trial.trial_id],
         [{
@@ -106,19 +120,23 @@ def test_exp_trial_update_categ(exp_storage: Storage.Experiment,
     )
 
 
+@pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_exp_trial_update_twice(exp_storage: Storage.Experiment,
-                                tunable_groups: TunableGroups) -> None:
+                                tunable_groups: TunableGroups,
+                                zone_info: Optional[tzinfo]) -> None:
     """
     Update the trial status twice and receive an error.
     """
     trial = exp_storage.new_trial(tunable_groups)
-    trial.update(Status.FAILED, datetime.utcnow())
+    trial.update(Status.FAILED, datetime.now(zone_info))
     with pytest.raises(RuntimeError):
-        trial.update(Status.SUCCEEDED, datetime.utcnow(), 99.9)
+        trial.update(Status.SUCCEEDED, datetime.now(UTC), 99.9)
 
 
+@pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_exp_trial_pending_3(exp_storage: Storage.Experiment,
-                             tunable_groups: TunableGroups) -> None:
+                             tunable_groups: TunableGroups,
+                             zone_info: Optional[tzinfo]) -> None:
     """
     Start THREE trials, let one succeed, another one fail and keep one not updated.
     Check that one is still pending another one can be loaded into the optimizer.
@@ -129,10 +147,10 @@ def test_exp_trial_pending_3(exp_storage: Storage.Experiment,
     trial_succ = exp_storage.new_trial(tunable_groups)
     trial_pend = exp_storage.new_trial(tunable_groups)
 
-    trial_fail.update(Status.FAILED, datetime.utcnow())
-    trial_succ.update(Status.SUCCEEDED, datetime.utcnow(), score)
+    trial_fail.update(Status.FAILED, datetime.now(zone_info))
+    trial_succ.update(Status.SUCCEEDED, datetime.now(zone_info), score)
 
-    (pending,) = list(exp_storage.pending_trials(datetime.utcnow(), running=True))
+    (pending,) = list(exp_storage.pending_trials(datetime.now(UTC), running=True))
     assert pending.trial_id == trial_pend.trial_id
 
     (trial_ids, configs, scores, status) = exp_storage.load()

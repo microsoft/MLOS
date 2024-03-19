@@ -15,6 +15,8 @@ from types import TracebackType
 from typing import Any, Dict, Optional, Tuple, Type
 from typing_extensions import Literal
 
+from pytz import UTC
+
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.storage.base_storage import Storage
@@ -79,6 +81,7 @@ class Scheduler(metaclass=ABCMeta):
         self.optimizer = optimizer
         self.storage = storage
         self._root_env_config = root_env_config
+        self._last_trial_id = -1
 
         _LOG.debug("Scheduler instantiated: %s :: %s", self, config)
 
@@ -179,21 +182,24 @@ class Scheduler(metaclass=ABCMeta):
             _LOG.debug("Config %d ::\n%s", config_id, json.dumps(tunable_values, indent=2))
         return tunables
 
-    def _get_optimizer_suggestions(self, last_trial_id: int = -1, is_warm_up: bool = False) -> int:
+    def _schedule_new_optimizer_suggestions(self) -> bool:
         """
         Optimizer part of the loop. Load the results of the executed trials
         into the optimizer, suggest new configurations, and add them to the queue.
-        Return the last trial ID processed by the optimizer.
+        Return True if optimization is not over, False otherwise.
         """
         assert self.experiment is not None
-        (trial_ids, configs, scores, status) = self.experiment.load(last_trial_id)
+        (trial_ids, configs, scores, status) = self.experiment.load(self._last_trial_id)
         _LOG.info("QUEUE: Update the optimizer with trial results: %s", trial_ids)
-        self.optimizer.bulk_register(configs, scores, status, is_warm_up)
+        self.optimizer.bulk_register(configs, scores, status)
+        self._last_trial_id = max(trial_ids, default=self._last_trial_id)
 
-        tunables = self.optimizer.suggest()
-        self.schedule_trial(tunables)
+        not_converged = self.optimizer.not_converged()
+        if not_converged:
+            tunables = self.optimizer.suggest()
+            self.schedule_trial(tunables)
 
-        return max(trial_ids, default=last_trial_id)
+        return not_converged
 
     def schedule_trial(self, tunables: TunableGroups) -> None:
         """
@@ -233,7 +239,7 @@ class Scheduler(metaclass=ABCMeta):
         Scheduler part of the loop. Check for pending trials in the queue and run them.
         """
         assert self.experiment is not None
-        for trial in self.experiment.pending_trials(datetime.utcnow(), running=running):
+        for trial in self.experiment.pending_trials(datetime.now(UTC), running=running):
             self.run_trial(trial)
 
     def not_converged(self) -> bool:

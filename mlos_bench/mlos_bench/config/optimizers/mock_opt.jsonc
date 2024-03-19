@@ -6,7 +6,7 @@
 
     "config": {
         "optimization_target": "score",
-        "max_iterations": 5,
+        "max_suggestions": 5,
         "seed": 42
     }
 }

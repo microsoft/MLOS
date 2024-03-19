@@ -26,7 +26,7 @@ def mlos_core_optimizer(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
     """
     test_opt_config = {
         'optimizer_type': 'FLAML',
-        'max_iterations': 10,
+        'max_suggestions': 10,
         'seed': SEED,
     }
     return MlosCoreOptimizer(tunable_groups, test_opt_config)
