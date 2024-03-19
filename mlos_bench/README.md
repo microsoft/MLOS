@@ -195,10 +195,12 @@ Searching for an optimal set of tunable parameters is very similar to running a 
 All we have to do is specifying the [`Optimizer`](./mlos_bench/optimizers/) in the top-level configuration, like in our [`azure-redis-opt.jsonc`](./mlos_bench/config/cli/azure-redis-opt.jsonc) example.
 
 ```sh
-mlos_bench --config "./mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc" --globals "experiment_MyBenchmark.jsonc" --max_suggestions 10
+mlos_bench --config "./mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc" --globals "experiment_MyBenchmark.jsonc" --max_suggestions 10 --trial-config-repeat-count 3
 ```
 
-Note that again we use the command line option `--max_suggestions` to override the default value from [`mlos_core_flaml.jsonc`](./mlos_bench/config/optimizers/mlos_core_flaml.jsonc).
+Note that again we use the command line option `--max_suggestions` to override the max. number of suggested configurations to trial from [`mlos_core_flaml.jsonc`](./mlos_bench/config/optimizers/mlos_core_flaml.jsonc).
+We also use `--trial-config-repeat-count` to benchmark each suggested configuration 3 times.
+That means, we will run 30 trials in total, 3 for each of the 10 suggested configurations.
 
 We don't have to specify the `"tunable_values"` for the optimization: the optimizer will suggest new values on each iteration and the framework will feed this data into the benchmarking environment.
 
