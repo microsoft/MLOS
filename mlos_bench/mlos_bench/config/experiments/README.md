@@ -92,7 +92,7 @@ will be pushed down to the `Optimizer` configuration, e.g., [`mlos_core_flaml.js
 > NOTE: it is perfectly ok to have several files with the experiment-specific parameters (say, one for Azure, another one for Storage, and so on) and either include them in the `"globals"` section of the CLI config, and/or specify them in the command line when running the experiment, e.g.
 >
 > ```bash
-> mlos_bench --config mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc --globals experiment_Redis_Azure.jsonc experiment_Redis_Tunables.jsonc --max_iterations 10
+> mlos_bench --config mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc --globals experiment_Redis_Azure.jsonc experiment_Redis_Tunables.jsonc --max_suggestions 10
 > ```
 >
 > (Note several files after the `--globals` option).

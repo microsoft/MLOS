@@ -30,7 +30,7 @@ def test_init_mlos_core_smac_opt_bad_trial_count(tunable_groups: TunableGroups) 
     test_opt_config = {
         'optimizer_type': 'SMAC',
         'max_trials': 10,
-        'max_iterations': 11,
+        'max_suggestions': 11,
         'seed': SEED,
     }
     with pytest.raises(AssertionError):
@@ -44,13 +44,13 @@ def test_init_mlos_core_smac_opt_max_trials(tunable_groups: TunableGroups) -> No
     """
     test_opt_config = {
         'optimizer_type': 'SMAC',
-        'max_iterations': 123,
+        'max_suggestions': 123,
         'seed': SEED,
     }
     opt = MlosCoreOptimizer(tunable_groups, test_opt_config)
     # pylint: disable=protected-access
     assert isinstance(opt._opt, SmacOptimizer)
-    assert opt._opt.base_optimizer.scenario.n_trials == test_opt_config['max_iterations']
+    assert opt._opt.base_optimizer.scenario.n_trials == test_opt_config['max_suggestions']
 
 
 def test_init_mlos_core_smac_absolute_output_directory(tunable_groups: TunableGroups) -> None:

@@ -69,6 +69,8 @@ class Scheduler(metaclass=ABCMeta):
         self._experiment_id = config["experiment_id"].strip()
         self._trial_id = int(config["trial_id"])
         self._config_id = int(config.get("config_id", -1))
+        self._max_trials = int(config.get("max_trials", -1))
+        self._trial_count = 0
 
         self._trial_config_repeat_count = int(config.get("trial_config_repeat_count", 1))
         if self._trial_config_repeat_count <= 0:
@@ -83,6 +85,7 @@ class Scheduler(metaclass=ABCMeta):
         self._storage = storage
         self._root_env_config = root_env_config
         self._current_trial_runner_idx = 0
+        self._last_trial_id = -1
 
         _LOG.debug("Scheduler instantiated: %s :: %s", self, config)
 
@@ -237,23 +240,26 @@ class Scheduler(metaclass=ABCMeta):
             _LOG.debug("Config %d ::\n%s", config_id, json.dumps(tunable_values, indent=2))
         return tunables.copy()
 
-    def _get_optimizer_suggestions(self, last_trial_id: int = -1, is_warm_up: bool = False) -> int:
+    def _schedule_new_optimizer_suggestions(self) -> bool:
         """
         Optimizer part of the loop. Load the results of the executed trials
         into the optimizer, suggest new configurations, and add them to the queue.
-        Return the last trial ID processed by the optimizer.
+        Return True if optimization is not over, False otherwise.
         """
         assert self.experiment is not None
         # FIXME: In async mode, trial_ids may be returned out of order, so we may
         # need to adjust this fetching logic.
-        (trial_ids, configs, scores, status) = self.experiment.load(last_trial_id)
+        (trial_ids, configs, scores, status) = self.experiment.load(self._last_trial_id)
         _LOG.info("QUEUE: Update the optimizer with trial results: %s", trial_ids)
-        self.optimizer.bulk_register(configs, scores, status, is_warm_up)
+        self.optimizer.bulk_register(configs, scores, status)
+        self._last_trial_id = max(trial_ids, default=self._last_trial_id)
 
-        tunables = self.optimizer.suggest()
-        self.schedule_trial(tunables)
+        not_done = self.not_done()
+        if not_done:
+            tunables = self.optimizer.suggest()
+            self.schedule_trial(tunables)
 
-        return max(trial_ids, default=last_trial_id)
+        return not_done
 
     def schedule_trial(self, tunables: TunableGroups) -> None:
         """
@@ -302,10 +308,20 @@ class Scheduler(metaclass=ABCMeta):
         for trial in self.experiment.pending_trials(datetime.now(UTC), running=running):
             self.run_trial(trial)
 
+    def not_done(self) -> bool:
+        """
+        Check the stopping conditions.
+        By default, stop when the optimizer converges or max limit of trials reached.
+        """
+        return self.optimizer.not_converged() and (
+            self._trial_count < self._max_trials or self._max_trials <= 0
+        )
+
     @abstractmethod
     def run_trial(self, trial: Storage.Trial) -> None:
         """
         Set up and run a single trial. Save the results in the storage.
         """
         assert self.experiment is not None
-        _LOG.info("QUEUE: Execute trial: %s", trial)
+        self._trial_count += 1
+        _LOG.info("QUEUE: Execute trial # %d/%d :: %s", self._trial_count, self._max_trials, trial)

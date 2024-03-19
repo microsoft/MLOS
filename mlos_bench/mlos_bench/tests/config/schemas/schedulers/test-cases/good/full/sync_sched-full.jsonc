@@ -6,6 +6,7 @@
         "teardown": false,
         "experiment_id": "MyExperimentName",
         "config_id": 1,
-        "trial_id": 1
+        "trial_id": 1,
+        "max_trials": 100
     }
 }

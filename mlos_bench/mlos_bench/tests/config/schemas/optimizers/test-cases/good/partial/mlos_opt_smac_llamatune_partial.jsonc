@@ -4,7 +4,7 @@
 
     "config": {
         "optimization_target": "score",
-        "max_iterations": 20,
+        "max_suggestions": 20,
         "seed": 12345,
         "optimizer_type": "SMAC",
         "space_adapter_type": "LLAMATUNE"

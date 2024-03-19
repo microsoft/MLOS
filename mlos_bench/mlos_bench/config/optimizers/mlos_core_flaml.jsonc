@@ -7,7 +7,7 @@
     "config": {
         "optimization_target": "score",
         "optimization_direction": "min",
-        "max_iterations": 100,
+        "max_suggestions": 100,
         "optimizer_type": "FLAML"
     }
 }
