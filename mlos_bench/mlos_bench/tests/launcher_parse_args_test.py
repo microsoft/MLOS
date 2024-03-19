@@ -171,10 +171,10 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     globals_file_config = launcher.config_loader.load_config(globals_file, ConfigSchema.GLOBALS)
     # The actual global_config gets overwritten as a part of processing, so to test
     # this we read the original value out of the source files.
-    orig_max_iters = globals_file_config.get('max_iterations', opt_config.get('config', {}).get('max_iterations', 100))
+    orig_max_iters = globals_file_config.get('max_suggestions', opt_config.get('config', {}).get('max_suggestions', 100))
     assert launcher.optimizer.max_iterations \
         == orig_max_iters \
-        == launcher.global_config['max_iterations']
+        == launcher.global_config['max_suggestions']
 
     # Check that the optimizer got initialized with random values instead of the defaults.
     # Note: the environment doesn't get updated until suggest() is called to

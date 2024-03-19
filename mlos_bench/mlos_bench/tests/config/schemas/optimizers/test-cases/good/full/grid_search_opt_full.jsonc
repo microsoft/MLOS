@@ -5,7 +5,7 @@
         "some/path/to/tunables.jsonc"
     ],
     "config": {
-        "max_iterations": 100,
+        "max_suggestions": 100,
         "optimization_direction": "max",
         "optimization_target": "score",
         "seed": 12345,

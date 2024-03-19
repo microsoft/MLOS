@@ -21,7 +21,7 @@ from mlos_bench.run import _main
         ([
             "--config", "mlos_bench/mlos_bench/tests/config/cli/mock-opt.jsonc",
             "--trial_config_repeat_count", "3",
-            "--max_iterations", "3",
+            "--max_suggestions", "3",
         ], 64.53897),
     ]
 )

@@ -35,7 +35,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     BASE_SUPPORTED_CONFIG_PROPS = {
         "optimization_target",
         "optimization_direction",
-        "max_iterations",
+        "max_suggestions",
         "seed",
         "start_with_defaults",
     }
@@ -71,12 +71,12 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         experiment_id = self._global_config.get('experiment_id')
         self.experiment_id = str(experiment_id).strip() if experiment_id else None
 
-        self._iter = 1
+        self._iter = 0
         # If False, use the optimizer to suggest the initial configuration;
         # if True (default), use the already initialized values for the first iteration.
         self._start_with_defaults: bool = bool(
             strtobool(str(self._config.pop('start_with_defaults', True))))
-        self._max_iter = int(self._config.pop('max_iterations', 100))
+        self._max_iter = int(self._config.pop('max_suggestions', 100))
         self._opt_target = str(self._config.pop('optimization_target', 'score'))
         self._opt_sign = {"min": 1, "max": -1}[self._config.pop('optimization_direction', 'min')]
 
@@ -224,7 +224,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
 
     @abstractmethod
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
-                      status: Optional[Sequence[Status]] = None, is_warm_up: bool = False) -> bool:
+                      status: Optional[Sequence[Status]] = None) -> bool:
         """
         Pre-load the optimizer with the bulk data from previous experiments.
 
@@ -236,16 +236,13 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             Benchmark results from experiments that correspond to `configs`.
         status : Optional[Sequence[float]]
             Status of the experiments that correspond to `configs`.
-        is_warm_up : bool
-            True for the initial load, False for subsequent calls.
 
         Returns
         -------
         is_not_empty : bool
             True if there is data to register, false otherwise.
         """
-        _LOG.info("%s the optimizer with: %d configs, %d scores, %d status values",
-                  "Warm-up" if is_warm_up else "Load",
+        _LOG.info("Update the optimizer with: %d configs, %d scores, %d status values",
                   len(configs or []), len(scores or []), len(status or []))
         if len(configs or []) != len(scores or []):
             raise ValueError("Numbers of configs and scores do not match.")
@@ -257,10 +254,11 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             self._start_with_defaults = False
         return has_data
 
-    @abstractmethod
     def suggest(self) -> TunableGroups:
         """
         Generate the next suggestion.
+        Base class' implementation increments the iteration count
+        and returns the current values of the tunables.
 
         Returns
         -------
@@ -269,13 +267,15 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             These are the same tunables we pass to the constructor,
             but with the values set to the next suggestion.
         """
+        self._iter += 1
+        _LOG.debug("Iteration %d :: Suggest", self._iter)
+        return self._tunables.copy()
 
     @abstractmethod
     def register(self, tunables: TunableGroups, status: Status,
                  score: Optional[Union[float, Dict[str, float]]] = None) -> Optional[float]:
         """
         Register the observation for the given configuration.
-        Base class' implementations logs and increments the iteration count.
 
         Parameters
         ----------
@@ -295,7 +295,6 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         """
         _LOG.info("Iteration %d :: Register: %s = %s score: %s",
                   self._iter, tunables, status, score)
-        self._iter += 1
         if status.is_succeeded() == (score is None):  # XOR
             raise ValueError("Status and score must be consistent.")
         return self._get_score(status, score)
@@ -336,7 +335,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         Return True if not converged, False otherwise.
         Base implementation just checks the iteration count.
         """
-        return self._iter <= self._max_iter
+        return self._iter < self._max_iter
 
     @abstractmethod
     def get_best_observation(self) -> Union[Tuple[float, TunableGroups], Tuple[None, None]]:

@@ -36,7 +36,3 @@ class OneShotOptimizer(MockOptimizer):
     @property
     def supports_preload(self) -> bool:
         return False
-
-    def suggest(self) -> TunableGroups:
-        _LOG.info("Suggest: %s", self._tunables)
-        return self._tunables.copy()
