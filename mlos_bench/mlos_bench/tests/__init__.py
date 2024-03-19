@@ -22,13 +22,17 @@ import pytest
 from mlos_bench.util import get_class_from_name
 
 
-ZONE_INFO: List[Optional[tzinfo]] = [
+ZONE_NAMES = [
     # Explicit time zones.
-    pytz.UTC,
-    pytz.timezone("America/Chicago"),
-    pytz.timezone("America/Los_Angeles"),
+    "UTC",
+    "America/Chicago",
+    "America/Los_Angeles",
     # Implicit local time zone.
     None,
+]
+ZONE_INFO: List[Optional[tzinfo]] = [
+    None if zone_name is None else pytz.timezone(zone_name)
+    for zone_name in ZONE_NAMES
 ]
 
 
