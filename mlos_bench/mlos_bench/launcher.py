@@ -226,9 +226,9 @@ class Launcher:
             help='Number of times to repeat each config. Default is 1 trial per config, though more may be advised.')
 
         parser.add_argument(
-            '--trial_runners', '--trial-runners', required=False, type=int, default=1,
-            help='Number of trial runners to run in parallel. '
-            + 'Individual TrialRunners can be identified in configs with $trial_runner_id.')
+            '--num_trial_runners', '--num-trial-runners', required=False, type=int, default=1,
+            help='Number of TrialRunners to use for executing benchmark Environments. '
+            + 'Individual TrialRunners can be identified in configs with $trial_runner_id and optionally run in parallel.')
 
         parser.add_argument(
             '--scheduler', required=False,
