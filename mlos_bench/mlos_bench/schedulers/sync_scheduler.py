@@ -35,7 +35,7 @@ class SyncScheduler(Scheduler):
         while not_converged:
             _LOG.info("Optimization loop: Last trial ID: %d", self._last_trial_id)
             self._run_schedule(is_warm_up)
-            not_converged = self._get_optimizer_suggestions()
+            not_converged = self._schedule_new_optimizer_suggestions()
             is_warm_up = False
 
     def run_trial(self, trial: Storage.Trial) -> None:

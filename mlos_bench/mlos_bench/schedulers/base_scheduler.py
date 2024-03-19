@@ -178,7 +178,7 @@ class Scheduler(metaclass=ABCMeta):
             _LOG.debug("Config %d ::\n%s", config_id, json.dumps(tunable_values, indent=2))
         return tunables
 
-    def _get_optimizer_suggestions(self) -> bool:
+    def _schedule_new_optimizer_suggestions(self) -> bool:
         """
         Optimizer part of the loop. Load the results of the executed trials
         into the optimizer, suggest new configurations, and add them to the queue.
