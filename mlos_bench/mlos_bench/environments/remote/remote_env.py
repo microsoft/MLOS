@@ -12,6 +12,8 @@ import logging
 from datetime import datetime
 from typing import Dict, Iterable, Optional, Tuple
 
+from pytz import UTC
+
 from mlos_bench.environments.status import Status
 from mlos_bench.environments.script_env import ScriptEnv
 from mlos_bench.services.base_service import Service
@@ -174,5 +176,5 @@ class RemoteEnv(ScriptEnv):
             (status, output) = self._remote_exec_service.get_remote_exec_results(output)
         _LOG.debug("Status: %s :: %s", status, output)
         # FIXME: get the timestamp from the remote environment!
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(UTC)
         return (status, timestamp, output)

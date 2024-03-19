@@ -15,6 +15,8 @@ from types import TracebackType
 from typing import Any, Dict, Optional, Tuple, Type
 from typing_extensions import Literal
 
+from pytz import UTC
+
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.storage.base_storage import Storage
@@ -231,7 +233,7 @@ class Scheduler(metaclass=ABCMeta):
         Scheduler part of the loop. Check for pending trials in the queue and run them.
         """
         assert self.experiment is not None
-        for trial in self.experiment.pending_trials(datetime.utcnow(), running=running):
+        for trial in self.experiment.pending_trials(datetime.now(UTC), running=running):
             self.run_trial(trial)
 
     @abstractmethod

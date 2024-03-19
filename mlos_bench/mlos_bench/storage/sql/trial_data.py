@@ -16,6 +16,7 @@ from mlos_bench.storage.base_tunable_config_data import TunableConfigData
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.sql.tunable_config_data import TunableConfigSqlData
+from mlos_bench.util import utcify_timestamp
 
 if TYPE_CHECKING:
     from mlos_bench.storage.base_tunable_config_trial_group_data import TunableConfigTrialGroupData
@@ -100,8 +101,10 @@ class TrialSqlData(TrialData):
                     self._schema.trial_telemetry.c.metric_id,
                 )
             )
+            # Not all storage backends store the original zone info.
+            # We try to ensure data is entered in UTC and augment it on return again here.
             return pandas.DataFrame(
-                [(row.ts, row.metric_id, row.metric_value) for row in cur_telemetry.fetchall()],
+                [(utcify_timestamp(row.ts, origin="utc"), row.metric_id, row.metric_value) for row in cur_telemetry.fetchall()],
                 columns=['ts', 'metric', 'value'])
 
     @property
