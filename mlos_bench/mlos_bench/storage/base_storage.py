@@ -403,6 +403,9 @@ class Storage(metaclass=ABCMeta):
             config.update(global_config or {})
             config["experiment_id"] = self._experiment_id
             config["trial_id"] = self._trial_id
+            trial_runner_id = self.trial_runner_id
+            if trial_runner_id is not None:
+                config.setdefault("trial_runner_id", trial_runner_id)
             return config
 
         @abstractmethod

@@ -138,10 +138,10 @@ class Launcher:
         self.trial_runners: List[TrialRunner] = []
         for trial_runner_id in range(0, self.global_config["num_trial_runners"]):
             # Create a new global config for each Environment with a unique trial_runner_id for it.
-            global_config = self.global_config.copy()
-            global_config["trial_runner_id"] = trial_runner_id
+            env_global_config = self.global_config.copy()
+            env_global_config["trial_runner_id"] = trial_runner_id
             env = self._config_loader.load_environment(
-                self.root_env_config, TunableGroups(), global_config, service=self._parent_service)
+                self.root_env_config, TunableGroups(), env_global_config, service=self._parent_service)
             self.trial_runners[trial_runner_id] = TrialRunner(trial_runner_id, env)
         _LOG.info("Init %d trial runners for environments: %s",
                   self.trial_runners, list(trial_runner.environment for trial_runner in self.trial_runners))

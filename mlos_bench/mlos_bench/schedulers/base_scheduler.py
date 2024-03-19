@@ -50,7 +50,7 @@ class Scheduler(metaclass=ABCMeta):
         config : dict
             The configuration for the Scheduler.
         global_config : dict
-            he global configuration for the experiment.
+            The global configuration for the experiment.
         trial_runner : List[TrialRunner]
             The set of TrialRunner(s) (and associated Environment(s)) to benchmark/optimize.
         optimizer : Optimizer
@@ -119,6 +119,23 @@ class Scheduler(metaclass=ABCMeta):
     def storage(self) -> Storage:
         """Gets the Storage."""
         return self._storage
+
+    def get_trial_runner(self, trial: Storage.Trial) -> TrialRunner:
+        """
+        Gets the TrialRunner associated with the given Trial.
+
+        Parameters
+        ----------
+        trial : Storage.Trial
+            The trial to get the associated TrialRunner for.
+
+        Returns
+        -------
+        TrialRunner
+        """
+        if trial.trial_runner_id is None:
+            raise ValueError(f"Trial {trial} has no trial_runner_id")
+        return self._trial_runners[trial.trial_runner_id]
 
     def __repr__(self) -> str:
         """
@@ -194,6 +211,7 @@ class Scheduler(metaclass=ABCMeta):
         assert self.experiment is not None
         if self._do_teardown:
             for trial_runner in self.trial_runners:
+                assert not trial_runner.is_running
                 trial_runner.teardown()
 
     def get_best_observation(self) -> Tuple[Optional[float], Optional[TunableGroups]]:
@@ -224,6 +242,8 @@ class Scheduler(metaclass=ABCMeta):
         Return the last trial ID processed by the optimizer.
         """
         assert self.experiment is not None
+        # FIXME: In async mode, trial_ids may be returned out of order, so we may
+        # need to adjust this fetching logic.
         (trial_ids, configs, scores, status) = self.experiment.load(last_trial_id)
         _LOG.info("QUEUE: Update the optimizer with trial results: %s", trial_ids)
         self.optimizer.bulk_register(configs, scores, status, is_warm_up)

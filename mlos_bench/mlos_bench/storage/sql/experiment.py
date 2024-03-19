@@ -151,8 +151,6 @@ class Experiment(Storage.Experiment):
                     self._schema.trial.c.trial_id.asc(),
                 )
             )
-            # Note: this iterative approach is somewhat expensive.
-            # TODO: Look into a better bulk fetch option.
             for trial in cur_trials.fetchall():
                 tunables = self._get_params(
                     conn, self._schema.config_param, config_id=trial.config_id)

@@ -29,7 +29,7 @@ class TrialRunner:
     and async status polling via EventLoopContext background threads.
 
     Multiple TrialRunners can be used in a multi-processing pool to run multiple trials
-    in parallel.
+    in parallel, for instance.
     """
 
     def __init__(self, trial_runner_id: int, env: Environment) -> None:
@@ -37,6 +37,7 @@ class TrialRunner:
         self._env = env
         assert self._env.parameters["trial_runner_id"] == self._trial_runner_id
         self._in_context = False
+        self._is_running = False
         self._event_loop_context = EventLoopContext()
 
     @property
@@ -72,16 +73,22 @@ class TrialRunner:
         self._in_context = False
         return False  # Do not suppress exceptions
 
-    def run(self,
-            trial: Storage.Trial,
-            global_config: Optional[Dict[str, Any]] = None) -> Tuple[Status, Optional[Dict[str, float]]]:
+    @property
+    def is_running(self) -> bool:
+        """Get the running state of the current TrialRunner."""
+        return self._is_running
+
+    def run_trial(self,
+                  trial: Storage.Trial,
+                  global_config: Optional[Dict[str, Any]] = None) -> None:
         """
-        Run a single trial on this TrialRunner's Environment.
+        Run a single trial on this TrialRunner's Environment and stores the results
+        in the backend Trial Storage.
 
         Parameters
         ----------
         trial : Storage.Trial
-            A Storage class based Trial used to persist the experiment data.
+            A Storage class based Trial used to persist the experiment trial data.
         global_config : dict
             Global configuration parameters.
 
@@ -91,32 +98,38 @@ class TrialRunner:
             Status and results of the trial.
         """
         assert self._in_context
-        _LOG.info("Trial: %s", trial)
 
-        if not self._env.setup(trial.tunables, trial.config(global_config)):
-            _LOG.warning("Setup failed: %s :: %s", self._env, trial.tunables)
+        assert not self._is_running
+        self._is_running = True
+
+        assert trial.trial_runner_id == self.trial_runner_id, \
+            f"TrialRunner {self} should not run trial {trial} with different trial_runner_id {trial.trial_runner_id}."
+
+        if not self.environment.setup(trial.tunables, trial.config(global_config)):
+            _LOG.warning("Setup failed: %s :: %s", self.environment, trial.tunables)
             # FIXME: Use the actual timestamp from the environment.
-            trial.update(Status.FAILED, datetime.utcnow())
-            return (Status.FAILED, None)
+            _LOG.info("TrialRunner: Update trial results: %s :: %s", trial, Status.FAILED)
+            status, timestamp = Status.FAILED, datetime.utcnow()
+            trial.update(status, timestamp)
+            return
 
         # TODO: start background status polling of the environments in the event loop.
 
-        (status, timestamp, results) = self._env.run()  # Block and wait for the final result.
-        _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
+        (status, timestamp, results) = self.environment.run()  # Block and wait for the final result.
+        _LOG.info("TrialRunner Results: %s :: %s\n%s", trial.tunables, status, results)
 
         # In async mode (TODO), poll the environment for status and telemetry
         # and update the storage with the intermediate results.
-        (_status, _timestamp, telemetry) = self._env.status()
+        (_status, _timestamp, telemetry) = self.environment.status()
 
         # Use the status and timestamp from `.run()` as it is the final status of the experiment.
         # TODO: Use the `.status()` output in async mode.
         trial.update_telemetry(status, timestamp, telemetry)
 
         trial.update(status, timestamp, results)
-        # Filter out non-numeric scores from the optimizer.
-        scores = results if not isinstance(results, dict) \
-            else {k: float(v) for (k, v) in results.items() if isinstance(v, (int, float))}
-        return (status, scores)
+        _LOG.info("TrialRunner: Update trial results: %s :: %s %s", trial, status, results)
+
+        self._is_running = False
 
     def teardown(self) -> None:
         """
