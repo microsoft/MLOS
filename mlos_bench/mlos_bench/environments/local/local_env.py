@@ -240,8 +240,14 @@ class LocalEnv(ScriptEnv):
         ValueError
             On parse errors.
         """
-        # FIXME: We should probably not be assuming results arrived in UTC timezone.
-        new_datetime_col = pandas.to_datetime(datetime_col, utc=True)
+        new_datetime_col = pandas.to_datetime(datetime_col, utc=False)
+        # If timezone data is missing, assume the local timezone.
+        if new_datetime_col.dt.tz is None:
+            local_tzinfo = datetime.now().astimezone().tzinfo
+            new_datetime_col = new_datetime_col.dt.tz_localize(local_tzinfo)
+        assert new_datetime_col.dt.tz is not None
+        # And convert it to UTC.
+        new_datetime_col = new_datetime_col.dt.tz_convert('UTC')
         if new_datetime_col.isna().any():
             raise ValueError(f"Invalid date format in the telemetry data: {datetime_col}")
         if new_datetime_col.le(LocalEnv._MIN_TS).any():
