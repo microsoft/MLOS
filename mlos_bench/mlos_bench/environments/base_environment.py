@@ -14,6 +14,8 @@ from types import TracebackType
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Type, TYPE_CHECKING, Union
 from typing_extensions import Literal
 
+from pytz import UTC
+
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.dict_templater import DictTemplater
 from mlos_bench.environments.status import Status
@@ -411,7 +413,7 @@ class Environment(metaclass=abc.ABCMeta):
         """
         # Make sure we create a context before invoking setup/run/status/teardown
         assert self._in_context
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(UTC)
         if self._is_ready:
             return (Status.READY, timestamp, [])
         _LOG.warning("Environment not ready: %s", self)

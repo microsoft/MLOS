@@ -10,6 +10,8 @@ from datetime import datetime
 from random import random, seed as rand_seed
 from typing import Generator, Optional
 
+from pytz import UTC
+
 import pytest
 
 from mlos_bench.environments.status import Status
@@ -34,6 +36,7 @@ def storage() -> SqlStorage:
         config={
             "drivername": "sqlite",
             "database": ":memory:",
+            # "database": "mlos_bench.pytest.db",
         }
     )
 
@@ -150,7 +153,7 @@ def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: Optional[str]) -> S
                 tunable_value_norm = base_score * (tunable_value - tunable_min) / tunable_range
             else:
                 tunable_value_norm = 0
-            timestamp = datetime.utcnow()
+            timestamp = datetime.now(UTC)
             trial.update_telemetry(status=Status.RUNNING, timestamp=timestamp, metrics=[
                 (timestamp, "some-metric", tunable_value_norm + random() / 100),
             ])

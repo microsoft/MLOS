@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 
 from typing import Iterator, Set
 
+from pytz import UTC
+
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -26,7 +28,7 @@ def test_schedule_trial(exp_storage: Storage.Experiment,
     """
     Schedule several trials for future execution and retrieve them later at certain timestamps.
     """
-    timestamp = datetime.utcnow()
+    timestamp = datetime.now(UTC)
     timedelta_1min = timedelta(minutes=1)
     timedelta_1hr = timedelta(hours=1)
     config = {"location": "westus2", "num_repeats": 10}

@@ -17,7 +17,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql.schema import DbSchema
-from mlos_bench.util import nullable
+from mlos_bench.util import nullable, utcify_timestamp
 
 _LOG = logging.getLogger(__name__)
 
@@ -47,6 +47,8 @@ class Trial(Storage.Trial):
     def update(self, status: Status, timestamp: datetime,
                metrics: Optional[Union[Dict[str, Any], float]] = None
                ) -> Optional[Dict[str, Any]]:
+        # Make sure to convert the timestamp to UTC before storing it in the database.
+        timestamp = utcify_timestamp(timestamp, origin="local")
         metrics = super().update(status, timestamp, metrics)
         with self._engine.begin() as conn:
             self._update_status(conn, status, timestamp)
@@ -106,6 +108,9 @@ class Trial(Storage.Trial):
     def update_telemetry(self, status: Status, timestamp: datetime,
                          metrics: List[Tuple[datetime, str, Any]]) -> None:
         super().update_telemetry(status, timestamp, metrics)
+        # Make sure to convert the timestamp to UTC before storing it in the database.
+        timestamp = utcify_timestamp(timestamp, origin="local")
+        metrics = [(utcify_timestamp(ts, origin="local"), key, val) for (ts, key, val) in metrics]
         # NOTE: Not every SQLAlchemy dialect supports `Insert.on_conflict_do_nothing()`
         # and we need to keep `.update_telemetry()` idempotent; hence a loop instead of
         # a bulk upsert.
@@ -130,6 +135,8 @@ class Trial(Storage.Trial):
         Insert a new status record into the database.
         This call is idempotent.
         """
+        # Make sure to convert the timestamp to UTC before storing it in the database.
+        timestamp = utcify_timestamp(timestamp, origin="local")
         try:
             conn.execute(self._schema.trial_status.insert().values(
                 exp_id=self._experiment_id,
