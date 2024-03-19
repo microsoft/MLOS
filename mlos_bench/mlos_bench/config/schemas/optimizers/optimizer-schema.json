@@ -23,7 +23,7 @@
                     "example": "min"
                 },
                 "max_suggestions": {
-                    "description": "The maximum number of additional (in the case of merging experiment data or resuming experiments) config suggestions to run when we launch the app.  Note: configs may be repeated in more than one trial.",
+                    "description": "The maximum number of additional (in the case of merging experiment data or resuming experiments) config suggestions to run when we launch the app, or no limit if 0 is provided. Note: configs may be repeated in more than one trial.",
                     "type": "integer",
                     "minimum": 0,
                     "example": 100
