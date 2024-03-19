@@ -109,7 +109,7 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     # Check that we pick up the right scheduler config:
     assert isinstance(launcher.scheduler, SyncScheduler)
     assert launcher.scheduler._trial_config_repeat_count == 3  # pylint: disable=protected-access
-    assert launcher.scheduler._max_trials == 100  # pylint: disable=protected-access
+    assert launcher.scheduler._max_trials == -1  # pylint: disable=protected-access
 
 
 def test_launcher_args_parse_2(config_paths: List[str]) -> None:
