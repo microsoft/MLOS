@@ -194,12 +194,12 @@ class Scheduler(metaclass=ABCMeta):
         self.optimizer.bulk_register(configs, scores, status)
         self._last_trial_id = max(trial_ids, default=self._last_trial_id)
 
-        not_converged = self.optimizer.not_converged()
-        if not_converged:
+        not_done = self.not_done()
+        if not_done:
             tunables = self.optimizer.suggest()
             self.schedule_trial(tunables)
 
-        return not_converged
+        return not_done
 
     def schedule_trial(self, tunables: TunableGroups) -> None:
         """
@@ -242,7 +242,7 @@ class Scheduler(metaclass=ABCMeta):
         for trial in self.experiment.pending_trials(datetime.now(UTC), running=running):
             self.run_trial(trial)
 
-    def not_converged(self) -> bool:
+    def not_done(self) -> bool:
         """
         Check the stopping conditions.
         By default, stop when the optimizer converges or max limit of trials reached.
