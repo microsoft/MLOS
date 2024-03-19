@@ -19,7 +19,7 @@ import shutil
 import pytz
 import pytest
 
-from mlos_bench.util import get_class_from_name
+from mlos_bench.util import get_class_from_name, nullable
 
 
 ZONE_NAMES = [
