@@ -161,7 +161,7 @@ def test_grid_search(grid_search_opt: GridSearchOptimizer,
     assert all(config in grid_search_tunables_grid for config in grid_search_opt.pending_configs)
     assert all(config in list(grid_search_opt.pending_configs) for config in grid_search_tunables_grid)
 
-    # FIXME: Should we consider not_converged as the "max_suggestions", an empty grid, or both?
+    # We consider not_converged as either having reached "max_suggestions" or an empty grid?
 
     # Try to empty the rest of the grid.
     while grid_search_opt.not_converged():
