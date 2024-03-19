@@ -31,7 +31,7 @@ ZONE_NAMES = [
     None,
 ]
 ZONE_INFO: List[Optional[tzinfo]] = [
-    None if zone_name is None else pytz.timezone(zone_name)
+    nullable(pytz.timezone, zone_name)
     for zone_name in ZONE_NAMES
 ]
 
