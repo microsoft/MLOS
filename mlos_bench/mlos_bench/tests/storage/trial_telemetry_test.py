@@ -5,8 +5,10 @@
 """
 Unit tests for saving and restoring the telemetry data.
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, tzinfo
 from typing import Any, List, Optional, Tuple
+
+from pytz import UTC
 
 import pytest
 
@@ -15,11 +17,12 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.util import nullable
 
+from mlos_bench.tests import ZONE_INFO
+
 # pylint: disable=redefined-outer-name
 
 
-@pytest.fixture
-def telemetry_data() -> List[Tuple[datetime, str, Any]]:
+def zoned_telemetry_data(zone_info: Optional[tzinfo]) -> List[Tuple[datetime, str, Any]]:
     """
     Mock telemetry data for the trial.
 
@@ -28,7 +31,7 @@ def telemetry_data() -> List[Tuple[datetime, str, Any]]:
     List[Tuple[datetime, str, str]]
         A list of (timestamp, metric_id, metric_value)
     """
-    timestamp1 = datetime.utcnow()
+    timestamp1 = datetime.now(zone_info)
     timestamp2 = timestamp1 + timedelta(seconds=1)
     return sorted([
         (timestamp1, "cpu_load", 10.1),
@@ -45,35 +48,42 @@ def _telemetry_str(data: List[Tuple[datetime, str, Any]]
     """
     Convert telemetry values to strings.
     """
-    return [(ts, key, nullable(str, val)) for (ts, key, val) in data]
+    # All retrieved timestamps should have been converted to UTC.
+    return [(ts.astimezone(UTC), key, nullable(str, val)) for (ts, key, val) in data]
 
 
+@pytest.mark.parametrize(("origin_zone_info"), ZONE_INFO)
 def test_update_telemetry(storage: Storage,
                           exp_storage: Storage.Experiment,
                           tunable_groups: TunableGroups,
-                          telemetry_data: List[Tuple[datetime, str, Any]]) -> None:
+                          origin_zone_info: Optional[tzinfo]) -> None:
     """
     Make sure update_telemetry() and load_telemetry() methods work.
     """
+    telemetry_data = zoned_telemetry_data(origin_zone_info)
     trial = exp_storage.new_trial(tunable_groups)
     assert exp_storage.load_telemetry(trial.trial_id) == []
 
-    trial.update_telemetry(Status.RUNNING, datetime.utcnow(), telemetry_data)
+    trial.update_telemetry(Status.RUNNING, datetime.now(origin_zone_info), telemetry_data)
     assert exp_storage.load_telemetry(trial.trial_id) == _telemetry_str(telemetry_data)
 
     # Also check that the TrialData telemetry looks right.
     trial_data = storage.experiments[exp_storage.experiment_id].trials[trial.trial_id]
-    assert _telemetry_str([tuple(r) for r in trial_data.telemetry_df.to_numpy()]) == _telemetry_str(telemetry_data)
+    trial_telemetry_df = trial_data.telemetry_df
+    trial_telemetry_data = [tuple(r) for r in trial_telemetry_df.to_numpy()]
+    assert _telemetry_str(trial_telemetry_data) == _telemetry_str(telemetry_data)
 
 
+@pytest.mark.parametrize(("origin_zone_info"), ZONE_INFO)
 def test_update_telemetry_twice(exp_storage: Storage.Experiment,
                                 tunable_groups: TunableGroups,
-                                telemetry_data: List[Tuple[datetime, str, Any]]) -> None:
+                                origin_zone_info: Optional[tzinfo]) -> None:
     """
     Make sure update_telemetry() call is idempotent.
     """
+    telemetry_data = zoned_telemetry_data(origin_zone_info)
     trial = exp_storage.new_trial(tunable_groups)
-    timestamp = datetime.utcnow()
+    timestamp = datetime.now(origin_zone_info)
     trial.update_telemetry(Status.RUNNING, timestamp, telemetry_data)
     trial.update_telemetry(Status.RUNNING, timestamp, telemetry_data)
     trial.update_telemetry(Status.RUNNING, timestamp, telemetry_data)

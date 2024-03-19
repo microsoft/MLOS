@@ -7,10 +7,12 @@ Simple class to run an individual Trial on a given Environment.
 """
 
 from types import TracebackType
-from typing import Any, Dict, Literal, Optional, Tuple, Type
+from typing import Any, Dict, Literal, Optional, Type
 
 from datetime import datetime
 import logging
+
+from pytz import UTC
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.status import Status
@@ -109,8 +111,7 @@ class TrialRunner:
             _LOG.warning("Setup failed: %s :: %s", self.environment, trial.tunables)
             # FIXME: Use the actual timestamp from the environment.
             _LOG.info("TrialRunner: Update trial results: %s :: %s", trial, Status.FAILED)
-            status, timestamp = Status.FAILED, datetime.utcnow()
-            trial.update(status, timestamp)
+            trial.update(Status.FAILED, datetime.now(UTC))
             return
 
         # TODO: start background status polling of the environments in the event loop.

@@ -156,7 +156,7 @@ class DbSchema:
             self._meta,
             Column("exp_id", String(self._ID_LEN), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("ts", DateTime, nullable=False, default="now"),
+            Column("ts", DateTime(timezone=True), nullable=False, default="now"),
             Column("status", String(self._STATUS_LEN), nullable=False),
 
             UniqueConstraint("exp_id", "trial_id", "ts"),
@@ -182,7 +182,7 @@ class DbSchema:
             self._meta,
             Column("exp_id", String(self._ID_LEN), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("ts", DateTime, nullable=False, default="now"),
+            Column("ts", DateTime(timezone=True), nullable=False, default="now"),
             Column("metric_id", String(self._ID_LEN), nullable=False),
             Column("metric_value", String(self._METRIC_VALUE_LEN)),
 

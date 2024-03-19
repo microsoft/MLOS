@@ -8,6 +8,7 @@ Various helper functions for mlos_bench.
 
 # NOTE: This has to be placed in the top-level mlos_bench package to avoid circular imports.
 
+from datetime import datetime
 import os
 import json
 import logging
@@ -15,9 +16,13 @@ import importlib
 import subprocess
 
 from typing import (
-    Any, Callable, Dict, Iterable, Mapping, Optional,
+    Any, Callable, Dict, Iterable, Literal, Mapping, Optional,
     Tuple, Type, TypeVar, TYPE_CHECKING, Union,
 )
+
+import pandas
+import pytz
+
 
 _LOG = logging.getLogger(__name__)
 
@@ -302,3 +307,95 @@ def nullable(func: Callable, value: Optional[Any]) -> Optional[Any]:
         The result of the function application or None if the value is None.
     """
     return None if value is None else func(value)
+
+
+def utcify_timestamp(timestamp: datetime, *, origin: Literal["utc", "local"]) -> datetime:
+    """
+    Augment a timestamp with zoneinfo if missing and convert it to UTC.
+
+    Parameters
+    ----------
+    timestamp : datetime
+        A timestamp to convert to UTC.
+        Note: The original datetime may or may not have tzinfo associated with it.
+
+    origin : Literal["utc", "local"]
+        Whether the source timestamp is considered to be in UTC or local time.
+        In the case of loading data from storage, where we intentionally convert all
+        timestamps to UTC, this can help us retrieve the original timezone when the
+        storage backend doesn't explicitly store it.
+        In the case of receiving data from a client or other source, this can help us
+        convert the timestamp to UTC if it's not already.
+
+    Returns
+    -------
+    datetime
+        A datetime with zoneinfo in UTC.
+    """
+    if timestamp.tzinfo is not None or origin == "local":
+        # A timestamp with no zoneinfo is interpretted as "local" time
+        # (e.g., according to the TZ environment variable).
+        # That could be UTC or some other timezone, but either way we convert it to
+        # be explicitly UTC with zone info.
+        return timestamp.astimezone(pytz.UTC)
+    elif origin == "utc":
+        # If the timestamp is already in UTC, we just add the zoneinfo without conversion.
+        # Converting with astimezone() when the local time is *not* UTC would cause
+        # a timestamp conversion which we don't want.
+        return timestamp.replace(tzinfo=pytz.UTC)
+    else:
+        raise ValueError(f"Invalid origin: {origin}")
+
+
+def utcify_nullable_timestamp(timestamp: Optional[datetime], *, origin: Literal["utc", "local"]) -> Optional[datetime]:
+    """
+    A nullable version of utcify_timestamp.
+    """
+    return utcify_timestamp(timestamp, origin=origin) if timestamp is not None else None
+
+
+# All timestamps in the telemetry data must be greater than this date
+# (a very rough approximation for the start of this feature).
+_MIN_TS = datetime(2024, 1, 1, 0, 0, 0, tzinfo=pytz.UTC)
+
+
+def datetime_parser(datetime_col: pandas.Series, *, origin: Literal["utc", "local"]) -> pandas.Series:
+    """
+    Attempt to convert a pandas column to a datetime format.
+
+    Parameters
+    ----------
+    datetime_col : pandas.Series
+        The column to convert.
+
+    origin : Literal["utc", "local"]
+        Whether to interpret naive timestamps as originating from UTC or local time.
+
+    Returns
+    -------
+    pandas.Series
+        The converted datetime column.
+
+    Raises
+    ------
+    ValueError
+        On parse errors.
+    """
+    new_datetime_col = pandas.to_datetime(datetime_col, utc=False)
+    # If timezone data is missing, assume the provided origin timezone.
+    if new_datetime_col.dt.tz is None:
+        if origin == "local":
+            tzinfo = datetime.now().astimezone().tzinfo
+        elif origin == "utc":
+            tzinfo = pytz.UTC
+        else:
+            raise ValueError(f"Invalid timezone origin: {origin}")
+        new_datetime_col = new_datetime_col.dt.tz_localize(tzinfo)
+    assert new_datetime_col.dt.tz is not None
+    # And convert it to UTC.
+    new_datetime_col = new_datetime_col.dt.tz_convert('UTC')
+    if new_datetime_col.isna().any():
+        raise ValueError(f"Invalid date format in the data: {datetime_col}")
+    if new_datetime_col.le(_MIN_TS).any():
+        raise ValueError(f"Invalid date range in the data: {datetime_col}")
+    return new_datetime_col

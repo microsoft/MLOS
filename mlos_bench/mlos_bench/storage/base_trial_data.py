@@ -10,6 +10,7 @@ from datetime import datetime
 from typing import Any, Dict, Optional, TYPE_CHECKING
 
 import pandas
+from pytz import UTC
 
 from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable import TunableValue
@@ -39,6 +40,8 @@ class TrialData(metaclass=ABCMeta):
         self._experiment_id = experiment_id
         self._trial_id = trial_id
         self._tunable_config_id = tunable_config_id
+        assert ts_start.tzinfo == UTC, "ts_start must be in UTC"
+        assert ts_end is None or ts_end.tzinfo == UTC, "ts_end must be in UTC if not None"
         self._ts_start = ts_start
         self._ts_end = ts_end
         self._status = status

@@ -107,7 +107,7 @@ class Launcher:
         # experiment_id is generally taken from --globals files, but we also allow overriding it on the CLI.
         # It's useful to keep it there explicitly mostly for the --help output.
         if args.experiment_id:
-            self.global_config["experiment_id"] = args.experiment_id
+            self.global_config['experiment_id'] = args.experiment_id
         # trial_config_repeat_count is a scheduler property but it's convenient to set it via command line
         if args.trial_config_repeat_count:
             self.global_config["trial_config_repeat_count"] = args.trial_config_repeat_count

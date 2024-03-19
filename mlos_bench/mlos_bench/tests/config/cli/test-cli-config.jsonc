@@ -9,6 +9,8 @@
         "bar"
     ],
 
+    "scheduler": "schedulers/sync_scheduler.jsonc",
+
     "optimizer": "optimizers/mlos_core_default_opt.jsonc",
 
     "services": [
