@@ -113,6 +113,8 @@ class Environment(metaclass=abc.ABCMeta):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM/Host, etc.).
         """
+        global_config = global_config or {}
+        global_config.setdefault("trial_runner_id", -1)
         self._validate_json_config(config, name)
         self.name = name
         self.config = config
@@ -132,7 +134,7 @@ class Environment(metaclass=abc.ABCMeta):
 
         groups = self._expand_groups(
             config.get("tunable_params", []),
-            (global_config or {}).get("tunable_params_map", {}))
+            global_config.get("tunable_params_map", {}))
         _LOG.debug("Tunable groups for: '%s' :: %s", name, groups)
 
         self._tunable_params = tunables.subgroup(groups)
@@ -142,8 +144,9 @@ class Environment(metaclass=abc.ABCMeta):
             set(config.get("required_args", [])) -
             set(self._tunable_params.get_param_values().keys())
         )
+        req_args.add("trial_runner_id")
         merge_parameters(dest=self._const_args, source=global_config, required_keys=req_args)
-        self._const_args = self._expand_vars(self._const_args, global_config or {})
+        self._const_args = self._expand_vars(self._const_args, global_config)
 
         self._params = self._combine_tunables(self._tunable_params)
         _LOG.debug("Parameters for '%s' :: %s", name, self._params)
