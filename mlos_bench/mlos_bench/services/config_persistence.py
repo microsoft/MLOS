@@ -23,7 +23,6 @@ from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.services.base_service import Service
-from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -37,6 +36,7 @@ else:
 if TYPE_CHECKING:
     from mlos_bench.storage.base_storage import Storage
     from mlos_bench.schedulers.base_scheduler import Scheduler
+    from mlos_bench.schedulers.trial_runner import TrialRunner
 
 
 _LOG = logging.getLogger(__name__)
@@ -308,7 +308,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
     def build_scheduler(self, *,
                         config: Dict[str, Any],
                         global_config: Dict[str, Any],
-                        trial_runners: List[TrialRunner],
+                        trial_runners: List["TrialRunner"],
                         optimizer: Optimizer,
                         storage: "Storage",
                         root_env_config: str) -> "Scheduler":
