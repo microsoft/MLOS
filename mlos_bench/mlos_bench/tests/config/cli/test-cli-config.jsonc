@@ -18,6 +18,7 @@
     ],
 
     "trial_config_repeat_count": 1,
+    "num_trial_runners": 3,
 
     "random_seed": 42,
     "random_init": true
