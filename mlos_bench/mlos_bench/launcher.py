@@ -142,9 +142,9 @@ class Launcher:
             env_global_config["trial_runner_id"] = trial_runner_id
             env = self._config_loader.load_environment(
                 self.root_env_config, TunableGroups(), env_global_config, service=self._parent_service)
-            self.trial_runners[trial_runner_id] = TrialRunner(trial_runner_id, env)
+            self.trial_runners.append(TrialRunner(trial_runner_id, env))
         _LOG.info("Init %d trial runners for environments: %s",
-                  self.trial_runners, list(trial_runner.environment for trial_runner in self.trial_runners))
+                  len(self.trial_runners), list(trial_runner.environment for trial_runner in self.trial_runners))
 
         # NOTE: Init tunable values *after* the Environment(s), but *before* the Optimizer
         # TODO: should we assign the same or different tunables for all TrialRunner Environments?
@@ -226,7 +226,7 @@ class Launcher:
             help='Number of times to repeat each config. Default is 1 trial per config, though more may be advised.')
 
         parser.add_argument(
-            '--num_trial_runners', '--num-trial-runners', required=False, type=int, default=1,
+            '--num_trial_runners', '--num-trial-runners', required=False, type=int,
             help='Number of TrialRunners to use for executing benchmark Environments. '
             + 'Individual TrialRunners can be identified in configs with $trial_runner_id and optionally run in parallel.')
 
