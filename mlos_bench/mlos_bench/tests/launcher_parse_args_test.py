@@ -54,6 +54,7 @@ def config_paths() -> List[str]:
 
 
 # TODO: def test_launcher_args_defaults(config_paths: List[str]) -> None:
+# TODO: Test default trial config repeat count (also derived from config)
 
 
 def test_launcher_args_parse_1(config_paths: List[str]) -> None:
