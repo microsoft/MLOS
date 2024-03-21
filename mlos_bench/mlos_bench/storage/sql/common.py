@@ -30,7 +30,13 @@ def get_trials(
     from mlos_bench.storage.sql.trial_data import TrialSqlData  # pylint: disable=import-outside-toplevel,cyclic-import
     with engine.connect() as conn:
         # Build up sql a statement for fetching trials.
-        stmt = schema.trial.select().where(
+        stmt = schema.trial.select().join(
+            schema.trial_param,
+            schema.trial.c.trial_id == schema.trial_param.c.trial_id
+            and schema.trial.c.exp_id == schema.trial_param.c.exp_id
+            and schema.trial_param.c.param_id == "trial_runner_id",
+            isouter=True,
+        ).where(
             schema.trial.c.exp_id == experiment_id,
         ).order_by(
             schema.trial.c.exp_id.asc(),
@@ -52,6 +58,7 @@ def get_trials(
                 ts_start=utcify_timestamp(trial.ts_start, origin="utc"),
                 ts_end=utcify_nullable_timestamp(trial.ts_end, origin="utc"),
                 status=Status[trial.status],
+                trial_runner_id=trial.param_value,
             )
             for trial in trials.fetchall()
         }
@@ -91,6 +98,12 @@ def get_results_df(
         cur_trials_stmt = select(
             schema.trial,
             tunable_config_trial_group_id_subquery,
+        ).join(
+            schema.trial_param,
+            schema.trial.c.trial_id == schema.trial_param.c.trial_id
+            and schema.trial.c.exp_id == schema.trial_param.c.exp_id
+            and schema.trial_param.c.param_id == "trial_runner_id",
+            isouter=True,
         ).where(
             schema.trial.c.exp_id == experiment_id,
             and_(
@@ -115,6 +128,7 @@ def get_results_df(
                 row.config_id,
                 row.tunable_config_trial_group_id,
                 row.status,
+                row.param_value,
             ) for row in cur_trials.fetchall()],
             columns=[
                 'trial_id',
@@ -123,6 +137,7 @@ def get_results_df(
                 'tunable_config_id',
                 'tunable_config_trial_group_id',
                 'status',
+                'trial_runner_id',
             ]
         )
 

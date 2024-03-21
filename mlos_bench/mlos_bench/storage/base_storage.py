@@ -343,7 +343,7 @@ class Storage(metaclass=ABCMeta):
             self._config = config or {}
 
         def __repr__(self) -> str:
-            return f"{self._experiment_id}:{self._trial_id}:{self._tunable_config_id}"
+            return f"{self._experiment_id}:{self._trial_id}:{self._tunable_config_id}:{self.trial_runner_id}"
 
         @property
         def trial_id(self) -> int:
@@ -358,6 +358,13 @@ class Storage(metaclass=ABCMeta):
             ID of the current trial (tunable) configuration.
             """
             return self._tunable_config_id
+
+        @property
+        def trial_runner_id(self) -> Optional[int]:
+            """
+            ID of the TrialRunner this trial is assigned to.
+            """
+            return self._config.get("trial_runner_id")
 
         @property
         def opt_target(self) -> str:
@@ -396,6 +403,9 @@ class Storage(metaclass=ABCMeta):
             config.update(global_config or {})
             config["experiment_id"] = self._experiment_id
             config["trial_id"] = self._trial_id
+            trial_runner_id = self.trial_runner_id
+            if trial_runner_id is not None:
+                config.setdefault("trial_runner_id", trial_runner_id)
             return config
 
         @abstractmethod

@@ -35,7 +35,8 @@ class TrialSqlData(TrialData):
                  config_id: int,
                  ts_start: datetime,
                  ts_end: Optional[datetime],
-                 status: Status):
+                 status: Status,
+                 trial_runner_id: Optional[int] = None):
         super().__init__(
             experiment_id=experiment_id,
             trial_id=trial_id,
@@ -43,6 +44,7 @@ class TrialSqlData(TrialData):
             ts_start=ts_start,
             ts_end=ts_end,
             status=status,
+            trial_runner_id=trial_runner_id,
         )
         self._engine = engine
         self._schema = schema
