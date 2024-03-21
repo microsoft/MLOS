@@ -95,11 +95,14 @@ class Launcher:
 
         self._parent_service: Service = LocalExecService(parent=self._config_loader)
 
+        args_dict = vars(args)
         self.global_config = self._load_config(
             config.get("globals", []) + (args.globals or []),
             (args.config_path or []) + config.get("config_path", []),
             args_rest,
-            {key: val for (key, val) in config.items() if key not in vars(args)},
+            # Include any item from the cli config file that either isn't in the cli
+            # args at all or whose cli arg is missing.
+            {key: val for (key, val) in config.items() if key not in args_dict or args_dict[key] is None},
         )
         # experiment_id is generally taken from --globals files, but we also allow overriding it on the CLI.
         # It's useful to keep it there explicitly mostly for the --help output.
