@@ -102,8 +102,12 @@ class Launcher:
             args_rest,
             # Include any item from the cli config file that either isn't in the cli
             # args at all or whose cli arg is missing.
-            {key: val for (key, val) in config.items() if key not in args_dict or args_dict[key] is None},
+            # {key: val for (key, val) in config.items() if key not in args_dict or args_dict[key] is None},
+            {key: val for (key, val) in config.items() if key not in args_dict},
         )
+        # FIXME: Something's changed:
+        # pytest -n0 mlos_bench/mlos_bench/tests/config/cli/test_load_cli_config_examples.py -k azure-redis-bench
+        raise ValueError(f"global_config: {self.global_config}\nargs_dict: {args_dict}")
         # experiment_id is generally taken from --globals files, but we also allow overriding it on the CLI.
         # It's useful to keep it there explicitly mostly for the --help output.
         if args.experiment_id:
