@@ -237,7 +237,8 @@ def test_launcher_args_parse_3(config_paths: List[str]) -> None:
     """
     config_file = 'cli/test-cli-config.jsonc'
     globals_file = 'globals/global_test_config.jsonc'
-    # Here we have multiple --config-path and --service args, each with their own path.
+    # Here we don't override values in test-cli-config with cli args but ensure that
+    # those take precedence over other config files.
     cli_args = ' '.join([f"--config-path {config_path}" for config_path in config_paths]) + \
         f' --config {config_file}' + \
         f' --globals {globals_file}'
