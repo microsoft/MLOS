@@ -90,6 +90,16 @@ class Scheduler(metaclass=ABCMeta):
         _LOG.debug("Scheduler instantiated: %s :: %s", self, config)
 
     @property
+    def trial_config_repeat_count(self) -> int:
+        """Gets the number of trials to run for a given config."""
+        return self._trial_config_repeat_count
+
+    @property
+    def max_trials(self) -> int:
+        """Gets the maximum number of trials to run for a given config, or -1 for no limit."""
+        return self._max_trials
+
+    @property
     def experiment(self) -> Optional[Storage.Experiment]:
         """Gets the Experiment Storage."""
         return self._experiment

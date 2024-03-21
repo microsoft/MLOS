@@ -35,6 +35,14 @@ class Environment(metaclass=abc.ABCMeta):
     """
     An abstract base of all benchmark environments.
     """
+    # Should be provided by the runtime.
+    _COMMON_CONST_ARGS = {
+        "trial_runner_id",
+    }
+    _COMMON_REQ_ARGS = {
+        "experiment_id",
+        "trial_id",
+    }
 
     @classmethod
     def new(cls,
@@ -114,7 +122,11 @@ class Environment(metaclass=abc.ABCMeta):
             deploy or reboot a VM/Host, etc.).
         """
         global_config = global_config or {}
-        global_config.setdefault("trial_runner_id", -1)
+        # Make some usual runtime arguments available for tests.
+        for arg in self._COMMON_CONST_ARGS:
+            global_config.setdefault(arg, None)
+        for arg in self._COMMON_REQ_ARGS:
+            global_config.setdefault(arg, None)
         self._validate_json_config(config, name)
         self.name = name
         self.config = config
@@ -144,7 +156,7 @@ class Environment(metaclass=abc.ABCMeta):
             set(config.get("required_args", [])) -
             set(self._tunable_params.get_param_values().keys())
         )
-        req_args.add("trial_runner_id")
+        req_args.update(self._COMMON_CONST_ARGS)
         merge_parameters(dest=self._const_args, source=global_config, required_keys=req_args)
         self._const_args = self._expand_vars(self._const_args, global_config)
 
@@ -311,6 +323,18 @@ class Environment(metaclass=abc.ABCMeta):
         return self._tunable_params
 
     @property
+    def const_args(self) -> Dict[str, TunableValue]:
+        """
+        Get the constant arguments for this Environment.
+
+        Returns
+        -------
+        parameters : Dict[str, TunableValue]
+            Key/value pairs of all environment const_args parameters.
+        """
+        return self._const_args.copy()
+
+    @property
     def parameters(self) -> Dict[str, TunableValue]:
         """
         Key/value pairs of all environment parameters (i.e., `const_args` and `tunable_params`).
@@ -321,7 +345,7 @@ class Environment(metaclass=abc.ABCMeta):
         parameters : Dict[str, TunableValue]
             Key/value pairs of all environment parameters (i.e., `const_args` and `tunable_params`).
         """
-        return self._params
+        return self._params.copy()
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """

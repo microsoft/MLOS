@@ -56,6 +56,7 @@ class Launcher:
     def __init__(self, description: str, long_text: str = "", argv: Optional[List[str]] = None):
         # pylint: disable=too-many-statements
         # pylint: disable=too-complex
+        # pylint: disable=too-many-locals
         _LOG.info("Launch: %s", description)
         epilog = """
             Additional --key=value pairs can be specified to augment or override values listed in --globals.
@@ -97,12 +98,13 @@ class Launcher:
 
         self._parent_service: Service = LocalExecService(parent=self._config_loader)
 
+        args_dict = vars(args)
         self.global_config = self._load_config(
             config.get("globals", []) + (args.globals or []),
             (args.config_path or []) + config.get("config_path", []),
             args_rest,
             # Prime the global config with the command line args and the config file.
-            {key: val for (key, val) in config.items() if key not in vars(args)},
+            {key: val for (key, val) in config.items() if key not in args_dict or args_dict[key] is None},
         )
         # experiment_id is generally taken from --globals files, but we also allow overriding it on the CLI.
         # It's useful to keep it there explicitly mostly for the --help output.
