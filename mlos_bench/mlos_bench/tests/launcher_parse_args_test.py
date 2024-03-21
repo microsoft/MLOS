@@ -231,5 +231,23 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     # assert launcher.optimizer.seed == 1234
 
 
+def test_launcher_args_parse_3(config_paths: List[str]) -> None:
+    """
+    Check that cli file values take precedence over other values.
+    """
+    config_file = 'cli/test-cli-config.jsonc'
+    globals_file = 'globals/global_test_config.jsonc'
+    # Here we have multiple --config-path and --service args, each with their own path.
+    cli_args = ' '.join([f"--config-path {config_path}" for config_path in config_paths]) + \
+        f' --config {config_file}' + \
+        f' --globals {globals_file}'
+    launcher = _get_launcher(__name__, cli_args)
+
+    # Check that CLI file parameter overrides JSON config:
+    assert isinstance(launcher.scheduler, SyncScheduler)
+    # from test-cli-config.jsonc (should override scheduler config file)
+    assert launcher.scheduler.trial_config_repeat_count == 2
+
+
 if __name__ == '__main__':
-    pytest.main([__file__, "-n1"])
+    pytest.main([__file__, "-n0"])
