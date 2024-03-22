@@ -20,7 +20,6 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.track_best_optimizer import TrackBestOptimizer
 from mlos_bench.optimizers.convert_configspace import configspace_data_to_tunable_values
 from mlos_bench.services.base_service import Service
-from mlos_bench.util import nullable
 
 _LOG = logging.getLogger(__name__)
 
