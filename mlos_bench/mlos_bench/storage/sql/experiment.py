@@ -13,7 +13,7 @@ from typing import Optional, Tuple, List, Dict, Iterator, Any
 
 from pytz import UTC
 
-from sqlalchemy import Engine, Connection, CursorResult, Table, column, func
+from sqlalchemy import Engine, Connection, CursorResult, Table, column, func, select
 
 from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -172,10 +172,10 @@ class Experiment(Storage.Experiment):
         (E.g., configurations, results, and telemetry).
         """
         cur_result: CursorResult[Tuple[str, Any]] = conn.execute(
-            table.select().with_only_columns(
+            select(
                 column(f"{field}_id"),
                 column(f"{field}_value"),
-            ).where(
+            ).select_from(table).where(
                 *[column(key) == val for (key, val) in kwargs.items()]
             )
         )
