@@ -108,7 +108,9 @@ class GridSearchOptimizer(TrackBestOptimizer):
         # See NOTEs above.
         return (dict(zip(self._config_keys, config)) for config in self._suggested_configs)
 
-    def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
+    def bulk_register(self,
+                      configs: Sequence[dict],
+                      scores: Sequence[Optional[Dict[str, TunableValue]]],
                       status: Optional[Sequence[Status]] = None) -> bool:
         if not super().bulk_register(configs, scores, status):
             return False
@@ -118,8 +120,8 @@ class GridSearchOptimizer(TrackBestOptimizer):
             tunables = self._tunables.copy().assign(params)
             self.register(tunables, trial_status, nullable(float, score))
         if _LOG.isEnabledFor(logging.DEBUG):
-            (score, _) = self.get_best_observation()
-            _LOG.debug("Update end: %s = %s", self.target, score)
+            (best_score, _) = self.get_best_observation()
+            _LOG.debug("Update end: %s = %s", self.target, best_score)
         return True
 
     def suggest(self) -> TunableGroups:
