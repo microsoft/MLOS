@@ -179,7 +179,7 @@ class Experiment(Storage.Experiment):
                 *[column(key) == val for (key, val) in kwargs.items()]
             )
         )
-        return dict(row._tuple() for row in cur_result.fetchall())
+        return dict(row._tuple() for row in cur_result.fetchall())  # pylint: disable=protected-access
 
     @staticmethod
     def _save_params(conn: Connection, table: Table,
