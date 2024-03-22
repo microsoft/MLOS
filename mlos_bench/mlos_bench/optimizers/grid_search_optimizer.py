@@ -118,7 +118,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
             status = [Status.SUCCEEDED] * len(configs)
         for (params, score, trial_status) in zip(configs, scores, status):
             tunables = self._tunables.copy().assign(params)
-            self.register(tunables, trial_status, nullable(float, score))
+            self.register(tunables, trial_status, score)
         if _LOG.isEnabledFor(logging.DEBUG):
             (best_score, _) = self.get_best_observation()
             _LOG.debug("Update end: %s = %s", self.target, best_score)
