@@ -23,4 +23,6 @@ def test_try_parse_val() -> None:
     assert isinstance(res, float) and math.isnan(res)
     res = try_parse_val("inf")
     assert isinstance(res, float) and math.isinf(res)
+    res = try_parse_val("-inf")
+    assert isinstance(res, float) and math.isinf(res) and res < 0
     assert try_parse_val("str") == str("str")
