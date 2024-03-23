@@ -102,7 +102,7 @@ class MlosCoreOptimizer(Optimizer):
             dtype=float) * self._opt_sign
         if status is not None:
             df_status = pd.Series(status)
-            df_scores[df_status != Status.SUCCEEDED] = float("inf") * self._opt_sign
+            df_scores[df_status != Status.SUCCEEDED] = float("inf")
             df_status_completed = df_status.apply(Status.is_completed)
             df_configs = df_configs[df_status_completed]
             df_scores = df_scores[df_status_completed]

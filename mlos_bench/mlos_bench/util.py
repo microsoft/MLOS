@@ -284,7 +284,7 @@ def try_parse_val(val: Optional[str]) -> Optional[Union[int, float, str]]:
         try:
             val_int = int(val)
             return val_int if val_int == val_float else val_float
-        except (ValueError, OverflowError):
+        except ValueError:
             return val_float
     except ValueError:
         return str(val)
