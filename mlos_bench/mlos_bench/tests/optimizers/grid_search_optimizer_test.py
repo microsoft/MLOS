@@ -239,7 +239,7 @@ def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
     assert all(suggestion.get_param_values() not in suggested_shuffled for suggestion in suggested)
 
     grid_search_opt.bulk_register([suggestion.get_param_values() for suggestion in suggested],
-                                  [score] * len(suggested),
+                                  [{"score": score}] * len(suggested),
                                   [status] * len(suggested))
 
     assert all(suggestion.get_param_values() not in grid_search_opt.pending_configs for suggestion in suggested)
