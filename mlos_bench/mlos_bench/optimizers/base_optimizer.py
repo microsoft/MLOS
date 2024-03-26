@@ -79,7 +79,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             strtobool(str(self._config.pop('start_with_defaults', True))))
         self._max_iter = int(self._config.pop('max_suggestions', 100))
 
-        opt_targets = self._config.pop('optimization_target', {'score': 'min'})
+        opt_targets: Dict[str, str] = self._config.pop('optimization_target', {'score': 'min'})
         if not isinstance(opt_targets, dict):
             raise ValueError(f"optimization_target should be a dict: {opt_targets}")
         # TODO: Implement multi-target optimization.
