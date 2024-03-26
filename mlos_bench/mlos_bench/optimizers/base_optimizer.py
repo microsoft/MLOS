@@ -84,7 +84,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             raise ValueError(f"optimization_target should be a dict: {opt_targets}")
         # TODO: Implement multi-target optimization.
         if len(opt_targets) != 1:
-            raise NotImplemented("Multi-target optimization is not implemented.")
+            raise NotImplementedError("Multi-target optimization is not implemented.")
         (self._opt_target, opt_dir) = list(opt_targets.items())[0]
         self._opt_sign = {"min": 1, "max": -1}[opt_dir]
 
