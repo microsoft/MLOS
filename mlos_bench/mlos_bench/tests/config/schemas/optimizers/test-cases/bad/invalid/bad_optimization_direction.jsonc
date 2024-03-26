@@ -2,7 +2,6 @@
     "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
 
     "config": {
-        "optimization_target": {"score": "min"},
-        "optimization_direction": "INVALID"
+        "optimization_target": {"score": "INVALID"}
     }
 }

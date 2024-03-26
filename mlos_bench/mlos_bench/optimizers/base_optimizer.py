@@ -35,7 +35,6 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     # See Also: mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json
     BASE_SUPPORTED_CONFIG_PROPS = {
         "optimization_target",
-        "optimization_direction",
         "max_suggestions",
         "seed",
         "start_with_defaults",
