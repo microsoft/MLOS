@@ -15,18 +15,10 @@
                 "optimization_target": {
                     "$comment": "Names of the optimization targets and their directions.",
                     "type": "object",
-                    "properties": {
-                        "name": {
-                            "description": "The name of the metric to optimize.",
-                            "type": "string",
-                            "example": "score"
-                        },
-                        "direction": {
-                            "description": "Whether to minimize or maximize the optimization target.",
-                            "enum": ["min", "max"],
-                            "example": "min"
-                        }
-                    }
+                    "values": {
+                        "enum": ["min", "max"]
+                    },
+                    "minItems": 1
                 },
                 "max_suggestions": {
                     "description": "The maximum number of additional (in the case of merging experiment data or resuming experiments) config suggestions to run when we launch the app, or no limit if 0 is provided. Note: configs may be repeated in more than one trial.",

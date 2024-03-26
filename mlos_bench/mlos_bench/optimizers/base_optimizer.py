@@ -78,8 +78,15 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._start_with_defaults: bool = bool(
             strtobool(str(self._config.pop('start_with_defaults', True))))
         self._max_iter = int(self._config.pop('max_suggestions', 100))
-        self._opt_target = str(self._config.pop('optimization_target', 'score'))
-        self._opt_sign = {"min": 1, "max": -1}[self._config.pop('optimization_direction', 'min')]
+
+        opt_targets = self._config.pop('optimization_target', {'score': 'min'})
+        if not isinstance(opt_targets, dict):
+            raise ValueError(f"optimization_target should be a dict: {opt_targets}")
+        # TODO: Implement multi-target optimization.
+        if len(opt_targets) != 1:
+            raise NotImplemented("Multi-target optimization is not implemented.")
+        (self._opt_target, opt_dir) = list(opt_targets.items())[0]
+        self._opt_sign = {"min": 1, "max": -1}[opt_dir]
 
     def _validate_json_config(self, config: dict) -> None:
         """
