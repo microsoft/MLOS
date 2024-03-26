@@ -20,6 +20,7 @@ from ConfigSpace import ConfigurationSpace
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.convert_configspace import tunable_groups_to_configspace
 
@@ -34,7 +35,6 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     # See Also: mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json
     BASE_SUPPORTED_CONFIG_PROPS = {
         "optimization_target",
-        "optimization_direction",
         "max_suggestions",
         "seed",
         "start_with_defaults",
@@ -77,8 +77,15 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._start_with_defaults: bool = bool(
             strtobool(str(self._config.pop('start_with_defaults', True))))
         self._max_iter = int(self._config.pop('max_suggestions', 100))
-        self._opt_target = str(self._config.pop('optimization_target', 'score'))
-        self._opt_sign = {"min": 1, "max": -1}[self._config.pop('optimization_direction', 'min')]
+
+        opt_targets: Dict[str, str] = self._config.pop('optimization_target', {'score': 'min'})
+        if not isinstance(opt_targets, dict):
+            raise ValueError(f"optimization_target should be a dict: {opt_targets}")
+        # TODO: Implement multi-target optimization.
+        if len(opt_targets) != 1:
+            raise NotImplementedError("Multi-target optimization is not implemented.")
+        (self._opt_target, opt_dir) = list(opt_targets.items())[0]
+        self._opt_sign = {"min": 1, "max": -1}[opt_dir]
 
     def _validate_json_config(self, config: dict) -> None:
         """
@@ -223,7 +230,9 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         return True
 
     @abstractmethod
-    def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
+    def bulk_register(self,
+                      configs: Sequence[dict],
+                      scores: Sequence[Optional[Dict[str, TunableValue]]],
                       status: Optional[Sequence[Status]] = None) -> bool:
         """
         Pre-load the optimizer with the bulk data from previous experiments.
@@ -232,9 +241,9 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         ----------
         configs : Sequence[dict]
             Records of tunable values from other experiments.
-        scores : Sequence[float]
+        scores : Sequence[Optional[Dict[str, TunableValue]]]
             Benchmark results from experiments that correspond to `configs`.
-        status : Optional[Sequence[float]]
+        status : Optional[Sequence[Status]]
             Status of the experiments that correspond to `configs`.
 
         Returns

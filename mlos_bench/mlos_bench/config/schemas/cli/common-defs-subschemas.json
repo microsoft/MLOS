@@ -15,7 +15,6 @@
                 "uniqueItems": true
             }
         },
-
         "experiment_id": {
             "description": "The name of the experiment. Controls trial reuse and sometimes used to disambiguate certain resources definitions.  Note: changes to this value will result in a new experiment being created, which may be necessary upon certain config or script changes.",
             "type": "string",
@@ -31,6 +30,14 @@
             "description": "Config ID to use (or resume) for the experiment.",
             "type": "integer",
             "minimum": 0
+        },
+        "optimization_target": {
+            "description": "Names of the optimization targets and their directions.",
+            "type": "object",
+            "additionalProperties": {
+                "enum": ["min", "max"]
+            },
+            "minItems": 1
         }
     }
 }
