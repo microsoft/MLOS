@@ -13,9 +13,9 @@
             "type": "object",
             "properties": {
                 "optimization_target": {
-                    "$comment": "Names of the optimization targets and their directions.",
+                    "description": "Names of the optimization targets and their directions.",
                     "type": "object",
-                    "values": {
+                    "additionalProperties": {
                         "enum": ["min", "max"]
                     },
                     "minItems": 1
