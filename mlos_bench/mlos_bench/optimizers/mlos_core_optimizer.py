@@ -46,6 +46,11 @@ class MlosCoreOptimizer(Optimizer):
                  service: Optional[Service] = None):
         super().__init__(tunables, config, global_config, service)
 
+        # TODO: Remove after implementing multi-target optimization in mlos_core
+        if len(self._opt_targets) != 1:
+            raise NotImplementedError(f"Multi-target optimization is not supported: {self}")
+        [(self._opt_target, self._opt_sign)] = list(self._opt_targets.items())
+
         opt_type = getattr(OptimizerType, self._config.pop(
             'optimizer_type', DEFAULT_OPTIMIZER_TYPE.name))
 
@@ -109,7 +114,7 @@ class MlosCoreOptimizer(Optimizer):
         self._opt.register(df_configs, df_scores)
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
-            _LOG.debug("Warm-up end: %s = %s", self.target, score)
+            _LOG.debug("Warm-up END: %s = %s", self, score)
         return True
 
     def _extract_target(self, scores: Optional[Dict[str, TunableValue]]) -> Optional[TunableValue]:
@@ -169,15 +174,16 @@ class MlosCoreOptimizer(Optimizer):
             configspace_data_to_tunable_values(df_config.loc[0].to_dict()))
 
     def register(self, tunables: TunableGroups, status: Status,
-                 score: Optional[Union[float, dict]] = None) -> Optional[float]:
-        score = super().register(tunables, status, score)  # With _opt_sign applied
+                 score: Optional[Dict[str, TunableValue]] = None) -> Optional[Dict[str, float]]:
+        registered_score = super().register(tunables, status, score)  # With _opt_sign applied
         if status.is_completed():
+            assert registered_score is not None
             df_config = self._to_df([tunables.get_param_values()])
-            _LOG.debug("Score: %s Dataframe:\n%s", score, df_config)
-            self._opt.register(df_config, pd.Series([score], dtype=float))
-        return score
+            _LOG.debug("Score: %s Dataframe:\n%s", registered_score, df_config)
+            self._opt.register(df_config, pd.Series([registered_score[self._opt_target]], dtype=float))
+        return registered_score
 
-    def get_best_observation(self) -> Union[Tuple[float, TunableGroups], Tuple[None, None]]:
+    def get_best_observation(self) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
         df_config = self._opt.get_best_observation()
         if len(df_config) == 0:
             return (None, None)
@@ -186,4 +192,4 @@ class MlosCoreOptimizer(Optimizer):
         score = params.pop("score")
         assert score is not None
         score = float(score) * self._opt_sign  # mlos_core always uses the `score` column
-        return (score, self._tunables.copy().assign(params))
+        return ({self._opt_target: score}, self._tunables.copy().assign(params))

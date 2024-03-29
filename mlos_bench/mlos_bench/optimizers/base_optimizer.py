@@ -79,13 +79,10 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._max_iter = int(self._config.pop('max_suggestions', 100))
 
         opt_targets: Dict[str, str] = self._config.pop('optimization_target', {'score': 'min'})
-        if not isinstance(opt_targets, dict):
-            raise ValueError(f"optimization_target should be a dict: {opt_targets}")
-        # TODO: Implement multi-target optimization.
-        if len(opt_targets) != 1:
-            raise NotImplementedError("Multi-target optimization is not implemented.")
-        (self._opt_target, opt_dir) = list(opt_targets.items())[0]
-        self._opt_sign = {"min": 1, "max": -1}[opt_dir]
+        self._opt_targets: Dict[str, int] = {
+            opt_target: {"min": 1, "max": -1}[opt_dir]
+            for (opt_target, opt_dir) in opt_targets.items()
+        }
 
     def _validate_json_config(self, config: dict) -> None:
         """
@@ -101,8 +98,11 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         ConfigSchema.OPTIMIZER.validate(json_config)
 
     def __repr__(self) -> str:
-        opt_direction = 'min' if self.is_min else 'max'
-        return f"{self.name}:{opt_direction}({self.target})(config={self._config})"
+        opt_targets = ','.join(
+            f"{opt_target}:{'min' if opt_dir == 1 else 'max'}"
+            for (opt_target, opt_dir) in self.targets.items()
+        )
+        return f"{self.name}({opt_targets})(config={self._config})"
 
     def __enter__(self) -> 'Optimizer':
         """
@@ -199,28 +199,13 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         """
         return self.__class__.__name__
 
-    # TODO: Expand these properties for multi-objective.
-
     @property
-    def is_min(self) -> bool:
+    def targets(self) -> Dict[str, int]:
         """
-        True if minimizing, False otherwise. Minimization is the default.
+        A dictionary of {target: direction} of optimization targets.
+        Direction is 1 for minimization and -1 for maximization.
         """
-        return self._opt_sign > 0
-
-    @property
-    def target(self) -> str:
-        """
-        The name of the target metric to optimize.
-        """
-        return self._opt_target
-
-    @property
-    def direction(self) -> Literal['min', 'max']:
-        """
-        The direction to optimize the target metric (e.g., min or max).
-        """
-        return 'min' if self.is_min else 'max'
+        return self._opt_targets
 
     @property
     def supports_preload(self) -> bool:
@@ -282,7 +267,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
 
     @abstractmethod
     def register(self, tunables: TunableGroups, status: Status,
-                 score: Optional[Union[float, Dict[str, float]]] = None) -> Optional[float]:
+                 score: Optional[Dict[str, TunableValue]] = None) -> Optional[Dict[str, float]]:
         """
         Register the observation for the given configuration.
 
@@ -293,14 +278,15 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             Usually it's the same config that the `.suggest()` method returned.
         status : Status
             Final status of the experiment (e.g., SUCCEEDED or FAILED).
-        score : Union[float, Dict[str, float]]
-            A scalar or a dict with the final benchmark results.
+        score : Optional[Dict[str, TunableValue]]
+            A dict with the final benchmark results.
             None if the experiment was not successful.
 
         Returns
         -------
-        value : float
-            The scalar benchmark score extracted (and possibly transformed) from the dataframe that's being minimized.
+        value : Optional[Dict[str, float]]
+            Benchmark scores extracted (and possibly transformed)
+            from the dataframe that's being MINIMIZED.
         """
         _LOG.info("Iteration %d :: Register: %s = %s score: %s",
                   self._iter, tunables, status, score)
@@ -308,7 +294,9 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             raise ValueError("Status and score must be consistent.")
         return self._get_score(status, score)
 
-    def _get_score(self, status: Status, score: Optional[Union[float, Dict[str, float]]]) -> Optional[float]:
+    def _get_score(self, status: Status,
+                   score: Optional[Union[Dict[str, TunableValue], Dict[str, float]]]
+                   ) -> Optional[Dict[str, float]]:
         """
         Extract a scalar benchmark score from the dataframe.
         Change the sign if we are maximizing.
@@ -317,27 +305,33 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         ----------
         status : Status
             Final status of the experiment (e.g., SUCCEEDED or FAILED).
-        score : Union[float, Dict[str, float]]
-            A scalar or a dict with the final benchmark results.
+        score : Optional[Dict[str, TunableValue]]
+            A dict with the final benchmark results.
             None if the experiment was not successful.
 
         Returns
         -------
-        score : float
-            A scalar benchmark score to be used as a primary target for MINIMIZATION.
+        score : Optional[Dict[str, float]]
+            An optional dict of benchmark scores to be used as targets for MINIMIZATION.
         """
         if not status.is_completed():
             return None
-        if status.is_succeeded():
-            assert score is not None
-            if isinstance(score, dict):
-                if self._opt_target not in score:
-                    raise ValueError(f"Missing expected optimization target metric '{self._opt_target}' "
-                                     + f"in results for iteration {self._iter}: {score}")
-                score = score[self._opt_target]
-            return float(score) * self._opt_sign
-        assert score is None
-        return float("inf")
+
+        if not status.is_succeeded():
+            assert score is None
+            return {
+                opt_target: float("inf")
+                for opt_target in self._opt_targets.keys()
+            }
+
+        assert score is not None
+        target_metrics: Dict[str, float] = {}
+        for (opt_target, opt_dir) in self._opt_targets.items():
+            val = score[opt_target]
+            assert isinstance(val, (int, float))
+            target_metrics[opt_target] = val * opt_dir
+
+        return target_metrics
 
     def not_converged(self) -> bool:
         """
@@ -347,13 +341,13 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         return self._iter < self._max_iter
 
     @abstractmethod
-    def get_best_observation(self) -> Union[Tuple[float, TunableGroups], Tuple[None, None]]:
+    def get_best_observation(self) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
         """
         Get the best observation so far.
 
         Returns
         -------
-        (value, tunables) : Tuple[float, TunableGroups]
+        (value, tunables) : Tuple[Dict[str, float], TunableGroups]
             The best value and the corresponding configuration.
             (None, None) if no successful observation has been registered yet.
         """
