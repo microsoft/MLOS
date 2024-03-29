@@ -67,7 +67,7 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
             opt.register(tunables, status, output)
 
     (best_score, best_tunables) = opt.get_best_observation()
-    assert best_score is not None and len(best_score) != 1
+    assert best_score is not None and len(best_score) == 1
     assert isinstance(best_tunables, TunableGroups)
     return (best_score["score"], best_tunables)
 

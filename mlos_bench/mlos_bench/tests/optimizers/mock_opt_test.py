@@ -64,7 +64,7 @@ def _optimize(mock_opt: MockOptimizer, mock_configurations: list) -> float:
         assert mock_opt.not_converged()
         tunables = mock_opt.suggest()
         assert tunables.get_param_values() == tunable_values
-        mock_opt.register(tunables, Status.SUCCEEDED, score)
+        mock_opt.register(tunables, Status.SUCCEEDED, {"score": score})
 
     (scores, _tunables) = mock_opt.get_best_observation()
     assert scores is not None
