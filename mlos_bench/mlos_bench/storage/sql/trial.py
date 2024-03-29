@@ -8,7 +8,7 @@ Saving and updating benchmark data using SQLAlchemy backend.
 
 import logging
 from datetime import datetime
-from typing import List, Optional, Tuple, Union, Dict, Any
+from typing import List, Optional, Tuple, Dict, Any
 
 from sqlalchemy import Engine, Connection
 from sqlalchemy.exc import IntegrityError
@@ -28,24 +28,27 @@ class Trial(Storage.Trial):
     """
 
     def __init__(self, *,
-                 engine: Engine, schema: DbSchema, tunables: TunableGroups,
-                 experiment_id: str, trial_id: int, config_id: int,
-                 opt_target: str, opt_direction: Optional[str],
+                 engine: Engine,
+                 schema: DbSchema,
+                 tunables: TunableGroups,
+                 experiment_id: str,
+                 trial_id: int,
+                 config_id: int,
+                 opt_targets: Dict[str, str],
                  config: Optional[Dict[str, Any]] = None):
         super().__init__(
             tunables=tunables,
             experiment_id=experiment_id,
             trial_id=trial_id,
             tunable_config_id=config_id,
-            opt_target=opt_target,
-            opt_direction=opt_direction,
+            opt_targets=opt_targets,
             config=config,
         )
         self._engine = engine
         self._schema = schema
 
     def update(self, status: Status, timestamp: datetime,
-               metrics: Optional[Union[Dict[str, Any], float]] = None
+               metrics: Optional[Dict[str, Any]] = None
                ) -> Optional[Dict[str, Any]]:
         # Make sure to convert the timestamp to UTC before storing it in the database.
         timestamp = utcify_timestamp(timestamp, origin="local")

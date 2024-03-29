@@ -62,8 +62,7 @@ class SqlStorage(Storage):
                    root_env_config: str,
                    description: str,
                    tunables: TunableGroups,
-                   opt_target: str,
-                   opt_direction: Optional[str]) -> Storage.Experiment:
+                   opt_targets: Dict[str, str]) -> Storage.Experiment:
         return Experiment(
             engine=self._engine,
             schema=self._schema,
@@ -72,8 +71,7 @@ class SqlStorage(Storage):
             trial_id=trial_id,
             root_env_config=root_env_config,
             description=description,
-            opt_target=opt_target,
-            opt_direction=opt_direction,
+            opt_targets=opt_targets,
         )
 
     @property

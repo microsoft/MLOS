@@ -50,16 +50,13 @@ def exp_storage(
     Test fixture for Experiment using in-memory SQLite3 storage.
     Note: It has already entered the context upon return.
     """
-    opt_target = "score"
-    opt_direction = "min"
     with storage.experiment(
         experiment_id="Test-001",
         trial_id=1,
         root_env_config="environment.jsonc",
         description="pytest experiment",
         tunables=tunable_groups,
-        opt_target=opt_target,
-        opt_direction=opt_direction,
+        opt_targets={"score": "min"},
     ) as exp:
         yield exp
     # pylint: disable=protected-access
@@ -74,8 +71,6 @@ def exp_no_tunables_storage(
     Test fixture for Experiment using in-memory SQLite3 storage.
     Note: It has already entered the context upon return.
     """
-    opt_target = "score"
-    opt_direction = "min"
     empty_config: dict = {}
     with storage.experiment(
         experiment_id="Test-003",
@@ -83,8 +78,7 @@ def exp_no_tunables_storage(
         root_env_config="environment.jsonc",
         description="pytest experiment - no tunables",
         tunables=TunableGroups(empty_config),
-        opt_target=opt_target,
-        opt_direction=opt_direction,
+        opt_targets={"score": "min"},
     ) as exp:
         yield exp
     # pylint: disable=protected-access
@@ -100,16 +94,13 @@ def mixed_numerics_exp_storage(
     Test fixture for an Experiment with mixed numerics tunables using in-memory SQLite3 storage.
     Note: It has already entered the context upon return.
     """
-    opt_target = "score"
-    opt_direction = "min"
     with storage.experiment(
         experiment_id="Test-002",
         trial_id=1,
         root_env_config="dne.jsonc",
         description="pytest experiment",
         tunables=mixed_numerics_tunable_groups,
-        opt_target=opt_target,
-        opt_direction=opt_direction,
+        opt_targets={"score": "min"},
     ) as exp:
         yield exp
     # pylint: disable=protected-access
@@ -140,9 +131,12 @@ def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: Optional[str]) -> S
         tunables = opt.suggest()
         for repeat_j in range(CONFIG_TRIAL_REPEAT_COUNT):
             trial = exp.new_trial(tunables=tunables.copy(), config={
-                "opt_target": exp.opt_target,
-                "opt_direction": exp.opt_direction,
                 "trial_number": config_i * CONFIG_TRIAL_REPEAT_COUNT + repeat_j + 1,
+                **{
+                    f"opt_{key}_{i}": val
+                    for (i, opt_target) in enumerate(exp.opt_targets.items())
+                    for (key, val) in zip(["target", "direction"], opt_target)
+                }
             })
             if exp.tunables:
                 assert trial.tunable_config_id == config_i + 1

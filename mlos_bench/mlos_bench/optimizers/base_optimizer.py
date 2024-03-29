@@ -98,11 +98,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         ConfigSchema.OPTIMIZER.validate(json_config)
 
     def __repr__(self) -> str:
-        opt_targets = ','.join(
-            f"{opt_target}:{'min' if opt_dir == 1 else 'max'}"
-            for (opt_target, opt_dir) in self.targets.items()
-        )
-        return f"{self.name}({opt_targets})(config={self._config})"
+        return f"{self.name}({self._opt_targets})(config={self._config})"
 
     def __enter__(self) -> 'Optimizer':
         """
@@ -200,12 +196,14 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         return self.__class__.__name__
 
     @property
-    def targets(self) -> Dict[str, int]:
+    def targets(self) -> Dict[str, str]:
         """
         A dictionary of {target: direction} of optimization targets.
-        Direction is 1 for minimization and -1 for maximization.
         """
-        return self._opt_targets
+        return {
+            opt_target: {1: "min", -1: "max"}[opt_dir]
+            for (opt_target, opt_dir) in self._opt_targets.items()
+        }
 
     @property
     def supports_preload(self) -> bool:
