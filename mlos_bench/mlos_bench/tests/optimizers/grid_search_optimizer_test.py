@@ -122,7 +122,6 @@ def test_grid_search(grid_search_opt: GridSearchOptimizer,
     """
     Make sure that grid search optimizer initializes and works correctly.
     """
-    # pylint: disable=too-many-locals
     score: Dict[str, TunableValue] = {"score": 1.0}
     status = Status.SUCCEEDED
     suggestion = grid_search_opt.suggest()
@@ -196,6 +195,7 @@ def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
     Make sure that grid search optimizer works correctly when suggest and register
     are called out of order.
     """
+    # pylint: disable=too-many-locals
     score: Dict[str, TunableValue] = {"score": 1.0}
     status = Status.SUCCEEDED
     suggest_count = 10
