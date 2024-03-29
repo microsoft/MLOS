@@ -399,7 +399,7 @@ class Storage(metaclass=ABCMeta):
                 Same as `metrics`, but always in the dict format.
             """
             _LOG.info("Store trial: %s :: %s %s", self, status, metrics)
-            if status.is_completed():
+            if status.is_succeeded():
                 assert metrics is not None
                 opt_targets = set(self._opt_targets.keys())
                 if not opt_targets.issubset(metrics.keys()):
