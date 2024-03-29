@@ -114,7 +114,7 @@ class MlosCoreOptimizer(Optimizer):
         self._opt.register(df_configs, df_scores)
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
-            _LOG.debug("Warm-up END: %s = %s", self, score)
+            _LOG.debug("Warm-up END: %s :: %s", self, score)
         return True
 
     def _extract_target(self, scores: Optional[Dict[str, TunableValue]]) -> Optional[TunableValue]:

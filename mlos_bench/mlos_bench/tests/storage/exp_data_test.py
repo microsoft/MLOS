@@ -58,12 +58,7 @@ def test_exp_trial_data_objectives(storage: Storage,
     }
 
     exp = storage.experiments[exp_storage.experiment_id]
-    # objectives should be the combination of both the trial objectives and the experiment objectives
-    assert exp.objectives == {
-        "back-compat": None,
-        "some-other-target": "max",
-        # exp_storage.opt_target: exp_storage.opt_direction,
-    }
+    assert exp.objectives == exp_storage.opt_targets
 
     trial_data_opt_new = exp.trials[trial_opt_new.trial_id]
     assert trial_data_opt_new.metadata_dict == {

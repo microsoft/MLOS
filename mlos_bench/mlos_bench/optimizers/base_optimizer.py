@@ -98,7 +98,11 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         ConfigSchema.OPTIMIZER.validate(json_config)
 
     def __repr__(self) -> str:
-        return f"{self.name}({self._opt_targets})(config={self._config})"
+        opt_targets = ",".join(
+            f"{opt_target}:{({1: 'min', -1: 'max'}[opt_dir])}"
+            for (opt_target, opt_dir) in self._opt_targets.items()
+        )
+        return f"{self.name}({opt_targets},config={self._config})"
 
     def __enter__(self) -> 'Optimizer':
         """
