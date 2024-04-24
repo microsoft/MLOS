@@ -83,7 +83,7 @@ def grid_search_opt(grid_search_tunables: TunableGroups,
     max_iterations = len(grid_search_tunables_grid) * 2 - 3
     return GridSearchOptimizer(tunables=grid_search_tunables, config={
         "max_suggestions": max_iterations,
-        "optimization_target": {"score": "max"},
+        "optimization_target": {"score": "max", "other_score": "min"},
     })
 
 
@@ -122,7 +122,7 @@ def test_grid_search(grid_search_opt: GridSearchOptimizer,
     """
     Make sure that grid search optimizer initializes and works correctly.
     """
-    score: Dict[str, TunableValue] = {"score": 1.0}
+    score: Dict[str, TunableValue] = {"score": 1.0, "other_score": 2.0}
     status = Status.SUCCEEDED
     suggestion = grid_search_opt.suggest()
     suggestion_dict = suggestion.get_param_values()
@@ -196,7 +196,7 @@ def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
     are called out of order.
     """
     # pylint: disable=too-many-locals
-    score: Dict[str, TunableValue] = {"score": 1.0}
+    score: Dict[str, TunableValue] = {"score": 1.0, "other_score": 2.0}
     status = Status.SUCCEEDED
     suggest_count = 10
     suggested = [grid_search_opt.suggest() for _ in range(suggest_count)]
