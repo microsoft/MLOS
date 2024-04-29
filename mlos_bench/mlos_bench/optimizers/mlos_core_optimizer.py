@@ -90,12 +90,16 @@ class MlosCoreOptimizer(Optimizer):
     def name(self) -> str:
         return f"{self.__class__.__name__}:{self._opt.__class__.__name__}"
 
-    def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
+    def bulk_register(self,
+                      configs: Sequence[dict],
+                      scores: Sequence[Optional[Dict[str, TunableValue]]],
                       status: Optional[Sequence[Status]] = None) -> bool:
         if not super().bulk_register(configs, scores, status):
             return False
         df_configs = self._to_df(configs)  # Impute missing values, if necessary
-        df_scores = pd.Series(scores, dtype=float) * self._opt_sign
+        df_scores = pd.Series(
+            [self._extract_target(score) for score in scores],
+            dtype=float) * self._opt_sign
         if status is not None:
             df_status = pd.Series(status)
             df_scores[df_status != Status.SUCCEEDED] = float("inf")
@@ -107,6 +111,9 @@ class MlosCoreOptimizer(Optimizer):
             (score, _) = self.get_best_observation()
             _LOG.debug("Warm-up end: %s = %s", self.target, score)
         return True
+
+    def _extract_target(self, scores: Optional[Dict[str, TunableValue]]) -> Optional[TunableValue]:
+        return None if scores is None else scores[self._opt_target]
 
     def _to_df(self, configs: Sequence[Dict[str, TunableValue]]) -> pd.DataFrame:
         """

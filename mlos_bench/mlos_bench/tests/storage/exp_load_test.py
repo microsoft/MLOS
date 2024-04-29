@@ -115,7 +115,7 @@ def test_exp_trial_update_categ(exp_storage: Storage.Experiment,
             'kernel_sched_migration_cost_ns': '-1',
             'vmSize': 'Standard_B4ms'
         }],
-        [99.9],
+        [{"score": "99.9", "benchmark": "test"}],
         [Status.SUCCEEDED]
     )
 
@@ -156,7 +156,7 @@ def test_exp_trial_pending_3(exp_storage: Storage.Experiment,
     (trial_ids, configs, scores, status) = exp_storage.load()
     assert trial_ids == [trial_fail.trial_id, trial_succ.trial_id]
     assert len(configs) == 2
-    assert scores == [None, score]
+    assert scores == [None, {"score": f"{score}"}]
     assert status == [Status.FAILED, Status.SUCCEEDED]
     assert tunable_groups.copy().assign(configs[0]).reset() == trial_fail.tunables
     assert tunable_groups.copy().assign(configs[1]).reset() == trial_succ.tunables

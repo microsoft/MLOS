@@ -20,6 +20,7 @@ from ConfigSpace import ConfigurationSpace
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.convert_configspace import tunable_groups_to_configspace
 
@@ -223,7 +224,9 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         return True
 
     @abstractmethod
-    def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
+    def bulk_register(self,
+                      configs: Sequence[dict],
+                      scores: Sequence[Optional[Dict[str, TunableValue]]],
                       status: Optional[Sequence[Status]] = None) -> bool:
         """
         Pre-load the optimizer with the bulk data from previous experiments.
@@ -232,9 +235,9 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         ----------
         configs : Sequence[dict]
             Records of tunable values from other experiments.
-        scores : Sequence[float]
+        scores : Sequence[Optional[Dict[str, TunableValue]]]
             Benchmark results from experiments that correspond to `configs`.
-        status : Optional[Sequence[float]]
+        status : Optional[Sequence[Status]]
             Status of the experiments that correspond to `configs`.
 
         Returns
