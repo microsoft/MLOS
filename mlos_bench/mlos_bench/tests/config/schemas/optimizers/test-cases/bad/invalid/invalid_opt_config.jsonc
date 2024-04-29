@@ -4,6 +4,6 @@
     "class": "mlos_bench.optimizers.InvalidOptimizer",
 
     "config": {
-        "optimization_target": {"score": "min"}
+        "optimization_targets": {"score": "min"}
     }
 }

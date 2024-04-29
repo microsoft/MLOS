@@ -34,7 +34,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
 
     # See Also: mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json
     BASE_SUPPORTED_CONFIG_PROPS = {
-        "optimization_target",
+        "optimization_targets",
         "max_suggestions",
         "seed",
         "start_with_defaults",
@@ -78,9 +78,9 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             strtobool(str(self._config.pop('start_with_defaults', True))))
         self._max_iter = int(self._config.pop('max_suggestions', 100))
 
-        opt_targets: Dict[str, str] = self._config.pop('optimization_target', {'score': 'min'})
+        opt_targets: Dict[str, str] = self._config.pop('optimization_targets', {'score': 'min'})
         if not isinstance(opt_targets, dict):
-            raise ValueError(f"optimization_target should be a dict: {opt_targets}")
+            raise ValueError(f"optimization_targets should be a dict: {opt_targets}")
         # TODO: Implement multi-target optimization.
         if len(opt_targets) != 1:
             raise NotImplementedError("Multi-target optimization is not implemented.")

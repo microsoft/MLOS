@@ -30,7 +30,7 @@ def llamatune_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
             "space_adapter_config": {
                 "num_low_dims": 2,
             },
-            "optimization_target": {"score": "min"},
+            "optimization_targets": {"score": "min"},
             "max_suggestions": 10,
             "optimizer_type": "SMAC",
             "seed": SEED,

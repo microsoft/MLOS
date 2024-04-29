@@ -53,7 +53,7 @@ it looks like this:
         "redis": []
     },
 
-    "optimization_target": {
+    "optimization_targets": {
         "score": "min"
     }
 }
@@ -83,7 +83,7 @@ Likewise, parameter
 
 ```jsonc
 {
-    "optimization_target": {
+    "optimization_targets": {
         "score": "min"
     }
 }

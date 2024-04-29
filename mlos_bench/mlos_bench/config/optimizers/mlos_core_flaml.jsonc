@@ -7,6 +7,6 @@
     "config": {
         "max_suggestions": 100,
         "optimizer_type": "FLAML",
-        "optimization_target": {"score": "min"}
+        "optimization_targets": {"score": "min"}
     }
 }

@@ -22,8 +22,8 @@
         "config_id": {
             "$ref": "./common-defs-subschemas.json#/$defs/config_id"
         },
-        "optimization_target": {
-            "$ref": "./common-defs-subschemas.json#/$defs/optimization_target"
+        "optimization_targets": {
+            "$ref": "./common-defs-subschemas.json#/$defs/optimization_targets"
         }
     },
     "additionalProperties": {

@@ -4,7 +4,7 @@
     "class": "mlos_bench.optimizers.MockOptimizer",
 
     "config": {
-        "optimization_target": {"score": "min"}
+        "optimization_targets": {"score": "min"}
     }
 }
 
