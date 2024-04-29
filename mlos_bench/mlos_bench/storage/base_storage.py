@@ -256,10 +256,8 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def load(self,
-                 last_trial_id: int = -1,
-                 opt_target: Optional[str] = None
-                 ) -> Tuple[List[int], List[dict], List[Optional[float]], List[Status]]:
+        def load(self, last_trial_id: int = -1,
+                 ) -> Tuple[List[int], List[dict], List[Optional[Dict[str, Any]]], List[Status]]:
             """
             Load (tunable values, benchmark scores, status) to warm-up the optimizer.
 
@@ -271,12 +269,10 @@ class Storage(metaclass=ABCMeta):
             ----------
             last_trial_id : int
                 (Optional) Trial ID to start from.
-            opt_target : Optional[str]
-                Name of the optimization target.
 
             Returns
             -------
-            (trial_ids, configs, scores, status) : ([dict], [Optional[float]], [Status])
+            (trial_ids, configs, scores, status) : ([int], [dict], [Optional[dict]], [Status])
                 Trial ids, Tunable values, benchmark scores, and status of the trials.
             """
 
