@@ -31,7 +31,7 @@
             "type": "integer",
             "minimum": 0
         },
-        "optimization_target": {
+        "optimization_targets": {
             "description": "Names of the optimization targets and their directions.",
             "type": "object",
             "additionalProperties": {

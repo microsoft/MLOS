@@ -34,7 +34,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
 
     # See Also: mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json
     BASE_SUPPORTED_CONFIG_PROPS = {
-        "optimization_target",
+        "optimization_targets",
         "max_suggestions",
         "seed",
         "start_with_defaults",
@@ -78,7 +78,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             strtobool(str(self._config.pop('start_with_defaults', True))))
         self._max_iter = int(self._config.pop('max_suggestions', 100))
 
-        opt_targets: Dict[str, str] = self._config.pop('optimization_target', {'score': 'min'})
+        opt_targets: Dict[str, str] = self._config.pop('optimization_targets', {'score': 'min'})
         self._opt_targets: Dict[str, int] = {
             opt_target: {"min": 1, "max": -1}[opt_dir]
             for (opt_target, opt_dir) in opt_targets.items()

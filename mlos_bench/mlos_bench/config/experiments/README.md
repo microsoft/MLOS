@@ -53,7 +53,7 @@ it looks like this:
         "redis": []
     },
 
-    "optimization_target": {
+    "optimization_targets": {
         "score": "min"
     }
 }
@@ -79,11 +79,11 @@ It has a mixture of parameters from different components of the framework. for e
 
 At runtime, these values will be pushed down to the `AzureVMService` configuration, e.g., [`service-linux-vm-ops.jsonc`](../services/remote/azure/service-linux-vm-ops.jsonc).
 
-Likewise, parameter
+Likewise, the parameter
 
 ```jsonc
 {
-    "optimization_target": {
+    "optimization_targets": {
         "score": "min"
     }
 }

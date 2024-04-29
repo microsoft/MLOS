@@ -2,7 +2,7 @@
     "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
 
     "config": {
-        "optimization_target": {"score": "min"},
+        "optimization_targets": {"score": "min"},
         "optimizer_type": "FLAML",
         "base_estimator": "foo"
     }
