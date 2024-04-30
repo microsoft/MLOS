@@ -29,6 +29,7 @@ def test_trial_metadata(exp_data: ExperimentData) -> None:
     """
     Check expected return values for TunableConfigData metadata.
     """
+    assert exp_data.objectives == {'score': 'min'}
     for (trial_id, trial) in exp_data.trials.items():
         assert trial.metadata_dict == {
             'opt_target_0': 'score',
