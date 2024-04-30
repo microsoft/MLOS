@@ -98,7 +98,7 @@ class Storage(metaclass=ABCMeta):
         description : str
             Human-readable description of the experiment.
         tunables : TunableGroups
-        opt_targets : Dict[str, str]
+        opt_targets : Dict[str, Literal["min", "max"]]
             Names of metrics we're optimizing for and the optimization direction {min, max}.
 
         Returns
@@ -206,7 +206,7 @@ class Storage(metaclass=ABCMeta):
             return self._tunables
 
         @property
-        def opt_targets(self) -> Dict[str, str]:
+        def opt_targets(self) -> Dict[str, Literal["min", "max"]]:
             """
             Get the Experiment's optimization targets and directions
             """
@@ -345,7 +345,7 @@ class Storage(metaclass=ABCMeta):
             return self._tunable_config_id
 
         @property
-        def opt_targets(self) -> Dict[str, str]:
+        def opt_targets(self) -> Dict[str, Literal["min", "max"]]:
             """
             Get the Trial's optimization targets and directions.
             """
