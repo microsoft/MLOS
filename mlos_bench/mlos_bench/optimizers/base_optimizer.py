@@ -334,7 +334,6 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         target_metrics: Dict[str, float] = {}
         for (opt_target, opt_dir) in self._opt_targets.items():
             val = scores[opt_target]
-            assert val is not None
             target_metrics[opt_target] = float(val) * opt_dir
 
         return target_metrics
