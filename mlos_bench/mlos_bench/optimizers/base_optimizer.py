@@ -294,11 +294,11 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
                   self._iter, tunables, status, score)
         if status.is_succeeded() == (score is None):  # XOR
             raise ValueError("Status and score must be consistent.")
-        return self._get_score(status, score)
+        return self._get_scores(status, score)
 
-    def _get_score(self, status: Status,
-                   score: Optional[Union[Dict[str, TunableValue], Dict[str, float]]]
-                   ) -> Optional[Dict[str, float]]:
+    def _get_scores(self, status: Status,
+                    scores: Optional[Union[Dict[str, TunableValue], Dict[str, float]]]
+                    ) -> Optional[Dict[str, float]]:
         """
         Extract a scalar benchmark score from the dataframe.
         Change the sign if we are maximizing.
@@ -307,7 +307,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         ----------
         status : Status
             Final status of the experiment (e.g., SUCCEEDED or FAILED).
-        score : Optional[Dict[str, TunableValue]]
+        scores : Optional[Dict[str, TunableValue]]
             A dict with the final benchmark results.
             None if the experiment was not successful.
 
@@ -320,16 +320,16 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             return None
 
         if not status.is_succeeded():
-            assert score is None
+            assert scores is None
             return {
                 opt_target: float("inf")
                 for opt_target in self._opt_targets.keys()
             }
 
-        assert score is not None
+        assert scores is not None
         target_metrics: Dict[str, float] = {}
         for (opt_target, opt_dir) in self._opt_targets.items():
-            val = score[opt_target]
+            val = scores[opt_target]
             assert val is not None
             target_metrics[opt_target] = float(val) * opt_dir
 

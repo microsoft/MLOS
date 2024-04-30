@@ -60,7 +60,7 @@ class TrackBestOptimizer(Optimizer, metaclass=ABCMeta):
     def get_best_observation(self) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
         if self._best_score is None:
             return (None, None)
-        score = self._get_score(Status.SUCCEEDED, self._best_score)
+        score = self._get_scores(Status.SUCCEEDED, self._best_score)
         assert score is not None
         assert self._best_config is not None
         return (score, self._best_config)
