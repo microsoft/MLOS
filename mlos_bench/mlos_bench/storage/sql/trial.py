@@ -8,7 +8,7 @@ Saving and updating benchmark data using SQLAlchemy backend.
 
 import logging
 from datetime import datetime
-from typing import List, Optional, Tuple, Dict, Any
+from typing import List, Literal, Optional, Tuple, Dict, Any
 
 from sqlalchemy import Engine, Connection
 from sqlalchemy.exc import IntegrityError
@@ -34,7 +34,7 @@ class Trial(Storage.Trial):
                  experiment_id: str,
                  trial_id: int,
                  config_id: int,
-                 opt_targets: Dict[str, str],
+                 opt_targets: Dict[str, Literal['min', 'max']],
                  config: Optional[Dict[str, Any]] = None):
         super().__init__(
             tunables=tunables,

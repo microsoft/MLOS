@@ -79,7 +79,7 @@ class Storage(metaclass=ABCMeta):
                    root_env_config: str,
                    description: str,
                    tunables: TunableGroups,
-                   opt_targets: Dict[str, str]) -> 'Storage.Experiment':
+                   opt_targets: Dict[str, Literal['min', 'max']]) -> 'Storage.Experiment':
         """
         Create a new experiment in the storage.
 
@@ -122,7 +122,7 @@ class Storage(metaclass=ABCMeta):
                      trial_id: int,
                      root_env_config: str,
                      description: str,
-                     opt_targets: Dict[str, str]):
+                     opt_targets: Dict[str, Literal['min', 'max']]):
             self._tunables = tunables.copy()
             self._trial_id = trial_id
             self._experiment_id = experiment_id
@@ -318,7 +318,7 @@ class Storage(metaclass=ABCMeta):
 
         def __init__(self, *,
                      tunables: TunableGroups, experiment_id: str, trial_id: int,
-                     tunable_config_id: int, opt_targets: Dict[str, str],
+                     tunable_config_id: int, opt_targets: Dict[str, Literal['min', 'max']],
                      config: Optional[Dict[str, Any]] = None):
             self._tunables = tunables
             self._experiment_id = experiment_id

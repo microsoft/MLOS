@@ -9,7 +9,7 @@ Saving and restoring the benchmark data using SQLAlchemy.
 import logging
 import hashlib
 from datetime import datetime
-from typing import Optional, Tuple, List, Dict, Iterator, Any
+from typing import Optional, Tuple, List, Literal, Dict, Iterator, Any
 
 from pytz import UTC
 
@@ -38,7 +38,7 @@ class Experiment(Storage.Experiment):
                  trial_id: int,
                  root_env_config: str,
                  description: str,
-                 opt_targets: Dict[str, str]):
+                 opt_targets: Dict[str, Literal['min', 'max']]):
         super().__init__(
             tunables=tunables,
             experiment_id=experiment_id,

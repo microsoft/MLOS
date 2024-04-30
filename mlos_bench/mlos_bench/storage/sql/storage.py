@@ -7,7 +7,7 @@ Saving and restoring the benchmark data in SQL database.
 """
 
 import logging
-from typing import Dict, Optional
+from typing import Dict, Literal, Optional
 
 from sqlalchemy import URL, create_engine
 
@@ -62,7 +62,7 @@ class SqlStorage(Storage):
                    root_env_config: str,
                    description: str,
                    tunables: TunableGroups,
-                   opt_targets: Dict[str, str]) -> Storage.Experiment:
+                   opt_targets: Dict[str, Literal['min', 'max']]) -> Storage.Experiment:
         return Experiment(
             engine=self._engine,
             schema=self._schema,

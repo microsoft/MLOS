@@ -79,10 +79,14 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._max_iter = int(self._config.pop('max_suggestions', 100))
 
         opt_targets: Dict[str, str] = self._config.pop('optimization_targets', {'score': 'min'})
-        self._opt_targets: Dict[str, Literal[1, -1]] = {
-            opt_target: {"min": 1, "max": -1}[opt_dir]
-            for (opt_target, opt_dir) in opt_targets.items()
-        }
+        self._opt_targets: Dict[str, Literal[1, -1]]
+        for (opt_target, opt_dir) in opt_targets.items():
+            if opt_dir == "min":
+                self._opt_targets[opt_target] = 1
+            elif opt_dir == "max":
+                self._opt_targets[opt_target] = -1
+            else:
+                raise ValueError(f"Invalid optimization direction: {opt_dir} for {opt_target}")
 
     def _validate_json_config(self, config: dict) -> None:
         """
@@ -205,7 +209,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         A dictionary of {target: direction} of optimization targets.
         """
         return {
-            opt_target: {1: "min", -1: "max"}[opt_dir]
+            opt_target: "min" if opt_dir == 1 else "max"
             for (opt_target, opt_dir) in self._opt_targets.items()
         }
 
