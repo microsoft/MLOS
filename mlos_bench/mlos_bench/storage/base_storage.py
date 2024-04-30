@@ -206,7 +206,7 @@ class Storage(metaclass=ABCMeta):
             return self._tunables
 
         @property
-        def opt_targets(self) -> Dict[str, str]:
+        def opt_targets(self) -> Dict[str, Literal["min", "max"]]:
             """
             Get the Experiment's optimization targets and directions
             """
