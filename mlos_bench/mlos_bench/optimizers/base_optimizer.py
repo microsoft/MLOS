@@ -79,7 +79,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._max_iter = int(self._config.pop('max_suggestions', 100))
 
         opt_targets: Dict[str, str] = self._config.pop('optimization_targets', {'score': 'min'})
-        self._opt_targets: Dict[str, int] = {
+        self._opt_targets: Dict[str, Literal[1, -1]] = {
             opt_target: {"min": 1, "max": -1}[opt_dir]
             for (opt_target, opt_dir) in opt_targets.items()
         }
