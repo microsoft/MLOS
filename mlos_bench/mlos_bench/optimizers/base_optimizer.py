@@ -200,7 +200,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         return self.__class__.__name__
 
     @property
-    def targets(self) -> Dict[str, str]:
+    def targets(self) -> Dict[str, Literal['min', 'max']]:
         """
         A dictionary of {target: direction} of optimization targets.
         """
