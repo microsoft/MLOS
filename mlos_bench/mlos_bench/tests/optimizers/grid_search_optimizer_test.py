@@ -83,7 +83,7 @@ def grid_search_opt(grid_search_tunables: TunableGroups,
     max_iterations = len(grid_search_tunables_grid) * 2 - 3
     return GridSearchOptimizer(tunables=grid_search_tunables, config={
         "max_suggestions": max_iterations,
-        "optimization_direction": "max",
+        "optimization_targets": {"score": "max"},
     })
 
 
