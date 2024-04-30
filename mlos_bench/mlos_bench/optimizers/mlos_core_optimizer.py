@@ -49,7 +49,7 @@ class MlosCoreOptimizer(Optimizer):
         # TODO: Remove after implementing multi-target optimization in mlos_core
         if len(self._opt_targets) != 1:
             raise NotImplementedError(f"Multi-target optimization is not supported: {self}")
-        [(self._opt_target, self._opt_sign)] = list(self._opt_targets.items())
+        (self._opt_target, self._opt_sign) = list(self._opt_targets.items())[0]
 
         opt_type = getattr(OptimizerType, self._config.pop(
             'optimizer_type', DEFAULT_OPTIMIZER_TYPE.name))
