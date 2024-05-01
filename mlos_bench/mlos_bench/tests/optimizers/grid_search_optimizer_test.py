@@ -255,3 +255,18 @@ def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
     best_score, best_config = grid_search_opt.get_best_observation()
     assert best_score == best_suggestion_score
     assert best_config == best_suggestion
+
+
+def test_grid_search_register(grid_search_opt: GridSearchOptimizer,
+                              grid_search_tunables: TunableGroups) -> None:
+    """
+    Make sure that the `.register()` method adjusts the score signs correctly.
+    """
+    assert grid_search_opt.register(
+        grid_search_tunables, Status.SUCCEEDED, {
+            "score": 1.0,
+            "other_score": 2.0
+        }) == {
+            "score": -1.0,      # max
+            "other_score": 2.0  # min
+    }
