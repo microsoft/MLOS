@@ -69,7 +69,7 @@ class FlamlOptimizer(BaseOptimizer):
         self.evaluated_samples: Dict[ConfigSpace.Configuration, EvaluatedSample] = {}
         self._suggested_config: Optional[dict]
 
-    def _register(self, configurations: pd.DataFrame, scores: pd.Series,
+    def _register(self, configurations: pd.DataFrame, scores: pd.DataFrame,
                   context: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations and scores.
 
@@ -78,15 +78,17 @@ class FlamlOptimizer(BaseOptimizer):
         configurations : pd.DataFrame
             Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
 
-        scores : pd.Series
+        scores : pd.DataFrame
             Scores from running the configurations. The index is the same as the index of the configurations.
 
         context : None
             Not Yet Implemented.
         """
         if context is not None:
-            raise NotImplementedError()
-        for (_, config), score in zip(configurations.astype('O').iterrows(), scores):
+            warn(f"Not Implemented: Ignoring context {context}", UserWarning)
+        if set(scores.columns) != {'score'}:
+            raise ValueError(f"Expected a single column 'score', got {scores.columns}")
+        for (_, config), score in zip(configurations.astype('O').iterrows(), scores['score']):
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
                 self.optimizer_parameter_space, values=config.to_dict())
             if cs_config in self.evaluated_samples:
@@ -110,7 +112,7 @@ class FlamlOptimizer(BaseOptimizer):
             Pandas dataframe with a single row. Column names are the parameter names.
         """
         if context is not None:
-            raise NotImplementedError()
+            warn(f"Not Implemented: Ignoring context {context}", UserWarning)
         config: dict = self._get_next_config()
         return pd.DataFrame(config, index=[0])
 

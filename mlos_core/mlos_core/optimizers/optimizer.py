@@ -45,7 +45,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             raise ValueError("Given parameter space differs from the one given to space adapter")
 
         self._space_adapter: Optional[BaseSpaceAdapter] = space_adapter
-        self._observations: List[Tuple[pd.DataFrame, pd.Series, Optional[pd.DataFrame]]] = []
+        self._observations: List[Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]] = []
         self._has_context: Optional[bool] = None
         self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame]]] = []
 
@@ -57,7 +57,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         """Get the space adapter instance (if any)."""
         return self._space_adapter
 
-    def register(self, configurations: pd.DataFrame, scores: pd.Series,
+    def register(self, configurations: pd.DataFrame, scores: pd.DataFrame,
                  context: Optional[pd.DataFrame] = None) -> None:
         """Wrapper method, which employs the space adapter (if any), before registering the configurations and scores.
 
@@ -65,7 +65,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         ----------
         configurations : pd.DataFrame
             Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
-        scores : pd.Series
+        scores : pd.DataFrame
             Scores from running the configurations. The index is the same as the index of the configurations.
 
         context : pd.DataFrame
@@ -91,7 +91,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         return self._register(configurations, scores, context)
 
     @abstractmethod
-    def _register(self, configurations: pd.DataFrame, scores: pd.Series,
+    def _register(self, configurations: pd.DataFrame, scores: pd.DataFrame,
                   context: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations and scores.
 
@@ -99,7 +99,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         ----------
         configurations : pd.DataFrame
             Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
-        scores : pd.Series
+        scores : pd.DataFrame
             Scores from running the configurations. The index is the same as the index of the configurations.
 
         context : pd.DataFrame
@@ -172,13 +172,14 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
-    def get_observations(self) -> pd.DataFrame:
-        """Returns the observations as a dataframe.
+    def get_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]:
+        """
+        Returns the observations as a triplet of DataFrames (config, score, context).
 
         Returns
         -------
-        observations : pd.DataFrame
-            Dataframe of observations. The columns are parameter names and "score" for the score, each row is an observation.
+        observations : Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]
+            A triplet of (config, score, context) DataFrames of observations.
         """
         if len(self._observations) == 0:
             raise ValueError("No observations registered yet.")
@@ -188,25 +189,22 @@ class BaseOptimizer(metaclass=ABCMeta):
             contexts = pd.concat([context for _, _, context in self._observations if context is not None])
         except ValueError:
             contexts = None
-        configs["score"] = scores
-        if contexts is not None:
-            # configs = pd.concat([configs, contexts], axis=1)
-            # Not reachable for now
-            raise NotImplementedError()
-        return configs
+        return (configs, scores, contexts)
 
-    def get_best_observation(self) -> pd.DataFrame:
-        """Returns the best observation so far as a dataframe.
+    def get_best_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]:
+        """
+        Get the best observation so far as a triplet of DataFrames (config, score, context).
 
         Returns
         -------
-        best_observation : pd.DataFrame
-            Dataframe with a single row containing the best observation. The columns are parameter names and "score" for the score.
+        observations : Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]
+            A triplet of best (config, score, context) DataFrames of observations.
         """
         if len(self._observations) == 0:
             raise ValueError("No observations registered yet.")
-        observations = self.get_observations()
-        return observations.nsmallest(1, columns='score')
+        (configs, scores, contexts) = self.get_observations()
+        idx = scores.nsmallest(1, columns=['score'], keep="all").index
+        return (configs[idx], scores[idx], contexts[idx] if contexts else None)
 
     def cleanup(self) -> None:
         """

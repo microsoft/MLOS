@@ -11,6 +11,7 @@ from logging import warning
 from pathlib import Path
 from typing import Dict, List, Optional, Union, TYPE_CHECKING
 from tempfile import TemporaryDirectory
+from warnings import warn
 
 import ConfigSpace
 import numpy.typing as npt
@@ -224,7 +225,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # -- this planned to be fixed in some future release: https://github.com/automl/SMAC3/issues/946
         raise RuntimeError('This function should never be called.')
 
-    def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: Optional[pd.DataFrame] = None) -> None:
+    def _register(self, configurations: pd.DataFrame,
+                  scores: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations and scores.
 
         Parameters
@@ -232,7 +234,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         configurations : pd.DataFrame
             Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
 
-        scores : pd.Series
+        scores : pd.DataFrame
             Scores from running the configurations. The index is the same as the index of the configurations.
 
         context : pd.DataFrame
@@ -241,10 +243,12 @@ class SmacOptimizer(BaseBayesianOptimizer):
         from smac.runhistory import StatusType, TrialInfo, TrialValue  # pylint: disable=import-outside-toplevel
 
         if context is not None:
-            raise NotImplementedError()
+            warn(f"Not Implemented: Ignoring context {context}", UserWarning)
+        if set(scores.columns) != {'score'}:
+            raise ValueError(f"Expected a single column 'score', got {scores.columns}")
 
         # Register each trial (one-by-one)
-        for config, score in zip(self._to_configspace_configs(configurations), scores.tolist()):
+        for config, score in zip(self._to_configspace_configs(configurations), scores['score']):
             # Retrieve previously generated TrialInfo (returned by .ask()) or create new TrialInfo instance
             info: TrialInfo = self.trial_info_map.get(config, TrialInfo(config=config, seed=self.base_optimizer.scenario.seed))
             value: TrialValue = TrialValue(cost=score, time=0.0, status=StatusType.SUCCESS)
@@ -270,7 +274,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             from smac.runhistory import TrialInfo  # pylint: disable=import-outside-toplevel
 
         if context is not None:
-            raise NotImplementedError()
+            warn(f"Not Implemented: Ignoring context {context}", UserWarning)
 
         trial: TrialInfo = self.base_optimizer.ask()
         trial.config.is_valid_configuration()

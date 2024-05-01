@@ -80,7 +80,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
     optimizer = optimizer_class(parameter_space=configuration_space, **kwargs)
 
     with pytest.raises(ValueError, match="No observations"):
-        optimizer.get_best_observation()
+        optimizer.get_best_observations()
 
     with pytest.raises(ValueError, match="No observations"):
         optimizer.get_observations()
@@ -97,7 +97,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
         assert isinstance(observation, pd.Series)
         optimizer.register(suggestion, observation)
 
-    best_observation = optimizer.get_best_observation()
+    best_observation = optimizer.get_best_observations()
     assert isinstance(best_observation, pd.DataFrame)
     assert (best_observation.columns == ['x', 'y', 'z', 'score']).all()
     assert best_observation['score'].iloc[0] < -5
@@ -261,8 +261,8 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
         llamatune_optimizer.register(suggestion, observation)
 
     # Retrieve best observations
-    best_observation = optimizer.get_best_observation()
-    llamatune_best_observation = llamatune_optimizer.get_best_observation()
+    best_observation = optimizer.get_best_observations()
+    llamatune_best_observation = llamatune_optimizer.get_best_observations()
 
     for best_obv in (best_observation, llamatune_best_observation):
         assert isinstance(best_obv, pd.DataFrame)
