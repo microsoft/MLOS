@@ -265,8 +265,13 @@ def test_grid_search_register(grid_search_opt: GridSearchOptimizer,
     assert grid_search_opt.register(
         grid_search_tunables, Status.SUCCEEDED, {
             "score": 1.0,
-            "other_score": 2.0
+            "other_score": 2.0,
         }) == {
-            "score": -1.0,      # max
-            "other_score": 2.0  # min
+            "score": -1.0,       # max
+            "other_score": 2.0,  # min
+    }
+
+    assert grid_search_opt.register(grid_search_tunables, Status.FAILED) == {
+        "score": float("inf"),
+        "other_score": float("inf"),
     }
