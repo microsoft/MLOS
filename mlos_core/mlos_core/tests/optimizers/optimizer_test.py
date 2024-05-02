@@ -73,9 +73,9 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
         # To avoid having to train more than 25 model iterations, we set a lower number of max iterations.
         kwargs['max_trials'] = max_iterations * 2
 
-    def objective(x: pd.Series) -> npt.ArrayLike:   # pylint: disable=invalid-name
-        ret: npt.ArrayLike = (6 * x - 2)**2 * np.sin(12 * x - 4)
-        return ret
+    def objective(x: pd.Series) -> pd.DataFrame:  # pylint: disable=invalid-name
+        return pd.DataFrame({"score": (6 * x - 2)**2 * np.sin(12 * x - 4)})
+
     # Emukit doesn't allow specifying a random state, so we set the global seed.
     np.random.seed(SEED)
     optimizer = optimizer_class(parameter_space=configuration_space, **kwargs)
@@ -89,13 +89,13 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
     for _ in range(max_iterations):
         suggestion = optimizer.suggest()
         assert isinstance(suggestion, pd.DataFrame)
-        assert (suggestion.columns == ['x', 'y', 'z']).all()
+        assert set(suggestion.columns) == {'x', 'y', 'z'}
         # check that suggestion is in the space
         configuration = CS.Configuration(optimizer.parameter_space, suggestion.iloc[0].to_dict())
         # Raises an error if outside of configuration space
         configuration.is_valid_configuration()
         observation = objective(suggestion['x'])
-        assert isinstance(observation, pd.Series)
+        assert isinstance(observation, pd.DataFrame)
         optimizer.register(suggestion, observation)
 
     (best_config, best_score, best_context) = optimizer.get_best_observations()
@@ -323,10 +323,9 @@ def test_mixed_numerics_type_input_space_types(optimizer_type: Optional[Optimize
     if kwargs is None:
         kwargs = {}
 
-    def objective(point: pd.DataFrame) -> pd.Series:
+    def objective(point: pd.DataFrame) -> pd.DataFrame:
         # mix of hyperparameters, optimal is to select the highest possible
-        ret: pd.Series = point["x"] + point["y"]
-        return ret
+        return pd.DataFrame({"score": point["x"] + point["y"]})
 
     input_space = CS.ConfigurationSpace(seed=SEED)
     # add a mix of numeric datatypes
@@ -346,7 +345,7 @@ def test_mixed_numerics_type_input_space_types(optimizer_type: Optional[Optimize
         )
 
     with pytest.raises(ValueError, match="No observations"):
-        optimizer.get_best_observation()
+        optimizer.get_best_observations()
 
     with pytest.raises(ValueError, match="No observations"):
         optimizer.get_observations()
@@ -364,11 +363,15 @@ def test_mixed_numerics_type_input_space_types(optimizer_type: Optional[Optimize
         test_configuration.is_valid_configuration()
         # Test registering the suggested configuration with a score.
         observation = objective(suggestion)
-        assert isinstance(observation, pd.Series)
+        assert isinstance(observation, pd.DataFrame)
         optimizer.register(suggestion, observation)
 
-    best_observation = optimizer.get_best_observation()
-    assert isinstance(best_observation, pd.DataFrame)
+    (best_config, best_score, best_context) = optimizer.get_best_observations()
+    assert isinstance(best_config, pd.DataFrame)
+    assert isinstance(best_score, pd.DataFrame)
+    assert isinstance(best_context, (pd.DataFrame, NoneType))
 
-    all_observations = optimizer.get_observations()
-    assert isinstance(all_observations, pd.DataFrame)
+    (all_configs, all_scores, all_contexts) = optimizer.get_observations()
+    assert isinstance(all_configs, pd.DataFrame)
+    assert isinstance(all_scores, pd.DataFrame)
+    assert isinstance(all_contexts, (pd.DataFrame, NoneType))
