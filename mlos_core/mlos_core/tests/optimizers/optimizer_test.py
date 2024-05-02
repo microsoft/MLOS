@@ -7,6 +7,7 @@ Tests for Bayesian Optimizers.
 """
 
 from copy import deepcopy
+from types import NoneType
 from typing import List, Optional, Type
 
 import logging
@@ -97,22 +98,29 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
         assert isinstance(observation, pd.Series)
         optimizer.register(suggestion, observation)
 
-    best_observation = optimizer.get_best_observations()
-    assert isinstance(best_observation, pd.DataFrame)
-    assert (best_observation.columns == ['x', 'y', 'z', 'score']).all()
-    assert best_observation['score'].iloc[0] < -5
+    (best_config, best_score, best_context) = optimizer.get_best_observations()
+    assert isinstance(best_config, pd.DataFrame)
+    assert isinstance(best_score, pd.DataFrame)
+    assert isinstance(best_context, (pd.DataFrame, NoneType))
+    assert set(best_config.columns) == {'x', 'y', 'z'}
+    assert set(best_score.columns) == {'score'}
+    assert best_score.score[0] < -5
 
-    all_observations = optimizer.get_observations()
-    assert isinstance(all_observations, pd.DataFrame)
-    assert all_observations.shape == (20, 4)
-    assert (all_observations.columns == ['x', 'y', 'z', 'score']).all()
+    (all_configs, all_scores, all_contexts) = optimizer.get_observations()
+    assert isinstance(all_configs, pd.DataFrame)
+    assert isinstance(all_scores, pd.DataFrame)
+    assert isinstance(all_contexts, (pd.DataFrame, NoneType))
+    assert set(all_configs.columns) == {'x', 'y', 'z'}
+    assert set(all_scores.columns) == {'score'}
+    assert all_configs.shape == (20, 3)
+    assert all_scores.shape == (20, 1)
 
     # It would be better to put this into bayesian_optimizer_test but then we'd have to refit the model
     if isinstance(optimizer, BaseBayesianOptimizer):
-        pred_best = optimizer.surrogate_predict(best_observation[['x', 'y', 'z']])
+        pred_best = optimizer.surrogate_predict(best_config)
         assert pred_best.shape == (1,)
 
-        pred_all = optimizer.surrogate_predict(all_observations[['x', 'y', 'z']])
+        pred_all = optimizer.surrogate_predict(all_configs)
         assert pred_all.shape == (20,)
 
 
