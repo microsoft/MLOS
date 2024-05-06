@@ -104,7 +104,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
     assert isinstance(best_context, (pd.DataFrame, NoneType))
     assert set(best_config.columns) == {'x', 'y', 'z'}
     assert set(best_score.columns) == {'score'}
-    assert best_score.score[0] < -5
+    assert best_score.score.iloc[0] < -5
 
     (all_configs, all_scores, all_contexts) = optimizer.get_observations()
     assert isinstance(all_configs, pd.DataFrame)
@@ -281,8 +281,8 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     (llamatune_best_config, llamatune_best_score, _context) = llamatune_best_observation
 
     # LlamaTune's optimizer score should better (i.e., lower) than plain optimizer's one, or close to that
-    assert best_score.score[0] > llamatune_best_score.score[0] or \
-        best_score.score[0] + 1e-3 > llamatune_best_score[0]
+    assert best_score.score.iloc[0] > llamatune_best_score.score.iloc[0] or \
+        best_score.score.iloc[0] + 1e-3 > llamatune_best_score.score.iloc[0]
 
     # Retrieve and check all observations
     for (all_configs, all_scores, all_contexts) in (

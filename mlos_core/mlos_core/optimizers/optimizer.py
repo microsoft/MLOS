@@ -183,10 +183,12 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         if len(self._observations) == 0:
             raise ValueError("No observations registered yet.")
-        configs = pd.concat([config for config, _, _ in self._observations])
-        scores = pd.concat([score for _, score, _ in self._observations])
+        configs = pd.concat([config for config, _, _ in self._observations]).reset_index(drop=True)
+        scores = pd.concat([score for _, score, _ in self._observations]).reset_index(drop=True)
         try:
-            contexts = pd.concat([context for _, _, context in self._observations if context is not None])
+            contexts = pd.concat(
+                [context for _, _, context in self._observations if context is not None]
+            ).reset_index(drop=True)
         except ValueError:
             contexts = None
         return (configs, scores, contexts)
@@ -204,7 +206,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             raise ValueError("No observations registered yet.")
         (configs, scores, contexts) = self.get_observations()
         idx = scores.nsmallest(1, columns=['score'], keep="all").index
-        return (configs[idx], scores[idx], contexts[idx] if contexts else None)
+        return (configs.loc[idx], scores.loc[idx], contexts.loc[idx] if contexts else None)
 
     def cleanup(self) -> None:
         """
