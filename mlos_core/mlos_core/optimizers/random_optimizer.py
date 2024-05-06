@@ -7,6 +7,7 @@ Contains the RandomOptimizer class.
 """
 
 from typing import Optional
+from warnings import warn
 
 import pandas as pd
 
@@ -40,6 +41,8 @@ class RandomOptimizer(BaseOptimizer):
         context : None
             Not Yet Implemented.
         """
+        if context is not None:
+            warn(f"Not Implemented: Ignoring context {context}", UserWarning)
         # should we pop them from self.pending_observations?
 
     def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
@@ -57,6 +60,8 @@ class RandomOptimizer(BaseOptimizer):
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
         """
+        if context is not None:
+            warn(f"Not Implemented: Ignoring context {context}", UserWarning)
         return pd.DataFrame(dict(self.optimizer_parameter_space.sample_configuration()), index=[0])
 
     def register_pending(self, configurations: pd.DataFrame,

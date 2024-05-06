@@ -291,9 +291,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         from smac.utils.configspace import convert_configurations_to_array  # pylint: disable=import-outside-toplevel
 
         if context is not None:
-            raise NotImplementedError()
+            warn(f"Not Implemented: Ignoring context {context}", UserWarning)
         if self._space_adapter and not isinstance(self._space_adapter, IdentityAdapter):
-            raise NotImplementedError()
+            raise NotImplementedError("Space adapter not supported for surrogate_predict.")
 
         # pylint: disable=protected-access
         if len(self._observations) <= self.base_optimizer._initial_design._n_configs:

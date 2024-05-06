@@ -17,11 +17,13 @@ from mlos_core.optimizers import BaseOptimizer, OptimizerType
 from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
 
 
+@pytest.mark.filterwarnings("error:Not Implemented")
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
     *[(member.value, {}) for member in OptimizerType],
 ])
-def test_context_not_implemented_error(configuration_space: CS.ConfigurationSpace,
-                                       optimizer_class: Type[BaseOptimizer], kwargs: Optional[dict]) -> None:
+def test_context_not_implemented_warning(configuration_space: CS.ConfigurationSpace,
+                                         optimizer_class: Type[BaseOptimizer],
+                                         kwargs: Optional[dict]) -> None:
     """
     Make sure we raise exceptions for the functionality that has not been implemented yet.
     """
@@ -31,13 +33,13 @@ def test_context_not_implemented_error(configuration_space: CS.ConfigurationSpac
     suggestion = optimizer.suggest()
     scores = pd.DataFrame({'score': [1]})
     context = pd.DataFrame([["something"]])
-    # test context not implemented errors
-    with pytest.raises(NotImplementedError):
+
+    with pytest.raises(UserWarning):
         optimizer.register(suggestion, scores, context=context)
 
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(UserWarning):
         optimizer.suggest(context=context)
 
     if isinstance(optimizer, BaseBayesianOptimizer):
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(UserWarning):
             optimizer.surrogate_predict(suggestion, context=context)
