@@ -30,13 +30,14 @@ def test_context_not_implemented_error(configuration_space: CS.ConfigurationSpac
     optimizer = optimizer_class(parameter_space=configuration_space, **kwargs)
     suggestion = optimizer.suggest()
     scores = pd.DataFrame({'score': [1]})
+    context = pd.DataFrame([["something"]])
     # test context not implemented errors
     with pytest.raises(NotImplementedError):
-        optimizer.register(suggestion, scores['score'], context=pd.DataFrame([["something"]]))
+        optimizer.register(suggestion, scores, context=context)
 
     with pytest.raises(NotImplementedError):
-        optimizer.suggest(context=pd.DataFrame([["something"]]))
+        optimizer.suggest(context=context)
 
     if isinstance(optimizer, BaseBayesianOptimizer):
         with pytest.raises(NotImplementedError):
-            optimizer.surrogate_predict(suggestion, context=pd.DataFrame([["something"]]))
+            optimizer.surrogate_predict(suggestion, context=context)

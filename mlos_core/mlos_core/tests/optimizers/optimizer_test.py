@@ -15,7 +15,6 @@ import pytest
 
 import pandas as pd
 import numpy as np
-import numpy.typing as npt
 import ConfigSpace as CS
 
 from mlos_core.optimizers import (
@@ -65,6 +64,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
     """
     Toy problem to test the optimizers.
     """
+    # pylint: disable=too-many-locals
     max_iterations = 20
     if kwargs is None:
         kwargs = {}
@@ -73,7 +73,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
         # To avoid having to train more than 25 model iterations, we set a lower number of max iterations.
         kwargs['max_trials'] = max_iterations * 2
 
-    def objective(x: pd.Series) -> pd.DataFrame:  # pylint: disable=invalid-name
+    def objective(x: pd.Series) -> pd.DataFrame:
         return pd.DataFrame({"score": (6 * x - 2)**2 * np.sin(12 * x - 4)})
 
     # Emukit doesn't allow specifying a random state, so we set the global seed.
@@ -187,17 +187,15 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     """
     Toy problem to test the optimizers with llamatune space adapter.
     """
-    # pylint: disable=too-complex
-    # pylint: disable=too-many-statements
-    # pylint: disable=too-many-locals
+    # pylint: disable=too-complex,disable=too-many-statements,disable=too-many-locals
     num_iters = 50
     if kwargs is None:
         kwargs = {}
 
-    def objective(point: pd.DataFrame) -> pd.Series:
+    def objective(point: pd.DataFrame) -> pd.DataFrame:
         # Best value can be reached by tuning an 1-dimensional search space
-        ret: pd.Series = np.sin(point['x'] * point['y'])
-        assert ret.hasnans is False
+        ret = pd.DataFrame({"score": np.sin(point.x * point.y)})
+        assert ret.score.hasnans is False
         return ret
 
     input_space = CS.ConfigurationSpace(seed=1234)
@@ -272,24 +270,35 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     best_observation = optimizer.get_best_observations()
     llamatune_best_observation = llamatune_optimizer.get_best_observations()
 
-    for best_obv in (best_observation, llamatune_best_observation):
-        assert isinstance(best_obv, pd.DataFrame)
-        assert (best_obv.columns == ['x', 'y', 'score']).all()
+    for (best_config, best_score, best_context) in (best_observation, llamatune_best_observation):
+        assert isinstance(best_config, pd.DataFrame)
+        assert isinstance(best_score, pd.DataFrame)
+        assert isinstance(best_context, (pd.DataFrame, NoneType))
+        assert set(best_config.columns) == {'x', 'y'}
+        assert set(best_score.columns) == {'score'}
+
+    (best_config, best_score, _context) = best_observation
+    (llamatune_best_config, llamatune_best_score, _context) = llamatune_best_observation
 
     # LlamaTune's optimizer score should better (i.e., lower) than plain optimizer's one, or close to that
-    assert best_observation['score'].iloc[0] > llamatune_best_observation['score'].iloc[0] or \
-        best_observation['score'].iloc[0] + 1e-3 > llamatune_best_observation['score'].iloc[0]
+    assert best_score.score[0] > llamatune_best_score.score[0] or \
+        best_score.score[0] + 1e-3 > llamatune_best_score[0]
 
     # Retrieve and check all observations
-    for all_obvs in (optimizer.get_observations(), llamatune_optimizer.get_observations()):
-        assert isinstance(all_obvs, pd.DataFrame)
-        assert all_obvs.shape == (num_iters, 3)
-        assert (all_obvs.columns == ['x', 'y', 'score']).all()
+    for (all_configs, all_scores, all_contexts) in (
+            optimizer.get_observations(), llamatune_optimizer.get_observations()):
+        assert isinstance(all_configs, pd.DataFrame)
+        assert isinstance(all_scores, pd.DataFrame)
+        assert isinstance(all_contexts, (pd.DataFrame, NoneType))
+        assert set(all_configs.columns) == {'x', 'y'}
+        assert set(all_scores.columns) == {'score'}
+        assert len(all_configs) == num_iters
+        assert len(all_scores) == num_iters
 
     # .surrogate_predict method not currently implemented if space adapter is employed
     if isinstance(llamatune_optimizer, BaseBayesianOptimizer):
         with pytest.raises(NotImplementedError):
-            llamatune_optimizer.surrogate_predict(llamatune_best_observation[['x', 'y']])
+            llamatune_optimizer.surrogate_predict(llamatune_best_config)
 
 
 # Dynamically determine all of the optimizers we have implemented.
