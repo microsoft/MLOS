@@ -114,7 +114,7 @@ class MlosCoreOptimizer(Optimizer):
 
         # Pass opt_targets columns as scores, and the rest as context.
         opt_context = set(df_scores.columns).difference(opt_targets)
-        self._opt.register(df_configs, df_scores[opt_targets],
+        self._opt.register(df_configs, df_scores[opt_targets].astype(float),
                            df_scores[list(opt_context)] if opt_context else None)
 
         if _LOG.isEnabledFor(logging.DEBUG):
