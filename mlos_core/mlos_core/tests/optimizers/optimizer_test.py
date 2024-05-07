@@ -7,7 +7,6 @@ Tests for Bayesian Optimizers.
 """
 
 from copy import deepcopy
-from types import NoneType
 from typing import List, Optional, Type
 
 import logging
@@ -101,15 +100,17 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
     (best_config, best_score, best_context) = optimizer.get_best_observations()
     assert isinstance(best_config, pd.DataFrame)
     assert isinstance(best_score, pd.DataFrame)
-    assert isinstance(best_context, (pd.DataFrame, NoneType))
+    assert best_context is None
     assert set(best_config.columns) == {'x', 'y', 'z'}
     assert set(best_score.columns) == {'score'}
+    assert best_config.shape == (1, 3)
+    assert best_score.shape == (1, 1)
     assert best_score.score.iloc[0] < -5
 
     (all_configs, all_scores, all_contexts) = optimizer.get_observations()
     assert isinstance(all_configs, pd.DataFrame)
     assert isinstance(all_scores, pd.DataFrame)
-    assert isinstance(all_contexts, (pd.DataFrame, NoneType))
+    assert all_contexts is None
     assert set(all_configs.columns) == {'x', 'y', 'z'}
     assert set(all_scores.columns) == {'score'}
     assert all_configs.shape == (20, 3)
@@ -273,7 +274,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     for (best_config, best_score, best_context) in (best_observation, llamatune_best_observation):
         assert isinstance(best_config, pd.DataFrame)
         assert isinstance(best_score, pd.DataFrame)
-        assert isinstance(best_context, (pd.DataFrame, NoneType))
+        assert best_context is None
         assert set(best_config.columns) == {'x', 'y'}
         assert set(best_score.columns) == {'score'}
 
@@ -289,7 +290,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
             optimizer.get_observations(), llamatune_optimizer.get_observations()):
         assert isinstance(all_configs, pd.DataFrame)
         assert isinstance(all_scores, pd.DataFrame)
-        assert isinstance(all_contexts, (pd.DataFrame, NoneType))
+        assert all_contexts is None
         assert set(all_configs.columns) == {'x', 'y'}
         assert set(all_scores.columns) == {'score'}
         assert len(all_configs) == num_iters
@@ -378,9 +379,9 @@ def test_mixed_numerics_type_input_space_types(optimizer_type: Optional[Optimize
     (best_config, best_score, best_context) = optimizer.get_best_observations()
     assert isinstance(best_config, pd.DataFrame)
     assert isinstance(best_score, pd.DataFrame)
-    assert isinstance(best_context, (pd.DataFrame, NoneType))
+    assert best_context is None
 
     (all_configs, all_scores, all_contexts) = optimizer.get_observations()
     assert isinstance(all_configs, pd.DataFrame)
     assert isinstance(all_scores, pd.DataFrame)
-    assert isinstance(all_contexts, (pd.DataFrame, NoneType))
+    assert all_contexts is None

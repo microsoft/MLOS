@@ -201,7 +201,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         if len(self._observations) == 0:
             raise ValueError("No observations registered yet.")
         (configs, scores, contexts) = self.get_observations()
-        idx = scores.nsmallest(1, columns=['score'], keep="all").index
+        idx = scores.nsmallest(1, columns=['score'], keep="first").index
         return (configs.loc[idx], scores.loc[idx],
                 None if contexts is None else contexts.loc[idx])
 
