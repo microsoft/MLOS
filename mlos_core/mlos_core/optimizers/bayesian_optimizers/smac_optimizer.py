@@ -243,7 +243,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         from smac.runhistory import StatusType, TrialInfo, TrialValue  # pylint: disable=import-outside-toplevel
 
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {context}", UserWarning)
+            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         if set(scores.columns) != {'score'}:
             raise ValueError(f"Expected a single column 'score', got {scores.columns}")
 
@@ -274,7 +274,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             from smac.runhistory import TrialInfo  # pylint: disable=import-outside-toplevel
 
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {context}", UserWarning)
+            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
 
         trial: TrialInfo = self.base_optimizer.ask()
         trial.config.is_valid_configuration()
@@ -291,7 +291,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         from smac.utils.configspace import convert_configurations_to_array  # pylint: disable=import-outside-toplevel
 
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {context}", UserWarning)
+            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         if self._space_adapter and not isinstance(self._space_adapter, IdentityAdapter):
             raise NotImplementedError("Space adapter not supported for surrogate_predict.")
 

@@ -85,7 +85,7 @@ class FlamlOptimizer(BaseOptimizer):
             Not Yet Implemented.
         """
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {context}", UserWarning)
+            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         if set(scores.columns) != {'score'}:
             raise ValueError(f"Expected a single column 'score', got {scores.columns}")
         for (_, config), score in zip(configurations.astype('O').iterrows(), scores['score']):
@@ -112,7 +112,7 @@ class FlamlOptimizer(BaseOptimizer):
             Pandas dataframe with a single row. Column names are the parameter names.
         """
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {context}", UserWarning)
+            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         config: dict = self._get_next_config()
         return pd.DataFrame(config, index=[0])
 
