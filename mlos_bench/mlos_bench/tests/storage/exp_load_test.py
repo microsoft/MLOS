@@ -93,7 +93,7 @@ def test_exp_trial_success(exp_storage: Storage.Experiment,
     Start a trial, finish it successfully, and and check that it is NOT pending.
     """
     trial = exp_storage.new_trial(tunable_groups)
-    trial.update(Status.SUCCEEDED, datetime.now(zone_info), 99.9)
+    trial.update(Status.SUCCEEDED, datetime.now(zone_info), {"score": 99.9})
     trials = list(exp_storage.pending_trials(datetime.now(zone_info), running=True))
     assert not trials
 
@@ -130,7 +130,7 @@ def test_exp_trial_update_twice(exp_storage: Storage.Experiment,
     trial = exp_storage.new_trial(tunable_groups)
     trial.update(Status.FAILED, datetime.now(zone_info))
     with pytest.raises(RuntimeError):
-        trial.update(Status.SUCCEEDED, datetime.now(UTC), 99.9)
+        trial.update(Status.SUCCEEDED, datetime.now(UTC), {"score": 99.9})
 
 
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
@@ -148,7 +148,7 @@ def test_exp_trial_pending_3(exp_storage: Storage.Experiment,
     trial_pend = exp_storage.new_trial(tunable_groups)
 
     trial_fail.update(Status.FAILED, datetime.now(zone_info))
-    trial_succ.update(Status.SUCCEEDED, datetime.now(zone_info), score)
+    trial_succ.update(Status.SUCCEEDED, datetime.now(zone_info), {"score": score})
 
     (pending,) = list(exp_storage.pending_trials(datetime.now(UTC), running=True))
     assert pending.trial_id == trial_pend.trial_id

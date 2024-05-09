@@ -61,7 +61,8 @@ def _test_opt_update_min(opt: Optimizer,
     """
     opt.bulk_register(configs, scores, status)
     (score, tunables) = opt.get_best_observation()
-    assert score == pytest.approx(66.66, 0.01)
+    assert score is not None
+    assert score["score"] == pytest.approx(66.66, 0.01)
     assert tunables is not None
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B4ms",
@@ -80,7 +81,8 @@ def _test_opt_update_max(opt: Optimizer,
     """
     opt.bulk_register(configs, scores, status)
     (score, tunables) = opt.get_best_observation()
-    assert score == pytest.approx(99.99, 0.01)
+    assert score is not None
+    assert score["score"] == pytest.approx(99.99, 0.01)
     assert tunables is not None
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B2s",

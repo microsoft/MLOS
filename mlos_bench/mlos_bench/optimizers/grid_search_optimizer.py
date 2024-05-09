@@ -8,7 +8,7 @@ Grid search optimizer for mlos_bench.
 
 import logging
 
-from typing import Dict, Iterable, Set, Optional, Sequence, Tuple, Union
+from typing import Dict, Iterable, Set, Optional, Sequence, Tuple
 
 import numpy as np
 import ConfigSpace
@@ -35,9 +35,6 @@ class GridSearchOptimizer(TrackBestOptimizer):
                  global_config: Optional[dict] = None,
                  service: Optional[Service] = None):
         super().__init__(tunables, config, global_config, service)
-
-        self._best_config: Optional[TunableGroups] = None
-        self._best_score: Optional[float] = None
 
         # Track the grid as a set of tuples of tunable values and reconstruct the
         # dicts as necessary.
@@ -120,7 +117,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
             self.register(tunables, trial_status, score)
         if _LOG.isEnabledFor(logging.DEBUG):
             (best_score, _) = self.get_best_observation()
-            _LOG.debug("Update end: %s = %s", self.target, best_score)
+            _LOG.debug("Update END: %s = %s", self, best_score)
         return True
 
     def suggest(self) -> TunableGroups:
@@ -157,7 +154,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
         return tunables
 
     def register(self, tunables: TunableGroups, status: Status,
-                 score: Optional[Union[float, dict]] = None) -> Optional[float]:
+                 score: Optional[Dict[str, TunableValue]] = None) -> Optional[Dict[str, float]]:
         registered_score = super().register(tunables, status, score)
         try:
             config = dict(ConfigSpace.Configuration(self.config_space, values=tunables.get_param_values()))
