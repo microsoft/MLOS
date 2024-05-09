@@ -7,7 +7,7 @@ Basic initializer module for the mlos_core optimizers.
 """
 
 from enum import Enum
-from typing import Optional, TypeVar
+from typing import List, Optional, TypeVar
 
 import ConfigSpace
 
@@ -62,6 +62,7 @@ class OptimizerFactory:
     @staticmethod
     def create(*,
                parameter_space: ConfigSpace.ConfigurationSpace,
+               optimization_targets: List[str],
                optimizer_type: OptimizerType = DEFAULT_OPTIMIZER_TYPE,
                optimizer_kwargs: Optional[dict] = None,
                space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
@@ -74,6 +75,8 @@ class OptimizerFactory:
         ----------
         parameter_space : ConfigSpace.ConfigurationSpace
             Input configuration space.
+        optimization_targets : List[str]
+            The names of the optimization targets to minimize.
         optimizer_type : OptimizerType
             Optimizer class as defined by Enum.
         optimizer_kwargs : Optional[dict]
@@ -102,6 +105,7 @@ class OptimizerFactory:
 
         optimizer: ConcreteOptimizer = optimizer_type.value(
             parameter_space=parameter_space,
+            optimization_targets=optimization_targets,
             space_adapter=space_adapter,
             **optimizer_kwargs
         )

@@ -74,6 +74,7 @@ class MlosCoreOptimizer(Optimizer):
 
         self._opt: BaseOptimizer = OptimizerFactory.create(
             parameter_space=self.config_space,
+            optimization_targets=list(self._opt_targets),
             optimizer_type=opt_type,
             optimizer_kwargs=self._config,
             space_adapter_type=space_adapter_type,
