@@ -26,6 +26,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     def __init__(self, *,
                  parameter_space: ConfigSpace.ConfigurationSpace,
+                 optimization_targets: List[str],
                  space_adapter: Optional[BaseSpaceAdapter] = None):
         """
         Create a new instance of the base optimizer.
@@ -34,6 +35,8 @@ class BaseOptimizer(metaclass=ABCMeta):
         ----------
         parameter_space : ConfigSpace.ConfigurationSpace
             The parameter space to optimize.
+        optimization_targets : List[str]
+            The names of the optimization targets to minimize.
         space_adapter : BaseSpaceAdapter
             The space adapter class to employ for parameter space transformations.
         """
@@ -44,6 +47,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         if space_adapter is not None and space_adapter.orig_parameter_space != parameter_space:
             raise ValueError("Given parameter space differs from the one given to space adapter")
 
+        self._optimization_targets = optimization_targets
         self._space_adapter: Optional[BaseSpaceAdapter] = space_adapter
         self._observations: List[Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]] = []
         self._has_context: Optional[bool] = None
@@ -72,6 +76,8 @@ class BaseOptimizer(metaclass=ABCMeta):
             Not Yet Implemented.
         """
         # Do some input validation.
+        assert set(scores.columns) == set(self._optimization_targets), \
+            "Mismatched optimization targets."
         assert self._has_context is None or self._has_context ^ (context is None), \
             "Context must always be added or never be added."
         assert len(configurations) == len(scores), \

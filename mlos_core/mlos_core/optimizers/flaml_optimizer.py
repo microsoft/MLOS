@@ -6,7 +6,7 @@
 Contains the FlamlOptimizer class.
 """
 
-from typing import Dict, NamedTuple, Optional, Union
+from typing import Dict, List, NamedTuple, Optional, Union
 from warnings import warn
 
 import ConfigSpace
@@ -26,34 +26,47 @@ class EvaluatedSample(NamedTuple):
 
 
 class FlamlOptimizer(BaseOptimizer):
-    """Wrapper class for FLAML Optimizer: A fast library for AutoML and tuning.
-
-    Parameters
-    ----------
-    parameter_space : ConfigSpace.ConfigurationSpace
-        The parameter space to optimize.
-
-    space_adapter : BaseSpaceAdapter
-        The space adapter class to employ for parameter space transformations.
-
-    low_cost_partial_config : dict
-        A dictionary from a subset of controlled dimensions to the initial low-cost values.
-        More info: https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
-
-    seed : Optional[int]
-        If provided, calls np.random.seed() with the provided value to set the seed globally at init.
+    """
+    Wrapper class for FLAML Optimizer: A fast library for AutoML and tuning.
     """
 
     def __init__(self, *,
                  parameter_space: ConfigSpace.ConfigurationSpace,
+                 optimization_targets: List[str],
                  space_adapter: Optional[BaseSpaceAdapter] = None,
                  low_cost_partial_config: Optional[dict] = None,
                  seed: Optional[int] = None):
+        """
+        Create an MLOS wrapper class for FLAML.
+
+        Parameters
+        ----------
+        parameter_space : ConfigSpace.ConfigurationSpace
+            The parameter space to optimize.
+
+        optimization_targets : List[str]
+            The names of the optimization targets to minimize.
+            For FLAML it must be a list with a single element, e.g., `["score"]`.
+
+        space_adapter : BaseSpaceAdapter
+            The space adapter class to employ for parameter space transformations.
+
+        low_cost_partial_config : dict
+            A dictionary from a subset of controlled dimensions to the initial low-cost values.
+            More info: https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
+
+        seed : Optional[int]
+            If provided, calls np.random.seed() with the provided value to set the seed globally at init.
+        """
 
         super().__init__(
             parameter_space=parameter_space,
+            optimization_targets=optimization_targets,
             space_adapter=space_adapter,
         )
+
+        if len(self._optimization_targets) != 1:
+            raise ValueError("FLAML does not support multi-target optimization")
 
         # Per upstream documentation, it is recommended to set the seed for
         # flaml at the start of its operation globally.
@@ -86,9 +99,8 @@ class FlamlOptimizer(BaseOptimizer):
         """
         if context is not None:
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
-        if set(scores.columns) != {'score'}:
-            raise ValueError(f"Expected a single column 'score', got {scores.columns}")
-        for (_, config), score in zip(configurations.astype('O').iterrows(), scores['score']):
+        for (_, config), score in zip(configurations.astype('O').iterrows(),
+                                      scores[self._optimization_targets[0]]):
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
                 self.optimizer_parameter_space, values=config.to_dict())
             if cs_config in self.evaluated_samples:
@@ -139,7 +151,7 @@ class FlamlOptimizer(BaseOptimizer):
         """
         cs_config = normalize_config(self.optimizer_parameter_space, config)
         if cs_config in self.evaluated_samples:
-            return {'score': self.evaluated_samples[cs_config].score}
+            return {self._optimization_targets[0]: self.evaluated_samples[cs_config].score}
 
         self._suggested_config = dict(cs_config)  # Cleaned-up version of the config
         return None  # Returning None stops the process
@@ -155,7 +167,8 @@ class FlamlOptimizer(BaseOptimizer):
         Returns
         -------
         result: dict
-            Dictionary with a single key, `score`, if config already evaluated; `None` otherwise.
+            A dictionary with a single key that is equal to the name of the optimization target,
+            if config already evaluated; `None` otherwise.
 
         Raises
         ------
@@ -181,7 +194,7 @@ class FlamlOptimizer(BaseOptimizer):
             self._target_function,
             config=self.flaml_parameter_space,
             mode='min',
-            metric='score',
+            metric=self._optimization_targets[0],
             points_to_evaluate=points_to_evaluate,
             evaluated_rewards=evaluated_rewards,
             num_samples=len(points_to_evaluate) + 1,
