@@ -39,7 +39,11 @@ def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace
     """
     if kwargs is None:
         kwargs = {}
-    optimizer = optimizer_class(parameter_space=configuration_space, **kwargs)
+    optimizer = optimizer_class(
+        parameter_space=configuration_space,
+        optimization_targets=['score'],
+        **kwargs
+    )
     assert optimizer is not None
 
     assert optimizer.parameter_space is not None
@@ -77,7 +81,11 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
 
     # Emukit doesn't allow specifying a random state, so we set the global seed.
     np.random.seed(SEED)
-    optimizer = optimizer_class(parameter_space=configuration_space, **kwargs)
+    optimizer = optimizer_class(
+        parameter_space=configuration_space,
+        optimization_targets=['score'],
+        **kwargs
+    )
 
     with pytest.raises(ValueError, match="No observations"):
         optimizer.get_best_observations()
@@ -154,11 +162,13 @@ def test_create_optimizer_with_factory_method(configuration_space: CS.Configurat
     if optimizer_type is None:
         optimizer = OptimizerFactory.create(
             parameter_space=configuration_space,
+            optimization_targets=['score'],
             optimizer_kwargs=kwargs,
         )
     else:
         optimizer = OptimizerFactory.create(
             parameter_space=configuration_space,
+            optimization_targets=['score'],
             optimizer_type=optimizer_type,
             optimizer_kwargs=kwargs,
         )
@@ -225,6 +235,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
 
     llamatune_optimizer: BaseOptimizer = OptimizerFactory.create(
         parameter_space=input_space,
+        optimization_targets=['score'],
         optimizer_type=optimizer_type,
         optimizer_kwargs=llamatune_optimizer_kwargs,
         space_adapter_type=SpaceAdapterType.LLAMATUNE,
@@ -233,6 +244,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     # Initialize an optimizer that uses the original space
     optimizer: BaseOptimizer = OptimizerFactory.create(
         parameter_space=input_space,
+        optimization_targets=['score'],
         optimizer_type=optimizer_type,
         optimizer_kwargs=optimizer_kwargs,
     )
@@ -345,11 +357,13 @@ def test_mixed_numerics_type_input_space_types(optimizer_type: Optional[Optimize
     if optimizer_type is None:
         optimizer = OptimizerFactory.create(
             parameter_space=input_space,
+            optimization_targets=['score'],
             optimizer_kwargs=kwargs,
         )
     else:
         optimizer = OptimizerFactory.create(
             parameter_space=input_space,
+            optimization_targets=['score'],
             optimizer_type=optimizer_type,
             optimizer_kwargs=kwargs,
         )
