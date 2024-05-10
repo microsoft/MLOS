@@ -12,10 +12,9 @@ from warnings import warn
 import ConfigSpace
 import numpy as np
 import pandas as pd
-
-from mlos_core.util import normalize_config
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
+from mlos_core.util import normalize_config
 
 
 class EvaluatedSample(NamedTuple):
@@ -44,11 +43,14 @@ class FlamlOptimizer(BaseOptimizer):
         If provided, calls np.random.seed() with the provided value to set the seed globally at init.
     """
 
-    def __init__(self, *,
-                 parameter_space: ConfigSpace.ConfigurationSpace,
-                 space_adapter: Optional[BaseSpaceAdapter] = None,
-                 low_cost_partial_config: Optional[dict] = None,
-                 seed: Optional[int] = None):
+    def __init__(
+        self,
+        *,
+        parameter_space: ConfigSpace.ConfigurationSpace,
+        space_adapter: Optional[BaseSpaceAdapter] = None,
+        low_cost_partial_config: Optional[dict] = None,
+        seed: Optional[int] = None,
+    ):
 
         super().__init__(
             parameter_space=parameter_space,
@@ -61,16 +63,25 @@ class FlamlOptimizer(BaseOptimizer):
             np.random.seed(seed)
 
         # pylint: disable=import-outside-toplevel
-        from mlos_core.spaces.converters.flaml import configspace_to_flaml_space, FlamlDomain
+        from mlos_core.spaces.converters.flaml import (
+            FlamlDomain,
+            configspace_to_flaml_space,
+        )
 
-        self.flaml_parameter_space: Dict[str, FlamlDomain] = configspace_to_flaml_space(self.optimizer_parameter_space)
+        self.flaml_parameter_space: Dict[str, FlamlDomain] = configspace_to_flaml_space(
+            self.optimizer_parameter_space
+        )
         self.low_cost_partial_config = low_cost_partial_config
 
         self.evaluated_samples: Dict[ConfigSpace.Configuration, EvaluatedSample] = {}
         self._suggested_config: Optional[dict]
 
-    def _register(self, configurations: pd.DataFrame, scores: pd.Series,
-                  context: Optional[pd.DataFrame] = None) -> None:
+    def _register(
+        self,
+        configurations: pd.DataFrame,
+        scores: pd.Series,
+        context: Optional[pd.DataFrame] = None,
+    ) -> None:
         """Registers the given configurations and scores.
 
         Parameters
@@ -86,15 +97,20 @@ class FlamlOptimizer(BaseOptimizer):
         """
         if context is not None:
             raise NotImplementedError()
-        for (_, config), score in zip(configurations.astype('O').iterrows(), scores):
+        for (_, config), score in zip(configurations.astype("O").iterrows(), scores):
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
-                self.optimizer_parameter_space, values=config.to_dict())
+                self.optimizer_parameter_space, values=config.to_dict()
+            )
             if cs_config in self.evaluated_samples:
                 warn(f"Configuration {config} was already registered", UserWarning)
 
-            self.evaluated_samples[cs_config] = EvaluatedSample(config=config.to_dict(), score=score)
+            self.evaluated_samples[cs_config] = EvaluatedSample(
+                config=config.to_dict(), score=score
+            )
 
-    def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def _suggest(
+        self, context: Optional[pd.DataFrame] = None
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
@@ -112,10 +128,11 @@ class FlamlOptimizer(BaseOptimizer):
         if context is not None:
             raise NotImplementedError()
         config: dict = self._get_next_config()
-        return pd.DataFrame(config, index=[0])
+        return pd.DataFrame(config, index=[0]), None
 
-    def register_pending(self, configurations: pd.DataFrame,
-                         context: Optional[pd.DataFrame] = None) -> None:
+    def register_pending(
+        self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None
+    ) -> None:
         raise NotImplementedError()
 
     def _target_function(self, config: dict) -> Union[dict, None]:
@@ -137,7 +154,7 @@ class FlamlOptimizer(BaseOptimizer):
         """
         cs_config = normalize_config(self.optimizer_parameter_space, config)
         if cs_config in self.evaluated_samples:
-            return {'score': self.evaluated_samples[cs_config].score}
+            return {"score": self.evaluated_samples[cs_config].score}
 
         self._suggested_config = dict(cs_config)  # Cleaned-up version of the config
         return None  # Returning None stops the process
@@ -169,17 +186,15 @@ class FlamlOptimizer(BaseOptimizer):
                 dict(normalize_config(self.optimizer_parameter_space, conf))
                 for conf in self.evaluated_samples
             ]
-            evaluated_rewards = [
-                s.score for s in self.evaluated_samples.values()
-            ]
+            evaluated_rewards = [s.score for s in self.evaluated_samples.values()]
 
         # Warm start FLAML optimizer
         self._suggested_config = None
         tune.run(
             self._target_function,
             config=self.flaml_parameter_space,
-            mode='min',
-            metric='score',
+            mode="min",
+            metric="score",
             points_to_evaluate=points_to_evaluate,
             evaluated_rewards=evaluated_rewards,
             num_samples=len(points_to_evaluate) + 1,
@@ -187,6 +202,6 @@ class FlamlOptimizer(BaseOptimizer):
             verbose=0,
         )
         if self._suggested_config is None:
-            raise RuntimeError('FLAML did not produce a suggestion')
+            raise RuntimeError("FLAML did not produce a suggestion")
 
         return self._suggested_config  # type: ignore[unreachable]
