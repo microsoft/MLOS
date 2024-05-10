@@ -16,7 +16,11 @@ from typing_extensions import Literal
 import pandas as pd
 
 from mlos_core.optimizers import (
-    BaseOptimizer, OptimizerType, OptimizerFactory, SpaceAdapterType, DEFAULT_OPTIMIZER_TYPE
+    BaseOptimizer,
+    OptimizerType,
+    OptimizerFactory,
+    SpaceAdapterType,
+    DEFAULT_OPTIMIZER_TYPE,
 )
 
 from mlos_bench.environments.status import Status
@@ -39,40 +43,49 @@ class MlosCoreOptimizer(Optimizer):
     A wrapper class for the mlos_core optimizers.
     """
 
-    def __init__(self,
-                 tunables: TunableGroups,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        tunables: TunableGroups,
+        config: dict,
+        global_config: Optional[dict] = None,
+        service: Optional[Service] = None,
+    ):
         super().__init__(tunables, config, global_config, service)
 
         # TODO: Remove after implementing multi-target optimization in mlos_core
         if len(self._opt_targets) != 1:
-            raise NotImplementedError(f"Multi-target optimization is not supported: {self}")
+            raise NotImplementedError(
+                f"Multi-target optimization is not supported: {self}"
+            )
         (self._opt_target, self._opt_sign) = list(self._opt_targets.items())[0]
 
-        opt_type = getattr(OptimizerType, self._config.pop(
-            'optimizer_type', DEFAULT_OPTIMIZER_TYPE.name))
+        opt_type = getattr(
+            OptimizerType,
+            self._config.pop("optimizer_type", DEFAULT_OPTIMIZER_TYPE.name),
+        )
 
         if opt_type == OptimizerType.SMAC:
-            output_directory = self._config.get('output_directory')
+            output_directory = self._config.get("output_directory")
             if output_directory is not None:
                 # If output_directory is specified, turn it into an absolute path.
-                self._config['output_directory'] = os.path.abspath(output_directory)
+                self._config["output_directory"] = os.path.abspath(output_directory)
             else:
-                _LOG.warning("SMAC optimizer output_directory was null. SMAC will use a temporary directory.")
+                _LOG.warning(
+                    "SMAC optimizer output_directory was null. SMAC will use a temporary directory."
+                )
 
             # Make sure max_trials >= max_iterations.
-            if 'max_trials' not in self._config:
-                self._config['max_trials'] = self._max_iter
-            assert int(self._config['max_trials']) >= self._max_iter, \
-                f"max_trials {self._config.get('max_trials')} <= max_iterations {self._max_iter}"
+            if "max_trials" not in self._config:
+                self._config["max_trials"] = self._max_iter
+            assert (
+                int(self._config["max_trials"]) >= self._max_iter
+            ), f"max_trials {self._config.get('max_trials')} <= max_iterations {self._max_iter}"
 
-            if 'run_name' not in self._config and self.experiment_id:
-                self._config['run_name'] = self.experiment_id
+            if "run_name" not in self._config and self.experiment_id:
+                self._config["run_name"] = self.experiment_id
 
-        space_adapter_type = self._config.pop('space_adapter_type', None)
-        space_adapter_config = self._config.pop('space_adapter_config', {})
+        space_adapter_type = self._config.pop("space_adapter_type", None)
+        space_adapter_config = self._config.pop("space_adapter_config", {})
 
         if space_adapter_type is not None:
             space_adapter_type = getattr(SpaceAdapterType, space_adapter_type)
@@ -85,9 +98,12 @@ class MlosCoreOptimizer(Optimizer):
             space_adapter_kwargs=space_adapter_config,
         )
 
-    def __exit__(self, ex_type: Optional[Type[BaseException]],
-                 ex_val: Optional[BaseException],
-                 ex_tb: Optional[TracebackType]) -> Literal[False]:
+    def __exit__(
+        self,
+        ex_type: Optional[Type[BaseException]],
+        ex_val: Optional[BaseException],
+        ex_tb: Optional[TracebackType],
+    ) -> Literal[False]:
         self._opt.cleanup()
         return super().__exit__(ex_type, ex_val, ex_tb)
 
@@ -95,16 +111,19 @@ class MlosCoreOptimizer(Optimizer):
     def name(self) -> str:
         return f"{self.__class__.__name__}:{self._opt.__class__.__name__}"
 
-    def bulk_register(self,
-                      configs: Sequence[dict],
-                      scores: Sequence[Optional[Dict[str, TunableValue]]],
-                      status: Optional[Sequence[Status]] = None) -> bool:
+    def bulk_register(
+        self,
+        configs: Sequence[dict],
+        scores: Sequence[Optional[Dict[str, TunableValue]]],
+        status: Optional[Sequence[Status]] = None,
+    ) -> bool:
         if not super().bulk_register(configs, scores, status):
             return False
         df_configs = self._to_df(configs)  # Impute missing values, if necessary
-        df_scores = pd.Series(
-            [self._extract_target(score) for score in scores],
-            dtype=float) * self._opt_sign
+        df_scores = (
+            pd.Series([self._extract_target(score) for score in scores], dtype=float)
+            * self._opt_sign
+        )
         if status is not None:
             df_status = pd.Series(status)
             df_scores[df_status != Status.SUCCEEDED] = float("inf")
@@ -117,7 +136,9 @@ class MlosCoreOptimizer(Optimizer):
             _LOG.debug("Warm-up END: %s :: %s", self, score)
         return True
 
-    def _extract_target(self, scores: Optional[Dict[str, TunableValue]]) -> Optional[TunableValue]:
+    def _extract_target(
+        self, scores: Optional[Dict[str, TunableValue]]
+    ) -> Optional[TunableValue]:
         return None if scores is None else scores[self._opt_target]
 
     def _to_df(self, configs: Sequence[Dict[str, TunableValue]]) -> pd.DataFrame:
@@ -138,7 +159,7 @@ class MlosCoreOptimizer(Optimizer):
         df_configs = pd.DataFrame(configs)
         tunables_names = list(self._tunables.get_param_values().keys())
         missing_cols = set(tunables_names).difference(df_configs.columns)
-        for (tunable, _group) in self._tunables:
+        for tunable, _group in self._tunables:
             if tunable.name in missing_cols:
                 df_configs[tunable.name] = tunable.default
             else:
@@ -149,7 +170,9 @@ class MlosCoreOptimizer(Optimizer):
             if tunable.special:
                 (special_name, type_name) = special_param_names(tunable.name)
                 tunables_names += [special_name, type_name]
-                is_special = df_configs[tunable.name].apply(tunable.special.__contains__)
+                is_special = df_configs[tunable.name].apply(
+                    tunable.special.__contains__
+                )
                 df_configs[type_name] = TunableValueKind.RANGE
                 df_configs.loc[is_special, type_name] = TunableValueKind.SPECIAL
                 if tunable.type == "int":
@@ -167,23 +190,34 @@ class MlosCoreOptimizer(Optimizer):
         tunables = super().suggest()
         if self._start_with_defaults:
             _LOG.info("Use default values for the first trial")
-        df_config = self._opt.suggest(defaults=self._start_with_defaults)
+        df_config, df_context = self._opt.suggest(defaults=self._start_with_defaults)
         self._start_with_defaults = False
-        _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, df_config)
+        _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, df_config, df_context)
         return tunables.assign(
-            configspace_data_to_tunable_values(df_config.loc[0].to_dict()))
+            configspace_data_to_tunable_values(df_config.loc[0].to_dict())
+        )
 
-    def register(self, tunables: TunableGroups, status: Status,
-                 score: Optional[Dict[str, TunableValue]] = None) -> Optional[Dict[str, float]]:
-        registered_score = super().register(tunables, status, score)  # With _opt_sign applied
+    def register(
+        self,
+        tunables: TunableGroups,
+        status: Status,
+        score: Optional[Dict[str, TunableValue]] = None,
+    ) -> Optional[Dict[str, float]]:
+        registered_score = super().register(
+            tunables, status, score
+        )  # With _opt_sign applied
         if status.is_completed():
             assert registered_score is not None
             df_config = self._to_df([tunables.get_param_values()])
             _LOG.debug("Score: %s Dataframe:\n%s", registered_score, df_config)
-            self._opt.register(df_config, pd.Series([registered_score[self._opt_target]], dtype=float))
+            self._opt.register(
+                df_config, pd.Series([registered_score[self._opt_target]], dtype=float)
+            )
         return registered_score
 
-    def get_best_observation(self) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
+    def get_best_observation(
+        self,
+    ) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
         df_config = self._opt.get_best_observation()
         if len(df_config) == 0:
             return (None, None)
@@ -191,5 +225,7 @@ class MlosCoreOptimizer(Optimizer):
         _LOG.debug("Best observation: %s", params)
         score = params.pop("score")
         assert score is not None
-        score = float(score) * self._opt_sign  # mlos_core always uses the `score` column
+        score = (
+            float(score) * self._opt_sign
+        )  # mlos_core always uses the `score` column
         return ({self._opt_target: score}, self._tunables.copy().assign(params))

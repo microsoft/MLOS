@@ -140,7 +140,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     def suggest(
         self, context: Optional[pd.DataFrame] = None, defaults: bool = False
-    ) -> pd.DataFrame:
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Wrapper method, which employs the space adapter (if any), after suggesting a new configuration.
 
         Parameters
@@ -167,7 +167,12 @@ class BaseOptimizer(metaclass=ABCMeta):
             metadata = self.delayed_metadata
 
         else:
-            configuration = self._suggest(context)
+            if self.delayed_config is None:
+                configuration, metadata = self._suggest(context)
+            else:
+                configuration, metadata = self.delayed_config, self.delayed_metadata
+                self.delayed_config, self.delayed_metadata = None, None
+
             assert (
                 len(configuration) == 1
             ), "Suggest must return a single configuration."
@@ -179,7 +184,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             assert len(configuration.columns) == len(
                 self.parameter_space.values()
             ), "Space adapter transformed configuration with the wrong number of parameters."
-        return configuration
+        return configuration, metadata
 
     @abstractmethod
     def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:

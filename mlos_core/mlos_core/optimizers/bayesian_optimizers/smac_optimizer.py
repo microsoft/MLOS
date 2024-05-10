@@ -11,7 +11,7 @@ import inspect
 from logging import warning
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union
 
 import ConfigSpace
 import numpy.typing as npt
@@ -80,6 +80,16 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     facade: AbstractFacade
         sets the facade to use for SMAC
+
+    intensifier: Optional[type[AbstractIntensifier]]
+        Sets the intensifier type to use in the optimizer. If not set, the default intensifier
+        from the facade will be used
+
+    initial_design_class: AbstractInitialDesign
+        Sets the initial design class to be used in the optimizer. Defaults to SobolInitialDesign
+
+    **kwargs:
+        Additional arguments to be passed to the scenerio, and intensifier
     """
 
     def __init__(
@@ -189,7 +199,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 initial_design_args["max_ratio"] = max_ratio
 
         # Use the default InitialDesign from SMAC.
-        # (currently SBOL instead of LatinHypercube due to better uniformity
+        # (currently SOBOL instead of LatinHypercube due to better uniformity
         # for initial sampling which results in lower overall samples required)
         initial_design = initial_design_class(
             **initial_design_args
@@ -237,7 +247,24 @@ class SmacOptimizer(BaseBayesianOptimizer):
         return self.base_optimizer._initial_design._n_configs
 
     @staticmethod
-    def _filter_kwargs(function, **kwargs):
+    def _filter_kwargs(function: Callable, **kwargs):
+        """
+        Filters arguments provided in the kwargs dictionary to be restricted to the arugments legal for
+        the called function.
+
+        Parameters
+        ----------
+        function : Callable
+            function over which we filter kwargs for.
+        kwargs:
+            kwargs that we are filtering for the target function
+
+        Returns
+        -------
+        dict
+            kwargs with the non-legal argument filtered out
+        """
+
         sig = inspect.signature(function)
         filter_keys = [
             param.name
@@ -253,7 +280,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
     def _dummy_target_func(
         config: ConfigSpace.Configuration,
         seed: int = 0,
-        budget: int = 1,
+        budget: float = 1,
         instance: object = None,
     ) -> None:
         """Dummy target function for SMAC optimizer.
@@ -267,6 +294,12 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         seed : int
             Random seed to use for the target function. Not actually used.
+
+        budget : int
+            The budget that was used for evaluating the configuration.
+
+        instnace : object
+            The instnace that the configuration was evaluated on.
         """
         # NOTE: Providing a target function when using the ask-and-tell interface is an imperfection of the API
         # -- this planned to be fixed in some future release: https://github.com/automl/SMAC3/issues/946
@@ -276,7 +309,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         self,
         configurations: pd.DataFrame,
         scores: pd.Series,
-        contexts: Optional[pd.DataFrame] = None,
+        context: Optional[pd.DataFrame] = None,
     ) -> None:
         """Registers the given configurations and scores.
 
@@ -296,10 +329,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         for config, score, ctx in zip(
             self._to_configspace_configs(configurations),
             scores.tolist(),
-            self._to_context(contexts),
+            self._to_context(context),
         ):
             # Retrieve previously generated TrialInfo (returned by .ask()) or create new TrialInfo instance
-
             matching: List = (
                 self.trial_info_df["Configuration"] == config
             ) & pd.Series(
@@ -335,7 +367,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # Save optimizer once we register all configs
         self.base_optimizer.optimizer.save()
 
-    def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def _suggest(
+        self, context: Optional[pd.DataFrame] = None
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Suggests a new configuration.
 
         Parameters
@@ -346,7 +380,12 @@ class SmacOptimizer(BaseBayesianOptimizer):
         Returns
         -------
         configuration : pd.DataFrame
-            Pandas dataframe with a single row. Column names are the parameter names.
+            Pandas dataframe with a single row containing the configuration.
+            Column names are the parameter names.
+
+        context : pd.DataFrame
+            Pandas dataframe with a single row containing the context.
+            Column names are the budget, seed, and instance of the evaluation, if valid.
         """
         trial: TrialInfo = self.base_optimizer.ask()
         trial.config.is_valid_configuration()
@@ -370,7 +409,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
     ) -> None:
         raise NotImplementedError()
 
-    # @TODO make the context work here
     def surrogate_predict(
         self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None
     ) -> npt.NDArray:
@@ -378,8 +416,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
             convert_configurations_to_array,
         )
 
-        if context is not None:
-            raise NotImplementedError()
         if self._space_adapter and not isinstance(self._space_adapter, IdentityAdapter):
             raise NotImplementedError()
 
@@ -421,6 +457,20 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     @staticmethod
     def _extract_context(trial: TrialInfo) -> pd.DataFrame:
+        """Convert TrialInfo to a DataFrame.
+
+        Parameters
+        ----------
+        trial : TrialInfo
+            The trial to extract.
+
+        Returns
+        -------
+        context : pd.DataFrame
+            Pandas dataframe with a single row containing the context.
+            Column names are the budget and instance of the evaluation, if valid.
+        """
+
         return pd.DataFrame(
             [[trial.instance, trial.seed, trial.budget]],
             columns=["instance", "seed", "budget"],
@@ -445,8 +495,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if len(self._observations) == 0:
             raise ValueError("No observations registered yet.")
         observations = self.get_observations()
-
-        # @TODO instnaces are pretty close to working here, but needs a bit more work
 
         budgets = observations["TrialInfo"].transform(lambda trial: trial.budget)
         max_budget = budgets.max()
