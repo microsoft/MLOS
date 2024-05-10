@@ -41,6 +41,5 @@
         "redis": []
     },
 
-    "optimization_target": "score",
-    "optimization_direction": "min"
+    "optimization_targets": {"score": "min"}
 }

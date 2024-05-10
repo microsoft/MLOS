@@ -124,8 +124,7 @@ class Scheduler(metaclass=ABCMeta):
             root_env_config=self._root_env_config,
             description=self.environment.name,
             tunables=self.environment.tunable_params,
-            opt_target=self.optimizer.target,
-            opt_direction=self.optimizer.direction,
+            opt_targets=self.optimizer.targets,
         ).__enter__()
         return self
 
@@ -172,7 +171,7 @@ class Scheduler(metaclass=ABCMeta):
         if self._do_teardown:
             self.environment.teardown()
 
-    def get_best_observation(self) -> Tuple[Optional[float], Optional[TunableGroups]]:
+    def get_best_observation(self) -> Tuple[Optional[Dict[str, float]], Optional[TunableGroups]]:
         """
         Get the best observation from the optimizer.
         """
@@ -224,13 +223,14 @@ class Scheduler(metaclass=ABCMeta):
                 # It is possible that the experiment configs were changed
                 # between resuming the experiment (since that is not currently
                 # prevented).
-                # TODO: Improve for supporting multi-objective
-                # (e.g., opt_target_1, opt_target_2, ... and opt_direction_1, opt_direction_2, ...)
                 "optimizer": self.optimizer.name,
-                "opt_target": self.optimizer.target,
-                "opt_direction": self.optimizer.direction,
                 "repeat_i": repeat_i,
                 "is_defaults": tunables.is_defaults,
+                **{
+                    f"opt_{key}_{i}": val
+                    for (i, opt_target) in enumerate(self.optimizer.targets.items())
+                    for (key, val) in zip(["target", "direction"], opt_target)
+                }
             })
 
     def _add_trial_to_queue(self, tunables: TunableGroups,

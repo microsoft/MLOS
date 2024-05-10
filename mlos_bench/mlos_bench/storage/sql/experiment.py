@@ -9,7 +9,7 @@ Saving and restoring the benchmark data using SQLAlchemy.
 import logging
 import hashlib
 from datetime import datetime
-from typing import Optional, Tuple, List, Dict, Iterator, Any
+from typing import Optional, Tuple, List, Literal, Dict, Iterator, Any
 
 from pytz import UTC
 
@@ -38,16 +38,15 @@ class Experiment(Storage.Experiment):
                  trial_id: int,
                  root_env_config: str,
                  description: str,
-                 opt_target: str,
-                 opt_direction: Optional[str]):
+                 opt_targets: Dict[str, Literal['min', 'max']]):
         super().__init__(
             tunables=tunables,
             experiment_id=experiment_id,
             trial_id=trial_id,
             root_env_config=root_env_config,
             description=description,
-            opt_target=opt_target,
-            opt_direction=opt_direction)
+            opt_targets=opt_targets,
+        )
         self._engine = engine
         self._schema = schema
 
@@ -84,12 +83,14 @@ class Experiment(Storage.Experiment):
                     git_commit=self._git_commit,
                     root_env_config=self._root_env_config,
                 ))
-                # TODO: Expand for multiple objectives.
-                conn.execute(self._schema.objectives.insert().values(
-                    exp_id=self._experiment_id,
-                    optimization_target=self._opt_target,
-                    optimization_direction=self._opt_direction,
-                ))
+                conn.execute(self._schema.objectives.insert().values([
+                    {
+                        "exp_id": self._experiment_id,
+                        "optimization_target": opt_target,
+                        "optimization_direction": opt_dir,
+                    }
+                    for (opt_target, opt_dir) in self.opt_targets.items()
+                ]))
             else:
                 if exp_info.trial_id is not None:
                     self._trial_id = exp_info.trial_id + 1
@@ -226,8 +227,7 @@ class Experiment(Storage.Experiment):
                     experiment_id=self._experiment_id,
                     trial_id=trial.trial_id,
                     config_id=trial.config_id,
-                    opt_target=self._opt_target,
-                    opt_direction=self._opt_direction,
+                    opt_targets=self._opt_targets,
                     config=config,
                 )
 
@@ -280,8 +280,7 @@ class Experiment(Storage.Experiment):
                     experiment_id=self._experiment_id,
                     trial_id=self._trial_id,
                     config_id=config_id,
-                    opt_target=self._opt_target,
-                    opt_direction=self._opt_direction,
+                    opt_targets=self._opt_targets,
                     config=config,
                 )
                 self._trial_id += 1

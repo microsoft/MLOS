@@ -52,7 +52,7 @@ class MockOptimizer(TrackBestOptimizer):
             self.register(tunables, trial_status, score)
         if _LOG.isEnabledFor(logging.DEBUG):
             (best_score, _) = self.get_best_observation()
-            _LOG.debug("Bulk register end: %s = %s", self.target, best_score)
+            _LOG.debug("Bulk register END: %s = %s", self, best_score)
         return True
 
     def suggest(self) -> TunableGroups:

@@ -12,15 +12,8 @@
             "$comment": "config properties common to all optimizer types.",
             "type": "object",
             "properties": {
-                "optimization_target": {
-                    "description": "The name of the metric to optimize.",
-                    "type": "string",
-                    "example": "score"
-                },
-                "optimization_direction": {
-                    "description": "Whether to minimize or maximize the optimization target.",
-                    "enum": ["min", "max"],
-                    "example": "min"
+                "optimization_targets": {
+                    "$ref": "../cli/common-defs-subschemas.json#/$defs/optimization_targets"
                 },
                 "max_suggestions": {
                     "description": "The maximum number of additional (in the case of merging experiment data or resuming experiments) config suggestions to run when we launch the app, or no limit if 0 is provided. Note: configs may be repeated in more than one trial.",

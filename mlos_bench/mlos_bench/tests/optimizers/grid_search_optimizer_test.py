@@ -83,7 +83,7 @@ def grid_search_opt(grid_search_tunables: TunableGroups,
     max_iterations = len(grid_search_tunables_grid) * 2 - 3
     return GridSearchOptimizer(tunables=grid_search_tunables, config={
         "max_suggestions": max_iterations,
-        "optimization_direction": "max",
+        "optimization_targets": {"score": "max", "other_score": "min"},
     })
 
 
@@ -122,7 +122,7 @@ def test_grid_search(grid_search_opt: GridSearchOptimizer,
     """
     Make sure that grid search optimizer initializes and works correctly.
     """
-    score = 1.0
+    score: Dict[str, TunableValue] = {"score": 1.0, "other_score": 2.0}
     status = Status.SUCCEEDED
     suggestion = grid_search_opt.suggest()
     suggestion_dict = suggestion.get_param_values()
@@ -195,7 +195,8 @@ def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
     Make sure that grid search optimizer works correctly when suggest and register
     are called out of order.
     """
-    score = 1.0
+    # pylint: disable=too-many-locals
+    score: Dict[str, TunableValue] = {"score": 1.0, "other_score": 2.0}
     status = Status.SUCCEEDED
     suggest_count = 10
     suggested = [grid_search_opt.suggest() for _ in range(suggest_count)]
@@ -222,7 +223,13 @@ def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
     best_suggestion_dict = best_suggestion.get_param_values()
     assert best_suggestion_dict not in grid_search_opt.pending_configs
     assert best_suggestion_dict not in grid_search_opt.suggested_configs
-    best_suggestion_score = score - 1 if grid_search_opt.direction == "min" else score + 1
+
+    best_suggestion_score: Dict[str, TunableValue] = {}
+    for (opt_target, opt_dir) in grid_search_opt.targets.items():
+        val = score[opt_target]
+        assert isinstance(val, (int, float))
+        best_suggestion_score[opt_target] = val - 1 if opt_dir == "min" else val + 1
+
     grid_search_opt.register(best_suggestion, status, best_suggestion_score)
     assert best_suggestion_dict not in grid_search_opt.suggested_configs
 
@@ -239,7 +246,7 @@ def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
     assert all(suggestion.get_param_values() not in suggested_shuffled for suggestion in suggested)
 
     grid_search_opt.bulk_register([suggestion.get_param_values() for suggestion in suggested],
-                                  [{"score": score}] * len(suggested),
+                                  [score] * len(suggested),
                                   [status] * len(suggested))
 
     assert all(suggestion.get_param_values() not in grid_search_opt.pending_configs for suggestion in suggested)
@@ -248,3 +255,23 @@ def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
     best_score, best_config = grid_search_opt.get_best_observation()
     assert best_score == best_suggestion_score
     assert best_config == best_suggestion
+
+
+def test_grid_search_register(grid_search_opt: GridSearchOptimizer,
+                              grid_search_tunables: TunableGroups) -> None:
+    """
+    Make sure that the `.register()` method adjusts the score signs correctly.
+    """
+    assert grid_search_opt.register(
+        grid_search_tunables, Status.SUCCEEDED, {
+            "score": 1.0,
+            "other_score": 2.0,
+        }) == {
+            "score": -1.0,       # max
+            "other_score": 2.0,  # min
+    }
+
+    assert grid_search_opt.register(grid_search_tunables, Status.FAILED) == {
+        "score": float("inf"),
+        "other_score": float("inf"),
+    }

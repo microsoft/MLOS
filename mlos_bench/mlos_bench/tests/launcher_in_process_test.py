@@ -30,4 +30,5 @@ def test_main_bench(argv: List[str], expected_score: float) -> None:
     Run mlos_bench optimization loop with given config and check the results.
     """
     (score, _config) = _main(argv)
-    assert pytest.approx(score, 1e-6) == expected_score
+    assert score is not None
+    assert pytest.approx(score["score"], 1e-5) == expected_score

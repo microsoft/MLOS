@@ -52,56 +52,19 @@ class ExperimentSqlData(ExperimentData):
 
     @property
     def objectives(self) -> Dict[str, Literal["min", "max"]]:
-        objectives: Dict[str, Literal["min", "max"]] = {}
-        # First try to lookup the objectives from the experiment metadata in the storage layer.
-        if hasattr(self._schema, "objectives"):
-            with self._engine.connect() as conn:
-                objectives_db_data = conn.execute(
-                    self._schema.objectives.select().where(
-                        self._schema.objectives.c.exp_id == self._experiment_id,
-                    ).order_by(
-                        # TODO: return weight as well
-                        self._schema.objectives.c.weight.desc(),
-                        self._schema.objectives.c.optimization_target.asc(),
-                    )
+        with self._engine.connect() as conn:
+            objectives_db_data = conn.execute(
+                self._schema.objectives.select().where(
+                    self._schema.objectives.c.exp_id == self._experiment_id,
+                ).order_by(
+                    self._schema.objectives.c.weight.desc(),
+                    self._schema.objectives.c.optimization_target.asc(),
                 )
-                objectives = {
-                    objective.optimization_target: objective.optimization_direction
-                    for objective in objectives_db_data.fetchall()
-                }
-        # Backwards compatibility: try and obtain the objectives from the TrialData and merge them in.
-        # NOTE: The original format of storing opt_target/opt_direction in the Trial
-        # metadata did not support multi-objectives.
-        # Nor does it make it easy to detect when a config change caused a switch in
-        # opt_direction for a given opt_target between run.py executions of an
-        # Experiment.
-        # For now, we simply issue a warning about potentially inconsistent data.
-        for trial in self.trials.values():
-            trial_objs_df = trial.metadata_df[
-                trial.metadata_df["parameter"].isin(("opt_target", "opt_direction"))
-            ][["parameter", "value"]]
-            try:
-                opt_targets = trial_objs_df[trial_objs_df["parameter"] == "opt_target"]
-                assert len(opt_targets) == 1, \
-                    "Should only be a single opt_target in the metadata params."
-                opt_target = opt_targets["value"].iloc[0]
-            except KeyError:
-                continue
-            try:
-                opt_directions = trial_objs_df[trial_objs_df["parameter"] == "opt_direction"]
-                assert len(opt_directions) <= 1, \
-                    "Should only be a single opt_direction in the metadata params."
-                opt_direction = opt_directions["value"].iloc[0]
-            except (KeyError, IndexError):
-                opt_direction = None
-            if opt_target not in objectives:
-                objectives[opt_target] = opt_direction
-            elif opt_direction != objectives[opt_target]:
-                _LOG.warning("Experiment %s has multiple trial optimization directions for optimization_target %s=%s",
-                             self, opt_target, objectives[opt_target])
-        for opt_tgt, opt_dir in objectives.items():
-            assert opt_dir in {None, "min", "max"}, f"Unexpected opt_dir {opt_dir} for opt_tgt {opt_tgt}."
-        return objectives
+            )
+            return {
+                objective.optimization_target: objective.optimization_direction
+                for objective in objectives_db_data.fetchall()
+            }
 
     # TODO: provide a way to get individual data to avoid repeated bulk fetches where only small amounts of data is accessed.
     # Or else make the TrialData object lazily populate.
