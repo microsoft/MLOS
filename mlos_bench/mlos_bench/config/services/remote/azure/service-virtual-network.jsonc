@@ -1,0 +1,38 @@
+// A service to provision virtual network resources specified in an Azure ARM template.
+{
+    "services": [
+        {
+            "class": "mlos_bench.services.remote.azure.azure_network_services.AzureNetworkService",
+
+            "config": {
+                // All values below, including those in `deploymentTemplateParameters`,
+                // can be overridden by the parameters pushed from the caller Environment.
+                "subscription": "PLACEHOLDER; AZURE SUBSCRIPTION ID",
+                "resourceGroup": "PLACEHOLDER; e.g., os-autotune",
+
+                "deploymentTemplatePath": "services/remote/azure/arm-templates/ARM-virtual-network.jsonc",
+                // Make sure to list all ARM template parameters that can be overridden by the caller.
+                "deploymentTemplateParameters": {
+                    "location": "PLACEHOLDER; e.g., westus2",
+                    // By default use the resource group name as the base vnetName.
+                    // Note: it is often useful to include the $location in the vnetName in
+                    // order to allow easily creating additional experiments across multiple
+                    // locations without name collisions.
+                    "vnetName": "$resourceGroup-$location-vnet",
+                    "vnetAddressPrefix": "10.0.0.0/16",
+                    "subnetName": "default",
+                    "subnetPrefix": "10.0.0.0/24",
+                    "networkSecurityGroupName": "$vnetName-default-nsg",
+                    // Note: This needs to be overridden by the parent environment to be useful:
+                    "sourceAddressPrefixes": ["192.168.42.0/24"],
+                    // By default allow interactive debugging from the sourceAddressPrefixes.
+                    "destinationPortRanges": [22, 3389]
+                },
+
+                "requestTimeout": 20,   // HTTP request timeout in seconds
+                "pollInterval": 20,     // Poll every 20 seconds
+                "pollTimeout": 3600     // Give up polling after one hour
+            }
+        }
+    ]
+}

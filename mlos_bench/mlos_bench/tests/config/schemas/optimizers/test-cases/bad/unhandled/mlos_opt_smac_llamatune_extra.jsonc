@@ -2,8 +2,8 @@
     "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
 
     "config": {
-        "optimization_target": "score",
-        "max_iterations": 20,
+        "optimization_targets": {"score": "min"},
+        "max_suggestions": 20,
         "seed": 12345,
         "start_with_defaults": false,
         "optimizer_type": "SMAC",

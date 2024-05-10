@@ -2,12 +2,11 @@
     // "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
     "description": "Azure VM Service configuration.",
 
-    "class": "mlos_bench.services.remote.azure.azure_services.AzureVMService",
+    "class": "mlos_bench.services.remote.azure.azure_vm_services.AzureVMService",
     "config": {
         "deploymentTemplatePath": "some/path/to/deployment/template.jsonc",
         "subscription": "subscription-id",
         "resourceGroup": "rg",
-        "deploymentName": "deployment",
 
         "customDataFile": "some/path/to/custom/data.yml",
         "deploymentTemplateParameters": {
@@ -30,6 +29,8 @@
 
         "pollInterval": 1,
         "pollTimeout": 60,
-        "requestTimeout": 90
+        "requestTimeout": 90,
+        "requestTotalRetries": 10,
+        "requestBackoffFactor": 0.3
     }
 }

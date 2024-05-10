@@ -1,0 +1,25 @@
+// mlos_bench --config config/cli/cli-create-network-test.jsonc
+{
+    "config_path": [
+        "mlos_bench/mlos_bench/config",
+        "mlos_bench/mlos_bench/config/experiments",
+        "mlos_bench/mlos_bench/tests/config"
+    ],
+
+    "environment": "environments/network/virtual-network-environment.jsonc",
+
+    "globals": [
+        "global_config_azure.jsonc",                 // Azure credentials
+        "experiment_create-network-test.jsonc"
+    ],
+
+    "services": [
+        "services/remote/azure/service-auth.jsonc",
+        "services/remote/azure/service-virtual-network.jsonc"
+    ],
+
+    "teardown": false,
+
+    "log_file": "create-network-test.log",
+    "log_level": "DEBUG"
+}

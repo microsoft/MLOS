@@ -2,7 +2,9 @@
 
 This [directory](./) contains the code for the `mlos-bench` experiment runner package.
 
-It makes use of the `mlos-core` package for its optimizer.
+It makes use of the [`mlos-core`](../mlos_core/) package for its optimizer.
+
+It's available for `pip install` via the pypi repository at [mlos-bench](https://pypi.org/project/mlos-bench/).
 
 ## Table of Contents
 
@@ -21,8 +23,11 @@ It makes use of the `mlos-core` package for its optimizer.
         - [Create a JSON config with DB credentials Optional](#create-a-json-config-with-db-credentials-optional)
         - [Create a top-level configuration file for your MLOS setup](#create-a-top-level-configuration-file-for-your-mlos-setup)
         - [Create another config file for the parameters specific to your experiment](#create-another-config-file-for-the-parameters-specific-to-your-experiment)
+            - [Importance of the Experiment ID config](#importance-of-the-experiment-id-config)
         - [Run the benchmark](#run-the-benchmark)
     - [Optimization](#optimization)
+        - [Resuming interrupted experiments](#resuming-interrupted-experiments)
+    - [Analyzing Results](#analyzing-results)
 
 <!-- /TOC -->
 
@@ -160,6 +165,15 @@ In that file, you can specify any parameters that occur in your other configs, n
 > A general rule is that the parameters from the global configs like `./global_config_azure.jsonc` or `experiment_MyAppBench.jsonc` override the corresponding parameters in other configurations.
 > That allows us to propagate the values of the parameters that are specific to the experiment into other components of the framework and keep the majority of the config files in our library immutable and reusable.
 
+#### Importance of the Experiment ID config
+
+An important part of this file is the value of `experiment_id` which controls the storage and retrieval of trial data.
+Should the experiment be interrupted, the `experiment_id` will be used to resume the experiment from the last completed trial, reloading the optimizer with data from the previously completed trial data.
+
+As such this value should be unique for each experiment.
+Be sure to change it whenever *"incompatible"* changes are made to the experiment configuration or scripts.
+Unfortunately, determining what constitutes and *"incompatible"* change for any given system is not always possible, so `mlos_bench` largely leaves this up to the user.
+
 ### 6. Run the benchmark
 
 Now we can run our configuration with `mlos_bench`:
@@ -181,9 +195,51 @@ Searching for an optimal set of tunable parameters is very similar to running a 
 All we have to do is specifying the [`Optimizer`](./mlos_bench/optimizers/) in the top-level configuration, like in our [`azure-redis-opt.jsonc`](./mlos_bench/config/cli/azure-redis-opt.jsonc) example.
 
 ```sh
-mlos_bench --config "./mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc" --globals "experiment_MyBenchmark.jsonc" --max_iterations 10
+mlos_bench --config "./mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc" --globals "experiment_MyBenchmark.jsonc" --max_suggestions 10 --trial-config-repeat-count 3
 ```
 
-Note that again we use the command line option `--max_iterations` to override the default value from [`mlos_core_flaml.jsonc`](./mlos_bench/config/optimizers/mlos_core_flaml.jsonc).
+Note that again we use the command line option `--max_suggestions` to override the max. number of suggested configurations to trial from [`mlos_core_flaml.jsonc`](./mlos_bench/config/optimizers/mlos_core_flaml.jsonc).
+We also use `--trial-config-repeat-count` to benchmark each suggested configuration 3 times.
+That means, we will run 30 trials in total, 3 for each of the 10 suggested configurations.
 
 We don't have to specify the `"tunable_values"` for the optimization: the optimizer will suggest new values on each iteration and the framework will feed this data into the benchmarking environment.
+
+### Resuming interrupted experiments
+
+Experiments sometimes get interrupted, e.g., due to errors in automation scripts or other failures in the system.
+
+<!-- TODO: Document retry logic once implemented: #523 -->
+
+To resume an interrupted experiment, simply run the same command as before.
+
+As mentioned above in the [importance of the `experiment_id` config](#importance-of-the-experiment-id-config) section, the `experiment_id` is used to resume interrupted experiments, reloading prior trial data for that `experiment_id`.
+
+## Analyzing Results
+
+The results of the experiment are stored in the database as specified in experiment configs (see above).
+
+After running the experiment, you can use the [`mlos-viz`](../mlos_viz/) package to analyze the results in a Jupyter notebook, for instance.
+See the [`sqlite-autotuning`](https://github.com/Microsoft-CISL/sqlite-autotuning) repository for a full example.
+
+The `mlos-viz` package uses the `ExperimentData` and `TrialData` [`mlos_bench.storage` APIs](./mlos_bench/storage/) to load the data from the database and visualize it.
+
+For example:
+
+```python
+from mlos_bench.storage import from_config
+# Specify the experiment_id used for your experiment.
+experiment_id = "YourExperimentId"
+trial_id = 1
+# Specify the path to your storage config file.
+storage = from_config(config_file="storage/sqlite.jsonc")
+# Access one of the experiments' data:
+experiment_data = storage.experiments[experiment_id]
+# Full experiment results are accessible in a data frame:
+results_data_frame = experiment_data.results
+# Individual trial results are accessible via the trials dictionary:
+trial_data = experiment_data.trials[trial_id]
+# Tunables used for the trial are accessible via the config property:
+trial_config = trial_data.config
+```
+
+See Also: <https://microsoft.github.io/MLOS> for full API documentation.

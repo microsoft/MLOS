@@ -63,6 +63,7 @@ def test_expand_const_args() -> None:
         "a": "b",
         "foo": "$bar/baz",
         "1": 1,
+        "recursive": "$foo/expansion",
     }
     global_config: Dict[str, TunableValue] = {
         "bar": "blah",
@@ -72,4 +73,5 @@ def test_expand_const_args() -> None:
         "a": "b",
         "foo": "blah/baz",
         "1": 1,
+        "recursive": "blah/baz/expansion",
     }

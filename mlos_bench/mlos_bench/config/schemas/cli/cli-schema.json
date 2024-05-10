@@ -47,6 +47,21 @@
             "uniqueItems": true
         },
 
+        "services": {
+            "description": "Path to the json config(s) describing the services to use for setting up and running the benchmark environment. These are initial services for all environments.  Individual environments can specify their own service configs to include as well.",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/json_config_path"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+        },
+
+        "scheduler": {
+            "description": "Path to the json config of scheduler to use for running the experiments.",
+            "$ref": "#/$defs/json_config_path"
+        },
+
         "environment": {
             "description": "Path to the json config describing the environment to run the benchmark in.",
             "$ref": "#/$defs/json_config_path"
@@ -55,6 +70,13 @@
         "optimizer": {
             "description": "Path to the json config describing the optimizer to use.",
             "$ref": "#/$defs/json_config_path"
+        },
+
+        "trial_config_repeat_count": {
+            "description": "Number of times to repeat a config.",
+            "type": "integer",
+            "minimum": 1,
+            "examples": [3, 5]
         },
 
         "storage": {

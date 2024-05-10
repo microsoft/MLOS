@@ -76,7 +76,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
 
         results_stdout_pattern = self.config.get("results_stdout_pattern")
         self._results_stdout_pattern: Optional[re.Pattern[str]] = \
-            re.compile(results_stdout_pattern) if results_stdout_pattern else None
+            re.compile(results_stdout_pattern, flags=re.MULTILINE) if results_stdout_pattern else None
 
     def _get_env_params(self, restrict: bool = True) -> Dict[str, str]:
         """

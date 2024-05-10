@@ -15,10 +15,14 @@ from types import TracebackType
 from typing import Dict, Optional, Sequence, Tuple, Type, Union
 from typing_extensions import Literal
 
+from ConfigSpace import ConfigurationSpace
+
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.optimizers.convert_configspace import tunable_groups_to_configspace
 
 _LOG = logging.getLogger(__name__)
 
@@ -30,9 +34,8 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
 
     # See Also: mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json
     BASE_SUPPORTED_CONFIG_PROPS = {
-        "optimization_target",
-        "optimization_direction",
-        "max_iterations",
+        "optimization_targets",
+        "max_suggestions",
         "seed",
         "start_with_defaults",
     }
@@ -60,6 +63,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._config = config.copy()
         self._global_config = global_config or {}
         self._tunables = tunables
+        self._config_space: Optional[ConfigurationSpace] = None
         self._service = service
         self._seed = int(config.get("seed", 42))
         self._in_context = False
@@ -67,14 +71,22 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         experiment_id = self._global_config.get('experiment_id')
         self.experiment_id = str(experiment_id).strip() if experiment_id else None
 
-        self._iter = 1
+        self._iter = 0
         # If False, use the optimizer to suggest the initial configuration;
         # if True (default), use the already initialized values for the first iteration.
         self._start_with_defaults: bool = bool(
             strtobool(str(self._config.pop('start_with_defaults', True))))
-        self._max_iter = int(self._config.pop('max_iterations', 100))
-        self._opt_target = str(self._config.pop('optimization_target', 'score'))
-        self._opt_sign = {"min": 1, "max": -1}[self._config.pop('optimization_direction', 'min')]
+        self._max_iter = int(self._config.pop('max_suggestions', 100))
+
+        opt_targets: Dict[str, str] = self._config.pop('optimization_targets', {'score': 'min'})
+        self._opt_targets: Dict[str, Literal[1, -1]] = {}
+        for (opt_target, opt_dir) in opt_targets.items():
+            if opt_dir == "min":
+                self._opt_targets[opt_target] = 1
+            elif opt_dir == "max":
+                self._opt_targets[opt_target] = -1
+            else:
+                raise ValueError(f"Invalid optimization direction: {opt_dir} for {opt_target}")
 
     def _validate_json_config(self, config: dict) -> None:
         """
@@ -90,8 +102,11 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         ConfigSchema.OPTIMIZER.validate(json_config)
 
     def __repr__(self) -> str:
-        opt_direction = 'min' if self.is_min else 'max'
-        return f"{self.name}:{opt_direction}({self.target})(config={self._config})"
+        opt_targets = ",".join(
+            f"{opt_target}:{({1: 'min', -1: 'max'}[opt_dir])}"
+            for (opt_target, opt_dir) in self._opt_targets.items()
+        )
+        return f"{self.name}({opt_targets},config={self._config})"
 
     def __enter__(self) -> 'Optimizer':
         """
@@ -118,6 +133,26 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         return False  # Do not suppress exceptions
 
     @property
+    def current_iteration(self) -> int:
+        """
+        The current number of iterations (trials) registered.
+
+        Note: this may or may not be the same as the number of configurations.
+        See Also: Launcher.trial_config_repeat_count.
+        """
+        return self._iter
+
+    @property
+    def max_iterations(self) -> int:
+        """
+        The maximum number of iterations (trials) to run.
+
+        Note: this may or may not be the same as the number of configurations.
+        See Also: Launcher.trial_config_repeat_count.
+        """
+        return self._max_iter
+
+    @property
     def seed(self) -> int:
         """
         The random seed for the optimizer.
@@ -136,7 +171,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     @property
     def tunable_params(self) -> TunableGroups:
         """
-        Get the configuration space of the optimizer.
+        Get the tunable parameters of the optimizer as TunableGroups.
 
         Returns
         -------
@@ -144,6 +179,21 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             A collection of covariant groups of tunable parameters.
         """
         return self._tunables
+
+    @property
+    def config_space(self) -> ConfigurationSpace:
+        """
+        Get the tunable parameters of the optimizer as a ConfigurationSpace.
+
+        Returns
+        -------
+        ConfigurationSpace
+            The ConfigSpace representation of the tunable parameters.
+        """
+        if self._config_space is None:
+            self._config_space = tunable_groups_to_configspace(self._tunables, self._seed)
+            _LOG.debug("ConfigSpace: %s", self._config_space)
+        return self._config_space
 
     @property
     def name(self) -> str:
@@ -154,18 +204,14 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         return self.__class__.__name__
 
     @property
-    def is_min(self) -> bool:
+    def targets(self) -> Dict[str, Literal['min', 'max']]:
         """
-        True if minimizing, False otherwise. Minimization is the default.
+        A dictionary of {target: direction} of optimization targets.
         """
-        return self._opt_sign > 0
-
-    @property
-    def target(self) -> str:
-        """
-        The name of the target metric to optimize.
-        """
-        return self._opt_target
+        return {
+            opt_target: "min" if opt_dir == 1 else "max"
+            for (opt_target, opt_dir) in self._opt_targets.items()
+        }
 
     @property
     def supports_preload(self) -> bool:
@@ -175,7 +221,9 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         return True
 
     @abstractmethod
-    def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
+    def bulk_register(self,
+                      configs: Sequence[dict],
+                      scores: Sequence[Optional[Dict[str, TunableValue]]],
                       status: Optional[Sequence[Status]] = None) -> bool:
         """
         Pre-load the optimizer with the bulk data from previous experiments.
@@ -184,9 +232,9 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         ----------
         configs : Sequence[dict]
             Records of tunable values from other experiments.
-        scores : Sequence[float]
+        scores : Sequence[Optional[Dict[str, TunableValue]]]
             Benchmark results from experiments that correspond to `configs`.
-        status : Optional[Sequence[float]]
+        status : Optional[Sequence[Status]]
             Status of the experiments that correspond to `configs`.
 
         Returns
@@ -194,7 +242,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         is_not_empty : bool
             True if there is data to register, false otherwise.
         """
-        _LOG.info("Warm-up the optimizer with: %d configs, %d scores, %d status values",
+        _LOG.info("Update the optimizer with: %d configs, %d scores, %d status values",
                   len(configs or []), len(scores or []), len(status or []))
         if len(configs or []) != len(scores or []):
             raise ValueError("Numbers of configs and scores do not match.")
@@ -206,10 +254,11 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             self._start_with_defaults = False
         return has_data
 
-    @abstractmethod
     def suggest(self) -> TunableGroups:
         """
         Generate the next suggestion.
+        Base class' implementation increments the iteration count
+        and returns the current values of the tunables.
 
         Returns
         -------
@@ -218,10 +267,13 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             These are the same tunables we pass to the constructor,
             but with the values set to the next suggestion.
         """
+        self._iter += 1
+        _LOG.debug("Iteration %d :: Suggest", self._iter)
+        return self._tunables.copy()
 
     @abstractmethod
     def register(self, tunables: TunableGroups, status: Status,
-                 score: Optional[Union[float, Dict[str, float]]] = None) -> Optional[float]:
+                 score: Optional[Dict[str, TunableValue]] = None) -> Optional[Dict[str, float]]:
         """
         Register the observation for the given configuration.
 
@@ -232,22 +284,25 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             Usually it's the same config that the `.suggest()` method returned.
         status : Status
             Final status of the experiment (e.g., SUCCEEDED or FAILED).
-        score : Union[float, Dict[str, float]]
-            A scalar or a dict with the final benchmark results.
+        score : Optional[Dict[str, TunableValue]]
+            A dict with the final benchmark results.
             None if the experiment was not successful.
 
         Returns
         -------
-        value : float
-            The scalar benchmark score extracted (and possibly transformed) from the dataframe that's being minimized.
+        value : Optional[Dict[str, float]]
+            Benchmark scores extracted (and possibly transformed)
+            from the dataframe that's being MINIMIZED.
         """
         _LOG.info("Iteration %d :: Register: %s = %s score: %s",
                   self._iter, tunables, status, score)
         if status.is_succeeded() == (score is None):  # XOR
             raise ValueError("Status and score must be consistent.")
-        return self._get_score(status, score)
+        return self._get_scores(status, score)
 
-    def _get_score(self, status: Status, score: Optional[Union[float, Dict[str, float]]]) -> Optional[float]:
+    def _get_scores(self, status: Status,
+                    scores: Optional[Union[Dict[str, TunableValue], Dict[str, float]]]
+                    ) -> Optional[Dict[str, float]]:
         """
         Extract a scalar benchmark score from the dataframe.
         Change the sign if we are maximizing.
@@ -256,40 +311,46 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         ----------
         status : Status
             Final status of the experiment (e.g., SUCCEEDED or FAILED).
-        score : Union[float, Dict[str, float]]
-            A scalar or a dict with the final benchmark results.
+        scores : Optional[Dict[str, TunableValue]]
+            A dict with the final benchmark results.
             None if the experiment was not successful.
 
         Returns
         -------
-        score : float
-            A scalar benchmark score to be used as a primary target for MINIMIZATION.
+        score : Optional[Dict[str, float]]
+            An optional dict of benchmark scores to be used as targets for MINIMIZATION.
         """
         if not status.is_completed():
             return None
-        if status.is_succeeded():
-            assert score is not None
-            if isinstance(score, dict):
-                score = score[self._opt_target]
-            return float(score) * self._opt_sign
-        assert score is None
-        return float("inf")
+
+        if not status.is_succeeded():
+            assert scores is None
+            return {opt_target: float("inf") for opt_target in self._opt_targets}
+
+        assert scores is not None
+        target_metrics: Dict[str, float] = {}
+        for (opt_target, opt_dir) in self._opt_targets.items():
+            val = scores[opt_target]
+            assert val is not None
+            target_metrics[opt_target] = float(val) * opt_dir
+
+        return target_metrics
 
     def not_converged(self) -> bool:
         """
         Return True if not converged, False otherwise.
         Base implementation just checks the iteration count.
         """
-        return self._iter <= self._max_iter
+        return self._iter < self._max_iter
 
     @abstractmethod
-    def get_best_observation(self) -> Union[Tuple[float, TunableGroups], Tuple[None, None]]:
+    def get_best_observation(self) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
         """
         Get the best observation so far.
 
         Returns
         -------
-        (value, tunables) : Tuple[float, TunableGroups]
+        (value, tunables) : Tuple[Dict[str, float], TunableGroups]
             The best value and the corresponding configuration.
             (None, None) if no successful observation has been registered yet.
         """

@@ -16,6 +16,8 @@ jobs:
   # Check in-repo markdown links
   markdown-link-check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 5
     steps:
     - uses: actions/checkout@v4
@@ -23,6 +25,6 @@ jobs:
       with:
         use-quiet-mode: yes
         use-verbose-mode: yes
-        folder-path: './doc, ./mlos_core, ./mlos_bench, ./.devcontainer'
+        folder-path: './doc, ./mlos_core, ./mlos_bench, ./mlos_viz, ./.devcontainer'
         file-path: './CODE_OF_CONDUCT.md, ./CONTRIBUTING.md, ./README.md, ./SECURITY.md'
         config-file: './.github/workflows/markdown-link-check-config.json'

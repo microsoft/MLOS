@@ -1,0 +1,57 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/azure/azure-deployment-service-subschema.json",
+    "title": "mlos_bench Azure Base Deployment Service config",
+    "description": "Base config schema for an mlos_bench Azure Deployment Services",
+    "$defs": {
+        "azure_deployment_service_config": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "../../common-defs-subschemas.json#/$defs/poll_configs"
+                },
+                {
+                    "properties": {
+                        "subscription": {
+                            "description": "Azure subscription id (typically provided in the global config in order to omit from source control).",
+                            "type": "string"
+                        },
+                        "resourceGroup": {
+                            "description": "The name of the resource group to place the deployment in (typically provided in the global config in order to omit from source control).",
+                            "type": "string"
+                        },
+                        "deploymentTemplatePath": {
+                            "description": "Path to an ARM template file, or null if it should be skipped.",
+                            "type": ["string", "null"],
+                            "pattern": "[.]json[c]?$"
+                        },
+                        "deploymentTemplateParameters": {
+                            "description": "Key/value pairs of ARM template parameters.",
+                            "type": "object",
+                            "additionalProperties": {
+                                "$comment": "The value of any parameter can be a string, number, boolean, or null or an array of the same.",
+                                "type": [
+                                    "string",
+                                    "number",
+                                    "boolean",
+                                    "null",
+                                    "array"
+                                ],
+                                "items": {
+                                    "$comment": "The value of any const_arg list can be a string, number, boolean, or null.",
+                                    "type": [
+                                        "string",
+                                        "number",
+                                        "boolean",
+                                        "null"
+                                    ]
+                                }
+                            },
+                            "minProperties": 1
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

@@ -3,7 +3,6 @@
     "config": {
         "subscription": "subscription-id",
         "resourceGroup": "rg",
-        "deploymentName": "deployment",
         "deploymentTemplatePath": "some/path/to/deployment/template.jsonc",
         "deploymentTemplateParameters": {
             // "param": "value" // <-- need at least one parameter

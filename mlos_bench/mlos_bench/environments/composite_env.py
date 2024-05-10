@@ -179,7 +179,7 @@ class CompositeEnv(Environment):
             env_context.teardown()
         super().teardown()
 
-    def run(self) -> Tuple[Status, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
         """
         Submit a new experiment to the environment.
         Return the result of the *last* child environment if successful,
@@ -187,48 +187,50 @@ class CompositeEnv(Environment):
 
         Returns
         -------
-        (status, output) : (Status, dict)
-            A pair of (Status, output) values, where `output` is a dict
+        (status, timestamp, output) : (Status, datetime, dict)
+            3-tuple of (Status, timestamp, output) values, where `output` is a dict
             with the results or None if the status is not COMPLETED.
             If run script is a benchmark, then the score is usually expected to
             be in the `score` field.
         """
         _LOG.info("Run: %s", self._children)
-        (status, metrics) = super().run()
+        (status, timestamp, metrics) = super().run()
         if not status.is_ready():
-            return (status, metrics)
+            return (status, timestamp, metrics)
 
         joint_metrics = {}
         for env_context in self._child_contexts:
             _LOG.debug("Child env. run: %s", env_context)
-            (status, metrics) = env_context.run()
+            (status, timestamp, metrics) = env_context.run()
             _LOG.debug("Child env. run results: %s :: %s %s", env_context, status, metrics)
             if not status.is_good():
                 _LOG.info("Run failed: %s :: %s", self, status)
-                return (status, None)
+                return (status, timestamp, None)
             joint_metrics.update(metrics or {})
 
         _LOG.info("Run completed: %s :: %s %s", self, status, joint_metrics)
-        return (status, joint_metrics)
+        # Return the status and the timestamp of the last child environment.
+        return (status, timestamp, joint_metrics)
 
-    def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
+    def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
         """
         Check the status of the benchmark environment.
 
         Returns
         -------
-        (benchmark_status, telemetry) : (Status, list)
-            A pair of (benchmark status, telemetry) values.
+        (benchmark_status, timestamp, telemetry) : (Status, datetime, list)
+            3-tuple of (benchmark status, timestamp, telemetry) values.
+            `timestamp` is UTC time stamp of the status; it's current time by default.
             `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
         """
-        (status, telemetry) = super().status()
+        (status, timestamp, telemetry) = super().status()
         if not status.is_ready():
-            return (status, telemetry)
+            return (status, timestamp, telemetry)
 
         joint_telemetry = []
         final_status = None
         for env_context in self._child_contexts:
-            (status, telemetry) = env_context.status()
+            (status, timestamp, telemetry) = env_context.status()
             _LOG.debug("Child env. status: %s :: %s", env_context, status)
             joint_telemetry.extend(telemetry)
             if not status.is_good() and final_status is None:
@@ -236,4 +238,5 @@ class CompositeEnv(Environment):
 
         final_status = final_status or status
         _LOG.info("Final status: %s :: %s", self, final_status)
-        return (final_status, joint_telemetry)
+        # Return the status and the timestamp of the last child environment or the first failed child environment.
+        return (final_status, timestamp, joint_telemetry)

@@ -106,10 +106,13 @@ class ConfigSchema(Enum):
     GLOBALS = path_join(CONFIG_SCHEMA_DIR, "cli/globals-schema.json")
     ENVIRONMENT = path_join(CONFIG_SCHEMA_DIR, "environments/environment-schema.json")
     OPTIMIZER = path_join(CONFIG_SCHEMA_DIR, "optimizers/optimizer-schema.json")
+    SCHEDULER = path_join(CONFIG_SCHEMA_DIR, "schedulers/scheduler-schema.json")
     SERVICE = path_join(CONFIG_SCHEMA_DIR, "services/service-schema.json")
     STORAGE = path_join(CONFIG_SCHEMA_DIR, "storage/storage-schema.json")
     TUNABLE_PARAMS = path_join(CONFIG_SCHEMA_DIR, "tunables/tunable-params-schema.json")
     TUNABLE_VALUES = path_join(CONFIG_SCHEMA_DIR, "tunables/tunable-values-schema.json")
+
+    UNIFIED = path_join(CONFIG_SCHEMA_DIR, "mlos-bench-config-schema.json")
 
     @property
     def schema(self) -> dict:

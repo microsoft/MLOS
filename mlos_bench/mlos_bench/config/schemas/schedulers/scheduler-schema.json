@@ -1,0 +1,106 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/schedulers/scheduler-schema.json",
+    "title": "mlos_bench Scheduler config",
+
+    "$defs": {
+        "comment": {
+            "$comment": "This section contains reusable partial schema bits (or just split out for readability)"
+        },
+
+        "config_base_scheduler": {
+            "$comment": "config properties common to all Scheduler types.",
+            "type": "object",
+            "properties": {
+                "experiment_id": {
+                    "$ref": "../cli/common-defs-subschemas.json#/$defs/experiment_id"
+                },
+                "trial_id": {
+                    "$ref": "../cli/common-defs-subschemas.json#/$defs/trial_id"
+                },
+                "config_id": {
+                    "$ref": "../cli/common-defs-subschemas.json#/$defs/config_id"
+                },
+                "teardown": {
+                    "description": "Whether to teardown the experiment after running it.",
+                    "type": "boolean"
+                },
+                "max_trials": {
+                    "description": "Max. number of trials to run. Use -1 or 0 for unlimited.",
+                    "type": "integer",
+                    "minimum": -1,
+                    "examples": [50, -1]
+                },
+                "trial_config_repeat_count": {
+                    "description": "Number of times to repeat a config.",
+                    "type": "integer",
+                    "minimum": 1,
+                    "examples": [3, 5]
+                }
+            }
+        }
+    },
+
+    "description": "config for the mlos_bench scheduler",
+    "$comment": "top level schema document rules",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "description": "The schema to use for validating the scheduler config (accepts both URLs and local paths).",
+            "type": "string",
+            "$comment": "This is optional, but if provided, should match the name of this file.",
+            "pattern": "/schemas/schedulers/scheduler-schema.json$"
+        },
+
+        "description": {
+            "description": "Optional description of the config.",
+            "type": "string"
+        },
+
+        "class": {
+            "description": "The name of the scheduler class to use.",
+            "$comment": "required",
+            "enum": [
+                "mlos_bench.schedulers.SyncScheduler",
+                "mlos_bench.schedulers.sync_scheduler.SyncScheduler"
+            ]
+        },
+
+        "config": {
+            "description": "The scheduler-specific config.",
+            "$comment": "Stub for scheduler-specific config appended with condition statements below",
+            "type": "object",
+            "minProperties": 1
+        }
+    },
+    "required": ["class"],
+
+    "oneOf": [
+        {
+            "$comment": "extensions to the 'config' object properties when synchronous scheduler is being used",
+            "if": {
+                "properties": {
+                    "class": {
+                        "enum": [
+                            "mlos_bench.schedulers.SyncScheduler",
+                            "mlos_bench.schedulers.sync_scheduler.SyncScheduler"
+                        ]
+                    }
+                },
+                "required": ["class"]
+            },
+            "then": {
+                "properties": {
+                    "config": {
+                        "type": "object",
+                        "allOf": [{ "$ref": "#/$defs/config_base_scheduler" }],
+                        "$comment": "disallow other properties",
+                        "unevaluatedProperties": false
+                    }
+                }
+            },
+            "else": false
+        }
+    ],
+    "unevaluatedProperties": false
+}

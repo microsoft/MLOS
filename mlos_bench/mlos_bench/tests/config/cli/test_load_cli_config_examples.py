@@ -20,6 +20,7 @@ from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments import Environment
 from mlos_bench.optimizers import Optimizer
 from mlos_bench.storage import Storage
+from mlos_bench.schedulers import Scheduler
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.launcher import Launcher
 from mlos_bench.util import path_join
@@ -52,7 +53,7 @@ assert configs
 
 @pytest.mark.skip(reason="Use full Launcher test (below) instead now.")
 @pytest.mark.parametrize("config_path", configs)
-def test_load_cli_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
+def test_load_cli_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:   # pragma: no cover
     """Tests loading a config example."""
     # pylint: disable=too-complex
     config = config_loader_service.load_config(config_path, ConfigSchema.CLI)
@@ -158,5 +159,10 @@ def test_load_cli_config_examples_via_launcher(config_loader_service: ConfigPers
     if "storage" in config:
         storage_config = launcher.config_loader.load_config(config["storage"], ConfigSchema.STORAGE)
         assert check_class_name(launcher.storage, storage_config["class"])
+
+    assert isinstance(launcher.scheduler, Scheduler)
+    if "scheduler" in config:
+        scheduler_config = launcher.config_loader.load_config(config["scheduler"], ConfigSchema.SCHEDULER)
+        assert check_class_name(launcher.scheduler, scheduler_config["class"])
 
     # TODO: Check that the launcher assigns the tunables values as expected.

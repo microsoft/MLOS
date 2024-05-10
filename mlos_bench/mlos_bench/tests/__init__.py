@@ -6,19 +6,34 @@
 Tests for mlos_bench.
 Used to make mypy happy about multiple conftest.py modules.
 """
-
+from datetime import tzinfo
 from logging import debug, warning
 from subprocess import run
-from typing import Optional
+from typing import List, Optional
 
 import filecmp
 import os
 import socket
 import shutil
 
+import pytz
 import pytest
 
-from mlos_bench.util import get_class_from_name
+from mlos_bench.util import get_class_from_name, nullable
+
+
+ZONE_NAMES = [
+    # Explicit time zones.
+    "UTC",
+    "America/Chicago",
+    "America/Los_Angeles",
+    # Implicit local time zone.
+    None,
+]
+ZONE_INFO: List[Optional[tzinfo]] = [
+    nullable(pytz.timezone, zone_name)
+    for zone_name in ZONE_NAMES
+]
 
 
 # A decorator for tests that require docker.

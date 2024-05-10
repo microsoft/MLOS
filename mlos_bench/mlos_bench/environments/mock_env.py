@@ -8,6 +8,7 @@ Scheduler-side environment to mock the benchmark results.
 
 import random
 import logging
+from datetime import datetime
 from typing import Dict, Optional, Tuple
 
 import numpy
@@ -16,6 +17,7 @@ from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.tunables import Tunable, TunableGroups, TunableValue
+from mlos_bench.util import nullable
 
 _LOG = logging.getLogger(__name__)
 
@@ -56,25 +58,25 @@ class MockEnv(Environment):
         super().__init__(name=name, config=config, global_config=global_config,
                          tunables=tunables, service=service)
         seed = self.config.get("seed")
-        self._random = random.Random(seed) if seed is not None else None
+        self._random = nullable(random.Random, seed)
         self._range = self.config.get("range")
         self._metrics = self.config.get("metrics", ["score"])
         self._is_ready = True
 
-    def run(self) -> Tuple[Status, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
         """
         Produce mock benchmark data for one experiment.
 
         Returns
         -------
-        (status, output) : (Status, dict)
-            A pair of (Status, output) values, where `output` is a dict
+        (status, timestamp, output) : (Status, datetime, dict)
+            3-tuple of (Status, timestamp, output) values, where `output` is a dict
             with the results or None if the status is not COMPLETED.
             The keys of the `output` dict are the names of the metrics
             specified in the config; by default it's just one metric
             named "score". All output metrics have the same value.
         """
-        (status, _) = result = super().run()
+        (status, timestamp, _) = result = super().run()
         if not status.is_ready():
             return result
 
@@ -89,7 +91,7 @@ class MockEnv(Environment):
         if self._range:
             score = self._range[0] + score * (self._range[1] - self._range[0])
 
-        return (Status.SUCCEEDED, {metric: score for metric in self._metrics})
+        return (Status.SUCCEEDED, timestamp, {metric: score for metric in self._metrics})
 
     @staticmethod
     def _normalized(tunable: Tunable) -> float:

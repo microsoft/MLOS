@@ -27,7 +27,7 @@ docker run -i --rm \
     -v "$reporoot":/src:ro \
     --workdir /src \
     markdown-link-check:latest \
-    find ./doc ./mlos_core ./mlos_bench ./.devcontainer -name '*.md' -not -path './node_modules/*' \
+    find ./doc ./mlos_core ./mlos_bench ./mlos_viz ./.devcontainer -name '*.md' -not -path './node_modules/*' \
         -exec markdown-link-check '{}' --config ./.github/workflows/markdown-link-check-config.json -q -v ';'
 
 docker run -i --rm \

@@ -9,7 +9,10 @@ e.g. Application Environment
 """
 
 import logging
+from datetime import datetime
 from typing import Dict, Iterable, Optional, Tuple
+
+from pytz import UTC
 
 from mlos_bench.environments.status import Status
 from mlos_bench.environments.script_env import ScriptEnv
@@ -104,7 +107,7 @@ class RemoteEnv(ScriptEnv):
 
         if self._script_setup:
             _LOG.info("Set up the remote environment: %s", self)
-            (status, _) = self._remote_exec(self._script_setup)
+            (status, _timestamp, _output) = self._remote_exec(self._script_setup)
             _LOG.info("Remote set up complete: %s :: %s", self, status)
             self._is_ready = status.is_succeeded()
         else:
@@ -112,7 +115,7 @@ class RemoteEnv(ScriptEnv):
 
         return self._is_ready
 
-    def run(self) -> Tuple[Status, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
         """
         Runs the run script on the remote environment.
 
@@ -122,22 +125,22 @@ class RemoteEnv(ScriptEnv):
 
         Returns
         -------
-        (status, output) : (Status, dict)
-            A pair of (Status, output) values, where `output` is a dict
+        (status, timestamp, output) : (Status, datetime, dict)
+            3-tuple of (Status, timestamp, output) values, where `output` is a dict
             with the results or None if the status is not COMPLETED.
             If run script is a benchmark, then the score is usually expected to
             be in the `score` field.
         """
         _LOG.info("Run script remotely on: %s", self)
-        (status, _) = result = super().run()
+        (status, timestamp, _) = result = super().run()
         if not (status.is_ready() and self._script_run):
             return result
 
-        (status, output) = self._remote_exec(self._script_run)
+        (status, timestamp, output) = self._remote_exec(self._script_run)
         if status.is_succeeded() and output is not None:
             output = self._extract_stdout_results(output.get("stdout", ""))
         _LOG.info("Remote run complete: %s :: %s = %s", self, status, output)
-        return (status, output)
+        return (status, timestamp, output)
 
     def teardown(self) -> None:
         """
@@ -145,11 +148,11 @@ class RemoteEnv(ScriptEnv):
         """
         if self._script_teardown:
             _LOG.info("Remote teardown: %s", self)
-            (status, _) = self._remote_exec(self._script_teardown)
+            (status, _timestamp, _output) = self._remote_exec(self._script_teardown)
             _LOG.info("Remote teardown complete: %s :: %s", self, status)
         super().teardown()
 
-    def _remote_exec(self, script: Iterable[str]) -> Tuple[Status, Optional[dict]]:
+    def _remote_exec(self, script: Iterable[str]) -> Tuple[Status, datetime, Optional[dict]]:
         """
         Run a script on the remote host.
 
@@ -160,8 +163,8 @@ class RemoteEnv(ScriptEnv):
 
         Returns
         -------
-        result : (Status, dict)
-            A pair of Status and dict with the benchmark/script results.
+        result : (Status, datetime, dict)
+            3-tuple of Status, timestamp, and dict with the benchmark/script results.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
         env_params = self._get_env_params()
@@ -172,4 +175,6 @@ class RemoteEnv(ScriptEnv):
         if status in {Status.PENDING, Status.SUCCEEDED}:
             (status, output) = self._remote_exec_service.get_remote_exec_results(output)
         _LOG.debug("Status: %s :: %s", status, output)
-        return (status, output)
+        # FIXME: get the timestamp from the remote environment!
+        timestamp = datetime.now(UTC)
+        return (status, timestamp, output)

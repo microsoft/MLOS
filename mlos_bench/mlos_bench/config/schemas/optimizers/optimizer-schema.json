@@ -12,18 +12,11 @@
             "$comment": "config properties common to all optimizer types.",
             "type": "object",
             "properties": {
-                "optimization_target": {
-                    "description": "The name of the metric to optimize.",
-                    "type": "string",
-                    "example": "score"
+                "optimization_targets": {
+                    "$ref": "../cli/common-defs-subschemas.json#/$defs/optimization_targets"
                 },
-                "optimization_direction": {
-                    "description": "Whether to minimize or maximize the optimization target.",
-                    "enum": ["min", "max"],
-                    "example": "min"
-                },
-                "max_iterations": {
-                    "description": "The maximum number of additional (in the case of merging experiment data or resuming experiments) iterations to run when we launch the app.",
+                "max_suggestions": {
+                    "description": "The maximum number of additional (in the case of merging experiment data or resuming experiments) config suggestions to run when we launch the app, or no limit if 0 is provided. Note: configs may be repeated in more than one trial.",
                     "type": "integer",
                     "minimum": 0,
                     "example": 100
@@ -64,6 +57,8 @@
             "enum": [
                 "mlos_bench.optimizers.MlosCoreOptimizer",
                 "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+                "mlos_bench.optimizers.GridSearchOptimizer",
+                "mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer",
                 "mlos_bench.optimizers.MockOptimizer",
                 "mlos_bench.optimizers.mock_optimizer.MockOptimizer",
                 "mlos_bench.optimizers.OneShotOptimizer",
@@ -125,6 +120,32 @@
                     }
                 },
                 "$comment": "Set 'else' to false to prevent it to defaulting to a valid document match."
+            },
+            "else": false
+        },
+
+        {
+            "$comment": "extensions to the 'config' object properties when the mock optimizer is being used",
+            "if": {
+                "properties": {
+                    "class": {
+                        "enum": [
+                            "mlos_bench.optimizers.GridSearchOptimizer",
+                            "mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer"
+                        ]
+                    }
+                },
+                "required": ["class"]
+            },
+            "then": {
+                "properties": {
+                    "config": {
+                        "type": "object",
+                        "allOf": [{ "$ref": "#/$defs/config_base_optimizer" }],
+                        "$comment": "disallow other properties",
+                        "unevaluatedProperties": false
+                    }
+                }
             },
             "else": false
         },

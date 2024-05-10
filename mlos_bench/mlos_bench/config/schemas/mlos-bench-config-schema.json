@@ -1,0 +1,92 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/mlos-bench-config-schema.json",
+    "title": "mlos_bench config schema",
+    "description": "Any mlos_bench config - this is the top level schema that should be used to validate any mlos_bench config",
+    "if": {
+        "$comment": "check if the config has a class or services property",
+        "type": "object",
+        "properties": {
+            "class": {
+                "type": "string"
+            },
+            "services": {
+                "type": "array"
+            }
+        },
+        "oneOf": [
+            {
+                "required": ["class"]
+            },
+            {
+                "properties": {
+                    "$schema": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "services": {
+                        "type": "array"
+                    }
+                },
+                "unevaluatedProperties": false,
+                "required": ["services"]
+            }
+        ]
+    },
+    "then": {
+        "oneOf": [
+             {
+                "description": "environment config",
+                "type": "object",
+                "$ref": "./environments/environment-schema.json"
+            },
+            {
+                "description": "optimizer config",
+                "type": "object",
+                "$ref": "./optimizers/optimizer-schema.json"
+            },
+            {
+                "description": "scheduler config",
+                "type": "object",
+                "$ref": "./schedulers/scheduler-schema.json"
+            },
+            {
+                "description": "service config",
+                "type": "object",
+                "$ref": "./services/service-schema.json"
+            },
+            {
+                "description": "storage config",
+                "type": "object",
+                "$ref": "./storage/storage-schema.json"
+            }
+        ]
+    },
+    "else": {
+        "$comment": "these configs are *mostly* flat dicts",
+        "anyOf": [
+            {
+                "description": "cli config",
+                "type": "object",
+                "$ref": "./cli/cli-schema.json"
+            },
+            {
+                "description": "globals config",
+                "type": "object",
+                "$ref": "./cli/globals-schema.json"
+            },
+            {
+                "description": "tunables params config",
+                "type": "object",
+                "$ref": "./tunables/tunable-params-schema.json"
+            },
+            {
+                "description": "tunables values config",
+                "type": "object",
+                "$ref": "./tunables/tunable-values-schema.json"
+            }
+        ]
+    }
+}

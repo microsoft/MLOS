@@ -23,19 +23,19 @@ def mock_configurations_no_defaults() -> list:
         ({
             "vmSize": "Standard_B4ms",
             "idle": "halt",
-            "kernel_sched_migration_cost_ns": 13111,
+            "kernel_sched_migration_cost_ns": 13112,
             "kernel_sched_latency_ns": 796233790,
         }, 88.88),
         ({
             "vmSize": "Standard_B2ms",
             "idle": "halt",
-            "kernel_sched_migration_cost_ns": 117025,
+            "kernel_sched_migration_cost_ns": 117026,
             "kernel_sched_latency_ns": 149827706,
         }, 66.66),
         ({
             "vmSize": "Standard_B4ms",
             "idle": "halt",
-            "kernel_sched_migration_cost_ns": 354784,
+            "kernel_sched_migration_cost_ns": 354785,
             "kernel_sched_latency_ns": 795285932,
         }, 99.99),
     ]
@@ -64,12 +64,12 @@ def _optimize(mock_opt: MockOptimizer, mock_configurations: list) -> float:
         assert mock_opt.not_converged()
         tunables = mock_opt.suggest()
         assert tunables.get_param_values() == tunable_values
-        mock_opt.register(tunables, Status.SUCCEEDED, score)
+        mock_opt.register(tunables, Status.SUCCEEDED, {"score": score})
 
-    (score, _tunables) = mock_opt.get_best_observation()
-    assert score is not None
-    assert isinstance(score, float)
-    return score
+    (scores, _tunables) = mock_opt.get_best_observation()
+    assert scores is not None
+    assert len(scores) == 1
+    return scores["score"]
 
 
 def test_mock_optimizer(mock_opt: MockOptimizer, mock_configurations: list) -> None:
@@ -102,9 +102,9 @@ def test_mock_optimizer_register_fail(mock_opt: MockOptimizer) -> None:
     Check the input acceptance conditions for Optimizer.register().
     """
     tunables = mock_opt.suggest()
-    mock_opt.register(tunables, Status.SUCCEEDED, 10)
+    mock_opt.register(tunables, Status.SUCCEEDED, {"score": 10})
     mock_opt.register(tunables, Status.FAILED)
     with pytest.raises(ValueError):
         mock_opt.register(tunables, Status.SUCCEEDED, None)
     with pytest.raises(ValueError):
-        mock_opt.register(tunables, Status.FAILED, 10)
+        mock_opt.register(tunables, Status.FAILED, {"score": 10})

@@ -8,14 +8,14 @@ Contains the BaseOptimizer abstract class.
 
 import collections
 from abc import ABCMeta, abstractmethod
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import ConfigSpace
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from mlos_core import config_to_dataframe
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
+from mlos_core.util import config_to_dataframe
 
 
 class BaseOptimizer(metaclass=ABCMeta):
@@ -167,13 +167,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             metadata = self.delayed_metadata
 
         else:
-            if self.delayed_config is None:
-                configuration, metadata = self._suggest(context)
-            else:
-                configuration, metadata = self.delayed_config, self.delayed_metadata
-                self.delayed_config, self.delayed_metadata = None, None
-
-            assert len(metadata) == 1, "Suggest must return a single metadata row."
+            configuration = self._suggest(context)
             assert (
                 len(configuration) == 1
             ), "Suggest must return a single configuration."
@@ -185,8 +179,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             assert len(configuration.columns) == len(
                 self.parameter_space.values()
             ), "Space adapter transformed configuration with the wrong number of parameters."
-
-        return configuration, metadata
+        return configuration
 
     @abstractmethod
     def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
@@ -244,7 +237,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         if contexts is not None:
             # configs = pd.concat([configs, contexts], axis=1)
             # Not reachable for now
-            raise NotImplementedError()  # pragma: no cover
+            raise NotImplementedError()
         return configs
 
     def get_best_observation(self) -> pd.DataFrame:
@@ -289,7 +282,7 @@ class BaseOptimizer(metaclass=ABCMeta):
                     j += 1
         return pd.DataFrame(df_dict)
 
-    def _to_1hot(self, config: pd.DataFrame) -> npt.NDArray:
+    def _to_1hot(self, config: Union[pd.DataFrame, pd.Series]) -> npt.NDArray:
         """
         Convert pandas DataFrame to one-hot-encoded numpy array.
         """
@@ -305,10 +298,14 @@ class BaseOptimizer(metaclass=ABCMeta):
             j = 0
             for param in self.optimizer_parameter_space.values():
                 if config.ndim > 1:
+                    assert isinstance(config, pd.DataFrame)
                     col = config.columns.get_loc(param.name)
+                    assert isinstance(col, int)
                     val = config.iloc[i, col]
                 else:
+                    assert isinstance(config, pd.Series)
                     col = config.index.get_loc(param.name)
+                    assert isinstance(col, int)
                     val = config.iloc[col]
                 if isinstance(param, ConfigSpace.CategoricalHyperparameter):
                     offset = param.choices.index(val)

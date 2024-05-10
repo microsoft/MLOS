@@ -19,9 +19,11 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
+  - pandas
+  - pyarrow
   - swig
   - libpq
-  - python
+  - python=3.11
   # Install an SMAC requirement pre-compiled from conda-forge.
   # This also requires a more recent vs2015_runtime from conda-forge.
   - conda-forge::pyrfr>=0.9.0
@@ -36,8 +38,9 @@ dependencies:
     - types-colorama
     - types-jsonschema
     - types-pygments
-    - types-pytest-lazy-fixture
     - types-requests
     - types-setuptools
+    - pyarrow
     - "--editable ../mlos_core[full-tests]"
     - "--editable ../mlos_bench[full-tests]"
+    - "--editable ../mlos_viz[full-tests]"

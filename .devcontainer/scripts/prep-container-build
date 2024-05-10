@@ -30,7 +30,7 @@ if [ -d .devcontainer/tmp ]; then
 fi
 mkdir -p .devcontainer/tmp/
 cp -v conda-envs/mlos.yml .devcontainer/tmp/mlos.yml
-for pkg in mlos_core mlos_bench; do
+for pkg in mlos_core mlos_bench mlos_viz; do
     mkdir -p .devcontainer/tmp/$pkg
     cp -v $pkg/setup.py .devcontainer/tmp/$pkg/setup.py
     cp -v $pkg/_version.py .devcontainer/tmp/$pkg/_version.py

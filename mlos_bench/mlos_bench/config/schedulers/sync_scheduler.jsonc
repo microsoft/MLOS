@@ -1,0 +1,12 @@
+// Mock optimizer to test the benchmarking framework.
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/schedulers/scheduler-schema.json",
+
+    "class": "mlos_bench.schedulers.SyncScheduler",
+
+    "config": {
+        "trial_config_repeat_count": 3,
+        "max_trials": -1,  // Limited only in hte Optimizer logic/config.
+        "teardown": false
+    }
+}
