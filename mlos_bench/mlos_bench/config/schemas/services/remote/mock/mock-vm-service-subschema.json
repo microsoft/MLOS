@@ -1,8 +1,8 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/mock/mock-vm-service-subschema.json",
-    "title": "mlos_bench Mock FileShare Service config",
-    "description": "config for an mlos_bench Mock FileShare Service",
+    "title": "mlos_bench Mock VM Service config",
+    "description": "config for an mlos_bench Mock VM Service",
     "type": "object",
     "properties": {
         "class": {

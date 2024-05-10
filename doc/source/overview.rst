@@ -1,3 +1,9 @@
+##########################
+MLOS Package APIs Overview
+##########################
+
+This is a list of major functions and classes provided by the MLOS packages.
+
 #############################
 mlos-core API
 #############################
@@ -214,6 +220,8 @@ Optimizer Adapters
 
 Storage
 =======
+Base Runtime Backends
+---------------------
 .. currentmodule:: mlos_bench.storage
 .. autosummary::
    :toctree: generated/
@@ -221,11 +229,70 @@ Storage
 
    Storage
 
-SQL DB Storage
---------------
+.. currentmodule:: mlos_bench.storage.storage_factory
+.. autosummary::
+   :toctree: generated/
+   :template: function.rst
+
+   from_config
+
+SQL DB Storage Backend
+----------------------
 .. currentmodule:: mlos_bench.storage.sql.storage
 .. autosummary::
    :toctree: generated/
    :template: class.rst
 
    SqlStorage
+
+Analysis Client Access APIs
+---------------------------
+.. currentmodule:: mlos_bench.storage.base_experiment_data
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   ExperimentData
+
+.. currentmodule:: mlos_bench.storage.base_trial_data
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   TrialData
+
+.. currentmodule:: mlos_bench.storage.base_tunable_config_data
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   TunableConfigData
+
+.. currentmodule:: mlos_bench.storage.base_tunable_config_trial_group_data
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   TunableConfigTrialGroupData
+
+#############################
+mlos-viz API
+#############################
+
+This is a list of major functions and classes provided by `mlos_viz`.
+
+.. currentmodule:: mlos_viz
+
+.. currentmodule:: mlos_viz
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   MlosVizMethod
+
+.. currentmodule:: mlos_viz
+.. autosummary::
+   :toctree: generated/
+   :template: function.rst
+
+   plot

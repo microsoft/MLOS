@@ -1,4 +1,9 @@
 {
+    // The name of the experiment.
+    // This is required value and should be unique across incompatible experiments
+    // (e.g., those with differing tunables, scripts, versions, etc.), since it also
+    // controls how trial data is stored and reloaded to resume and repopulate the
+    // optimizer state.
     "experiment_id": "RedisBench",
 
     // Any global parameter can be used as a dollar variable in the global config:
@@ -36,6 +41,5 @@
         "redis": []
     },
 
-    "optimization_target": "score",
-    "optimization_direction": "min"
+    "optimization_targets": {"score": "min"}
 }

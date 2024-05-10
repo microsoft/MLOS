@@ -7,7 +7,7 @@ Tests helpers for mlos_bench.environments.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 
@@ -19,7 +19,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 def check_env_success(env: Environment,
                       tunable_groups: TunableGroups,
-                      expected_results: Dict[str, Union[TunableValue]],
+                      expected_results: Dict[str, TunableValue],
                       expected_telemetry: List[Tuple[datetime, str, Any]],
                       global_config: Optional[dict] = None) -> None:
     """
@@ -42,11 +42,11 @@ def check_env_success(env: Environment,
 
         assert env_context.setup(tunable_groups, global_config)
 
-        (status, data) = env_context.run()
+        (status, _ts, data) = env_context.run()
         assert status.is_succeeded()
         assert data == pytest.approx(expected_results, nan_ok=True)
 
-        (status, telemetry) = env_context.status()
+        (status, _ts, telemetry) = env_context.status()
         assert status.is_good()
         assert telemetry == pytest.approx(expected_telemetry, nan_ok=True)
 
@@ -69,7 +69,7 @@ def check_env_fail_telemetry(env: Environment, tunable_groups: TunableGroups) ->
     with env as env_context:
 
         assert env_context.setup(tunable_groups)
-        (status, _data) = env_context.run()
+        (status, _ts, _data) = env_context.run()
         assert status.is_succeeded()
 
         with pytest.raises(ValueError):

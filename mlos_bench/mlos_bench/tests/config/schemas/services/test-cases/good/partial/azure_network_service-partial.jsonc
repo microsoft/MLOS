@@ -1,0 +1,11 @@
+{
+    "class": "mlos_bench.services.remote.azure.AzureNetworkService",
+    "config": {
+        "subscription": "subscription-id",
+        "resourceGroup": "rg",
+        "deploymentTemplatePath": "some/path/to/deployment/template.jsonc",
+        "deploymentTemplateParameters": {
+            "param": "value"
+        }
+    }
+}

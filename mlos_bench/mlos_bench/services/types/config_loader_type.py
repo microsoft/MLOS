@@ -6,7 +6,7 @@
 Protocol interface for helper functions to lookup and load configs.
 """
 
-from typing import Dict, List, Iterable, Optional, Union, Protocol, runtime_checkable, TYPE_CHECKING
+from typing import Any, Dict, List, Iterable, Optional, Union, Protocol, runtime_checkable, TYPE_CHECKING
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.tunables.tunable import TunableValue
@@ -126,4 +126,26 @@ class SupportsConfigLoading(Protocol):
         -------
         env : List[Environment]
             A list of new benchmarking environments.
+        """
+
+    def load_services(self, json_file_names: Iterable[str],
+                      global_config: Optional[Dict[str, Any]] = None,
+                      parent: Optional["Service"] = None) -> "Service":
+        """
+        Read the configuration files and bundle all service methods
+        from those configs into a single Service object.
+
+        Parameters
+        ----------
+        json_file_names : list of str
+            A list of service JSON configuration files.
+        global_config : dict
+            Global parameters to add to the service config.
+        parent : Service
+            An optional reference of the parent service to mix in.
+
+        Returns
+        -------
+        service : Service
+            A collection of service methods.
         """

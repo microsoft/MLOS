@@ -499,7 +499,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             ConfigSpace.Configuration(
                 self.optimizer_parameter_space, values=config.to_dict()
             )
-            for (_, config) in configurations.iterrows()
+            for (_, config) in configurations.astype("O").iterrows()
         ]
 
     def _to_context(self, contexts: pd.DataFrame) -> List[pd.Series]:

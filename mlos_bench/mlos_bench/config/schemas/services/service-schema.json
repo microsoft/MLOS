@@ -29,6 +29,9 @@
                             "$ref": "./remote/mock/mock-fileshare-service-subschema.json"
                         },
                         {
+                            "$ref": "./remote/mock/mock-network-service-subschema.json"
+                        },
+                        {
                             "$ref": "./remote/mock/mock-vm-service-subschema.json"
                         },
                         {
@@ -45,6 +48,9 @@
                         },
                         {
                             "$ref": "./remote/azure/azure-auth-service-subschema.json"
+                        },
+                        {
+                            "$ref": "./remote/azure/azure-network-service-subschema.json"
                         },
                         {
                             "$ref": "./remote/azure/azure-vm-service-subschema.json"

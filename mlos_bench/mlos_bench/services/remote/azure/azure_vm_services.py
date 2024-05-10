@@ -7,7 +7,6 @@ A collection Service functions for managing VMs on Azure.
 """
 
 import json
-import time
 import logging
 
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
@@ -16,36 +15,22 @@ import requests
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.types.authenticator_type import SupportsAuth
+from mlos_bench.services.remote.azure.azure_deployment_services import AzureDeploymentService
 from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 from mlos_bench.services.types.host_provisioner_type import SupportsHostProvisioning
 from mlos_bench.services.types.host_ops_type import SupportsHostOps
 from mlos_bench.services.types.os_ops_type import SupportsOSOps
-from mlos_bench.util import check_required_params, merge_parameters
+from mlos_bench.util import merge_parameters
 
 _LOG = logging.getLogger(__name__)
 
 
-class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, SupportsOSOps, SupportsRemoteExec):
+class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsHostOps, SupportsOSOps, SupportsRemoteExec):
     """
     Helper methods to manage VMs on Azure.
     """
 
-    _POLL_INTERVAL = 4     # seconds
-    _POLL_TIMEOUT = 300    # seconds
-    _REQUEST_TIMEOUT = 5   # seconds
-
-    # Azure Resources Deployment REST API as described in
-    # https://docs.microsoft.com/en-us/rest/api/resources/deployments
-
-    _URL_DEPLOY = (
-        "https://management.azure.com" +
-        "/subscriptions/{subscription}" +
-        "/resourceGroups/{resource_group}" +
-        "/providers/Microsoft.Resources" +
-        "/deployments/{deployment_name}" +
-        "?api-version=2022-05-01"
-    )
+    # pylint: disable=too-many-ancestors
 
     # Azure Compute REST API calls as described in
     # https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines
@@ -128,7 +113,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
                  parent: Optional[Service] = None,
                  methods: Union[Dict[str, Callable], List[Callable], None] = None):
         """
-        Create a new instance of Azure services proxy.
+        Create a new instance of Azure VM services proxy.
 
         Parameters
         ----------
@@ -165,30 +150,6 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             ])
         )
 
-        check_required_params(
-            self.config, {
-                "subscription",
-                "resourceGroup",
-                "deploymentName",
-                "deploymentTemplatePath",
-                "deploymentTemplateParameters",
-            }
-        )
-
-        # These parameters can come from command line as strings, so conversion is needed.
-        self._poll_interval = float(self.config.get("pollInterval", self._POLL_INTERVAL))
-        self._poll_timeout = float(self.config.get("pollTimeout", self._POLL_TIMEOUT))
-        self._request_timeout = float(self.config.get("requestTimeout", self._REQUEST_TIMEOUT))
-
-        # TODO: Provide external schema validation?
-        template = self.config_loader_service.load_config(
-            self.config['deploymentTemplatePath'], schema_type=None)
-        assert template is not None and isinstance(template, dict)
-        self._deploy_template = template
-
-        self._deploy_params = merge_parameters(
-            dest=self.config['deploymentTemplateParameters'].copy(), source=global_config)
-
         # As a convenience, allow reading customData out of a file, rather than
         # embedding it in a json config file.
         # Note: ARM templates expect this data to be base64 encoded, but that
@@ -201,118 +162,14 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             with open(self._custom_data_file, 'r', encoding='utf-8') as custom_data_fh:
                 self._deploy_params["customData"] = custom_data_fh.read()
 
-    def _get_headers(self) -> dict:
-        """
-        Get the headers for the REST API calls.
-        """
-        assert self._parent is not None and isinstance(self._parent, SupportsAuth), \
-            "Authorization service not provided. Include service-auth.jsonc?"
-        return self._parent.get_auth_headers()
-
-    @staticmethod
-    def _extract_arm_parameters(json_data: dict) -> dict:
-        """
-        Extract parameters from the ARM Template REST response JSON.
-
-        Returns
-        -------
-        parameters : dict
-            Flat dictionary of parameters and their values.
-        """
-        return {
-            key: val.get("value")
-            for (key, val) in json_data.get("properties", {}).get("parameters", {}).items()
-            if val.get("value") is not None
-        }
-
-    def _azure_vm_post_helper(self, params: dict, url: str) -> Tuple[Status, dict]:
-        """
-        General pattern for performing an action on an Azure VM via its REST API.
-
-        Parameters
-        ----------
-        params: dict
-            Flat dictionary of (key, value) pairs of tunable parameters.
-        url: str
-            REST API url for the target to perform on the Azure VM.
-            Should be a url that we intend to POST to.
-
-        Returns
-        -------
-        result : (Status, dict={})
-            A pair of Status and result.
-            Status is one of {PENDING, SUCCEEDED, FAILED}
-            Result will have a value for 'asyncResultsUrl' if status is PENDING,
-            and 'pollInterval' if suggested by the API.
-        """
-        _LOG.debug("Request: POST %s", url)
-
-        response = requests.post(url, headers=self._get_headers(), timeout=self._request_timeout)
-        _LOG.debug("Response: %s", response)
-
-        # Logical flow for async operations based on:
-        # https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/async-operations
-        if response.status_code == 200:
-            return (Status.SUCCEEDED, params.copy())
-        elif response.status_code == 202:
-            result = params.copy()
-            if "Azure-AsyncOperation" in response.headers:
-                result["asyncResultsUrl"] = response.headers.get("Azure-AsyncOperation")
-            elif "Location" in response.headers:
-                result["asyncResultsUrl"] = response.headers.get("Location")
-            if "Retry-After" in response.headers:
-                result["pollInterval"] = float(response.headers["Retry-After"])
-
-            return (Status.PENDING, result)
-        else:
-            _LOG.error("Response: %s :: %s", response, response.text)
-            # _LOG.error("Bad Request:\n%s", response.request.body)
-            return (Status.FAILED, {})
-
-    def _check_vm_operation_status(self, params: dict) -> Tuple[Status, dict]:
-        """
-        Checks the status of a pending operation on an Azure VM.
-
-        Parameters
-        ----------
-        params: dict
-            Flat dictionary of (key, value) pairs of tunable parameters.
-            Must have the "asyncResultsUrl" key to get the results.
-            If the key is not present, return Status.PENDING.
-
-        Returns
-        -------
-        result : (Status, dict)
-            A pair of Status and result.
-            Status is one of {PENDING, RUNNING, SUCCEEDED, FAILED}
-            Result is info on the operation runtime if SUCCEEDED, otherwise {}.
-        """
-        url = params.get("asyncResultsUrl")
-        if url is None:
-            return Status.PENDING, {}
-
-        try:
-            response = requests.get(url, headers=self._get_headers(), timeout=self._request_timeout)
-        except requests.exceptions.ReadTimeout:
-            _LOG.warning("Request timed out: %s", url)
-            # return Status.TIMED_OUT, {}
-            return Status.RUNNING, {}
-
-        if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Response: %s\n%s", response,
-                       json.dumps(response.json(), indent=2)
-                       if response.content else "")
-
-        if response.status_code == 200:
-            output = response.json()
-            status = output.get("status")
-            if status == "InProgress":
-                return Status.RUNNING, {}
-            elif status == "Succeeded":
-                return Status.SUCCEEDED, output
-
-        _LOG.error("Response: %s :: %s", response, response.text)
-        return Status.FAILED, {}
+    def _set_default_params(self, params: dict) -> dict:    # pylint: disable=no-self-use
+        # Try and provide a semi sane default for the deploymentName if not provided
+        # since this is a common way to set the deploymentName and can same some
+        # config work for the caller.
+        if "vmName" in params and "deploymentName" not in params:
+            params["deploymentName"] = f"{params['vmName']}-deployment"
+            _LOG.info("deploymentName missing from params. Defaulting to '%s'.", params["deploymentName"])
+        return params
 
     def wait_host_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
         """
@@ -333,12 +190,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
-        _LOG.info("Wait for %s to %s", params["deploymentName"],
-                  "provision" if is_setup else "deprovision")
-        return self._wait_while(self._check_deployment, Status.PENDING, params)
-
-    def wait_os_operation(self, params: dict) -> Tuple["Status", dict]:
-        return self.wait_host_operation(params)
+        return self._wait_deployment(params, is_setup=is_setup)
 
     def wait_host_operation(self, params: dict) -> Tuple[Status, dict]:
         """
@@ -360,113 +212,12 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
         _LOG.info("Wait for operation on VM %s", params["vmName"])
-        return self._wait_while(self._check_vm_operation_status, Status.RUNNING, params)
+        # Try and provide a semi sane default for the deploymentName
+        params.setdefault(f"{params['vmName']}-deployment")
+        return self._wait_while(self._check_operation_status, Status.RUNNING, params)
 
-    def _wait_while(self, func: Callable[[dict], Tuple[Status, dict]],
-                    loop_status: Status, params: dict) -> Tuple[Status, dict]:
-        """
-        Invoke `func` periodically while the status is equal to `loop_status`.
-        Return TIMED_OUT when timing out.
-
-        Parameters
-        ----------
-        func : a function
-            A function that takes `params` and returns a pair of (Status, {})
-        loop_status: Status
-            Steady state status - keep polling `func` while it returns `loop_status`.
-        params : dict
-            Flat dictionary of (key, value) pairs of tunable parameters.
-
-        Returns
-        -------
-        result : (Status, dict)
-            A pair of Status and result.
-        """
-        config = merge_parameters(
-            dest=self.config.copy(), source=params, required_keys=["deploymentName"])
-
-        poll_period = params.get("pollInterval", self._poll_interval)
-
-        _LOG.debug("Wait for %s status %s :: poll %.2f timeout %d s",
-                   config["deploymentName"], loop_status, poll_period, self._poll_timeout)
-
-        ts_timeout = time.time() + self._poll_timeout
-        poll_delay = poll_period
-        while True:
-            # Wait for the suggested time first then check status
-            ts_start = time.time()
-            if ts_start >= ts_timeout:
-                break
-
-            if poll_delay > 0:
-                _LOG.debug("Sleep for: %.2f of %.2f s", poll_delay, poll_period)
-                time.sleep(poll_delay)
-
-            (status, output) = func(params)
-            if status != loop_status:
-                return status, output
-
-            ts_end = time.time()
-            poll_delay = poll_period - ts_end + ts_start
-
-        _LOG.warning("Request timed out: %s", params)
-        return (Status.TIMED_OUT, {})
-
-    def _check_deployment(self, params: dict) -> Tuple[Status, dict]:
-        """
-        Check if Azure deployment exists.
-        Return SUCCEEDED if true, PENDING otherwise.
-
-        Parameters
-        ----------
-        _params : dict
-            Flat dictionary of (key, value) pairs of tunable parameters.
-            This parameter is not used; we need it for compatibility with
-            other polling functions used in `_wait_while()`.
-
-        Returns
-        -------
-        result : (Status, dict={})
-            A pair of Status and result. The result is always {}.
-            Status is one of {SUCCEEDED, PENDING, FAILED}
-        """
-        config = merge_parameters(
-            dest=self.config.copy(),
-            source=params,
-            required_keys=[
-                "subscription",
-                "resourceGroup",
-                "deploymentName",
-            ]
-        )
-
-        _LOG.info("Check deployment: %s", config["deploymentName"])
-
-        url = self._URL_DEPLOY.format(
-            subscription=config["subscription"],
-            resource_group=config["resourceGroup"],
-            deployment_name=config["deploymentName"],
-        )
-
-        response = requests.get(url, headers=self._get_headers(), timeout=self._request_timeout)
-        _LOG.debug("Response: %s", response)
-
-        if response.status_code == 200:
-            output = response.json()
-            state = output.get("properties", {}).get("provisioningState", "")
-
-            if state == "Succeeded":
-                return (Status.SUCCEEDED, {})
-            elif state in {"Accepted", "Creating", "Deleting", "Running", "Updating"}:
-                return (Status.PENDING, {})
-            else:
-                _LOG.error("Response: %s :: %s", response, json.dumps(output, indent=2))
-                return (Status.FAILED, {})
-        elif response.status_code == 404:
-            return (Status.PENDING, {})
-
-        _LOG.error("Response: %s :: %s", response, response.text)
-        return (Status.FAILED, {})
+    def wait_os_operation(self, params: dict) -> Tuple["Status", dict]:
+        return self.wait_host_operation(params)
 
     def provision_host(self, params: dict) -> Tuple[Status, dict]:
         """
@@ -486,58 +237,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             parameters extracted from the response JSON, or {} if the status is FAILED.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
-        config = merge_parameters(dest=self.config.copy(), source=params)
-        _LOG.info("Deploy: %s :: %s", config["deploymentName"], params)
-
-        params = merge_parameters(dest=self._deploy_params.copy(), source=params)
-        if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Deploy: %s merged params ::\n%s",
-                       config["deploymentName"], json.dumps(params, indent=2))
-
-        url = self._URL_DEPLOY.format(
-            subscription=config["subscription"],
-            resource_group=config["resourceGroup"],
-            deployment_name=config["deploymentName"],
-        )
-
-        json_req = {
-            "properties": {
-                "mode": "Incremental",
-                "template": self._deploy_template,
-                "parameters": {
-                    key: {"value": val} for (key, val) in params.items()
-                    if key in self._deploy_template.get("parameters", {})
-                }
-            }
-        }
-
-        if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Request: PUT %s\n%s", url, json.dumps(json_req, indent=2))
-
-        response = requests.put(url, json=json_req,
-                                headers=self._get_headers(), timeout=self._request_timeout)
-
-        if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Response: %s\n%s", response,
-                       json.dumps(response.json(), indent=2)
-                       if response.content else "")
-        else:
-            _LOG.info("Response: %s", response)
-
-        if response.status_code == 200:
-            return (Status.PENDING, config)
-        elif response.status_code == 201:
-            output = self._extract_arm_parameters(response.json())
-            if _LOG.isEnabledFor(logging.DEBUG):
-                _LOG.debug("Extracted parameters:\n%s", json.dumps(output, indent=2))
-            params.update(output)
-            params.setdefault("asyncResultsUrl", url)
-            params.setdefault("deploymentName", config["deploymentName"])
-            return (Status.PENDING, params)
-        else:
-            _LOG.error("Response: %s :: %s", response, response.text)
-            # _LOG.error("Bad Request:\n%s", response.request.body)
-            return (Status.FAILED, {})
+        return self._provision_resource(params)
 
     def deprovision_host(self, params: dict) -> Tuple[Status, dict]:
         """
@@ -554,6 +254,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        params = self._set_default_params(params)
         config = merge_parameters(
             dest=self.config.copy(),
             source=params,
@@ -567,7 +268,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
         _LOG.info("Deprovision VM: %s", config["vmName"])
         _LOG.info("Deprovision deployment: %s", config["deploymentName"])
         # TODO: Properly deprovision *all* resources specified in the ARM template.
-        return self._azure_vm_post_helper(config, self._URL_DEPROVISION.format(
+        return self._azure_rest_api_post_helper(config, self._URL_DEPROVISION.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
@@ -591,6 +292,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        params = self._set_default_params(params)
         config = merge_parameters(
             dest=self.config.copy(),
             source=params,
@@ -601,7 +303,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             ]
         )
         _LOG.info("Deallocate VM: %s", config["vmName"])
-        return self._azure_vm_post_helper(config, self._URL_DEALLOCATE.format(
+        return self._azure_rest_api_post_helper(config, self._URL_DEALLOCATE.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
@@ -622,6 +324,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        params = self._set_default_params(params)
         config = merge_parameters(
             dest=self.config.copy(),
             source=params,
@@ -632,7 +335,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             ]
         )
         _LOG.info("Start VM: %s :: %s", config["vmName"], params)
-        return self._azure_vm_post_helper(config, self._URL_START.format(
+        return self._azure_rest_api_post_helper(config, self._URL_START.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
@@ -655,6 +358,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        params = self._set_default_params(params)
         config = merge_parameters(
             dest=self.config.copy(),
             source=params,
@@ -665,7 +369,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             ]
         )
         _LOG.info("Stop VM: %s", config["vmName"])
-        return self._azure_vm_post_helper(config, self._URL_STOP.format(
+        return self._azure_rest_api_post_helper(config, self._URL_STOP.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
@@ -691,6 +395,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        params = self._set_default_params(params)
         config = merge_parameters(
             dest=self.config.copy(),
             source=params,
@@ -701,7 +406,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             ]
         )
         _LOG.info("Reboot VM: %s", config["vmName"])
-        return self._azure_vm_post_helper(config, self._URL_REBOOT.format(
+        return self._azure_rest_api_post_helper(config, self._URL_REBOOT.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
@@ -733,6 +438,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        config = self._set_default_params(config)
         config = merge_parameters(
             dest=self.config.copy(),
             source=config,

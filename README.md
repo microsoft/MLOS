@@ -21,7 +21,8 @@ MLOS is a project to enable autotuning for systems.
         - [Usage Examples](#usage-examples)
             - [mlos-core](#mlos-core)
             - [mlos-bench](#mlos-bench)
-    - [Distributing](#distributing)
+            - [mlos-viz](#mlos-viz)
+    - [Installation](#installation)
     - [See Also](#see-also)
         - [Examples](#examples)
 
@@ -45,11 +46,19 @@ To accomplish this, the general flow involves
 
 > Source: [LlamaTune: VLDB 2022](https://arxiv.org/abs/2203.05128)
 
+For a brief overview of some of the features and capabilities of MLOS, please see the following video:
+
+[![demo video](https://aka.ms/MLOS/demo-video-preview-image)](https://aka.ms/MLOS/demo-video)
+
 ## Organization
 
 To do this this repo provides two Python modules, which can be used independently or in combination:
 
 - [`mlos-bench`](./mlos_bench/) provides a framework to help automate running benchmarks as described above.
+
+- [`mlos-viz`](./mlos_viz/) provides some simple APIs to help automate visualizing the results of benchmark experiments and their trials.
+
+    It provides a simple `plot(experiment_data)` API, where `experiment_data` is obtained from the `mlos_bench.storage` module.
 
 - [`mlos-core`](./mlos_core/) provides an abstraction around existing optimization frameworks (e.g., [FLAML](https://github.com/microsoft/FLAML), [SMAC](https://github.com/automl/SMAC3), etc.)
 
@@ -127,40 +136,47 @@ See Also:
 - [mlos_bench/config](./mlos_bench/mlos_bench/config/) for additional configuration details.
 - [sqlite-autotuning](https://github.com/Microsoft-CISL/sqlite-autotuning) for a complete external example of using MLOS to tune `sqlite`.
 
-## Distributing
+#### `mlos-viz`
 
-MLOS is not [*yet*](https://github.com/microsoft/MLOS/issues/547) published on `pypi`, so until them here are some instructions for installation for usage in production or other environments.
+For a simple example of using the `mlos_viz` module to visualize the results of an experiment, see the [`sqlite-autotuning`](https://github.com/Microsoft-CISL/sqlite-autotuning) repository, especially the [mlos_demo_sqlite_teachers.ipynb](https://github.com/Microsoft-CISL/sqlite-autotuning/blob/main/mlos_demo_sqlite_teachers.ipynb) notebook.
 
-1. Build the *wheel* file(s)
+## Installation
 
-    ```sh
-    make dist
-    ```
+The MLOS modules are published to [pypi](https://pypi.org) when new releases are tagged:
 
-2. Install it (e.g. after copying it somewhere else).
+- [mlos-core](https://pypi.org/project/mlos-core/)
+- [mlos-bench](https://pypi.org/project/mlos-bench/)
+- [mlos-viz](https://pypi.org/project/mlos-viz/)
 
-    ```sh
-    # this will install just the optimizer component with SMAC support:
-    pip install dist/mlos_core-0.1.0-py3-none-any.whl[smac]
+To install the latest release, simply run:
 
-    # this will install just the optimizer component with flaml support:
-    pip install dist/mlos_core-0.1.0-py3-none-any.whl[flaml]
+```sh
+# this will install just the optimizer component with SMAC support:
+pip install -U mlos-core[smac]
 
-    # this will install just the optimizer component with smac and flaml support:
-    pip install dist/mlos_core-0.1.0-py3-none-any.whl[smac,flaml]
-    ```
+# this will install just the optimizer component with flaml support:
+pip install -U "mlos-core[flaml]"
 
-    ```sh
-    # this will install both the optimizer and the experiment runner:
-    pip install dist/mlos_bench-0.1.0-py3-none-any.whl
-    ```
+# this will install just the optimizer component with smac and flaml support:
+pip install -U "mlos-core[smac,flaml]"
 
-    > Note: exact versions may differ due to automatic versioning.
+# this will install both the flaml optimizer and the experiment runner with azure support:
+pip install -U "mlos-bench[flaml,azure]"
+
+# this will install both the smac optimizer and the experiment runner with ssh support:
+pip install -U "mlos-bench[smac,ssh]"
+
+# this will install the postgres storage backend for mlos-bench
+# and mlos-viz for visualizing results:
+pip install -U "mlos-bench[postgres]" mlos-viz
+```
+
+Details on using a local version from git are available in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## See Also
 
-- API and Examples Documentation: <https://aka.ms/mlos-core/docs>
-- Source Code Repository: <https://aka.ms/mlos-core/src>
+- API and Examples Documentation: <https://microsoft.github.io/MLOS>
+- Source Code Repository: <https://github.com/microsoft/MLOS>
 
 ### Examples
 

@@ -151,15 +151,15 @@ class LocalFileShareEnv(LocalEnv):
                 _LOG.exception("Cannot download %s to %s", path_from, path_to)
                 raise ex
 
-    def run(self) -> Tuple[Status, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
         """
         Download benchmark results from the shared storage
         and run post-processing scripts locally.
 
         Returns
         -------
-        (status, output) : (Status, dict)
-            A pair of (Status, output) values, where `output` is a dict
+        (status, timestamp, output) : (Status, datetime, dict)
+            3-tuple of (Status, timestamp, output) values, where `output` is a dict
             with the results or None if the status is not COMPLETED.
             If run script is a benchmark, then the score is usually expected to
             be in the `score` field.
@@ -167,6 +167,6 @@ class LocalFileShareEnv(LocalEnv):
         self._download_files()
         return super().run()
 
-    def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
+    def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
         self._download_files(ignore_missing=True)
         return super().status()

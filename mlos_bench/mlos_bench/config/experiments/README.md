@@ -12,6 +12,11 @@ it looks like this:
 
 ```jsonc
 {
+    // The name of the experiment.
+    // This is required value and should be unique across incompatible experiments
+    // (e.g., those with differing tunables, scripts, versions, etc.), since it also
+    // controls how trial data is stored and reloaded to resume and repopulate the
+    // optimizer state.
     "experiment_id": "RedisBench",
 
     "deploymentName": "RedisBench",
@@ -48,8 +53,9 @@ it looks like this:
         "redis": []
     },
 
-    "optimization_target": "score",
-    "optimization_direction": "min"
+    "optimization_targets": {
+        "score": "min"
+    }
 }
 ```
 
@@ -73,12 +79,13 @@ It has a mixture of parameters from different components of the framework. for e
 
 At runtime, these values will be pushed down to the `AzureVMService` configuration, e.g., [`service-linux-vm-ops.jsonc`](../services/remote/azure/service-linux-vm-ops.jsonc).
 
-Likewise, parameters
+Likewise, the parameter
 
 ```jsonc
 {
-    "optimization_target": "score",
-    "optimization_direction": "min"
+    "optimization_targets": {
+        "score": "min"
+    }
 }
 ```
 
@@ -87,7 +94,7 @@ will be pushed down to the `Optimizer` configuration, e.g., [`mlos_core_flaml.js
 > NOTE: it is perfectly ok to have several files with the experiment-specific parameters (say, one for Azure, another one for Storage, and so on) and either include them in the `"globals"` section of the CLI config, and/or specify them in the command line when running the experiment, e.g.
 >
 > ```bash
-> mlos_bench --config mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc --globals experiment_Redis_Azure.jsonc experiment_Redis_Tunables.jsonc --max_iterations 10
+> mlos_bench --config mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc --globals experiment_Redis_Azure.jsonc experiment_Redis_Tunables.jsonc --max_suggestions 10
 > ```
 >
 > (Note several files after the `--globals` option).

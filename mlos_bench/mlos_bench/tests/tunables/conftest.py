@@ -36,7 +36,7 @@ def tunable_categorical() -> Tunable:
 @pytest.fixture
 def tunable_int() -> Tunable:
     """
-    A test fixture that produces an interger Tunable object with limited range.
+    A test fixture that produces an integer Tunable object with limited range.
 
     Returns
     -------
@@ -47,8 +47,8 @@ def tunable_int() -> Tunable:
         "description": "Cost of migrating the thread to another core",
         "type": "int",
         "default": 40000,
-        "range": [-1, 500000],
-        "special": [-1]
+        "range": [0, 500000],
+        "special": [-1]  # Special value outside of the range
     })
 
 

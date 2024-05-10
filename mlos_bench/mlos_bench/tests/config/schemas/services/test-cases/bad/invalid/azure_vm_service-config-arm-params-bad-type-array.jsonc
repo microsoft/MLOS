@@ -5,7 +5,6 @@
         "subscription": "subscription-id",
 
         "resourceGroup": "rg",
-        "deploymentName": "deployment",
         "deploymentTemplateParameters": {
             "array": [ ["nested", "array", "invalid"] ]
         }

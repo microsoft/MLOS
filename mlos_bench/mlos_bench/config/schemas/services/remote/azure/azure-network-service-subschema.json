@@ -1,0 +1,29 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/azure/azure-network-service-subschema.json",
+    "title": "mlos_bench Azure Network Service config",
+    "description": "config for an mlos_bench Azure Network Service",
+    "type": "object",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.services.remote.azure.AzureNetworkService",
+                "mlos_bench.services.remote.azure.azure_network_services.AzureNetworkService"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "./azure-deployment-service-subschema.json#/$defs/azure_deployment_service_config"
+                },
+                {
+                    "$comment": "Unlike VM service, which can still do remote exec, network service needs a deployment template.",
+                    "required": ["deploymentTemplatePath"]
+                }
+            ],
+            "unevaluatedProperties": false
+        }
+    },
+    "required": ["class", "config"]
+}

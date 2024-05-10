@@ -1,0 +1,35 @@
+{
+    // "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
+    "description": "Azure Network Service configuration.",
+
+    "class": "mlos_bench.services.remote.azure.azure_network_services.AzureNetworkService",
+    "config": {
+        "deploymentTemplatePath": "some/path/to/deployment/template.jsonc",
+        "subscription": "subscription-id",
+        "resourceGroup": "rg",
+
+        "deploymentTemplateParameters": {
+            "location": "westus2",
+            "adminUsername": "admin",
+            "authenticationType": "sshPublicKey",
+            "adminPasswordOrKey": "ssh-rsa ...",
+            "virtualNetworkName": "vnet",
+            "subnetName": "subnet",
+            "networkSecurityGroupName": "nsg",
+            "ubuntuOSVersion": "18.04-LTS",
+
+            "string": "bar",
+            "int": 1,
+            "float": 1.1,
+            "bool": true,
+            "null": null,
+            "array": [123, "abc", true, null]
+        },
+
+        "pollInterval": 1,
+        "pollTimeout": 60,
+        "requestTimeout": 90,
+        "requestTotalRetries": 10,
+        "requestBackoffFactor": 0.3
+    }
+}

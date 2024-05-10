@@ -10,7 +10,6 @@
                 // can be overridden by the parameters pushed from the caller Environment.
                 "subscription": "PLACEHOLDER; AZURE SUBSCRIPTION ID",
                 "resourceGroup": "PLACEHOLDER; e.g., os-autotune",
-                "deploymentName": "PLACEHOLDER; e.g., mlos-2vms",
 
                 "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
 

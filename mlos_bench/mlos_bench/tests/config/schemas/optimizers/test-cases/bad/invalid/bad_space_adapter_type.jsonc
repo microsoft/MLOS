@@ -2,7 +2,7 @@
     "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
 
     "config": {
-        "optimization_target": "score",
+        "optimization_targets": {"score": "min"},
         // space_adapter_type only accepts certain values
         "space_adapter_type": "unknown"
     }

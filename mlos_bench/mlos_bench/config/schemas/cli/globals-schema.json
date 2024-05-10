@@ -10,11 +10,9 @@
             "type": "string",
             "pattern": "/schemas/cli/globals-schema.json$"
         },
-
         "tunable_params_map": {
             "$ref": "./common-defs-subschemas.json#/$defs/tunable_params_map"
         },
-
         "experiment_id": {
             "$ref": "./common-defs-subschemas.json#/$defs/experiment_id"
         },
@@ -23,6 +21,9 @@
         },
         "config_id": {
             "$ref": "./common-defs-subschemas.json#/$defs/config_id"
+        },
+        "optimization_targets": {
+            "$ref": "./common-defs-subschemas.json#/$defs/optimization_targets"
         }
     },
     "additionalProperties": {

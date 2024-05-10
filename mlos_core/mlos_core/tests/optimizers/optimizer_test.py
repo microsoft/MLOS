@@ -23,7 +23,7 @@ from mlos_core.optimizers import (
 from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer, SmacOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterType
 
-from mlos_core.tests import get_all_concrete_subclasses
+from mlos_core.tests import get_all_concrete_subclasses, SEED
 
 
 _LOG = logging.getLogger(__name__)
@@ -76,7 +76,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
         ret: npt.ArrayLike = (6 * x - 2)**2 * np.sin(12 * x - 4)
         return ret
     # Emukit doesn't allow specifying a random state, so we set the global seed.
-    np.random.seed(42)
+    np.random.seed(SEED)
     optimizer = optimizer_class(parameter_space=configuration_space, **kwargs)
 
     with pytest.raises(ValueError, match="No observations"):
@@ -298,3 +298,69 @@ def test_optimizer_type_defs(optimizer_class: Type[BaseOptimizer]) -> None:
     """
     optimizer_type_classes = {member.value for member in OptimizerType}
     assert optimizer_class in optimizer_type_classes
+
+
+@pytest.mark.parametrize(('optimizer_type', 'kwargs'), [
+    # Default optimizer
+    (None, {}),
+    # Enumerate all supported Optimizers
+    *[(member, {}) for member in OptimizerType],
+    # Optimizer with non-empty kwargs argument
+])
+def test_mixed_numerics_type_input_space_types(optimizer_type: Optional[OptimizerType], kwargs: Optional[dict]) -> None:
+    """
+    Toy problem to test the optimizers with mixed numeric types to ensure that original dtypes are retained.
+    """
+    max_iterations = 10
+    if kwargs is None:
+        kwargs = {}
+
+    def objective(point: pd.DataFrame) -> pd.Series:
+        # mix of hyperparameters, optimal is to select the highest possible
+        ret: pd.Series = point["x"] + point["y"]
+        return ret
+
+    input_space = CS.ConfigurationSpace(seed=SEED)
+    # add a mix of numeric datatypes
+    input_space.add_hyperparameter(CS.UniformIntegerHyperparameter(name='x', lower=0, upper=5))
+    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='y', lower=0.0, upper=5.0))
+
+    if optimizer_type is None:
+        optimizer = OptimizerFactory.create(
+            parameter_space=input_space,
+            optimizer_kwargs=kwargs,
+        )
+    else:
+        optimizer = OptimizerFactory.create(
+            parameter_space=input_space,
+            optimizer_type=optimizer_type,
+            optimizer_kwargs=kwargs,
+        )
+
+    with pytest.raises(ValueError, match="No observations"):
+        optimizer.get_best_observation()
+
+    with pytest.raises(ValueError, match="No observations"):
+        optimizer.get_observations()
+
+    for _ in range(max_iterations):
+        suggestion = optimizer.suggest()
+        assert isinstance(suggestion, pd.DataFrame)
+        assert (suggestion.columns == ['x', 'y']).all()
+        # Check suggestion values are the expected dtype
+        assert isinstance(suggestion['x'].iloc[0], np.integer)
+        assert isinstance(suggestion['y'].iloc[0], np.floating)
+        # Check that suggestion is in the space
+        test_configuration = CS.Configuration(optimizer.parameter_space, suggestion.astype('O').iloc[0].to_dict())
+        # Raises an error if outside of configuration space
+        test_configuration.is_valid_configuration()
+        # Test registering the suggested configuration with a score.
+        observation = objective(suggestion)
+        assert isinstance(observation, pd.Series)
+        optimizer.register(suggestion, observation)
+
+    best_observation = optimizer.get_best_observation()
+    assert isinstance(best_observation, pd.DataFrame)
+
+    all_observations = optimizer.get_observations()
+    assert isinstance(all_observations, pd.DataFrame)

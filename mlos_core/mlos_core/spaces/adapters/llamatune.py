@@ -13,6 +13,8 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
+
+from mlos_core.util import normalize_config
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
 
@@ -87,8 +89,9 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
 
     def inverse_transform(self, configurations: pd.DataFrame) -> pd.DataFrame:
         target_configurations = []
-        for (_, config) in configurations.iterrows():
-            configuration = ConfigSpace.Configuration(self.orig_parameter_space, values=config.to_dict())
+        for (_, config) in configurations.astype('O').iterrows():
+            configuration = ConfigSpace.Configuration(
+                self.orig_parameter_space, values=config.to_dict())
 
             target_config = self._suggested_configs.get(configuration, None)
             # NOTE: HeSBO is a non-linear projection method, and does not inherently support inverse projection
@@ -108,9 +111,11 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
                 if getattr(self, '_pinv_matrix', None) is None:
                     self._try_generate_approx_inverse_mapping()
 
+                # Replace NaNs with zeros for inactive hyperparameters
+                config_vector = np.nan_to_num(configuration.get_array(), nan=0.0)
                 # Perform approximate reverse mapping
                 # NOTE: applying special value biasing is not possible
-                vector = self._config_scaler.inverse_transform([configuration.get_array()])[0]
+                vector = self._config_scaler.inverse_transform([config_vector])[0]
                 target_config_vector = self._pinv_matrix.dot(vector)
                 target_config = ConfigSpace.Configuration(self.target_parameter_space, vector=target_config_vector)
 
@@ -127,12 +132,12 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
         target_configuration = ConfigSpace.Configuration(self.target_parameter_space, values=target_values_dict)
 
         orig_values_dict = self._transform(target_values_dict)
-        orig_configuration = ConfigSpace.Configuration(self.orig_parameter_space, values=orig_values_dict)
+        orig_configuration = normalize_config(self.orig_parameter_space, orig_values_dict)
 
         # Add to inverse dictionary -- needed for registering the performance later
         self._suggested_configs[orig_configuration] = target_configuration
 
-        return pd.DataFrame([orig_values_dict.values()], columns=list(self.orig_parameter_space.keys()))
+        return pd.DataFrame([list(orig_configuration.values())], columns=list(orig_configuration.keys()))
 
     def _construct_low_dim_space(self, num_low_dims: int, max_unique_values_per_param: Optional[int]) -> None:
         """Constructs the low-dimensional parameter (potentially discretized) search space.

@@ -29,9 +29,9 @@ if [ "$cmd" == 'start' ]; then
     set -x
     tmpdir=$(mktemp -d)
     docker build --progress=plain -t mlos-doc-nginx \
-        --build-arg http_proxy=$http_proxy \
-        --build-arg https_proxy=$https_proxy \
-        --build-arg no_proxy=$no_proxy \
+        --build-arg http_proxy=${http_proxy:-} \
+        --build-arg https_proxy=${https_proxy:-} \
+        --build-arg no_proxy=${no_proxy:-} \
         --build-arg NGINX_PORT=$NGINX_PORT \
         -f Dockerfile "$tmpdir"
     rmdir "$tmpdir"

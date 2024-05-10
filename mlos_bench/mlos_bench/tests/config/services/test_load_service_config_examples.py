@@ -28,9 +28,9 @@ CONFIG_TYPE = "services"
 def filter_configs(configs_to_filter: List[str]) -> List[str]:
     """If necessary, filter out json files that aren't for the module we're testing."""
     def predicate(config_path: str) -> bool:
-        vm_template = config_path.endswith("arm-templates/azuredeploy-ubuntu-vm.jsonc")
+        arm_template = config_path.find("services/remote/azure/arm-templates/") >= 0 and config_path.endswith(".jsonc")
         setup_rg_scripts = config_path.find("azure/scripts/setup-rg") >= 0
-        return not (vm_template or setup_rg_scripts)
+        return not (arm_template or setup_rg_scripts)
     return [config_path for config_path in configs_to_filter if predicate(config_path)]
 
 

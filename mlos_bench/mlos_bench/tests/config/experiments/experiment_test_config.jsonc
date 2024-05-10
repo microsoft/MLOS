@@ -12,6 +12,8 @@
     "storageFileShareName": "baz",
 
     // Assign some values to variadic tunables and required parameters present in the config examples.
+    "resourceGroup": "mlos-autotuning-test-rg",
+    "location": "eastus",
     "vmName": "vmTestName",
     "tunable_params_map": {
         "linux-runtime": ["linux-scheduler", "linux-swap"],

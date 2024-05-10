@@ -3,7 +3,7 @@
 // Licensed under the MIT License.
 //
 // Run:
-// mlos_bench --config mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc --globals experiment_RedisBench.jsonc --max_iterations 10
+// mlos_bench --config mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc --globals experiment_RedisBench.jsonc --max_suggestions 10
 {
     "config_path": [
         "mlos_bench/mlos_bench/config",

@@ -1,0 +1,3 @@
+# setuptools-scm has an issue that causes it to include all files in git in the sdist produced.
+# Here we exclude test files.
+prune **/tests

@@ -15,7 +15,6 @@ from mlos_bench.tests.config import locate_config_examples
 from mlos_bench.config.schemas.config_schemas import ConfigSchema
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_storage import Storage
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import get_class_from_name
 
 
@@ -46,9 +45,7 @@ def test_load_storage_config_examples(config_loader_service: ConfigPersistenceSe
     cls = get_class_from_name(config["class"])
     assert issubclass(cls, Storage)
     # Make an instance of the class based on the config.
-    storage_inst = config_loader_service.build_generic(
-        base_cls=Storage,   # type: ignore[type-abstract]
-        tunables=TunableGroups(),
+    storage_inst = config_loader_service.build_storage(
         config=config,
         service=config_loader_service,
     )

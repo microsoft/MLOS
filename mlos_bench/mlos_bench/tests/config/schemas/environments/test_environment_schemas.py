@@ -69,6 +69,7 @@ def test_environment_configs_against_schema(test_case_name: str) -> None:
     Checks that the environment config validates against the schema.
     """
     check_test_case_against_schema(TEST_CASES.by_path[test_case_name], ConfigSchema.ENVIRONMENT)
+    check_test_case_against_schema(TEST_CASES.by_path[test_case_name], ConfigSchema.UNIFIED)
 
 
 @pytest.mark.parametrize("test_case_name", sorted(TEST_CASES.by_type["good"]))
@@ -77,3 +78,4 @@ def test_environment_configs_with_extra_param(test_case_name: str) -> None:
     Checks that the environment config fails to validate if extra params are present in certain places.
     """
     check_test_case_config_with_extra_param(TEST_CASES.by_type["good"][test_case_name], ConfigSchema.ENVIRONMENT)
+    check_test_case_config_with_extra_param(TEST_CASES.by_type["good"][test_case_name], ConfigSchema.UNIFIED)

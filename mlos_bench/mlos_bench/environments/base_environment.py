@@ -10,12 +10,14 @@ import abc
 import json
 import logging
 from datetime import datetime
-from string import Template
 from types import TracebackType
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Type, TYPE_CHECKING, Union
 from typing_extensions import Literal
 
+from pytz import UTC
+
 from mlos_bench.config.schemas import ConfigSchema
+from mlos_bench.dict_templater import DictTemplater
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import TunableValue
@@ -201,10 +203,7 @@ class Environment(metaclass=abc.ABCMeta):
         """
         Expand `$var` into actual values of the variables.
         """
-        return {
-            key: Template(val).safe_substitute(global_config) if isinstance(val, str) else val
-            for key, val in params.items()
-        }
+        return DictTemplater(params).expand_vars(extra_source_dict=global_config)
 
     @property
     def _config_loader_service(self) -> "SupportsConfigLoading":
@@ -381,7 +380,7 @@ class Environment(metaclass=abc.ABCMeta):
         assert self._in_context
         self._is_ready = False
 
-    def run(self) -> Tuple[Status, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
         """
         Execute the run script for this environment.
 
@@ -390,30 +389,32 @@ class Environment(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        (status, output) : (Status, dict)
-            A pair of (Status, output) values, where `output` is a dict
+        (status, timestamp, output) : (Status, datetime, dict)
+            3-tuple of (Status, timestamp, output) values, where `output` is a dict
             with the results or None if the status is not COMPLETED.
             If run script is a benchmark, then the score is usually expected to
             be in the `score` field.
         """
         # Make sure we create a context before invoking setup/run/status/teardown
         assert self._in_context
-        (status, _) = self.status()
-        return (status, None)
+        (status, timestamp, _) = self.status()
+        return (status, timestamp, None)
 
-    def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
+    def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
         """
         Check the status of the benchmark environment.
 
         Returns
         -------
-        (benchmark_status, telemetry) : (Status, list)
-            A pair of (benchmark status, telemetry) values.
+        (benchmark_status, timestamp, telemetry) : (Status, datetime, list)
+            3-tuple of (benchmark status, timestamp, telemetry) values.
+            `timestamp` is UTC time stamp of the status; it's current time by default.
             `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
         """
         # Make sure we create a context before invoking setup/run/status/teardown
         assert self._in_context
+        timestamp = datetime.now(UTC)
         if self._is_ready:
-            return (Status.READY, [])
+            return (Status.READY, timestamp, [])
         _LOG.warning("Environment not ready: %s", self)
-        return (Status.PENDING, [])
+        return (Status.PENDING, timestamp, [])

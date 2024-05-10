@@ -7,7 +7,7 @@
                 "type": "int",
                 "meta": {"name_prefix": "/proc/sys/kernel/"},
                 "default": 500000,
-                "range": [-1, 1000000],
+                "range": [0, 1000000],
                 "special": [-1]
             },
             "sched_latency_ns": {

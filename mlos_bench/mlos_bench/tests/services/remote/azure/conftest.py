@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Configuration test fixtures for azure_services in mlos_bench.
+Configuration test fixtures for azure_vm_services in mlos_bench.
 """
 
 from unittest.mock import patch
@@ -11,7 +11,12 @@ from unittest.mock import patch
 import pytest
 
 from mlos_bench.services.config_persistence import ConfigPersistenceService
-from mlos_bench.services.remote.azure import AzureAuthService, AzureVMService, AzureFileShareService
+from mlos_bench.services.remote.azure import (
+    AzureAuthService,
+    AzureNetworkService,
+    AzureVMService,
+    AzureFileShareService,
+)
 
 # pylint: disable=redefined-outer-name
 
@@ -36,13 +41,12 @@ def azure_auth_service(config_persistence_service: ConfigPersistenceService,
 
 
 @pytest.fixture
-def azure_vm_service(azure_auth_service: AzureAuthService) -> AzureVMService:
+def azure_network_service(azure_auth_service: AzureAuthService) -> AzureNetworkService:
     """
     Creates a dummy Azure VM service for tests that require it.
     """
-    return AzureVMService(config={
+    return AzureNetworkService(config={
         "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
-        "deploymentName": "TEST_DEPLOYMENT",
         "subscription": "TEST_SUB",
         "resourceGroup": "TEST_RG",
         "deploymentTemplateParameters": {
@@ -50,6 +54,42 @@ def azure_vm_service(azure_auth_service: AzureAuthService) -> AzureVMService:
         },
         "pollInterval": 1,
         "pollTimeout": 2
+    }, global_config={
+        "deploymentName": "TEST_DEPLOYMENT-VNET",
+        "vnetName": "test-vnet",  # Should come from the upper-level config
+    }, parent=azure_auth_service)
+
+
+@pytest.fixture
+def azure_vm_service(azure_auth_service: AzureAuthService) -> AzureVMService:
+    """
+    Creates a dummy Azure VM service for tests that require it.
+    """
+    return AzureVMService(config={
+        "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
+        "subscription": "TEST_SUB",
+        "resourceGroup": "TEST_RG",
+        "deploymentTemplateParameters": {
+            "location": "westus2",
+        },
+        "pollInterval": 1,
+        "pollTimeout": 2
+    }, global_config={
+        "deploymentName": "TEST_DEPLOYMENT-VM",
+        "vmName": "test-vm",  # Should come from the upper-level config
+    }, parent=azure_auth_service)
+
+
+@pytest.fixture
+def azure_vm_service_remote_exec_only(azure_auth_service: AzureAuthService) -> AzureVMService:
+    """
+    Creates a dummy Azure VM service with no deployment template.
+    """
+    return AzureVMService(config={
+        "subscription": "TEST_SUB",
+        "resourceGroup": "TEST_RG",
+        "pollInterval": 1,
+        "pollTimeout": 2,
     }, global_config={
         "vmName": "test-vm",  # Should come from the upper-level config
     }, parent=azure_auth_service)
