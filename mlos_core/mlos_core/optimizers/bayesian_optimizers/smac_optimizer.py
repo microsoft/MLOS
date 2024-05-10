@@ -264,7 +264,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
         dict
             kwargs with the non-legal argument filtered out
         """
-
         sig = inspect.signature(function)
         filter_keys = [
             param.name
@@ -324,7 +323,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
         context : pd.DataFrame
             Context of the request that is being registered.
         """
-
         # Register each trial (one-by-one)
         for config, score, ctx in zip(
             self._to_configspace_configs(configurations),
@@ -387,7 +385,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Pandas dataframe with a single row containing the context.
             Column names are the budget, seed, and instance of the evaluation, if valid.
         """
-
         if context is not None:
             raise NotImplementedError()
 
@@ -474,7 +471,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Pandas dataframe with a single row containing the context.
             Column names are the budget and instance of the evaluation, if valid.
         """
-
         return pd.DataFrame(
             [[trial.instance, trial.seed, trial.budget]],
             columns=["instance", "seed", "budget"],
