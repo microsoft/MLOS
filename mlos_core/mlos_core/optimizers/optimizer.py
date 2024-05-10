@@ -195,19 +195,24 @@ class BaseOptimizer(metaclass=ABCMeta):
                               for _, _, context in self._observations]).reset_index(drop=True)
         return (configs, scores, contexts if len(contexts.columns) > 0 else None)
 
-    def get_best_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]:
+    def get_best_observations(self, n_max: int = 1) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]:
         """
-        Get the best observation so far as a triplet of DataFrames (config, score, context).
+        Get the N best observations so far as a triplet of DataFrames (config, score, context).
+
+        Parameters
+        ----------
+        n_max : int
+            Maximum number of best observations to return. Default is 1.
 
         Returns
         -------
         observations : Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]
-            A triplet of best (config, score, context) DataFrames of observations.
+            A triplet of best (config, score, context) DataFrames of best observations.
         """
         if len(self._observations) == 0:
             raise ValueError("No observations registered yet.")
         (configs, scores, contexts) = self.get_observations()
-        idx = scores.nsmallest(1, columns=['score'], keep="first").index
+        idx = scores.nsmallest(n_max, columns=self._optimization_targets, keep="first").index
         return (configs.loc[idx], scores.loc[idx],
                 None if contexts is None else contexts.loc[idx])
 
