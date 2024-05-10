@@ -101,7 +101,7 @@ def test_basic_interface_toy_problem(
         optimizer.get_observations()
 
     for _ in range(max_iterations):
-        suggestion = optimizer.suggest()
+        suggestion, context = optimizer.suggest()
         assert isinstance(suggestion, pd.DataFrame)
         assert (suggestion.columns == ["x", "y", "z"]).all()
         # check that suggestion is in the space
@@ -112,7 +112,7 @@ def test_basic_interface_toy_problem(
         configuration.is_valid_configuration()
         observation = objective(suggestion["x"])
         assert isinstance(observation, pd.Series)
-        optimizer.register(suggestion, observation)
+        optimizer.register(suggestion, observation, context)
 
     best_observation = optimizer.get_best_observation()
     assert isinstance(best_observation, pd.DataFrame)
@@ -290,18 +290,18 @@ def test_optimizer_with_llamatune(
             _LOG.debug("Optimizer is done with random init.")
 
         # loop for optimizer
-        suggestion = optimizer.suggest()
+        suggestion, context = optimizer.suggest()
         observation = objective(suggestion)
-        optimizer.register(suggestion, observation)
+        optimizer.register(suggestion, observation, context)
 
         # loop for llamatune-optimizer
-        suggestion = llamatune_optimizer.suggest()
+        suggestion, context = llamatune_optimizer.suggest()
         _x, _y = suggestion["x"].iloc[0], suggestion["y"].iloc[0]
         assert _x == pytest.approx(_y, rel=1e-3) or _x + _y == pytest.approx(
             3.0, rel=1e-3
         )  # optimizer explores 1-dimensional space
         observation = objective(suggestion)
-        llamatune_optimizer.register(suggestion, observation)
+        llamatune_optimizer.register(suggestion, observation, context)
 
     # Retrieve best observations
     best_observation = optimizer.get_best_observation()
@@ -405,7 +405,7 @@ def test_mixed_numerics_type_input_space_types(
         optimizer.get_observations()
 
     for _ in range(max_iterations):
-        suggestion = optimizer.suggest()
+        suggestion, context = optimizer.suggest()
         assert isinstance(suggestion, pd.DataFrame)
         assert (suggestion.columns == ["x", "y"]).all()
         # Check suggestion values are the expected dtype
@@ -420,7 +420,7 @@ def test_mixed_numerics_type_input_space_types(
         # Test registering the suggested configuration with a score.
         observation = objective(suggestion)
         assert isinstance(observation, pd.Series)
-        optimizer.register(suggestion, observation)
+        optimizer.register(suggestion, observation, context)
 
     best_observation = optimizer.get_best_observation()
     assert isinstance(best_observation, pd.DataFrame)

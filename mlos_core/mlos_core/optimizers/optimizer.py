@@ -64,7 +64,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         ] = []
 
         self.delayed_config = None
-        self.delayed_metadata = None
+        self.delayed_context = None
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(space_adapter={self.space_adapter})"
@@ -156,22 +156,24 @@ class BaseOptimizer(metaclass=ABCMeta):
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
         """
+
         if defaults:
-            self.delayed_config, self.delayed_metadata = self._suggest(context)
+            self.delayed_config, self.delayed_context = self._suggest(context)
 
             configuration = config_to_dataframe(
                 self.parameter_space.get_default_configuration()
             )
-            if self.space_adapter is not None:
-                configuration = self.space_adapter.inverse_transform(configuration)
-            metadata = self.delayed_metadata
+            context = self.delayed_context
 
         else:
             if self.delayed_config is None:
-                configuration, metadata = self._suggest(context)
+                configuration, context = self._suggest(context)
             else:
-                configuration, metadata = self.delayed_config, self.delayed_metadata
-                self.delayed_config, self.delayed_metadata = None, None
+                configuration, context = self.delayed_config, self.delayed_context
+                self.delayed_config, self.delayed_context = None, None
+
+        if self.space_adapter is not None:
+            configuration = self.space_adapter.inverse_transform(configuration)
 
             assert (
                 len(configuration) == 1
@@ -184,7 +186,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             assert len(configuration.columns) == len(
                 self.parameter_space.values()
             ), "Space adapter transformed configuration with the wrong number of parameters."
-        return configuration, metadata
+        return configuration, context
 
     @abstractmethod
     def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:

@@ -387,6 +387,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Pandas dataframe with a single row containing the context.
             Column names are the budget, seed, and instance of the evaluation, if valid.
         """
+
+        if context is not None:
+            raise NotImplementedError()
+
         trial: TrialInfo = self.base_optimizer.ask()
         trial.config.is_valid_configuration()
         self.optimizer_parameter_space.check_configuration(trial.config)
@@ -482,6 +486,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         )
 
     def get_observations(self) -> pd.DataFrame:
+        if len(self.trial_info_df) == 0:
+            raise ValueError("No observations registered yet.")
+
         return self.trial_info_df
 
     def get_best_observation(self) -> pd.DataFrame:
@@ -492,7 +499,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         best_observation : pd.DataFrame
             Dataframe with a single row containing the best observation. The columns are parameter names and "score" for the score.
         """
-        if len(self._observations) == 0:
+        if len(self.trial_info_df) == 0:
             raise ValueError("No observations registered yet.")
         observations = self.get_observations()
 
