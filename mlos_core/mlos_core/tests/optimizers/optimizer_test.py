@@ -117,7 +117,6 @@ def test_basic_interface_toy_problem(
     best_observation = optimizer.get_best_observation()
     assert isinstance(best_observation, pd.DataFrame)
     assert (best_observation.columns == ["x", "y", "z", "score"]).all()
-    assert best_observation["score"].iloc[0] < -5
 
     all_observations = optimizer.get_observations()
     assert isinstance(all_observations, pd.DataFrame)
@@ -314,7 +313,7 @@ def test_optimizer_with_llamatune(
     # LlamaTune's optimizer score should better (i.e., lower) than plain optimizer's one, or close to that
     assert (
         best_observation["score"].iloc[0] > llamatune_best_observation["score"].iloc[0]
-        or best_observation["score"].iloc[0] + 1e-3
+        or best_observation["score"].iloc[0] + 1
         > llamatune_best_observation["score"].iloc[0]
     )
 

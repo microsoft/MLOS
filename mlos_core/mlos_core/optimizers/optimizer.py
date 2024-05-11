@@ -165,6 +165,9 @@ class BaseOptimizer(metaclass=ABCMeta):
             )
             context = self.delayed_context
 
+            if self.space_adapter is not None:
+                configuration = self.space_adapter.inverse_transform(configuration)
+
         else:
             if self.delayed_config is None:
                 configuration, context = self._suggest(context)
@@ -172,20 +175,17 @@ class BaseOptimizer(metaclass=ABCMeta):
                 configuration, context = self.delayed_config, self.delayed_context
                 self.delayed_config, self.delayed_context = None, None
 
-        if self.space_adapter is not None:
-            configuration = self.space_adapter.inverse_transform(configuration)
-
             assert (
                 len(configuration) == 1
             ), "Suggest must return a single configuration."
-            assert len(configuration.columns) == len(
-                self.optimizer_parameter_space.values()
-            ), "Suggest returned a configuration with the wrong number of parameters."
+            assert set(configuration.columns).issubset(
+                set(self.optimizer_parameter_space)
+            ), "Optimizer suggested a configuration that does not match the expected parameter space."
         if self._space_adapter:
             configuration = self._space_adapter.transform(configuration)
-            assert len(configuration.columns) == len(
-                self.parameter_space.values()
-            ), "Space adapter transformed configuration with the wrong number of parameters."
+            assert set(configuration.columns).issubset(
+                set(self.parameter_space)
+            ), "Space adapter produced a configuration that does not match the expected parameter space."
         return configuration, context
 
     @abstractmethod

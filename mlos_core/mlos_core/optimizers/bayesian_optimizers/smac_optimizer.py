@@ -14,6 +14,7 @@ from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union
 
 import ConfigSpace
+import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import (
@@ -482,6 +483,21 @@ class SmacOptimizer(BaseBayesianOptimizer):
         )
 
     def get_observations(self) -> pd.DataFrame:
+        """Returns the observations as a dataframe.
+
+        Returns
+        -------
+        observations : pd.DataFrame
+            Dataframe of observations. The columns are parameter names and "score" for the score, each row is an observation.
+        """
+        if len(self._observations) == 0:
+            raise ValueError("No observations registered yet.")
+        configs = pd.concat([config for config, _, _ in self._observations])
+        configs["score"] = pd.concat([score for _, score, _ in self._observations])
+
+        return configs
+
+    def get_observations_full(self) -> pd.DataFrame:
         if len(self.trial_info_df) == 0:
             raise ValueError("No observations registered yet.")
 
@@ -495,36 +511,29 @@ class SmacOptimizer(BaseBayesianOptimizer):
         best_observation : pd.DataFrame
             Dataframe with a single row containing the best observation. The columns are parameter names and "score" for the score.
         """
-        if len(self.trial_info_df) == 0:
+        if len(self._observations) == 0:
             raise ValueError("No observations registered yet.")
-        observations = self.get_observations()
 
-        budgets = observations["TrialInfo"].transform(lambda trial: trial.budget)
-        max_budget = budgets.max()
-
-        if not isnan(max_budget):
-            observations = observations[budgets == max_budget].reset_index()
-
-        def extract(column):
-            keys = list(observations.loc[0, column].keys())
-            out = pd.DataFrame(
-                observations[column]
-                .transform(lambda config: [config[k] for k in keys])
-                .to_list(),
-                columns=keys,
+        observations = self._observations
+        try:
+            max_budget = max(
+                [context["budget"].max() for _, _, context in self._observations]
             )
-            return out
 
-        out_config = extract("Configuration")
-        out_value = pd.DataFrame(
-            observations["TrialValue"].transform(lambda value: [value.cost]).to_list(),
-            columns=["cost"],
-        )
-        out_context = extract("Context")
+            if max_budget is not np.nan:
+                observations = [
+                    config
+                    for config, _, context in self._observations
+                    if context["budget"].max() == max_budget
+                ]
+        except Exception as e:
+            print(e)
 
-        return pd.concat([out_config, out_value, out_context], axis=1).nsmallest(
-            1, columns="cost"
-        )
+        configs = pd.concat([config for config, _, _ in observations])
+        scores = pd.concat([score for _, score, _ in observations])
+        configs["score"] = scores
+
+        return configs.nsmallest(1, columns="score")
 
     def cleanup(self) -> None:
         if self._temp_output_directory is not None:
@@ -550,8 +559,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
             ConfigSpace.Configuration(
                 self.optimizer_parameter_space, values=config.to_dict()
             )
-            for (_, config) in configurations.iterrows()
+            for (_, config) in configurations.astype("O").iterrows()
         ]
 
     def _to_context(self, contexts: pd.DataFrame) -> List[pd.Series]:
+        if contexts is None:
+            return [pd.Series([])]
         return list(map(lambda idx_series: idx_series[1], contexts.iterrows()))
