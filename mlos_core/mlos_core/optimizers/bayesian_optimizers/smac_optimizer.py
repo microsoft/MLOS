@@ -265,6 +265,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         dict
             kwargs with the non-legal argument filtered out
         """
+        if kwargs is None:
+            return {}
+
         sig = inspect.signature(function)
         filter_keys = [
             param.name
@@ -338,10 +341,17 @@ class SmacOptimizer(BaseBayesianOptimizer):
             )
 
             if sum(matching) == 0:
-                info: TrialInfo = TrialInfo(
-                    config=config,
-                    **SmacOptimizer._filter_kwargs(TrialInfo, **ctx.to_dict()),
-                )
+                if ctx is None:
+                    info: TrialInfo = TrialInfo(
+                        config=config,
+                    )
+                else:
+                    out = SmacOptimizer._filter_kwargs(TrialInfo, **ctx.to_dict())
+                    info: TrialInfo = TrialInfo(
+                        config=config,
+                        **out,
+                    )
+
             else:
                 info: TrialInfo = self.trial_info_df[matching]["TrialInfo"].iloc[0]
 
@@ -564,5 +574,5 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     def _to_context(self, contexts: pd.DataFrame) -> List[pd.Series]:
         if contexts is None:
-            return [pd.Series([])]
+            return pd.Series([])
         return list(map(lambda idx_series: idx_series[1], contexts.iterrows()))
