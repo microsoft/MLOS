@@ -89,7 +89,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Probability of choosing to evaluate a random configuration during optimization.
             Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
         """
-
         super().__init__(
             parameter_space=parameter_space,
             optimization_targets=optimization_targets,

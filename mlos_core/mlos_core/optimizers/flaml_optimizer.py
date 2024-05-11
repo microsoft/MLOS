@@ -58,7 +58,6 @@ class FlamlOptimizer(BaseOptimizer):
         seed : Optional[int]
             If provided, calls np.random.seed() with the provided value to set the seed globally at init.
         """
-
         super().__init__(
             parameter_space=parameter_space,
             optimization_targets=optimization_targets,
