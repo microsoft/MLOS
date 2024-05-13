@@ -2,10 +2,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A wrapper for mlos_core optimizers for mlos_bench.
-"""
-
 import logging
 import os
 from types import TracebackType
