@@ -64,7 +64,7 @@ class Launcher:
             """
         parser = argparse.ArgumentParser(description=f"{description} : {long_text}",
                                          epilog=epilog)
-        (args, args_rest) = self._parse_args(parser, argv)
+        (args, path_args, args_rest) = self._parse_args(parser, argv)
 
         # Bootstrap config loader: command line takes priority.
         config_path = args.config_path or []
@@ -95,19 +95,23 @@ class Launcher:
 
         self._parent_service: Service = LocalExecService(parent=self._config_loader)
 
+        # Prepare global_config from a combination of global config files, cli configs, and cli args.
         args_dict = vars(args)
+        # teardown (bool) conflicts with Environment configs that use it for shell
+        # commands (list), so we exclude it from copying over
+        excluded_cli_args = path_args + ["teardown"]
+        # Include (almost) any item from the cli config file that either isn't in the cli
+        # args at all or whose cli arg is missing.
+        cli_config_args = {key: val for (key, val) in config.items()
+                           if (key not in args_dict or args_dict[key] is None) and key not in excluded_cli_args}
+
         self.global_config = self._load_config(
-            config.get("globals", []) + (args.globals or []),
-            (args.config_path or []) + config.get("config_path", []),
-            args_rest,
-            # Include any item from the cli config file that either isn't in the cli
-            # args at all or whose cli arg is missing.
-            # {key: val for (key, val) in config.items() if key not in args_dict or args_dict[key] is None},
-            {key: val for (key, val) in config.items() if key not in args_dict},
+            args_globals=config.get("globals", []) + (args.globals or []),
+            config_path=(args.config_path or []) + config.get("config_path", []),
+            args_rest=args_rest,
+            global_config=cli_config_args,
         )
-        # FIXME: Something's changed:
-        # pytest -n0 mlos_bench/mlos_bench/tests/config/cli/test_load_cli_config_examples.py -k azure-redis-bench
-        raise ValueError(f"global_config: {self.global_config}\nargs_dict: {args_dict}")
+        # TODO: Can we generalize these two rules using excluded_cli_args?
         # experiment_id is generally taken from --globals files, but we also allow overriding it on the CLI.
         # It's useful to keep it there explicitly mostly for the --help output.
         if args.experiment_id:
@@ -171,10 +175,12 @@ class Launcher:
         return self._parent_service
 
     @staticmethod
-    def _parse_args(parser: argparse.ArgumentParser, argv: Optional[List[str]]) -> Tuple[argparse.Namespace, List[str]]:
+    def _parse_args(parser: argparse.ArgumentParser,
+                    argv: Optional[List[str]]) -> Tuple[argparse.Namespace, List[str], List[str]]:
         """
         Parse the command line arguments.
         """
+        path_args = []
         parser.add_argument(
             '--config', required=False,
             help='Main JSON5 configuration file. Its keys are the same as the' +
@@ -182,10 +188,12 @@ class Launcher:
                  '\n' +
                  ' See the `mlos_bench/config/` tree at https://github.com/microsoft/MLOS/ ' +
                  ' for additional config examples for this and other arguments.')
+        path_args.append('config')
 
         parser.add_argument(
             '--log_file', '--log-file', required=False,
             help='Path to the log file. Use stdout if omitted.')
+        path_args.append('log_file')
 
         parser.add_argument(
             '--log_level', '--log-level', required=False, type=str,
@@ -196,20 +204,26 @@ class Launcher:
             '--config_path', '--config-path', '--config-paths', '--config_paths',
             nargs="+", action='extend', required=False,
             help='One or more locations of JSON config files.')
+        path_args.append('config_path')
+        path_args.append('config_paths')
 
         parser.add_argument(
             '--service', '--services',
             nargs='+', action='extend', required=False,
             help='Path to JSON file with the configuration of the service(s) for environment(s) to use.')
+        path_args.append('service')
+        path_args.append('services')
 
         parser.add_argument(
             '--environment', required=False,
             help='Path to JSON file with the configuration of the benchmarking environment(s).')
+        path_args.append('environment')
 
         parser.add_argument(
             '--optimizer', required=False,
             help='Path to the optimizer configuration file. If omitted, run' +
                  ' a single trial with default (or specified in --tunable_values).')
+        path_args.append('optimizer')
 
         parser.add_argument(
             '--trial_config_repeat_count', '--trial-config-repeat-count', required=False, type=int,
@@ -219,11 +233,13 @@ class Launcher:
             '--scheduler', required=False,
             help='Path to the scheduler configuration file. By default, use' +
                  ' a single worker synchronous scheduler.')
+        path_args.append('scheduler')
 
         parser.add_argument(
             '--storage', required=False,
             help='Path to the storage configuration file.' +
                  ' If omitted, use the ephemeral in-memory SQL storage.')
+        path_args.append('storage')
 
         parser.add_argument(
             '--random_init', '--random-init', required=False, default=False,
@@ -239,11 +255,13 @@ class Launcher:
             help='Path to one or more JSON files that contain values of the tunable' +
                  ' parameters. This can be used for a single trial (when no --optimizer' +
                  ' is specified) or as default values for the first run in optimization.')
+        path_args.append('tunable_values')
 
         parser.add_argument(
             '--globals', nargs="+", action='extend', required=False,
             help='Path to one or more JSON files that contain additional' +
                  ' [private] parameters of the benchmarking environment.')
+        path_args.append('globals')
 
         parser.add_argument(
             '--no_teardown', '--no-teardown', required=False, default=None,
@@ -270,7 +288,7 @@ class Launcher:
             argv = sys.argv[1:].copy()
         (args, args_rest) = parser.parse_known_args(argv)
 
-        return (args, args_rest)
+        return (args, path_args, args_rest)
 
     @staticmethod
     def _try_parse_extra_args(cmdline: Iterable[str]) -> Dict[str, TunableValue]:
@@ -303,7 +321,7 @@ class Launcher:
         _LOG.debug("Parsed config: %s", config)
         return config
 
-    def _load_config(self,
+    def _load_config(self, *,
                      args_globals: Iterable[str],
                      config_path: Iterable[str],
                      args_rest: Iterable[str],
@@ -404,7 +422,6 @@ class Launcher:
                 config={
                     "experiment_id": "UNDEFINED - override from global config",
                     "trial_id": 0,
-                    "config_id": -1,
                     "trial_config_repeat_count": 1,
                     "teardown": self.teardown,
                 },
