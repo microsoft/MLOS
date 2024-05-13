@@ -95,10 +95,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
             space_adapter=space_adapter,
         )
 
-        # TODO: specify weights for optimization targets in the parameters
-        self._optimization_targets_weights = numpy.ones(
-            len(self._optimization_targets)) / len(self._optimization_targets)
-
         # Declare at the top because we need it in __del__/cleanup()
         self._temp_output_directory: Optional[TemporaryDirectory] = None
 
@@ -197,6 +193,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
             intensifier=intensifier,
             random_design=random_design,
             config_selector=config_selector,
+            multi_objective_algorithm=Optimizer_Smac.get_multi_objective_algorithm(
+                scenario,
+                # objective_weights=[1, 2],  # TODO: pass weights as constructor args
+            ),
             overwrite=True,
             logging_level=False,  # Use the existing logger
         )
@@ -262,9 +262,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # Register each trial (one-by-one)
         for (config, (_i, score)) in zip(self._to_configspace_configs(configurations), scores.iterrows()):
             # Retrieve previously generated TrialInfo (returned by .ask()) or create new TrialInfo instance
-            info: TrialInfo = self.trial_info_map.get(config, TrialInfo(config=config, seed=self.base_optimizer.scenario.seed))
-            value = TrialValue(cost=self._optimization_targets_weights.dot(score.astype(float)),
-                               time=0.0, status=StatusType.SUCCESS)
+            info: TrialInfo = self.trial_info_map.get(
+                config, TrialInfo(config=config, seed=self.base_optimizer.scenario.seed))
+            value = TrialValue(cost=list(score.astype(float)), time=0.0, status=StatusType.SUCCESS)
             self.base_optimizer.tell(info, value, save=False)
 
         # Save optimizer once we register all configs
