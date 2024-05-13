@@ -25,23 +25,36 @@ class EvaluatedSample(NamedTuple):
 
 
 class FlamlOptimizer(BaseOptimizer):
-    """Wrapper class for FLAML Optimizer: A fast library for AutoML and tuning.
-
-    Parameters
-    ----------
-    parameter_space : ConfigSpace.ConfigurationSpace
-        The parameter space to optimize.
-
-    space_adapter : BaseSpaceAdapter
-        The space adapter class to employ for parameter space transformations.
-
-    low_cost_partial_config : dict
-        A dictionary from a subset of controlled dimensions to the initial low-cost values.
-        More info: https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
-
-    seed : Optional[int]
-        If provided, calls np.random.seed() with the provided value to set the seed globally at init.
     """
+    Wrapper class for FLAML Optimizer: A fast library for AutoML and tuning.
+    """
+
+    def __init__(
+        self,
+        *,
+        parameter_space: ConfigSpace.ConfigurationSpace,
+        space_adapter: Optional[BaseSpaceAdapter] = None,
+        low_cost_partial_config: Optional[dict] = None,
+        seed: Optional[int] = None,
+    ):
+        """
+            Create an MLOS wrapper class for FLAML.
+
+            Parameters
+            ----------
+            parameter_space : ConfigSpace.ConfigurationSpace
+                The parameter space to optimize.
+
+            space_adapter : BaseSpaceAdapter
+                The space adapter class to employ for parameter space transformations.
+
+            low_cost_partial_config : dict
+                A dictionary from a subset of controlled dimensions to the initial low-cost values.
+                More info: https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
+
+        seed : Optional[int]
+            If provided, calls np.random.seed() with the provided value to set the seed globally at init.
+        """
 
     def __init__(
         self,
