@@ -6,7 +6,7 @@
 Contains the RandomOptimizer class.
 """
 
-from typing import Optional
+from typing import Optional, Tuple
 from warnings import warn
 
 import pandas as pd
@@ -53,7 +53,7 @@ class RandomOptimizer(BaseOptimizer):
 
     def _suggest(
         self, context: Optional[pd.DataFrame] = None
-    ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
