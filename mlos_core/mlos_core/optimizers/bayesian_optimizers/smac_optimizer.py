@@ -11,7 +11,7 @@ import inspect
 from logging import warning
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Union
 
 import ConfigSpace
 import numpy as np
@@ -378,7 +378,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     def _suggest(
         self, context: Optional[pd.DataFrame] = None
-    ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Suggests a new configuration.
 
         Parameters

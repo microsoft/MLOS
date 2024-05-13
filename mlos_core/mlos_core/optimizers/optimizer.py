@@ -140,7 +140,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     def suggest(
         self, context: Optional[pd.DataFrame] = None, defaults: bool = False
-    ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Wrapper method, which employs the space adapter (if any), after suggesting a new configuration.
 
         Parameters
