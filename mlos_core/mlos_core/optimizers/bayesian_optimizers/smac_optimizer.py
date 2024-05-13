@@ -41,7 +41,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
                  use_default_config: bool = False,
                  n_random_probability: float = 0.1):
         """
-        Instantiate a new SMAC optimizer.
+        Instantiate a new SMAC optimizer wrapper.
 
         Parameters
         ----------
