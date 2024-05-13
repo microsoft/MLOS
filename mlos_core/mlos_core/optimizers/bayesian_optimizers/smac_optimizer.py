@@ -53,7 +53,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         use_default_config: bool = False,
         n_random_probability: float = 0.1,
         facade: Type[AbstractFacade] = Optimizer_Smac,
-        intensifier: Optional[type[AbstractIntensifier]] = None,
+        intensifier: Optional[Type[AbstractIntensifier]] = None,
         initial_design_class: AbstractInitialDesign = SobolInitialDesign,
         **kwargs,
     ):
