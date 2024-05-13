@@ -22,50 +22,8 @@ from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 
 
 class SmacOptimizer(BaseBayesianOptimizer):
-    """Wrapper class for SMAC based Bayesian optimization.
-
-    Parameters
-    ----------
-    parameter_space : ConfigSpace.ConfigurationSpace
-        The parameter space to optimize.
-
-    space_adapter : BaseSpaceAdapter
-        The space adapter class to employ for parameter space transformations.
-
-    seed : Optional[int]
-        By default SMAC uses a known seed (0) to keep results reproducible.
-        However, if a `None` seed is explicitly provided, we let a random seed be produced by SMAC.
-
-    run_name : Optional[str]
-        Name of this run. This is used to easily distinguish across different runs.
-        If set to `None` (default), SMAC will generate a hash from metadata.
-
-    output_directory : Optional[str]
-        The directory where SMAC output will saved. If set to `None` (default), a temporary dir will be used.
-
-    max_trials : int
-        Maximum number of trials (i.e., function evaluations) to be run. Defaults to 100.
-        Note that modifying this value directly affects the value of `n_random_init`, if latter is set to `None`.
-
-    n_random_init : Optional[int]
-        Number of points evaluated at start to bootstrap the optimizer.
-        Default depends on max_trials and number of parameters and max_ratio.
-        Note: it can sometimes be useful to set this to 1 when pre-warming the
-        optimizer from historical data.
-        See Also: mlos_bench.optimizer.bulk_register
-
-    max_ratio : Optional[int]
-        Maximum ratio of max_trials to be random configurations to be evaluated
-        at start to bootstrap the optimizer.
-        Useful if you want to explicitly control the number of random
-        configurations evaluated at start.
-
-    use_default_config: bool
-        Whether to use the default config for the first trial after random initialization.
-
-    n_random_probability: float
-        Probability of choosing to evaluate a random configuration during optimization.
-        Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
+    """
+    Wrapper class for SMAC based Bayesian optimization.
     """
 
     def __init__(self, *,  # pylint: disable=too-many-locals
@@ -79,7 +37,52 @@ class SmacOptimizer(BaseBayesianOptimizer):
                  max_ratio: Optional[float] = None,
                  use_default_config: bool = False,
                  n_random_probability: float = 0.1):
+        """
+        Instantiate a new SMAC optimizer wrapper.
 
+        Parameters
+        ----------
+        parameter_space : ConfigSpace.ConfigurationSpace
+            The parameter space to optimize.
+
+        space_adapter : BaseSpaceAdapter
+            The space adapter class to employ for parameter space transformations.
+
+        seed : Optional[int]
+            By default SMAC uses a known seed (0) to keep results reproducible.
+            However, if a `None` seed is explicitly provided, we let a random seed be produced by SMAC.
+
+        run_name : Optional[str]
+            Name of this run. This is used to easily distinguish across different runs.
+            If set to `None` (default), SMAC will generate a hash from metadata.
+
+        output_directory : Optional[str]
+            The directory where SMAC output will saved. If set to `None` (default), a temporary dir will be used.
+
+        max_trials : int
+            Maximum number of trials (i.e., function evaluations) to be run. Defaults to 100.
+            Note that modifying this value directly affects the value of `n_random_init`, if latter is set to `None`.
+
+        n_random_init : Optional[int]
+            Number of points evaluated at start to bootstrap the optimizer.
+            Default depends on max_trials and number of parameters and max_ratio.
+            Note: it can sometimes be useful to set this to 1 when pre-warming the
+            optimizer from historical data.
+            See Also: mlos_bench.optimizer.bulk_register
+
+        max_ratio : Optional[int]
+            Maximum ratio of max_trials to be random configurations to be evaluated
+            at start to bootstrap the optimizer.
+            Useful if you want to explicitly control the number of random
+            configurations evaluated at start.
+
+        use_default_config: bool
+            Whether to use the default config for the first trial after random initialization.
+
+        n_random_probability: float
+            Probability of choosing to evaluate a random configuration during optimization.
+            Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
+        """
         super().__init__(
             parameter_space=parameter_space,
             space_adapter=space_adapter,
