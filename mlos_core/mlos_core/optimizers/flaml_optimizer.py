@@ -38,33 +38,23 @@ class FlamlOptimizer(BaseOptimizer):
         seed: Optional[int] = None,
     ):
         """
-            Create an MLOS wrapper class for FLAML.
+        Create an MLOS wrapper class for FLAML.
 
-            Parameters
-            ----------
-            parameter_space : ConfigSpace.ConfigurationSpace
-                The parameter space to optimize.
+        Parameters
+        ----------
+        parameter_space : ConfigSpace.ConfigurationSpace
+            The parameter space to optimize.
 
-            space_adapter : BaseSpaceAdapter
-                The space adapter class to employ for parameter space transformations.
+        space_adapter : BaseSpaceAdapter
+            The space adapter class to employ for parameter space transformations.
 
-            low_cost_partial_config : dict
-                A dictionary from a subset of controlled dimensions to the initial low-cost values.
-                More info: https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
+        low_cost_partial_config : dict
+            A dictionary from a subset of controlled dimensions to the initial low-cost values.
+            More info: https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
 
         seed : Optional[int]
             If provided, calls np.random.seed() with the provided value to set the seed globally at init.
         """
-
-    def __init__(
-        self,
-        *,
-        parameter_space: ConfigSpace.ConfigurationSpace,
-        space_adapter: Optional[BaseSpaceAdapter] = None,
-        low_cost_partial_config: Optional[dict] = None,
-        seed: Optional[int] = None,
-    ):
-
         super().__init__(
             parameter_space=parameter_space,
             space_adapter=space_adapter,
@@ -111,6 +101,11 @@ class FlamlOptimizer(BaseOptimizer):
         if context is not None:
             raise NotImplementedError()
         for (_, config), score in zip(configurations.astype("O").iterrows(), scores):
+            warn(
+                f"Not Implemented: Ignoring context {list(context.columns)}",
+                UserWarning,
+            )
+        for (_, config), score in zip(configurations.astype("O").iterrows(), scores):
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
                 self.optimizer_parameter_space, values=config.to_dict()
             )
@@ -139,7 +134,10 @@ class FlamlOptimizer(BaseOptimizer):
             Pandas dataframe with a single row. Column names are the parameter names.
         """
         if context is not None:
-            raise NotImplementedError()
+            warn(
+                f"Not Implemented: Ignoring context {list(context.columns)}",
+                UserWarning,
+            )
         config: dict = self._get_next_config()
         return pd.DataFrame(config, index=[0]), None
 
