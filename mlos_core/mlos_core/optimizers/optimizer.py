@@ -63,8 +63,8 @@ class BaseOptimizer(metaclass=ABCMeta):
             Tuple[pd.DataFrame, Optional[pd.DataFrame]]
         ] = []
 
-        self.delayed_config = None
-        self.delayed_context = None
+        self.delayed_config: Optional[pd.DataFrame] = None
+        self.delayed_context: Optional[pd.DataFrame] = None
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(space_adapter={self.space_adapter})"
@@ -140,7 +140,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     def suggest(
         self, context: Optional[pd.DataFrame] = None, defaults: bool = False
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """Wrapper method, which employs the space adapter (if any), after suggesting a new configuration.
 
         Parameters
@@ -159,14 +159,13 @@ class BaseOptimizer(metaclass=ABCMeta):
         if defaults:
             self.delayed_config, self.delayed_context = self._suggest(context)
 
-            configuration = config_to_dataframe(
+            configuration: Optional[pd.DataFrame] = config_to_dataframe(
                 self.parameter_space.get_default_configuration()
             )
-            context = self.delayed_context
+            context: Optional[pd.DataFrame] = self.delayed_context
 
             if self.space_adapter is not None:
                 configuration = self.space_adapter.inverse_transform(configuration)
-
         else:
             if self.delayed_config is None:
                 configuration, context = self._suggest(context)
@@ -188,7 +187,9 @@ class BaseOptimizer(metaclass=ABCMeta):
         return configuration, context
 
     @abstractmethod
-    def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def _suggest(
+        self, context: Optional[pd.DataFrame] = None
+    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """Suggests a new configuration.
 
         Parameters

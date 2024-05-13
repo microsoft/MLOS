@@ -11,7 +11,7 @@ import inspect
 from logging import warning
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 from warnings import warn
 
 import ConfigSpace
@@ -54,8 +54,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         n_random_probability: float = 0.1,
         facade: Type[AbstractFacade] = Optimizer_Smac,
         intensifier: Optional[Type[AbstractIntensifier]] = None,
-        initial_design_class: AbstractInitialDesign = SobolInitialDesign,
-        **kwargs,
+        initial_design_class: Type[AbstractInitialDesign] = SobolInitialDesign,
+        **kwargs: Any,
     ):
         """
         Instantiate a new SMAC optimizer wrapper.
@@ -365,13 +365,13 @@ class SmacOptimizer(BaseBayesianOptimizer):
                     )
                 else:
                     out = SmacOptimizer._filter_kwargs(TrialInfo, **ctx.to_dict())
-                    info: TrialInfo = TrialInfo(
+                    info = TrialInfo(
                         config=config,
                         **out,
                     )
 
             else:
-                info: TrialInfo = self.trial_info_df[matching]["TrialInfo"].iloc[0]
+                info = self.trial_info_df[matching]["TrialInfo"].iloc[0]
 
             value: TrialValue = TrialValue(
                 cost=score, time=0.0, status=StatusType.SUCCESS
@@ -396,7 +396,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     def _suggest(
         self, context: Optional[pd.DataFrame] = None
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """Suggests a new configuration.
 
         Parameters

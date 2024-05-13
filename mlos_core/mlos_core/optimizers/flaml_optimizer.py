@@ -119,7 +119,7 @@ class FlamlOptimizer(BaseOptimizer):
 
     def _suggest(
         self, context: Optional[pd.DataFrame] = None
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
