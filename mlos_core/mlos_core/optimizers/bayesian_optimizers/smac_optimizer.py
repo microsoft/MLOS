@@ -11,6 +11,7 @@ import inspect
 from logging import warning
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import Callable, Dict, List, Optional, Tuple, Union
 from warnings import warn
 
 import ConfigSpace
@@ -38,17 +39,24 @@ class SmacOptimizer(BaseBayesianOptimizer):
     Wrapper class for SMAC based Bayesian optimization.
     """
 
-    def __init__(self, *,  # pylint: disable=too-many-locals
-                 parameter_space: ConfigSpace.ConfigurationSpace,
-                 space_adapter: Optional[BaseSpaceAdapter] = None,
-                 seed: Optional[int] = 0,
-                 run_name: Optional[str] = None,
-                 output_directory: Optional[str] = None,
-                 max_trials: int = 100,
-                 n_random_init: Optional[int] = None,
-                 max_ratio: Optional[float] = None,
-                 use_default_config: bool = False,
-                 n_random_probability: float = 0.1):
+    def __init__(
+        self,  # pylint: disable=too-many-locals
+        *,  # pylint: disable=too-many-locals
+        parameter_space: ConfigSpace.ConfigurationSpace,
+        space_adapter: Optional[BaseSpaceAdapter] = None,
+        seed: Optional[int] = 0,
+        run_name: Optional[str] = None,
+        output_directory: Optional[str] = None,
+        max_trials: int = 100,
+        n_random_init: Optional[int] = None,
+        max_ratio: Optional[float] = None,
+        use_default_config: bool = False,
+        n_random_probability: float = 0.1,
+        facade: type[AbstractFacade] = Optimizer_Smac,
+        intensifier: Optional[type[AbstractIntensifier]] = None,
+        initial_design_class: AbstractInitialDesign = SobolInitialDesign,
+        **kwargs,
+    ):
         """
         Instantiate a new SMAC optimizer wrapper.
 
@@ -94,6 +102,19 @@ class SmacOptimizer(BaseBayesianOptimizer):
         n_random_probability: float
             Probability of choosing to evaluate a random configuration during optimization.
             Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
+
+        facade: AbstractFacade
+            sets the facade to use for SMAC
+
+        intensifier: Optional[type[AbstractIntensifier]]
+            Sets the intensifier type to use in the optimizer. If not set, the default intensifier
+            from the facade will be used
+
+        initial_design_class: AbstractInitialDesign
+            Sets the initial design class to be used in the optimizer. Defaults to SobolInitialDesign
+
+        **kwargs:
+            Additional arguments to be passed to the scenerio, and intensifier
         """
         super().__init__(
             parameter_space=parameter_space,
@@ -312,10 +333,17 @@ class SmacOptimizer(BaseBayesianOptimizer):
         context : pd.DataFrame
             Context of the request that is being registered.
         """
-        from smac.runhistory import StatusType, TrialInfo, TrialValue  # pylint: disable=import-outside-toplevel
+        from smac.runhistory import (  # pylint: disable=import-outside-toplevel
+            StatusType,
+            TrialInfo,
+            TrialValue,
+        )
 
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+            warn(
+                f"Not Implemented: Ignoring context {list(context.columns)}",
+                UserWarning,
+            )
 
         # Register each trial (one-by-one)
         for config, score, ctx in zip(
@@ -387,7 +415,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Column names are the budget, seed, and instance of the evaluation, if valid.
         """
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+            warn(
+                f"Not Implemented: Ignoring context {list(context.columns)}",
+                UserWarning,
+            )
 
         trial: TrialInfo = self.base_optimizer.ask()
         trial.config.is_valid_configuration()
@@ -411,11 +442,18 @@ class SmacOptimizer(BaseBayesianOptimizer):
     ) -> None:
         raise NotImplementedError()
 
-    def surrogate_predict(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
-        from smac.utils.configspace import convert_configurations_to_array  # pylint: disable=import-outside-toplevel
+    def surrogate_predict(
+        self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None
+    ) -> npt.NDArray:
+        from smac.utils.configspace import (  # pylint: disable=import-outside-toplevel
+            convert_configurations_to_array,
+        )
 
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+            warn(
+                f"Not Implemented: Ignoring context {list(context.columns)}",
+                UserWarning,
+            )
         if self._space_adapter and not isinstance(self._space_adapter, IdentityAdapter):
             raise NotImplementedError()
 
@@ -438,9 +476,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
             -1,
         )
 
-    def acquisition_function(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
+    def acquisition_function(
+        self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None
+    ) -> npt.NDArray:
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+            warn(
+                f"Not Implemented: Ignoring context {list(context.columns)}",
+                UserWarning,
+            )
         if self._space_adapter:
             raise NotImplementedError()
 
