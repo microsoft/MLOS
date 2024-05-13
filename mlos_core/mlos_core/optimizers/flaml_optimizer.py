@@ -37,7 +37,7 @@ class FlamlOptimizer(BaseOptimizer):
                  low_cost_partial_config: Optional[dict] = None,
                  seed: Optional[int] = None):
         """
-        Create an MLOS wrapper class for FLAML.
+        Create an MLOS wrapper for FLAML.
 
         Parameters
         ----------
