@@ -11,6 +11,7 @@ from logging import warning
 from pathlib import Path
 from typing import Dict, List, Optional, Union, TYPE_CHECKING
 from tempfile import TemporaryDirectory
+from warnings import warn
 
 import ConfigSpace
 import numpy.typing as npt
@@ -241,7 +242,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         from smac.runhistory import StatusType, TrialInfo, TrialValue  # pylint: disable=import-outside-toplevel
 
         if context is not None:
-            raise NotImplementedError()
+            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
 
         # Register each trial (one-by-one)
         for config, score in zip(self._to_configspace_configs(configurations), scores.tolist()):
@@ -270,7 +271,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             from smac.runhistory import TrialInfo  # pylint: disable=import-outside-toplevel
 
         if context is not None:
-            raise NotImplementedError()
+            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
 
         trial: TrialInfo = self.base_optimizer.ask()
         trial.config.is_valid_configuration()
@@ -287,7 +288,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         from smac.utils.configspace import convert_configurations_to_array  # pylint: disable=import-outside-toplevel
 
         if context is not None:
-            raise NotImplementedError()
+            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         if self._space_adapter and not isinstance(self._space_adapter, IdentityAdapter):
             raise NotImplementedError()
 
@@ -305,7 +306,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     def acquisition_function(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
         if context is not None:
-            raise NotImplementedError()
+            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         if self._space_adapter:
             raise NotImplementedError()
 
