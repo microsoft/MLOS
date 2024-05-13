@@ -156,7 +156,6 @@ class BaseOptimizer(metaclass=ABCMeta):
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
         """
-
         if defaults:
             self.delayed_config, self.delayed_context = self._suggest(context)
 
