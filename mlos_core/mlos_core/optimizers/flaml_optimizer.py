@@ -99,7 +99,6 @@ class FlamlOptimizer(BaseOptimizer):
             Not Yet Implemented.
         """
         if context is not None:
-            raise NotImplementedError()
             for (_, config), score in zip(
                 configurations.astype("O").iterrows(), scores
             ):
