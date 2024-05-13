@@ -11,6 +11,7 @@ from types import TracebackType
 from typing import Dict, Optional, Sequence, Tuple, Type, Union
 
 import pandas as pd
+from typing_extensions import Literal
 from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.optimizers.convert_configspace import (
@@ -28,7 +29,6 @@ from mlos_core.optimizers import (
     OptimizerType,
     SpaceAdapterType,
 )
-from typing_extensions import Literal
 
 _LOG = logging.getLogger(__name__)
 
