@@ -25,7 +25,7 @@ def test_context_not_implemented_warning(configuration_space: CS.ConfigurationSp
                                          optimizer_class: Type[BaseOptimizer],
                                          kwargs: Optional[dict]) -> None:
     """
-    Make sure we raise exceptions for the functionality that has not been implemented yet.
+    Make sure we raise warnings for the functionality that has not been implemented yet.
     """
     if kwargs is None:
         kwargs = {}

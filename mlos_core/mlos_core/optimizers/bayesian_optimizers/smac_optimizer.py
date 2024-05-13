@@ -322,7 +322,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     def acquisition_function(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
         if context is not None:
-            raise NotImplementedError()
+            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         if self._space_adapter:
             raise NotImplementedError()
 
