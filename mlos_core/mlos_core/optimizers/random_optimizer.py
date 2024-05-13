@@ -74,8 +74,11 @@ class RandomOptimizer(BaseOptimizer):
                 f"Not Implemented: Ignoring context {list(context.columns)}",
                 UserWarning,
             )
-        return pd.DataFrame(
-            dict(self.optimizer_parameter_space.sample_configuration()), index=[0]
+        return (
+            pd.DataFrame(
+                dict(self.optimizer_parameter_space.sample_configuration()), index=[0]
+            ),
+            None,
         )
 
     def register_pending(
