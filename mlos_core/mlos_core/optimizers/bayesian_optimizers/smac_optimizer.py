@@ -106,7 +106,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         facade: AbstractFacade
             sets the facade to use for SMAC
 
-        intensifier: Optional[type[AbstractIntensifier]]
+        intensifier: Optional[Type[AbstractIntensifier]]
             Sets the intensifier type to use in the optimizer. If not set, the default intensifier
             from the facade will be used
 

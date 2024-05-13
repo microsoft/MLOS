@@ -6,7 +6,7 @@
 Contains the FlamlOptimizer class.
 """
 
-from typing import Dict, NamedTuple, Optional, Union
+from typing import Dict, NamedTuple, Optional, Tuple, Union
 from warnings import warn
 
 import ConfigSpace
@@ -119,7 +119,7 @@ class FlamlOptimizer(BaseOptimizer):
 
     def _suggest(
         self, context: Optional[pd.DataFrame] = None
-    ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
