@@ -198,6 +198,8 @@ class BaseOptimizer(metaclass=ABCMeta):
     def get_best_observations(self, n_max: int = 1) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]:
         """
         Get the N best observations so far as a triplet of DataFrames (config, score, context).
+        Default is N=1. The columns are ordered in ASCENDING order of the optimization targets.
+        The function uses `pandas.DataFrame.nsmallest(..., keep="first")` method under the hood.
 
         Parameters
         ----------
