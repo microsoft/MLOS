@@ -11,7 +11,7 @@ import inspect
 from logging import warning
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Type, Union
 from warnings import warn
 
 import ConfigSpace
@@ -52,7 +52,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         max_ratio: Optional[float] = None,
         use_default_config: bool = False,
         n_random_probability: float = 0.1,
-        facade: type[AbstractFacade] = Optimizer_Smac,
+        facade: Type[AbstractFacade] = Optimizer_Smac,
         intensifier: Optional[type[AbstractIntensifier]] = None,
         initial_design_class: AbstractInitialDesign = SobolInitialDesign,
         **kwargs,
