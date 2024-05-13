@@ -14,7 +14,6 @@ from tempfile import TemporaryDirectory
 from warnings import warn
 
 import ConfigSpace
-import numpy
 import numpy.typing as npt
 import pandas as pd
 
