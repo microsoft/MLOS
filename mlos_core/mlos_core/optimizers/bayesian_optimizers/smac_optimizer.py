@@ -23,7 +23,6 @@ from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import (
 )
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
-from numpy import isnan
 from smac import HyperparameterOptimizationFacade as Optimizer_Smac
 from smac import Scenario
 from smac.facade import AbstractFacade
@@ -66,55 +65,68 @@ class SmacOptimizer(BaseBayesianOptimizer):
             The parameter space to optimize.
 
         space_adapter : BaseSpaceAdapter
-            The space adapter class to employ for parameter space transformations.
+            The space adapter class to employ for parameter space
+            transformations.
 
         seed : Optional[int]
             By default SMAC uses a known seed (0) to keep results reproducible.
-            However, if a `None` seed is explicitly provided, we let a random seed be produced by SMAC.
+            However, if a `None` seed is explicitly provided, we let a random
+            seed be produced by SMAC.
 
         run_name : Optional[str]
-            Name of this run. This is used to easily distinguish across different runs.
-            If set to `None` (default), SMAC will generate a hash from metadata.
+            Name of this run. This is used to easily distinguish across
+            different runs. If set to `None` (default), SMAC will generate a
+            hash from metadata.
 
         output_directory : Optional[str]
-            The directory where SMAC output will saved. If set to `None` (default), a temporary dir will be used.
+            The directory where SMAC output will saved. If set to `None`
+            (default), a temporary dir will be used.
 
         max_trials : int
-            Maximum number of trials (i.e., function evaluations) to be run. Defaults to 100.
-            Note that modifying this value directly affects the value of `n_random_init`, if latter is set to `None`.
+            Maximum number of trials (i.e., function evaluations) to be run.
+            Defaults to 100.
+            Note that modifying this value directly affects the value of
+            `n_random_init`, if latter is set to `None`.
 
         n_random_init : Optional[int]
             Number of points evaluated at start to bootstrap the optimizer.
-            Default depends on max_trials and number of parameters and max_ratio.
-            Note: it can sometimes be useful to set this to 1 when pre-warming the
-            optimizer from historical data.
+            Default depends on max_trials and number of parameters and
+            max_ratio.
+            Note: it can sometimes be useful to set this to 1 when pre-warming
+            the optimizer from historical data.
             See Also: mlos_bench.optimizer.bulk_register
 
         max_ratio : Optional[int]
-            Maximum ratio of max_trials to be random configurations to be evaluated
-            at start to bootstrap the optimizer.
+            Maximum ratio of max_trials to be random configurations to be
+            evaluated at start to bootstrap the optimizer.
             Useful if you want to explicitly control the number of random
             configurations evaluated at start.
 
         use_default_config: bool
-            Whether to use the default config for the first trial after random initialization.
+            Whether to use the default config for the first trial after random
+            initialization.
 
         n_random_probability: float
-            Probability of choosing to evaluate a random configuration during optimization.
-            Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
+            Probability of choosing to evaluate a random configuration during
+            optimization.
+            Defaults to `0.1`. Setting this to a higher value favors
+            exploration over exploitation.
 
         facade: AbstractFacade
             sets the facade to use for SMAC
 
         intensifier: Optional[Type[AbstractIntensifier]]
-            Sets the intensifier type to use in the optimizer. If not set, the default intensifier
+            Sets the intensifier type to use in the optimizer. If not set, the
+            default intensifier
             from the facade will be used
 
         initial_design_class: AbstractInitialDesign
-            Sets the initial design class to be used in the optimizer. Defaults to SobolInitialDesign
+            Sets the initial design class to be used in the optimizer.
+            Defaults to SobolInitialDesign
 
         **kwargs:
-            Additional arguments to be passed to the scenerio, and intensifier
+            Additional arguments to be passed to the
+            scenerio, and intensifier
         """
         super().__init__(
             parameter_space=parameter_space,
@@ -129,8 +141,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
             columns=["Configuration", "Context", "TrialInfo", "TrialValue"]
         )
 
-        # The default when not specified is to use a known seed (0) to keep results reproducible.
-        # However, if a `None` seed is explicitly provided, we let a random seed be produced by SMAC.
+        # The default when not specified is to use a known seed (0) to keep
+        # results reproducible.
+        # However, if a `None` seed is explicitly provided, we let a random
+        # seed be produced by SMAC.
         # https://automl.github.io/SMAC3/main/api/smac.scenario.html#smac.scenario.Scenario
         seed = -1 if seed is None else seed
 
@@ -148,7 +162,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if n_random_init is not None:
             assert isinstance(n_random_init, int) and n_random_init >= 0
             if n_random_init == max_trials and use_default_config:
-                # Increase max budgeted trials to account for use_default_config.
+                # Increase max budgeted trials to account for
+                # use_default_config.
                 max_trials += 1
 
         scenario: Scenario = Scenario(
@@ -158,7 +173,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             deterministic=True,
             use_default_config=use_default_config,
             n_trials=max_trials,
-            seed=seed or -1,  # if -1, SMAC will generate a random seed internally
+            seed=seed or -1,  # if -1, SMAC will generate a random seed
             n_workers=1,  # Use a single thread for evaluating trials
             **SmacOptimizer._filter_kwargs(Scenario, **kwargs),
         )
@@ -197,7 +212,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 warning(
                     "Number of random initial configurations (%d) is "
                     + "greater than 25%% of max_trials (%d). "
-                    + "Consider setting max_ratio to avoid SMAC overriding n_random_init.",
+                    + "Consider setting max_ratio to avoid SMAC overriding "
+                    + "n_random_init.",
                     n_random_init,
                     max_trials,
                 )
@@ -209,13 +225,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # (currently SOBOL instead of LatinHypercube due to better uniformity
         # for initial sampling which results in lower overall samples required)
 
-        initial_design = initial_design_class(**initial_design_args)  # type: ignore
-        # initial_design = LatinHypercubeInitialDesign(**initial_design_args)  # type: ignore[arg-type]
+        initial_design = initial_design_class(
+            **iniatial_design_args)  # type: ignore
 
         # Workaround a bug in SMAC that doesn't pass the seed to the random
         # design when generated a random_design for itself via the
         # get_random_design static method when random_design is None.
-        assert isinstance(n_random_probability, float) and n_random_probability >= 0
+        assert isinstance(n_random_probability,
+                          float) and n_random_probability >= 0
         random_design = ProbabilityRandomDesign(
             probability=n_random_probability, seed=scenario.seed
         )
@@ -329,7 +346,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
         context : pd.DataFrame
             Context of the request that is being registered.
         """
-
         if context is not None:
             warn(
                 f"Not Implemented: Ignoring context {list(context.columns)}",
@@ -346,7 +362,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
             matching: List = (
                 self.trial_info_df["Configuration"] == config
             ) & pd.Series(
-                [df_ctx.equals(ctx) for df_ctx in self.trial_info_df["Context"]]
+                [df_ctx.equals(ctx)
+                 for df_ctx in self.trial_info_df["Context"]]
             )
 
             if sum(matching) == 0:
@@ -373,7 +390,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 ]
             else:
                 # make a new entry
-                self.trial_info_df.at[list(matching).index(True), "TrialValue"] = value
+                self.trial_info_df.at[list(matching).index(
+                    True), "TrialValue"] = value
 
             self.base_optimizer.tell(info, value, save=False)
 
@@ -520,7 +538,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if len(self._observations) == 0:
             raise ValueError("No observations registered yet.")
         configs = pd.concat([config for config, _, _ in self._observations])
-        configs["score"] = pd.concat([score for _, score, _ in self._observations])
+        configs["score"] = pd.concat(
+            [score for _, score, _ in self._observations])
 
         return configs
 
@@ -597,7 +616,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         ]
 
 
-def _to_context(self, contexts: Optional[pd.DataFrame]) -> List[pd.Series]:
+def _to_context(contexts: Optional[pd.DataFrame]) -> List[pd.Series]:
     if contexts is None:
         return [pd.Series([], dtype=float)]
     return [idx_series[1] for idx_series in contexts.iterrows()]
