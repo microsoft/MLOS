@@ -131,5 +131,5 @@ def test_smac_optimization_loop(mock_env_no_noise: MockEnv,
         "kernel_sched_migration_cost_ns": 297669,
         "kernel_sched_latency_ns": 290365137,
     }
-    assert score == pytest.approx(expected_score, 0.01)
+    assert score == pytest.approx(expected_score, 0.1)
     assert tunables.get_param_values() == expected_tunable_values

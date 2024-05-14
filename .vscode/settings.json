@@ -136,8 +136,8 @@
     // See Also .vscode/launch.json for environment variable args to pytest during debug sessions.
     // For the rest, see setup.cfg
     "python.testing.pytestArgs": [
-        "--log-level=DEBUG",
         "."
     ],
-    "python.testing.unittestEnabled": false
+    "python.testing.unittestEnabled": false,
+    "restructuredtext.pythonRecommendation.disabled": true
 }

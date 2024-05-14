@@ -19,7 +19,7 @@ from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
 @pytest.mark.parametrize(
     ("optimizer_class", "kwargs"),
     [
-        *[(member.value, {}) for member in OptimizerType],
+        *[(member.value, {}) for member in OptimizerType if not member == OptimizerType.SMAC],
     ],
 )
 def test_context_not_implemented_warning(

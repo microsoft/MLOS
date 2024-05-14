@@ -11,6 +11,7 @@ import inspect
 from logging import warning
 from pathlib import Path
 from tempfile import TemporaryDirectory
+import threading
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 from warnings import warn
 
@@ -247,6 +248,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
             **SmacOptimizer._filter_kwargs(facade, **kwargs),
         )
 
+        self.lock = threading.Lock()
+
     def __del__(self) -> None:
         # Best-effort attempt to clean up, in case the user forgets to call .cleanup()
         self.cleanup()
@@ -318,8 +321,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         budget : int
             The budget that was used for evaluating the configuration.
 
-        instnace : object
-            The instnace that the configuration was evaluated on.
+        instance : object
+            The instance that the configuration was evaluated on.
         """
         # NOTE: Providing a target function when using the ask-and-tell interface is an imperfection of the API
         # -- this planned to be fixed in some future release: https://github.com/automl/SMAC3/issues/946
@@ -344,55 +347,55 @@ class SmacOptimizer(BaseBayesianOptimizer):
         context : pd.DataFrame
             Context of the request that is being registered.
         """
-        if context is not None:
-            warn(
-                f"Not Implemented: Ignoring context {list(context.columns)}",
-                UserWarning,
-            )
-
-        # Register each trial (one-by-one)
-        for config, score, ctx in zip(
-            self._to_configspace_configs(configurations),
-            scores.tolist(),
-            _to_context(context),
-        ):
-            # Retrieve previously generated TrialInfo (returned by .ask()) or create new TrialInfo instance
-            matching: List = (
-                self.trial_info_df["Configuration"] == config
-            ) & pd.Series(
-                [df_ctx.equals(ctx) for df_ctx in self.trial_info_df["Context"]]
-            )
-
-            if sum(matching) == 0:
-                out = SmacOptimizer._filter_kwargs(TrialInfo, **ctx.to_dict())
-                info = TrialInfo(
-                    config=config,
-                    **out,
+        with self.lock:
+            # Register each trial (one-by-one)
+            for config, score, ctx in zip(
+                self._to_configspace_configs(configurations),
+                scores.tolist(),
+                _to_context(context) or [None for _ in scores],
+            ):
+                value: TrialValue = TrialValue(
+                    cost=score, time=0.0, status=StatusType.SUCCESS
                 )
 
-            else:
-                info = self.trial_info_df[matching]["TrialInfo"].iloc[0]
+                # Retrieve previously generated TrialInfo (returned by .ask()) or create new TrialInfo instance
+                if ctx is None:
+                    matching: List = (
+                        self.trial_info_df["Configuration"] == config
+                    )
+                else:
+                    matching: List = (
+                        self.trial_info_df["Configuration"] == config
+                    ) & pd.Series(
+                        [df_ctx.equals(ctx) for df_ctx in self.trial_info_df["Context"]]
+                    )
 
-            value: TrialValue = TrialValue(
-                cost=score, time=0.0, status=StatusType.SUCCESS
-            )
-
-            if sum(matching) == 0:
-                # append
-                self.trial_info_df.loc[len(self.trial_info_df.index)] = [
-                    config,
-                    ctx,
-                    info,
-                    value,
-                ]
-            else:
                 # make a new entry
-                self.trial_info_df.at[list(matching).index(True), "TrialValue"] = value
+                if sum(matching) > 0:
+                    info = self.trial_info_df[matching]["TrialInfo"].iloc[-1]
+                    self.trial_info_df.at[list(matching).index(True), "TrialValue"] = value
+                else:
+                    if ctx is None or "budget" not in ctx or "instance" not in ctx:
+                        info = TrialInfo(config=config, seed=self.base_optimizer.scenario.seed)
+                        self.trial_info_df.loc[len(self.trial_info_df.index)] = [
+                            config,
+                            info,
+                            info,
+                            value,
+                        ]
+                    else:
+                        info = TrialInfo(config=config, seed=self.base_optimizer.scenario.seed,
+                                         budget=ctx["budget"], instance=ctx["instance"])
+                        self.trial_info_df.loc[len(self.trial_info_df.index)] = [
+                            config,
+                            ctx,
+                            info,
+                            value,
+                        ]
+                self.base_optimizer.tell(info, value, save=False)
 
-            self.base_optimizer.tell(info, value, save=False)
-
-        # Save optimizer once we register all configs
-        self.base_optimizer.optimizer.save()
+            # Save optimizer once we register all configs
+            self.base_optimizer.optimizer.save()
 
     def _suggest(
         self, context: Optional[pd.DataFrame] = None
@@ -414,28 +417,29 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Pandas dataframe with a single row containing the context.
             Column names are the budget, seed, and instance of the evaluation, if valid.
         """
-        if context is not None:
-            warn(
-                f"Not Implemented: Ignoring context {list(context.columns)}",
-                UserWarning,
-            )
+        with self.lock:
+            if context is not None:
+                warn(
+                    f"Not Implemented: Ignoring context {list(context.columns)}",
+                    UserWarning,
+                )
 
-        trial: TrialInfo = self.base_optimizer.ask()
-        trial.config.is_valid_configuration()
-        self.optimizer_parameter_space.check_configuration(trial.config)
-        assert trial.config.config_space == self.optimizer_parameter_space
+            trial: TrialInfo = self.base_optimizer.ask()
+            trial.config.is_valid_configuration()
+            self.optimizer_parameter_space.check_configuration(trial.config)
+            assert trial.config.config_space == self.optimizer_parameter_space
 
-        config_df = self._extract_config(trial)
-        context_df = SmacOptimizer._extract_context(trial)
+            config_df = self._extract_config(trial)
+            context_df = SmacOptimizer._extract_context(trial)
 
-        self.trial_info_df.loc[len(self.trial_info_df.index)] = [
-            trial.config,
-            context_df.iloc[0],
-            trial,
-            None,
-        ]
+            self.trial_info_df.loc[len(self.trial_info_df.index)] = [
+                trial.config,
+                context_df.iloc[0],
+                trial,
+                None,
+            ]
 
-        return config_df, context_df
+            return config_df, context_df
 
     def register_pending(
         self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None
@@ -614,7 +618,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         ]
 
 
-def _to_context(contexts: Optional[pd.DataFrame]) -> List[pd.Series]:
+def _to_context(contexts: Optional[pd.DataFrame]) -> Optional[List[pd.Series]]:
     if contexts is None:
-        return [pd.Series([], dtype=float)]
+        return None
     return [idx_series[1] for idx_series in contexts.iterrows()]
