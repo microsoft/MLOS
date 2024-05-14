@@ -7,7 +7,7 @@ Test multi-target optimization.
 """
 
 import logging
-from typing import Type
+from typing import List, Optional, Type
 
 import pytest
 
@@ -19,15 +19,37 @@ from mlos_core.optimizers import OptimizerType, BaseOptimizer
 
 from mlos_core.tests import SEED
 
-
 _LOG = logging.getLogger(__name__)
-_LOG.setLevel(logging.DEBUG)
 
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
     *[(member.value, {}) for member in OptimizerType],
 ])
-def test_multi_target_opt(optimizer_class: Type[BaseOptimizer], kwargs: dict) -> None:
+def test_multi_target_opt_wrong_weights(optimizer_class: Type[BaseOptimizer], kwargs: dict) -> None:
+    """
+    Make sure that the optimizer raises an error if the number of objective weights
+    does not match the number of optimization targets.
+    """
+    with pytest.raises(ValueError):
+        optimizer_class(
+            parameter_space=CS.ConfigurationSpace(seed=SEED),
+            optimization_targets=['main_score', 'other_score'],
+            objective_weights=[1],
+            **kwargs
+        )
+
+
+@pytest.mark.parametrize(('objective_weights'), [
+    [2, 1],
+    [0.5, 0.5],
+    None,
+])
+@pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
+    *[(member.value, {}) for member in OptimizerType],
+])
+def test_multi_target_opt(objective_weights: Optional[List[float]],
+                          optimizer_class: Type[BaseOptimizer],
+                          kwargs: dict) -> None:
     """
     Toy multi-target optimization problem to test the optimizers with
     mixed numeric types to ensure that original dtypes are retained.
@@ -51,8 +73,8 @@ def test_multi_target_opt(optimizer_class: Type[BaseOptimizer], kwargs: dict) ->
     optimizer = optimizer_class(
         parameter_space=input_space,
         optimization_targets=['main_score', 'other_score'],
-        objective_weights=[2, 1],
-        **kwargs
+        objective_weights=objective_weights,
+        **kwargs,
     )
 
     with pytest.raises(ValueError, match="No observations"):
