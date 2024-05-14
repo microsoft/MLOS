@@ -33,6 +33,7 @@ class FlamlOptimizer(BaseOptimizer):
     def __init__(self, *,
                  parameter_space: ConfigSpace.ConfigurationSpace,
                  optimization_targets: List[str],
+                 objective_weights: Optional[List[float]] = None,
                  space_adapter: Optional[BaseSpaceAdapter] = None,
                  low_cost_partial_config: Optional[dict] = None,
                  seed: Optional[int] = None):
@@ -48,6 +49,9 @@ class FlamlOptimizer(BaseOptimizer):
             The names of the optimization targets to minimize.
             For FLAML it must be a list with a single element, e.g., `["score"]`.
 
+        objective_weights : Optional[List[float]]
+            Optional list of weights of optimization targets.
+
         space_adapter : BaseSpaceAdapter
             The space adapter class to employ for parameter space transformations.
 
@@ -61,12 +65,9 @@ class FlamlOptimizer(BaseOptimizer):
         super().__init__(
             parameter_space=parameter_space,
             optimization_targets=optimization_targets,
+            objective_weights=objective_weights,
             space_adapter=space_adapter,
         )
-
-        if len(self._optimization_targets) != 1:
-            raise ValueError("FLAML does not support multi-target optimization")
-        self._flaml_optimization_target = self._optimization_targets[0]
 
         # Per upstream documentation, it is recommended to set the seed for
         # flaml at the start of its operation globally.
@@ -99,14 +100,15 @@ class FlamlOptimizer(BaseOptimizer):
         """
         if context is not None:
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
-        for (_, config), score in zip(configurations.astype('O').iterrows(),
-                                      scores[self._flaml_optimization_target]):
+        for (_, config), (_, score) in zip(configurations.astype('O').iterrows(), scores.iterrows()):
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
                 self.optimizer_parameter_space, values=config.to_dict())
             if cs_config in self.evaluated_samples:
                 warn(f"Configuration {config} was already registered", UserWarning)
-
-            self.evaluated_samples[cs_config] = EvaluatedSample(config=config.to_dict(), score=score)
+            self.evaluated_samples[cs_config] = EvaluatedSample(
+                config=config.to_dict(),
+                score=float(np.average(score.astype(float), weights=self._objective_weights)),
+            )
 
     def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         """Suggests a new configuration.

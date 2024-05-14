@@ -7,13 +7,15 @@ Test multi-target optimization.
 """
 
 import logging
+from typing import Type
+
 import pytest
 
 import pandas as pd
 import numpy as np
 import ConfigSpace as CS
 
-from mlos_core.optimizers import OptimizerType, OptimizerFactory
+from mlos_core.optimizers import OptimizerType, BaseOptimizer
 
 from mlos_core.tests import SEED
 
@@ -22,7 +24,10 @@ _LOG = logging.getLogger(__name__)
 _LOG.setLevel(logging.DEBUG)
 
 
-def test_multi_target_opt() -> None:
+@pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
+    *[(member.value, {}) for member in OptimizerType],
+])
+def test_multi_target_opt(optimizer_class: Type[BaseOptimizer], kwargs: dict) -> None:
     """
     Toy multi-target optimization problem to test the optimizers with
     mixed numeric types to ensure that original dtypes are retained.
@@ -43,15 +48,11 @@ def test_multi_target_opt() -> None:
     input_space.add_hyperparameter(
         CS.UniformFloatHyperparameter(name='y', lower=0.0, upper=5.0))
 
-    optimizer = OptimizerFactory.create(
+    optimizer = optimizer_class(
         parameter_space=input_space,
         optimization_targets=['score', 'other_score'],
-        optimizer_type=OptimizerType.SMAC,
-        optimizer_kwargs={
-            # Test with default config.
-            'use_default_config': True,
-            # 'n_random_init': 10,
-        },
+        objective_weights=[1, 2],
+        **kwargs
     )
 
     with pytest.raises(ValueError, match="No observations"):
