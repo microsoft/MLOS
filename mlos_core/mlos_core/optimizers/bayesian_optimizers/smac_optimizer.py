@@ -225,14 +225,12 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # (currently SOBOL instead of LatinHypercube due to better uniformity
         # for initial sampling which results in lower overall samples required)
 
-        initial_design = initial_design_class(
-            **iniatial_design_args)  # type: ignore
+        initial_design = initial_design_class(**initial_design_args)  # type: ignore
 
         # Workaround a bug in SMAC that doesn't pass the seed to the random
         # design when generated a random_design for itself via the
         # get_random_design static method when random_design is None.
-        assert isinstance(n_random_probability,
-                          float) and n_random_probability >= 0
+        assert isinstance(n_random_probability, float) and n_random_probability >= 0
         random_design = ProbabilityRandomDesign(
             probability=n_random_probability, seed=scenario.seed
         )
@@ -362,8 +360,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             matching: List = (
                 self.trial_info_df["Configuration"] == config
             ) & pd.Series(
-                [df_ctx.equals(ctx)
-                 for df_ctx in self.trial_info_df["Context"]]
+                [df_ctx.equals(ctx) for df_ctx in self.trial_info_df["Context"]]
             )
 
             if sum(matching) == 0:
@@ -390,8 +387,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 ]
             else:
                 # make a new entry
-                self.trial_info_df.at[list(matching).index(
-                    True), "TrialValue"] = value
+                self.trial_info_df.at[list(matching).index(True), "TrialValue"] = value
 
             self.base_optimizer.tell(info, value, save=False)
 
@@ -538,8 +534,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if len(self._observations) == 0:
             raise ValueError("No observations registered yet.")
         configs = pd.concat([config for config, _, _ in self._observations])
-        configs["score"] = pd.concat(
-            [score for _, score, _ in self._observations])
+        configs["score"] = pd.concat([score for _, score, _ in self._observations])
 
         return configs
 
