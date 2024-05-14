@@ -8,10 +8,10 @@ See Also: <https://automl.github.io/SMAC3/main/index.html>
 """
 
 import inspect
+import threading
 from logging import warning
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import threading
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 from warnings import warn
 
@@ -360,9 +360,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
                 # Retrieve previously generated TrialInfo (returned by .ask()) or create new TrialInfo instance
                 if ctx is None:
-                    matching: List = (
-                        self.trial_info_df["Configuration"] == config
-                    )
+                    matching: List = self.trial_info_df["Configuration"] == config
                 else:
                     matching: List = (
                         self.trial_info_df["Configuration"] == config
@@ -373,10 +371,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 # make a new entry
                 if sum(matching) > 0:
                     info = self.trial_info_df[matching]["TrialInfo"].iloc[-1]
-                    self.trial_info_df.at[list(matching).index(True), "TrialValue"] = value
+                    self.trial_info_df.at[list(matching).index(True), "TrialValue"] = (
+                        value
+                    )
                 else:
                     if ctx is None or "budget" not in ctx or "instance" not in ctx:
-                        info = TrialInfo(config=config, seed=self.base_optimizer.scenario.seed)
+                        info = TrialInfo(
+                            config=config, seed=self.base_optimizer.scenario.seed
+                        )
                         self.trial_info_df.loc[len(self.trial_info_df.index)] = [
                             config,
                             info,
@@ -384,8 +386,12 @@ class SmacOptimizer(BaseBayesianOptimizer):
                             value,
                         ]
                     else:
-                        info = TrialInfo(config=config, seed=self.base_optimizer.scenario.seed,
-                                         budget=ctx["budget"], instance=ctx["instance"])
+                        info = TrialInfo(
+                            config=config,
+                            seed=self.base_optimizer.scenario.seed,
+                            budget=ctx["budget"],
+                            instance=ctx["instance"],
+                        )
                         self.trial_info_df.loc[len(self.trial_info_df.index)] = [
                             config,
                             ctx,
@@ -581,7 +587,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             observations = [
                 (config, score, context)
                 for config, score, context in self._observations
-                if (context or pd.DataFrame())["budget"].max() == max_budget
+                if context is not None and context["budget"].max() == max_budget
             ]
 
         configs = pd.concat([config for config, _, _ in observations])
