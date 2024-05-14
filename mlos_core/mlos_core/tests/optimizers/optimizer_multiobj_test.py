@@ -37,7 +37,7 @@ def test_multi_target_opt(optimizer_class: Type[BaseOptimizer], kwargs: dict) ->
     def objective(point: pd.DataFrame) -> pd.DataFrame:
         # mix of hyperparameters, optimal is to select the highest possible
         return pd.DataFrame({
-            "score": point.x + point.y,
+            "main_score": point.x + point.y,
             "other_score": point.x ** 2 + point.y ** 2,
         })
 
@@ -50,8 +50,8 @@ def test_multi_target_opt(optimizer_class: Type[BaseOptimizer], kwargs: dict) ->
 
     optimizer = optimizer_class(
         parameter_space=input_space,
-        optimization_targets=['score', 'other_score'],
-        objective_weights=[1, 2],
+        optimization_targets=['main_score', 'other_score'],
+        objective_weights=[2, 1],
         **kwargs
     )
 
@@ -76,7 +76,7 @@ def test_multi_target_opt(optimizer_class: Type[BaseOptimizer], kwargs: dict) ->
         # Test registering the suggested configuration with a score.
         observation = objective(suggestion)
         assert isinstance(observation, pd.DataFrame)
-        assert set(observation.columns) == {'score', 'other_score'}
+        assert set(observation.columns) == {'main_score', 'other_score'}
         optimizer.register(suggestion, observation)
 
     (best_config, best_score, best_context) = optimizer.get_best_observations()
@@ -84,7 +84,7 @@ def test_multi_target_opt(optimizer_class: Type[BaseOptimizer], kwargs: dict) ->
     assert isinstance(best_score, pd.DataFrame)
     assert best_context is None
     assert set(best_config.columns) == {'x', 'y'}
-    assert set(best_score.columns) == {'score', 'other_score'}
+    assert set(best_score.columns) == {'main_score', 'other_score'}
     assert best_config.shape == (1, 2)
     assert best_score.shape == (1, 2)
 
@@ -93,6 +93,6 @@ def test_multi_target_opt(optimizer_class: Type[BaseOptimizer], kwargs: dict) ->
     assert isinstance(all_scores, pd.DataFrame)
     assert all_contexts is None
     assert set(all_configs.columns) == {'x', 'y'}
-    assert set(all_scores.columns) == {'score', 'other_score'}
+    assert set(all_scores.columns) == {'main_score', 'other_score'}
     assert all_configs.shape == (max_iterations, 2)
     assert all_scores.shape == (max_iterations, 2)
