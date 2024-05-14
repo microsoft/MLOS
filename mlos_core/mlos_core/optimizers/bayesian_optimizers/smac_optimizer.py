@@ -19,11 +19,6 @@ import ConfigSpace
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import (
-    BaseBayesianOptimizer,
-)
-from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
-from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 from smac import HyperparameterOptimizationFacade as Optimizer_Smac
 from smac import Scenario
 from smac.facade import AbstractFacade
@@ -32,6 +27,10 @@ from smac.intensifier.abstract_intensifier import AbstractIntensifier
 from smac.main.config_selector import ConfigSelector
 from smac.random_design.probability_design import ProbabilityRandomDesign
 from smac.runhistory import StatusType, TrialInfo, TrialValue
+
+from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import BaseBayesianOptimizer
+from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
+from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 
 
 class SmacOptimizer(BaseBayesianOptimizer):
@@ -349,6 +348,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         """
         with self.lock:
             # Register each trial (one-by-one)
+            ctx: List[pd.Series | None]
             for config, score, ctx in zip(
                 self._to_configspace_configs(configurations),
                 scores.tolist(),
@@ -362,7 +362,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 if ctx is None:
                     matching: List = self.trial_info_df["Configuration"] == config
                 else:
-                    matching: List = (
+                    matching = (
                         self.trial_info_df["Configuration"] == config
                     ) & pd.Series(
                         [df_ctx.equals(ctx) for df_ctx in self.trial_info_df["Context"]]
@@ -455,9 +455,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
     def surrogate_predict(
         self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None
     ) -> npt.NDArray:
-        from smac.utils.configspace import (  # pylint: disable=import-outside-toplevel
-            convert_configurations_to_array,
-        )
+        from smac.utils.configspace import convert_configurations_to_array  # pylint: disable=import-outside-toplevel
 
         if context is not None:
             warn(

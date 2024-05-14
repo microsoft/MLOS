@@ -14,6 +14,7 @@ import ConfigSpace
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.util import config_to_dataframe
 
