@@ -30,6 +30,8 @@ class FlamlOptimizer(BaseOptimizer):
     Wrapper class for FLAML Optimizer: A fast library for AutoML and tuning.
     """
 
+    _METRIC_NAME = "FLAML_score"
+
     def __init__(self, *,
                  parameter_space: ConfigSpace.ConfigurationSpace,
                  optimization_targets: List[str],
@@ -47,7 +49,6 @@ class FlamlOptimizer(BaseOptimizer):
 
         optimization_targets : List[str]
             The names of the optimization targets to minimize.
-            For FLAML it must be a list with a single element, e.g., `["score"]`.
 
         objective_weights : Optional[List[float]]
             Optional list of weights of optimization targets.
@@ -149,11 +150,11 @@ class FlamlOptimizer(BaseOptimizer):
         Returns
         -------
         result: Union[dict, None]
-            Dictionary with a single key, `score`, if config already evaluated; `None` otherwise.
+            Dictionary with a single key, `FLAML_score`, if config already evaluated; `None` otherwise.
         """
         cs_config = normalize_config(self.optimizer_parameter_space, config)
         if cs_config in self.evaluated_samples:
-            return {self._flaml_optimization_target: self.evaluated_samples[cs_config].score}
+            return {self._METRIC_NAME: self.evaluated_samples[cs_config].score}
 
         self._suggested_config = dict(cs_config)  # Cleaned-up version of the config
         return None  # Returning None stops the process
@@ -196,7 +197,7 @@ class FlamlOptimizer(BaseOptimizer):
             self._target_function,
             config=self.flaml_parameter_space,
             mode='min',
-            metric=self._flaml_optimization_target,
+            metric=self._METRIC_NAME,
             points_to_evaluate=points_to_evaluate,
             evaluated_rewards=evaluated_rewards,
             num_samples=len(points_to_evaluate) + 1,
