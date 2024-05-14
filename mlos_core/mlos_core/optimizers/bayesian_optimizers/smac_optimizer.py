@@ -168,7 +168,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         )
 
         if intensifier is None:
-            intensifier_instance = facade.get_intensifier(scenario, max_config_calls=1)
+            intensifier_instance = facade.get_intensifier(scenario)
         else:
             intensifier_instance = intensifier(
                 scenario, **SmacOptimizer._filter_kwargs(intensifier, **kwargs)
@@ -208,9 +208,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # Use the default InitialDesign from SMAC.
         # (currently SOBOL instead of LatinHypercube due to better uniformity
         # for initial sampling which results in lower overall samples required)
-        initial_design = initial_design_class(
-            **initial_design_args
-        )  # type: ignore[arg-type]
+
+        # type: ignore[arg-type]
+        initial_design = initial_design_class(**initial_design_args)
         # initial_design = LatinHypercubeInitialDesign(**initial_design_args)  # type: ignore[arg-type]
 
         # Workaround a bug in SMAC that doesn't pass the seed to the random
@@ -254,7 +254,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         return self.base_optimizer._initial_design._n_configs
 
     @staticmethod
-    def _filter_kwargs(function: Callable, **kwargs):
+    def _filter_kwargs(
+        function: Callable, **kwargs: Optional[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """
         Filters arguments provided in the kwargs dictionary to be restricted to the arugments legal for
         the called function.
@@ -359,16 +361,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
             )
 
             if sum(matching) == 0:
-                if ctx is None:
-                    info: TrialInfo = TrialInfo(
-                        config=config,
-                    )
-                else:
-                    out = SmacOptimizer._filter_kwargs(TrialInfo, **ctx.to_dict())
-                    info = TrialInfo(
-                        config=config,
-                        **out,
-                    )
+                out = SmacOptimizer._filter_kwargs(TrialInfo, **ctx.to_dict())
+                info = TrialInfo(
+                    config=config,
+                    **out,
+                )
 
             else:
                 info = self.trial_info_df[matching]["TrialInfo"].iloc[0]
@@ -565,7 +562,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 observations = [
                     config
                     for config, _, context in self._observations
-                    if context["budget"].max() == max_budget
+                    if (context or pd.DataFrame())["budget"].max() == max_budget
                 ]
         except Exception as e:
             print(e)
@@ -603,7 +600,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             for (_, config) in configurations.astype("O").iterrows()
         ]
 
-    def _to_context(self, contexts: pd.DataFrame) -> List[pd.Series]:
+    def _to_context(self, contexts: Optional[pd.DataFrame]) -> List[pd.Series]:
         if contexts is None:
             return pd.Series([])
         return list(map(lambda idx_series: idx_series[1], contexts.iterrows()))

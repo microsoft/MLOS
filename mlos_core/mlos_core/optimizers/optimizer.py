@@ -159,7 +159,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         if defaults:
             self.delayed_config, self.delayed_context = self._suggest(context)
 
-            configuration: Optional[pd.DataFrame] = config_to_dataframe(
+            configuration: pd.DataFrame = config_to_dataframe(
                 self.parameter_space.get_default_configuration()
             )
             context: Optional[pd.DataFrame] = self.delayed_context
