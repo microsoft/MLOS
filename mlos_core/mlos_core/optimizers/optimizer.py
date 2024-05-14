@@ -162,7 +162,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             configuration: pd.DataFrame = config_to_dataframe(
                 self.parameter_space.get_default_configuration()
             )
-            context: Optional[pd.DataFrame] = self.delayed_context
+            context = self.delayed_context
 
             if self.space_adapter is not None:
                 configuration = self.space_adapter.inverse_transform(configuration)

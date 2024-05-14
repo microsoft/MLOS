@@ -209,8 +209,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # (currently SOBOL instead of LatinHypercube due to better uniformity
         # for initial sampling which results in lower overall samples required)
 
-        # type: ignore[arg-type]
-        initial_design = initial_design_class(**initial_design_args)
+        initial_design = initial_design_class(**initial_design_args)  # type: ignore
         # initial_design = LatinHypercubeInitialDesign(**initial_design_args)  # type: ignore[arg-type]
 
         # Workaround a bug in SMAC that doesn't pass the seed to the random
@@ -555,13 +554,16 @@ class SmacOptimizer(BaseBayesianOptimizer):
         observations = self._observations
         try:
             max_budget = max(
-                [context["budget"].max() for _, _, context in self._observations]
+                [
+                    (context or pd.DataFrame()).max()
+                    for _, _, context in self._observations
+                ]
             )
 
             if max_budget is not np.nan:
                 observations = [
-                    config
-                    for config, _, context in self._observations
+                    (config, score, context)
+                    for config, score, context in self._observations
                     if (context or pd.DataFrame())["budget"].max() == max_budget
                 ]
         except Exception as e:
@@ -602,5 +604,5 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     def _to_context(self, contexts: Optional[pd.DataFrame]) -> List[pd.Series]:
         if contexts is None:
-            return pd.Series([])
+            return pd.Series([], astype=float)
         return list(map(lambda idx_series: idx_series[1], contexts.iterrows()))
