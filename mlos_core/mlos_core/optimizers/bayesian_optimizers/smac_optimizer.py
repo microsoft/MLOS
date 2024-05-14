@@ -253,9 +253,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         return self.base_optimizer._initial_design._n_configs
 
     @staticmethod
-    def _filter_kwargs(
-        function: Callable, **kwargs: Optional[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+    def _filter_kwargs(function: Callable, **kwargs: Any) -> Dict[str, Any]:
         """
         Filters arguments provided in the kwargs dictionary to be restricted to the arugments legal for
         the called function.
@@ -272,9 +270,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
         dict
             kwargs with the non-legal argument filtered out
         """
-        if kwargs is None:
-            return {}
-
         sig = inspect.signature(function)
         filter_keys = [
             param.name
@@ -555,7 +550,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         try:
             max_budget = max(
                 [
-                    (context or pd.DataFrame()).max()
+                    (context or pd.DataFrame())["budget"].max()
                     for _, _, context in self._observations
                 ]
             )
@@ -598,11 +593,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
         return [
             ConfigSpace.Configuration(
                 self.optimizer_parameter_space, values=config.to_dict()
-            )
+            )q
             for (_, config) in configurations.astype("O").iterrows()
         ]
 
-    def _to_context(self, contexts: Optional[pd.DataFrame]) -> List[pd.Series]:
+    def _to_context(self, contexts: Optional[pd.DataFrame]) -> List[pd.Series[float]]:
         if contexts is None:
-            return pd.Series([], astype=float)
+            return pd.Series([], dtype=float)
         return list(map(lambda idx_series: idx_series[1], contexts.iterrows()))
