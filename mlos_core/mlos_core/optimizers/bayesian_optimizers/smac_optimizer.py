@@ -563,12 +563,15 @@ class SmacOptimizer(BaseBayesianOptimizer):
             raise ValueError("No observations registered yet.")
 
         observations = self._observations
-        max_budget = max(
-            [
-                (context or pd.DataFrame())["budget"].max()
-                for _, _, context in self._observations
-            ]
-        )
+
+        max_budget = np.nan
+        budgets = [
+            context["budget"].max()
+            for _, _, context in self._observations
+            if context is not None
+        ]
+        if len(budgets) > 0:
+            max_budget = max(budgets)
 
         if max_budget is not np.nan:
             observations = [
