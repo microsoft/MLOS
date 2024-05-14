@@ -329,11 +329,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
         context : pd.DataFrame
             Context of the request that is being registered.
         """
-        from smac.runhistory import (  # pylint: disable=import-outside-toplevel
-            StatusType,
-            TrialInfo,
-            TrialValue,
-        )
 
         if context is not None:
             warn(
@@ -345,7 +340,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         for config, score, ctx in zip(
             self._to_configspace_configs(configurations),
             scores.tolist(),
-            self._to_context(context),
+            _to_context(context),
         ):
             # Retrieve previously generated TrialInfo (returned by .ask()) or create new TrialInfo instance
             matching: List = (
@@ -530,6 +525,13 @@ class SmacOptimizer(BaseBayesianOptimizer):
         return configs
 
     def get_observations_full(self) -> pd.DataFrame:
+        """Returns the observations as a dataframe with additional info.
+
+        Returns
+        -------
+        observations : pd.DataFrame
+            Dataframe of observations. The columns are parameter names and "score" for the score, each row is an observation.
+        """
         if len(self.trial_info_df) == 0:
             raise ValueError("No observations registered yet.")
 
@@ -547,22 +549,19 @@ class SmacOptimizer(BaseBayesianOptimizer):
             raise ValueError("No observations registered yet.")
 
         observations = self._observations
-        try:
-            max_budget = max(
-                [
-                    (context or pd.DataFrame())["budget"].max()
-                    for _, _, context in self._observations
-                ]
-            )
+        max_budget = max(
+            [
+                (context or pd.DataFrame())["budget"].max()
+                for _, _, context in self._observations
+            ]
+        )
 
-            if max_budget is not np.nan:
-                observations = [
-                    (config, score, context)
-                    for config, score, context in self._observations
-                    if (context or pd.DataFrame())["budget"].max() == max_budget
-                ]
-        except Exception as e:
-            print(e)
+        if max_budget is not np.nan:
+            observations = [
+                (config, score, context)
+                for config, score, context in self._observations
+                if (context or pd.DataFrame())["budget"].max() == max_budget
+            ]
 
         configs = pd.concat([config for config, _, _ in observations])
         scores = pd.concat([score for _, score, _ in observations])
@@ -597,7 +596,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
             for (_, config) in configurations.astype("O").iterrows()
         ]
 
-    def _to_context(self, contexts: Optional[pd.DataFrame]) -> List[pd.Series[float]]:
-        if contexts is None:
-            return [pd.Series([], dtype=float)]
-        return list(map(lambda idx_series: idx_series[1], contexts.iterrows()))
+
+def _to_context(self, contexts: Optional[pd.DataFrame]) -> List[pd.Series]:
+    if contexts is None:
+        return [pd.Series([], dtype=float)]
+    return [idx_series[1] for idx_series in contexts.iterrows()]

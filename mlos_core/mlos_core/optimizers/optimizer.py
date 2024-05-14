@@ -23,6 +23,7 @@ class BaseOptimizer(metaclass=ABCMeta):
     Optimizer abstract base class defining the basic interface.
     """
 
+    # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         *,
