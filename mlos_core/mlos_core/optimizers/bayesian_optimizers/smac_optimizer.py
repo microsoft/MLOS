@@ -599,5 +599,5 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     def _to_context(self, contexts: Optional[pd.DataFrame]) -> List[pd.Series[float]]:
         if contexts is None:
-            return pd.Series([], dtype=float)
+            return [pd.Series([], dtype=float)]
         return list(map(lambda idx_series: idx_series[1], contexts.iterrows()))
