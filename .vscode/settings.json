@@ -133,7 +133,7 @@
         "editor.formatOnSaveMode": "modifications",
         "editor.codeActionsOnSave": {
             "source.organizeImports": true,
-            "source.fixAll": true
+            "source.fixAll": "always"
         },
     },
     // See Also .vscode/launch.json for environment variable args to pytest during debug sessions.

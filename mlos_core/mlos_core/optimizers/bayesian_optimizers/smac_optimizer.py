@@ -348,7 +348,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         """
         with self.lock:
             # Register each trial (one-by-one)
-            ctx: List[pd.Series | None]
+            ctx: pd.Series | None
             for config, score, ctx in zip(
                 self._to_configspace_configs(configurations),
                 scores.tolist(),
