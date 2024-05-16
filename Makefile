@@ -243,26 +243,26 @@ bdist_wheel: mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl
 bdist_wheel: mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl
 bdist_wheel: mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl
 
-mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: mlos_core/dist/tmp/mlos-core-latest.tar
+mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: mlos_core/dist/tmp/mlos_core-latest.tar
 mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: MODULE_NAME := mlos_core
-mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: PACKAGE_NAME := mlos-core
-mlos_core/dist/tmp/mlos-core-latest.tar: mlos_core/setup.py mlos_core/MANIFEST.in $(MLOS_CORE_PYTHON_FILES)
-mlos_core/dist/tmp/mlos-core-latest.tar: MODULE_NAME := mlos_core
-mlos_core/dist/tmp/mlos-core-latest.tar: PACKAGE_NAME := mlos-core
+mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: PACKAGE_NAME := mlos_core
+mlos_core/dist/tmp/mlos_core-latest.tar: mlos_core/setup.py mlos_core/MANIFEST.in $(MLOS_CORE_PYTHON_FILES)
+mlos_core/dist/tmp/mlos_core-latest.tar: MODULE_NAME := mlos_core
+mlos_core/dist/tmp/mlos_core-latest.tar: PACKAGE_NAME := mlos_core
 
-mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl: mlos_bench/dist/tmp/mlos-bench-latest.tar
+mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl: mlos_bench/dist/tmp/mlos_bench-latest.tar
 mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl: MODULE_NAME := mlos_bench
-mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl: PACKAGE_NAME := mlos-bench
-mlos_bench/dist/tmp/mlos-bench-latest.tar: mlos_bench/setup.py mlos_bench/MANIFEST.in $(MLOS_BENCH_PYTHON_FILES)
-mlos_bench/dist/tmp/mlos-bench-latest.tar: MODULE_NAME := mlos_bench
-mlos_bench/dist/tmp/mlos-bench-latest.tar: PACKAGE_NAME := mlos-bench
+mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl: PACKAGE_NAME := mlos_bench
+mlos_bench/dist/tmp/mlos_bench-latest.tar: mlos_bench/setup.py mlos_bench/MANIFEST.in $(MLOS_BENCH_PYTHON_FILES)
+mlos_bench/dist/tmp/mlos_bench-latest.tar: MODULE_NAME := mlos_bench
+mlos_bench/dist/tmp/mlos_bench-latest.tar: PACKAGE_NAME := mlos_bench
 
-mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl: mlos_viz/dist/tmp/mlos-viz-latest.tar
+mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl: mlos_viz/dist/tmp/mlos_viz-latest.tar
 mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl: MODULE_NAME := mlos_viz
-mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl: PACKAGE_NAME := mlos-viz
-mlos_viz/dist/tmp/mlos-bench-latest.tar: mlos_viz/setup.py mlos_viz/MANIFEST.in $(mlos_viz_PYTHON_FILES)
-mlos_viz/dist/tmp/mlos-bench-latest.tar: MODULE_NAME := mlos_viz
-mlos_viz/dist/tmp/mlos-bench-latest.tar: PACKAGE_NAME := mlos-viz
+mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl: PACKAGE_NAME := mlos_viz
+mlos_viz/dist/tmp/mlos_viz-latest.tar: mlos_viz/setup.py mlos_viz/MANIFEST.in $(mlos_viz_PYTHON_FILES)
+mlos_viz/dist/tmp/mlos_viz-latest.tar: MODULE_NAME := mlos_viz
+mlos_viz/dist/tmp/mlos_viz-latest.tar: PACKAGE_NAME := mlos_viz
 
 %-latest.tar: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 %-latest.tar:
