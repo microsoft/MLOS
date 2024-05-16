@@ -11,19 +11,19 @@ from typing import Optional, TypeVar
 
 import ConfigSpace
 
-from mlos_core.optimizers.optimizer import BaseOptimizer
-from mlos_core.optimizers.random_optimizer import RandomOptimizer
 from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
 from mlos_core.optimizers.flaml_optimizer import FlamlOptimizer
-from mlos_core.spaces.adapters import SpaceAdapterType, SpaceAdapterFactory
+from mlos_core.optimizers.optimizer import BaseOptimizer
+from mlos_core.optimizers.random_optimizer import RandomOptimizer
+from mlos_core.spaces.adapters import SpaceAdapterFactory, SpaceAdapterType
 
 __all__ = [
-    'SpaceAdapterType',
-    'OptimizerFactory',
-    'BaseOptimizer',
-    'RandomOptimizer',
-    'FlamlOptimizer',
-    'SmacOptimizer',
+    "SpaceAdapterType",
+    "OptimizerFactory",
+    "BaseOptimizer",
+    "RandomOptimizer",
+    "FlamlOptimizer",
+    "SmacOptimizer",
 ]
 
 
@@ -45,7 +45,7 @@ class OptimizerType(Enum):
 # ConcreteOptimizer = TypeVar('ConcreteOptimizer', *[member.value for member in OptimizerType])
 # To address this, we add a test for complete coverage of the enum.
 ConcreteOptimizer = TypeVar(
-    'ConcreteOptimizer',
+    "ConcreteOptimizer",
     RandomOptimizer,
     FlamlOptimizer,
     SmacOptimizer,
@@ -60,12 +60,14 @@ class OptimizerFactory:
     # pylint: disable=too-few-public-methods
 
     @staticmethod
-    def create(*,
-               parameter_space: ConfigSpace.ConfigurationSpace,
-               optimizer_type: OptimizerType = DEFAULT_OPTIMIZER_TYPE,
-               optimizer_kwargs: Optional[dict] = None,
-               space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
-               space_adapter_kwargs: Optional[dict] = None) -> ConcreteOptimizer:   # type: ignore[type-var]
+    def create(
+        *,
+        parameter_space: ConfigSpace.ConfigurationSpace,
+        optimizer_type: OptimizerType = DEFAULT_OPTIMIZER_TYPE,
+        optimizer_kwargs: Optional[dict] = None,
+        space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
+        space_adapter_kwargs: Optional[dict] = None
+    ) -> ConcreteOptimizer:  # type: ignore[type-var]
         """
         Create a new optimizer instance, given the parameter space, optimizer type,
         and potential optimizer options.

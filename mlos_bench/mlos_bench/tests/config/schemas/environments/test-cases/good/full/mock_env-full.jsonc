@@ -1,6 +1,5 @@
 {
     "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/environment-schema.json",
-
     "name": "mock_env-full",
     "description": "More descriptive text.",
     "class": "mlos_bench.environments.mock_env.MockEnv",
@@ -20,7 +19,10 @@
         "required_args": [
             "foo"
         ],
-        "range": [0, 1],
+        "range": [
+            0,
+            1
+        ],
         "seed": 42,
         "metrics": [
             "latency",

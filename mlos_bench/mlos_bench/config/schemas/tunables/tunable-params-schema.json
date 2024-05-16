@@ -2,16 +2,26 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-params-schema.json",
     "title": "mlos_bench Tunable Params config",
-
     "$defs": {
         "tunable_param_meta": {
             "description": "A dictionary of metadata about the tunable parameter.  Can be used by scripts for additional info when generating configs from the suggested values.",
             "type": "object",
             "additionalProperties": {
                 "$comment": "Only flat dictionaries are allowed.",
-                "type": ["array", "string", "boolean", "null", "number"],
+                "type": [
+                    "array",
+                    "string",
+                    "boolean",
+                    "null",
+                    "number"
+                ],
                 "items": {
-                    "type": ["string", "boolean", "null", "number"]
+                    "type": [
+                        "string",
+                        "boolean",
+                        "null",
+                        "number"
+                    ]
                 }
             }
         },
@@ -25,7 +35,11 @@
                         "type": {
                             "description": "Which distribution to use when sampling from the numerical range.",
                             "$comment": "The possible distribution types. Full match must be below. This is just for IDE help.",
-                            "enum": ["uniform", "beta", "normal"]
+                            "enum": [
+                                "uniform",
+                                "beta",
+                                "normal"
+                            ]
                         },
                         "params": {
                             "description": "Per distribution type configuration parameters",
@@ -34,7 +48,9 @@
                             "minItems": 1
                         }
                     },
-                    "required": ["type"]
+                    "required": [
+                        "type"
+                    ]
                 },
                 {
                     "oneOf": [
@@ -51,7 +67,9 @@
                                     "unevaluatedProperties": false
                                 }
                             },
-                            "required": ["type"],
+                            "required": [
+                                "type"
+                            ],
                             "unevaluatedProperties": false
                         },
                         {
@@ -76,11 +94,17 @@
                                             "exclusiveMinimum": 0
                                         }
                                     },
-                                    "required": ["alpha", "beta"],
+                                    "required": [
+                                        "alpha",
+                                        "beta"
+                                    ],
                                     "unevaluatedProperties": false
                                 }
                             },
-                            "required": ["type", "params"],
+                            "required": [
+                                "type",
+                                "params"
+                            ],
                             "unevaluatedProperties": false
                         },
                         {
@@ -104,11 +128,17 @@
                                             "exclusiveMinimum": 0
                                         }
                                     },
-                                    "required": ["mu", "sigma"],
+                                    "required": [
+                                        "mu",
+                                        "sigma"
+                                    ],
                                     "unevaluatedProperties": false
                                 }
                             },
-                            "required": ["type", "params"],
+                            "required": [
+                                "type",
+                                "params"
+                            ],
                             "unevaluatedProperties": false
                         }
                     ]
@@ -136,7 +166,12 @@
             "type": "array",
             "items": {
                 "description": "Some special values may have a different type than the numeric parameter (e.g., keyword \"AUTO\").",
-                "type": ["number", "string", "boolean", "null"]
+                "type": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "null"
+                ]
             },
             "minItems": 1,
             "uniqueItems": true
@@ -169,13 +204,21 @@
                     "const": "categorical"
                 },
                 "default": {
-                    "type": ["string", "number", "boolean"]
+                    "type": [
+                        "string",
+                        "number",
+                        "boolean"
+                    ]
                 },
                 "values": {
                     "description": "List of values for this categorical type tunable",
                     "type": "array",
                     "items": {
-                        "type": ["string", "number", "boolean"]
+                        "type": [
+                            "string",
+                            "number",
+                            "boolean"
+                        ]
                     },
                     "minItems": 1,
                     "uniqueItems": true
@@ -184,9 +227,21 @@
                     "$ref": "#/$defs/weights"
                 }
             },
-            "required": ["type", "default", "values"],
+            "required": [
+                "type",
+                "default",
+                "values"
+            ],
             "not": {
-                "required": ["range", "special", "special_weights", "range_weight", "log", "quantization", "distribution"]
+                "required": [
+                    "range",
+                    "special",
+                    "special_weights",
+                    "range_weight",
+                    "log",
+                    "quantization",
+                    "distribution"
+                ]
             },
             "$comment": "TODO: add check that default is in values",
             "unevaluatedProperties": false
@@ -234,9 +289,16 @@
                     "$ref": "#/$defs/range_weight"
                 }
             },
-            "required": ["type", "default", "range"],
+            "required": [
+                "type",
+                "default",
+                "range"
+            ],
             "not": {
-                "required": ["values", "values_weights"]
+                "required": [
+                    "values",
+                    "values_weights"
+                ]
             },
             "$comment": "TODO: add check that default is in range",
             "unevaluatedProperties": false
@@ -284,9 +346,16 @@
                     "$ref": "#/$defs/range_weight"
                 }
             },
-            "required": ["type", "default", "range"],
+            "required": [
+                "type",
+                "default",
+                "range"
+            ],
             "not": {
-                "required": ["values", "values_weights"]
+                "required": [
+                    "values",
+                    "values_weights"
+                ]
             },
             "$comment": "TODO: add check that default is in range",
             "unevaluatedProperties": false
@@ -328,11 +397,13 @@
                     "$ref": "#/$defs/tunable_params_set"
                 }
             },
-            "required": ["cost", "params"],
+            "required": [
+                "cost",
+                "params"
+            ],
             "unevaluatedProperties": false
         }
     },
-
     "$comment": "Tunable Params Groups config are named collection of one or more CovariantTunableGroups.",
     "type": "object",
     "properties": {

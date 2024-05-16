@@ -18,35 +18,36 @@
 
 import os
 import sys
-
 from logging import warning
 
 import sphinx_rtd_theme
 
-
-sys.path.insert(0, os.path.abspath('../../mlos_core/mlos_core'))
-sys.path.insert(1, os.path.abspath('../../mlos_bench/mlos_bench'))
-sys.path.insert(1, os.path.abspath('../../mlos_viz/mlos_viz'))
+sys.path.insert(0, os.path.abspath("../../mlos_core/mlos_core"))
+sys.path.insert(1, os.path.abspath("../../mlos_bench/mlos_bench"))
+sys.path.insert(1, os.path.abspath("../../mlos_viz/mlos_viz"))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'MlosCore'
-copyright = '2024, GSL'
-author = 'GSL'
+project = "MlosCore"
+copyright = "2024, GSL"
+author = "GSL"
 
 # The full version, including alpha/beta/rc tags
-release = '0.5.1'
+release = "0.5.1"
 
 try:
     from setuptools_scm import get_version
-    version = get_version(root='../..', relative_to=__file__)
+
+    version = get_version(root="../..", relative_to=__file__)
     if version is not None:
         release = version
 except ImportError:
     warning("setuptools_scm not found, using version from _version.py")
 except LookupError as e:
-    warning(f"setuptools_scm failed to find git version, using version from _version.py: {e}")
+    warning(
+        f"setuptools_scm failed to find git version, using version from _version.py: {e}"
+    )
 
 
 # -- General configuration ---------------------------------------------------
@@ -55,25 +56,25 @@ except LookupError as e:
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'nbsphinx',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.doctest',
+    "nbsphinx",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.doctest",
     # 'sphinx.ext.intersphinx',
     # 'sphinx.ext.linkcode',
-    'numpydoc',
-    'matplotlib.sphinxext.plot_directive',
-    'myst_parser',
+    "numpydoc",
+    "matplotlib.sphinxext.plot_directive",
+    "myst_parser",
 ]
 
 source_suffix = {
-    '.rst': 'restructuredtext',
+    ".rst": "restructuredtext",
     # '.txt': 'markdown',
-    '.md': 'markdown',
+    ".md": "markdown",
 }
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # generate autosummary even if no references
 autosummary_generate = True
@@ -82,10 +83,10 @@ autosummary_generate = True
 numpydoc_class_members_toctree = False
 
 autodoc_default_options = {
-    'members': True,
-    'undoc-members': True,
+    "members": True,
+    "undoc-members": True,
     # Don't generate documentation for some (non-private) functions that are more for internal implementation use.
-    'exclude-members': 'mlos_bench.util.check_required_params'
+    "exclude-members": "mlos_bench.util.check_required_params",
 }
 
 # Generate the plots for the gallery
@@ -94,7 +95,7 @@ autodoc_default_options = {
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', '_templates']
+exclude_patterns = ["_build", "_templates"]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -102,16 +103,16 @@ exclude_patterns = ['_build', '_templates']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # -- nbsphinx options for rendering notebooks -------------------------------
 # nbsphinx_execute = 'never'   # enable to stop nbsphinx from executing notebooks
-nbsphinx_kernel_name = 'python3'
+nbsphinx_kernel_name = "python3"
 # Exclude build directory and Jupyter backup files:
-exclude_patterns = ['_build', '**.ipynb_checkpoints']
+exclude_patterns = ["_build", "**.ipynb_checkpoints"]

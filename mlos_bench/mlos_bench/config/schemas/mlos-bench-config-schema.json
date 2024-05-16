@@ -16,7 +16,9 @@
         },
         "oneOf": [
             {
-                "required": ["class"]
+                "required": [
+                    "class"
+                ]
             },
             {
                 "properties": {
@@ -31,13 +33,15 @@
                     }
                 },
                 "unevaluatedProperties": false,
-                "required": ["services"]
+                "required": [
+                    "services"
+                ]
             }
         ]
     },
     "then": {
         "oneOf": [
-             {
+            {
                 "description": "environment config",
                 "type": "object",
                 "$ref": "./environments/environment-schema.json"

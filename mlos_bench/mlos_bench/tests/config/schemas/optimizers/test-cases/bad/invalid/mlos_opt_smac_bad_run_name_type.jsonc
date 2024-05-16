@@ -1,8 +1,7 @@
 {
     "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
-
     "config": {
         "optimizer_type": "SMAC",
-        "run_name": 1   // number not allowed
+        "run_name": 1 // number not allowed
     }
 }

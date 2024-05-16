@@ -38,7 +38,9 @@
                             "description": "Names of fake benchmark metrics to be generate",
                             "items": {
                                 "type": "string",
-                                "examples": ["score"]
+                                "examples": [
+                                    "score"
+                                ]
                             },
                             "minItems": 1,
                             "uniqueItems": true

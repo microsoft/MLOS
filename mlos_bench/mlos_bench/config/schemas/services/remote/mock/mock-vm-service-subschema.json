@@ -17,9 +17,14 @@
                     "type": "string"
                 }
             },
-            "required": ["vmName"],
+            "required": [
+                "vmName"
+            ],
             "unevaluatedProperties": false
         }
     },
-    "required": ["class", "config"]
+    "required": [
+        "class",
+        "config"
+    ]
 }

@@ -6,17 +6,26 @@
             "int": {
                 "type": "int",
                 "default": 10,
-                "range": [1, 500]
+                "range": [
+                    1,
+                    500
+                ]
             },
             "float": {
                 "type": "float",
                 "default": 10.1,
-                "range": [1.1, 111.1]
+                "range": [
+                    1.1,
+                    111.1
+                ]
             },
             "cat": {
                 "type": "categorical",
                 "default": "yes",
-                "values": ["yes", "no"]
+                "values": [
+                    "yes",
+                    "no"
+                ]
             }
         }
     }

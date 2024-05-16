@@ -5,9 +5,12 @@
             "cat": {
                 "type": "categorical",
                 "default": "foo",
-                "values": ["foo", "bar"]
+                "values": [
+                    "foo",
+                    "bar"
+                ]
             }
         }
     },
-    "foo": "bar"    // <-- this is unhandled
+    "foo": "bar" // <-- this is unhandled
 }

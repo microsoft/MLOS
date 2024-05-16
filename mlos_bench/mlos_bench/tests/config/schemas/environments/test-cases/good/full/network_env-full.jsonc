@@ -10,8 +10,12 @@
         "some/service.jsonc"
     ],
     "config": {
-        "tunable_params": ["baz"],
-        "required_args": ["foo"],
+        "tunable_params": [
+            "baz"
+        ],
+        "required_args": [
+            "foo"
+        ],
         "const_args": {
             "foo": "bar"
         },

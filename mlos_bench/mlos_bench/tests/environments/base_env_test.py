@@ -10,8 +10,8 @@ from typing import Dict
 
 import pytest
 
-from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.environments.base_environment import Environment
+from mlos_bench.tunables.tunable import TunableValue
 
 _GROUPS = {
     "group": ["a", "b"],
@@ -29,8 +29,8 @@ def test_expand_groups() -> None:
     Check the dollar variable expansion for tunable groups.
     """
     assert Environment._expand_groups(
-        ["begin", "$list", "$empty", "$str", "end"],
-        _GROUPS) == ["begin", "c", "d", "efg", "end"]
+        ["begin", "$list", "$empty", "$str", "end"], _GROUPS
+    ) == ["begin", "c", "d", "efg", "end"]
 
 
 def test_expand_groups_empty_input() -> None:

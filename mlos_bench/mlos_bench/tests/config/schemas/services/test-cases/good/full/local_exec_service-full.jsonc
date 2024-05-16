@@ -2,7 +2,6 @@
     //"$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
     "class": "mlos_bench.services.local.local_exec.LocalExecService",
     "description": "descriptive text",
-
     "config": {
         "abort_on_error": true,
         "temp_dir": "/tmp"

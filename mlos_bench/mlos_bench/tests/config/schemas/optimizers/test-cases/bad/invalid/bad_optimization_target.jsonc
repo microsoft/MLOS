@@ -1,7 +1,9 @@
 {
     "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
-
     "config": {
-        "optimization_targets": ["latency", "throughput"]
+        "optimization_targets": [
+            "latency",
+            "throughput"
+        ]
     }
 }

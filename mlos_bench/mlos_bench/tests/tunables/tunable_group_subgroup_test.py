@@ -14,4 +14,4 @@ def test_tunable_group_subgroup(tunable_groups: TunableGroups) -> None:
     Check that the subgroup() method returns only a selection of tunable parameters.
     """
     tunables = tunable_groups.subgroup(["provision"])
-    assert tunables.get_param_values() == {'vmSize': 'Standard_B4ms'}
+    assert tunables.get_param_values() == {"vmSize": "Standard_B4ms"}

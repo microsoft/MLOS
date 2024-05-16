@@ -52,7 +52,6 @@
             },
             "minProperties": 1
         },
-
         "command_lines": {
             "type": "array",
             "description": "The command lines to execute.",
@@ -64,7 +63,6 @@
             },
             "minItems": 1
         },
-
         "setup_run_teardown_configs": {
             "type": "object",
             "properties": {
@@ -86,7 +84,6 @@
                 }
             }
         },
-
         "shell_param_type": {
             "description": "All parameters must be valid shell variable names, else use shell_env_params_rename.",
             "type": "string",
@@ -116,7 +113,6 @@
                 }
             }
         },
-
         "file_download_config": {
             "type": "object",
             "properties": {
@@ -135,7 +131,6 @@
             ],
             "unevaluatedProperties": false
         },
-
         "file_upload_config": {
             "type": "object",
             "properties": {

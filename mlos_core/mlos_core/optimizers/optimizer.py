@@ -15,8 +15,8 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
-from mlos_core.util import config_to_dataframe
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
+from mlos_core.util import config_to_dataframe
 
 
 class BaseOptimizer(metaclass=ABCMeta):
@@ -24,9 +24,12 @@ class BaseOptimizer(metaclass=ABCMeta):
     Optimizer abstract base class defining the basic interface.
     """
 
-    def __init__(self, *,
-                 parameter_space: ConfigSpace.ConfigurationSpace,
-                 space_adapter: Optional[BaseSpaceAdapter] = None):
+    def __init__(
+        self,
+        *,
+        parameter_space: ConfigSpace.ConfigurationSpace,
+        space_adapter: Optional[BaseSpaceAdapter] = None,
+    ):
         """
         Create a new instance of the base optimizer.
 
@@ -38,16 +41,28 @@ class BaseOptimizer(metaclass=ABCMeta):
             The space adapter class to employ for parameter space transformations.
         """
         self.parameter_space: ConfigSpace.ConfigurationSpace = parameter_space
-        self.optimizer_parameter_space: ConfigSpace.ConfigurationSpace = \
-            parameter_space if space_adapter is None else space_adapter.target_parameter_space
+        self.optimizer_parameter_space: ConfigSpace.ConfigurationSpace = (
+            parameter_space
+            if space_adapter is None
+            else space_adapter.target_parameter_space
+        )
 
-        if space_adapter is not None and space_adapter.orig_parameter_space != parameter_space:
-            raise ValueError("Given parameter space differs from the one given to space adapter")
+        if (
+            space_adapter is not None
+            and space_adapter.orig_parameter_space != parameter_space
+        ):
+            raise ValueError(
+                "Given parameter space differs from the one given to space adapter"
+            )
 
         self._space_adapter: Optional[BaseSpaceAdapter] = space_adapter
-        self._observations: List[Tuple[pd.DataFrame, pd.Series, Optional[pd.DataFrame]]] = []
+        self._observations: List[
+            Tuple[pd.DataFrame, pd.Series, Optional[pd.DataFrame]]
+        ] = []
         self._has_context: Optional[bool] = None
-        self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame]]] = []
+        self._pending_observations: List[
+            Tuple[pd.DataFrame, Optional[pd.DataFrame]]
+        ] = []
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(space_adapter={self.space_adapter})"
@@ -57,8 +72,12 @@ class BaseOptimizer(metaclass=ABCMeta):
         """Get the space adapter instance (if any)."""
         return self._space_adapter
 
-    def register(self, configurations: pd.DataFrame, scores: pd.Series,
-                 context: Optional[pd.DataFrame] = None) -> None:
+    def register(
+        self,
+        configurations: pd.DataFrame,
+        scores: pd.Series,
+        context: Optional[pd.DataFrame] = None,
+    ) -> None:
         """Wrapper method, which employs the space adapter (if any), before registering the configurations and scores.
 
         Parameters
@@ -72,27 +91,36 @@ class BaseOptimizer(metaclass=ABCMeta):
             Not Yet Implemented.
         """
         # Do some input validation.
-        assert self._has_context is None or self._has_context ^ (context is None), \
-            "Context must always be added or never be added."
-        assert len(configurations) == len(scores), \
-            "Mismatched number of configurations and scores."
+        assert self._has_context is None or self._has_context ^ (
+            context is None
+        ), "Context must always be added or never be added."
+        assert len(configurations) == len(
+            scores
+        ), "Mismatched number of configurations and scores."
         if context is not None:
-            assert len(configurations) == len(context), \
-                "Mismatched number of configurations and context."
-        assert configurations.shape[1] == len(self.parameter_space.values()), \
-            "Mismatched configuration shape."
+            assert len(configurations) == len(
+                context
+            ), "Mismatched number of configurations and context."
+        assert configurations.shape[1] == len(
+            self.parameter_space.values()
+        ), "Mismatched configuration shape."
         self._observations.append((configurations, scores, context))
         self._has_context = context is not None
 
         if self._space_adapter:
             configurations = self._space_adapter.inverse_transform(configurations)
-            assert configurations.shape[1] == len(self.optimizer_parameter_space.values()), \
-                "Mismatched configuration shape after inverse transform."
+            assert configurations.shape[1] == len(
+                self.optimizer_parameter_space.values()
+            ), "Mismatched configuration shape after inverse transform."
         return self._register(configurations, scores, context)
 
     @abstractmethod
-    def _register(self, configurations: pd.DataFrame, scores: pd.Series,
-                  context: Optional[pd.DataFrame] = None) -> None:
+    def _register(
+        self,
+        configurations: pd.DataFrame,
+        scores: pd.Series,
+        context: Optional[pd.DataFrame] = None,
+    ) -> None:
         """Registers the given configurations and scores.
 
         Parameters
@@ -105,9 +133,11 @@ class BaseOptimizer(metaclass=ABCMeta):
         context : pd.DataFrame
             Not Yet Implemented.
         """
-        pass    # pylint: disable=unnecessary-pass # pragma: no cover
+        pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
-    def suggest(self, context: Optional[pd.DataFrame] = None, defaults: bool = False) -> pd.DataFrame:
+    def suggest(
+        self, context: Optional[pd.DataFrame] = None, defaults: bool = False
+    ) -> pd.DataFrame:
         """
         Wrapper method, which employs the space adapter (if any), after suggesting a new configuration.
 
@@ -125,19 +155,24 @@ class BaseOptimizer(metaclass=ABCMeta):
             Pandas dataframe with a single row. Column names are the parameter names.
         """
         if defaults:
-            configuration = config_to_dataframe(self.parameter_space.get_default_configuration())
+            configuration = config_to_dataframe(
+                self.parameter_space.get_default_configuration()
+            )
             if self.space_adapter is not None:
                 configuration = self.space_adapter.inverse_transform(configuration)
         else:
             configuration = self._suggest(context)
-            assert len(configuration) == 1, \
-                "Suggest must return a single configuration."
-            assert set(configuration.columns).issubset(set(self.optimizer_parameter_space)), \
-                "Optimizer suggested a configuration that does not match the expected parameter space."
+            assert (
+                len(configuration) == 1
+            ), "Suggest must return a single configuration."
+            assert set(configuration.columns).issubset(
+                set(self.optimizer_parameter_space)
+            ), "Optimizer suggested a configuration that does not match the expected parameter space."
         if self._space_adapter:
             configuration = self._space_adapter.transform(configuration)
-            assert set(configuration.columns).issubset(set(self.parameter_space)), \
-                "Space adapter produced a configuration that does not match the expected parameter space."
+            assert set(configuration.columns).issubset(
+                set(self.parameter_space)
+            ), "Space adapter produced a configuration that does not match the expected parameter space."
         return configuration
 
     @abstractmethod
@@ -154,11 +189,12 @@ class BaseOptimizer(metaclass=ABCMeta):
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
         """
-        pass    # pylint: disable=unnecessary-pass # pragma: no cover
+        pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
-    def register_pending(self, configurations: pd.DataFrame,
-                         context: Optional[pd.DataFrame] = None) -> None:
+    def register_pending(
+        self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None
+    ) -> None:
         """Registers the given configurations as "pending".
         That is it say, it has been suggested by the optimizer, and an experiment trial has been started.
         This can be useful for executing multiple trials in parallel, retry logic, etc.
@@ -170,7 +206,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         context : pd.DataFrame
             Not Yet Implemented.
         """
-        pass    # pylint: disable=unnecessary-pass # pragma: no cover
+        pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
     def get_observations(self) -> pd.DataFrame:
         """Returns the observations as a dataframe.
@@ -185,7 +221,9 @@ class BaseOptimizer(metaclass=ABCMeta):
         configs = pd.concat([config for config, _, _ in self._observations])
         scores = pd.concat([score for _, score, _ in self._observations])
         try:
-            contexts = pd.concat([context for _, _, context in self._observations if context is not None])
+            contexts = pd.concat(
+                [context for _, _, context in self._observations if context is not None]
+            )
         except ValueError:
             contexts = None
         configs["score"] = scores
@@ -206,7 +244,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         if len(self._observations) == 0:
             raise ValueError("No observations registered yet.")
         observations = self.get_observations()
-        return observations.nsmallest(1, columns='score')
+        return observations.nsmallest(1, columns="score")
 
     def cleanup(self) -> None:
         """
@@ -224,7 +262,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             j = 0
             for param in self.optimizer_parameter_space.values():
                 if isinstance(param, ConfigSpace.CategoricalHyperparameter):
-                    for (offset, val) in enumerate(param.choices):
+                    for offset, val in enumerate(param.choices):
                         if config[i][j + offset] == 1:
                             df_dict[param.name].append(val)
                             break

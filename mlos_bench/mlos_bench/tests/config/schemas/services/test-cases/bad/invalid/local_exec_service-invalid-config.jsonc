@@ -1,7 +1,6 @@
 {
     "class": "mlos_bench.services.local.local_exec.LocalExecService",
-
     "config": {
-        "temp_dir": 1   // bad type
+        "temp_dir": 1 // bad type
     }
 }

@@ -3,7 +3,12 @@
     "name": "Azure MySQL Flex DB Configuration",
     "class": "mlos_bench.environments.remote.SaaSEnv",
     "config": {
-        "required_args": ["vmName"],
-        "tunable_params": ["mysql-innodb", "mysql-buffer"]
+        "required_args": [
+            "vmName"
+        ],
+        "tunable_params": [
+            "mysql-innodb",
+            "mysql-buffer"
+        ]
     }
 }

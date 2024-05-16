@@ -124,7 +124,9 @@ def test_from_extras_expansion(source_template_dict: Dict[str, Any]) -> None:
         "extra_str": "str-from-extras",
         "string": "shouldn't be used",
     }
-    results = DictTemplater(source_template_dict).expand_vars(extra_source_dict=extra_source_dict)
+    results = DictTemplater(source_template_dict).expand_vars(
+        extra_source_dict=extra_source_dict
+    )
     assert results == {
         "extra_str-ref": f"{extra_source_dict['extra_str']}-ref",
         "str": "string",

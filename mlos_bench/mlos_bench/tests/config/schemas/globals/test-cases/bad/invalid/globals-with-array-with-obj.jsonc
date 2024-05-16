@@ -3,5 +3,9 @@
     "bar": "baz",
     "num": 1,
     "bool": true,
-    "array": [{"obj": "invalid"}]
+    "array": [
+        {
+            "obj": "invalid"
+        }
+    ]
 }

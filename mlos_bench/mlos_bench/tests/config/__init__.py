@@ -6,10 +6,9 @@
 Helper functions for config example loading tests.
 """
 
-from typing import Callable, List, Optional
-
 import os
 import sys
+from typing import Callable, List, Optional
 
 from mlos_bench.util import path_join
 
@@ -19,12 +18,16 @@ else:
     from importlib.resources import files
 
 
-BUILTIN_TEST_CONFIG_PATH = str(files("mlos_bench.tests.config").joinpath("")).replace("\\", "/")
+BUILTIN_TEST_CONFIG_PATH = str(files("mlos_bench.tests.config").joinpath("")).replace(
+    "\\", "/"
+)
 
 
-def locate_config_examples(root_dir: str,
-                           config_examples_dir: str,
-                           examples_filter: Optional[Callable[[List[str]], List[str]]] = None) -> List[str]:
+def locate_config_examples(
+    root_dir: str,
+    config_examples_dir: str,
+    examples_filter: Optional[Callable[[List[str]], List[str]]] = None,
+) -> List[str]:
     """Locates all config examples in the given directory.
 
     Parameters

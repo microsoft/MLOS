@@ -2,7 +2,6 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/storage/storage-schema.json",
     "title": "mlos_bench Storage config",
-
     "$defs": {
         "config_sql_storage": {
             "type": "object",
@@ -63,10 +62,12 @@
                 }
             },
             "unevaluatedProperties": false,
-            "required": ["drivername", "database"]
+            "required": [
+                "drivername",
+                "database"
+            ]
         }
     },
-
     "description": "config for the mlos_bench storage service",
     "type": "object",
     "properties": {
@@ -76,12 +77,10 @@
             "$comment": "This is optional, but if provided, should match the name of this file.",
             "pattern": "/schemas/storage/storage-schema.json$"
         },
-
         "description": {
             "description": "Optional description of the config.",
             "type": "string"
         },
-
         "class": {
             "description": "The name of the storage class to use.",
             "$comment": "required",
@@ -89,18 +88,19 @@
                 "mlos_bench.storage.sql.storage.SqlStorage"
             ]
         },
-
         "resolve_config_property_paths": {
             "description": "An array of properties in the config that should be resolved to their full paths using the mlos_bench search path logic.",
             "$comment": "This is only relevant for certain drivers.",
-            "type": ["string", "array"],
+            "type": [
+                "string",
+                "array"
+            ],
             "items": {
                 "type": "string"
             },
             "uniqueItems": true,
             "minItems": 1
         },
-
         "config": {
             "description": "The storage driver specific config.",
             "$comment": "Stub for storage specific config appended with condition statements below",
@@ -108,9 +108,11 @@
             "minProperties": 1
         }
     },
-    "required": ["class", "config"],
+    "required": [
+        "class",
+        "config"
+    ],
     "unevaluatedProperties": false,
-
     "oneOf": [
         {
             "$comment": "Extensions to the allowed 'config' object properties when the storage is the mlos_core storage.",
@@ -122,7 +124,9 @@
                         ]
                     }
                 },
-                "required": ["class"]
+                "required": [
+                    "class"
+                ]
             },
             "then": {
                 "allOf": [
@@ -147,10 +151,14 @@
                                             ]
                                         }
                                     },
-                                    "required": ["drivername"]
+                                    "required": [
+                                        "drivername"
+                                    ]
                                 }
                             },
-                            "required": ["config"]
+                            "required": [
+                                "config"
+                            ]
                         },
                         "then": {
                             "allOf": [
@@ -163,7 +171,9 @@
                                                     "const": "database"
                                                 }
                                             },
-                                            "required": ["resolve_config_property_paths"]
+                                            "required": [
+                                                "resolve_config_property_paths"
+                                            ]
                                         },
                                         {
                                             "properties": {
@@ -176,11 +186,15 @@
                                                     "maxItems": 1
                                                 }
                                             },
-                                            "required": ["resolve_config_property_paths"]
+                                            "required": [
+                                                "resolve_config_property_paths"
+                                            ]
                                         },
                                         {
                                             "not": {
-                                                "required": ["resolve_config_property_paths"]
+                                                "required": [
+                                                    "resolve_config_property_paths"
+                                                ]
                                             }
                                         }
                                     ]
@@ -200,7 +214,10 @@
                             "$comment": "Other drivers need to omit resolve_config_property_paths, but include host and username in their config",
                             "properties": {
                                 "config": {
-                                    "required": ["host", "username"]
+                                    "required": [
+                                        "host",
+                                        "username"
+                                    ]
                                 }
                             },
                             "not": {

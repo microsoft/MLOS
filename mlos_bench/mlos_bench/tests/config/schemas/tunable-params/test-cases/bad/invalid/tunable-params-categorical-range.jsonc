@@ -5,8 +5,14 @@
             "cat": {
                 "type": "categorical",
                 "default": "foo",
-                "values": ["foo", "bar"],
-                "range": ["bar", "foo"]    // <-- this is invalid
+                "values": [
+                    "foo",
+                    "bar"
+                ],
+                "range": [
+                    "bar",
+                    "foo"
+                ] // <-- this is invalid
             }
         }
     }

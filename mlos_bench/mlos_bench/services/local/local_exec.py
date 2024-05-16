@@ -12,10 +12,18 @@ import os
 import shlex
 import subprocess
 import sys
-
 from string import Template
 from typing import (
-    Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, TYPE_CHECKING, Union
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
 )
 
 from mlos_bench.os_environ import environ
@@ -71,11 +79,13 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
     due to reduced dependency management complications vs the target environment.
     """
 
-    def __init__(self,
-                 config: Optional[Dict[str, Any]] = None,
-                 global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None,
-                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional[Service] = None,
+        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+    ):
         """
         Create a new instance of a service to run scripts locally.
 
@@ -92,14 +102,19 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
             New methods to register with the service.
         """
         super().__init__(
-            config, global_config, parent,
-            self.merge_methods(methods, [self.local_exec])
+            config,
+            global_config,
+            parent,
+            self.merge_methods(methods, [self.local_exec]),
         )
         self.abort_on_error = self.config.get("abort_on_error", True)
 
-    def local_exec(self, script_lines: Iterable[str],
-                   env: Optional[Mapping[str, "TunableValue"]] = None,
-                   cwd: Optional[str] = None) -> Tuple[int, str, str]:
+    def local_exec(
+        self,
+        script_lines: Iterable[str],
+        env: Optional[Mapping[str, "TunableValue"]] = None,
+        cwd: Optional[str] = None,
+    ) -> Tuple[int, str, str]:
         """
         Execute the script lines from `script_lines` in a local process.
 
@@ -125,7 +140,9 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
             _LOG.debug("Run in directory: %s", temp_dir)
 
             for line in script_lines:
-                (return_code, stdout, stderr) = self._local_exec_script(line, env, temp_dir)
+                (return_code, stdout, stderr) = self._local_exec_script(
+                    line, env, temp_dir
+                )
                 stdout_list.append(stdout)
                 stderr_list.append(stderr)
                 if return_code != 0 and self.abort_on_error:
@@ -167,9 +184,12 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
                 subcmd_tokens.insert(0, sys.executable)
         return subcmd_tokens
 
-    def _local_exec_script(self, script_line: str,
-                           env_params: Optional[Mapping[str, "TunableValue"]],
-                           cwd: str) -> Tuple[int, str, str]:
+    def _local_exec_script(
+        self,
+        script_line: str,
+        env_params: Optional[Mapping[str, "TunableValue"]],
+        cwd: str,
+    ) -> Tuple[int, str, str]:
         """
         Execute the script from `script_path` in a local process.
 
@@ -198,7 +218,7 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
         if env_params:
             env = {key: str(val) for (key, val) in env_params.items()}
 
-        if sys.platform == 'win32':
+        if sys.platform == "win32":
             # A hack to run Python on Windows with env variables set:
             env_copy = environ.copy()
             env_copy["PYTHONPATH"] = ""
@@ -206,16 +226,25 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
             env = env_copy
 
         try:
-            if sys.platform != 'win32':
+            if sys.platform != "win32":
                 cmd = [" ".join(cmd)]
 
             _LOG.info("Run: %s", cmd)
             if _LOG.isEnabledFor(logging.DEBUG):
-                _LOG.debug("Expands to: %s", Template(" ".join(cmd)).safe_substitute(env))
+                _LOG.debug(
+                    "Expands to: %s", Template(" ".join(cmd)).safe_substitute(env)
+                )
                 _LOG.debug("Current working dir: %s", cwd)
 
-            proc = subprocess.run(cmd, env=env or None, cwd=cwd, shell=True,
-                                  text=True, check=False, capture_output=True)
+            proc = subprocess.run(
+                cmd,
+                env=env or None,
+                cwd=cwd,
+                shell=True,
+                text=True,
+                check=False,
+                capture_output=True,
+            )
 
             _LOG.debug("Run: return code = %d", proc.returncode)
             return (proc.returncode, proc.stdout, proc.stderr)

@@ -3,10 +3,13 @@
     "config": {
         "deploymentTemplatePath": "some/path/to/deployment/template.jsonc",
         "subscription": "subscription-id",
-
         "resourceGroup": "rg",
         "deploymentTemplateParameters": {
-            "array": [ { "invalid": "type"} ]
+            "array": [
+                {
+                    "invalid": "type"
+                }
+            ]
         }
     }
 }

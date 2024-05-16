@@ -1,7 +1,6 @@
 {
     // "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
     "description": "SSH Host Service configuration.",
-
     "class": "mlos_bench.services.remote.ssh.ssh_host_service.SshHostService",
     "config": {
         "ssh_username": "someuser",

@@ -7,7 +7,7 @@ Base interface for accessing the stored benchmark config trial group data.
 """
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import pandas
 
@@ -27,14 +27,19 @@ class TunableConfigTrialGroupData(metaclass=ABCMeta):
     (e.g., for repeats), which we call a (tunable) config trial group.
     """
 
-    def __init__(self, *,
-                 experiment_id: str,
-                 tunable_config_id: int,
-                 tunable_config_trial_group_id: Optional[int] = None):
+    def __init__(
+        self,
+        *,
+        experiment_id: str,
+        tunable_config_id: int,
+        tunable_config_trial_group_id: Optional[int] = None,
+    ):
         self._experiment_id = experiment_id
         self._tunable_config_id = tunable_config_id
         # can be lazily initialized as necessary:
-        self._tunable_config_trial_group_id: Optional[int] = tunable_config_trial_group_id
+        self._tunable_config_trial_group_id: Optional[int] = (
+            tunable_config_trial_group_id
+        )
 
     @property
     def experiment_id(self) -> str:
@@ -67,7 +72,9 @@ class TunableConfigTrialGroupData(metaclass=ABCMeta):
         config_id.
         """
         if self._tunable_config_trial_group_id is None:
-            self._tunable_config_trial_group_id = self._get_tunable_config_trial_group_id()
+            self._tunable_config_trial_group_id = (
+                self._get_tunable_config_trial_group_id()
+            )
         assert self._tunable_config_trial_group_id is not None
         return self._tunable_config_trial_group_id
 
@@ -77,7 +84,10 @@ class TunableConfigTrialGroupData(metaclass=ABCMeta):
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, self.__class__):
             return False
-        return self._tunable_config_id == other._tunable_config_id and self._experiment_id == other._experiment_id
+        return (
+            self._tunable_config_id == other._tunable_config_id
+            and self._experiment_id == other._experiment_id
+        )
 
     @property
     @abstractmethod

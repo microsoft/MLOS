@@ -41,24 +41,35 @@ def expand_results_data_args(
     # Prepare the orderby columns.
     if results_df is None:
         if exp_data is None:
-            raise ValueError("Must provide either exp_data or both results_df and objectives.")
+            raise ValueError(
+                "Must provide either exp_data or both results_df and objectives."
+            )
         results_df = exp_data.results_df
 
     if objectives is None:
         if exp_data is None:
-            raise ValueError("Must provide either exp_data or both results_df and objectives.")
+            raise ValueError(
+                "Must provide either exp_data or both results_df and objectives."
+            )
         objectives = exp_data.objectives
     objs_cols: Dict[str, bool] = {}
-    for (opt_tgt, opt_dir) in objectives.items():
+    for opt_tgt, opt_dir in objectives.items():
         if opt_dir not in ["min", "max"]:
-            raise ValueError(f"Unexpected optimization direction for target {opt_tgt}: {opt_dir}")
+            raise ValueError(
+                f"Unexpected optimization direction for target {opt_tgt}: {opt_dir}"
+            )
         ascending = opt_dir == "min"
-        if opt_tgt.startswith(ExperimentData.RESULT_COLUMN_PREFIX) and opt_tgt in results_df.columns:
+        if (
+            opt_tgt.startswith(ExperimentData.RESULT_COLUMN_PREFIX)
+            and opt_tgt in results_df.columns
+        ):
             objs_cols[opt_tgt] = ascending
         elif ExperimentData.RESULT_COLUMN_PREFIX + opt_tgt in results_df.columns:
             objs_cols[ExperimentData.RESULT_COLUMN_PREFIX + opt_tgt] = ascending
         else:
-            raise UserWarning(f"{opt_tgt} is not a result column for experiment {exp_data}")
+            raise UserWarning(
+                f"{opt_tgt} is not a result column for experiment {exp_data}"
+            )
     # Note: these copies are important to avoid issues with downstream consumers.
     # It is more efficient to copy the dataframe than to go back to the original data source.
     # TODO: However, it should be possible to later fixup the downstream consumers

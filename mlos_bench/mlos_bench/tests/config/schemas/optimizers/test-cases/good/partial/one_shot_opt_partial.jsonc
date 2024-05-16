@@ -1,8 +1,9 @@
 {
     "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json",
-
     "class": "mlos_bench.optimizers.OneShotOptimizer",
     "config": {
-        "optimization_targets": {"score": "min"}
+        "optimization_targets": {
+            "score": "min"
+        }
     }
 }

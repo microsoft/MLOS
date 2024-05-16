@@ -6,15 +6,14 @@
 Unit tests for LocalExecService to run Python scripts locally.
 """
 
-from typing import Any, Dict
-
 import json
+from typing import Any, Dict
 
 import pytest
 
-from mlos_bench.tunables.tunable import TunableValue
-from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+from mlos_bench.services.local.local_exec import LocalExecService
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.util import path_join
 
 # pylint: disable=redefined-outer-name
@@ -57,17 +56,22 @@ def test_run_python_script(local_exec_service: LocalExecService) -> None:
             json.dump(params_meta, fh_meta)
 
         script_path = local_exec_service.config_loader_service.resolve_path(
-            "environments/os/linux/runtime/scripts/local/generate_kernel_config_script.py")
+            "environments/os/linux/runtime/scripts/local/generate_kernel_config_script.py"
+        )
 
-        (return_code, _stdout, stderr) = local_exec_service.local_exec([
-            f"{script_path} {input_file} {meta_file} {output_file}"
-        ], cwd=temp_dir, env=params)
+        (return_code, _stdout, stderr) = local_exec_service.local_exec(
+            [f"{script_path} {input_file} {meta_file} {output_file}"],
+            cwd=temp_dir,
+            env=params,
+        )
 
         assert stderr.strip() == ""
         assert return_code == 0
         # assert stdout.strip() == ""
 
-        with open(path_join(temp_dir, output_file), "rt", encoding="utf-8") as fh_output:
+        with open(
+            path_join(temp_dir, output_file), "rt", encoding="utf-8"
+        ) as fh_output:
             assert [ln.strip() for ln in fh_output.readlines()] == [
                 'echo "40000" > /proc/sys/kernel/sched_migration_cost_ns',
                 'echo "800000" > /proc/sys/kernel/sched_granularity_ns',

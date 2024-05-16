@@ -22,7 +22,10 @@
                         },
                         "deploymentTemplatePath": {
                             "description": "Path to an ARM template file, or null if it should be skipped.",
-                            "type": ["string", "null"],
+                            "type": [
+                                "string",
+                                "null"
+                            ],
                             "pattern": "[.]json[c]?$"
                         },
                         "deploymentTemplateParameters": {

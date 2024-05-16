@@ -1,7 +1,6 @@
 // *IN-MEMORY* SQLite3 database - effectively, a null storage.
 {
     "class": "mlos_bench.storage.sql.storage.SqlStorage",
-
     "config": {
         // Don't create the schema until we actually need it.
         // (helps speed up initial launch and tests)

@@ -14,16 +14,27 @@ from mlos_bench.run import _main
 
 
 @pytest.mark.parametrize(
-    ("argv", "expected_score"), [
-        ([
-            "--config", "mlos_bench/mlos_bench/tests/config/cli/mock-bench.jsonc",
-        ], 65.6742),
-        ([
-            "--config", "mlos_bench/mlos_bench/tests/config/cli/mock-opt.jsonc",
-            "--trial_config_repeat_count", "3",
-            "--max_suggestions", "3",
-        ], 64.53897),
-    ]
+    ("argv", "expected_score"),
+    [
+        (
+            [
+                "--config",
+                "mlos_bench/mlos_bench/tests/config/cli/mock-bench.jsonc",
+            ],
+            65.6742,
+        ),
+        (
+            [
+                "--config",
+                "mlos_bench/mlos_bench/tests/config/cli/mock-opt.jsonc",
+                "--trial_config_repeat_count",
+                "3",
+                "--max_suggestions",
+                "3",
+            ],
+            64.53897,
+        ),
+    ],
 )
 def test_main_bench(argv: List[str], expected_score: float) -> None:
     """

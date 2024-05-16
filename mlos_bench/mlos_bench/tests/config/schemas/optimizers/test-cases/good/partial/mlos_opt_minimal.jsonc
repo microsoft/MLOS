@@ -1,7 +1,5 @@
 {
     // no schema
-
     "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer"
-
     // no config required
 }

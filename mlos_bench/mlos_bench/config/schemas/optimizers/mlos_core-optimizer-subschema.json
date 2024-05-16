@@ -3,7 +3,6 @@
     "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/optimizers/mlos_core-optimizer-subschema.json",
     "title": "mlos_core Optimizer config subschema",
     "$comment": "Extensions to the allowed 'config' object properties when the optimizer is the mlos_core optimizer.",
-
     "type": "object",
     "properties": {
         "optimizer_type": {
@@ -80,13 +79,19 @@
                     },
                     "output_directory": {
                         "description": "Directory to store SMAC output files.",
-                        "type": ["string", "null"],
+                        "type": [
+                            "string",
+                            "null"
+                        ],
                         "pattern": "^[a-zA-Z0-9_./\\:-]+$",
                         "example": "smac_output"
                     },
                     "run_name": {
                         "description": "Name to give for the smac output (e.g., $experimentId). If null is used, SMAC will calculate a hash based name.",
-                        "type": ["string", "null"],
+                        "type": [
+                            "string",
+                            "null"
+                        ],
                         "pattern": "^[a-zA-Z0-9_.-]+$",
                         "example": "$experimentId"
                     }

@@ -5,7 +5,10 @@
             "bad-!-char-in-name": {
                 "type": "categorical",
                 "default": "foo",
-                "values": ["foo", "bar"]
+                "values": [
+                    "foo",
+                    "bar"
+                ]
             }
         }
     }

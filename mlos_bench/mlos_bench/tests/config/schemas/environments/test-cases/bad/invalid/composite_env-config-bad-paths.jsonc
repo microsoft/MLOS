@@ -3,7 +3,7 @@
     "class": "mlos_bench.environments.CompositeEnv",
     "config": {
         "include_children": [
-            "some/child.xml"    // should end in json(c)
+            "some/child.xml" // should end in json(c)
         ]
     }
 }

@@ -3,42 +3,35 @@
         "mlos_bench/mlos_bench/config",
         "mlos_bench/mlos_bench/tests/config"
     ],
-
     "services": [
         // start by default with ssh based exec and file services
         // can be overridden at the environment level as well
         "services/remote/ssh/ssh_host_service.jsonc",
         "services/remote/ssh/ssh_fileshare_service.jsonc"
     ],
-
     "environment": "environments/root/root-azure-redis.jsonc",
     "optimizer": "optimizers/one_shot_opt.jsonc",
     "storage": "storage/sqlite.jsonc",
-
     "trial_config_repeat_count": 3,
-
     "random_init": true,
     "random_seed": 42,
-
     "tunable_values": [
         "tunable-values/tunable-values-example.jsonc"
     ],
-
     "globals": [
         "global_config.json"
     ],
-
     "tunable_params_map": {
         "linux-boot": [],
         "linux-runtime": [],
-        "mysql": ["mysql-innodb", "mysql-buffer"]
+        "mysql": [
+            "mysql-innodb",
+            "mysql-buffer"
+        ]
     },
-
     "experiment_id": "RedisBench",
     "trial_id": 1,
-
     "teardown": false,
-
     "log_file": "azure-redis-1shot.log",
     "log_level": "DEBUG"
 }

@@ -1,9 +1,9 @@
 {
     "name": "Redis Composite Env",
     "class": "mlos_bench.environments.composite_env.CompositeEnv",
-
-    "include_tunables": ["environments/apps/redis/redis-tunables.jsonc"],
-
+    "include_tunables": [
+        "environments/apps/redis/redis-tunables.jsonc"
+    ],
     "config": {
         "children": [
             // Local: Generate new Redis config and upload it to a shared storage
@@ -11,7 +11,9 @@
                 "name": "Generate Redis configuration",
                 "class": "mlos_bench.environments.local.LocalFileShareEnv",
                 "config": {
-                    "tunable_params": ["$redis"],
+                    "tunable_params": [
+                        "$redis"
+                    ],
                     "required_args": [
                         "experiment_id",
                         "trial_id"

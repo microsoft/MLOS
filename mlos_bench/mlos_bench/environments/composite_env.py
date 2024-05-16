@@ -8,14 +8,14 @@ Composite benchmark environment.
 
 import logging
 from datetime import datetime
-
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Tuple, Type
+
 from typing_extensions import Literal
 
-from mlos_bench.services.base_service import Service
-from mlos_bench.environments.status import Status
 from mlos_bench.environments.base_environment import Environment
+from mlos_bench.environments.status import Status
+from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -27,13 +27,15 @@ class CompositeEnv(Environment):
     Composite benchmark environment.
     """
 
-    def __init__(self,
-                 *,
-                 name: str,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 tunables: Optional[TunableGroups] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        *,
+        name: str,
+        config: dict,
+        global_config: Optional[dict] = None,
+        tunables: Optional[TunableGroups] = None,
+        service: Optional[Service] = None
+    ):
         """
         Create a new environment with a given config.
 
@@ -53,8 +55,13 @@ class CompositeEnv(Environment):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name=name, config=config, global_config=global_config,
-                         tunables=tunables, service=service)
+        super().__init__(
+            name=name,
+            config=config,
+            global_config=global_config,
+            tunables=tunables,
+            service=service,
+        )
 
         # By default, the Environment includes only the tunables explicitly specified
         # in the "tunable_params" section of the config. `CompositeEnv`, however, must
@@ -70,20 +77,28 @@ class CompositeEnv(Environment):
         # each CompositeEnv gets a copy of the original global config and adjusts it with
         # the `const_args` specific to it.
         global_config = (global_config or {}).copy()
-        for (key, val) in self._const_args.items():
+        for key, val in self._const_args.items():
             global_config.setdefault(key, val)
 
         for child_config_file in config.get("include_children", []):
             for env in self._config_loader_service.load_environment_list(
-                    child_config_file, tunables, global_config, self._const_args, self._service):
+                child_config_file,
+                tunables,
+                global_config,
+                self._const_args,
+                self._service,
+            ):
                 self._add_child(env, tunables)
 
         for child_config in config.get("children", []):
             env = self._config_loader_service.build_environment(
-                child_config, tunables, global_config, self._const_args, self._service)
+                child_config, tunables, global_config, self._const_args, self._service
+            )
             self._add_child(env, tunables)
 
-        _LOG.debug("Build composite environment '%s' END: %s", self, self._tunable_params)
+        _LOG.debug(
+            "Build composite environment '%s' END: %s", self, self._tunable_params
+        )
 
         if not self._children:
             raise ValueError("At least one child environment must be present")
@@ -92,16 +107,21 @@ class CompositeEnv(Environment):
         self._child_contexts = [env.__enter__() for env in self._children]
         return super().__enter__()
 
-    def __exit__(self, ex_type: Optional[Type[BaseException]],
-                 ex_val: Optional[BaseException],
-                 ex_tb: Optional[TracebackType]) -> Literal[False]:
+    def __exit__(
+        self,
+        ex_type: Optional[Type[BaseException]],
+        ex_val: Optional[BaseException],
+        ex_tb: Optional[TracebackType],
+    ) -> Literal[False]:
         ex_throw = None
         for env in reversed(self._children):
             try:
                 env.__exit__(ex_type, ex_val, ex_tb)
             # pylint: disable=broad-exception-caught
             except Exception as ex:
-                _LOG.error("Exception while exiting child environment '%s': %s", env, ex)
+                _LOG.error(
+                    "Exception while exiting child environment '%s': %s", env, ex
+                )
                 ex_throw = ex
         self._child_contexts = []
         super().__exit__(ex_type, ex_val, ex_tb)
@@ -132,8 +152,11 @@ class CompositeEnv(Environment):
         pretty : str
             Pretty-printed environment configuration.
         """
-        return super().pprint(indent, level) + '\n' + '\n'.join(
-            child.pprint(indent, level + 1) for child in self._children)
+        return (
+            super().pprint(indent, level)
+            + "\n"
+            + "\n".join(child.pprint(indent, level + 1) for child in self._children)
+        )
 
     def _add_child(self, env: Environment, tunables: TunableGroups) -> None:
         """
@@ -145,7 +168,9 @@ class CompositeEnv(Environment):
         self._tunable_params.merge(env.tunable_params)
         tunables.merge(env.tunable_params)
 
-    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
+    def setup(
+        self, tunables: TunableGroups, global_config: Optional[dict] = None
+    ) -> bool:
         """
         Set up the children environments.
 
@@ -165,7 +190,9 @@ class CompositeEnv(Environment):
         """
         assert self._in_context
         self._is_ready = super().setup(tunables, global_config) and all(
-            env_context.setup(tunables, global_config) for env_context in self._child_contexts)
+            env_context.setup(tunables, global_config)
+            for env_context in self._child_contexts
+        )
         return self._is_ready
 
     def teardown(self) -> None:
@@ -202,7 +229,9 @@ class CompositeEnv(Environment):
         for env_context in self._child_contexts:
             _LOG.debug("Child env. run: %s", env_context)
             (status, timestamp, metrics) = env_context.run()
-            _LOG.debug("Child env. run results: %s :: %s %s", env_context, status, metrics)
+            _LOG.debug(
+                "Child env. run results: %s :: %s %s", env_context, status, metrics
+            )
             if not status.is_good():
                 _LOG.info("Run failed: %s :: %s", self, status)
                 return (status, timestamp, None)

@@ -6,9 +6,8 @@
 Remote host Environment.
 """
 
-from typing import Optional
-
 import logging
+from typing import Optional
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
@@ -23,13 +22,15 @@ class HostEnv(Environment):
     Remote host environment.
     """
 
-    def __init__(self,
-                 *,
-                 name: str,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 tunables: Optional[TunableGroups] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        *,
+        name: str,
+        config: dict,
+        global_config: Optional[dict] = None,
+        tunables: Optional[TunableGroups] = None,
+        service: Optional[Service] = None
+    ):
         """
         Create a new environment for host operations.
 
@@ -50,13 +51,22 @@ class HostEnv(Environment):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM/host, etc.).
         """
-        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
+        super().__init__(
+            name=name,
+            config=config,
+            global_config=global_config,
+            tunables=tunables,
+            service=service,
+        )
 
-        assert self._service is not None and isinstance(self._service, SupportsHostProvisioning), \
-            "HostEnv requires a service that supports host provisioning operations"
+        assert self._service is not None and isinstance(
+            self._service, SupportsHostProvisioning
+        ), "HostEnv requires a service that supports host provisioning operations"
         self._host_service: SupportsHostProvisioning = self._service
 
-    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
+    def setup(
+        self, tunables: TunableGroups, global_config: Optional[dict] = None
+    ) -> bool:
         """
         Check if host is ready. (Re)provision and start it, if necessary.
 
@@ -94,7 +104,9 @@ class HostEnv(Environment):
         _LOG.info("Host tear down: %s", self)
         (status, params) = self._host_service.deprovision_host(self._params)
         if status.is_pending():
-            (status, _) = self._host_service.wait_host_deployment(params, is_setup=False)
+            (status, _) = self._host_service.wait_host_deployment(
+                params, is_setup=False
+            )
 
         super().teardown()
         _LOG.debug("Final status of Host deprovisioning: %s :: %s", self, status)

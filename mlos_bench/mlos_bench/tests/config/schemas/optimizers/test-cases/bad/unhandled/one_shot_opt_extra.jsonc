@@ -1,8 +1,9 @@
 {
     "class": "mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer",
-
     "config": {
-        "optimization_targets": {"score": "min"},
+        "optimization_targets": {
+            "score": "min"
+        },
         "extra_param": "should not be here"
     }
 }

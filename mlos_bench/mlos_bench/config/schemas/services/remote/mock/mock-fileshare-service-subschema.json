@@ -16,9 +16,14 @@
                     "type": "string"
                 }
             },
-            "required": ["fileShareName"],
+            "required": [
+                "fileShareName"
+            ],
             "unevaluatedProperties": false
         }
     },
-    "required": ["class", "config"]
+    "required": [
+        "class",
+        "config"
+    ]
 }

@@ -7,47 +7,75 @@
             "align_va_addr": {
                 "type": "categorical",
                 "default": "on",
-                "values": ["on", "off"]
+                "values": [
+                    "on",
+                    "off"
+                ]
             },
             "idle": {
                 "type": "categorical",
                 "default": "halt",
-                "values": ["halt", "poll", "nomwait"]
+                "values": [
+                    "halt",
+                    "poll",
+                    "nomwait"
+                ]
             },
             "ima.ahash_bufsize": {
                 "type": "int",
                 "default": 4096,
-                "range": [0, 65536]
+                "range": [
+                    0,
+                    65536
+                ]
             },
             "noautogroup": {
                 "type": "categorical",
                 "default": "",
-                "values": ["", "noautogroup"]
+                "values": [
+                    "",
+                    "noautogroup"
+                ]
             },
             "nohugevmalloc": {
                 "type": "categorical",
                 "default": "",
-                "values": ["", "nohugevmalloc"]
+                "values": [
+                    "",
+                    "nohugevmalloc"
+                ]
             },
             "nohalt": {
                 "type": "categorical",
                 "default": "",
-                "values": ["", "nohalt"]
+                "values": [
+                    "",
+                    "nohalt"
+                ]
             },
             "nohz": {
                 "type": "categorical",
                 "default": "",
-                "values": ["", "nohz"]
+                "values": [
+                    "",
+                    "nohz"
+                ]
             },
             "no-kvmapf": {
                 "type": "categorical",
                 "default": "",
-                "values": ["", "no-kvmapf"]
+                "values": [
+                    "",
+                    "no-kvmapf"
+                ]
             },
             "nopvspin": {
                 "type": "categorical",
                 "default": "",
-                "values": ["", "nopvspin"]
+                "values": [
+                    "",
+                    "nopvspin"
+                ]
             }
         }
     }

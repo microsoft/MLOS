@@ -1,6 +1,5 @@
 {
     "experiment_id": "create-network-test",
-
     "resourceGroup": "mlos-autotuning-test",
     "location": "eastus",
     /*
@@ -13,5 +12,7 @@
         "157.56.0.0/14",
         "167.220.0.0/16"
     ],
-    "destinationPortRanges": [22]
+    "destinationPortRanges": [
+        22
+    ]
 }

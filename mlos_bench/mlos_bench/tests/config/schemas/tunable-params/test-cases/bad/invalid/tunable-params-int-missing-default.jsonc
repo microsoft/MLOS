@@ -4,7 +4,10 @@
         "params": {
             "int": {
                 "type": "int",
-                "range": [1, 500]
+                "range": [
+                    1,
+                    500
+                ]
             }
         }
     }

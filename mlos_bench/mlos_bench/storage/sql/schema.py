@@ -7,12 +7,23 @@ DB schema definition.
 """
 
 import logging
-from typing import List, Any
+from typing import Any, List
 
 from sqlalchemy import (
-    Engine, MetaData, Dialect, create_mock_engine,
-    Table, Column, Sequence, Integer, Float, String, DateTime,
-    PrimaryKeyConstraint, ForeignKeyConstraint, UniqueConstraint,
+    Column,
+    DateTime,
+    Dialect,
+    Engine,
+    Float,
+    ForeignKeyConstraint,
+    Integer,
+    MetaData,
+    PrimaryKeyConstraint,
+    Sequence,
+    String,
+    Table,
+    UniqueConstraint,
+    create_mock_engine,
 )
 
 _LOG = logging.getLogger(__name__)
@@ -69,7 +80,6 @@ class DbSchema:
             Column("root_env_config", String(1024), nullable=False),
             Column("git_repo", String(1024), nullable=False),
             Column("git_commit", String(40), nullable=False),
-
             PrimaryKeyConstraint("exp_id"),
         )
 
@@ -84,20 +94,29 @@ class DbSchema:
             # Will need to adjust the insert and return values to support this
             # eventually.
             Column("weight", Float, nullable=True),
-
             PrimaryKeyConstraint("exp_id", "optimization_target"),
             ForeignKeyConstraint(["exp_id"], [self.experiment.c.exp_id]),
         )
 
         # A workaround for SQLAlchemy issue with autoincrement in DuckDB:
         if engine.dialect.name == "duckdb":
-            seq_config_id = Sequence('seq_config_id')
-            col_config_id = Column("config_id", Integer, seq_config_id,
-                                   server_default=seq_config_id.next_value(),
-                                   nullable=False, primary_key=True)
+            seq_config_id = Sequence("seq_config_id")
+            col_config_id = Column(
+                "config_id",
+                Integer,
+                seq_config_id,
+                server_default=seq_config_id.next_value(),
+                nullable=False,
+                primary_key=True,
+            )
         else:
-            col_config_id = Column("config_id", Integer, nullable=False,
-                                   primary_key=True, autoincrement=True)
+            col_config_id = Column(
+                "config_id",
+                Integer,
+                nullable=False,
+                primary_key=True,
+                autoincrement=True,
+            )
 
         self.config = Table(
             "config",
@@ -116,7 +135,6 @@ class DbSchema:
             Column("ts_end", DateTime),
             # Should match the text IDs of `mlos_bench.environments.Status` enum:
             Column("status", String(self._STATUS_LEN), nullable=False),
-
             PrimaryKeyConstraint("exp_id", "trial_id"),
             ForeignKeyConstraint(["exp_id"], [self.experiment.c.exp_id]),
             ForeignKeyConstraint(["config_id"], [self.config.c.config_id]),
@@ -130,7 +148,6 @@ class DbSchema:
             Column("config_id", Integer, nullable=False),
             Column("param_id", String(self._ID_LEN), nullable=False),
             Column("param_value", String(self._PARAM_VALUE_LEN)),
-
             PrimaryKeyConstraint("config_id", "param_id"),
             ForeignKeyConstraint(["config_id"], [self.config.c.config_id]),
         )
@@ -144,10 +161,10 @@ class DbSchema:
             Column("trial_id", Integer, nullable=False),
             Column("param_id", String(self._ID_LEN), nullable=False),
             Column("param_value", String(self._PARAM_VALUE_LEN)),
-
             PrimaryKeyConstraint("exp_id", "trial_id", "param_id"),
-            ForeignKeyConstraint(["exp_id", "trial_id"],
-                                 [self.trial.c.exp_id, self.trial.c.trial_id]),
+            ForeignKeyConstraint(
+                ["exp_id", "trial_id"], [self.trial.c.exp_id, self.trial.c.trial_id]
+            ),
         )
 
         self.trial_status = Table(
@@ -157,10 +174,10 @@ class DbSchema:
             Column("trial_id", Integer, nullable=False),
             Column("ts", DateTime(timezone=True), nullable=False, default="now"),
             Column("status", String(self._STATUS_LEN), nullable=False),
-
             UniqueConstraint("exp_id", "trial_id", "ts"),
-            ForeignKeyConstraint(["exp_id", "trial_id"],
-                                 [self.trial.c.exp_id, self.trial.c.trial_id]),
+            ForeignKeyConstraint(
+                ["exp_id", "trial_id"], [self.trial.c.exp_id, self.trial.c.trial_id]
+            ),
         )
 
         self.trial_result = Table(
@@ -170,10 +187,10 @@ class DbSchema:
             Column("trial_id", Integer, nullable=False),
             Column("metric_id", String(self._ID_LEN), nullable=False),
             Column("metric_value", String(self._METRIC_VALUE_LEN)),
-
             PrimaryKeyConstraint("exp_id", "trial_id", "metric_id"),
-            ForeignKeyConstraint(["exp_id", "trial_id"],
-                                 [self.trial.c.exp_id, self.trial.c.trial_id]),
+            ForeignKeyConstraint(
+                ["exp_id", "trial_id"], [self.trial.c.exp_id, self.trial.c.trial_id]
+            ),
         )
 
         self.trial_telemetry = Table(
@@ -184,15 +201,15 @@ class DbSchema:
             Column("ts", DateTime(timezone=True), nullable=False, default="now"),
             Column("metric_id", String(self._ID_LEN), nullable=False),
             Column("metric_value", String(self._METRIC_VALUE_LEN)),
-
             UniqueConstraint("exp_id", "trial_id", "ts", "metric_id"),
-            ForeignKeyConstraint(["exp_id", "trial_id"],
-                                 [self.trial.c.exp_id, self.trial.c.trial_id]),
+            ForeignKeyConstraint(
+                ["exp_id", "trial_id"], [self.trial.c.exp_id, self.trial.c.trial_id]
+            ),
         )
 
         _LOG.debug("Schema: %s", self._meta)
 
-    def create(self) -> 'DbSchema':
+    def create(self) -> "DbSchema":
         """
         Create the DB schema.
         """

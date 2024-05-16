@@ -2,7 +2,6 @@
     "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
     "class": "mlos_bench.tests.services.remote.mock.mock_remote_exec_service.MockRemoteExecService",
     "description": "descriptive text",
-
     "config": {
         "vmName": "test-vm"
     }

@@ -3,7 +3,12 @@
     "class": "mlos_bench.environments.LocalEnv",
     "config": {
         "run": [
-            ["/bin/bash", "-c", "echo", "array style args not supported (yet)"]
+            [
+                "/bin/bash",
+                "-c",
+                "echo",
+                "array style args not supported (yet)"
+            ]
         ]
     }
 }

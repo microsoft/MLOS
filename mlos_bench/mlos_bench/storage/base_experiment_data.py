@@ -7,8 +7,8 @@ Base interface for accessing the stored benchmark experiment data.
 """
 
 from abc import ABCMeta, abstractmethod
-from distutils.util import strtobool    # pylint: disable=deprecated-module
-from typing import Dict, Literal, Optional, Tuple, TYPE_CHECKING
+from distutils.util import strtobool  # pylint: disable=deprecated-module
+from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple
 
 import pandas
 
@@ -16,7 +16,9 @@ from mlos_bench.storage.base_tunable_config_data import TunableConfigData
 
 if TYPE_CHECKING:
     from mlos_bench.storage.base_trial_data import TrialData
-    from mlos_bench.storage.base_tunable_config_trial_group_data import TunableConfigTrialGroupData
+    from mlos_bench.storage.base_tunable_config_trial_group_data import (
+        TunableConfigTrialGroupData,
+    )
 
 
 class ExperimentData(metaclass=ABCMeta):
@@ -30,12 +32,15 @@ class ExperimentData(metaclass=ABCMeta):
     RESULT_COLUMN_PREFIX = "result."
     CONFIG_COLUMN_PREFIX = "config."
 
-    def __init__(self, *,
-                 experiment_id: str,
-                 description: str,
-                 root_env_config: str,
-                 git_repo: str,
-                 git_commit: str):
+    def __init__(
+        self,
+        *,
+        experiment_id: str,
+        description: str,
+        root_env_config: str,
+        git_repo: str,
+        git_commit: str,
+    ):
         self._experiment_id = experiment_id
         self._description = description
         self._root_env_config = root_env_config
@@ -140,9 +145,9 @@ class ExperimentData(metaclass=ABCMeta):
         trials_items = sorted(self.trials.items())
         if not trials_items:
             return None
-        for (_trial_id, trial) in trials_items:
+        for _trial_id, trial in trials_items:
             # Take the first config id marked as "defaults" when it was instantiated.
-            if strtobool(str(trial.metadata_dict.get('is_defaults', False))):
+            if strtobool(str(trial.metadata_dict.get("is_defaults", False))):
                 return trial.tunable_config_id
         # Fallback (min trial_id)
         return trials_items[0][1].tunable_config_id

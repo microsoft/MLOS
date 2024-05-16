@@ -19,11 +19,16 @@
                 },
                 {
                     "$comment": "Unlike VM service, which can still do remote exec, network service needs a deployment template.",
-                    "required": ["deploymentTemplatePath"]
+                    "required": [
+                        "deploymentTemplatePath"
+                    ]
                 }
             ],
             "unevaluatedProperties": false
         }
     },
-    "required": ["class", "config"]
+    "required": [
+        "class",
+        "config"
+    ]
 }

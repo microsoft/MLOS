@@ -1,8 +1,9 @@
 {
     "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
-
     "config": {
-        "optimization_targets": {"score": "min"},
+        "optimization_targets": {
+            "score": "min"
+        },
         "optimizer_type": "SMAC",
         // base_estimator is only valid for optimizer_type == SKOPT
         "base_estimator": "gp"

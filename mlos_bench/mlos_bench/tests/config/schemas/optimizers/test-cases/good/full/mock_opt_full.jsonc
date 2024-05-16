@@ -1,9 +1,10 @@
 {
     "class": "mlos_bench.optimizers.MockOptimizer",
-
     "config": {
         // Here we do our best to list the exhaustive set of full configs available for the base optimizer config.
-        "optimization_targets": {"score": "min"},
+        "optimization_targets": {
+            "score": "min"
+        },
         "max_suggestions": 20,
         "seed": 12345,
         "start_with_defaults": false

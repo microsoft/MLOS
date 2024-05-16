@@ -14,13 +14,12 @@ from pytest_docker.plugin import Services as DockerServices
 
 from mlos_bench.tests import check_socket
 
-
 # The SSH test server port and name.
 # See Also: docker-compose.yml
 SSH_TEST_SERVER_PORT = 2254
-SSH_TEST_SERVER_NAME = 'ssh-server'
-ALT_TEST_SERVER_NAME = 'alt-server'
-REBOOT_TEST_SERVER_NAME = 'reboot-server'
+SSH_TEST_SERVER_NAME = "ssh-server"
+ALT_TEST_SERVER_NAME = "alt-server"
+REBOOT_TEST_SERVER_NAME = "reboot-server"
 
 
 @dataclass
@@ -43,8 +42,12 @@ class SshTestServerInfo:
         Note: this value can change when the service restarts so we can't rely on the DockerServices.
         """
         if self._port is None or uncached:
-            port_cmd = run(f"docker compose -p {self.compose_project_name} port {self.service_name} {SSH_TEST_SERVER_PORT}",
-                           shell=True, check=True, capture_output=True)
+            port_cmd = run(
+                f"docker compose -p {self.compose_project_name} port {self.service_name} {SSH_TEST_SERVER_PORT}",
+                shell=True,
+                check=True,
+                capture_output=True,
+            )
             self._port = int(port_cmd.stdout.decode().strip().split(":")[1])
         return self._port
 
@@ -69,7 +72,9 @@ class SshTestServerInfo:
         }
 
 
-def wait_docker_service_socket(docker_services: DockerServices, hostname: str, port: int) -> None:
+def wait_docker_service_socket(
+    docker_services: DockerServices, hostname: str, port: int
+) -> None:
     """Wait until a docker service is ready."""
     docker_services.wait_until_responsive(
         check=lambda: check_socket(hostname, port),

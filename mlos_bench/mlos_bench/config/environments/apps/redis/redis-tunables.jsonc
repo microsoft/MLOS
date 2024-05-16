@@ -6,13 +6,19 @@
                 "description": "Background tasks frequency",
                 "type": "int",
                 "default": 10,
-                "range": [1, 500]
+                "range": [
+                    1,
+                    500
+                ]
             },
             "dynamic_hz": {
                 "description": "Enable adaptive hz",
                 "type": "categorical",
                 "default": "yes",
-                "values": ["yes", "no"]
+                "values": [
+                    "yes",
+                    "no"
+                ]
             }
         }
     }

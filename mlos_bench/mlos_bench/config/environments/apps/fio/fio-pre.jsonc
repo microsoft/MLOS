@@ -1,7 +1,6 @@
 {
     "name": "FIO-Before Env",
     "class": "mlos_bench.environments.composite_env.CompositeEnv",
-
     "config": {
         "const_args": {
             "fio_prefix": "fio.pre",

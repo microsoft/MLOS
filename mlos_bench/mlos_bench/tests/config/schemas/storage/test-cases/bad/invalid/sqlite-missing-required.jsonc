@@ -1,6 +1,5 @@
 {
     "class": "mlos_bench.storage.sql.storage.SqlStorage",
-
     "config": {
         "drivername": "sqlite",
         // Missing required fields:

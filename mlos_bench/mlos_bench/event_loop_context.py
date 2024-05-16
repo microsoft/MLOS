@@ -6,21 +6,21 @@
 EventLoopContext class definition.
 """
 
-from asyncio import AbstractEventLoop
-from concurrent.futures import Future
-from typing import Any, Coroutine, Optional, TypeVar
-from threading import Lock as ThreadLock, Thread
-
 import asyncio
 import logging
 import sys
+from asyncio import AbstractEventLoop
+from concurrent.futures import Future
+from threading import Lock as ThreadLock
+from threading import Thread
+from typing import Any, Coroutine, Optional, TypeVar
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
 else:
     from typing_extensions import TypeAlias
 
-CoroReturnType = TypeVar('CoroReturnType')  # pylint: disable=invalid-name
+CoroReturnType = TypeVar("CoroReturnType")  # pylint: disable=invalid-name
 if sys.version_info >= (3, 9):
     FutureReturnType: TypeAlias = Future[CoroReturnType]
 else:
@@ -66,10 +66,14 @@ class EventLoopContext:
                 assert self._event_loop_thread_refcnt == 0
                 if self._event_loop is None:
                     if sys.platform == "win32":
-                        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+                        asyncio.set_event_loop_policy(
+                            asyncio.WindowsSelectorEventLoopPolicy()
+                        )
                     self._event_loop = asyncio.new_event_loop()
                 assert not self._event_loop.is_running()
-                self._event_loop_thread = Thread(target=self._run_event_loop, daemon=True)
+                self._event_loop_thread = Thread(
+                    target=self._run_event_loop, daemon=True
+                )
                 self._event_loop_thread.start()
             self._event_loop_thread_refcnt += 1
 
@@ -90,7 +94,9 @@ class EventLoopContext:
                     raise RuntimeError("Failed to stop event loop thread.")
                 self._event_loop_thread = None
 
-    def run_coroutine(self, coro: Coroutine[Any, Any, CoroReturnType]) -> FutureReturnType:
+    def run_coroutine(
+        self, coro: Coroutine[Any, Any, CoroReturnType]
+    ) -> FutureReturnType:
         """
         Runs the given coroutine in the background event loop thread and
         returns a Future that can be used to wait for the result.

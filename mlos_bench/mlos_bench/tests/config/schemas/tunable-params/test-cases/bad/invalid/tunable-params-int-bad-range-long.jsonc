@@ -5,7 +5,11 @@
             "int": {
                 "type": "int",
                 "default": 10,
-                "range": [1, 500, 1000] // <-- this is invalid
+                "range": [
+                    1,
+                    500,
+                    1000
+                ] // <-- this is invalid
             }
         }
     }

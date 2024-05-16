@@ -8,24 +8,31 @@ A collection Service functions for managing VMs on Azure.
 
 import json
 import logging
-
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import requests
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.remote.azure.azure_deployment_services import AzureDeploymentService
-from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
-from mlos_bench.services.types.host_provisioner_type import SupportsHostProvisioning
+from mlos_bench.services.remote.azure.azure_deployment_services import (
+    AzureDeploymentService,
+)
 from mlos_bench.services.types.host_ops_type import SupportsHostOps
+from mlos_bench.services.types.host_provisioner_type import SupportsHostProvisioning
 from mlos_bench.services.types.os_ops_type import SupportsOSOps
+from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 from mlos_bench.util import merge_parameters
 
 _LOG = logging.getLogger(__name__)
 
 
-class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsHostOps, SupportsOSOps, SupportsRemoteExec):
+class AzureVMService(
+    AzureDeploymentService,
+    SupportsHostProvisioning,
+    SupportsHostOps,
+    SupportsOSOps,
+    SupportsRemoteExec,
+):
     """
     Helper methods to manage VMs on Azure.
     """
@@ -37,35 +44,35 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/start
     _URL_START = (
-        "https://management.azure.com" +
-        "/subscriptions/{subscription}" +
-        "/resourceGroups/{resource_group}" +
-        "/providers/Microsoft.Compute" +
-        "/virtualMachines/{vm_name}" +
-        "/start" +
-        "?api-version=2022-03-01"
+        "https://management.azure.com"
+        + "/subscriptions/{subscription}"
+        + "/resourceGroups/{resource_group}"
+        + "/providers/Microsoft.Compute"
+        + "/virtualMachines/{vm_name}"
+        + "/start"
+        + "?api-version=2022-03-01"
     )
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/power-off
     _URL_STOP = (
-        "https://management.azure.com" +
-        "/subscriptions/{subscription}" +
-        "/resourceGroups/{resource_group}" +
-        "/providers/Microsoft.Compute" +
-        "/virtualMachines/{vm_name}" +
-        "/powerOff" +
-        "?api-version=2022-03-01"
+        "https://management.azure.com"
+        + "/subscriptions/{subscription}"
+        + "/resourceGroups/{resource_group}"
+        + "/providers/Microsoft.Compute"
+        + "/virtualMachines/{vm_name}"
+        + "/powerOff"
+        + "?api-version=2022-03-01"
     )
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/deallocate
     _URL_DEALLOCATE = (
-        "https://management.azure.com" +
-        "/subscriptions/{subscription}" +
-        "/resourceGroups/{resource_group}" +
-        "/providers/Microsoft.Compute" +
-        "/virtualMachines/{vm_name}" +
-        "/deallocate" +
-        "?api-version=2022-03-01"
+        "https://management.azure.com"
+        + "/subscriptions/{subscription}"
+        + "/resourceGroups/{resource_group}"
+        + "/providers/Microsoft.Compute"
+        + "/virtualMachines/{vm_name}"
+        + "/deallocate"
+        + "?api-version=2022-03-01"
     )
 
     # TODO: This is probably the more correct URL to use for the deprovision operation.
@@ -87,31 +94,33 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/restart
     _URL_REBOOT = (
-        "https://management.azure.com" +
-        "/subscriptions/{subscription}" +
-        "/resourceGroups/{resource_group}" +
-        "/providers/Microsoft.Compute" +
-        "/virtualMachines/{vm_name}" +
-        "/restart" +
-        "?api-version=2022-03-01"
+        "https://management.azure.com"
+        + "/subscriptions/{subscription}"
+        + "/resourceGroups/{resource_group}"
+        + "/providers/Microsoft.Compute"
+        + "/virtualMachines/{vm_name}"
+        + "/restart"
+        + "?api-version=2022-03-01"
     )
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/run-command
     _URL_REXEC_RUN = (
-        "https://management.azure.com" +
-        "/subscriptions/{subscription}" +
-        "/resourceGroups/{resource_group}" +
-        "/providers/Microsoft.Compute" +
-        "/virtualMachines/{vm_name}" +
-        "/runCommand" +
-        "?api-version=2022-03-01"
+        "https://management.azure.com"
+        + "/subscriptions/{subscription}"
+        + "/resourceGroups/{resource_group}"
+        + "/providers/Microsoft.Compute"
+        + "/virtualMachines/{vm_name}"
+        + "/runCommand"
+        + "?api-version=2022-03-01"
     )
 
-    def __init__(self,
-                 config: Optional[Dict[str, Any]] = None,
-                 global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None,
-                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional[Service] = None,
+        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+    ):
         """
         Create a new instance of Azure VM services proxy.
 
@@ -128,26 +137,31 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
             New methods to register with the service.
         """
         super().__init__(
-            config, global_config, parent,
-            self.merge_methods(methods, [
-                # SupportsHostProvisioning
-                self.provision_host,
-                self.deprovision_host,
-                self.deallocate_host,
-                self.wait_host_deployment,
-                # SupportsHostOps
-                self.start_host,
-                self.stop_host,
-                self.restart_host,
-                self.wait_host_operation,
-                # SupportsOSOps
-                self.shutdown,
-                self.reboot,
-                self.wait_os_operation,
-                # SupportsRemoteExec
-                self.remote_exec,
-                self.get_remote_exec_results,
-            ])
+            config,
+            global_config,
+            parent,
+            self.merge_methods(
+                methods,
+                [
+                    # SupportsHostProvisioning
+                    self.provision_host,
+                    self.deprovision_host,
+                    self.deallocate_host,
+                    self.wait_host_deployment,
+                    # SupportsHostOps
+                    self.start_host,
+                    self.stop_host,
+                    self.restart_host,
+                    self.wait_host_operation,
+                    # SupportsOSOps
+                    self.shutdown,
+                    self.reboot,
+                    self.wait_os_operation,
+                    # SupportsRemoteExec
+                    self.remote_exec,
+                    self.get_remote_exec_results,
+                ],
+            ),
         )
 
         # As a convenience, allow reading customData out of a file, rather than
@@ -156,22 +170,29 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
         # can be done using the `base64()` string function inside the ARM template.
         self._custom_data_file = self.config.get("customDataFile", None)
         if self._custom_data_file:
-            if self._deploy_params.get('customData', None):
+            if self._deploy_params.get("customData", None):
                 raise ValueError("Both customDataFile and customData are specified.")
-            self._custom_data_file = self.config_loader_service.resolve_path(self._custom_data_file)
-            with open(self._custom_data_file, 'r', encoding='utf-8') as custom_data_fh:
+            self._custom_data_file = self.config_loader_service.resolve_path(
+                self._custom_data_file
+            )
+            with open(self._custom_data_file, "r", encoding="utf-8") as custom_data_fh:
                 self._deploy_params["customData"] = custom_data_fh.read()
 
-    def _set_default_params(self, params: dict) -> dict:    # pylint: disable=no-self-use
+    def _set_default_params(self, params: dict) -> dict:  # pylint: disable=no-self-use
         # Try and provide a semi sane default for the deploymentName if not provided
         # since this is a common way to set the deploymentName and can same some
         # config work for the caller.
         if "vmName" in params and "deploymentName" not in params:
             params["deploymentName"] = f"{params['vmName']}-deployment"
-            _LOG.info("deploymentName missing from params. Defaulting to '%s'.", params["deploymentName"])
+            _LOG.info(
+                "deploymentName missing from params. Defaulting to '%s'.",
+                params["deploymentName"],
+            )
         return params
 
-    def wait_host_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
+    def wait_host_deployment(
+        self, params: dict, *, is_setup: bool
+    ) -> Tuple[Status, dict]:
         """
         Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
@@ -263,16 +284,19 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
                 "resourceGroup",
                 "deploymentName",
                 "vmName",
-            ]
+            ],
         )
         _LOG.info("Deprovision VM: %s", config["vmName"])
         _LOG.info("Deprovision deployment: %s", config["deploymentName"])
         # TODO: Properly deprovision *all* resources specified in the ARM template.
-        return self._azure_rest_api_post_helper(config, self._URL_DEPROVISION.format(
-            subscription=config["subscription"],
-            resource_group=config["resourceGroup"],
-            vm_name=config["vmName"],
-        ))
+        return self._azure_rest_api_post_helper(
+            config,
+            self._URL_DEPROVISION.format(
+                subscription=config["subscription"],
+                resource_group=config["resourceGroup"],
+                vm_name=config["vmName"],
+            ),
+        )
 
     def deallocate_host(self, params: dict) -> Tuple[Status, dict]:
         """
@@ -300,14 +324,17 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
                 "subscription",
                 "resourceGroup",
                 "vmName",
-            ]
+            ],
         )
         _LOG.info("Deallocate VM: %s", config["vmName"])
-        return self._azure_rest_api_post_helper(config, self._URL_DEALLOCATE.format(
-            subscription=config["subscription"],
-            resource_group=config["resourceGroup"],
-            vm_name=config["vmName"],
-        ))
+        return self._azure_rest_api_post_helper(
+            config,
+            self._URL_DEALLOCATE.format(
+                subscription=config["subscription"],
+                resource_group=config["resourceGroup"],
+                vm_name=config["vmName"],
+            ),
+        )
 
     def start_host(self, params: dict) -> Tuple[Status, dict]:
         """
@@ -332,14 +359,17 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
                 "subscription",
                 "resourceGroup",
                 "vmName",
-            ]
+            ],
         )
         _LOG.info("Start VM: %s :: %s", config["vmName"], params)
-        return self._azure_rest_api_post_helper(config, self._URL_START.format(
-            subscription=config["subscription"],
-            resource_group=config["resourceGroup"],
-            vm_name=config["vmName"],
-        ))
+        return self._azure_rest_api_post_helper(
+            config,
+            self._URL_START.format(
+                subscription=config["subscription"],
+                resource_group=config["resourceGroup"],
+                vm_name=config["vmName"],
+            ),
+        )
 
     def stop_host(self, params: dict, force: bool = False) -> Tuple[Status, dict]:
         """
@@ -366,14 +396,17 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
                 "subscription",
                 "resourceGroup",
                 "vmName",
-            ]
+            ],
         )
         _LOG.info("Stop VM: %s", config["vmName"])
-        return self._azure_rest_api_post_helper(config, self._URL_STOP.format(
-            subscription=config["subscription"],
-            resource_group=config["resourceGroup"],
-            vm_name=config["vmName"],
-        ))
+        return self._azure_rest_api_post_helper(
+            config,
+            self._URL_STOP.format(
+                subscription=config["subscription"],
+                resource_group=config["resourceGroup"],
+                vm_name=config["vmName"],
+            ),
+        )
 
     def shutdown(self, params: dict, force: bool = False) -> Tuple["Status", dict]:
         return self.stop_host(params, force)
@@ -403,20 +436,24 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
                 "subscription",
                 "resourceGroup",
                 "vmName",
-            ]
+            ],
         )
         _LOG.info("Reboot VM: %s", config["vmName"])
-        return self._azure_rest_api_post_helper(config, self._URL_REBOOT.format(
-            subscription=config["subscription"],
-            resource_group=config["resourceGroup"],
-            vm_name=config["vmName"],
-        ))
+        return self._azure_rest_api_post_helper(
+            config,
+            self._URL_REBOOT.format(
+                subscription=config["subscription"],
+                resource_group=config["resourceGroup"],
+                vm_name=config["vmName"],
+            ),
+        )
 
     def reboot(self, params: dict, force: bool = False) -> Tuple["Status", dict]:
         return self.restart_host(params, force)
 
-    def remote_exec(self, script: Iterable[str], config: dict,
-                    env_params: dict) -> Tuple[Status, dict]:
+    def remote_exec(
+        self, script: Iterable[str], config: dict, env_params: dict
+    ) -> Tuple[Status, dict]:
         """
         Run a command on Azure VM.
 
@@ -446,16 +483,20 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
                 "subscription",
                 "resourceGroup",
                 "vmName",
-            ]
+            ],
         )
 
         if _LOG.isEnabledFor(logging.INFO):
-            _LOG.info("Run a script on VM: %s\n  %s", config["vmName"], "\n  ".join(script))
+            _LOG.info(
+                "Run a script on VM: %s\n  %s", config["vmName"], "\n  ".join(script)
+            )
 
         json_req = {
             "commandId": "RunShellScript",
             "script": list(script),
-            "parameters": [{"name": key, "value": val} for (key, val) in env_params.items()]
+            "parameters": [
+                {"name": key, "value": val} for (key, val) in env_params.items()
+            ],
         }
 
         url = self._URL_REXEC_RUN.format(
@@ -468,12 +509,18 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
             _LOG.debug("Request: POST %s\n%s", url, json.dumps(json_req, indent=2))
 
         response = requests.post(
-            url, json=json_req, headers=self._get_headers(), timeout=self._request_timeout)
+            url,
+            json=json_req,
+            headers=self._get_headers(),
+            timeout=self._request_timeout,
+        )
 
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Response: %s\n%s", response,
-                       json.dumps(response.json(), indent=2)
-                       if response.content else "")
+            _LOG.debug(
+                "Response: %s\n%s",
+                response,
+                json.dumps(response.json(), indent=2) if response.content else "",
+            )
         else:
             _LOG.info("Response: %s", response)
 
@@ -481,10 +528,13 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
             # TODO: extract the results from JSON response
             return (Status.SUCCEEDED, config)
         elif response.status_code == 202:
-            return (Status.PENDING, {
-                **config,
-                "asyncResultsUrl": response.headers.get("Azure-AsyncOperation")
-            })
+            return (
+                Status.PENDING,
+                {
+                    **config,
+                    "asyncResultsUrl": response.headers.get("Azure-AsyncOperation"),
+                },
+            )
         else:
             _LOG.error("Response: %s :: %s", response, response.text)
             # _LOG.error("Bad Request:\n%s", response.request.body)

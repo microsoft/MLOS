@@ -1,7 +1,6 @@
 {
     "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
     "description": "Azure Authentication Service configuration.",
-
     "class": "mlos_bench.services.remote.azure.AzureAuthService",
     "config": {
         "tokenRequestInterval": 300,

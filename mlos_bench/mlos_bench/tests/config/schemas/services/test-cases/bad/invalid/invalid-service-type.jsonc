@@ -1,6 +1,5 @@
 {
     "class": "mlos_bench.services.UnhandledClassName",
-
     "config": {
         "invalid": true
     }

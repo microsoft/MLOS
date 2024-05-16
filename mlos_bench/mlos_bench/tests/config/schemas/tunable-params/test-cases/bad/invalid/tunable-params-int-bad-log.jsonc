@@ -5,7 +5,10 @@
             "int": {
                 "type": "int",
                 "default": 10,
-                "range": [1, 500],
+                "range": [
+                    1,
+                    500
+                ],
                 "log": 1 // <-- this is invalid
             }
         }

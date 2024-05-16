@@ -3,8 +3,8 @@ FROM debian:latest
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        openssh-server openssh-client \
-        sudo
+    openssh-server openssh-client \
+    sudo
 ARG PORT=2254
 EXPOSE ${PORT}
 RUN echo "Port ${PORT}" > /etc/ssh/sshd_config.d/local.conf \

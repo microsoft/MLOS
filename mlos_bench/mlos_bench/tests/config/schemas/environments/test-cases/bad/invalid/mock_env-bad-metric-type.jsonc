@@ -3,7 +3,9 @@
     "class": "mlos_bench.environments.mock_env.MockEnv",
     "config": {
         "metrics": [
-            {"bad": "metric type"}
+            {
+                "bad": "metric type"
+            }
         ]
     }
 }

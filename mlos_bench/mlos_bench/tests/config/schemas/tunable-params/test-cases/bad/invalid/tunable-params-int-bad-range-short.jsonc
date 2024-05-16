@@ -5,7 +5,9 @@
             "int": {
                 "type": "int",
                 "default": 10,
-                "range": [1] // <-- this is invalid
+                "range": [
+                    1
+                ] // <-- this is invalid
             }
         }
     }

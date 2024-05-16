@@ -1,8 +1,9 @@
 {
     "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
-
     "config": {
-        "optimization_targets": {"score": "min"},
+        "optimization_targets": {
+            "score": "min"
+        },
         // optimizer_type only accepts certain values
         "optimizer_type": "unknown"
     }

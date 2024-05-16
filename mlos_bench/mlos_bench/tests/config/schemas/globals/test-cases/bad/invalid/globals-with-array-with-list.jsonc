@@ -3,5 +3,13 @@
     "bar": "baz",
     "num": 1,
     "bool": true,
-    "array": [["nested", "list"], "should", "be", "disallowed"]
+    "array": [
+        [
+            "nested",
+            "list"
+        ],
+        "should",
+        "be",
+        "disallowed"
+    ]
 }

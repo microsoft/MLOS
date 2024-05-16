@@ -15,8 +15,8 @@ from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 from mlos_core.spaces.adapters.llamatune import LlamaTuneAdapter
 
 __all__ = [
-    'IdentityAdapter',
-    'LlamaTuneAdapter',
+    "IdentityAdapter",
+    "LlamaTuneAdapter",
 ]
 
 
@@ -35,7 +35,7 @@ class SpaceAdapterType(Enum):
 # ConcreteSpaceAdapter = TypeVar('ConcreteSpaceAdapter', *[member.value for member in SpaceAdapterType])
 # To address this, we add a test for complete coverage of the enum.
 ConcreteSpaceAdapter = TypeVar(
-    'ConcreteSpaceAdapter',
+    "ConcreteSpaceAdapter",
     IdentityAdapter,
     LlamaTuneAdapter,
 )
@@ -47,10 +47,12 @@ class SpaceAdapterFactory:
     # pylint: disable=too-few-public-methods
 
     @staticmethod
-    def create(*,
-               parameter_space: ConfigSpace.ConfigurationSpace,
-               space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
-               space_adapter_kwargs: Optional[dict] = None) -> ConcreteSpaceAdapter:    # type: ignore[type-var]
+    def create(
+        *,
+        parameter_space: ConfigSpace.ConfigurationSpace,
+        space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
+        space_adapter_kwargs: Optional[dict] = None
+    ) -> ConcreteSpaceAdapter:  # type: ignore[type-var]
         """
         Create a new space adapter instance, given the parameter space and potential
         space adapter options.
@@ -75,8 +77,7 @@ class SpaceAdapterFactory:
             space_adapter_kwargs = {}
 
         space_adapter: ConcreteSpaceAdapter = space_adapter_type.value(
-            orig_parameter_space=parameter_space,
-            **space_adapter_kwargs
+            orig_parameter_space=parameter_space, **space_adapter_kwargs
         )
 
         return space_adapter

@@ -10,31 +10,41 @@
                 "pollInterval": {
                     "description": "Poll interval in seconds.",
                     "type": "number",
-                    "examples": [4],
+                    "examples": [
+                        4
+                    ],
                     "minimum": 1
                 },
                 "pollTimeout": {
                     "description": "Poll timeout in seconds.",
                     "type": "number",
-                    "examples": [300],
+                    "examples": [
+                        300
+                    ],
                     "minimum": 1
                 },
                 "requestTimeout": {
                     "description": "Request timeout in seconds.",
                     "type": "number",
-                    "examples": [5],
+                    "examples": [
+                        5
+                    ],
                     "minimum": 1
                 },
                 "requestTotalRetries": {
                     "description": "Maximum number of times to retry a polling read request.",
                     "type": "integer",
-                    "examples": [10],
+                    "examples": [
+                        10
+                    ],
                     "minimum": 1
                 },
                 "requestBackoffFactor": {
                     "description": "Exponential increasing delay factor between retries (in seconds).",
                     "type": "number",
-                    "examples": [0.3],
+                    "examples": [
+                        0.3
+                    ],
                     "minimum": 0.1
                 }
             }
@@ -44,7 +54,10 @@
             "properties": {
                 "temp_dir": {
                     "description": "Path to temp dir (or null to use system default).",
-                    "type": ["string", "null"]
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 }
             },
             "minProperties": 1

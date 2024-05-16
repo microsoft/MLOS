@@ -2,23 +2,29 @@
 // Specifically the azure-redis-bench and azure-redis-opt tests.
 {
     "experiment_id": "test",
-
     "mountPoint": "/mnt/tmp",
-
     // FIXME: The setup ubuntu configs currently use these values in their mounting scripts.
     // We should abstract that out so those details are only needed when a service that uses those is used.
     "storageAccountName": "foo",
     "storageAccountKey": "bar",
     "storageFileShareName": "baz",
-
     // Assign some values to variadic tunables and required parameters present in the config examples.
     "resourceGroup": "mlos-autotuning-test-rg",
     "location": "eastus",
     "vmName": "vmTestName",
     "tunable_params_map": {
-        "linux-runtime": ["linux-scheduler", "linux-swap"],
-        "linux-boot": ["linux-kernel-boot"],
-        "provision": ["azure-vm"],
-        "redis": ["redis"]
+        "linux-runtime": [
+            "linux-scheduler",
+            "linux-swap"
+        ],
+        "linux-boot": [
+            "linux-kernel-boot"
+        ],
+        "provision": [
+            "azure-vm"
+        ],
+        "redis": [
+            "redis"
+        ]
     }
 }

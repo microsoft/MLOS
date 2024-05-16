@@ -1,7 +1,5 @@
 {
     // no schema required
-
     "class": "mlos_bench.optimizers.MockOptimizer"
-    
     // no config required
 }

@@ -1,6 +1,9 @@
 {
     "tunable_params_map": {
-        "mysql": ["mysql-innodb", "mysql-innodb"]   // can't have repeats
+        "mysql": [
+            "mysql-innodb",
+            "mysql-innodb"
+        ] // can't have repeats
     },
     "log_file": "/tmp/mlos_bench.log",
     "log_level": "DEBUG"

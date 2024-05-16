@@ -1,8 +1,7 @@
 {
     "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
-
     "config": {
         "optimizer_type": "SMAC",
-        "output_directory": 1   // number not allowed
+        "output_directory": 1 // number not allowed
     }
 }

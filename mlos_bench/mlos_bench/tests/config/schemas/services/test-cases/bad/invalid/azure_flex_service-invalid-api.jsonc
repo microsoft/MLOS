@@ -1,9 +1,7 @@
 {
     "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
     "description": "Azure SaaS Configuration Service",
-
     "class": "mlos_bench.services.remote.azure.AzureSaaSConfigService",
-
     "config": {
         "subscription": "subscription-id",
         "resourceGroup": "rg",
@@ -11,7 +9,7 @@
         "provider": "Microsoft.DBforMySQL",
         "supportsBatchUpdate": true,
         "isFlex": true,
-        "apiVersion": "latest",  // Invalid version
+        "apiVersion": "latest", // Invalid version
         "requestTimeout": 20
     }
 }

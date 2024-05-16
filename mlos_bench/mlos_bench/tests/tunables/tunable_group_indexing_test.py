@@ -10,7 +10,9 @@ from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
-def test_tunable_group_indexing(tunable_groups: TunableGroups, tunable_categorical: Tunable) -> None:
+def test_tunable_group_indexing(
+    tunable_groups: TunableGroups, tunable_categorical: Tunable
+) -> None:
     """
     Check that various types of indexing work for the tunable group.
     """
@@ -20,7 +22,9 @@ def test_tunable_group_indexing(tunable_groups: TunableGroups, tunable_categoric
 
     # NOTE: we reassign the tunable_categorical here since they come from
     # different fixtures so are technically different objects.
-    (tunable_categorical, covariant_group) = tunable_groups.get_tunable(tunable_categorical.name)
+    (tunable_categorical, covariant_group) = tunable_groups.get_tunable(
+        tunable_categorical.name
+    )
     assert tunable_groups.get_tunable(tunable_categorical)[0] == tunable_categorical
 
     assert tunable_categorical in covariant_group
@@ -40,7 +44,9 @@ def test_tunable_group_indexing(tunable_groups: TunableGroups, tunable_categoric
     assert covariant_group[tunable_categorical.name] == tunable_categorical.value
 
     # Check that we can assign a new value by index.
-    new_value = [x for x in tunable_categorical.categories if x != tunable_categorical.value][0]
+    new_value = [
+        x for x in tunable_categorical.categories if x != tunable_categorical.value
+    ][0]
     tunable_groups[tunable_categorical] = new_value
     assert tunable_groups[tunable_categorical] == new_value
     assert tunable_groups[tunable_categorical.name] == new_value

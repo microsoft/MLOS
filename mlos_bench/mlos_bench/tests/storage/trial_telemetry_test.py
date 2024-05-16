@@ -8,21 +8,21 @@ Unit tests for saving and restoring the telemetry data.
 from datetime import datetime, timedelta, tzinfo
 from typing import Any, List, Optional, Tuple
 
+import pytest
 from pytz import UTC
 
-import pytest
-
 from mlos_bench.environments.status import Status
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
-from mlos_bench.util import nullable
-
 from mlos_bench.tests import ZONE_INFO
+from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.util import nullable
 
 # pylint: disable=redefined-outer-name
 
 
-def zoned_telemetry_data(zone_info: Optional[tzinfo]) -> List[Tuple[datetime, str, Any]]:
+def zoned_telemetry_data(
+    zone_info: Optional[tzinfo],
+) -> List[Tuple[datetime, str, Any]]:
     """
     Mock telemetry data for the trial.
 
@@ -33,18 +33,21 @@ def zoned_telemetry_data(zone_info: Optional[tzinfo]) -> List[Tuple[datetime, st
     """
     timestamp1 = datetime.now(zone_info)
     timestamp2 = timestamp1 + timedelta(seconds=1)
-    return sorted([
-        (timestamp1, "cpu_load", 10.1),
-        (timestamp1, "memory", 20),
-        (timestamp1, "setup", "prod"),
-        (timestamp2, "cpu_load", 30.1),
-        (timestamp2, "memory", 40),
-        (timestamp2, "setup", "prod"),
-    ])
+    return sorted(
+        [
+            (timestamp1, "cpu_load", 10.1),
+            (timestamp1, "memory", 20),
+            (timestamp1, "setup", "prod"),
+            (timestamp2, "cpu_load", 30.1),
+            (timestamp2, "memory", 40),
+            (timestamp2, "setup", "prod"),
+        ]
+    )
 
 
-def _telemetry_str(data: List[Tuple[datetime, str, Any]]
-                   ) -> List[Tuple[datetime, str, Optional[str]]]:
+def _telemetry_str(
+    data: List[Tuple[datetime, str, Any]]
+) -> List[Tuple[datetime, str, Optional[str]]]:
     """
     Convert telemetry values to strings.
     """
@@ -53,10 +56,12 @@ def _telemetry_str(data: List[Tuple[datetime, str, Any]]
 
 
 @pytest.mark.parametrize(("origin_zone_info"), ZONE_INFO)
-def test_update_telemetry(storage: Storage,
-                          exp_storage: Storage.Experiment,
-                          tunable_groups: TunableGroups,
-                          origin_zone_info: Optional[tzinfo]) -> None:
+def test_update_telemetry(
+    storage: Storage,
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+    origin_zone_info: Optional[tzinfo],
+) -> None:
     """
     Make sure update_telemetry() and load_telemetry() methods work.
     """
@@ -64,7 +69,9 @@ def test_update_telemetry(storage: Storage,
     trial = exp_storage.new_trial(tunable_groups)
     assert exp_storage.load_telemetry(trial.trial_id) == []
 
-    trial.update_telemetry(Status.RUNNING, datetime.now(origin_zone_info), telemetry_data)
+    trial.update_telemetry(
+        Status.RUNNING, datetime.now(origin_zone_info), telemetry_data
+    )
     assert exp_storage.load_telemetry(trial.trial_id) == _telemetry_str(telemetry_data)
 
     # Also check that the TrialData telemetry looks right.
@@ -75,9 +82,11 @@ def test_update_telemetry(storage: Storage,
 
 
 @pytest.mark.parametrize(("origin_zone_info"), ZONE_INFO)
-def test_update_telemetry_twice(exp_storage: Storage.Experiment,
-                                tunable_groups: TunableGroups,
-                                origin_zone_info: Optional[tzinfo]) -> None:
+def test_update_telemetry_twice(
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+    origin_zone_info: Optional[tzinfo],
+) -> None:
     """
     Make sure update_telemetry() call is idempotent.
     """

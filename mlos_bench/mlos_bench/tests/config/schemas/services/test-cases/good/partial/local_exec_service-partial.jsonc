@@ -1,6 +1,5 @@
 {
     "class": "mlos_bench.services.LocalExecService",
-
     "config": {
         "abort_on_error": false,
         "temp_dir": "/tmp"

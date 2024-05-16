@@ -7,5 +7,8 @@
         // should be disallowed
         "foo": "bar"
     },
-    "tunable_params_map": ["bad", "type"]
+    "tunable_params_map": [
+        "bad",
+        "type"
+    ]
 }

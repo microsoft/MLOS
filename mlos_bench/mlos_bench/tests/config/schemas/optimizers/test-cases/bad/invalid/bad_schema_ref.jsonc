@@ -1,10 +1,9 @@
 {
     "$schema": "bad/path/to/wrong-schema.json",
-
     "class": "mlos_bench.optimizers.MockOptimizer",
-
     "config": {
-        "optimization_targets": {"score": "min"}
+        "optimization_targets": {
+            "score": "min"
+        }
     }
 }
-

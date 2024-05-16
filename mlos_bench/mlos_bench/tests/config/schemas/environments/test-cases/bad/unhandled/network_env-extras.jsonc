@@ -2,6 +2,8 @@
     "name": "network_env-extras",
     "class": "mlos_bench.environments.remote.network_env.NetworkEnv",
     "config": {
-        "teardown": ["foo"]
+        "teardown": [
+            "foo"
+        ]
     }
 }

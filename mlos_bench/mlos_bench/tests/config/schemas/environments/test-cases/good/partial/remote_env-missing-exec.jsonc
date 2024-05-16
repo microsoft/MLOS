@@ -2,7 +2,9 @@
     "name": "remote_env-config-extras",
     "class": "mlos_bench.environments.RemoteEnv",
     "config": {
-        "tunable_params": ["foo"]
+        "tunable_params": [
+            "foo"
+        ]
         /* At least one of setup, teardown, run are required.
         "run": [
             "/bin/bash -c true"

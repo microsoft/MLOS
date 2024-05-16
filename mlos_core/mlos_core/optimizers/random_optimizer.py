@@ -23,8 +23,12 @@ class RandomOptimizer(BaseOptimizer):
         The parameter space to optimize.
     """
 
-    def _register(self, configurations: pd.DataFrame, scores: pd.Series,
-                  context: Optional[pd.DataFrame] = None) -> None:
+    def _register(
+        self,
+        configurations: pd.DataFrame,
+        scores: pd.Series,
+        context: Optional[pd.DataFrame] = None,
+    ) -> None:
         """Registers the given configurations and scores.
 
         Doesn't do anything on the RandomOptimizer except storing configurations for logging.
@@ -62,9 +66,12 @@ class RandomOptimizer(BaseOptimizer):
         if context is not None:
             # not sure how that works here?
             raise NotImplementedError()
-        return pd.DataFrame(dict(self.optimizer_parameter_space.sample_configuration()), index=[0])
+        return pd.DataFrame(
+            dict(self.optimizer_parameter_space.sample_configuration()), index=[0]
+        )
 
-    def register_pending(self, configurations: pd.DataFrame,
-                         context: Optional[pd.DataFrame] = None) -> None:
+    def register_pending(
+        self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None
+    ) -> None:
         raise NotImplementedError()
         # self._pending_observations.append((configurations, context))

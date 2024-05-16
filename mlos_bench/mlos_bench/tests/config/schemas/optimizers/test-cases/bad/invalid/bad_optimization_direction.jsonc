@@ -1,7 +1,8 @@
 {
     "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
-
     "config": {
-        "optimization_targets": {"score": "INVALID"}
+        "optimization_targets": {
+            "score": "INVALID"
+        }
     }
 }

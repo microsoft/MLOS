@@ -1,5 +1,4 @@
 {
     "class": "mlos_bench.schedulers.SyncScheduler",
-    "config": {
-    }
+    "config": {}
 }

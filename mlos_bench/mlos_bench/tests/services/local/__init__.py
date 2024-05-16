@@ -10,5 +10,5 @@ Used to make mypy happy about multiple conftest.py modules.
 from .mock import MockLocalExecService
 
 __all__ = [
-    'MockLocalExecService',
+    "MockLocalExecService",
 ]

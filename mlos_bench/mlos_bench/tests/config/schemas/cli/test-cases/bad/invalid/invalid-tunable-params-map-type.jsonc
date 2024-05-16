@@ -1,6 +1,6 @@
 {
     "tunable_params_map": {
-        "mysql": "mysql-innodb"  // Must be a list of strings
+        "mysql": "mysql-innodb" // Must be a list of strings
     },
     "log_file": "/tmp/mlos_bench.log",
     "log_level": "DEBUG"

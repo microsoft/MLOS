@@ -5,8 +5,11 @@
             "float": {
                 "type": "float",
                 "default": 10,
-                "range": [1, 500],
-                "foo": "bar"    // <-- this is unhandled
+                "range": [
+                    1,
+                    500
+                ],
+                "foo": "bar" // <-- this is unhandled
             }
         }
     }

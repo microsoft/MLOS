@@ -4,7 +4,10 @@
         "params": {
             "float": {
                 "type": "float",
-                "range": [1, 500]
+                "range": [
+                    1,
+                    500
+                ]
             }
         }
     }

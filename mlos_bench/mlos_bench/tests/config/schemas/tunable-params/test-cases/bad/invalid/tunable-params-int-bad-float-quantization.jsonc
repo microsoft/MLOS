@@ -5,8 +5,11 @@
             "float": {
                 "type": "float",
                 "default": 10,
-                "range": [1, 500],
-                "quantization": 0   // <-- should be greater than 0
+                "range": [
+                    1,
+                    500
+                ],
+                "quantization": 0 // <-- should be greater than 0
             }
         }
     }

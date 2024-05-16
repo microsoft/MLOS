@@ -5,9 +5,8 @@
 """
 An interface to access the experiment benchmark data stored in SQL DB.
 """
-from typing import Dict, Literal, Optional
-
 import logging
+from typing import Dict, Literal, Optional
 
 import pandas
 from sqlalchemy import Engine, Integer, String, func
@@ -15,11 +14,15 @@ from sqlalchemy import Engine, Integer, String, func
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.base_trial_data import TrialData
 from mlos_bench.storage.base_tunable_config_data import TunableConfigData
-from mlos_bench.storage.base_tunable_config_trial_group_data import TunableConfigTrialGroupData
+from mlos_bench.storage.base_tunable_config_trial_group_data import (
+    TunableConfigTrialGroupData,
+)
 from mlos_bench.storage.sql import common
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.sql.tunable_config_data import TunableConfigSqlData
-from mlos_bench.storage.sql.tunable_config_trial_group_data import TunableConfigTrialGroupSqlData
+from mlos_bench.storage.sql.tunable_config_trial_group_data import (
+    TunableConfigTrialGroupSqlData,
+)
 
 _LOG = logging.getLogger(__name__)
 
@@ -32,14 +35,17 @@ class ExperimentSqlData(ExperimentData):
     scripts and mlos_bench configuration files.
     """
 
-    def __init__(self, *,
-                 engine: Engine,
-                 schema: DbSchema,
-                 experiment_id: str,
-                 description: str,
-                 root_env_config: str,
-                 git_repo: str,
-                 git_commit: str):
+    def __init__(
+        self,
+        *,
+        engine: Engine,
+        schema: DbSchema,
+        experiment_id: str,
+        description: str,
+        root_env_config: str,
+        git_repo: str,
+        git_commit: str
+    ):
         super().__init__(
             experiment_id=experiment_id,
             description=description,
@@ -54,9 +60,11 @@ class ExperimentSqlData(ExperimentData):
     def objectives(self) -> Dict[str, Literal["min", "max"]]:
         with self._engine.connect() as conn:
             objectives_db_data = conn.execute(
-                self._schema.objectives.select().where(
+                self._schema.objectives.select()
+                .where(
                     self._schema.objectives.c.exp_id == self._experiment_id,
-                ).order_by(
+                )
+                .order_by(
                     self._schema.objectives.c.weight.desc(),
                     self._schema.objectives.c.optimization_target.asc(),
                 )
@@ -77,13 +85,19 @@ class ExperimentSqlData(ExperimentData):
     def tunable_config_trial_groups(self) -> Dict[int, TunableConfigTrialGroupData]:
         with self._engine.connect() as conn:
             tunable_config_trial_groups = conn.execute(
-                self._schema.trial.select().with_only_columns(
+                self._schema.trial.select()
+                .with_only_columns(
                     self._schema.trial.c.config_id,
-                    func.min(self._schema.trial.c.trial_id).cast(Integer).label(    # pylint: disable=not-callable
-                        'tunable_config_trial_group_id'),
-                ).where(
+                    func.min(self._schema.trial.c.trial_id)
+                    .cast(Integer)
+                    .label(  # pylint: disable=not-callable
+                        "tunable_config_trial_group_id"
+                    ),
+                )
+                .where(
                     self._schema.trial.c.exp_id == self._experiment_id,
-                ).group_by(
+                )
+                .group_by(
                     self._schema.trial.c.exp_id,
                     self._schema.trial.c.config_id,
                 )
@@ -103,11 +117,14 @@ class ExperimentSqlData(ExperimentData):
     def tunable_configs(self) -> Dict[int, TunableConfigData]:
         with self._engine.connect() as conn:
             tunable_configs = conn.execute(
-                self._schema.trial.select().with_only_columns(
-                    self._schema.trial.c.config_id.cast(Integer).label('config_id'),
-                ).where(
+                self._schema.trial.select()
+                .with_only_columns(
+                    self._schema.trial.c.config_id.cast(Integer).label("config_id"),
+                )
+                .where(
                     self._schema.trial.c.exp_id == self._experiment_id,
-                ).group_by(
+                )
+                .group_by(
                     self._schema.trial.c.exp_id,
                     self._schema.trial.c.config_id,
                 )
@@ -136,20 +153,30 @@ class ExperimentSqlData(ExperimentData):
         """
         with self._engine.connect() as conn:
             query_results = conn.execute(
-                self._schema.trial.select().with_only_columns(
-                    self._schema.trial.c.config_id.cast(Integer).label('config_id'),
-                ).where(
+                self._schema.trial.select()
+                .with_only_columns(
+                    self._schema.trial.c.config_id.cast(Integer).label("config_id"),
+                )
+                .where(
                     self._schema.trial.c.exp_id == self._experiment_id,
                     self._schema.trial.c.trial_id.in_(
-                        self._schema.trial_param.select().with_only_columns(
-                            func.min(self._schema.trial_param.c.trial_id).cast(Integer).label(  # pylint: disable=not-callable
-                                "first_trial_id_with_defaults"),
-                        ).where(
+                        self._schema.trial_param.select()
+                        .with_only_columns(
+                            func.min(self._schema.trial_param.c.trial_id)
+                            .cast(Integer)
+                            .label(  # pylint: disable=not-callable
+                                "first_trial_id_with_defaults"
+                            ),
+                        )
+                        .where(
                             self._schema.trial_param.c.exp_id == self._experiment_id,
                             self._schema.trial_param.c.param_id == "is_defaults",
-                            func.lower(self._schema.trial_param.c.param_value, type_=String).in_(["1", "true"]),
-                        ).scalar_subquery()
-                    )
+                            func.lower(
+                                self._schema.trial_param.c.param_value, type_=String
+                            ).in_(["1", "true"]),
+                        )
+                        .scalar_subquery()
+                    ),
                 )
             )
             min_default_trial_row = query_results.fetchone()
@@ -158,17 +185,24 @@ class ExperimentSqlData(ExperimentData):
                 return min_default_trial_row._tuple()[0]
             # fallback logic - assume minimum trial_id for experiment
             query_results = conn.execute(
-                self._schema.trial.select().with_only_columns(
-                    self._schema.trial.c.config_id.cast(Integer).label('config_id'),
-                ).where(
+                self._schema.trial.select()
+                .with_only_columns(
+                    self._schema.trial.c.config_id.cast(Integer).label("config_id"),
+                )
+                .where(
                     self._schema.trial.c.exp_id == self._experiment_id,
                     self._schema.trial.c.trial_id.in_(
-                        self._schema.trial.select().with_only_columns(
-                            func.min(self._schema.trial.c.trial_id).cast(Integer).label("first_trial_id"),
-                        ).where(
+                        self._schema.trial.select()
+                        .with_only_columns(
+                            func.min(self._schema.trial.c.trial_id)
+                            .cast(Integer)
+                            .label("first_trial_id"),
+                        )
+                        .where(
                             self._schema.trial.c.exp_id == self._experiment_id,
-                        ).scalar_subquery()
-                    )
+                        )
+                        .scalar_subquery()
+                    ),
                 )
             )
             min_trial_row = query_results.fetchone()

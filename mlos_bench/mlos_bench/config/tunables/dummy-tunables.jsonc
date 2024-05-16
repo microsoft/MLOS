@@ -7,7 +7,9 @@
             "dummy_param": {
                 "description": "Dummy parameter.",
                 "type": "categorical",
-                "values": ["dummy"],
+                "values": [
+                    "dummy"
+                ],
                 "default": "dummy"
             }
         }
