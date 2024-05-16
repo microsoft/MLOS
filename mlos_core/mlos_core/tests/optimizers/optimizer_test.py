@@ -182,7 +182,7 @@ def test_create_optimizer_with_factory_method(
 
     assert optimizer.parameter_space is not None
 
-    suggestion, context = optimizer.suggest()
+    suggestion, _ = optimizer.suggest()
     assert suggestion is not None
 
     if optimizer_type is not None:

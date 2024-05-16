@@ -348,8 +348,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         """
         with self.lock:
             # Register each trial (one-by-one)
-            contexts: List[pd.Series] | List[None] = _to_context(context) or [
-                None for _ in scores
+            contexts: Union[List[pd.Series], List[None]] = _to_context(context) or [
+                None for _ in scores    # type: ignore[misc]
             ]
             for config, score, ctx in zip(
                 self._to_configspace_configs(configurations),
@@ -361,8 +361,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 )
 
                 # Retrieve previously generated TrialInfo (returned by .ask()) or create new TrialInfo instance
+                matching: pd.Series[bool]
                 if ctx is None:
-                    matching: List = self.trial_info_df["Configuration"] == config
+                    matching = self.trial_info_df["Configuration"] == config
                 else:
                     matching = (
                         self.trial_info_df["Configuration"] == config
