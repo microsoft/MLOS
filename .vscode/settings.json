@@ -17,6 +17,7 @@
         // See Also:
         // - https://github.com/microsoft/vscode/issues/2809#issuecomment-1544387883
         // - mlos_bench/config/schemas/README.md
+
         {
             "fileMatch": [
                 "mlos_bench/mlos_bench/tests/config/schemas/environments/test-cases/**/*.jsonc",
@@ -130,17 +131,13 @@
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8",
         "editor.formatOnSave": true,
-        "editor.formatOnSaveMode": "modifications",
-        "editor.codeActionsOnSave": {
-            "source.organizeImports": true,
-            "source.fixAll": "always"
-        },
+        "editor.formatOnSaveMode": "modifications"
     },
     // See Also .vscode/launch.json for environment variable args to pytest during debug sessions.
     // For the rest, see setup.cfg
     "python.testing.pytestArgs": [
+        "--log-level=DEBUG",
         "."
     ],
-    "python.testing.unittestEnabled": false,
-    "restructuredtext.pythonRecommendation.disabled": true
+    "python.testing.unittestEnabled": false
 }
