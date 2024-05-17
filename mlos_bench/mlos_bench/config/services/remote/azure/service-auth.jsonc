@@ -1,10 +1,11 @@
 {
     "class": "mlos_bench.services.remote.azure.AzureAuthService",
     "config": {
-        "tokenRequestInterval": 300 // seconds
+        "tokenRequestInterval": 300  // seconds
 
         // NOTE: Uncomment the following lines if using a Service Principal
         // and provide the corresponding parameters in the global config:
+
         // "spClientId": "PLACEHOLDER",
         // "keyVaultName": "PLACEHOLDER",
         // "certName": "PLACEHOLDER",

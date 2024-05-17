@@ -4,20 +4,10 @@
     "float": 1.1,
     "bool": true,
     "null": null,
-    "array": [
-        123,
-        "abc",
-        true,
-        null
-    ],
+    "array": [123, "abc", true, null],
     "tunable_params_map": {
         // Examples
-        "mysql": [
-            "mysql-innodb",
-            "mysql-myisam",
-            "mysql-binlog",
-            "mysql-hugepages"
-        ]
+        "mysql": ["mysql-innodb", "mysql-myisam", "mysql-binlog", "mysql-hugepages"]
     },
     "experiment_id": "ExperimentName",
     "trial_id": 1

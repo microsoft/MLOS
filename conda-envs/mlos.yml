@@ -6,7 +6,7 @@ dependencies:
   # All other dependencies for the mlos modules come from pip.
   - pip
   - pylint
-  - black
+  - pycodestyle
   - pydocstyle
   - flake8
   - setuptools
@@ -22,18 +22,18 @@ dependencies:
   - libpq
   - python
   - pip:
-      - autopep8>=1.7.0
-      - bump2version
-      - check-jsonschema
-      - licenseheaders
-      - mypy
-      - pandas-stubs
-      - types-beautifulsoup4
-      - types-colorama
-      - types-jsonschema
-      - types-pygments
-      - types-requests
-      - types-setuptools
-      - "--editable ../mlos_core[full-tests]"
-      - "--editable ../mlos_bench[full-tests]"
-      - "--editable ../mlos_viz[full-tests]"
+    - autopep8>=1.7.0
+    - bump2version
+    - check-jsonschema
+    - licenseheaders
+    - mypy
+    - pandas-stubs
+    - types-beautifulsoup4
+    - types-colorama
+    - types-jsonschema
+    - types-pygments
+    - types-requests
+    - types-setuptools
+    - "--editable ../mlos_core[full-tests]"
+    - "--editable ../mlos_bench[full-tests]"
+    - "--editable ../mlos_viz[full-tests]"

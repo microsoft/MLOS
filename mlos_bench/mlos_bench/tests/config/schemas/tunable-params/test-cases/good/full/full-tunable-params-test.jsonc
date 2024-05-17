@@ -7,19 +7,10 @@
                 "description": "Int",
                 "type": "int",
                 "default": 10,
-                "range": [
-                    1,
-                    500
-                ],
-                "meta": {
-                    "suffix": "MB"
-                },
-                "special": [
-                    -1
-                ],
-                "special_weights": [
-                    0.1
-                ],
+                "range": [1, 500],
+                "meta": {"suffix": "MB"},
+                "special": [-1],
+                "special_weights": [0.1],
                 "range_weight": 0.9,
                 "quantization": 50,
                 "distribution": {
@@ -35,19 +26,10 @@
                 "description": "Int",
                 "type": "int",
                 "default": 10,
-                "range": [
-                    1,
-                    500
-                ],
-                "meta": {
-                    "suffix": "MB"
-                },
-                "special": [
-                    -1
-                ],
-                "special_weights": [
-                    0.1
-                ],
+                "range": [1, 500],
+                "meta": {"suffix": "MB"},
+                "special": [-1],
+                "special_weights": [0.1],
                 "range_weight": 0.9,
                 "quantization": 50,
                 "distribution": {
@@ -63,18 +45,9 @@
                 "description": "Float",
                 "type": "float",
                 "default": 10.1,
-                "meta": {
-                    "scale": 1000,
-                    "prefix": "/proc/var/random/",
-                    "base": 2.71828
-                },
-                "range": [
-                    1.1,
-                    111.1
-                ],
-                "special": [
-                    -1.1
-                ],
+                "meta": {"scale": 1000, "prefix": "/proc/var/random/", "base": 2.71828},
+                "range": [1.1, 111.1],
+                "special": [-1.1],
                 "quantization": 10,
                 "distribution": {
                     "type": "uniform"
@@ -84,50 +57,26 @@
             "cat": {
                 "description": "Cat",
                 "type": "categorical",
-                "meta": {
-                    "quote": true,
-                    "list": [
-                        "a",
-                        "b",
-                        "c",
-                        1,
-                        2,
-                        3
-                    ]
-                },
+                "meta": {"quote": true, "list": ["a", "b", "c", 1, 2, 3]},
                 "default": "yes",
-                "values": [
-                    "yes",
-                    "no"
-                ]
+                "values": ["yes", "no"]
             },
             "cat-ints": {
                 "description": "Categorical integers",
                 "type": "categorical",
-                "values": [
-                    1,
-                    2,
-                    3
-                ],
+                "values": [1, 2, 3],
                 "default": 1
             },
             "cat-bool": {
                 "description": "Categorical bool",
                 "type": "categorical",
-                "values": [
-                    true,
-                    false
-                ],
+                "values": [true, false],
                 "default": true
             },
             "cat-mixed": {
                 "description": "Categorical mixed (should all be converted to strings internally)",
                 "type": "categorical",
-                "values": [
-                    true,
-                    1,
-                    "true"
-                ],
+                "values": [true, 1, "true"],
                 "default": true
             }
         }
@@ -143,48 +92,25 @@
                 "description": "Int",
                 "type": "int",
                 "default": 10,
-                "meta": {
-                    "suffix": "MB"
-                },
-                "range": [
-                    1,
-                    500
-                ],
-                "special": [
-                    -1
-                ]
+                "meta": {"suffix": "MB"},
+                "range": [1, 500],
+                "special": [-1]
             },
             "float-2": {
                 "description": "Float",
                 "type": "float",
                 "default": 10.1,
-                "meta": {
-                    "scale": 1000,
-                    "prefix": "/proc/var/random/"
-                },
-                "range": [
-                    1.1,
-                    111.1
-                ],
-                "special": [
-                    -1.1
-                ]
+                "meta": {"scale": 1000, "prefix": "/proc/var/random/"},
+                "range": [1.1, 111.1],
+                "special": [-1.1]
             },
             "cat-2": {
                 "description": "Cat",
                 "type": "categorical",
                 "default": "yes",
-                "meta": {
-                    "quote": true
-                },
-                "values": [
-                    "yes",
-                    "no"
-                ],
-                "values_weights": [
-                    50,
-                    50
-                ]
+                "meta": {"quote": true},
+                "values": ["yes", "no"],
+                "values_weights": [50, 50]
             }
         }
     }

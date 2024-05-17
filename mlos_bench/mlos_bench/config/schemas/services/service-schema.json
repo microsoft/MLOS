@@ -62,9 +62,7 @@
                             "$ref": "./remote/azure/azure-saas-service-subschema.json"
                         }
                     ],
-                    "required": [
-                        "class"
-                    ]
+                    "required": ["class"]
                 },
                 {
                     "type": "object",
@@ -106,9 +104,7 @@
                     "$ref": "#/$defs/service_config"
                 }
             ],
-            "required": [
-                "class"
-            ]
+            "required": ["class"]
         },
         {
             "$comment": "We no longer accept a flat list of Service objects.",

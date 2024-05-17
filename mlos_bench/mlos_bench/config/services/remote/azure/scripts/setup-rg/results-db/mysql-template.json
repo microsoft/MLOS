@@ -24,64 +24,64 @@
     "functions": [],
     "variables": {},
     "resources": [
-        {
-            "type": "Microsoft.DBforMySQL/flexibleServers",
-            "apiVersion": "2021-12-01-preview",
-            "name": "[parameters('dbName')]",
-            "location": "[parameters('dbLocation')]",
-            "sku": {
-                "name": "Standard_B1s",
-                "tier": "Burstable"
-            },
-            "properties": {
-                "administratorLogin": "[parameters('dbAdminUsername')]",
-                "administratorLoginPassword": "[parameters('dbAdminPassword')]",
-                "storage": {
-                    "storageSizeGB": 20,
-                    "iops": 360,
-                    "autoGrow": "Enabled"
-                },
-                "version": "8.0.21",
-                "network": {
-                    "publicNetworkAccess": "Enabled"
-                },
-                "backup": {
-                    "backupRetentionDays": 7,
-                    "geoRedundantBackup": "Disabled"
-                },
-                "highAvailability": {
-                    "mode": "Disabled"
-                }
-            }
+    {
+        "type": "Microsoft.DBforMySQL/flexibleServers",
+        "apiVersion": "2021-12-01-preview",
+        "name": "[parameters('dbName')]",
+        "location": "[parameters('dbLocation')]",
+        "sku": {
+            "name": "Standard_B1s",
+            "tier": "Burstable"
         },
-        {
-            "type": "Microsoft.DBforMySQL/flexibleServers/databases",
-            "apiVersion": "2021-12-01-preview",
-            "name": "[concat(parameters('dbName'), '/mlos')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/flexibleServers', parameters('dbName'))]"
-            ],
-            "properties": {
-                "charset": "utf8",
-                "collation": "utf8_general_ci"
-            }
-        },
-        {
-            "copy": {
-                "name": "firewallCopy",
-                "count": "[length(parameters('dbFirewallRules'))]"
+        "properties": {
+            "administratorLogin": "[parameters('dbAdminUsername')]",
+            "administratorLoginPassword": "[parameters('dbAdminPassword')]",
+            "storage": {
+                "storageSizeGB": 20,
+                "iops": 360,
+                "autoGrow": "Enabled"
             },
-            "type": "Microsoft.DBforMySQL/flexibleServers/firewallRules",
-            "apiVersion": "2021-12-01-preview",
-            "name": "[concat(parameters('dbName'), '/', parameters('dbFirewallRules')[copyIndex('firewallCopy')].name)]",
-            "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/flexibleServers', parameters('dbName'))]"
-            ],
-            "properties": {
-                "startIpAddress": "[parameters('dbFirewallRules')[copyIndex('firewallCopy')].startIpAddress]",
-                "endIpAddress": "[parameters('dbFirewallRules')[copyIndex('firewallCopy')].endIpAddress]"
+            "version": "8.0.21",
+            "network": {
+                "publicNetworkAccess": "Enabled"
+            },
+            "backup": {
+                "backupRetentionDays": 7,
+                "geoRedundantBackup": "Disabled"
+            },
+            "highAvailability": {
+                "mode": "Disabled"
             }
         }
+    },
+    {
+        "type": "Microsoft.DBforMySQL/flexibleServers/databases",
+        "apiVersion": "2021-12-01-preview",
+        "name": "[concat(parameters('dbName'), '/mlos')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.DBforMySQL/flexibleServers', parameters('dbName'))]"
+        ],
+        "properties": {
+            "charset": "utf8",
+            "collation": "utf8_general_ci"
+        }
+    },
+    {
+        "copy": {
+            "name": "firewallCopy",
+            "count": "[length(parameters('dbFirewallRules'))]"
+        },
+        "type": "Microsoft.DBforMySQL/flexibleServers/firewallRules",
+        "apiVersion": "2021-12-01-preview",
+        "name": "[concat(parameters('dbName'), '/', parameters('dbFirewallRules')[copyIndex('firewallCopy')].name)]",
+        "dependsOn": [
+            "[resourceId('Microsoft.DBforMySQL/flexibleServers', parameters('dbName'))]"
+        ],
+        "properties": {
+            "startIpAddress": "[parameters('dbFirewallRules')[copyIndex('firewallCopy')].startIpAddress]",
+            "endIpAddress": "[parameters('dbFirewallRules')[copyIndex('firewallCopy')].endIpAddress]"
+        }
+    }
     ],
     "outputs": {
         "dbName": {

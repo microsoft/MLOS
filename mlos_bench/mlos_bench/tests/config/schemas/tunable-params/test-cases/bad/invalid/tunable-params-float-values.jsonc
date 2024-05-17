@@ -5,15 +5,8 @@
             "float": {
                 "type": "float",
                 "default": 10,
-                "range": [
-                    1,
-                    500
-                ],
-                "values": [
-                    0,
-                    1,
-                    2
-                ] // <-- this is invalid
+                "range": [1, 500],
+                "values": [0, 1, 2] // <-- this is invalid
             }
         }
     }

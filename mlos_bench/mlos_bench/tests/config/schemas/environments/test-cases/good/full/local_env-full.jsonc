@@ -10,12 +10,8 @@
         "some/service.jsonc"
     ],
     "config": {
-        "tunable_params": [
-            "baz"
-        ],
-        "required_args": [
-            "foo"
-        ],
+        "tunable_params": ["baz"],
+        "required_args": ["foo"],
         "const_args": {
             "foo": "bar"
         },
@@ -29,11 +25,15 @@
         "teardown": [
             "/bin/bash -c true"
         ],
+
         "dump_params_file": "/tmp/dump_params.json",
         "dump_meta_file": "/tmp/dump_params_meta.json",
+
         "results_stdout_pattern": "(\\w+),([0-9.]+)",
+
         "read_results_file": "/tmp/results.csv",
         "read_telemetry_file": "/tmp/telemetry.csv",
+
         "shell_env_params": [
             "foo"
         ],

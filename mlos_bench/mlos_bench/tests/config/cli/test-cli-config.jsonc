@@ -2,17 +2,23 @@
 {
     // We minimally need an environment to load.
     "environment": "environments/mock/mock_env.jsonc",
+
     // Check that these are appended to any CLI args.
     "config_path": [
         "foo",
         "bar"
     ],
+
     "scheduler": "schedulers/sync_scheduler.jsonc",
+
     "optimizer": "optimizers/mlos_core_default_opt.jsonc",
+
     "services": [
         "services/remote/mock/mock_fileshare_service.jsonc"
     ],
+
     "trial_config_repeat_count": 1,
+
     "random_seed": 42,
     "random_init": true
 }

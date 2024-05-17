@@ -1,5 +1,6 @@
 {
     "class": "mlos_bench.services.local.local_exec.LocalExecService",
+
     "config": {
         "abort_on_error": "false" // wrong type
     }

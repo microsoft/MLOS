@@ -5,16 +5,7 @@
             "cat": {
                 "type": "categorical",
                 "default": "foo",
-                "values": [
-                    {
-                        "object": "invalid"
-                    },
-                    [
-                        "array",
-                        "not",
-                        "allowed"
-                    ]
-                ], // <-- this is invalid
+                "values": [{"object": "invalid"}, ["array", "not", "allowed"]], // <-- this is invalid
             }
         }
     }

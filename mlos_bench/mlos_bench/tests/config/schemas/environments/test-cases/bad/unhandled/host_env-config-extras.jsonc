@@ -2,9 +2,7 @@
     "name": "host_env-config-extras",
     "class": "mlos_bench.environments.remote.host_env.HostEnv",
     "config": {
-        "tunable_params": [
-            "foo"
-        ],
+        "tunable_params": ["foo"],
         "extras": "invalid"
     }
 }

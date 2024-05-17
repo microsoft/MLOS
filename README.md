@@ -12,19 +12,19 @@ MLOS is a project to enable autotuning for systems.
 <!-- TOC -->
 
 - [MLOS](#mlos)
-  - [Contents](#contents)
-  - [Overview](#overview)
-  - [Organization](#organization)
-  - [Contributing](#contributing)
-  - [Getting Started](#getting-started)
-    - [conda activation](#conda-activation)
-    - [Usage Examples](#usage-examples)
-      - [mlos-core](#mlos-core)
-      - [mlos-bench](#mlos-bench)
-      - [mlos-viz](#mlos-viz)
-  - [Installation](#installation)
-  - [See Also](#see-also)
-    - [Examples](#examples)
+    - [Contents](#contents)
+    - [Overview](#overview)
+    - [Organization](#organization)
+    - [Contributing](#contributing)
+    - [Getting Started](#getting-started)
+        - [conda activation](#conda-activation)
+        - [Usage Examples](#usage-examples)
+            - [mlos-core](#mlos-core)
+            - [mlos-bench](#mlos-bench)
+            - [mlos-viz](#mlos-viz)
+    - [Installation](#installation)
+    - [See Also](#see-also)
+        - [Examples](#examples)
 
 <!-- /TOC -->
 

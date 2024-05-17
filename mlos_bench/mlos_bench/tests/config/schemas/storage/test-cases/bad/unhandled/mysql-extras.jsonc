@@ -1,6 +1,8 @@
 {
     "class": "mlos_bench.storage.sql.storage.SqlStorage",
+
     "foo": "bar", // <-- unexpected property
+
     "config": {
         "log_sql": false,
         "drivername": "msyql",

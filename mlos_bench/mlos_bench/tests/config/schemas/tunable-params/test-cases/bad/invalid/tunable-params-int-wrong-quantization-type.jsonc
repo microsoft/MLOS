@@ -5,11 +5,8 @@
             "int": {
                 "type": "int",
                 "default": 10,
-                "range": [
-                    1,
-                    500
-                ],
-                "quantization": "yes" // <-- this is invalid
+                "range": [1, 500],
+                "quantization": "yes"  // <-- this is invalid
             }
         }
     }

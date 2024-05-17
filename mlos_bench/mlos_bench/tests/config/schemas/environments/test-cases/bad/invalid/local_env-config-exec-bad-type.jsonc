@@ -4,9 +4,7 @@
     "config": {
         "run": [
             1,
-            {
-                "bad": "types"
-            },
+            {"bad": "types"},
             false
         ]
     }

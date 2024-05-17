@@ -2,9 +2,7 @@
     "name": "os_env-config-extras",
     "class": "mlos_bench.environments.remote.os_env.OSEnv",
     "config": {
-        "tunable_params": [
-            "foo"
-        ],
+        "tunable_params": ["foo"],
         "extras": "invalid"
     }
 }

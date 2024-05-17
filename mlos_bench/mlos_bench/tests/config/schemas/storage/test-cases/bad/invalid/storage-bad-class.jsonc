@@ -1,4 +1,7 @@
 {
-    "class": "mlos_bench.storage.unknown.storage.UnknownStorage", // <-- unhandled class
-    "config": {}
+
+    "class": "mlos_bench.storage.unknown.storage.UnknownStorage",   // <-- unhandled class
+
+    "config": {
+    }
 }

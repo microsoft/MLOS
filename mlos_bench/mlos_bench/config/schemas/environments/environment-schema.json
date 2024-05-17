@@ -3,6 +3,7 @@
     "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/environment-schema.json",
     "title": "mlos_bench Environment config",
     "description": "config for an mlos_bench Environment - this is the top level schema that should be used to validate an environment config",
+
     "type": "object",
     "allOf": [
         {

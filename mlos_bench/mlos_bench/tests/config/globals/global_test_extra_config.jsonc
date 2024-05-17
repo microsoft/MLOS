@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
+
 // *** DO *NOT* CHANGE! This config is used for tests! ***
 {
     "test_global_value": "from-file",

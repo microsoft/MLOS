@@ -23,9 +23,7 @@
                         "deprovision_on_teardown": {
                             "description": "Whether to deprovision a (virtual) network environment during the teardown phase. Since virtual networks may be used for multiple experiments, this typically defaults to false.",
                             "type": "boolean",
-                            "examples": [
-                                false
-                            ]
+                            "examples": [false]
                         }
                     }
                 }

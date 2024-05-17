@@ -1,9 +1,9 @@
 {
+
     // Bad optimizer class - should be rejected.
     "class": "mlos_bench.optimizers.InvalidOptimizer",
+
     "config": {
-        "optimization_targets": {
-            "score": "min"
-        }
+        "optimization_targets": {"score": "min"}
     }
 }

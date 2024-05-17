@@ -1,19 +1,20 @@
 {
     "name": "Configure Linux VM at runtime",
     "class": "mlos_bench.environments.composite_env.CompositeEnv",
-    "include_tunables": [
-        "environments/os/linux/runtime/linux-runtime-tunables.jsonc"
-    ],
+
+    "include_tunables": ["environments/os/linux/runtime/linux-runtime-tunables.jsonc"],
+
     "config": {
         "children": [
             // Local: Generate kernel config and upload it to the shared storage
             {
                 "name": "Generate Linux kernel parameters for Ubuntu",
                 "class": "mlos_bench.environments.LocalFileShareEnv",
+
                 "config": {
-                    "tunable_params": [
-                        "$linux-runtime"
-                    ],
+
+                    "tunable_params": ["$linux-runtime"],
+
                     "required_args": [
                         "experiment_id",
                         "trial_id"

@@ -5,10 +5,7 @@
             "test_param": {
                 "type": "int",
                 "default": 0,
-                "range": [
-                    0,
-                    10
-                ]
+                "range": [0, 10]
             }
         }
     }

@@ -2,13 +2,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
+
 // *** DO *NOT* CHANGE! This config is used for tests! ***
 {
     "experiment_id": "MockExperiment",
     "trial_id": 1,
+
     // A couple of dynamic globals used to test variable expansion.
     "testVmName": "$experiment_id-vm",
     "testVnetName": "$testVmName-vnet",
+
     // Note: $PWD generally also works, but has issues in vscode unit test
     // runner vs. CLI due to the way its wrapper sometimes starts in one
     // directory vs. moves to the code directory without changing the
@@ -18,6 +21,7 @@
     // here when expanding variables.
     "pathVarWithEnvVarRef": "$CUSTOM_PATH_FROM_ENV/foo",
     "varWithEnvVarRef": "user:$USER",
+
     // Override the default value of the "max_suggestions" parameter
     // of the optimizer when running local tests:
     "max_suggestions": 5

@@ -69,8 +69,5 @@
             "unevaluatedProperties": false
         }
     },
-    "required": [
-        "class",
-        "config"
-    ]
+    "required": ["class", "config"]
 }

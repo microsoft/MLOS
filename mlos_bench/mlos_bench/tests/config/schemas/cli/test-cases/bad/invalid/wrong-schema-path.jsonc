@@ -1,21 +1,28 @@
 {
     "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/wrong/schema/path/bad-schema.json",
+
     "config_path": [
         "mlos_bench/mlos_bench/config",
         "mlos_bench/mlos_bench/tests/config"
     ],
+
     "environment": "environments/root/root-azure-redis.jsonc",
     "optimizer": "optimizers/one_shot_opt.jsonc",
     "storage": "storage/sqlite.jsonc",
+
     "tunable_values": [
         "tunable-values/tunable-values-example.jsonc"
     ],
+
     "globals": [
         "global_config.json"
     ],
+
     "experiment_id": "RedisBench",
     "trial_id": 1,
+
     "teardown": false,
+
     "log_file": "azure-redis-1shot.log",
     "log_level": "DEBUG"
 }

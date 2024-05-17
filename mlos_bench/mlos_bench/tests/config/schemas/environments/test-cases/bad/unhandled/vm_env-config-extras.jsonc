@@ -2,9 +2,7 @@
     "name": "vm_env-config-extras",
     "class": "mlos_bench.environments.remote.vm_env.VMEnv",
     "config": {
-        "tunable_params": [
-            "foo"
-        ],
+        "tunable_params": ["foo"],
         "extras": "invalid"
     }
 }

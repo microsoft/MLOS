@@ -1,5 +1,6 @@
 {
     "description": "SSH Host Service configuration.",
+
     "class": "mlos_bench.services.remote.ssh.SshHostService",
     "config": {
         "ssh_username": "someuser"

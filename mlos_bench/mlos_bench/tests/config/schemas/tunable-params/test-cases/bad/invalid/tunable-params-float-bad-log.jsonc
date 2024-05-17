@@ -5,11 +5,8 @@
             "float": {
                 "type": "float",
                 "default": 10,
-                "range": [
-                    0,
-                    10
-                ],
-                "log": "yes" // <-- this is invalid
+                "range": [0, 10],
+                "log": "yes"  // <-- this is invalid
             }
         }
     }

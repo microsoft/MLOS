@@ -1,13 +1,13 @@
 // MLOS Core optimizer
 {
     //"$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json",
+
     "class": "mlos_bench.optimizers.MlosCoreOptimizer",
+
     "config": {
-        "optimization_targets": {
-            "score": "min"
-        },
+        "optimization_targets": {"score": "min"},
         "max_suggestions": 100,
         "optimizer_type": "SMAC",
-        "output_directory": null // Override to have a permanent output with SMAC history etc.
+        "output_directory": null  // Override to have a permanent output with SMAC history etc.
     }
 }

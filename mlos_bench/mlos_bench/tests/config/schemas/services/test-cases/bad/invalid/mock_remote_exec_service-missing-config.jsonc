@@ -1,5 +1,6 @@
 {
     "class": "mlos_bench.tests.services.remote.mock.mock_remote_exec_service.MockRemoteExecService",
+
     "config": {
         //"vmName": "test-vm"
     }

@@ -3,26 +3,34 @@
     "services": [
         {
             "class": "mlos_bench.services.remote.azure.AzureVMService",
+
             "config": {
+
                 // All values below, including those in `deploymentTemplateParameters`,
                 // can be overridden by the parameters pushed from the caller Environment.
                 "subscription": "PLACEHOLDER; AZURE SUBSCRIPTION ID",
                 "resourceGroup": "PLACEHOLDER; e.g., os-autotune",
+
                 "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
+
                 // Make sure to list all ARM template parameters that can be overridden by the caller.
                 "deploymentTemplateParameters": {
+
                     "storageAccountName": "PLACEHOLDER; e.g., osatsharedstorage",
                     "storageFileShareName": "PLACEHOLDER; e.g., os-autotune-file-share",
                     "location": "PLACEHOLDER; e.g., westus2",
+
                     "virtualNetworkName": "PLACEHOLDER; e.g., mlos-2vms-vnet",
                     "subnetName": "PLACEHOLDER; e.g., mlos-2vms-subnet",
+
                     "vmName": "PLACEHOLDER; e.g., os-autotune-linux-vm",
                     "vmSize": "PLACEHOLDER; e.g., Standard_B2s",
                     "ubuntuOSVersion": "PLACEHOLDER; e.g., 18.04-LTS"
                 },
-                "requestTimeout": 20, // HTTP request timeout in seconds
-                "pollInterval": 20, // Poll every 20 seconds
-                "pollTimeout": 3600 // Give up polling after one hour
+
+                "requestTimeout": 20,   // HTTP request timeout in seconds
+                "pollInterval": 20,     // Poll every 20 seconds
+                "pollTimeout": 3600     // Give up polling after one hour
             }
         }
     ]

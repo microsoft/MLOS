@@ -1,8 +1,10 @@
 {
     "class": "mlos_bench.storage.sql.storage.SqlStorage",
+
     "config": {
         "drivername": "sqlite",
         "database": "mlos_bench",
+
         "extra": "invalid"
     }
 }

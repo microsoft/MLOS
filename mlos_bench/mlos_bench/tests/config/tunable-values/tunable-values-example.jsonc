@@ -1,6 +1,7 @@
 // A simple key-value assignment of an tunables instance.
 {
     "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-values-schema.json",
+
     "sched_migration_cost_ns": 500000,
     "sched_latency_ns": 12000000,
     "sched_child_runs_first": "0",

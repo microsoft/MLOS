@@ -9,11 +9,7 @@
             "float": 1.1,
             "bool": true,
             "null": null,
-            "array": [
-                {
-                    "obj": "invalid"
-                }
-            ]
+            "array": [{"obj": "invalid"}]
         }
     }
 }

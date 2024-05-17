@@ -1,15 +1,16 @@
 {
     "class": "mlos_bench.optimizers.OneShotOptimizer",
+
     "description": "A full config test case for the OneShotOptimizer.",
+
     "include_tunables": [
         "some/path/to/tunables.jsonc",
         "some/other/path/to/tunables.json"
     ],
+
     "config": {
         // Here we do our best to list the exhaustive set of full configs available for the base optimizer config.
-        "optimization_targets": {
-            "score": "min"
-        },
+        "optimization_targets": {"score": "min"},
         "max_suggestions": 20,
         "seed": 12345,
         "start_with_defaults": false

@@ -3,9 +3,5 @@
     "bar": "baz",
     "num": 1,
     "bool": true,
-    "array": [
-        "foo",
-        "bar",
-        "baz"
-    ]
+    "array": ["foo", "bar", "baz"]
 }

@@ -1,5 +1,6 @@
 {
     "class": "mlos_bench.storage.sql.storage.SqlStorage",
+
     "config": {
         // These two are required:
         //"drivername": "mysql",

@@ -4,6 +4,7 @@
         "storageAccountName": "storage-account-name",
         "storageFileShareName": "file-share-name",
         "storageAccountKey": "storage-account-key-blob",
+
         "extra": "invalid"
     }
 }

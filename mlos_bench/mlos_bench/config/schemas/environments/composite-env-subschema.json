@@ -58,14 +58,10 @@
                             },
                             "anyOf": [
                                 {
-                                    "required": [
-                                        "include_children"
-                                    ]
+                                    "required": ["include_children"]
                                 },
                                 {
-                                    "required": [
-                                        "children"
-                                    ]
+                                    "required": ["children"]
                                 }
                             ]
                         }
@@ -73,10 +69,7 @@
                     "unevaluatedProperties": false
                 }
             },
-            "required": [
-                "class",
-                "config"
-            ]
+            "required": ["class", "config"]
         }
     ]
 }

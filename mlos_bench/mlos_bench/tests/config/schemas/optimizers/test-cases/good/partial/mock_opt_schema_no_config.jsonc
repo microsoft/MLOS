@@ -1,3 +1,4 @@
 {
+
     "class": "mlos_bench.optimizers.MockOptimizer"
 }

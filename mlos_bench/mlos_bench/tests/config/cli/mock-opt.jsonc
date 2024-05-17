@@ -2,20 +2,24 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
+
 // *** DO *NOT* CHANGE! This config is used for tests! ***
 {
     "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/cli/cli-schema.json",
+
     "config_path": [
         // relative to the root of the repo (for now), where this is expected to be executed from
         "mlos_bench/mlos_bench/tests/config",
         "mlos_bench/mlos_bench/config"
     ],
+
     "environment": "environments/mock/mock_env.jsonc",
     "optimizer": "optimizers/mlos_core_default_opt.jsonc",
-    "globals": [
-        "globals/global_test_config.jsonc"
-    ],
+
+    "globals": ["globals/global_test_config.jsonc"],
+
     "teardown": true,
+
     // "log_file": "mock-opt.log",
     "log_level": "DEBUG"
 }

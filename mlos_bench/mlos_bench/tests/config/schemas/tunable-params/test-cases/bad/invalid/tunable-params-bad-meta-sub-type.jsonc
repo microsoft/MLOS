@@ -5,10 +5,7 @@
             "float": {
                 "type": "float",
                 "default": 0.5,
-                "range": [
-                    0,
-                    1
-                ],
+                "range": [0, 1],
                 "meta": {
                     "item": {
                         "bad": "sub-type"

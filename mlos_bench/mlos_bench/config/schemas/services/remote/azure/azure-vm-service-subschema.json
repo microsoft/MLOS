@@ -34,7 +34,5 @@
             "unevaluatedProperties": false
         }
     },
-    "required": [
-        "class"
-    ]
+    "required": ["class"]
 }

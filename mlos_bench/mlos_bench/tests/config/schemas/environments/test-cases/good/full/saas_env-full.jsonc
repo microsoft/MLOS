@@ -3,6 +3,7 @@
     "name": "Azure MySQL Flex DB Configuration",
     "description": "More descriptive text.",
     "class": "mlos_bench.environments.remote.SaaSEnv",
+
     "include_tunables": [
         "some/tunables.jsonc"
     ],
@@ -10,15 +11,10 @@
         "some/service.jsonc"
     ],
     "config": {
-        "required_args": [
-            "vmName"
-        ],
+        "required_args": ["vmName"],
         "const_args": {
             "provider": "Microsoft.DBforMySQL"
         },
-        "tunable_params": [
-            "mysql-innodb",
-            "mysql-buffer"
-        ]
+        "tunable_params": ["mysql-innodb", "mysql-buffer"]
     }
 }

@@ -2,6 +2,7 @@
     "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
     "class": "mlos_bench.tests.services.remote.mock.mock_fileshare_service.MockFileShareService",
     "description": "descriptive text",
+
     "config": {
         "fileShareName": "test-fileshare"
     }

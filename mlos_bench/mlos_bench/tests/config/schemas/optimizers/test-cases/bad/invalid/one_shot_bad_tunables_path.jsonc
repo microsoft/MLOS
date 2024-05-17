@@ -1,6 +1,7 @@
 {
     "class": "mlos_bench.optimizers.OneShotOptimizer",
+
     "include_tunables": [
-        "bad/path/to/tunables.xml" // path should end in .json or .jsonc
+        "bad/path/to/tunables.xml"  // path should end in .json or .jsonc
     ]
 }

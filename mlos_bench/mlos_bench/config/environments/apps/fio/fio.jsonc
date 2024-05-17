@@ -1,11 +1,14 @@
 {
     "name": "FIO Composite Env",
     "class": "mlos_bench.environments.composite_env.CompositeEnv",
+
     "config": {
+
         "const_args": {
             "fio_prefix": "fio",
             "fio_benchmark": "readwrite.fio.ini"
         },
+
         "children": [
             {
                 "name": "Upload FIO job file",
@@ -56,7 +59,7 @@
                     ],
                     "run": [
                         "mkdir -p $mountPoint/$experiment_id/$trial_id/output/$fio_prefix/",
-                        "sudo fio --output-format=json --filename=$fio_target --runtime=20 $mountPoint/$experiment_id/$trial_id/scripts/$fio_benchmark > /dev/null", // warm-up
+                        "sudo fio --output-format=json --filename=$fio_target --runtime=20 $mountPoint/$experiment_id/$trial_id/scripts/$fio_benchmark > /dev/null",  // warm-up
                         "sudo fio --output-format=json --filename=$fio_target --runtime=60 $mountPoint/$experiment_id/$trial_id/scripts/$fio_benchmark > $mountPoint/$experiment_id/$trial_id/output/$fio_prefix/fio_results.json",
                         "sudo rm $fio_target"
                     ]

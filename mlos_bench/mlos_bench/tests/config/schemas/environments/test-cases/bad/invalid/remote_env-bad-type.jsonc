@@ -5,6 +5,6 @@
         "run": [
             "/bin/bash -c true"
         ],
-        "wait_boot": "false" // bad type
+        "wait_boot": "false"    // bad type
     }
 }

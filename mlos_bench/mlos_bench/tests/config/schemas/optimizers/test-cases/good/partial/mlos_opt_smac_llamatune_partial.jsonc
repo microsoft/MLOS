@@ -1,10 +1,9 @@
 {
     // No schema required.
     "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+
     "config": {
-        "optimization_targets": {
-            "score": "min"
-        },
+        "optimization_targets": {"score": "min"},
         "max_suggestions": 20,
         "seed": 12345,
         "optimizer_type": "SMAC",

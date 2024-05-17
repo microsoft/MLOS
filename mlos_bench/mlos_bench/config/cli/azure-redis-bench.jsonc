@@ -10,12 +10,16 @@
         "mlos_bench/mlos_bench/config/experiments",
         "mlos_bench/mlos_bench/tests/config"
     ],
+
     "environment": "environments/root/root-azure-redis.jsonc",
     "storage": "storage/sqlite.jsonc",
+
     "globals": [
         "global_config_azure.jsonc"
     ],
+
     "teardown": false,
+
     "log_file": "azure-redis-bench.log",
     "log_level": "DEBUG"
 }

@@ -1,5 +1,6 @@
 {
     "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+
     "config": {
         "optimization_target": "latency",
         "optimization_direction": "min"

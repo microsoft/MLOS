@@ -55,14 +55,10 @@
                     },
                     "anyOf": [
                         {
-                            "required": [
-                                "upload"
-                            ]
+                            "required": ["upload"]
                         },
                         {
-                            "required": [
-                                "download"
-                            ]
+                            "required": ["download"]
                         }
                     ]
                 }

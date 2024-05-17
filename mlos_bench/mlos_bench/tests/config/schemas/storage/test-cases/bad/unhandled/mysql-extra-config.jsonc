@@ -1,11 +1,13 @@
 {
     "class": "mlos_bench.storage.sql.storage.SqlStorage",
+
     "config": {
         "log_sql": false,
         "drivername": "msyql",
         "database": "mlos_bench",
         "host": "db.example.com",
         "username": "username",
+
         "extra": "invalid"
     }
 }

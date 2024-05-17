@@ -3,24 +3,23 @@
     "class": "mlos_bench.environments.composite_env.CompositeEnv",
     "description": "Test Environment for RemoteEnv via local SSH test infrastructure",
     "name": "composite_remote_ssh_env",
+
     "include_services": [
         // from the built in configs
         "services/local/local_exec_service.jsonc",
         "services/remote/ssh/ssh_host_service.jsonc",
         "services/remote/ssh/ssh_fileshare_service.jsonc"
     ],
-    "include_tunables": [
-        "environments/remote/test_ssh-tunables.jsonc"
-    ],
+
+    "include_tunables": ["environments/remote/test_ssh-tunables.jsonc"],
+
     "config": {
         "children": [
             {
                 "class": "mlos_bench.environments.remote.remote_env.RemoteEnv",
                 "name": "remote_ssh_env",
                 "config": {
-                    "tunable_params": [
-                        "test_ssh_tunable_group"
-                    ],
+                    "tunable_params": ["test_ssh_tunable_group"],
                     "required_args": [
                         "ssh_hostname",
                         "ssh_port",

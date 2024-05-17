@@ -2,9 +2,7 @@
     "name": "local_env-partial",
     "class": "mlos_bench.environments.LocalEnv",
     "config": {
-        "tunable_params": [
-            "baz"
-        ],
+        "tunable_params": ["baz"],
         "run": [
             "/bin/bash -c true"
         ]

@@ -2,6 +2,7 @@
     "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
     "class": "mlos_bench.tests.services.local.mock.mock_local_exec_service.MockLocalExecService",
     "description": "descriptive text",
+
     "config": {
         "temp_dir": "/tmp"
     }

@@ -9,13 +9,8 @@
             "source_param_num_invalid": 0,
             "source_param_bool_invalid": true,
             "source_param_null_invalid": null,
-            "source_param_list_invalid": [
-                "foo",
-                "bar"
-            ],
-            "source_param_obj_invalid": {
-                "invalid": "type"
-            }
+            "source_param_list_invalid": ["foo", "bar"],
+            "source_param_obj_invalid": { "invalid": "type" }
         }
     }
 }

@@ -1,5 +1,5 @@
 {
     "name": "mock_env-extras",
     "class": "mlos_bench.environments.MockEnv",
-    "foo": "bar" // <-- doesn't belong here
+    "foo": "bar"    // <-- doesn't belong here
 }

@@ -35,10 +35,7 @@
             "description": "Names of the optimization targets and their directions.",
             "type": "object",
             "additionalProperties": {
-                "enum": [
-                    "min",
-                    "max"
-                ]
+                "enum": ["min", "max"]
             },
             "minItems": 1
         }
