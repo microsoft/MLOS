@@ -10,13 +10,16 @@ See Also: <https://automl.github.io/SMAC3/main/index.html>
 from logging import warning
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 from warnings import warn
 
 import ConfigSpace
 import numpy.typing as npt
 import pandas as pd
 
-from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import BaseBayesianOptimizer
+from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import (
+    BaseBayesianOptimizer,
+)
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 
@@ -26,17 +29,20 @@ class SmacOptimizer(BaseBayesianOptimizer):
     Wrapper class for SMAC based Bayesian optimization.
     """
 
-    def __init__(self, *,  # pylint: disable=too-many-locals
-                 parameter_space: ConfigSpace.ConfigurationSpace,
-                 space_adapter: Optional[BaseSpaceAdapter] = None,
-                 seed: Optional[int] = 0,
-                 run_name: Optional[str] = None,
-                 output_directory: Optional[str] = None,
-                 max_trials: int = 100,
-                 n_random_init: Optional[int] = None,
-                 max_ratio: Optional[float] = None,
-                 use_default_config: bool = False,
-                 n_random_probability: float = 0.1):
+    def __init__(
+        self,
+        *,  # pylint: disable=too-many-locals
+        parameter_space: ConfigSpace.ConfigurationSpace,
+        space_adapter: Optional[BaseSpaceAdapter] = None,
+        seed: Optional[int] = 0,
+        run_name: Optional[str] = None,
+        output_directory: Optional[str] = None,
+        max_trials: int = 100,
+        n_random_init: Optional[int] = None,
+        max_ratio: Optional[float] = None,
+        use_default_config: bool = False,
+        n_random_probability: float = 0.1,
+    ):
         """
         Instantiate a new SMAC optimizer wrapper.
 
@@ -254,10 +260,17 @@ class SmacOptimizer(BaseBayesianOptimizer):
         context : pd.DataFrame
             Not Yet Implemented.
         """
-        from smac.runhistory import StatusType, TrialInfo, TrialValue  # pylint: disable=import-outside-toplevel
+        from smac.runhistory import (
+            StatusType,
+            TrialInfo,
+            TrialValue,
+        )  # pylint: disable=import-outside-toplevel
 
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+            warn(
+                f"Not Implemented: Ignoring context {list(context.columns)}",
+                UserWarning,
+            )
 
         # Register each trial (one-by-one)
         for config, score in zip(
@@ -289,10 +302,15 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Pandas dataframe with a single row. Column names are the parameter names.
         """
         if TYPE_CHECKING:
-            from smac.runhistory import TrialInfo  # pylint: disable=import-outside-toplevel
+            from smac.runhistory import (
+                TrialInfo,
+            )  # pylint: disable=import-outside-toplevel
 
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+            warn(
+                f"Not Implemented: Ignoring context {list(context.columns)}",
+                UserWarning,
+            )
 
         trial: TrialInfo = self.base_optimizer.ask()
         trial.config.is_valid_configuration()
@@ -312,10 +330,15 @@ class SmacOptimizer(BaseBayesianOptimizer):
     def surrogate_predict(
         self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None
     ) -> npt.NDArray:
-        from smac.utils.configspace import convert_configurations_to_array  # pylint: disable=import-outside-toplevel
+        from smac.utils.configspace import (
+            convert_configurations_to_array,
+        )  # pylint: disable=import-outside-toplevel
 
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+            warn(
+                f"Not Implemented: Ignoring context {list(context.columns)}",
+                UserWarning,
+            )
         if self._space_adapter and not isinstance(self._space_adapter, IdentityAdapter):
             raise NotImplementedError()
 
@@ -342,7 +365,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
         self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None
     ) -> npt.NDArray:
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+            warn(
+                f"Not Implemented: Ignoring context {list(context.columns)}",
+                UserWarning,
+            )
         if self._space_adapter:
             raise NotImplementedError()
 

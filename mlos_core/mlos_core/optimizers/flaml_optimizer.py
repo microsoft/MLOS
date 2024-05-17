@@ -30,11 +30,14 @@ class FlamlOptimizer(BaseOptimizer):
     Wrapper class for FLAML Optimizer: A fast library for AutoML and tuning.
     """
 
-    def __init__(self, *,
-                 parameter_space: ConfigSpace.ConfigurationSpace,
-                 space_adapter: Optional[BaseSpaceAdapter] = None,
-                 low_cost_partial_config: Optional[dict] = None,
-                 seed: Optional[int] = None):
+    def __init__(
+        self,
+        *,
+        parameter_space: ConfigSpace.ConfigurationSpace,
+        space_adapter: Optional[BaseSpaceAdapter] = None,
+        low_cost_partial_config: Optional[dict] = None,
+        seed: Optional[int] = None,
+    ):
         """
         Create an MLOS wrapper class for FLAML.
 
@@ -64,7 +67,10 @@ class FlamlOptimizer(BaseOptimizer):
             np.random.seed(seed)
 
         # pylint: disable=import-outside-toplevel
-        from mlos_core.spaces.converters.flaml import FlamlDomain, configspace_to_flaml_space
+        from mlos_core.spaces.converters.flaml import (
+            FlamlDomain,
+            configspace_to_flaml_space,
+        )
 
         self.flaml_parameter_space: Dict[str, FlamlDomain] = configspace_to_flaml_space(
             self.optimizer_parameter_space
@@ -94,8 +100,11 @@ class FlamlOptimizer(BaseOptimizer):
             Not Yet Implemented.
         """
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
-        for (_, config), score in zip(configurations.astype('O').iterrows(), scores):
+            warn(
+                f"Not Implemented: Ignoring context {list(context.columns)}",
+                UserWarning,
+            )
+        for (_, config), score in zip(configurations.astype("O").iterrows(), scores):
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
                 self.optimizer_parameter_space, values=config.to_dict()
             )
@@ -122,7 +131,10 @@ class FlamlOptimizer(BaseOptimizer):
             Pandas dataframe with a single row. Column names are the parameter names.
         """
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+            warn(
+                f"Not Implemented: Ignoring context {list(context.columns)}",
+                UserWarning,
+            )
         config: dict = self._get_next_config()
         return pd.DataFrame(config, index=[0])
 

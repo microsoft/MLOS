@@ -46,7 +46,10 @@ class RandomOptimizer(BaseOptimizer):
             Not Yet Implemented.
         """
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+            warn(
+                f"Not Implemented: Ignoring context {list(context.columns)}",
+                UserWarning,
+            )
         # should we pop them from self.pending_observations?
 
     def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
@@ -66,8 +69,13 @@ class RandomOptimizer(BaseOptimizer):
         """
         if context is not None:
             # not sure how that works here?
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
-        return pd.DataFrame(dict(self.optimizer_parameter_space.sample_configuration()), index=[0])
+            warn(
+                f"Not Implemented: Ignoring context {list(context.columns)}",
+                UserWarning,
+            )
+        return pd.DataFrame(
+            dict(self.optimizer_parameter_space.sample_configuration()), index=[0]
+        )
 
     def register_pending(
         self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None

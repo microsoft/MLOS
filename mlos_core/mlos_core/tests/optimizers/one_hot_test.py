@@ -85,35 +85,36 @@ def optimizer(configuration_space: CS.ConfigurationSpace) -> BaseOptimizer:
     )
 
 
-def test_to_1hot_data_frame(optimizer: BaseOptimizer,
-                            data_frame: pd.DataFrame,
-                            one_hot_data_frame: npt.NDArray) -> None:
+def test_to_1hot_data_frame(
+    optimizer: BaseOptimizer, data_frame: pd.DataFrame, one_hot_data_frame: npt.NDArray
+) -> None:
     """
     Toy problem to test one-hot encoding of dataframe.
     """
     assert optimizer._to_1hot(data_frame) == pytest.approx(one_hot_data_frame)
 
 
-def test_to_1hot_series(optimizer: BaseOptimizer,
-                        series: pd.Series, one_hot_series: npt.NDArray) -> None:
+def test_to_1hot_series(
+    optimizer: BaseOptimizer, series: pd.Series, one_hot_series: npt.NDArray
+) -> None:
     """
     Toy problem to test one-hot encoding of series.
     """
     assert optimizer._to_1hot(series) == pytest.approx(one_hot_series)
 
 
-def test_from_1hot_data_frame(optimizer: BaseOptimizer,
-                              data_frame: pd.DataFrame,
-                              one_hot_data_frame: npt.NDArray) -> None:
+def test_from_1hot_data_frame(
+    optimizer: BaseOptimizer, data_frame: pd.DataFrame, one_hot_data_frame: npt.NDArray
+) -> None:
     """
     Toy problem to test one-hot decoding of dataframe.
     """
     assert optimizer._from_1hot(one_hot_data_frame).to_dict() == data_frame.to_dict()
 
 
-def test_from_1hot_series(optimizer: BaseOptimizer,
-                          series: pd.Series,
-                          one_hot_series: npt.NDArray) -> None:
+def test_from_1hot_series(
+    optimizer: BaseOptimizer, series: pd.Series, one_hot_series: npt.NDArray
+) -> None:
     """
     Toy problem to test one-hot decoding of series.
     """
@@ -124,7 +125,9 @@ def test_from_1hot_series(optimizer: BaseOptimizer,
     assert one_hot_df.iloc[0].to_dict() == series.to_dict()
 
 
-def test_round_trip_data_frame(optimizer: BaseOptimizer, data_frame: pd.DataFrame) -> None:
+def test_round_trip_data_frame(
+    optimizer: BaseOptimizer, data_frame: pd.DataFrame
+) -> None:
     """
     Round-trip test for one-hot-encoding and then decoding a data frame.
     """
@@ -144,8 +147,9 @@ def test_round_trip_series(optimizer: BaseOptimizer, series: pd.DataFrame) -> No
     assert (series_round_trip.z == series.z).all()
 
 
-def test_round_trip_reverse_data_frame(optimizer: BaseOptimizer,
-                                       one_hot_data_frame: npt.NDArray) -> None:
+def test_round_trip_reverse_data_frame(
+    optimizer: BaseOptimizer, one_hot_data_frame: npt.NDArray
+) -> None:
     """
     Round-trip test for one-hot-decoding and then encoding of a numpy array.
     """
@@ -153,8 +157,9 @@ def test_round_trip_reverse_data_frame(optimizer: BaseOptimizer,
     assert round_trip == pytest.approx(one_hot_data_frame)
 
 
-def test_round_trip_reverse_series(optimizer: BaseOptimizer,
-                                   one_hot_series: npt.NDArray) -> None:
+def test_round_trip_reverse_series(
+    optimizer: BaseOptimizer, one_hot_series: npt.NDArray
+) -> None:
     """
     Round-trip test for one-hot-decoding and then encoding of a numpy array.
     """
