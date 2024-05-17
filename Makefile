@@ -26,7 +26,7 @@ MAKEFLAGS += -j$(shell nproc)
 #MAKEFLAGS += -Oline
 
 .PHONY: all
-all: check test dist dist-test doc licenseheaders
+all: black check test dist dist-test doc licenseheaders
 
 .PHONY: conda-env
 conda-env: build/conda-env.${CONDA_ENV_NAME}.build-stamp
@@ -45,14 +45,17 @@ clean-conda-env:
 	conda env remove -y ${CONDA_INFO_LEVEL} -n ${CONDA_ENV_NAME}
 	rm -f build/conda-env.${CONDA_ENV_NAME}.build-stamp
 
-.PHONY: check
-check: black pydocstyle pylint mypy # cspell licenseheaders markdown-link-check
+black:
+	black .
 
-.PHONY: black
-black: conda-env
-black: build/black.mlos_core.${CONDA_ENV_NAME}.build-stamp
-black: build/black.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-black: build/black.mlos_viz.${CONDA_ENV_NAME}.build-stamp
+.PHONY: check
+check: black-check pydocstyle pylint mypy # cspell licenseheaders markdown-link-check
+
+.PHONY: black-check
+black-check: conda-env
+black-check: build/black.mlos_core.${CONDA_ENV_NAME}.build-stamp
+black-check: build/black.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+black-check: build/black.mlos_viz.${CONDA_ENV_NAME}.build-stamp
 
 
 build/black.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
