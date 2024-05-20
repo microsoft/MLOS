@@ -29,13 +29,17 @@ def test_context_not_implemented_warning(configuration_space: CS.ConfigurationSp
     """
     if kwargs is None:
         kwargs = {}
-    optimizer = optimizer_class(parameter_space=configuration_space, **kwargs)
+    optimizer = optimizer_class(
+        parameter_space=configuration_space,
+        optimization_targets=['score'],
+        **kwargs
+    )
     suggestion = optimizer.suggest()
     scores = pd.DataFrame({'score': [1]})
     context = pd.DataFrame([["something"]])
-    # test context not implemented errors
+
     with pytest.raises(UserWarning):
-        optimizer.register(suggestion, scores['score'], context=context)
+        optimizer.register(suggestion, scores, context=context)
 
     with pytest.raises(UserWarning):
         optimizer.suggest(context=context)

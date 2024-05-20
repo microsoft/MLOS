@@ -29,6 +29,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     def __init__(self, *,  # pylint: disable=too-many-locals
                  parameter_space: ConfigSpace.ConfigurationSpace,
+                 optimization_targets: List[str],
                  space_adapter: Optional[BaseSpaceAdapter] = None,
                  seed: Optional[int] = 0,
                  run_name: Optional[str] = None,
@@ -45,6 +46,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         ----------
         parameter_space : ConfigSpace.ConfigurationSpace
             The parameter space to optimize.
+
+        optimization_targets : List[str]
+            The names of the optimization targets to minimize.
 
         space_adapter : BaseSpaceAdapter
             The space adapter class to employ for parameter space transformations.
@@ -86,6 +90,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         """
         super().__init__(
             parameter_space=parameter_space,
+            optimization_targets=optimization_targets,
             space_adapter=space_adapter,
         )
 
@@ -125,6 +130,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         scenario: Scenario = Scenario(
             self.optimizer_parameter_space,
+            objectives=self._optimization_targets,
             name=run_name,
             output_directory=Path(output_directory),
             deterministic=True,
@@ -186,6 +192,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
             intensifier=intensifier,
             random_design=random_design,
             config_selector=config_selector,
+            multi_objective_algorithm=Optimizer_Smac.get_multi_objective_algorithm(
+                scenario,
+                # objective_weights=[1, 2],  # TODO: pass weights as constructor args
+            ),
             overwrite=True,
             logging_level=False,  # Use the existing logger
         )
@@ -228,7 +238,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # -- this planned to be fixed in some future release: https://github.com/automl/SMAC3/issues/946
         raise RuntimeError('This function should never be called.')
 
-    def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: Optional[pd.DataFrame] = None) -> None:
+    def _register(self, configurations: pd.DataFrame,
+                  scores: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations and scores.
 
         Parameters
@@ -236,7 +247,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         configurations : pd.DataFrame
             Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
 
-        scores : pd.Series
+        scores : pd.DataFrame
             Scores from running the configurations. The index is the same as the index of the configurations.
 
         context : pd.DataFrame
@@ -248,10 +259,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
 
         # Register each trial (one-by-one)
-        for config, score in zip(self._to_configspace_configs(configurations), scores.tolist()):
+        for (config, (_i, score)) in zip(self._to_configspace_configs(configurations), scores.iterrows()):
             # Retrieve previously generated TrialInfo (returned by .ask()) or create new TrialInfo instance
-            info: TrialInfo = self.trial_info_map.get(config, TrialInfo(config=config, seed=self.base_optimizer.scenario.seed))
-            value: TrialValue = TrialValue(cost=score, time=0.0, status=StatusType.SUCCESS)
+            info: TrialInfo = self.trial_info_map.get(
+                config, TrialInfo(config=config, seed=self.base_optimizer.scenario.seed))
+            value = TrialValue(cost=list(score.astype(float)), time=0.0, status=StatusType.SUCCESS)
             self.base_optimizer.tell(info, value, save=False)
 
         # Save optimizer once we register all configs
@@ -293,7 +305,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if context is not None:
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         if self._space_adapter and not isinstance(self._space_adapter, IdentityAdapter):
-            raise NotImplementedError()
+            raise NotImplementedError("Space adapter not supported for surrogate_predict.")
 
         # pylint: disable=protected-access
         if len(self._observations) <= self.base_optimizer._initial_design._n_configs:

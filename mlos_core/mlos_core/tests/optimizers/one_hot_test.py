@@ -75,6 +75,7 @@ def optimizer(configuration_space: CS.ConfigurationSpace) -> BaseOptimizer:
     """
     return SmacOptimizer(
         parameter_space=configuration_space,
+        optimization_targets=['score'],
     )
 
 

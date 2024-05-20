@@ -24,7 +24,7 @@ class RandomOptimizer(BaseOptimizer):
         The parameter space to optimize.
     """
 
-    def _register(self, configurations: pd.DataFrame, scores: pd.Series,
+    def _register(self, configurations: pd.DataFrame, scores: pd.DataFrame,
                   context: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations and scores.
 
@@ -35,7 +35,7 @@ class RandomOptimizer(BaseOptimizer):
         configurations : pd.DataFrame
             Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
 
-        scores : pd.Series
+        scores : pd.DataFrame
             Scores from running the configurations. The index is the same as the index of the configurations.
 
         context : None
