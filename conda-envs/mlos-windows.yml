@@ -13,7 +13,6 @@ dependencies:
   - pydocstyle
   - flake8
   - setuptools
-  - setuptools-scm
   - jupyter
   - ipykernel
   - nb_conda_kernels
@@ -30,6 +29,7 @@ dependencies:
   - pip:
     - autopep8>=1.7.0
     - bump2version
+    - setuptools-scm>=8.1.0
     - check-jsonschema
     - licenseheaders
     - mypy
