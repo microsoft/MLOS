@@ -70,6 +70,10 @@ class FlamlOptimizer(BaseOptimizer):
             space_adapter=space_adapter,
         )
 
+        if len(self._optimization_targets) != 1:
+            raise ValueError("FLAML does not support multi-target optimization")
+        self._flaml_optimization_target = self._optimization_targets[0]
+
         # Per upstream documentation, it is recommended to set the seed for
         # flaml at the start of its operation globally.
         if seed is not None:
