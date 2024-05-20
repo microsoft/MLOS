@@ -113,10 +113,9 @@ class MlosCoreOptimizer(Optimizer):
             df_configs = df_configs[df_status_completed]
             df_scores = df_scores[df_status_completed]
 
-        # Pass opt_targets columns as scores, and the rest as context.
-        opt_context = set(df_scores.columns).difference(opt_targets)
-        self._opt.register(df_configs, df_scores[opt_targets].astype(float),
-                           df_scores[list(opt_context)] if opt_context else None)
+        # TODO: Specify (in the config) which metrics to pass to the optimizer.
+        # Issue: https://github.com/microsoft/MLOS/issues/745
+        self._opt.register(df_configs, df_scores[opt_targets].astype(float))
 
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
