@@ -1,5 +1,6 @@
 name: mlos-3.10
 channels:
+  - conda-forge
   - defaults
 dependencies:
   # Basic dev environment packages.

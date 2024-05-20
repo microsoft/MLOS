@@ -1,7 +1,6 @@
 name: mlos
 channels:
   # Note: we have to reverse the channel priority for Windows to accomodate strict channel_priority setups.
-  # Hence, additional dependencies may differ from the Linux setup.
   - conda-forge
   - defaults
 dependencies:

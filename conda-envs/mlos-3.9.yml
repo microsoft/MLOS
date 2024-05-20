@@ -1,7 +1,7 @@
 name: mlos-3.9
 channels:
-  - defaults
   - conda-forge
+  - defaults
 dependencies:
   # Basic dev environment packages.
   # All other dependencies for the mlos modules come from pip.
