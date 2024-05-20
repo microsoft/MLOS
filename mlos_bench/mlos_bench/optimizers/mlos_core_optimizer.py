@@ -192,13 +192,9 @@ class MlosCoreOptimizer(Optimizer):
             assert registered_score is not None
             df_config = self._to_df([tunables.get_param_values()])
             _LOG.debug("Score: %s Dataframe:\n%s", registered_score, df_config)
-            opt_context = set(score or {}).difference(registered_score)
-            self._opt.register(
-                df_config,
-                pd.DataFrame([registered_score], dtype=float),
-                pd.DataFrame([{col: score[col] for col in opt_context}])
-                if score and opt_context else None
-            )
+            # TODO: Specify (in the config) which metrics to pass to the optimizer.
+            # Issue: https://github.com/microsoft/MLOS/issues/745
+            self._opt.register(df_config, pd.DataFrame([registered_score], dtype=float))
         return registered_score
 
     def get_best_observation(self) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
