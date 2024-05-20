@@ -1,6 +1,7 @@
 name: mlos-3.8
 channels:
   - defaults
+  - conda-forge
 dependencies:
   # Basic dev environment packages.
   # All other dependencies for the mlos modules come from pip.
@@ -10,7 +11,7 @@ dependencies:
   - pydocstyle
   - flake8
   - setuptools
-  - setuptools-scm>=8.1.0
+  - conda-forge::setuptools-scm>=8.1.0
   - jupyter
   - ipykernel
   - nb_conda_kernels
