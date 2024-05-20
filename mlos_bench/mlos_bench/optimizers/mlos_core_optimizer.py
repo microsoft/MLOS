@@ -108,15 +108,16 @@ class MlosCoreOptimizer(Optimizer):
         if status is not None:
             # Select only the completed trials, set scores for failed trials to +inf.
             df_status = pd.Series(status)
+            # TODO: Be more flexible with values used for failed trials (not just +inf).
+            # Issue: https://github.com/microsoft/MLOS/issues/523
             df_scores.loc[df_status != Status.SUCCEEDED, opt_targets] = float("inf")
             df_status_completed = df_status.apply(Status.is_completed)
             df_configs = df_configs[df_status_completed]
             df_scores = df_scores[df_status_completed]
 
-        # Pass opt_targets columns as scores, and the rest as context.
-        opt_context = set(df_scores.columns).difference(opt_targets)
-        self._opt.register(df_configs, df_scores[opt_targets].astype(float),
-                           df_scores[list(opt_context)] if opt_context else None)
+        # TODO: Specify (in the config) which metrics to pass to the optimizer.
+        # Issue: https://github.com/microsoft/MLOS/issues/745
+        self._opt.register(df_configs, df_scores[opt_targets].astype(float))
 
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
@@ -192,13 +193,9 @@ class MlosCoreOptimizer(Optimizer):
             assert registered_score is not None
             df_config = self._to_df([tunables.get_param_values()])
             _LOG.debug("Score: %s Dataframe:\n%s", registered_score, df_config)
-            opt_context = set(score or {}).difference(registered_score)
-            self._opt.register(
-                df_config,
-                pd.DataFrame([registered_score], dtype=float),
-                pd.DataFrame([{col: score[col] for col in opt_context}])
-                if score and opt_context else None
-            )
+            # TODO: Specify (in the config) which metrics to pass to the optimizer.
+            # Issue: https://github.com/microsoft/MLOS/issues/745
+            self._opt.register(df_config, pd.DataFrame([registered_score], dtype=float))
         return registered_score
 
     def get_best_observation(self) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
