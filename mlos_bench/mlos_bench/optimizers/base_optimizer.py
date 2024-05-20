@@ -325,6 +325,8 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
 
         if not status.is_succeeded():
             assert scores is None
+            # TODO: Be more flexible with values used for failed trials (not just +inf).
+            # Issue: https://github.com/microsoft/MLOS/issues/523
             return {opt_target: float("inf") for opt_target in self._opt_targets}
 
         assert scores is not None

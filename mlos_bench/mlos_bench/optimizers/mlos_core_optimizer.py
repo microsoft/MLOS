@@ -108,6 +108,8 @@ class MlosCoreOptimizer(Optimizer):
         if status is not None:
             # Select only the completed trials, set scores for failed trials to +inf.
             df_status = pd.Series(status)
+            # TODO: Be more flexible with values used for failed trials (not just +inf).
+            # Issue: https://github.com/microsoft/MLOS/issues/523
             df_scores.loc[df_status != Status.SUCCEEDED, opt_targets] = float("inf")
             df_status_completed = df_status.apply(Status.is_completed)
             df_configs = df_configs[df_status_completed]
