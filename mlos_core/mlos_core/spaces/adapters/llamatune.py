@@ -222,7 +222,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
                 index = max(0, min(len(param.choices) - 1, index))
                 # NOTE: potential rounding here would be unfair to first & last values
                 orig_value = param.choices[index]
-            elif isinstance(param, ConfigSpace.hyperparameters.NumericalHyperparameter):
+            elif isinstance(param, NumericalHyperparameter):
                 if param.name in self._special_param_values_dict:
                     value = self._special_param_value_scaler(param, value)
 

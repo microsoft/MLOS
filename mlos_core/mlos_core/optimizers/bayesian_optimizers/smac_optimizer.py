@@ -27,7 +27,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
     Wrapper class for SMAC based Bayesian optimization.
     """
 
-    def __init__(self, *,  # pylint: disable=too-many-locals
+    def __init__(self, *,  # pylint: disable=too-many-locals,too-many-arguments
                  parameter_space: ConfigSpace.ConfigurationSpace,
                  optimization_targets: List[str],
                  space_adapter: Optional[BaseSpaceAdapter] = None,
@@ -283,7 +283,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Pandas dataframe with a single row. Column names are the parameter names.
         """
         if TYPE_CHECKING:
-            from smac.runhistory import TrialInfo  # pylint: disable=import-outside-toplevel
+            from smac.runhistory import TrialInfo  # pylint: disable=import-outside-toplevel,unused-import
 
         if context is not None:
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
