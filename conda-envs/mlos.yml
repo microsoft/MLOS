@@ -21,7 +21,7 @@ dependencies:
   - pyarrow
   - swig
   - libpq
-  - python
+  - python<3.12
   - pip:
     - autopep8>=1.7.0
     - bump2version
