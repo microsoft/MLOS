@@ -32,7 +32,7 @@ class FlamlOptimizer(BaseOptimizer):
 
     _METRIC_NAME = "FLAML_score"
 
-    def __init__(self, *,
+    def __init__(self, *,   # pylint: disable=too-many-arguments
                  parameter_space: ConfigSpace.ConfigurationSpace,
                  optimization_targets: List[str],
                  objective_weights: Optional[List[float]] = None,

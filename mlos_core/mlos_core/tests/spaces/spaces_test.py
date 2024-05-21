@@ -18,7 +18,7 @@ import pytest
 import scipy
 
 import ConfigSpace as CS
-from ConfigSpace.hyperparameters import NormalIntegerHyperparameter
+from ConfigSpace.hyperparameters import Hyperparameter, NormalIntegerHyperparameter
 
 import flaml.tune.sample
 
@@ -26,7 +26,7 @@ from mlos_core.spaces.converters.flaml import configspace_to_flaml_space, FlamlD
 
 
 OptimizerSpace = Union[FlamlSpace, CS.ConfigurationSpace]
-OptimizerParam = Union[FlamlDomain, CS.hyperparameters.Hyperparameter]
+OptimizerParam = Union[FlamlDomain, Hyperparameter]
 
 
 def assert_is_uniform(arr: npt.NDArray) -> None:

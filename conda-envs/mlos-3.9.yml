@@ -1,5 +1,6 @@
 name: mlos-3.9
 channels:
+  - conda-forge
   - defaults
 dependencies:
   # Basic dev environment packages.
@@ -10,7 +11,7 @@ dependencies:
   - pydocstyle
   - flake8
   - setuptools
-  - setuptools-scm
+  - setuptools-scm>=8.1.0
   - jupyter
   - ipykernel
   - nb_conda_kernels

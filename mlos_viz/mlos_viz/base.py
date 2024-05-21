@@ -180,7 +180,7 @@ def augment_results_df_with_config_trial_group_stats(exp_data: Optional[Experime
         compute_zscore_for_group_agg(results_groups_perf, stats_df, result_col, "var")
         quantiles = [0.50, 0.75, 0.90, 0.95, 0.99]
         for quantile in quantiles:     # TODO: can we do this in one pass?
-            quantile_col = result_col + f".p{int(quantile*100)}"
+            quantile_col = f"{result_col}.p{int(quantile * 100)}"
             stats_df[quantile_col] = results_groups_perf.transform("quantile", quantile)
         augmented_results_df = pandas.concat([augmented_results_df, stats_df], axis=1)
     return augmented_results_df

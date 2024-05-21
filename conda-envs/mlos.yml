@@ -1,5 +1,6 @@
 name: mlos
 channels:
+  - conda-forge
   - defaults
 dependencies:
   # Basic dev environment packages.
@@ -10,7 +11,7 @@ dependencies:
   - pydocstyle
   - flake8
   - setuptools
-  - setuptools-scm
+  - setuptools-scm>=8.1.0
   - jupyter
   - ipykernel
   - nb_conda_kernels
@@ -20,7 +21,8 @@ dependencies:
   - pyarrow
   - swig
   - libpq
-  - python
+  # FIXME: https://github.com/microsoft/MLOS/issues/727
+  - python<3.12
   - pip:
     - autopep8>=1.7.0
     - bump2version
