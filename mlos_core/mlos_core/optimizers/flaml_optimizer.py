@@ -30,6 +30,7 @@ class FlamlOptimizer(BaseOptimizer):
     Wrapper class for FLAML Optimizer: A fast library for AutoML and tuning.
     """
 
+    # The name of an internal objective attribute that is calculated as a weighted average of the user provided objective metrics.
     _METRIC_NAME = "FLAML_score"
 
     def __init__(self, *,   # pylint: disable=too-many-arguments
