@@ -22,7 +22,8 @@ dependencies:
   - pyarrow
   - swig
   - libpq
-  - python=3.11
+  # FIXME: https://github.com/microsoft/MLOS/issues/727
+  - python<3.12
   # Install an SMAC requirement pre-compiled from conda-forge.
   # This also requires a more recent vs2015_runtime from conda-forge.
   - pyrfr>=0.9.0
