@@ -16,20 +16,20 @@ import numpy as np
 import flaml.tune
 import flaml.tune.sample
 
-
 if TYPE_CHECKING:
-    if sys.version_info >= (3, 10):
-        from typing import TypeAlias
-    else:
-        from typing_extensions import TypeAlias
-
     from ConfigSpace.hyperparameters import Hyperparameter
 
-    FlamlDomain: TypeAlias = flaml.tune.sample.Domain
-    FlamlSpace: TypeAlias = Dict[str, flaml.tune.sample.Domain]
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
 
 
-def configspace_to_flaml_space(config_space: ConfigSpace.ConfigurationSpace) -> Dict[str, "FlamlDomain"]:
+FlamlDomain: TypeAlias = flaml.tune.sample.Domain
+FlamlSpace: TypeAlias = Dict[str, flaml.tune.sample.Domain]
+
+
+def configspace_to_flaml_space(config_space: ConfigSpace.ConfigurationSpace) -> Dict[str, FlamlDomain]:
     """Converts a ConfigSpace.ConfigurationSpace to dict.
 
     Parameters
@@ -49,7 +49,7 @@ def configspace_to_flaml_space(config_space: ConfigSpace.ConfigurationSpace) -> 
         (ConfigSpace.UniformFloatHyperparameter, True): flaml.tune.loguniform,
     }
 
-    def _one_parameter_convert(parameter: "Hyperparameter") -> "FlamlDomain":
+    def _one_parameter_convert(parameter: "Hyperparameter") -> FlamlDomain:
         if isinstance(parameter, ConfigSpace.UniformFloatHyperparameter):
             # FIXME: upper isn't included in the range
             return flaml_numeric_type[(type(parameter), parameter.log)](parameter.lower, parameter.upper)
