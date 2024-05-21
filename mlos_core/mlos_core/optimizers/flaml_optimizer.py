@@ -30,7 +30,7 @@ class FlamlOptimizer(BaseOptimizer):
     Wrapper class for FLAML Optimizer: A fast library for AutoML and tuning.
     """
 
-    def __init__(self, *,
+    def __init__(self, *,   # pylint: disable=too-many-arguments
                  parameter_space: ConfigSpace.ConfigurationSpace,
                  optimization_targets: List[str],
                  space_adapter: Optional[BaseSpaceAdapter] = None,

@@ -1,7 +1,6 @@
 name: mlos
 channels:
   # Note: we have to reverse the channel priority for Windows to accomodate strict channel_priority setups.
-  # Hence, additional dependencies may differ from the Linux setup.
   - conda-forge
   - defaults
 dependencies:
@@ -13,7 +12,7 @@ dependencies:
   - pydocstyle
   - flake8
   - setuptools
-  - setuptools-scm
+  - setuptools-scm>=8.1.0
   - jupyter
   - ipykernel
   - nb_conda_kernels
@@ -23,10 +22,11 @@ dependencies:
   - pyarrow
   - swig
   - libpq
-  - python=3.11
+  # FIXME: https://github.com/microsoft/MLOS/issues/727
+  - python<3.12
   # Install an SMAC requirement pre-compiled from conda-forge.
   # This also requires a more recent vs2015_runtime from conda-forge.
-  - conda-forge::pyrfr>=0.9.0
+  - pyrfr>=0.9.0
   - pip:
     - autopep8>=1.7.0
     - bump2version
