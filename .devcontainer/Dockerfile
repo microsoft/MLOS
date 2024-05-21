@@ -53,7 +53,7 @@ RUN umask 0002 \
 # python is used for both the base env and mlos env.
 RUN umask 0002 \
     && /opt/conda/bin/conda update -v -y -n base -c conda-forge --all \
-    && /opt/conda/bin/conda update -v -y -n base -c conda-forge conda 'python<3.12' \
+    && /opt/conda/bin/conda update -v -y -n base -c conda-forge conda python \
     && /opt/conda/bin/conda clean -v -y -a \
     && /opt/conda/bin/conda run -n base pip cache purge
 
