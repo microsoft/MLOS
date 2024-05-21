@@ -42,20 +42,22 @@ USER vscode:conda
 RUN umask 0002 \
     && /opt/conda/bin/conda config --set channel_priority strict \
     && /opt/conda/bin/conda info \
-    && /opt/conda/bin/conda update -v -y -n base -c conda-forge --all \
+    && /opt/conda/bin/conda update -v -y -n base -c defaults --all \
     && /opt/conda/bin/conda list -n base \
-    && /opt/conda/bin/conda install -v -y -n base -c conda-forge conda-libmamba-solver \
+    && /opt/conda/bin/conda install -v -y -n base conda-libmamba-solver \
     && /opt/conda/bin/conda config --set solver libmamba \
     && /opt/conda/bin/conda list -n base \
-    && /opt/conda/bin/conda clean -v -y -a
-
-# Update the base. This helps save space by making sure the same version
-# python is used for both the base env and mlos env.
-RUN umask 0002 \
-    && /opt/conda/bin/conda update -v -y -n base -c conda-forge --all \
-    && /opt/conda/bin/conda update -v -y -n base -c conda-forge conda python \
     && /opt/conda/bin/conda clean -v -y -a \
     && /opt/conda/bin/conda run -n base pip cache purge
+
+# No longer relevant since we're using conda-forge in the environment files by default now.
+## Update the base. This helps save space by making sure the same version
+## python is used for both the base env and mlos env.
+#RUN umask 0002 \
+#    && /opt/conda/bin/conda update -v -y -n base -c defaults --all \
+#    && /opt/conda/bin/conda update -v -y -n base -c defaults conda python \
+#    && /opt/conda/bin/conda clean -v -y -a \
+#    && /opt/conda/bin/conda run -n base pip cache purge
 
 # Install some additional editor packages for the base environment.
 RUN umask 0002 \
