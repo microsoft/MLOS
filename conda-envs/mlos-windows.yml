@@ -12,7 +12,7 @@ dependencies:
   - pydocstyle
   - flake8
   - setuptools
-  - conda-forge::setuptools-scm>=8.1.0
+  - setuptools-scm>=8.1.0
   - jupyter
   - ipykernel
   - nb_conda_kernels
@@ -25,7 +25,7 @@ dependencies:
   - python=3.11
   # Install an SMAC requirement pre-compiled from conda-forge.
   # This also requires a more recent vs2015_runtime from conda-forge.
-  - conda-forge::pyrfr>=0.9.0
+  - pyrfr>=0.9.0
   - pip:
     - autopep8>=1.7.0
     - bump2version
