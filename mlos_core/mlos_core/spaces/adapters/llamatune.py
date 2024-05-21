@@ -9,6 +9,7 @@ from typing import Dict, Optional
 from warnings import warn
 
 import ConfigSpace
+from ConfigSpace.hyperparameters import NumericalHyperparameter
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
