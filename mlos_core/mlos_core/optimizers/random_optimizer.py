@@ -6,7 +6,7 @@
 Contains the RandomOptimizer class.
 """
 
-from typing import Optional
+from typing import Optional, Tuple
 from warnings import warn
 
 import pandas as pd
@@ -45,7 +45,9 @@ class RandomOptimizer(BaseOptimizer):
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         # should we pop them from self.pending_observations?
 
-    def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def _suggest(
+        self, context: Optional[pd.DataFrame] = None
+    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
@@ -59,11 +61,15 @@ class RandomOptimizer(BaseOptimizer):
         -------
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
+
+        context : pd.DataFrame
+            Pandas dataframe with a single row containing the context.
+            Column names are the budget, seed, and instance of the evaluation, if valid.
         """
         if context is not None:
             # not sure how that works here?
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
-        return pd.DataFrame(dict(self.optimizer_parameter_space.sample_configuration()), index=[0])
+        return pd.DataFrame(dict(self.optimizer_parameter_space.sample_configuration()), index=[0]), None
 
     def register_pending(self, configurations: pd.DataFrame,
                          context: Optional[pd.DataFrame] = None) -> None:

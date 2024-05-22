@@ -61,7 +61,7 @@ def test_multi_target_opt() -> None:
         optimizer.get_observations()
 
     for _ in range(max_iterations):
-        suggestion = optimizer.suggest()
+        suggestion, context = optimizer.suggest()
         assert isinstance(suggestion, pd.DataFrame)
         assert set(suggestion.columns) == {'x', 'y'}
         # Check suggestion values are the expected dtype
@@ -76,12 +76,11 @@ def test_multi_target_opt() -> None:
         observation = objective(suggestion)
         assert isinstance(observation, pd.DataFrame)
         assert set(observation.columns) == {'score', 'other_score'}
-        optimizer.register(suggestion, observation)
+        optimizer.register(suggestion, observation, context)
 
     (best_config, best_score, best_context) = optimizer.get_best_observations()
     assert isinstance(best_config, pd.DataFrame)
     assert isinstance(best_score, pd.DataFrame)
-    assert best_context is None
     assert set(best_config.columns) == {'x', 'y'}
     assert set(best_score.columns) == {'score', 'other_score'}
     assert best_config.shape == (1, 2)
@@ -90,7 +89,6 @@ def test_multi_target_opt() -> None:
     (all_configs, all_scores, all_contexts) = optimizer.get_observations()
     assert isinstance(all_configs, pd.DataFrame)
     assert isinstance(all_scores, pd.DataFrame)
-    assert all_contexts is None
     assert set(all_configs.columns) == {'x', 'y'}
     assert set(all_scores.columns) == {'score', 'other_score'}
     assert all_configs.shape == (max_iterations, 2)

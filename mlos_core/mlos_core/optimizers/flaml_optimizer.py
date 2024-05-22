@@ -6,7 +6,7 @@
 Contains the FlamlOptimizer class.
 """
 
-from typing import Dict, List, NamedTuple, Optional, Union
+from typing import Dict, List, NamedTuple, Optional, Tuple, Union
 from warnings import warn
 
 import ConfigSpace
@@ -108,7 +108,9 @@ class FlamlOptimizer(BaseOptimizer):
 
             self.evaluated_samples[cs_config] = EvaluatedSample(config=config.to_dict(), score=score)
 
-    def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def _suggest(
+        self, context: Optional[pd.DataFrame] = None
+    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
@@ -126,7 +128,7 @@ class FlamlOptimizer(BaseOptimizer):
         if context is not None:
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         config: dict = self._get_next_config()
-        return pd.DataFrame(config, index=[0])
+        return pd.DataFrame(config, index=[0]), None
 
     def register_pending(self, configurations: pd.DataFrame,
                          context: Optional[pd.DataFrame] = None) -> None:

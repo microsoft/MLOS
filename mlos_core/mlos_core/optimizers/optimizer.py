@@ -26,7 +26,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     def __init__(self, *,
                  parameter_space: ConfigSpace.ConfigurationSpace,
-                 optimization_targets: List[str],
+                 optimization_targets: str | List[str] | None = None,
                  space_adapter: Optional[BaseSpaceAdapter] = None):
         """
         Create a new instance of the base optimizer.
@@ -52,6 +52,8 @@ class BaseOptimizer(metaclass=ABCMeta):
         self._observations: List[Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]] = []
         self._has_context: Optional[bool] = None
         self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame]]] = []
+        self.delayed_config: Optional[pd.DataFrame] = None
+        self.delayed_context: Optional[pd.DataFrame] = None
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(space_adapter={self.space_adapter})"
@@ -76,8 +78,10 @@ class BaseOptimizer(metaclass=ABCMeta):
             Not Yet Implemented.
         """
         # Do some input validation.
-        assert set(scores.columns) == set(self._optimization_targets), \
-            "Mismatched optimization targets."
+        if type(self._optimization_targets) is str:
+            assert self._optimization_targets in scores.columns, "Mismatched optimization targets."
+        if type(self._optimization_targets) is list:
+            assert set(scores.columns) >= set(self._optimization_targets), "Mismatched optimization targets."
         assert self._has_context is None or self._has_context ^ (context is None), \
             "Context must always be added or never be added."
         assert len(configurations) == len(scores), \
@@ -113,7 +117,9 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
-    def suggest(self, context: Optional[pd.DataFrame] = None, defaults: bool = False) -> pd.DataFrame:
+    def suggest(
+        self, context: Optional[pd.DataFrame] = None, defaults: bool = False
+    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """
         Wrapper method, which employs the space adapter (if any), after suggesting a new configuration.
 
@@ -129,13 +135,26 @@ class BaseOptimizer(metaclass=ABCMeta):
         -------
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
+
+        context : pd.DataFrame
+            Pandas dataframe with a single row containing the context.
+            Column names are the budget, seed, and instance of the evaluation, if valid.
         """
         if defaults:
-            configuration = config_to_dataframe(self.parameter_space.get_default_configuration())
+            self.delayed_config, self.delayed_context = self._suggest(context)
+
+            configuration: pd.DataFrame = config_to_dataframe(
+                self.parameter_space.get_default_configuration()
+            )
+            context = self.delayed_context
             if self.space_adapter is not None:
                 configuration = self.space_adapter.inverse_transform(configuration)
         else:
-            configuration = self._suggest(context)
+            if self.delayed_config is None:
+                configuration, context = self._suggest(context)
+            else:
+                configuration, context = self.delayed_config, self.delayed_context
+                self.delayed_config, self.delayed_context = None, None
             assert len(configuration) == 1, \
                 "Suggest must return a single configuration."
             assert set(configuration.columns).issubset(set(self.optimizer_parameter_space)), \
@@ -144,10 +163,12 @@ class BaseOptimizer(metaclass=ABCMeta):
             configuration = self._space_adapter.transform(configuration)
             assert set(configuration.columns).issubset(set(self.parameter_space)), \
                 "Space adapter produced a configuration that does not match the expected parameter space."
-        return configuration
+        return configuration, context
 
     @abstractmethod
-    def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def _suggest(
+        self, context: Optional[pd.DataFrame] = None
+    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """Suggests a new configuration.
 
         Parameters
