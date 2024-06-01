@@ -19,7 +19,11 @@ import ConfigSpace
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-
+from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import (
+    BaseBayesianOptimizer,
+)
+from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
+from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 from smac import HyperparameterOptimizationFacade as Optimizer_Smac
 from smac import Scenario
 from smac.facade import AbstractFacade
@@ -28,9 +32,6 @@ from smac.intensifier.abstract_intensifier import AbstractIntensifier
 from smac.main.config_selector import ConfigSelector
 from smac.random_design.probability_design import ProbabilityRandomDesign
 from smac.runhistory import StatusType, TrialInfo, TrialValue
-from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import BaseBayesianOptimizer
-from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
-from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 
 
 class SmacOptimizer(BaseBayesianOptimizer):
@@ -144,7 +145,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if output_directory is None:
             # pylint: disable=consider-using-with
             try:
-                self._temp_output_directory = TemporaryDirectory(ignore_cleanup_errors=True)  # Argument added in Python 3.10
+                self._temp_output_directory = TemporaryDirectory(
+                    ignore_cleanup_errors=True
+                )  # Argument added in Python 3.10
             except TypeError:
                 self._temp_output_directory = TemporaryDirectory()
             output_directory = self._temp_output_directory.name
@@ -188,27 +191,27 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # See Also: #488
 
         initial_design_args: Dict[str, Union[list, int, float, Scenario]] = {
-            'scenario': scenario,
+            "scenario": scenario,
             # Workaround a bug in SMAC that sets a default arg to a mutable
             # value that can cause issues when multiple optimizers are
             # instantiated with the use_default_config option within the same
             # process that use different ConfigSpaces so that the second
             # receives the default config from both as an additional config.
-            'additional_configs': []
+            "additional_configs": [],
         }
         if n_random_init is not None:
-            initial_design_args['n_configs'] = n_random_init
+            initial_design_args["n_configs"] = n_random_init
             if n_random_init > 0.25 * max_trials and max_ratio is None:
                 warning(
-                    'Number of random initial configurations (%d) is ' +
-                    'greater than 25%% of max_trials (%d). ' +
-                    'Consider setting max_ratio to avoid SMAC overriding n_random_init.',
+                    "Number of random initial configurations (%d) is "
+                    + "greater than 25%% of max_trials (%d). "
+                    + "Consider setting max_ratio to avoid SMAC overriding n_random_init.",
                     n_random_init,
                     max_trials,
                 )
             if max_ratio is not None:
                 assert isinstance(max_ratio, float) and 0.0 <= max_ratio <= 1.0
-                initial_design_args['max_ratio'] = max_ratio
+                initial_design_args["max_ratio"] = max_ratio
 
         # Use the default InitialDesign from SMAC.
         # (currently SOBOL instead of LatinHypercube due to better uniformity
@@ -219,7 +222,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # design when generated a random_design for itself via the
         # get_random_design static method when random_design is None.
         assert isinstance(n_random_probability, float) and n_random_probability >= 0
-        random_design = ProbabilityRandomDesign(probability=n_random_probability, seed=scenario.seed)
+        random_design = ProbabilityRandomDesign(
+            probability=n_random_probability, seed=scenario.seed
+        )
 
         self.base_optimizer = facade(
             scenario,
@@ -311,10 +316,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
         """
         # NOTE: Providing a target function when using the ask-and-tell interface is an imperfection of the API
         # -- this planned to be fixed in some future release: https://github.com/automl/SMAC3/issues/946
-        raise RuntimeError('This function should never be called.')
+        raise RuntimeError("This function should never be called.")
 
-    def _register(self, configurations: pd.DataFrame,
-                  scores: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
+    def _register(
+        self,
+        configurations: pd.DataFrame,
+        scores: pd.DataFrame,
+        context: Optional[pd.DataFrame] = None,
+    ) -> None:
         """Registers the given configurations and scores.
 
         Parameters
@@ -328,10 +337,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
         context : pd.DataFrame
             Context of the request that is being registered.
         """
+
         with self.lock:
             # Register each trial (one-by-one)
             contexts: Union[List[pd.Series], List[None]] = _to_context(context) or [
-                None for _ in scores    # type: ignore[misc]
+                None for _ in scores  # type: ignore[misc]
             ]
             for config, score, ctx in zip(
                 self._to_configspace_configs(configurations),
@@ -354,10 +364,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
                 # make a new entry
                 if sum(matching) > 0:
-                    info = self.trial_info_df[matching]["TrialInfo"].iloc[-1]
-                    self.trial_info_df.at[list(matching).index(True), "TrialValue"] = (
-                        value
-                    )
+                    self.trial_info_df.loc[
+                        np.where(np.array(matching) == True)[0][-1], "TrialValue"
+                    ] = value
                 else:
                     if ctx is None or "budget" not in ctx or "instance" not in ctx:
                         info = TrialInfo(
@@ -365,7 +374,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
                         )
                         self.trial_info_df.loc[len(self.trial_info_df.index)] = [
                             config,
-                            info,
+                            ctx,
                             info,
                             value,
                         ]
@@ -430,41 +439,68 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         return config_df, context_df
 
-    def register_pending(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
+    def register_pending(
+        self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None
+    ) -> None:
         raise NotImplementedError()
 
-    def surrogate_predict(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
-        from smac.utils.configspace import convert_configurations_to_array  # pylint: disable=import-outside-toplevel
+    def surrogate_predict(
+        self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None
+    ) -> npt.NDArray:
+        from smac.utils.configspace import (
+            convert_configurations_to_array,  # pylint: disable=import-outside-toplevel
+        )
 
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+            warn(
+                f"Not Implemented: Ignoring context {list(context.columns)}",
+                UserWarning,
+            )
         if self._space_adapter and not isinstance(self._space_adapter, IdentityAdapter):
-            raise NotImplementedError("Space adapter not supported for surrogate_predict.")
+            raise NotImplementedError(
+                "Space adapter not supported for surrogate_predict."
+            )
 
         # pylint: disable=protected-access
         if len(self._observations) <= self.base_optimizer._initial_design._n_configs:
             raise RuntimeError(
-                'Surrogate model can make predictions *only* after all initial points have been evaluated ' +
-                f'{len(self._observations)} <= {self.base_optimizer._initial_design._n_configs}')
+                "Surrogate model can make predictions *only* after all initial points have been evaluated "
+                + f"{len(self._observations)} <= {self.base_optimizer._initial_design._n_configs}"
+            )
         if self.base_optimizer._config_selector._model is None:
-            raise RuntimeError('Surrogate model is not yet trained')
+            raise RuntimeError("Surrogate model is not yet trained")
 
-        configs: npt.NDArray = convert_configurations_to_array(self._to_configspace_configs(configurations))
-        mean_predictions, _ = self.base_optimizer._config_selector._model.predict(configs)
-        return mean_predictions.reshape(-1,)
+        configs: npt.NDArray = convert_configurations_to_array(
+            self._to_configspace_configs(configurations)
+        )
+        mean_predictions, _ = self.base_optimizer._config_selector._model.predict(
+            configs
+        )
+        return mean_predictions.reshape(
+            -1,
+        )
 
-    def acquisition_function(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
+    def acquisition_function(
+        self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None
+    ) -> npt.NDArray:
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+            warn(
+                f"Not Implemented: Ignoring context {list(context.columns)}",
+                UserWarning,
+            )
         if self._space_adapter:
             raise NotImplementedError()
 
         # pylint: disable=protected-access
         if self.base_optimizer._config_selector._acquisition_function is None:
-            raise RuntimeError('Acquisition function is not yet initialized')
+            raise RuntimeError("Acquisition function is not yet initialized")
 
         configs: list = self._to_configspace_configs(configurations)
-        return self.base_optimizer._config_selector._acquisition_function(configs).reshape(-1,)
+        return self.base_optimizer._config_selector._acquisition_function(
+            configs
+        ).reshape(
+            -1,
+        )
 
     def cleanup(self) -> None:
         try:
@@ -474,7 +510,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         except AttributeError:
             warning("_temp_output_directory does not exist.")
 
-    def _to_configspace_configs(self, configurations: pd.DataFrame) -> List[ConfigSpace.Configuration]:
+    def _to_configspace_configs(
+        self, configurations: pd.DataFrame
+    ) -> List[ConfigSpace.Configuration]:
         """Convert a dataframe of configurations to a list of ConfigSpace configurations.
 
         Parameters
@@ -488,8 +526,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
             List of ConfigSpace configurations.
         """
         return [
-            ConfigSpace.Configuration(self.optimizer_parameter_space, values=config.to_dict())
-            for (_, config) in configurations.astype('O').iterrows()
+            ConfigSpace.Configuration(
+                self.optimizer_parameter_space, values=config.to_dict()
+            )
+            for (_, config) in configurations.astype("O").iterrows()
         ]
 
     @staticmethod
