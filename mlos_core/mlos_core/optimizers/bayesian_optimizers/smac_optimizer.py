@@ -42,7 +42,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         self,  # pylint: disable=too-many-locals
         *,  # pylint: disable=too-many-locals
         parameter_space: ConfigSpace.ConfigurationSpace,
-        optimization_targets: str | List[str] | None = None,
+        optimization_targets: Union[str, List[str], None] = None,
+        objective_weights: Optional[List[float]] = None,
         space_adapter: Optional[BaseSpaceAdapter] = None,
         seed: Optional[int] = 0,
         run_name: Optional[str] = None,
@@ -67,6 +68,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         optimization_targets : List[str]
             The names of the optimization targets to minimize.
+
+        objective_weights : Optional[List[float]]
+            Optional list of weights of optimization targets.
 
         space_adapter : BaseSpaceAdapter
             The space adapter class to employ for parameter space transformations.
@@ -125,6 +129,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         super().__init__(
             parameter_space=parameter_space,
             optimization_targets=optimization_targets,
+            objective_weights=objective_weights,
             space_adapter=space_adapter,
         )
 
@@ -228,6 +233,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
             intensifier=intensifier_instance,
             random_design=random_design,
             config_selector=config_selector,
+            multi_objective_algorithm=Optimizer_Smac.get_multi_objective_algorithm(
+                scenario, objective_weights=self._objective_weights),
             overwrite=True,
             logging_level=False,  # Use the existing logger
             **SmacOptimizer._filter_kwargs(facade, **kwargs),
