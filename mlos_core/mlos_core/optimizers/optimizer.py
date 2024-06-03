@@ -26,7 +26,8 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     def __init__(self, *,
                  parameter_space: ConfigSpace.ConfigurationSpace,
-                 optimization_targets: str | List[str] | None = None,
+                 optimization_targets: Union[str, List[str], None] = None,
+                 objective_weights: Optional[List[float]] = None,
                  space_adapter: Optional[BaseSpaceAdapter] = None):
         """
         Create a new instance of the base optimizer.
@@ -37,6 +38,8 @@ class BaseOptimizer(metaclass=ABCMeta):
             The parameter space to optimize.
         optimization_targets : List[str]
             The names of the optimization targets to minimize.
+        objective_weights : Optional[List[float]]
+            Optional list of weights of optimization targets.
         space_adapter : BaseSpaceAdapter
             The space adapter class to employ for parameter space transformations.
         """
@@ -48,6 +51,10 @@ class BaseOptimizer(metaclass=ABCMeta):
             raise ValueError("Given parameter space differs from the one given to space adapter")
 
         self._optimization_targets = optimization_targets
+        self._objective_weights = objective_weights
+        if objective_weights is not None and len(objective_weights) != len(optimization_targets):
+            raise ValueError("Number of weights must match the number of optimization targets")
+
         self._space_adapter: Optional[BaseSpaceAdapter] = space_adapter
         self._observations: List[Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]] = []
         self._has_context: Optional[bool] = None
