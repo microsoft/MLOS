@@ -26,7 +26,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     def __init__(self, *,
                  parameter_space: ConfigSpace.ConfigurationSpace,
-                 optimization_targets: str | List[str] | None = None,
+                 optimization_targets: Optional[Union[str, List[str]] = None,
                  space_adapter: Optional[BaseSpaceAdapter] = None):
         """
         Create a new instance of the base optimizer.
