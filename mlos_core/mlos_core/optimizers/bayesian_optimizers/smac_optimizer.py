@@ -19,7 +19,8 @@ import ConfigSpace
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-
+from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
+from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 from smac import HyperparameterOptimizationFacade as Optimizer_Smac
 from smac import Scenario
 from smac.facade import AbstractFacade
@@ -199,15 +200,15 @@ class SmacOptimizer(BaseBayesianOptimizer):
             # instantiated with the use_default_config option within the same
             # process that use different ConfigSpaces so that the second
             # receives the default config from both as an additional config.
-            'additional_configs': []
+            'additional_configs': [],
         }
         if n_random_init is not None:
             initial_design_args['n_configs'] = n_random_init
             if n_random_init > 0.25 * max_trials and max_ratio is None:
                 warning(
-                    'Number of random initial configurations (%d) is ' +
-                    'greater than 25%% of max_trials (%d). ' +
-                    'Consider setting max_ratio to avoid SMAC overriding n_random_init.',
+                    'Number of random initial configurations (%d) is '
+                    + 'greater than 25%% of max_trials (%d). '
+                    + 'Consider setting max_ratio to avoid SMAC overriding n_random_init.',
                     n_random_init,
                     max_trials,
                 )
@@ -338,7 +339,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         with self.lock:
             # Register each trial (one-by-one)
             contexts: Union[List[pd.Series], List[None]] = _to_context(context) or [
-                None for _ in scores    # type: ignore[misc]
+                None for _ in scores   # type: ignore[misc]
             ]
             for config, score, ctx in zip(
                 self._to_configspace_configs(configurations),
@@ -372,7 +373,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
                         )
                         self.trial_info_df.loc[len(self.trial_info_df.index)] = [
                             config,
-                            info,
+                            ctx,
                             info,
                             value,
                         ]
@@ -446,7 +447,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if context is not None:
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         if self._space_adapter and not isinstance(self._space_adapter, IdentityAdapter):
-            raise NotImplementedError("Space adapter not supported for surrogate_predict.")
+           raise NotImplementedError("Space adapter not supported for surrogate_predict.")
 
         # pylint: disable=protected-access
         if len(self._observations) <= self.base_optimizer._initial_design._n_configs:
