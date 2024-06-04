@@ -112,6 +112,7 @@ def test_multi_target_opt(objective_weights: Optional[List[float]],
     (all_configs, all_scores, all_contexts) = optimizer.get_observations()
     assert isinstance(all_configs, pd.DataFrame)
     assert isinstance(all_scores, pd.DataFrame)
+    assert isinstance(all_contexts, pd.DataFrame) or all_contexts is None
     assert set(all_configs.columns) == {'x', 'y'}
     assert set(all_scores.columns) == {'main_score', 'other_score'}
     assert all_configs.shape == (max_iterations, 2)
