@@ -393,4 +393,7 @@ def test_mixed_numerics_type_input_space_types(optimizer_type: Optional[Optimize
     (all_configs, all_scores, all_contexts) = optimizer.get_observations()
     assert isinstance(all_configs, pd.DataFrame)
     assert isinstance(all_scores, pd.DataFrame)
-    assert isinstance(all_contexts, pd.DataFrame) or all_contexts is None
+    if optimizer_type is OptimizerType.SMAC:
+        assert isinstance(all_contexts, pd.DataFrame) or all_contexts is None
+    else:
+        assert all_contexts is None
