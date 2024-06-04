@@ -30,9 +30,13 @@ class FlamlOptimizer(BaseOptimizer):
     Wrapper class for FLAML Optimizer: A fast library for AutoML and tuning.
     """
 
+    # The name of an internal objective attribute that is calculated as a weighted average of the user provided objective metrics.
+    _METRIC_NAME = "FLAML_score"
+
     def __init__(self, *,   # pylint: disable=too-many-arguments
                  parameter_space: ConfigSpace.ConfigurationSpace,
                  optimization_targets: List[str],
+                 objective_weights: Optional[List[float]] = None,
                  space_adapter: Optional[BaseSpaceAdapter] = None,
                  low_cost_partial_config: Optional[dict] = None,
                  seed: Optional[int] = None):
@@ -46,7 +50,9 @@ class FlamlOptimizer(BaseOptimizer):
 
         optimization_targets : List[str]
             The names of the optimization targets to minimize.
-            For FLAML it must be a list with a single element, e.g., `["score"]`.
+
+        objective_weights : Optional[List[float]]
+            Optional list of weights of optimization targets.
 
         space_adapter : BaseSpaceAdapter
             The space adapter class to employ for parameter space transformations.
@@ -61,12 +67,9 @@ class FlamlOptimizer(BaseOptimizer):
         super().__init__(
             parameter_space=parameter_space,
             optimization_targets=optimization_targets,
+            objective_weights=objective_weights,
             space_adapter=space_adapter,
         )
-
-        if len(self._optimization_targets) != 1:
-            raise ValueError("FLAML does not support multi-target optimization")
-        self._flaml_optimization_target = self._optimization_targets[0]
 
         # Per upstream documentation, it is recommended to set the seed for
         # flaml at the start of its operation globally.
@@ -99,14 +102,15 @@ class FlamlOptimizer(BaseOptimizer):
         """
         if context is not None:
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
-        for (_, config), score in zip(configurations.astype('O').iterrows(),
-                                      scores[self._flaml_optimization_target]):
+        for (_, config), (_, score) in zip(configurations.astype('O').iterrows(), scores.iterrows()):
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
                 self.optimizer_parameter_space, values=config.to_dict())
             if cs_config in self.evaluated_samples:
                 warn(f"Configuration {config} was already registered", UserWarning)
-
-            self.evaluated_samples[cs_config] = EvaluatedSample(config=config.to_dict(), score=score)
+            self.evaluated_samples[cs_config] = EvaluatedSample(
+                config=config.to_dict(),
+                score=float(np.average(score.astype(float), weights=self._objective_weights)),
+            )
 
     def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         """Suggests a new configuration.
@@ -147,11 +151,11 @@ class FlamlOptimizer(BaseOptimizer):
         Returns
         -------
         result: Union[dict, None]
-            Dictionary with a single key, `score`, if config already evaluated; `None` otherwise.
+            Dictionary with a single key, `FLAML_score`, if config already evaluated; `None` otherwise.
         """
         cs_config = normalize_config(self.optimizer_parameter_space, config)
         if cs_config in self.evaluated_samples:
-            return {self._flaml_optimization_target: self.evaluated_samples[cs_config].score}
+            return {self._METRIC_NAME: self.evaluated_samples[cs_config].score}
 
         self._suggested_config = dict(cs_config)  # Cleaned-up version of the config
         return None  # Returning None stops the process
@@ -194,7 +198,7 @@ class FlamlOptimizer(BaseOptimizer):
             self._target_function,
             config=self.flaml_parameter_space,
             mode='min',
-            metric=self._flaml_optimization_target,
+            metric=self._METRIC_NAME,
             points_to_evaluate=points_to_evaluate,
             evaluated_rewards=evaluated_rewards,
             num_samples=len(points_to_evaluate) + 1,
