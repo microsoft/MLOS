@@ -139,7 +139,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         # Store for TrialInfo instances returned by .ask()
         self.trial_info_df: pd.DataFrame = pd.DataFrame(
-            columns=["Configuration", "Context", "TrialInfo", "TrialValue"]
+            columns=["Configuration", "Metadata", "TrialInfo", "TrialValue"]
         )
         # The default when not specified is to use a known seed (0) to keep results reproducible.
         # However, if a `None` seed is explicitly provided, we let a random seed be produced by SMAC.
@@ -322,7 +322,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         raise RuntimeError('This function should never be called.')
 
     def _register(self, configurations: pd.DataFrame,
-                  scores: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
+                  scores: pd.DataFrame, metadata: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations and scores.
 
         Parameters
@@ -333,18 +333,18 @@ class SmacOptimizer(BaseBayesianOptimizer):
         scores : pd.DataFrame
             Scores from running the configurations. The index is the same as the index of the configurations.
 
-        context : pd.DataFrame
-            Context of the request that is being registered.
+        metadata : pd.DataFrame
+            Metadata of the request that is being registered.
         """
         with self.lock:
             # Register each trial (one-by-one)
-            contexts: Union[List[pd.Series], List[None]] = _to_context(context) or [
+            metadatas: Union[List[pd.Series], List[None]] = _to_metadata(metadata) or [
                 None for _ in scores   # type: ignore[misc]
             ]
             for config, score, ctx in zip(
                 self._to_configspace_configs(configurations),
                 scores.values.tolist(),
-                contexts,
+                metadatas,
             ):
                 value: TrialValue = TrialValue(
                     cost=score, time=0.0, status=StatusType.SUCCESS
@@ -357,7 +357,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
                     matching = (
                         self.trial_info_df["Configuration"] == config
                     ) & pd.Series(
-                        [df_ctx.equals(ctx) for df_ctx in self.trial_info_df["Context"]]
+                        [df_ctx.equals(ctx) for df_ctx in self.trial_info_df["Metadata"]]
                     )
 
                 # make a new entry
@@ -410,8 +410,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
 
-        context : pd.DataFrame
-            Pandas dataframe with a single row containing the context.
+        metadata : pd.DataFrame
+            Pandas dataframe with a single row containing the metadata.
             Column names are the budget, seed, and instance of the evaluation, if valid.
         """
         with self.lock:
@@ -427,16 +427,16 @@ class SmacOptimizer(BaseBayesianOptimizer):
             assert trial.config.config_space == self.optimizer_parameter_space
 
             config_df = self._extract_config(trial)
-            context_df = SmacOptimizer._extract_context(trial)
+            metadata_df = SmacOptimizer._extract_metadata(trial)
 
             self.trial_info_df.loc[len(self.trial_info_df.index)] = [
                 trial.config,
-                context_df.iloc[0],
+                metadata_df.iloc[0],
                 trial,
                 None,
             ]
 
-        return config_df, context_df
+        return config_df, metadata_df
 
     def register_pending(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
@@ -501,7 +501,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         ]
 
     @staticmethod
-    def _extract_context(trial: TrialInfo) -> pd.DataFrame:
+    def _extract_metadata(trial: TrialInfo) -> pd.DataFrame:
         """Convert TrialInfo to a DataFrame.
 
         Parameters
@@ -511,8 +511,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         Returns
         -------
-        context : pd.DataFrame
-            Pandas dataframe with a single row containing the context.
+        metadata : pd.DataFrame
+            Pandas dataframe with a single row containing the metadata.
             Column names are the budget and instance of the evaluation, if valid.
         """
         return pd.DataFrame(
@@ -553,18 +553,18 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         max_budget = np.nan
         budgets = [
-            context["budget"].max()
-            for _, _, context in self._observations
-            if context is not None
+            metadata["budget"].max()
+            for _, _, metadata in self._observations
+            if metadata is not None
         ]
         if len(budgets) > 0:
             max_budget = max(budgets)
 
         if max_budget is not np.nan:
             observations = [
-                (config, score, context)
-                for config, score, context in self._observations
-                if context is not None and context["budget"].max() == max_budget
+                (config, score, metadata)
+                for config, score, metadata in self._observations
+                if metadata is not None and metadata["budget"].max() == max_budget
             ]
 
         configs = pd.concat([config for config, _, _ in observations])
@@ -574,7 +574,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         return configs.nsmallest(1, columns="score")
 
 
-def _to_context(contexts: Optional[pd.DataFrame]) -> Optional[List[pd.Series]]:
-    if contexts is None:
+def _to_metadata(metadata: Optional[pd.DataFrame]) -> Optional[List[pd.Series]]:
+    if metadata is None:
         return None
-    return [idx_series[1] for idx_series in contexts.iterrows()]
+    return [idx_series[1] for idx_series in metadata.iterrows()]
