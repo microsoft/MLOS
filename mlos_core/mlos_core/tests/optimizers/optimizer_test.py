@@ -48,7 +48,7 @@ def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace
 
     assert optimizer.parameter_space is not None
 
-    suggestion, context = optimizer.suggest()
+    suggestion, _ = optimizer.suggest()
     assert suggestion is not None
 
     myrepr = repr(optimizer)
@@ -94,7 +94,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
         optimizer.get_observations()
 
     for _ in range(max_iterations):
-        suggestion, context = optimizer.suggest()
+        suggestion, metadata = optimizer.suggest()
         assert isinstance(suggestion, pd.DataFrame)
         assert set(suggestion.columns) == {'x', 'y', 'z'}
         # check that suggestion is in the space
@@ -103,9 +103,9 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
         configuration.is_valid_configuration()
         observation = objective(suggestion['x'])
         assert isinstance(observation, pd.DataFrame)
-        optimizer.register(suggestion, observation, context)
+        optimizer.register(suggestion, observation, metadata)
 
-    (best_config, best_score, best_context) = optimizer.get_best_observations()
+    (best_config, best_score, _) = optimizer.get_best_observations()
     assert isinstance(best_config, pd.DataFrame)
     assert isinstance(best_score, pd.DataFrame)
     assert set(best_config.columns) == {'x', 'y', 'z'}
@@ -114,7 +114,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
     assert best_score.shape == (1, 1)
     assert best_score.score.iloc[0] < -5
 
-    (all_configs, all_scores, all_contexts) = optimizer.get_observations()
+    (all_configs, all_scores, _) = optimizer.get_observations()
     assert isinstance(all_configs, pd.DataFrame)
     assert isinstance(all_scores, pd.DataFrame)
     assert set(all_configs.columns) == {'x', 'y', 'z'}
@@ -266,36 +266,36 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
             _LOG.debug("Optimizer is done with random init.")
 
         # loop for optimizer
-        suggestion, context = optimizer.suggest()
+        suggestion, metadata = optimizer.suggest()
         observation = objective(suggestion)
-        optimizer.register(suggestion, observation, context)
+        optimizer.register(suggestion, observation, metadata)
 
         # loop for llamatune-optimizer
-        suggestion, context = llamatune_optimizer.suggest()
+        suggestion, metadata = llamatune_optimizer.suggest()
         _x, _y = suggestion['x'].iloc[0], suggestion['y'].iloc[0]
         assert _x == pytest.approx(_y, rel=1e-3) or _x + _y == pytest.approx(3., rel=1e-3)  # optimizer explores 1-dimensional space
         observation = objective(suggestion)
-        llamatune_optimizer.register(suggestion, observation, context)
+        llamatune_optimizer.register(suggestion, observation, metadata)
 
     # Retrieve best observations
     best_observation = optimizer.get_best_observations()
     llamatune_best_observation = llamatune_optimizer.get_best_observations()
 
-    for (best_config, best_score, best_context) in (best_observation, llamatune_best_observation):
+    for (best_config, best_score, best_metadata) in (best_observation, llamatune_best_observation):
         assert isinstance(best_config, pd.DataFrame)
         assert isinstance(best_score, pd.DataFrame)
         assert set(best_config.columns) == {'x', 'y'}
         assert set(best_score.columns) == {'score'}
 
-    (best_config, best_score, _context) = best_observation
-    (llamatune_best_config, llamatune_best_score, _context) = llamatune_best_observation
+    (best_config, best_score, _metadata) = best_observation
+    (llamatune_best_config, llamatune_best_score, _metadata) = llamatune_best_observation
 
     # LlamaTune's optimizer score should better (i.e., lower) than plain optimizer's one, or close to that
     assert best_score.score.iloc[0] > llamatune_best_score.score.iloc[0] or \
         best_score.score.iloc[0] + 1e-3 > llamatune_best_score.score.iloc[0]
 
     # Retrieve and check all observations
-    for (all_configs, all_scores, all_contexts) in (
+    for (all_configs, all_scores, all_metadata) in (
             optimizer.get_observations(), llamatune_optimizer.get_observations()):
         assert isinstance(all_configs, pd.DataFrame)
         assert isinstance(all_scores, pd.DataFrame)
