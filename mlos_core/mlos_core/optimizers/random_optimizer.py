@@ -25,7 +25,7 @@ class RandomOptimizer(BaseOptimizer):
     """
 
     def _register(self, configurations: pd.DataFrame, scores: pd.DataFrame,
-                  metadata: Optional[pd.DataFrame] = None) -> None:
+                  context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations and scores.
 
         Doesn't do anything on the RandomOptimizer except storing configurations for logging.
@@ -34,10 +34,10 @@ class RandomOptimizer(BaseOptimizer):
         ----------
         configurations : pd.DataFrame
             Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
-
         scores : pd.DataFrame
             Scores from running the configurations. The index is the same as the index of the configurations.
-
+        context : None
+            Metadata is ignored for random_optimizer.
         metadata : None
             Metadata is ignored for random_optimizer.
         """

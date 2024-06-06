@@ -19,6 +19,7 @@ import ConfigSpace
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+from mlos_core.mlos_core.optimizers.utils import filter_kwargs, to_metadata
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 from smac import HyperparameterOptimizationFacade as Optimizer_Smac
@@ -171,7 +172,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             n_trials=max_trials,
             seed=seed or -1,  # if -1, SMAC will generate a random seed internally
             n_workers=1,  # Use a single thread for evaluating trials
-            **SmacOptimizer._filter_kwargs(Scenario, **kwargs),
+            **filter_kwargs(Scenario, **kwargs),
         )
 
         config_selector: ConfigSelector = facade.get_config_selector(
@@ -182,7 +183,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             intensifier_instance = facade.get_intensifier(scenario)
         else:
             intensifier_instance = intensifier(
-                scenario, **SmacOptimizer._filter_kwargs(intensifier, **kwargs)
+                scenario, **filter_kwargs(intensifier, **kwargs)
             )
 
         # TODO: When bulk registering prior configs to rewarm the optimizer,
@@ -238,7 +239,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 scenario, objective_weights=self._objective_weights),
             overwrite=True,
             logging_level=False,  # Use the existing logger
-            **SmacOptimizer._filter_kwargs(facade, **kwargs),
+            **filter_kwargs(facade, **kwargs),
         )
 
         self.lock = threading.Lock()
@@ -264,33 +265,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         return self.base_optimizer._initial_design._n_configs
 
     @staticmethod
-    def _filter_kwargs(function: Callable, **kwargs: Any) -> Dict[str, Any]:
-        """
-        Filters arguments provided in the kwargs dictionary to be restricted to the arguments legal for
-        the called function.
-
-        Parameters
-        ----------
-        function : Callable
-            function over which we filter kwargs for.
-        kwargs:
-            kwargs that we are filtering for the target function
-
-        Returns
-        -------
-        dict
-            kwargs with the non-legal argument filtered out
-        """
-        sig = inspect.signature(function)
-        filter_keys = [
-            param.name
-            for param in sig.parameters.values()
-            if param.kind == param.POSITIONAL_OR_KEYWORD
-        ]
-        filtered_dict = {
-            filter_key: kwargs[filter_key] for filter_key in filter_keys & kwargs.keys()
-        }
-        return filtered_dict
+    
 
     @staticmethod
     def _dummy_target_func(
@@ -322,7 +297,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         raise RuntimeError('This function should never be called.')
 
     def _register(self, configurations: pd.DataFrame,
-                  scores: pd.DataFrame, metadata: Optional[pd.DataFrame] = None) -> None:
+                  scores: pd.DataFrame, context: Optional[pd.DataFrame] = None, 
+                  metadata: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations and scores.
 
         Parameters
@@ -335,10 +311,16 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         metadata : pd.DataFrame
             Metadata of the request that is being registered.
+            
+        context : pd.DataFrame
+            Not Yet Implemented.
         """
+        if context is not None:
+            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+        
         with self.lock:
             # Register each trial (one-by-one)
-            metadatas: Union[List[pd.Series], List[None]] = _to_metadata(metadata) or [
+            metadatas: Union[List[pd.Series], List[None]] = to_metadata(metadata) or [
                 None for _ in scores   # type: ignore[misc]
             ]
             for config, score, ctx in zip(
@@ -426,8 +408,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
             self.optimizer_parameter_space.check_configuration(trial.config)
             assert trial.config.config_space == self.optimizer_parameter_space
 
-            config_df = self._extract_config(trial)
-            metadata_df = SmacOptimizer._extract_metadata(trial)
+            config_df = _extract_config(trial)
+            metadata_df = _extract_metadata(trial)
 
             self.trial_info_df.loc[len(self.trial_info_df.index)] = [
                 trial.config,
@@ -500,31 +482,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
             for (_, config) in configurations.astype('O').iterrows()
         ]
 
-    @staticmethod
-    def _extract_metadata(trial: TrialInfo) -> pd.DataFrame:
-        """Convert TrialInfo to a DataFrame.
-
-        Parameters
-        ----------
-        trial : TrialInfo
-            The trial to extract.
-
-        Returns
-        -------
-        metadata : pd.DataFrame
-            Pandas dataframe with a single row containing the metadata.
-            Column names are the budget and instance of the evaluation, if valid.
-        """
-        return pd.DataFrame(
-            [[trial.instance, trial.seed, trial.budget]],
-            columns=["instance", "seed", "budget"],
-        )
-
-    def _extract_config(self, trial: TrialInfo) -> pd.DataFrame:
-        return pd.DataFrame(
-            [trial.config], columns=list(self.optimizer_parameter_space.keys())
-        )
-
     def get_observations_full(self) -> pd.DataFrame:
         """Returns the observations as a dataframe with additional info.
 
@@ -573,8 +530,39 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         return configs.nsmallest(1, columns="score")
 
+def _extract_metadata(trial: TrialInfo) -> pd.DataFrame:
+    """Convert TrialInfo to a metadata DataFrame.
 
-def _to_metadata(metadata: Optional[pd.DataFrame]) -> Optional[List[pd.Series]]:
-    if metadata is None:
-        return None
-    return [idx_series[1] for idx_series in metadata.iterrows()]
+    Parameters
+    ----------
+    trial : TrialInfo
+        The trial to extract.
+
+    Returns
+    -------
+    metadata : pd.DataFrame
+        Pandas dataframe with a single row containing the metadata.
+        Column names are the budget and instance of the evaluation, if valid.
+    """
+    return pd.DataFrame(
+        [[trial.instance, trial.seed, trial.budget]],
+        columns=["instance", "seed", "budget"],
+    )
+    
+def _extract_config(self, trial: TrialInfo) -> pd.DataFrame:
+    """Convert TrialInfo to a config DataFrame.
+
+    Parameters
+    ----------
+    trial : TrialInfo
+        The trial to extract.
+
+    Returns
+    -------
+    config : pd.DataFrame
+        Pandas dataframe with a single row containing the config.
+        Column names are config parameters
+    """
+    return pd.DataFrame(
+        [trial.config], columns=list(self.optimizer_parameter_space.keys())
+        )

@@ -99,27 +99,29 @@ def test_multi_target_opt(objective_weights: Optional[List[float]],
         observation = objective(suggestion)
         assert isinstance(observation, pd.DataFrame)
         assert set(observation.columns) == {'main_score', 'other_score'}
-        optimizer.register(suggestion, observation, metadata)
+        optimizer.register(suggestion, observation, context=None, metadata=metadata)
 
-    (best_config, best_score, best_metadata) = optimizer.get_best_observations()
+    (best_config, best_score, best_metadata, best_context) = optimizer.get_best_observations()
     assert isinstance(best_config, pd.DataFrame)
     assert isinstance(best_score, pd.DataFrame)
     if optimizer_class is OptimizerType.SMAC:
         assert isinstance(best_metadata, pd.DataFrame) or best_metadata is None
     else:
         assert best_metadata is None
+    assert best_context is None
     assert set(best_config.columns) == {'x', 'y'}
     assert set(best_score.columns) == {'main_score', 'other_score'}
     assert best_config.shape == (1, 2)
     assert best_score.shape == (1, 2)
 
-    (all_configs, all_scores, all_metadata) = optimizer.get_observations()
+    (all_configs, all_scores, all_metadata, best_context) = optimizer.get_observations()
     assert isinstance(all_configs, pd.DataFrame)
     assert isinstance(all_scores, pd.DataFrame)
     if optimizer_class is OptimizerType.SMAC:
         assert isinstance(all_metadata, pd.DataFrame) or all_metadata is None
     else:
         assert all_metadata is None
+    assert best_context is None
     assert set(all_configs.columns) == {'x', 'y'}
     assert set(all_scores.columns) == {'main_score', 'other_score'}
     assert all_configs.shape == (max_iterations, 2)
