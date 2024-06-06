@@ -125,7 +125,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         **kwargs:
             Additional arguments to be passed to the
-            scenerio, and intensifier
+            facade, scenario, and intensifier
         """
         super().__init__(
             parameter_space=parameter_space,
