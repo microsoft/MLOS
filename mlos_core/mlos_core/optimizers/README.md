@@ -1,3 +1,5 @@
+# Optimizers
+
 This is a directory that contains wrappers for different optimizers to integrate into MLOS.
 This is implemented though child classes for the `BaseOptimizer` class defined in `optimizer.py`.
 
