@@ -102,7 +102,7 @@ class BaseOptimizer(metaclass=ABCMeta):
                 "Mismatched number of configurations and metadata."
         assert configurations.shape[1] == len(self.parameter_space.values()), \
             "Mismatched configuration shape."
-        self._observations.append((configurations, scores, metadata, context))
+        self._observations.append((configurations, scores, context, metadata))
         self._has_context = context is not None
 
         if self._space_adapter:
