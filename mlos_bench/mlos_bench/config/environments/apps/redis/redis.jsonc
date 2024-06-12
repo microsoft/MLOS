@@ -45,6 +45,11 @@
                         "trial_id",
                         "mountPoint"
                     ],
+                    "shell_env_params": [
+                        "mountPoint",
+                        "experiment_id",
+                        "trial_id"
+                    ],
                     "setup": [
                         "$mountPoint/$experiment_id/$trial_id/scripts/setup-workload.sh",
                         "$mountPoint/$experiment_id/$trial_id/scripts/setup-app.sh"
