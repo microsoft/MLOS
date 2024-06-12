@@ -83,7 +83,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         context : pd.DataFrame
             Not implemented yet.
         metadata : pd.DataFrame
-            Implementaton depends on instance.
+            Implementation depends on instance (e.g., saved optimizer state to return).
         """
         # Do some input validation.
         if type(self._optimization_targets) is str:
