@@ -91,7 +91,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         if type(self._optimization_targets) is list:
             assert set(scores.columns) >= set(self._optimization_targets), "Mismatched optimization targets."
         assert self._has_context is None or self._has_context ^ (context is None), \
-            "Metadata must always be added or never be added."
+            "Context must always be added or never be added."
         assert len(configurations) == len(scores), \
             "Mismatched number of configurations and scores."
         if context is not None:
