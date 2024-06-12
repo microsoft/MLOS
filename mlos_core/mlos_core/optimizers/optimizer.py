@@ -218,7 +218,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     def get_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame]]:
         """
-        Returns the observations as a triplet of DataFrames (config, score, metadata).
+        Returns the observations as a triplet of DataFrames (config, score, context, metadata).
 
         Returns
         -------
