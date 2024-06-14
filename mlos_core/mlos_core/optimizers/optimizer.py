@@ -26,7 +26,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     def __init__(self, *,
                  parameter_space: ConfigSpace.ConfigurationSpace,
-                 optimization_targets: Optional[Union[str, List[str]]] = None,
+                 optimization_targets: List[str],
                  objective_weights: Optional[List[float]] = None,
                  space_adapter: Optional[BaseSpaceAdapter] = None):
         """
@@ -86,10 +86,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             Implementation depends on instance (e.g., saved optimizer state to return).
         """
         # Do some input validation.
-        if type(self._optimization_targets) is str:
-            assert self._optimization_targets in scores.columns, "Mismatched optimization targets."
-        if type(self._optimization_targets) is list:
-            assert set(scores.columns) >= set(self._optimization_targets), "Mismatched optimization targets."
+        assert set(scores.columns) >= set(self._optimization_targets), "Mismatched optimization targets."
         assert self._has_context is None or self._has_context ^ (context is None), \
             "Context must always be added or never be added."
         assert len(configurations) == len(scores), \
@@ -109,7 +106,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             configurations = self._space_adapter.inverse_transform(configurations)
             assert configurations.shape[1] == len(self.optimizer_parameter_space.values()), \
                 "Mismatched configuration shape after inverse transform."
-        return self._register(configurations, scores, metadata, context)
+        return self._register(configurations, scores, context, metadata)
 
     @abstractmethod
     def _register(self, configurations: pd.DataFrame, scores: pd.DataFrame,

@@ -138,7 +138,7 @@ class FlamlOptimizer(BaseOptimizer):
         return pd.DataFrame(config, index=[0]), None
 
     def register_pending(self, configurations: pd.DataFrame,
-                         metadata: Optional[pd.DataFrame] = None) -> None:
+                         context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
 
     def _target_function(self, config: dict) -> Union[dict, None]:

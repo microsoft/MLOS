@@ -44,7 +44,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         self,  # pylint: disable=too-many-locals
         *,  # pylint: disable=too-many-locals
         parameter_space: ConfigSpace.ConfigurationSpace,
-        optimization_targets: Union[str, List[str], None] = None,
+        optimization_targets: List[str],
         objective_weights: Optional[List[float]] = None,
         space_adapter: Optional[BaseSpaceAdapter] = None,
         seed: Optional[int] = 0,
