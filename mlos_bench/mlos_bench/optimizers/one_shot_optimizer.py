@@ -33,6 +33,14 @@ class OneShotOptimizer(MockOptimizer):
         _LOG.info("Run a single iteration for: %s", self._tunables)
         self._max_iter = 1  # Always run for just one iteration.
 
+    def suggest(self) -> TunableGroups:
+        """
+        Always produce the same (initial) suggestion.
+        """
+        tunables = super().suggest()
+        self._start_with_defaults = True
+        return tunables
+
     @property
     def supports_preload(self) -> bool:
         return False
