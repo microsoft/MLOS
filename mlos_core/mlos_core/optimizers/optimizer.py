@@ -56,9 +56,11 @@ class BaseOptimizer(metaclass=ABCMeta):
             raise ValueError("Number of weights must match the number of optimization targets")
 
         self._space_adapter: Optional[BaseSpaceAdapter] = space_adapter
-        self._observations: List[Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]] = []
+        self._observations: List[Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame]]] = []
         self._has_context: Optional[bool] = None
-        self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame]]] = []
+        self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame]]] = []
+        self.delayed_config: Optional[pd.DataFrame] = None
+        self.delayed_metadata: Optional[pd.DataFrame] = None
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(space_adapter={self.space_adapter})"
@@ -69,7 +71,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         return self._space_adapter
 
     def register(self, configurations: pd.DataFrame, scores: pd.DataFrame,
-                 context: Optional[pd.DataFrame] = None) -> None:
+                 context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
         """Wrapper method, which employs the space adapter (if any), before registering the configurations and scores.
 
         Parameters
@@ -78,13 +80,13 @@ class BaseOptimizer(metaclass=ABCMeta):
             Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
         scores : pd.DataFrame
             Scores from running the configurations. The index is the same as the index of the configurations.
-
         context : pd.DataFrame
-            Not Yet Implemented.
+            Not implemented yet.
+        metadata : pd.DataFrame
+            Implementation depends on instance (e.g., saved optimizer state to return).
         """
         # Do some input validation.
-        assert set(scores.columns) == set(self._optimization_targets), \
-            "Mismatched optimization targets."
+        assert set(scores.columns) >= set(self._optimization_targets), "Mismatched optimization targets."
         assert self._has_context is None or self._has_context ^ (context is None), \
             "Context must always be added or never be added."
         assert len(configurations) == len(scores), \
@@ -92,20 +94,23 @@ class BaseOptimizer(metaclass=ABCMeta):
         if context is not None:
             assert len(configurations) == len(context), \
                 "Mismatched number of configurations and context."
+        if metadata is not None:
+            assert len(configurations) == len(metadata), \
+                "Mismatched number of configurations and metadata."
         assert configurations.shape[1] == len(self.parameter_space.values()), \
             "Mismatched configuration shape."
-        self._observations.append((configurations, scores, context))
+        self._observations.append((configurations, scores, context, metadata))
         self._has_context = context is not None
 
         if self._space_adapter:
             configurations = self._space_adapter.inverse_transform(configurations)
             assert configurations.shape[1] == len(self.optimizer_parameter_space.values()), \
                 "Mismatched configuration shape after inverse transform."
-        return self._register(configurations, scores, context)
+        return self._register(configurations, scores, context, metadata)
 
     @abstractmethod
     def _register(self, configurations: pd.DataFrame, scores: pd.DataFrame,
-                  context: Optional[pd.DataFrame] = None) -> None:
+                  context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations and scores.
 
         Parameters
@@ -114,13 +119,16 @@ class BaseOptimizer(metaclass=ABCMeta):
             Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
         scores : pd.DataFrame
             Scores from running the configurations. The index is the same as the index of the configurations.
-
         context : pd.DataFrame
-            Not Yet Implemented.
+            Not implemented yet.
+        metadata : pd.DataFrame
+            Implementaton depends on instance.
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
-    def suggest(self, context: Optional[pd.DataFrame] = None, defaults: bool = False) -> pd.DataFrame:
+    def suggest(
+        self, context: Optional[pd.DataFrame] = None, defaults: bool = False
+    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """
         Wrapper method, which employs the space adapter (if any), after suggesting a new configuration.
 
@@ -136,13 +144,25 @@ class BaseOptimizer(metaclass=ABCMeta):
         -------
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
+        metadata : pd.DataFrame
+            Pandas dataframe with a single row containing the metadata.
+            Column names are the budget, seed, and instance of the evaluation, if valid.
         """
         if defaults:
-            configuration = config_to_dataframe(self.parameter_space.get_default_configuration())
+            self.delayed_config, self.delayed_metadata = self._suggest(context)
+
+            configuration: pd.DataFrame = config_to_dataframe(
+                self.parameter_space.get_default_configuration()
+            )
+            metadata = self.delayed_metadata
             if self.space_adapter is not None:
                 configuration = self.space_adapter.inverse_transform(configuration)
         else:
-            configuration = self._suggest(context)
+            if self.delayed_config is None:
+                configuration, metadata = self._suggest(metadata)
+            else:
+                configuration, metadata = self.delayed_config, self.delayed_metadata
+                self.delayed_config, self.delayed_metadata = None, None
             assert len(configuration) == 1, \
                 "Suggest must return a single configuration."
             assert set(configuration.columns).issubset(set(self.optimizer_parameter_space)), \
@@ -151,10 +171,12 @@ class BaseOptimizer(metaclass=ABCMeta):
             configuration = self._space_adapter.transform(configuration)
             assert set(configuration.columns).issubset(set(self.parameter_space)), \
                 "Space adapter produced a configuration that does not match the expected parameter space."
-        return configuration
+        return configuration, metadata
 
     @abstractmethod
-    def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def _suggest(
+        self, context: Optional[pd.DataFrame] = None
+    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """Suggests a new configuration.
 
         Parameters
@@ -166,12 +188,16 @@ class BaseOptimizer(metaclass=ABCMeta):
         -------
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
+            
+        metadata : pd.DataFrame
+            Pandas dataframe with a single row containing the metadata.
+            Column names are the budget, seed, and instance of the evaluation, if valid.
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
     def register_pending(self, configurations: pd.DataFrame,
-                         context: Optional[pd.DataFrame] = None) -> None:
+                         context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations as "pending".
         That is it say, it has been suggested by the optimizer, and an experiment trial has been started.
         This can be useful for executing multiple trials in parallel, retry logic, etc.
@@ -181,30 +207,34 @@ class BaseOptimizer(metaclass=ABCMeta):
         configurations : pd.DataFrame
             Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
         context : pd.DataFrame
-            Not Yet Implemented.
+            Not implemented yet.
+        metadata : pd.DataFrame
+            Implementaton depends on instance.
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
-    def get_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]:
+    def get_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame]]:
         """
-        Returns the observations as a triplet of DataFrames (config, score, context).
+        Returns the observations as a triplet of DataFrames (config, score, context, metadata).
 
         Returns
         -------
         observations : Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]
-            A triplet of (config, score, context) DataFrames of observations.
+            A triplet of (config, score, metadata) DataFrames of observations.
         """
         if len(self._observations) == 0:
             raise ValueError("No observations registered yet.")
-        configs = pd.concat([config for config, _, _ in self._observations]).reset_index(drop=True)
-        scores = pd.concat([score for _, score, _ in self._observations]).reset_index(drop=True)
+        configs = pd.concat([config for config, _, _, _ in self._observations]).reset_index(drop=True)
+        scores = pd.concat([score for _, score, _, _ in self._observations]).reset_index(drop=True)
         contexts = pd.concat([pd.DataFrame() if context is None else context
-                              for _, _, context in self._observations]).reset_index(drop=True)
-        return (configs, scores, contexts if len(contexts.columns) > 0 else None)
+                              for _, _, context, _ in self._observations]).reset_index(drop=True)
+        metadatas = pd.concat([pd.DataFrame() if metadata is None else metadata
+                              for _, _, _, metadata in self._observations]).reset_index(drop=True)
+        return (configs, scores, contexts, metadatas if len(metadatas.columns) > 0 else None)
 
-    def get_best_observations(self, n_max: int = 1) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]:
+    def get_best_observations(self, n_max: int = 1) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame]]:
         """
-        Get the N best observations so far as a triplet of DataFrames (config, score, context).
+        Get the N best observations so far as a triplet of DataFrames (config, score, metadata).
         Default is N=1. The columns are ordered in ASCENDING order of the optimization targets.
         The function uses `pandas.DataFrame.nsmallest(..., keep="first")` method under the hood.
 
@@ -215,15 +245,15 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Returns
         -------
-        observations : Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]
-            A triplet of best (config, score, context) DataFrames of best observations.
+        observations : Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame]]
+            A triplet of best (config, score, context, metadata) DataFrames of best observations.
         """
         if len(self._observations) == 0:
             raise ValueError("No observations registered yet.")
-        (configs, scores, contexts) = self.get_observations()
+        (configs, scores, contexts, metadatas) = self.get_observations()
         idx = scores.nsmallest(n_max, columns=self._optimization_targets, keep="first").index
         return (configs.loc[idx], scores.loc[idx],
-                None if contexts is None else contexts.loc[idx])
+                None if contexts is None else contexts.loc[idx], None if metadatas is None else metadatas.loc[idx])
 
     def cleanup(self) -> None:
         """

@@ -72,6 +72,7 @@
         "sklearn",
         "skopt",
         "smac",
+        "SOBOL",
         "sqlalchemy",
         "srcpaths",
         "subcmd",

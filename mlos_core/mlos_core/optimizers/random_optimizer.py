@@ -6,7 +6,7 @@
 Contains the RandomOptimizer class.
 """
 
-from typing import Optional
+from typing import Optional, Tuple
 from warnings import warn
 
 import pandas as pd
@@ -25,7 +25,7 @@ class RandomOptimizer(BaseOptimizer):
     """
 
     def _register(self, configurations: pd.DataFrame, scores: pd.DataFrame,
-                  context: Optional[pd.DataFrame] = None) -> None:
+                  context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations and scores.
 
         Doesn't do anything on the RandomOptimizer except storing configurations for logging.
@@ -34,18 +34,19 @@ class RandomOptimizer(BaseOptimizer):
         ----------
         configurations : pd.DataFrame
             Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
-
         scores : pd.DataFrame
             Scores from running the configurations. The index is the same as the index of the configurations.
-
         context : None
-            Not Yet Implemented.
+            Metadata is ignored for random_optimizer.
+        metadata : None
+            Metadata is ignored for random_optimizer.
         """
-        if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+        pass
         # should we pop them from self.pending_observations?
 
-    def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def _suggest(
+        self, context: Optional[pd.DataFrame] = None
+    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
@@ -59,13 +60,17 @@ class RandomOptimizer(BaseOptimizer):
         -------
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
+
+        metadata : pd.DataFrame
+            Pandas dataframe with a single row containing the metadata.
+            Column names are the budget, seed, and instance of the evaluation, if valid.
         """
         if context is not None:
             # not sure how that works here?
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
-        return pd.DataFrame(dict(self.optimizer_parameter_space.sample_configuration()), index=[0])
+        return pd.DataFrame(dict(self.optimizer_parameter_space.sample_configuration()), index=[0]), None
 
     def register_pending(self, configurations: pd.DataFrame,
-                         context: Optional[pd.DataFrame] = None) -> None:
+                         metadata: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
-        # self._pending_observations.append((configurations, context))
+        # self._pending_observations.append((configurations, metadata))
