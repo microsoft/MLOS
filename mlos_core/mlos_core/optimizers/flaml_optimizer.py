@@ -85,7 +85,7 @@ class FlamlOptimizer(BaseOptimizer):
         self.evaluated_samples: Dict[ConfigSpace.Configuration, EvaluatedSample] = {}
         self._suggested_config: Optional[dict]
 
-    def _register(self, configurations: pd.DataFrame, scores: pd.DataFrame,
+    def _register(self, *, configurations: pd.DataFrame, scores: pd.DataFrame,
                   context: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations and scores.
 
@@ -112,7 +112,7 @@ class FlamlOptimizer(BaseOptimizer):
                 score=float(np.average(score.astype(float), weights=self._objective_weights)),
             )
 
-    def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def _suggest(self, *, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         """Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
@@ -132,11 +132,11 @@ class FlamlOptimizer(BaseOptimizer):
         config: dict = self._get_next_config()
         return pd.DataFrame(config, index=[0])
 
-    def register_pending(self, configurations: pd.DataFrame,
+    def register_pending(self, *, configurations: pd.DataFrame,
                          context: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
 
-    def _target_function(self, config: dict) -> Union[dict, None]:
+    def _target_function(self, *, config: dict) -> Union[dict, None]:
         """Configuration evaluation function called by FLAML optimizer.
 
         FLAML may suggest the same configuration multiple times (due to its warm-start mechanism).

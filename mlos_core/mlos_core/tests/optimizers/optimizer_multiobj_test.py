@@ -99,7 +99,7 @@ def test_multi_target_opt(objective_weights: Optional[List[float]],
         observation = objective(suggestion)
         assert isinstance(observation, pd.DataFrame)
         assert set(observation.columns) == {'main_score', 'other_score'}
-        optimizer.register(suggestion, observation)
+        optimizer.register(configurations=suggestion, scores=observation)
 
     (best_config, best_score, best_context) = optimizer.get_best_observations()
     assert isinstance(best_config, pd.DataFrame)

@@ -241,7 +241,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # -- this planned to be fixed in some future release: https://github.com/automl/SMAC3/issues/946
         raise RuntimeError('This function should never be called.')
 
-    def _register(self, configurations: pd.DataFrame,
+    def _register(self, *, configurations: pd.DataFrame,
                   scores: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations and scores.
 
@@ -262,7 +262,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
 
         # Register each trial (one-by-one)
-        for (config, (_i, score)) in zip(self._to_configspace_configs(configurations), scores.iterrows()):
+        for (config, (_i, score)) in zip(self._to_configspace_configs(configurations=configurations), scores.iterrows()):
             # Retrieve previously generated TrialInfo (returned by .ask()) or create new TrialInfo instance
             info: TrialInfo = self.trial_info_map.get(
                 config, TrialInfo(config=config, seed=self.base_optimizer.scenario.seed))
@@ -272,7 +272,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # Save optimizer once we register all configs
         self.base_optimizer.optimizer.save()
 
-    def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def _suggest(self, *, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         """Suggests a new configuration.
 
         Parameters
@@ -299,10 +299,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
         config_df = pd.DataFrame([trial.config], columns=list(self.optimizer_parameter_space.keys()))
         return config_df
 
-    def register_pending(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
+    def register_pending(self, *, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
 
-    def surrogate_predict(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
+    def surrogate_predict(self, *, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
         from smac.utils.configspace import convert_configurations_to_array  # pylint: disable=import-outside-toplevel
 
         if context is not None:
@@ -318,11 +318,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if self.base_optimizer._config_selector._model is None:
             raise RuntimeError('Surrogate model is not yet trained')
 
-        configs: npt.NDArray = convert_configurations_to_array(self._to_configspace_configs(configurations))
+        configs: npt.NDArray = convert_configurations_to_array(self._to_configspace_configs(configurations=configurations))
         mean_predictions, _ = self.base_optimizer._config_selector._model.predict(configs)
         return mean_predictions.reshape(-1,)
 
-    def acquisition_function(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
+    def acquisition_function(self, *, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
         if context is not None:
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         if self._space_adapter:
@@ -332,7 +332,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if self.base_optimizer._config_selector._acquisition_function is None:
             raise RuntimeError('Acquisition function is not yet initialized')
 
-        configs: list = self._to_configspace_configs(configurations)
+        configs: list = self._to_configspace_configs(configurations=configurations)
         return self.base_optimizer._config_selector._acquisition_function(configs).reshape(-1,)
 
     def cleanup(self) -> None:
@@ -340,7 +340,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             self._temp_output_directory.cleanup()
             self._temp_output_directory = None
 
-    def _to_configspace_configs(self, configurations: pd.DataFrame) -> List[ConfigSpace.Configuration]:
+    def _to_configspace_configs(self, *, configurations: pd.DataFrame) -> List[ConfigSpace.Configuration]:
         """Convert a dataframe of configurations to a list of ConfigSpace configurations.
 
         Parameters
