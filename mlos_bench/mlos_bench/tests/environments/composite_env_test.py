@@ -41,8 +41,8 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
                             "EnvId": 1,
                         },
                         "required_args": ["vmName", "someConst", "global_param"],
-                        "range": [60, 120],
-                        "metrics": ["score"],
+                        "mock_env_range": [60, 120],
+                        "mock_env_metrics": ["score"],
                     }
                 },
                 {
@@ -56,8 +56,8 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
                             "global_param": "local"
                         },
                         "required_args": ["vmName"],
-                        "range": [60, 120],
-                        "metrics": ["score"],
+                        "mock_env_range": [60, 120],
+                        "mock_env_metrics": ["score"],
                     }
                 },
                 {
@@ -70,8 +70,8 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
                             "EnvId": 3,
                         },
                         "required_args": ["vmName", "vm_server_name", "vm_client_name"],
-                        "range": [60, 120],
-                        "metrics": ["score"],
+                        "mock_env_range": [60, 120],
+                        "mock_env_metrics": ["score"],
                     }
                 }
             ]
@@ -193,8 +193,8 @@ def nested_composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
                                         "vm_server_name",
                                         "global_param"
                                     ],
-                                    "range": [60, 120],
-                                    "metrics": ["score"],
+                                    "mock_env_range": [60, 120],
+                                    "mock_env_metrics": ["score"],
                                 }
                             },
                             # ...
@@ -218,8 +218,8 @@ def nested_composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
                                 "config": {
                                     "tunable_params": ["boot"],
                                     "required_args": ["vmName", "EnvId", "vm_client_name"],
-                                    "range": [60, 120],
-                                    "metrics": ["score"],
+                                    "mock_env_range": [60, 120],
+                                    "mock_env_metrics": ["score"],
                                 }
                             },
                             # ...
