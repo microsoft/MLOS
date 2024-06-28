@@ -334,8 +334,8 @@ mlos_viz/dist/tmp/mlos_viz-latest.tar: PACKAGE_NAME := mlos_viz
 	# Check to make sure the README contents made it into the package metadata.
 	unzip -p $(MODULE_NAME)/dist/tmp/$(MODULE_NAME)-latest-py3-none-any.whl */METADATA | egrep -v '^[A-Z][a-zA-Z-]+:' | grep -q -i '^# mlos'
 
-.PHONY: dist-test-env-clean
-dist-test-env-clean:
+.PHONY: clean-dist-test-env
+clean-dist-test-env:
 	# Remove any existing mlos-dist-test environment so we can start clean.
 	conda env remove -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) 2>/dev/null || true
 	rm -f build/dist-test-env.$(PYTHON_VERSION).build-stamp
@@ -350,7 +350,7 @@ build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_core/dist/tmp/mlos_core-
 build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl
 build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl
 	# Create a clean test environment for checking the wheel files.
-	$(MAKE) dist-test-env-clean
+	$(MAKE) clean-dist-test-env
 	conda create -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) python=$(PYTHON_VERS_REQ)
 	# Install some additional dependencies necessary for clean building some of the wheels.
 	conda install -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) swig libpq
@@ -365,7 +365,7 @@ build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_viz/dist/tmp/mlos_viz-la
 	touch $@
 
 .PHONY: dist-test
-#dist-test: dist-clean
+#dist-test: clean-dist
 dist-test: dist-test-env build/dist-test.$(PYTHON_VERSION).build-stamp
 
 # Unnecessary if we invoke it as "python3 -m pytest ..."
@@ -384,7 +384,7 @@ build/dist-test.$(PYTHON_VERSION).build-stamp: $(PYTHON_FILES) build/dist-test-e
 	PYTHONPATH=mlos_bench conda run -n mlos-dist-test-$(PYTHON_VERSION) python3 -m pytest mlos_viz/mlos_viz/tests/test_dabl_plot.py
 	touch $@
 
-dist-test-clean: dist-test-env-clean
+clean-dist-test: clean-dist-test-env
 	rm -f build/dist-test-env.$(PYTHON_VERSION).build-stamp
 
 
@@ -414,6 +414,7 @@ build/publish.${CONDA_ENV_NAME}.%.py.build-stamp: $(PUBLISH_DEPS)
 
 publish-pypi: build/publish.${CONDA_ENV_NAME}.pypi.py.build-stamp
 publish-test-pypi: build/publish.${CONDA_ENV_NAME}.testpypi.py.build-stamp
+
 
 build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp: doc/requirements.txt
@@ -597,15 +598,15 @@ clean-test:
 	rm -rf junit/
 	rm -rf test-output.xml
 
-.PHONY: dist-clean
-dist-clean:
-	rm -rf build dist
+.PHONY: clean-dist
+clean-dist:
+	rm -rf dist
 	rm -rf mlos_core/build mlos_core/dist
 	rm -rf mlos_bench/build mlos_bench/dist
 	rm -rf mlos_viz/build mlos_viz/dist
 
 .PHONY: clean
-clean: clean-check clean-test dist-clean clean-doc clean-doc-env dist-test-clean
+clean: clean-format clean-check clean-test clean-dist clean-doc clean-doc-env clean-dist-test
 	rm -f .*.build-stamp
 	rm -f build/conda-env.build-stamp build/conda-env.*.build-stamp
 	rm -rf mlos_core.egg-info
