@@ -318,8 +318,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if self.base_optimizer._config_selector._model is None:
             raise RuntimeError('Surrogate model is not yet trained')
 
-        configs: npt.NDArray = convert_configurations_to_array(self._to_configspace_configs(configs=configs))
-        mean_predictions, _ = self.base_optimizer._config_selector._model.predict(configs)
+        config_array: npt.NDArray = convert_configurations_to_array(self._to_configspace_configs(configs=configs))
+        mean_predictions, _ = self.base_optimizer._config_selector._model.predict(config_array)
         return mean_predictions.reshape(-1,)
 
     def acquisition_function(self, *, configs: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
