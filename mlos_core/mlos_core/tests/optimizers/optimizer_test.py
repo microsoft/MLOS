@@ -388,7 +388,7 @@ def test_mixed_numerics_type_input_space_types(optimizer_type: Optional[Optimize
         # Test registering the suggested configuration with a score.
         observation = objective(suggestion)
         assert isinstance(observation, pd.DataFrame)
-        optimizer.register(suggestion, observation)
+        optimizer.register(configurations=suggestion, scores=observation)
 
     (best_config, best_score, best_context) = optimizer.get_best_observations()
     assert isinstance(best_config, pd.DataFrame)

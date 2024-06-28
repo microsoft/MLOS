@@ -136,7 +136,7 @@ class FlamlOptimizer(BaseOptimizer):
                          context: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
 
-    def _target_function(self, *, config: dict) -> Union[dict, None]:
+    def _target_function(self, config: dict) -> Union[dict, None]:
         """Configuration evaluation function called by FLAML optimizer.
 
         FLAML may suggest the same configuration multiple times (due to its warm-start mechanism).
