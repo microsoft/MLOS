@@ -26,7 +26,7 @@ MAKEFLAGS += -j$(shell nproc)
 #MAKEFLAGS += -Oline
 
 .PHONY: all
-all: check test dist dist-test doc licenseheaders
+all: format check test dist dist-test doc | conda-env
 
 .PHONY: conda-env
 conda-env: build/conda-env.${CONDA_ENV_NAME}.build-stamp
@@ -44,6 +44,47 @@ build/conda-env.${CONDA_ENV_NAME}.build-stamp: ${ENV_YML} mlos_core/setup.py mlo
 clean-conda-env:
 	conda env remove -y ${CONDA_INFO_LEVEL} -n ${CONDA_ENV_NAME}
 	rm -f build/conda-env.${CONDA_ENV_NAME}.build-stamp
+
+
+# Since these targets potentially change the files we need to run them in sequence.
+# In future versions of make we can do that by marking each as a .NOTPARALLEL psuedo target.
+# But with make 4.3 that changes the entire Makefile to be serial.
+
+# Here we make dynamic prereqs to apply to other targets that need to run in sequence.
+FORMAT_PREREQS :=
+
+.PHONY: format
+format: build/format.${CONDA_ENV_NAME}.build-stamp
+
+ifneq (,$(filter format,$(MAKECMDGOALS)))
+    FORMAT_PREREQS += build/format.${CONDA_ENV_NAME}.build-stamp
+endif
+
+build/format.${CONDA_ENV_NAME}.build-stamp: build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
+# TODO: add isort and black formatters
+build/format.${CONDA_ENV_NAME}.build-stamp:
+	touch $@
+
+.PHONY: licenseheaders
+licenseheaders: build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
+
+ifneq (,$(filter licenseheaders,$(MAKECMDGOALS)))
+    FORMAT_PREREQS += build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
+endif
+
+build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
+build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: $(PYTHON_FILES)
+build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: $(SCRIPT_FILES)
+build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: $(SQL_FILES) doc/mit-license.tmpl
+build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: doc/mit-license.tmpl
+build/licenseheaders.${CONDA_ENV_NAME}.build-stamp:
+	# Note: to avoid makefile dependency loops, we don't touch the setup.py
+	# files as that would force the conda-env to be rebuilt.
+	conda run -n ${CONDA_ENV_NAME} licenseheaders -t doc/mit-license.tmpl \
+		-E .py .sh .ps1 .sql .cmd \
+		-x mlos_bench/setup.py mlos_core/setup.py mlos_viz/setup.py
+	touch $@
+
 
 .PHONY: check
 check: pycodestyle pydocstyle pylint mypy # cspell licenseheaders markdown-link-check
