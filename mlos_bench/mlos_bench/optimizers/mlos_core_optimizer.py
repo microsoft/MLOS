@@ -117,7 +117,7 @@ class MlosCoreOptimizer(Optimizer):
 
         # TODO: Specify (in the config) which metrics to pass to the optimizer.
         # Issue: https://github.com/microsoft/MLOS/issues/745
-        self._opt.register(configs=df_configs, scores=df_scores[opt_targets].astype(float))
+        self._opt.register(configurations=df_configs, scores=df_scores[opt_targets].astype(float))
 
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()

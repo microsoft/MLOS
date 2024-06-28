@@ -231,7 +231,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         Redefine this method in optimizers that require cleanup.
         """
 
-    def _from_1hot(self, config: npt.NDArray) -> pd.DataFrame:
+    def _from_1hot(self, *, config: npt.NDArray) -> pd.DataFrame:
         """
         Convert numpy array from one-hot encoding to a DataFrame
         with categoricals and ints in proper columns.
@@ -254,7 +254,7 @@ class BaseOptimizer(metaclass=ABCMeta):
                     j += 1
         return pd.DataFrame(df_dict)
 
-    def _to_1hot(self, config: Union[pd.DataFrame, pd.Series]) -> npt.NDArray:
+    def _to_1hot(self, *, config: Union[pd.DataFrame, pd.Series]) -> npt.NDArray:
         """
         Convert pandas DataFrame to one-hot-encoded numpy array.
         """
