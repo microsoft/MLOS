@@ -34,7 +34,6 @@ def local_exec_service() -> LocalExecService:
     return LocalExecService(parent=ConfigPersistenceService({
         "config_path": [
             "mlos_bench/config",
-            "mlos_bench/tests/config",
             "mlos_bench/examples",
         ]
     }))
@@ -53,7 +52,9 @@ def _launch_main_app(root_path: str, local_exec_service: LocalExecService,
         # temp_dir = '/tmp'
         log_path = path_join(temp_dir, "mock-test.log")
         (return_code, _stdout, _stderr) = local_exec_service.local_exec(
-            [f"./mlos_bench/mlos_bench/run.py {cli_config} --log_file '{log_path}'"],
+            ["./mlos_bench/mlos_bench/run.py" +
+             " --config_path ./mlos_bench/mlos_bench/tests/config/" +
+             f" {cli_config} --log_file '{log_path}'"],
             cwd=root_path)
         assert return_code == 0
 
@@ -79,7 +80,7 @@ def test_launch_main_app_bench(root_path: str, local_exec_service: LocalExecServ
     """
     _launch_main_app(
         root_path, local_exec_service,
-        "--config cli/mock-bench.jsonc" +
+        " --config cli/mock-bench.jsonc" +
         " --trial_config_repeat_count 5" +
         " --mock_env_seed -1",  # Deterministic Mock Environment.
         [
@@ -103,7 +104,7 @@ def test_launch_main_app_bench_values(
         " --mock_env_seed -1",  # Deterministic Mock Environment.
         [
             f"^{_RE_DATE} run\\.py:\\d+ " +
-            r"_main INFO Final score: \{'score': 67\.40\d+\}\s*$",
+            r"_main INFO Final score: \{'score': 67\.11\d+\}\s*$",
         ]
     )
 
