@@ -294,6 +294,9 @@ bdist_wheel: mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl
 bdist_wheel: mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl
 bdist_wheel: mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl
 
+# Make the whl files depend on the .tar.gz files, mostly to prevent conflicts
+# with shared use of the their build/ trees.
+
 mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: MODULE_NAME := mlos_core
 mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: PACKAGE_NAME := mlos_core
 mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: mlos_core/dist/tmp/mlos_core-latest.tar.gz
