@@ -95,50 +95,44 @@ build/licenseheaders.${CONDA_ENV_NAME}.build-stamp:
 
 
 .PHONY: check
-check: pycodestyle pydocstyle pylint mypy # cspell licenseheaders markdown-link-check
+check: pycodestyle pydocstyle pylint mypy # cspell markdown-link-check
+# TODO: add isort and black checks
 
 .PHONY: pycodestyle
-pycodestyle: conda-env
 pycodestyle: build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp
 pycodestyle: build/pycodestyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
 pycodestyle: build/pycodestyle.mlos_viz.${CONDA_ENV_NAME}.build-stamp
-
 
 build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/pycodestyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
 build/pycodestyle.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
 
-build/pycodestyle.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg
+PYCODESTYLE_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
+PYCODESTYLE_COMMON_PREREQS += $(FORMAT_PREREQS)
+PYCODESTYLE_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
+
+build/pycodestyle.%.${CONDA_ENV_NAME}.build-stamp: $(PYCODESTYLE_COMMON_PREREQS)
 	# Check for decent pep8 code style with pycodestyle.
-	# Note: if this fails, try using autopep8 to fix it.
-	conda run -n ${CONDA_ENV_NAME} pycodestyle $(filter-out setup.cfg,$+)
+	# Note: if this fails, try using "'make format' or 'make clean-format format'" to fix it.
+	conda run -n ${CONDA_ENV_NAME} pycodestyle $(filter %.py,$+)
 	touch $@
 
 .PHONY: pydocstyle
-pydocstyle: conda-env
 pydocstyle: build/pydocstyle.mlos_core.${CONDA_ENV_NAME}.build-stamp
 pydocstyle: build/pydocstyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
 pydocstyle: build/pydocstyle.mlos_viz.${CONDA_ENV_NAME}.build-stamp
-
 
 build/pydocstyle.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/pydocstyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
 build/pydocstyle.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
 
-build/pydocstyle.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg
+PYDOCSTYLE_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
+PYDOCSTYLE_COMMON_PREREQS += $(FORMAT_PREREQS)
+PYDOCSTYLE_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
+
+build/pydocstyle.%.${CONDA_ENV_NAME}.build-stamp: $(PYDOCSTYLE_COMMON_PREREQS)
 	# Check for decent pep8 doc style with pydocstyle.
-	conda run -n ${CONDA_ENV_NAME} pydocstyle $(filter-out setup.cfg,$+)
-	touch $@
-
-.PHONY: licenseheaders
-licenseheaders: build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
-
-build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: $(PYTHON_FILES) $(SCRIPT_FILES) $(SQL_FILES) doc/mit-license.tmpl
-	# Note: to avoid makefile dependency loops, we don't touch the setup.py
-	# files as that would force the conda-env to be rebuilt.
-	conda run -n ${CONDA_ENV_NAME} licenseheaders -t doc/mit-license.tmpl \
-		-E .py .sh .ps1 .sql .cmd \
-		-x mlos_bench/setup.py mlos_core/setup.py mlos_viz/setup.py
+	conda run -n ${CONDA_ENV_NAME} pydocstyle $(filter %.py,$+)
 	touch $@
 
 .PHONY: cspell
@@ -150,7 +144,7 @@ cspell: build/cspell-container.build-stamp
 	./.devcontainer/scripts/run-cspell.sh
 endif
 
-build/cspell-container.build-stamp:
+build/cspell-container.build-stamp: $(FORMAT_PREREQS)
 	# Build the docker image with cspell in it.
 	$(MAKE) -C .devcontainer/build cspell
 	touch $@
@@ -164,13 +158,12 @@ markdown-link-check: build/markdown-link-check-container.build-stamp
 	./.devcontainer/scripts/run-markdown-link-check.sh
 endif
 
-build/markdown-link-check-container.build-stamp:
+build/markdown-link-check-container.build-stamp: $(FORMAT_PREREQS)
 	# Build the docker image with markdown-link-check in it.
 	$(MAKE) -C .devcontainer/build markdown-link-check
 	touch $@
 
 .PHONY: pylint
-pylint: conda-env
 pylint: build/pylint.mlos_core.${CONDA_ENV_NAME}.build-stamp
 pylint: build/pylint.mlos_bench.${CONDA_ENV_NAME}.build-stamp
 pylint: build/pylint.mlos_viz.${CONDA_ENV_NAME}.build-stamp
@@ -180,12 +173,15 @@ build/pylint.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/pylint.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
 build/pylint.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
 
-build/pylint.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp .pylintrc
-	conda run -n ${CONDA_ENV_NAME} pylint -j0 $(filter-out .pylintrc,$+)
+PYLINT_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
+PYLINT_COMMON_PREREQS += $(FORMAT_PREREQS)
+PYLINT_COMMON_PREREQS += .pylintrc
+
+build/pylint.%.${CONDA_ENV_NAME}.build-stamp: $(PYLINT_COMMON_PREREQS)
+	conda run -n ${CONDA_ENV_NAME} pylint -j0 $(filter %.py,$+)
 	touch $@
 
 .PHONY: flake8
-flake8: conda-env
 flake8: build/flake8.mlos_core.${CONDA_ENV_NAME}.build-stamp
 flake8: build/flake8.mlos_bench.${CONDA_ENV_NAME}.build-stamp
 flake8: build/flake8.mlos_viz.${CONDA_ENV_NAME}.build-stamp
@@ -194,28 +190,33 @@ build/flake8.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/flake8.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
 build/flake8.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
 
-build/flake8.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg
-	conda run -n ${CONDA_ENV_NAME} flake8 -j0 $(filter-out setup.cfg,$+)
+FLAKE8_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
+FLAKE8_COMMON_PREREQS += $(FORMAT_PREREQS)
+FLAKE8_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
+
+build/flake8.%.${CONDA_ENV_NAME}.build-stamp: $(FLAKE8_COMMON_PREREQS)
+	conda run -n ${CONDA_ENV_NAME} flake8 -j0 $(filter %.py,$+)
 	touch $@
 
 .PHONY: mypy
-mypy: conda-env
 mypy: build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp
 mypy: build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
 mypy: build/mypy.mlos_viz.${CONDA_ENV_NAME}.build-stamp
 
 
+# Run these in order.
 build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES) build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp
 build/mypy.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES) build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
 
-NON_MYPY_FILES := scripts/dmypy-wrapper.sh setup.cfg
-NON_MYPY_FILES += build/conda-env.${CONDA_ENV_NAME}.build-stamp
-NON_MYPY_FILES += build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp
-NON_MYPY_FILES += build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-build/mypy.%.${CONDA_ENV_NAME}.build-stamp: scripts/dmypy-wrapper.sh build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg
+MYPY_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
+MYPY_COMMON_PREREQS += $(FORMAT_PREREQS)
+MYPY_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
+MYPY_COMMON_PREREQS += scripts/dmypy-wrapper.sh
+
+build/mypy.%.${CONDA_ENV_NAME}.build-stamp: $(MYPY_COMMON_PREREQS)
 	conda run -n ${CONDA_ENV_NAME} scripts/dmypy-wrapper.sh \
-		$(filter-out $(NON_MYPY_FILES),$+)
+		$(filter %.py,$+)
 	touch $@
 
 
@@ -434,14 +435,16 @@ clean-doc-env:
 
 COMMON_DOC_FILES := build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp doc/source/*.rst doc/source/_templates/*.rst doc/source/conf.py
 
-doc/source/api/mlos_core/modules.rst: $(MLOS_CORE_PYTHON_FILES) $(COMMON_DOC_FILES)
+doc/source/api/mlos_core/modules.rst: $(FORMAT_PREREQS) $(COMMON_DOC_FILES)
+doc/source/api/mlos_core/modules.rst: $(MLOS_CORE_PYTHON_FILES)
 	rm -rf doc/source/api/mlos_core
 	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M \
 		-o source/api/mlos_core/ \
 		../mlos_core/ \
 		../mlos_core/setup.py ../mlos_core/mlos_core/tests/
 
-doc/source/api/mlos_bench/modules.rst: $(MLOS_BENCH_PYTHON_FILES) $(COMMON_DOC_FILES)
+doc/source/api/mlos_bench/modules.rst: $(FORMAT_PREREQS) $(COMMON_DOC_FILES)
+doc/source/api/mlos_bench/modules.rst: $(MLOS_BENCH_PYTHON_FILES)
 	rm -rf doc/source/api/mlos_bench
 	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M \
 		-o source/api/mlos_bench/ \
@@ -454,7 +457,8 @@ doc/source/api/mlos_bench/modules.rst: $(MLOS_BENCH_PYTHON_FILES) $(COMMON_DOC_F
 	echo ".. literalinclude:: mlos_bench.run.usage.txt" >> doc/source/api/mlos_bench/mlos_bench.run.rst
 	echo "   :language: none" >> doc/source/api/mlos_bench/mlos_bench.run.rst
 
-doc/source/api/mlos_viz/modules.rst: $(MLOS_VIZ_PYTHON_FILES) $(COMMON_DOC_FILES)
+doc/source/api/mlos_viz/modules.rst: $(FORMAT_PREREQS) $(COMMON_DOC_FILES)
+doc/source/api/mlos_viz/modules.rst: $(MLOS_VIZ_PYTHON_FILES)
 	rm -rf doc/source/api/mlos_viz
 	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M \
 		-o source/api/mlos_viz/ \
