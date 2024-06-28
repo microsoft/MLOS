@@ -45,7 +45,7 @@ build/conda-env.${CONDA_ENV_NAME}.build-stamp: ${ENV_YML} $(MLOS_PKG_CONF_FILES)
 	@echo "CONDA_INFO_LEVEL: ${CONDA_INFO_LEVEL}"
 	conda env list -q | grep -q "^${CONDA_ENV_NAME} " || conda env create ${CONDA_INFO_LEVEL} -n ${CONDA_ENV_NAME} -f ${ENV_YML}
 	conda env update ${CONDA_INFO_LEVEL} -n ${CONDA_ENV_NAME} --prune -f ${ENV_YML}
-	$(MAKE) clean-check clean-test clean-doc
+	$(MAKE) clean-format clean-check clean-test clean-doc clean-dist
 	touch $@
 
 .PHONY: clean-conda-env
