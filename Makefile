@@ -113,7 +113,7 @@ PYCODESTYLE_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 
 build/pycodestyle.%.${CONDA_ENV_NAME}.build-stamp: $(PYCODESTYLE_COMMON_PREREQS)
 	# Check for decent pep8 code style with pycodestyle.
-	# Note: if this fails, try using "'make format' or 'make clean-format format'" to fix it.
+	# Note: if this fails, try using 'make format' to fix it.
 	conda run -n ${CONDA_ENV_NAME} pycodestyle $(filter %.py,$+)
 	touch $@
 
