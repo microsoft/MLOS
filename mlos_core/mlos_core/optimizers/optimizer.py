@@ -254,7 +254,7 @@ class BaseOptimizer(metaclass=ABCMeta):
                     j += 1
         return pd.DataFrame(df_dict)
 
-    def _to_1hot(self, *, config: Union[pd.DataFrame, pd.Series]) -> npt.NDArray:
+    def _to_1hot(self, config: Union[pd.DataFrame, pd.Series]) -> npt.NDArray:
         """
         Convert pandas DataFrame to one-hot-encoded numpy array.
         """
