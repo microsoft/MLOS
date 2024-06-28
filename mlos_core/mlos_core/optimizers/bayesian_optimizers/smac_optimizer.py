@@ -332,8 +332,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if self.base_optimizer._config_selector._acquisition_function is None:
             raise RuntimeError('Acquisition function is not yet initialized')
 
-        configs: list = self._to_configspace_configs(configs=configs)
-        return self.base_optimizer._config_selector._acquisition_function(configs).reshape(-1,)
+        cs_configs: list = self._to_configspace_configs(configs=configs)
+        return self.base_optimizer._config_selector._acquisition_function(cs_configs).reshape(-1,)
 
     def cleanup(self) -> None:
         if self._temp_output_directory is not None:
