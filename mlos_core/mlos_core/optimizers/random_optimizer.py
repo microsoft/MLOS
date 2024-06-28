@@ -24,19 +24,19 @@ class RandomOptimizer(BaseOptimizer):
         The parameter space to optimize.
     """
 
-    def _register(self, *, configurations: pd.DataFrame, scores: pd.DataFrame,
+    def _register(self, *, configs: pd.DataFrame, scores: pd.DataFrame,
                   context: Optional[pd.DataFrame] = None) -> None:
-        """Registers the given configurations and scores.
+        """Registers the given configs and scores.
 
-        Doesn't do anything on the RandomOptimizer except storing configurations for logging.
+        Doesn't do anything on the RandomOptimizer except storing configs for logging.
 
         Parameters
         ----------
-        configurations : pd.DataFrame
-            Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
+        configs : pd.DataFrame
+            Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
 
         scores : pd.DataFrame
-            Scores from running the configurations. The index is the same as the index of the configurations.
+            Scores from running the configs. The index is the same as the index of the configs.
 
         context : None
             Not Yet Implemented.
@@ -65,7 +65,7 @@ class RandomOptimizer(BaseOptimizer):
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         return pd.DataFrame(dict(self.optimizer_parameter_space.sample_configuration()), index=[0])
 
-    def register_pending(self, *, configurations: pd.DataFrame,
+    def register_pending(self, *, configs: pd.DataFrame,
                          context: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
-        # self._pending_observations.append((configurations, context))
+        # self._pending_observations.append((configs, context))

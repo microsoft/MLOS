@@ -85,24 +85,24 @@ class FlamlOptimizer(BaseOptimizer):
         self.evaluated_samples: Dict[ConfigSpace.Configuration, EvaluatedSample] = {}
         self._suggested_config: Optional[dict]
 
-    def _register(self, *, configurations: pd.DataFrame, scores: pd.DataFrame,
+    def _register(self, *, configs: pd.DataFrame, scores: pd.DataFrame,
                   context: Optional[pd.DataFrame] = None) -> None:
-        """Registers the given configurations and scores.
+        """Registers the given configs and scores.
 
         Parameters
         ----------
-        configurations : pd.DataFrame
-            Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
+        configs : pd.DataFrame
+            Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
 
         scores : pd.DataFrame
-            Scores from running the configurations. The index is the same as the index of the configurations.
+            Scores from running the configs. The index is the same as the index of the configs.
 
         context : None
             Not Yet Implemented.
         """
         if context is not None:
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
-        for (_, config), (_, score) in zip(configurations.astype('O').iterrows(), scores.iterrows()):
+        for (_, config), (_, score) in zip(configs.astype('O').iterrows(), scores.iterrows()):
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
                 self.optimizer_parameter_space, values=config.to_dict())
             if cs_config in self.evaluated_samples:
@@ -132,7 +132,7 @@ class FlamlOptimizer(BaseOptimizer):
         config: dict = self._get_next_config()
         return pd.DataFrame(config, index=[0])
 
-    def register_pending(self, *, configurations: pd.DataFrame,
+    def register_pending(self, *, configs: pd.DataFrame,
                          context: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
 
@@ -165,7 +165,7 @@ class FlamlOptimizer(BaseOptimizer):
 
         Since FLAML does not provide an ask-and-tell interface, we need to create a new instance of FLAML
         each time we get asked for a new suggestion. This is suboptimal performance-wise, but works.
-        To do so, we use any previously evaluated configurations to bootstrap FLAML (i.e., warm-start).
+        To do so, we use any previously evaluated configs to bootstrap FLAML (i.e., warm-start).
         For more info: https://microsoft.github.io/FLAML/docs/Use-Cases/Tune-User-Defined-Function#warm-start
 
         Returns
