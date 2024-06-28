@@ -21,8 +21,8 @@
                     "properties": {
                         "mock_env_seed": {
                             "type": "integer",
-                            "description": "Seed for the random number generator",
-                            "default": 0
+                            "description": "Seed for the random number generator. Set to -1 for deterministic behavior, 0 for default randomness.",
+                            "default": -1
                         },
                         "mock_env_range": {
                             "type": "array",

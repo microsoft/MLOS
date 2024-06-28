@@ -18,7 +18,7 @@ from mlos_bench.run import _main
         ([
             "--config", "mlos_bench/mlos_bench/tests/config/cli/mock-bench.jsonc",
             "--trial_config_repeat_count", "5",
-            "--mock_env_seed", "0",  # Deterministic Mock Environment.
+            "--mock_env_seed", "-1",  # Deterministic Mock Environment.
         ], 67.40329),
         ([
             "--config", "mlos_bench/mlos_bench/tests/config/cli/mock-opt.jsonc",

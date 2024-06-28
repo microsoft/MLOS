@@ -49,6 +49,7 @@ class MockEnv(Environment):
             Free-format dictionary of global parameters (e.g., security credentials)
             to be mixed in into the "const_args" section of the local config.
             Optional arguments are `mock_env_seed`, `mock_env_range`, and `mock_env_metrics`.
+            Set `mock_env_seed` to -1 for deterministic behavior, 0 for default randomness.
         tunables : TunableGroups
             A collection of tunable parameters for *all* environments.
         service: Service
@@ -56,8 +57,8 @@ class MockEnv(Environment):
         """
         super().__init__(name=name, config=config, global_config=global_config,
                          tunables=tunables, service=service)
-        seed = int(self.config.get("mock_env_seed", 0))
-        self._random = random.Random(seed) if seed > 0 else None
+        seed = int(self.config.get("mock_env_seed", -1))
+        self._random = random.Random(seed or None) if seed >= 0 else None
         self._range = self.config.get("mock_env_range")
         self._metrics = self.config.get("mock_env_metrics", ["score"])
         self._is_ready = True

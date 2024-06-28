@@ -57,7 +57,7 @@ def mock_env_no_noise(tunable_groups: TunableGroups) -> MockEnv:
         name="Test Env No Noise",
         config={
             "tunable_params": ["provision", "boot", "kernel"],
-            "mock_env_seed": 0,
+            "mock_env_seed": -1,
             "mock_env_range": [60, 120],
             "mock_env_metrics": ["score", "other_score"],
         },
