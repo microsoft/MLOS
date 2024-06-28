@@ -50,7 +50,7 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
                 config_df = config_to_dataframe(config)
                 logger("config: %s", str(config))
                 try:
-                    logger("prediction: %s", opt._opt.surrogate_predict(config_df))
+                    logger("prediction: %s", opt._opt.surrogate_predict(configs=config_df))
                 except RuntimeError:
                     pass
 
