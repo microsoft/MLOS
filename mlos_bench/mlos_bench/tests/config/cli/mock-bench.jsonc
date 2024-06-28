@@ -14,10 +14,9 @@
 
     "environment": "environments/mock/mock_env.jsonc",
 
-    // Use default values for tunables unless otherwise specified
-    // "tunable_values": [
-    //     "tunable-values/tunable-values-example.jsonc"
-    // ],
+    "tunable_values": [
+        "tunable-values/tunable-values-example.jsonc"
+    ],
 
     "globals": ["globals/global_test_config.jsonc"],
 
