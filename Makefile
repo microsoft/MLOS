@@ -31,7 +31,15 @@ all: format check test dist dist-test doc | conda-env
 .PHONY: conda-env
 conda-env: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 
-build/conda-env.${CONDA_ENV_NAME}.build-stamp: ${ENV_YML} mlos_core/setup.py mlos_bench/setup.py mlos_viz/setup.py
+MLOS_CORE_CONF_FILES := mlos_core/setup.py mlos_core/MANIFEST.in
+MLOS_BENCH_CONF_FILES := mlos_bench/setup.py mlos_bench/MANIFEST.in
+MLOS_VIZ_CONF_FILES := mlos_viz/setup.py mlos_viz/MANIFEST.in
+MLOS_GLOBAL_CONF_FILES := setup.cfg
+
+MLOS_PKGS := mlos_core mlos_bench mlos_viz
+MLOS_PKG_CONF_FILES := $(MLOS_CORE_CONF_FILES) $(MLOS_BENCH_CONF_FILES) $(MLOS_VIZ_CONF_FILES) $(MLOS_GLOBAL_CONF_FILES)
+
+build/conda-env.${CONDA_ENV_NAME}.build-stamp: ${ENV_YML} $(MLOS_PKG_CONF_FILES)
 	@echo "CONDA_SOLVER: ${CONDA_SOLVER}"
 	@echo "CONDA_EXPERIMENTAL_SOLVER: ${CONDA_EXPERIMENTAL_SOLVER}"
 	@echo "CONDA_INFO_LEVEL: ${CONDA_INFO_LEVEL}"
