@@ -62,7 +62,7 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 We expect development to follow a typical "forking" style workflow:
 
 1. Fork a copy of the [MLOS repo in Github](https://github.com/microsoft/MLOS).
-2. Create a development (a.k.a. topic) branch off of `main` to work on changes.
+1. Create a development (a.k.a. topic) branch off of `main` to work on changes.
 
     For instance:
 
@@ -70,9 +70,27 @@ We expect development to follow a typical "forking" style workflow:
     git checkout -b YourDevName/some-topic-description main
     ```
 
-3. Submit changes for inclusion as a [Pull Request on Github](https://github.com/microsoft/MLOS/pulls).
-4. PRs are associated with [Github Issues](https://github.com/microsoft/MLOS/issues) and need [MLOS-committers](https://github.com/orgs/microsoft/teams/MLOS-committers) to sign-off (in addition to other CI pipeline checks like tests and lint checks to pass).
-5. Once approved, the PR can be completed using a squash merge in order to keep a nice linear history.
+1. Ensure all of the lint checks and tests pass.
+
+    The easiest way to do this is to run the `make` commands that are also used in the CI pipeline:
+
+    ```shell
+    # All at once.
+    make all
+
+    # Or individually (for easier debugging)
+    make check
+    make test
+    make dist-test
+    make doc-test
+    ```
+
+1. Submit changes for inclusion as a [Pull Request on Github](https://github.com/microsoft/MLOS/pulls).
+
+    > Please try to keep PRs small whenver possible and don't include unnecessaary formatting changes.
+
+1. PRs are associated with [Github Issues](https://github.com/microsoft/MLOS/issues) and need [MLOS-committers](https://github.com/orgs/microsoft/teams/MLOS-committers) to sign-off (in addition to other CI pipeline checks like tests and lint checks to pass).
+1. Once approved, the PR can be completed using a squash merge in order to keep a nice linear history.
 
 ## Distributing
 
