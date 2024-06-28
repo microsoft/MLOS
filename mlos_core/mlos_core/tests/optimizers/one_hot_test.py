@@ -85,7 +85,7 @@ def test_to_1hot_data_frame(optimizer: BaseOptimizer,
     """
     Toy problem to test one-hot encoding of dataframe.
     """
-    assert optimizer._to_1hot(data_frame) == pytest.approx(one_hot_data_frame)
+    assert optimizer._to_1hot(config=data_frame) == pytest.approx(one_hot_data_frame)
 
 
 def test_to_1hot_series(optimizer: BaseOptimizer,
@@ -93,7 +93,7 @@ def test_to_1hot_series(optimizer: BaseOptimizer,
     """
     Toy problem to test one-hot encoding of series.
     """
-    assert optimizer._to_1hot(series) == pytest.approx(one_hot_series)
+    assert optimizer._to_1hot(config=series) == pytest.approx(one_hot_series)
 
 
 def test_from_1hot_data_frame(optimizer: BaseOptimizer,
@@ -102,7 +102,7 @@ def test_from_1hot_data_frame(optimizer: BaseOptimizer,
     """
     Toy problem to test one-hot decoding of dataframe.
     """
-    assert optimizer._from_1hot(one_hot_data_frame).to_dict() == data_frame.to_dict()
+    assert optimizer._from_1hot(config=one_hot_data_frame).to_dict() == data_frame.to_dict()
 
 
 def test_from_1hot_series(optimizer: BaseOptimizer,
@@ -111,7 +111,7 @@ def test_from_1hot_series(optimizer: BaseOptimizer,
     """
     Toy problem to test one-hot decoding of series.
     """
-    one_hot_df = optimizer._from_1hot(one_hot_series)
+    one_hot_df = optimizer._from_1hot(config=one_hot_series)
     assert one_hot_df.shape[0] == 1, f"Unexpected number of rows ({one_hot_df.shape[0]} != 1)"
     assert one_hot_df.iloc[0].to_dict() == series.to_dict()
 
@@ -120,7 +120,7 @@ def test_round_trip_data_frame(optimizer: BaseOptimizer, data_frame: pd.DataFram
     """
     Round-trip test for one-hot-encoding and then decoding a data frame.
     """
-    df_round_trip = optimizer._from_1hot(optimizer._to_1hot(data_frame))
+    df_round_trip = optimizer._from_1hot(config=optimizer._to_1hot(config=data_frame))
     assert df_round_trip.x.to_numpy() == pytest.approx(data_frame.x)
     assert (df_round_trip.y == data_frame.y).all()
     assert (df_round_trip.z == data_frame.z).all()
@@ -130,7 +130,7 @@ def test_round_trip_series(optimizer: BaseOptimizer, series: pd.DataFrame) -> No
     """
     Round-trip test for one-hot-encoding and then decoding a series.
     """
-    series_round_trip = optimizer._from_1hot(optimizer._to_1hot(series))
+    series_round_trip = optimizer._from_1hot(config=optimizer._to_1hot(config=series))
     assert series_round_trip.x.to_numpy() == pytest.approx(series.x)
     assert (series_round_trip.y == series.y).all()
     assert (series_round_trip.z == series.z).all()
@@ -141,7 +141,7 @@ def test_round_trip_reverse_data_frame(optimizer: BaseOptimizer,
     """
     Round-trip test for one-hot-decoding and then encoding of a numpy array.
     """
-    round_trip = optimizer._to_1hot(optimizer._from_1hot(one_hot_data_frame))
+    round_trip = optimizer._to_1hot(config=optimizer._from_1hot(config=one_hot_data_frame))
     assert round_trip == pytest.approx(one_hot_data_frame)
 
 
@@ -150,5 +150,5 @@ def test_round_trip_reverse_series(optimizer: BaseOptimizer,
     """
     Round-trip test for one-hot-decoding and then encoding of a numpy array.
     """
-    round_trip = optimizer._to_1hot(optimizer._from_1hot(one_hot_series))
+    round_trip = optimizer._to_1hot(config=optimizer._from_1hot(config=one_hot_series))
     assert round_trip == pytest.approx(one_hot_series)
