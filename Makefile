@@ -566,10 +566,17 @@ build/linklint-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov
 	@echo "OK"
 	touch $@
 
+
 .PHONY: clean-doc
 clean-doc:
 	rm -rf doc/build/ doc/global/ doc/source/api/ doc/source/generated
 	rm -rf doc/source/source_tree_docs/*
+
+.PHONY: clean-format
+clean-format:
+	# TODO: add black and isort rules
+	rm -f build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/licenseheaders-prereqs.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: clean-check
 clean-check:
@@ -583,8 +590,6 @@ clean-check:
 	rm -f build/pydocstyle.build-stamp
 	rm -f build/pydocstyle.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pydocstyle.mlos_*.${CONDA_ENV_NAME}.build-stamp
-	rm -f build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
-	rm -f build/licenseheaders-prereqs.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: clean-test
 clean-test:
