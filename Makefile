@@ -223,37 +223,32 @@ build/mypy.%.${CONDA_ENV_NAME}.build-stamp: $(MYPY_COMMON_PREREQS)
 .PHONY: test
 test: pytest
 
-PYTEST_MODULES :=
+PYTEST_CONF_FILES := $(MLOS_GLOBAL_CONF_FILES) conftest.py
 
 .PHONY: pytest
 pytest: conda-env build/pytest.${CONDA_ENV_NAME}.build-stamp
 
-build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
-build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp: $(MLOS_CORE_PYTHON_FILES) conftest.py setup.cfg
-build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp:
-	# Update the PYTEST_MODULES list to include mlos_core.
-	$(eval PYTEST_MODULES += mlos_core)
-	echo "PYTEST_MODULES: $(PYTEST_MODULES)"
-	touch $@
+pytest-mlos-core: build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp
+pytest-mlos-bench: build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp
+pytest-mlos-viz: build/pytest.mlos_viz.${CONDA_ENV_NAME}.needs-build-stamp
 
-# Run the mlos_bench target update after mlos_core target update.
-build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp: build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp
-build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
-build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp: $(MLOS_BENCH_PYTHON_FILES) conftest.py setup.cfg
-build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp:
-	# Update the PYTEST_MODULES list to include mlos_bench.
-	$(eval PYTEST_MODULES += mlos_bench)
-	echo "PYTEST_MODULES: $(PYTEST_MODULES)"
-	touch $@
+build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp: $(MLOS_CORE_PYTHON_FILES) $(MLOS_CORE_CONF_FILES)
+build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp: PYTEST_MODULE := mlos_core
 
-# Run the mlos_viz target update after mlos_bench target update.
-build/pytest.mlos_viz.${CONDA_ENV_NAME}.needs-build-stamp: build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp
-build/pytest.mlos_viz.${CONDA_ENV_NAME}.needs-build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
-build/pytest.mlos_viz.${CONDA_ENV_NAME}.needs-build-stamp: $(MLOS_VIZ_PYTHON_FILES) conftest.py setup.cfg
-build/pytest.mlos_viz.${CONDA_ENV_NAME}.needs-build-stamp:
-	# Update the PYTEST_MODULES list to include mlos_viz.
-	$(eval PYTEST_MODULES += mlos_viz)
-	echo "PYTEST_MODULES: $(PYTEST_MODULES)"
+build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp: $(MLOS_BENCH_PYTHON_FILES) $(MLOS_BENCH_CONF_FILES)
+build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp: PYTEST_MODULE := mlos_bench
+
+build/pytest.mlos_viz.${CONDA_ENV_NAME}.needs-build-stamp: $(MLOS_VIZ_PYTHON_FILES) $(MLOS_VIZ_CONF_FILES)
+build/pytest.mlos_viz.${CONDA_ENV_NAME}.needs-build-stamp: PYTEST_MODULE := mlos_viz
+
+# Invividual package test rules (for tight loop dev work).
+# Skip code coverage tests for these.
+PYTEST_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
+PYTEST_COMMON_PREREQS += $(FORMAT_PREREQS)
+PYTEST_COMMON_PREREQS += $(PYTEST_CONF_FILES)
+
+build/pytest.%.${CONDA_ENV_NAME}.needs-build-stamp: $(PYTEST_COMMON_PREREQS)
+	conda run -n ${CONDA_ENV_NAME} pytest $(PYTEST_EXTRA_OPTIONS) $(PYTEST_MODULE)
 	touch $@
 
 PYTEST_OPTIONS :=
@@ -262,25 +257,25 @@ PYTEST_OPTIONS :=
 SKIP_COVERAGE := $(shell echo $${SKIP_COVERAGE:-} | grep -i -x -e 1 -e true)
 
 ifeq ($(SKIP_COVERAGE),)
-    PYTEST_OPTIONS += --cov=. --cov-append --cov-fail-under=91.5 --cov-report=xml --cov-report=html --junitxml=junit/test-results.xml --local-badge-output-dir=doc/source/badges/
+    PYTEST_OPTIONS += --cov=. --cov-append --cov-fail-under=92 --cov-report=xml --cov-report=html --junitxml=junit/test-results.xml --local-badge-output-dir=doc/source/badges/
 endif
 
-# Run the pytest target on only the modules that have changed recently, but
-# make sure the coverage report is for both of them when used in the pipeline.
+# Global pytest rule that also produces code coverage for the pipeline.
 # NOTE: When run locally, the junit/test-results.xml will only include the
 # tests from the latest run, but this file is only used for upstream reporting,
 # so probably shouldn't matter.
-build/pytest.${CONDA_ENV_NAME}.build-stamp: build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp
-build/pytest.${CONDA_ENV_NAME}.build-stamp: build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp
-build/pytest.${CONDA_ENV_NAME}.build-stamp: build/pytest.mlos_viz.${CONDA_ENV_NAME}.needs-build-stamp
+build/pytest.${CONDA_ENV_NAME}.build-stamp: $(PYTEST_COMMON_PREREQS)
+build/pytest.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES) $(MLOS_CORE_CONF_FILES)
+build/pytest.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES) $(MLOS_BENCH_CONF_FILES)
+build/pytest.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES) $(MLOS_VIZ_CONF_FILES)
 build/pytest.${CONDA_ENV_NAME}.build-stamp:
-	# Make sure to update the list of modules needed everytime in case the test fails and we need to rerun it.
-	for pytest_module in $(PYTEST_MODULES); do rm -f build/pytest.$${pytest_module}.${CONDA_ENV_NAME}.needs-build-stamp; done
-	# Run pytest for the modules: $(PYTEST_MODULES)
+	# Remove the markers for individual targets (above).
+	for pytest_module in $(MLOS_PKGS); do rm -f build/pytest.$${pytest_module}.${CONDA_ENV_NAME}.build-stamp; done
+	# Run pytest for the modules: $(MLOS_PKGS)
 	mkdir -p doc/source/badges/
-	conda run -n ${CONDA_ENV_NAME} pytest $(PYTEST_OPTIONS) $(PYTEST_EXTRA_OPTIONS) $(PYTEST_MODULES)
-	# Mark those as done again.
-	for pytest_module in $(PYTEST_MODULES); do touch build/pytest.$${pytest_module}.${CONDA_ENV_NAME}.needs-build-stamp; done
+	conda run -n ${CONDA_ENV_NAME} pytest $(PYTEST_OPTIONS) $(PYTEST_EXTRA_OPTIONS) $(MLOS_PKGS)
+	# Global success.  Mark the individual targets as done again.
+	for pytest_module in $(MLOS_PKGS); do touch build/pytest.$${pytest_module}.${CONDA_ENV_NAME}.build-stamp; done
 	touch $@
 
 
