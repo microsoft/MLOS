@@ -81,8 +81,12 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         context : pd.DataFrame
             Not Yet Implemented.
+
+        metadata : Optional[pd.DataFrame]
+            Not Yet Implemented.
         """
         # Do some input validation.
+        assert metadata is None or isinstance(metadata, pd.DataFrame)
         assert set(scores.columns) == set(self._optimization_targets), \
             "Mismatched optimization targets."
         assert self._has_context is None or self._has_context ^ (context is None), \
@@ -168,6 +172,9 @@ class BaseOptimizer(metaclass=ABCMeta):
         -------
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
+
+        metadata : Optional[pd.DataFrame]
+            The metadata associated with the given configuration used for evaluations.
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
@@ -184,6 +191,8 @@ class BaseOptimizer(metaclass=ABCMeta):
         configs : pd.DataFrame
             Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
         context : pd.DataFrame
+            Not Yet Implemented.
+        metadata : Optional[pd.DataFrame]
             Not Yet Implemented.
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
