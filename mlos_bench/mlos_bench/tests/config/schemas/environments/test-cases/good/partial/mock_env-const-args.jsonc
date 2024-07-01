@@ -2,7 +2,7 @@
     "name": "partial mock env",
     "class": "mlos_bench.environments.MockEnv",
     "config": {
-        "seed": 42,
+        "mock_env_seed": 42,
         "const_args": {
             "foo": "bar",
             "int": 1,

@@ -19,12 +19,12 @@
                 },
                 {
                     "properties": {
-                        "seed": {
+                        "mock_env_seed": {
                             "type": "integer",
-                            "description": "Seed for the random number generator",
-                            "default": 0
+                            "description": "Seed for the random number generator. Set to -1 for deterministic behavior, 0 for default randomness.",
+                            "default": -1
                         },
-                        "range": {
+                        "mock_env_range": {
                             "type": "array",
                             "description": "Range of the random number generator",
                             "items": {
@@ -33,7 +33,7 @@
                             "minItems": 2,
                             "maxItems": 2
                         },
-                        "metrics": {
+                        "mock_env_metrics": {
                             "type": "array",
                             "description": "Names of fake benchmark metrics to be generate",
                             "items": {

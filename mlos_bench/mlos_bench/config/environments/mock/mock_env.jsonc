@@ -19,8 +19,8 @@
             "linux-hugepages-2048kB",
             "redis"
         ],
-        "seed": 42,            // Seed for the random noise generator. Omit to produce noise-free data.
-        "range": [60, 120],    // Range of the generated output values of the benchmark.
-        "metrics": ["score"]   // Names of fake benchmark metrics to generate. (Default is one metric, "score").
+        "mock_env_seed": 42,            // Seed for the random noise generator. Omit or set to 0 to produce noise-free data.
+        "mock_env_range": [60, 120],    // Range of the generated output values of the benchmark.
+        "mock_env_metrics": ["score"]   // Names of fake benchmark metrics to generate. (Default is one metric, "score").
     }
 }

@@ -61,7 +61,7 @@ class MockOptimizer(TrackBestOptimizer):
         """
         tunables = super().suggest()
         if self._start_with_defaults:
-            _LOG.info("Use default values for the first trial")
+            _LOG.info("Use default tunable values")
             self._start_with_defaults = False
         else:
             for (tunable, _group) in tunables:

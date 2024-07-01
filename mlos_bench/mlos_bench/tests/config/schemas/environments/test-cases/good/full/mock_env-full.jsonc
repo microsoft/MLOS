@@ -20,9 +20,9 @@
         "required_args": [
             "foo"
         ],
-        "range": [0, 1],
-        "seed": 42,
-        "metrics": [
+        "mock_env_range": [0, 1],
+        "mock_env_seed": 42,
+        "mock_env_metrics": [
             "latency",
             "cost"
         ]
