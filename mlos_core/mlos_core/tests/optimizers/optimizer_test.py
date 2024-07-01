@@ -48,7 +48,7 @@ def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace
 
     assert optimizer.parameter_space is not None
 
-    suggestion = optimizer.suggest()
+    suggestion, metadata = optimizer.suggest()
     assert suggestion is not None
 
     myrepr = repr(optimizer)
@@ -56,7 +56,7 @@ def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace
 
     # pending not implemented
     with pytest.raises(NotImplementedError):
-        optimizer.register_pending(configs=suggestion)
+        optimizer.register_pending(configs=suggestion, metadata=metadata)
 
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
@@ -94,8 +94,9 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
         optimizer.get_observations()
 
     for _ in range(max_iterations):
-        suggestion = optimizer.suggest()
+        suggestion, metadata = optimizer.suggest()
         assert isinstance(suggestion, pd.DataFrame)
+        assert metadata is None or isinstance(metadata, pd.DataFrame)
         assert set(suggestion.columns) == {'x', 'y', 'z'}
         # check that suggestion is in the space
         configuration = CS.Configuration(optimizer.parameter_space, suggestion.iloc[0].to_dict())
@@ -103,7 +104,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
         configuration.is_valid_configuration()
         observation = objective(suggestion['x'])
         assert isinstance(observation, pd.DataFrame)
-        optimizer.register(configs=suggestion, scores=observation)
+        optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
 
     (best_config, best_score, best_context) = optimizer.get_best_observations()
     assert isinstance(best_config, pd.DataFrame)
@@ -268,16 +269,16 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
             _LOG.debug("Optimizer is done with random init.")
 
         # loop for optimizer
-        suggestion = optimizer.suggest()
+        suggestion, metadata = optimizer.suggest()
         observation = objective(suggestion)
-        optimizer.register(configs=suggestion, scores=observation)
+        optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
 
         # loop for llamatune-optimizer
-        suggestion = llamatune_optimizer.suggest()
+        suggestion, metadata = llamatune_optimizer.suggest()
         _x, _y = suggestion['x'].iloc[0], suggestion['y'].iloc[0]
         assert _x == pytest.approx(_y, rel=1e-3) or _x + _y == pytest.approx(3., rel=1e-3)  # optimizer explores 1-dimensional space
         observation = objective(suggestion)
-        llamatune_optimizer.register(configs=suggestion, scores=observation)
+        llamatune_optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
 
     # Retrieve best observations
     best_observation = optimizer.get_best_observations()
@@ -375,7 +376,7 @@ def test_mixed_numerics_type_input_space_types(optimizer_type: Optional[Optimize
         optimizer.get_observations()
 
     for _ in range(max_iterations):
-        suggestion = optimizer.suggest()
+        suggestion, metadata = optimizer.suggest()
         assert isinstance(suggestion, pd.DataFrame)
         assert (suggestion.columns == ['x', 'y']).all()
         # Check suggestion values are the expected dtype
@@ -388,7 +389,7 @@ def test_mixed_numerics_type_input_space_types(optimizer_type: Optional[Optimize
         # Test registering the suggested configuration with a score.
         observation = objective(suggestion)
         assert isinstance(observation, pd.DataFrame)
-        optimizer.register(configs=suggestion, scores=observation)
+        optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
 
     (best_config, best_score, best_context) = optimizer.get_best_observations()
     assert isinstance(best_config, pd.DataFrame)
