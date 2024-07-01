@@ -113,8 +113,8 @@ PYCODESTYLE_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 
 build/pycodestyle.%.${CONDA_ENV_NAME}.build-stamp: $(PYCODESTYLE_COMMON_PREREQS)
 	# Check for decent pep8 code style with pycodestyle.
-	# Note: if this fails, try using 'make format' to fix it.
-	conda run -n ${CONDA_ENV_NAME} pycodestyle $(filter %.py,$+)
+	# Note: if this fails, try using 'make format' or 'make clean-format format' to fix it.
+	conda run -n ${CONDA_ENV_NAME} pycodestyle $(filter %.py,$?)
 	touch $@
 
 .PHONY: pydocstyle
@@ -132,7 +132,7 @@ PYDOCSTYLE_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 
 build/pydocstyle.%.${CONDA_ENV_NAME}.build-stamp: $(PYDOCSTYLE_COMMON_PREREQS)
 	# Check for decent pep8 doc style with pydocstyle.
-	conda run -n ${CONDA_ENV_NAME} pydocstyle $(filter %.py,$+)
+	conda run -n ${CONDA_ENV_NAME} pydocstyle $(filter %.py,$?)
 	touch $@
 
 .PHONY: cspell
@@ -178,7 +178,7 @@ PYLINT_COMMON_PREREQS += $(FORMAT_PREREQS)
 PYLINT_COMMON_PREREQS += .pylintrc
 
 build/pylint.%.${CONDA_ENV_NAME}.build-stamp: $(PYLINT_COMMON_PREREQS)
-	conda run -n ${CONDA_ENV_NAME} pylint -j0 $(filter %.py,$+)
+	conda run -n ${CONDA_ENV_NAME} pylint -j0 $(filter %.py,$?)
 	touch $@
 
 .PHONY: flake8
@@ -195,7 +195,7 @@ FLAKE8_COMMON_PREREQS += $(FORMAT_PREREQS)
 FLAKE8_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 
 build/flake8.%.${CONDA_ENV_NAME}.build-stamp: $(FLAKE8_COMMON_PREREQS)
-	conda run -n ${CONDA_ENV_NAME} flake8 -j0 $(filter %.py,$+)
+	conda run -n ${CONDA_ENV_NAME} flake8 -j0 $(filter %.py,$?)
 	touch $@
 
 .PHONY: mypy
@@ -216,7 +216,7 @@ MYPY_COMMON_PREREQS += scripts/dmypy-wrapper.sh
 
 build/mypy.%.${CONDA_ENV_NAME}.build-stamp: $(MYPY_COMMON_PREREQS)
 	conda run -n ${CONDA_ENV_NAME} scripts/dmypy-wrapper.sh \
-		$(filter %.py,$+)
+		$(filter %.py,$?)
 	touch $@
 
 
