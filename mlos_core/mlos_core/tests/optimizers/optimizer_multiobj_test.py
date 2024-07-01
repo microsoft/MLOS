@@ -84,8 +84,9 @@ def test_multi_target_opt(objective_weights: Optional[List[float]],
         optimizer.get_observations()
 
     for _ in range(max_iterations):
-        suggestion = optimizer.suggest()
+        suggestion, metadata = optimizer.suggest()
         assert isinstance(suggestion, pd.DataFrame)
+        assert metadata is None or isinstance(metadata, pd.DataFrame)
         assert set(suggestion.columns) == {'x', 'y'}
         # Check suggestion values are the expected dtype
         assert isinstance(suggestion.x.iloc[0], np.integer)
