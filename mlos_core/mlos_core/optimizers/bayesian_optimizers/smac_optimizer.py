@@ -305,7 +305,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         config_df = pd.DataFrame([trial.config], columns=list(self.optimizer_parameter_space.keys()))
         return config_df, None
 
-    def register_pending(self, *, configs: pd.DataFrame, context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
+    def register_pending(self, *, configs: pd.DataFrame,
+                         context: Optional[pd.DataFrame] = None,
+                         metadata: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
 
     def surrogate_predict(self, *, configs: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:

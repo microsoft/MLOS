@@ -172,7 +172,8 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     @abstractmethod
     def register_pending(self, *, configs: pd.DataFrame,
-                         context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
+                         context: Optional[pd.DataFrame] = None,
+                         metadata: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configs as "pending".
         That is it say, it has been suggested by the optimizer, and an experiment trial has been started.
         This can be useful for executing multiple trials in parallel, retry logic, etc.
