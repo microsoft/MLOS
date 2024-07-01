@@ -342,7 +342,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         return self.base_optimizer._config_selector._acquisition_function(cs_configs).reshape(-1,)
 
     def cleanup(self) -> None:
-        if self._temp_output_directory is not None:
+        if hasattr(self, '_temp_output_directory') and self._temp_output_directory is not None:
             self._temp_output_directory.cleanup()
             self._temp_output_directory = None
 
