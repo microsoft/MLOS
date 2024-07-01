@@ -58,7 +58,6 @@
             // Add the IDs of extensions you want installed when the container is created.
             "extensions": [
                 "davidanson.vscode-markdownlint",
-                "donjayamanne.githistory",
                 "donjayamanne.python-environment-manager",
                 "eamodio.gitlens",
                 "editorconfig.editorconfig",
@@ -67,7 +66,6 @@
                 "github.vscode-github-actions",
                 "github.vscode-pull-request-github",
                 "gruntfuggly.todo-tree",
-                "hashicorp.terraform",
                 "huntertran.auto-markdown-toc",
                 "ibm.output-colorizer",
                 "lextudio.restructuredtext",
@@ -86,8 +84,7 @@
                 "streetsidesoftware.code-spell-checker",
                 "tamasfe.even-better-toml",
                 "trond-snekvik.simple-rst",
-                "tyriar.sort-lines",
-                "waderyan.gitblame"
+                "tyriar.sort-lines"
             ]
         }
     }

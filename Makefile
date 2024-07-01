@@ -34,7 +34,7 @@ conda-env: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 MLOS_CORE_CONF_FILES := mlos_core/pyproject.toml mlos_core/setup.py mlos_core/MANIFEST.in
 MLOS_BENCH_CONF_FILES := mlos_bench/pyproject.toml mlos_bench/setup.py mlos_bench/MANIFEST.in
 MLOS_VIZ_CONF_FILES := mlos_viz/pyproject.toml mlos_viz/setup.py mlos_viz/MANIFEST.in
-MLOS_GLOBAL_CONF_FILES := setup.cfg pyproject.toml
+MLOS_GLOBAL_CONF_FILES := setup.cfg # pyproject.toml
 
 MLOS_PKGS := mlos_core mlos_bench mlos_viz
 MLOS_PKG_CONF_FILES := $(MLOS_CORE_CONF_FILES) $(MLOS_BENCH_CONF_FILES) $(MLOS_VIZ_CONF_FILES) $(MLOS_GLOBAL_CONF_FILES)
@@ -222,8 +222,8 @@ PYCODESTYLE_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 
 build/pycodestyle.%.${CONDA_ENV_NAME}.build-stamp: $(PYCODESTYLE_COMMON_PREREQS)
 	# Check for decent pep8 code style with pycodestyle.
-	# Note: if this fails, try using 'make format' or 'make clean-format format' to fix it.
-	conda run -n ${CONDA_ENV_NAME} pycodestyle $(filter %.py,$?)
+	# Note: if this fails, try using 'make format' to fix it.
+	conda run -n ${CONDA_ENV_NAME} pycodestyle $(filter %.py,$+)
 	touch $@
 
 .PHONY: pydocstyle
@@ -241,7 +241,7 @@ PYDOCSTYLE_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 
 build/pydocstyle.%.${CONDA_ENV_NAME}.build-stamp: $(PYDOCSTYLE_COMMON_PREREQS)
 	# Check for decent pep8 doc style with pydocstyle.
-	conda run -n ${CONDA_ENV_NAME} pydocstyle $(filter %.py,$?)
+	conda run -n ${CONDA_ENV_NAME} pydocstyle $(filter %.py,$+)
 	touch $@
 
 .PHONY: cspell
@@ -287,7 +287,7 @@ PYLINT_COMMON_PREREQS += $(FORMAT_PREREQS)
 PYLINT_COMMON_PREREQS += .pylintrc
 
 build/pylint.%.${CONDA_ENV_NAME}.build-stamp: $(PYLINT_COMMON_PREREQS)
-	conda run -n ${CONDA_ENV_NAME} pylint -j0 $(filter %.py,$?)
+	conda run -n ${CONDA_ENV_NAME} pylint -j0 $(filter %.py,$+)
 	touch $@
 
 .PHONY: flake8
@@ -304,7 +304,7 @@ FLAKE8_COMMON_PREREQS += $(FORMAT_PREREQS)
 FLAKE8_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 
 build/flake8.%.${CONDA_ENV_NAME}.build-stamp: $(FLAKE8_COMMON_PREREQS)
-	conda run -n ${CONDA_ENV_NAME} flake8 -j0 $(filter %.py,$?)
+	conda run -n ${CONDA_ENV_NAME} flake8 -j0 $(filter %.py,$+)
 	touch $@
 
 .PHONY: mypy
@@ -325,7 +325,7 @@ MYPY_COMMON_PREREQS += scripts/dmypy-wrapper.sh
 
 build/mypy.%.${CONDA_ENV_NAME}.build-stamp: $(MYPY_COMMON_PREREQS)
 	conda run -n ${CONDA_ENV_NAME} scripts/dmypy-wrapper.sh \
-		$(filter %.py,$?)
+		$(filter %.py,$+)
 	touch $@
 
 
@@ -388,20 +388,31 @@ build/pytest.${CONDA_ENV_NAME}.build-stamp:
 	touch $@
 
 
+# setuptools-scm needs a longer history than Github CI workers have by default.
+.PHONY: unshallow
+unshallow: build/unshallow.build-stamp
+
+build/unshallow.build-stamp:
+	git rev-parse --is-shallow-repository | grep -x -q false || git fetch --unshallow --quiet
+	touch $@
+
 .PHONY: dist
 dist: sdist bdist_wheel
 
 .PHONY: sdist
-sdist: conda-env
+sdist: conda-env unshallow
 sdist: mlos_core/dist/tmp/mlos_core-latest.tar.gz
 sdist: mlos_bench/dist/tmp/mlos_bench-latest.tar.gz
 sdist: mlos_viz/dist/tmp/mlos_viz-latest.tar.gz
 
 .PHONY: bdist_wheel
-bdist_wheel: conda-env
+bdist_wheel: conda-env unshallow
 bdist_wheel: mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl
 bdist_wheel: mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl
 bdist_wheel: mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl
+
+# Make the whl files depend on the .tar.gz files, mostly to prevent conflicts
+# with shared use of the their build/ trees.
 
 mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: MODULE_NAME := mlos_core
 mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: PACKAGE_NAME := mlos_core
@@ -424,7 +435,7 @@ mlos_viz/dist/tmp/mlos_viz-latest.tar.gz: $(MLOS_VIZ_CONF_FILES) $(MLOS_VIZ_PYTH
 mlos_viz/dist/tmp/mlos_viz-latest.tar.gz: MODULE_NAME := mlos_viz
 mlos_viz/dist/tmp/mlos_viz-latest.tar.gz: PACKAGE_NAME := mlos_viz
 
-%-latest.tar.gz: build/conda-env.${CONDA_ENV_NAME}.build-stamp $(FORMAT_PREREQS)
+%-latest.tar.gz: build/conda-env.${CONDA_ENV_NAME}.build-stamp build/unshallow.build-stamp $(FORMAT_PREREQS)
 	mkdir -p $(MODULE_NAME)/dist/tmp
 	rm -f $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar{,.gz}
 	rm -f $(MODULE_NAME)/dist/tmp/$(PACKAGE_NAME)-latest.tar{,.gz}
@@ -442,7 +453,7 @@ mlos_viz/dist/tmp/mlos_viz-latest.tar.gz: PACKAGE_NAME := mlos_viz
 	[ "$(MODULE_NAME)" != "mlos_bench" ] || tar tzf $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar.gz | grep -m1 mlos_bench/config/
 	cd $(MODULE_NAME)/dist/tmp && ln -s ../$(PACKAGE_NAME)-*.tar.gz $(PACKAGE_NAME)-latest.tar.gz
 
-%-latest-py3-none-any.whl: build/conda-env.${CONDA_ENV_NAME}.build-stamp $(FORMAT_PREREQS)
+%-latest-py3-none-any.whl: build/conda-env.${CONDA_ENV_NAME}.build-stamp build/unshallow.build-stamp $(FORMAT_PREREQS)
 	mkdir -p $(MODULE_NAME)/dist/tmp
 	rm -f $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl
 	rm -f $(MODULE_NAME)/dist/tmp/$(MODULE_NAME)-latest-py3-none-any.whl
@@ -750,6 +761,7 @@ clean-dist:
 
 .PHONY: clean
 clean: clean-format clean-check clean-test clean-dist clean-doc clean-doc-env clean-dist-test
+	rm -f build/unshallow.build-stamp
 	rm -f .*.build-stamp
 	rm -f build/conda-env.build-stamp build/conda-env.*.build-stamp
 	rm -rf mlos_core.egg-info
