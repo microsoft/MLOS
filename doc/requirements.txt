@@ -1,3 +1,4 @@
+setuptools-scm>=8.1.0
 sphinx
 nbsphinx
 jupyter_core>=4.11.2    # nbsphix dependency - addresses CVE-2022-39286

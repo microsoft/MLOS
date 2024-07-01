@@ -8,11 +8,11 @@ dependencies:
   # All other dependencies for the mlos modules come from pip.
   - pip
   - pylint
+  - black
   - pycodestyle
   - pydocstyle
   - flake8
-  - setuptools
-  - setuptools-scm>=8.1.0
+  - build
   - jupyter
   - ipykernel
   - nb_conda_kernels
@@ -31,6 +31,7 @@ dependencies:
     - autopep8>=1.7.0
     - bump2version
     - check-jsonschema
+    - isort
     - licenseheaders
     - mypy
     - pandas-stubs

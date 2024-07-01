@@ -31,10 +31,10 @@ all: format check test dist dist-test doc | conda-env
 .PHONY: conda-env
 conda-env: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 
-MLOS_CORE_CONF_FILES := mlos_core/setup.py mlos_core/MANIFEST.in
-MLOS_BENCH_CONF_FILES := mlos_bench/setup.py mlos_bench/MANIFEST.in
-MLOS_VIZ_CONF_FILES := mlos_viz/setup.py mlos_viz/MANIFEST.in
-MLOS_GLOBAL_CONF_FILES := setup.cfg
+MLOS_CORE_CONF_FILES := mlos_core/pyproject.toml mlos_core/setup.py mlos_core/MANIFEST.in
+MLOS_BENCH_CONF_FILES := mlos_bench/pyproject.toml mlos_bench/setup.py mlos_bench/MANIFEST.in
+MLOS_VIZ_CONF_FILES := mlos_viz/pyproject.toml mlos_viz/setup.py mlos_viz/MANIFEST.in
+MLOS_GLOBAL_CONF_FILES := setup.cfg # pyproject.toml
 
 MLOS_PKGS := mlos_core mlos_bench mlos_viz
 MLOS_PKG_CONF_FILES := $(MLOS_CORE_CONF_FILES) $(MLOS_BENCH_CONF_FILES) $(MLOS_VIZ_CONF_FILES) $(MLOS_GLOBAL_CONF_FILES)
@@ -69,7 +69,9 @@ ifneq (,$(filter format,$(MAKECMDGOALS)))
 endif
 
 build/format.${CONDA_ENV_NAME}.build-stamp: build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
-# TODO: add isort and black formatters
+# TODO: enable isort and black formatters
+#build/format.${CONDA_ENV_NAME}.build-stamp: build/isort.${CONDA_ENV_NAME}.build-stamp
+#build/format.${CONDA_ENV_NAME}.build-stamp: build/black.${CONDA_ENV_NAME}.build-stamp
 build/format.${CONDA_ENV_NAME}.build-stamp:
 	touch $@
 
@@ -93,10 +95,117 @@ build/licenseheaders.${CONDA_ENV_NAME}.build-stamp:
 		-x mlos_bench/setup.py mlos_core/setup.py mlos_viz/setup.py
 	touch $@
 
+.PHONY: isort
+isort: build/isort.${CONDA_ENV_NAME}.build-stamp
+
+ifneq (,$(filter isort,$(MAKECMDGOALS)))
+    FORMAT_PREREQS += build/isort.${CONDA_ENV_NAME}.build-stamp
+endif
+
+build/isort.${CONDA_ENV_NAME}.build-stamp: build/isort.mlos_core.${CONDA_ENV_NAME}.build-stamp
+build/isort.${CONDA_ENV_NAME}.build-stamp: build/isort.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+build/isort.${CONDA_ENV_NAME}.build-stamp: build/isort.mlos_viz.${CONDA_ENV_NAME}.build-stamp
+build/isort.${CONDA_ENV_NAME}.build-stamp:
+	touch $@
+
+# NOTE: when using pattern rules (involving %) we can only add one line of
+# prerequisities, so we use this pattern to compose the list as variables.
+
+# Both isort and licenseheaders alter files, so only run one at a time, by
+# making licenseheaders an order-only prerequisite.
+ISORT_COMMON_PREREQS :=
+ifneq (,$(filter format licenseheaders,$(MAKECMDGOALS)))
+ISORT_COMMON_PREREQS += build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
+endif
+ISORT_COMMON_PREREQS += build/conda-env.${CONDA_ENV_NAME}.build-stamp
+ISORT_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
+
+build/isort.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
+build/isort.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
+build/isort.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
+
+build/isort.%.${CONDA_ENV_NAME}.build-stamp: $(ISORT_COMMON_PREREQS)
+	# Reformat python file imports with isort.
+	conda run -n ${CONDA_ENV_NAME} isort --verbose --only-modified --atomic -j0 $(filter %.py,$?)
+	touch $@
+
+.PHONY: black
+black: build/black.${CONDA_ENV_NAME}.build-stamp
+
+ifneq (,$(filter black,$(MAKECMDGOALS)))
+    FORMAT_PREREQS += build/black.${CONDA_ENV_NAME}.build-stamp
+endif
+
+build/black.${CONDA_ENV_NAME}.build-stamp: build/black.mlos_core.${CONDA_ENV_NAME}.build-stamp
+build/black.${CONDA_ENV_NAME}.build-stamp: build/black.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+build/black.${CONDA_ENV_NAME}.build-stamp: build/black.mlos_viz.${CONDA_ENV_NAME}.build-stamp
+build/black.${CONDA_ENV_NAME}.build-stamp:
+	touch $@
+
+# Both black, licenseheaders, and isort all alter files, so only run one at a time, by
+# making licenseheaders and isort an order-only prerequisite.
+BLACK_COMMON_PREREQS :=
+ifneq (,$(filter format licenseheaders,$(MAKECMDGOALS)))
+BLACK_COMMON_PREREQS += build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
+endif
+ifneq (,$(filter format isort,$(MAKECMDGOALS)))
+BLACK_COMMON_PREREQS += build/isort.${CONDA_ENV_NAME}.build-stamp
+endif
+BLACK_COMMON_PREREQS += build/conda-env.${CONDA_ENV_NAME}.build-stamp
+BLACK_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
+
+build/black.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
+build/black.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
+build/black.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
+
+build/black.%.${CONDA_ENV_NAME}.build-stamp: $(BLACK_COMMON_PREREQS)
+	# Reformat python files with black.
+	conda run -n ${CONDA_ENV_NAME} black $(filter %.py,$?)
+	touch $@
 
 .PHONY: check
 check: pycodestyle pydocstyle pylint mypy # cspell markdown-link-check
-# TODO: add isort and black checks
+# TODO: Enable isort and black checks
+#check: isort-check black-check pycodestyle pydocstyle pylint mypy # cspell markdown-link-check
+
+.PHONY: black-check
+black-check: build/black-check.mlos_core.${CONDA_ENV_NAME}.build-stamp
+black-check: build/black-check.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+black-check: build/black-check.mlos_viz.${CONDA_ENV_NAME}.build-stamp
+
+# Make sure black format rules run before black-check rules.
+build/black-check.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
+build/black-check.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
+build/black-check.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
+
+BLACK_CHECK_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
+BLACK_CHECK_COMMON_PREREQS += $(FORMAT_PREREQS)
+BLACK_CHECK_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
+
+build/black-check.%.${CONDA_ENV_NAME}.build-stamp: $(BLACK_CHECK_COMMON_PREREQS)
+	# Check for import sort order.
+	# Note: if this fails use "make format" or "make black" to fix it.
+	conda run -n ${CONDA_ENV_NAME} black --verbose --check --diff $(filter %.py,$?)
+	touch $@
+
+.PHONY: isort-check
+isort-check: build/isort-check.mlos_core.${CONDA_ENV_NAME}.build-stamp
+isort-check: build/isort-check.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+isort-check: build/isort-check.mlos_viz.${CONDA_ENV_NAME}.build-stamp
+
+# Make sure isort format rules run before isort-check rules.
+build/isort-check.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
+build/isort-check.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
+build/isort-check.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
+
+ISORT_CHECK_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
+ISORT_CHECK_COMMON_PREREQS += $(FORMAT_PREREQS)
+ISORT_CHECK_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
+
+build/isort-check.%.${CONDA_ENV_NAME}.build-stamp: $(ISORT_CHECK_COMMON_PREREQS)
+	# Note: if this fails use "make format" or "make isort" to fix it.
+	conda run -n ${CONDA_ENV_NAME} isort --only-modified --check --diff -j0 $(filter %.py,$?)
+	touch $@
 
 .PHONY: pycodestyle
 pycodestyle: build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp
@@ -279,60 +388,93 @@ build/pytest.${CONDA_ENV_NAME}.build-stamp:
 	touch $@
 
 
+# setuptools-scm needs a longer history than Github CI workers have by default.
+.PHONY: unshallow
+unshallow: build/unshallow.build-stamp
+
+build/unshallow.build-stamp:
+	git rev-parse --is-shallow-repository | grep -x -q false || git fetch --unshallow --quiet
+	touch $@
+
 .PHONY: dist
-dist: bdist_wheel
+dist: sdist bdist_wheel
+
+.PHONY: sdist
+sdist: conda-env unshallow
+sdist: mlos_core/dist/tmp/mlos_core-latest.tar.gz
+sdist: mlos_bench/dist/tmp/mlos_bench-latest.tar.gz
+sdist: mlos_viz/dist/tmp/mlos_viz-latest.tar.gz
 
 .PHONY: bdist_wheel
-bdist_wheel: conda-env
+bdist_wheel: conda-env unshallow
 bdist_wheel: mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl
 bdist_wheel: mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl
 bdist_wheel: mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl
 
-mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: mlos_core/dist/tmp/mlos_core-latest.tar
+# Make the whl files depend on the .tar.gz files, mostly to prevent conflicts
+# with shared use of the their build/ trees.
+
 mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: MODULE_NAME := mlos_core
 mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: PACKAGE_NAME := mlos_core
-mlos_core/dist/tmp/mlos_core-latest.tar: mlos_core/setup.py mlos_core/MANIFEST.in $(MLOS_CORE_PYTHON_FILES)
-mlos_core/dist/tmp/mlos_core-latest.tar: MODULE_NAME := mlos_core
-mlos_core/dist/tmp/mlos_core-latest.tar: PACKAGE_NAME := mlos_core
+mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: mlos_core/dist/tmp/mlos_core-latest.tar.gz
+mlos_core/dist/tmp/mlos_core-latest.tar.gz: $(MLOS_CORE_CONF_FILES) $(MLOS_CORE_PYTHON_FILES)
+mlos_core/dist/tmp/mlos_core-latest.tar.gz: MODULE_NAME := mlos_core
+mlos_core/dist/tmp/mlos_core-latest.tar.gz: PACKAGE_NAME := mlos_core
 
-mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl: mlos_bench/dist/tmp/mlos_bench-latest.tar
 mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl: MODULE_NAME := mlos_bench
 mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl: PACKAGE_NAME := mlos_bench
-mlos_bench/dist/tmp/mlos_bench-latest.tar: mlos_bench/setup.py mlos_bench/MANIFEST.in $(MLOS_BENCH_PYTHON_FILES)
-mlos_bench/dist/tmp/mlos_bench-latest.tar: MODULE_NAME := mlos_bench
-mlos_bench/dist/tmp/mlos_bench-latest.tar: PACKAGE_NAME := mlos_bench
+mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl: mlos_bench/dist/tmp/mlos_bench-latest.tar.gz
+mlos_bench/dist/tmp/mlos_bench-latest.tar.gz: $(MLOS_BENCH_CONF_FILES) $(MLOS_BENCH_PYTHON_FILES)
+mlos_bench/dist/tmp/mlos_bench-latest.tar.gz: MODULE_NAME := mlos_bench
+mlos_bench/dist/tmp/mlos_bench-latest.tar.gz: PACKAGE_NAME := mlos_bench
 
-mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl: mlos_viz/dist/tmp/mlos_viz-latest.tar
 mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl: MODULE_NAME := mlos_viz
 mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl: PACKAGE_NAME := mlos_viz
-mlos_viz/dist/tmp/mlos_viz-latest.tar: mlos_viz/setup.py mlos_viz/MANIFEST.in $(mlos_viz_PYTHON_FILES)
-mlos_viz/dist/tmp/mlos_viz-latest.tar: MODULE_NAME := mlos_viz
-mlos_viz/dist/tmp/mlos_viz-latest.tar: PACKAGE_NAME := mlos_viz
+mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl: mlos_viz/dist/tmp/mlos_viz-latest.tar.gz
+mlos_viz/dist/tmp/mlos_viz-latest.tar.gz: $(MLOS_VIZ_CONF_FILES) $(MLOS_VIZ_PYTHON_FILES)
+mlos_viz/dist/tmp/mlos_viz-latest.tar.gz: MODULE_NAME := mlos_viz
+mlos_viz/dist/tmp/mlos_viz-latest.tar.gz: PACKAGE_NAME := mlos_viz
 
-%-latest.tar: build/conda-env.${CONDA_ENV_NAME}.build-stamp
-%-latest.tar:
+%-latest.tar.gz: build/conda-env.${CONDA_ENV_NAME}.build-stamp build/unshallow.build-stamp $(FORMAT_PREREQS)
 	mkdir -p $(MODULE_NAME)/dist/tmp
-	rm -f $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar
-	rm -f $(MODULE_NAME)/dist/tmp/$(PACKAGE_NAME)-latest.tar
-	cd $(MODULE_NAME)/ && conda run -n ${CONDA_ENV_NAME} python3 setup.py sdist --formats tar
-	ls $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar
-	! ( tar tf $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar | grep -m1 tests/ )
-	[ "$(MODULE_NAME)" != "mlos_bench" ] || tar tf $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar | grep -m1 mlos_bench/config/
-	cd $(MODULE_NAME)/dist/tmp && ln -s ../$(PACKAGE_NAME)-*.tar $(PACKAGE_NAME)-latest.tar
+	rm -f $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar{,.gz}
+	rm -f $(MODULE_NAME)/dist/tmp/$(PACKAGE_NAME)-latest.tar{,.gz}
+	rm -rf $(MODULE_NAME)/build/
+	rm -rf $(MODULE_NAME)/$(MODULE_NAME).egg-info/
+	cd $(MODULE_NAME)/ && conda run -n ${CONDA_ENV_NAME} python3 -m build --sdist
+	# Do some sanity checks on the sdist tarball output.
+	BASE_VERS=`conda run -n ${CONDA_ENV_NAME} python3 $(MODULE_NAME)/$(MODULE_NAME)/version.py | cut -d. -f-2 | egrep -x '[0-9.]+' || echo err-unknown-base-version` \
+		&& ls $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar.gz | grep -F $$BASE_VERS
+	# Make sure tests were excluded.
+	! ( tar tzf $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar.gz | grep -m1 tests/ )
+	# Make sure the py.typed marker file exists.
+	tar tzf $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar.gz | grep -m1 /py.typed
+	# Check to make sure the mlos_bench module has the config directory.
+	[ "$(MODULE_NAME)" != "mlos_bench" ] || tar tzf $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar.gz | grep -m1 mlos_bench/config/
+	cd $(MODULE_NAME)/dist/tmp && ln -s ../$(PACKAGE_NAME)-*.tar.gz $(PACKAGE_NAME)-latest.tar.gz
 
-%-latest-py3-none-any.whl: build/conda-env.${CONDA_ENV_NAME}.build-stamp
-%-latest-py3-none-any.whl:
+%-latest-py3-none-any.whl: build/conda-env.${CONDA_ENV_NAME}.build-stamp build/unshallow.build-stamp $(FORMAT_PREREQS)
+	mkdir -p $(MODULE_NAME)/dist/tmp
 	rm -f $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl
 	rm -f $(MODULE_NAME)/dist/tmp/$(MODULE_NAME)-latest-py3-none-any.whl
-	cd $(MODULE_NAME)/ && conda run -n ${CONDA_ENV_NAME} pip wheel --no-index --no-deps --wheel-dir dist dist/tmp/$(PACKAGE_NAME)-latest.tar
-	ls $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl
+	rm -rf $(MODULE_NAME)/build/
+	rm -rf $(MODULE_NAME)/$(MODULE_NAME).egg-info/
+	cd $(MODULE_NAME)/ && conda run -n ${CONDA_ENV_NAME} python3 -m build --wheel
+	# Do some sanity checks on the wheel output.
+	BASE_VERS=`conda run -n ${CONDA_ENV_NAME} python3 $(MODULE_NAME)/$(MODULE_NAME)/version.py | cut -d. -f-2 | egrep -o '^[0-9.]+' || echo err-unknown-base-version` \
+		&& ls $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl | grep -F $$BASE_VERS
 	# Check to make sure the tests were excluded from the wheel.
 	! ( unzip -t $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl | grep -m1 tests/ )
+	# Make sure the py.typed marker file exists.
+	unzip -t $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl | grep -m1 /py.typed
 	# Check to make sure the mlos_bench module has the config directory.
 	[ "$(MODULE_NAME)" != "mlos_bench" ] || unzip -t $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl | grep -m1 mlos_bench/config/
-	cd $(MODULE_NAME)/dist/tmp && ln -s ../$(MODULE_NAME)-*-py3-none-any.whl $(MODULE_NAME)-latest-py3-none-any.whl
 	# Check to make sure the README contents made it into the package metadata.
-	unzip -p $(MODULE_NAME)/dist/tmp/$(MODULE_NAME)-latest-py3-none-any.whl */METADATA | egrep -v '^[A-Z][a-zA-Z-]+:' | grep -q -i '^# mlos'
+	unzip -p $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl */METADATA | egrep -v '^[A-Z][a-zA-Z-]+:' | grep -q -i '^# mlos'
+	# Also check that the they include the URL
+	unzip -p $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl */METADATA | grep -q -e '](https://github.com/microsoft/MLOS/'
+	# Link it into place
+	cd $(MODULE_NAME)/dist/tmp && ln -s ../$(MODULE_NAME)-*-py3-none-any.whl $(MODULE_NAME)-latest-py3-none-any.whl
 
 .PHONY: clean-dist-test-env
 clean-dist-test-env:
@@ -379,6 +521,8 @@ build/dist-test.$(PYTHON_VERSION).build-stamp: $(PYTHON_FILES) build/dist-test-e
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) python3 -m pytest mlos_core/mlos_core/tests/spaces/spaces_test.py
 	# Run a simple test that uses the mlos_bench wheel (full tests can be checked with `make test`).
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) python3 -m pytest mlos_bench/mlos_bench/tests/environments/mock_env_test.py
+	# Run a basic cli tool check.
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) mlos_bench --help 2>&1 | grep '^usage: mlos_bench '
 	# Run a simple test that uses the mlos_viz wheel (full tests can be checked with `make test`).
 	# To do that, we need the fixtures from mlos_bench, so make those available too.
 	PYTHONPATH=mlos_bench conda run -n mlos-dist-test-$(PYTHON_VERSION) python3 -m pytest mlos_viz/mlos_viz/tests/test_dabl_plot.py
@@ -400,13 +544,18 @@ build/publish-pypi-deps.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_E
 
 PUBLISH_DEPS := build/publish-pypi-deps.${CONDA_ENV_NAME}.build-stamp
 PUBLISH_DEPS += build/pytest.${CONDA_ENV_NAME}.build-stamp
+PUBLISH_DEPS += mlos_core/dist/tmp/mlos_core-latest.tar.gz
+PUBLISH_DEPS += mlos_bench/dist/tmp/mlos_bench-latest.tar.gz
+PUBLISH_DEPS += mlos_viz/dist/tmp/mlos_viz-latest.tar.gz
 PUBLISH_DEPS += build/dist-test.$(PYTHON_VERSION).build-stamp
 PUBLISH_DEPS += build/check-doc.build-stamp
 PUBLISH_DEPS += build/linklint-doc.build-stamp
 
 build/publish.${CONDA_ENV_NAME}.%.py.build-stamp: $(PUBLISH_DEPS)
-	rm -f mlos_*/dist/*.tar.gz
-	ls mlos_*/dist/*.tar | xargs -I% gzip -k %
+	test $(ls -1 mlos_core/dist/*.tar.gz | wc -l) -eq 1
+	test $(ls -1 mlos_bench/dist/*.tar.gz | wc -l) -eq 1
+	test $(ls -1 mlos_viz/dist/*.tar.gz | wc -l) -eq 1
+	test $(ls -1 mlos_*/dist/*.tar.gz | wc -l) -eq 3
 	repo_name=`echo "$@" | sed -r -e 's|build/publish\.[^.]+\.||' -e 's|\.py\.build-stamp||'` \
 		&& conda run -n ${CONDA_ENV_NAME} python3 -m twine upload --repository $$repo_name \
 			mlos_*/dist/mlos*-*.tar.gz mlos_*/dist/mlos*-*.whl
@@ -612,6 +761,7 @@ clean-dist:
 
 .PHONY: clean
 clean: clean-format clean-check clean-test clean-dist clean-doc clean-doc-env clean-dist-test
+	rm -f build/unshallow.build-stamp
 	rm -f .*.build-stamp
 	rm -f build/conda-env.build-stamp build/conda-env.*.build-stamp
 	rm -rf mlos_core.egg-info
