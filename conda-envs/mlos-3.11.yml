@@ -1,7 +1,7 @@
 name: mlos-3.11
 channels:
-  - conda-forge
   - defaults
+  - conda-forge
 dependencies:
   # Basic dev environment packages.
   # All other dependencies for the mlos modules come from pip.
@@ -10,8 +10,7 @@ dependencies:
   - pycodestyle
   - pydocstyle
   - flake8
-  - setuptools
-  - setuptools-scm>=8.1.0
+  - build
   - jupyter
   - ipykernel
   - nb_conda_kernels

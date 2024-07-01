@@ -11,8 +11,7 @@ dependencies:
   - pycodestyle
   - pydocstyle
   - flake8
-  - setuptools
-  - setuptools-scm>=8.1.0
+  - build
   - jupyter
   - ipykernel
   - nb_conda_kernels
