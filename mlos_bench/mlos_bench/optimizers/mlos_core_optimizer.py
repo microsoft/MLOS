@@ -180,7 +180,7 @@ class MlosCoreOptimizer(Optimizer):
         tunables = super().suggest()
         if self._start_with_defaults:
             _LOG.info("Use default values for the first trial")
-        df_config = self._opt.suggest(defaults=self._start_with_defaults)
+        df_config, _metadata = self._opt.suggest(defaults=self._start_with_defaults)
         self._start_with_defaults = False
         _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, df_config)
         return tunables.assign(
