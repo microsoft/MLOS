@@ -34,7 +34,7 @@ def test_context_not_implemented_warning(configuration_space: CS.ConfigurationSp
         optimization_targets=['score'],
         **kwargs
     )
-    suggestion = optimizer.suggest()
+    suggestion, _ = optimizer.suggest()
     scores = pd.DataFrame({'score': [1]})
     context = pd.DataFrame([["something"]])
 
