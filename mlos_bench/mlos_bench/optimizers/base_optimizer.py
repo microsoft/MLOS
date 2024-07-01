@@ -135,20 +135,23 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     @property
     def current_iteration(self) -> int:
         """
-        The current number of iterations (trials) registered.
+        The current number of iterations (suggestions) registered.
 
         Note: this may or may not be the same as the number of configurations.
-        See Also: Launcher.trial_config_repeat_count.
+        See Also: Scheduler.trial_config_repeat_count and Scheduler.max_trials.
         """
         return self._iter
+
+    # TODO: finish renaming iterations to suggestions.
+    # See Also: https://github.com/microsoft/MLOS/pull/713
 
     @property
     def max_iterations(self) -> int:
         """
-        The maximum number of iterations (trials) to run.
+        The maximum number of iterations (suggestions) to run.
 
         Note: this may or may not be the same as the number of configurations.
-        See Also: Launcher.trial_config_repeat_count.
+        See Also: Scheduler.trial_config_repeat_count and Scheduler.max_trials.
         """
         return self._max_iter
 
