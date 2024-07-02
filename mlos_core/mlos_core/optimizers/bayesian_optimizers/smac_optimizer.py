@@ -9,7 +9,7 @@ See Also: <https://automl.github.io/SMAC3/main/index.html>
 
 from logging import warning
 from pathlib import Path
-from typing import Dict, List, Optional, Union, TYPE_CHECKING
+from typing import Dict, List, Optional, Tuple, Union, TYPE_CHECKING
 from tempfile import TemporaryDirectory
 from warnings import warn
 
@@ -242,7 +242,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         raise RuntimeError('This function should never be called.')
 
     def _register(self, *, configs: pd.DataFrame,
-                  scores: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
+                  scores: pd.DataFrame, context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configs and scores.
 
         Parameters
@@ -254,6 +254,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Scores from running the configs. The index is the same as the index of the configs.
 
         context : pd.DataFrame
+            Not Yet Implemented.
+
+        metadata: pd.DataFrame
             Not Yet Implemented.
         """
         from smac.runhistory import StatusType, TrialInfo, TrialValue  # pylint: disable=import-outside-toplevel
@@ -272,7 +275,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # Save optimizer once we register all configs
         self.base_optimizer.optimizer.save()
 
-    def _suggest(self, *, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def _suggest(self, *, context: Optional[pd.DataFrame] = None) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """Suggests a new configuration.
 
         Parameters
@@ -284,6 +287,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         -------
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
+
+        metadata : Optional[pd.DataFrame]
+            Not yet implemented.
         """
         if TYPE_CHECKING:
             from smac.runhistory import TrialInfo  # pylint: disable=import-outside-toplevel,unused-import
@@ -297,9 +303,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
         assert trial.config.config_space == self.optimizer_parameter_space
         self.trial_info_map[trial.config] = trial
         config_df = pd.DataFrame([trial.config], columns=list(self.optimizer_parameter_space.keys()))
-        return config_df
+        return config_df, None
 
-    def register_pending(self, *, configs: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
+    def register_pending(self, *, configs: pd.DataFrame,
+                         context: Optional[pd.DataFrame] = None,
+                         metadata: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
 
     def surrogate_predict(self, *, configs: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
@@ -336,7 +344,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         return self.base_optimizer._config_selector._acquisition_function(cs_configs).reshape(-1,)
 
     def cleanup(self) -> None:
-        if self._temp_output_directory is not None:
+        if hasattr(self, '_temp_output_directory') and self._temp_output_directory is not None:
             self._temp_output_directory.cleanup()
             self._temp_output_directory = None
 
