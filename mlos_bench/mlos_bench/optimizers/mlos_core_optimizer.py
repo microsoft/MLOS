@@ -199,7 +199,7 @@ class MlosCoreOptimizer(Optimizer):
         return registered_score
 
     def get_best_observation(self) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
-        (df_config, df_score, _df_context) = self._opt.get_best_observations()
+        (df_config, df_score, _df_context, _df_metadata) = self._opt.get_best_observations()
         if len(df_config) == 0:
             return (None, None)
         params = configspace_data_to_tunable_values(df_config.iloc[0].to_dict())
