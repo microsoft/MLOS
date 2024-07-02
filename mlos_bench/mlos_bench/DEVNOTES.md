@@ -34,7 +34,7 @@ Each `Environment` config is a JSON5 file with the following structure:
         }
         // Environment constructor parameters
         // (specific to the Environment class being instantiated):
-        "seed": 42,
+        "mock_env_seed": 42,
         // ...
     }
 }
