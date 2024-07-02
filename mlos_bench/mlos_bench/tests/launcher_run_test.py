@@ -52,7 +52,9 @@ def _launch_main_app(root_path: str, local_exec_service: LocalExecService,
         # temp_dir = '/tmp'
         log_path = path_join(temp_dir, "mock-test.log")
         (return_code, _stdout, _stderr) = local_exec_service.local_exec(
-            [f"./mlos_bench/mlos_bench/run.py {cli_config} --log_file '{log_path}'"],
+            ["./mlos_bench/mlos_bench/run.py" +
+             " --config_path ./mlos_bench/mlos_bench/tests/config/" +
+             f" {cli_config} --log_file '{log_path}'"],
             cwd=root_path)
         assert return_code == 0
 
@@ -74,14 +76,35 @@ _RE_DATE = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}"
 def test_launch_main_app_bench(root_path: str, local_exec_service: LocalExecService) -> None:
     """
     Run mlos_bench command-line application with mock benchmark config
-    and check the results in the log.
+    and default tunable values and check the results in the log.
     """
     _launch_main_app(
         root_path, local_exec_service,
-        "--config mlos_bench/mlos_bench/tests/config/cli/mock-bench.jsonc",
+        " --config cli/mock-bench.jsonc" +
+        " --trial_config_repeat_count 5" +
+        " --mock_env_seed -1",  # Deterministic Mock Environment.
         [
             f"^{_RE_DATE} run\\.py:\\d+ " +
-            r"_main INFO Final score: \{'score': 65\.67\d+\}\s*$",
+            r"_main INFO Final score: \{'score': 67\.40\d+\}\s*$",
+        ]
+    )
+
+
+def test_launch_main_app_bench_values(
+        root_path: str, local_exec_service: LocalExecService) -> None:
+    """
+    Run mlos_bench command-line application with mock benchmark config
+    and user-specified tunable values and check the results in the log.
+    """
+    _launch_main_app(
+        root_path, local_exec_service,
+        " --config cli/mock-bench.jsonc" +
+        " --tunable_values tunable-values/tunable-values-example.jsonc" +
+        " --trial_config_repeat_count 5" +
+        " --mock_env_seed -1",  # Deterministic Mock Environment.
+        [
+            f"^{_RE_DATE} run\\.py:\\d+ " +
+            r"_main INFO Final score: \{'score': 67\.11\d+\}\s*$",
         ]
     )
 
@@ -93,7 +116,10 @@ def test_launch_main_app_opt(root_path: str, local_exec_service: LocalExecServic
     """
     _launch_main_app(
         root_path, local_exec_service,
-        "--config mlos_bench/mlos_bench/tests/config/cli/mock-opt.jsonc --trial_config_repeat_count 3 --max_suggestions 3",
+        "--config cli/mock-opt.jsonc" +
+        " --trial_config_repeat_count 3" +
+        " --max_suggestions 3" +
+        " --mock_env_seed 42",  # Noisy Mock Environment.
         [
             # Iteration 1: Expect first value to be the baseline
             f"^{_RE_DATE} mlos_core_optimizer\\.py:\\d+ " +
