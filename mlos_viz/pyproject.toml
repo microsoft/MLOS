@@ -37,7 +37,7 @@ dynamic = [
 ]
 
 [project.urls]
-Documentation = "https://microsoft.github.io/MLOS/"
+Documentation = "https://microsoft.github.io/MLOS/source_tree_docs/mlos_viz/"
 Repository = "https://github.com/microsoft/MLOS/"
 Issues = "https://github.com/microsoft/MLOS/issues"
 "Package Source" = "https://github.com/microsoft/MLOS/tree/main/mlos_viz/"

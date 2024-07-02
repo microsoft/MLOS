@@ -39,7 +39,7 @@ dynamic = [
 mlos_bench = "mlos_bench.run:_main"
 
 [project.urls]
-Documentation = "https://microsoft.github.io/MLOS/"
+Documentation = "https://microsoft.github.io/MLOS/source_tree_docs/mlos_bench/"
 Repository = "https://github.com/microsoft/MLOS/"
 Issues = "https://github.com/microsoft/MLOS/issues"
 "Package Source" = "https://github.com/microsoft/MLOS/tree/main/mlos_bench/"
