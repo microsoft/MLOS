@@ -69,7 +69,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         return self._space_adapter
 
     def register(self, *, configs: pd.DataFrame, scores: pd.DataFrame,
-                 context: Optional[pd.DataFrame] = None) -> None:
+                 context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
         """Wrapper method, which employs the space adapter (if any), before registering the configs and scores.
 
         Parameters
@@ -81,8 +81,12 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         context : pd.DataFrame
             Not Yet Implemented.
+
+        metadata : Optional[pd.DataFrame]
+            Not Yet Implemented.
         """
         # Do some input validation.
+        assert metadata is None or isinstance(metadata, pd.DataFrame)
         assert set(scores.columns) == set(self._optimization_targets), \
             "Mismatched optimization targets."
         assert self._has_context is None or self._has_context ^ (context is None), \
@@ -105,7 +109,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     @abstractmethod
     def _register(self, *, configs: pd.DataFrame, scores: pd.DataFrame,
-                  context: Optional[pd.DataFrame] = None) -> None:
+                  context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configs and scores.
 
         Parameters
@@ -120,7 +124,8 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
-    def suggest(self, *, context: Optional[pd.DataFrame] = None, defaults: bool = False) -> pd.DataFrame:
+    def suggest(self, *, context: Optional[pd.DataFrame] = None,
+                defaults: bool = False) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """
         Wrapper method, which employs the space adapter (if any), after suggesting a new configuration.
 
@@ -139,10 +144,11 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         if defaults:
             configuration = config_to_dataframe(self.parameter_space.get_default_configuration())
+            metadata = None
             if self.space_adapter is not None:
                 configuration = self.space_adapter.inverse_transform(configuration)
         else:
-            configuration = self._suggest(context=context)
+            configuration, metadata = self._suggest(context=context)
             assert len(configuration) == 1, \
                 "Suggest must return a single configuration."
             assert set(configuration.columns).issubset(set(self.optimizer_parameter_space)), \
@@ -151,10 +157,10 @@ class BaseOptimizer(metaclass=ABCMeta):
             configuration = self._space_adapter.transform(configuration)
             assert set(configuration.columns).issubset(set(self.parameter_space)), \
                 "Space adapter produced a configuration that does not match the expected parameter space."
-        return configuration
+        return configuration, metadata
 
     @abstractmethod
-    def _suggest(self, *, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def _suggest(self, *, context: Optional[pd.DataFrame] = None) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """Suggests a new configuration.
 
         Parameters
@@ -166,12 +172,16 @@ class BaseOptimizer(metaclass=ABCMeta):
         -------
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
+
+        metadata : Optional[pd.DataFrame]
+            The metadata associated with the given configuration used for evaluations.
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
     def register_pending(self, *, configs: pd.DataFrame,
-                         context: Optional[pd.DataFrame] = None) -> None:
+                         context: Optional[pd.DataFrame] = None,
+                         metadata: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configs as "pending".
         That is it say, it has been suggested by the optimizer, and an experiment trial has been started.
         This can be useful for executing multiple trials in parallel, retry logic, etc.
@@ -181,6 +191,8 @@ class BaseOptimizer(metaclass=ABCMeta):
         configs : pd.DataFrame
             Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
         context : pd.DataFrame
+            Not Yet Implemented.
+        metadata : Optional[pd.DataFrame]
             Not Yet Implemented.
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
