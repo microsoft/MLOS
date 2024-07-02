@@ -17,7 +17,6 @@ from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.tunables import Tunable, TunableGroups, TunableValue
-from mlos_bench.util import nullable
 
 _LOG = logging.getLogger(__name__)
 
@@ -49,7 +48,8 @@ class MockEnv(Environment):
         global_config : dict
             Free-format dictionary of global parameters (e.g., security credentials)
             to be mixed in into the "const_args" section of the local config.
-            Optional arguments are `seed`, `range`, and `metrics`.
+            Optional arguments are `mock_env_seed`, `mock_env_range`, and `mock_env_metrics`.
+            Set `mock_env_seed` to -1 for deterministic behavior, 0 for default randomness.
         tunables : TunableGroups
             A collection of tunable parameters for *all* environments.
         service: Service
@@ -57,10 +57,10 @@ class MockEnv(Environment):
         """
         super().__init__(name=name, config=config, global_config=global_config,
                          tunables=tunables, service=service)
-        seed = self.config.get("seed")
-        self._random = nullable(random.Random, seed)
-        self._range = self.config.get("range")
-        self._metrics = self.config.get("metrics", ["score"])
+        seed = int(self.config.get("mock_env_seed", -1))
+        self._random = random.Random(seed or None) if seed >= 0 else None
+        self._range = self.config.get("mock_env_range")
+        self._metrics = self.config.get("mock_env_metrics", ["score"])
         self._is_ready = True
 
     def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
