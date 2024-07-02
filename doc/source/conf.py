@@ -31,22 +31,27 @@ sys.path.insert(1, os.path.abspath('../../mlos_viz/mlos_viz'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'MlosCore'
-copyright = '2024, GSL'
-author = 'GSL'
+project = 'MLOS'
+copyright = '2024, Microsoft GSL'
+author = 'Microsoft GSL'
 
 # The full version, including alpha/beta/rc tags
-release = '0.5.1'
+try:
+    from version import VERSION
+except ImportError:
+    VERSION = '0.0.1-dev'
+    warning(f"version.py not found, using dummy VERSION={VERSION}")
 
 try:
     from setuptools_scm import get_version
-    version = get_version(root='../..', relative_to=__file__)
+    version = get_version(root='../..', relative_to=__file__, fallback_version=VERSION)
     if version is not None:
-        release = version
+        VERSION = version
 except ImportError:
-    warning("setuptools_scm not found, using version from _version.py")
+    warning("setuptools_scm not found, using VERSION {VERSION}")
 except LookupError as e:
-    warning(f"setuptools_scm failed to find git version, using version from _version.py: {e}")
+    warning(f"setuptools_scm failed to find git version, using VERSION {VERSION}: {e}")
+release = VERSION
 
 
 # -- General configuration ---------------------------------------------------
