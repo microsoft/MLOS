@@ -27,7 +27,7 @@ tmpdir=$(mktemp -d)
 get_python_deps() {
     local pkg="$1"
     touch /tmp/conda-tmp/$pkg.requirements.txt
-    python3 /tmp/conda-tmp/$pkg/setup.py egg_info --egg-base "$tmpdir/"
+    (cd /tmp/conda-tmp/$pkg && python3 setup.py egg_info --egg-base "$tmpdir/")
     cat "$tmpdir/$pkg.egg-info/requires.txt" \
         | grep -v -e '^\[' -e '^\s*$' \
         | grep -v '^mlos-' \
