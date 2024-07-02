@@ -462,7 +462,7 @@ build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp: doc/requirements.txt
 	touch $@
 
 .PHONY: doc-prereqs
-doc-prereqs: build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp
+doc-prereqs: build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp build/unshallow.build-stamp
 
 .PHONY: clean-doc-env
 clean-doc-env:
