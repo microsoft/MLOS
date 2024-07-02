@@ -18,7 +18,7 @@ Set-Location mlos_core
 if (Test-Path dist) {
     Remove-Item -Recurse -Force dist
 }
-conda run -n $env:CONDA_ENV_NAME python setup.py bdist_wheel
+conda run -n $env:CONDA_ENV_NAME python -m build
 Set-Location ..
 $mlos_core_whl = (Resolve-Path mlos_core/dist/mlos_core-*-py3-none-any.whl | Select-Object -ExpandProperty Path)
 Write-Host "mlos_core_whl: $mlos_core_whl"
@@ -32,7 +32,7 @@ Set-Location mlos_bench
 if (Test-Path dist) {
     Remove-Item -Recurse -Force dist
 }
-conda run -n $env:CONDA_ENV_NAME python setup.py bdist_wheel
+conda run -n $env:CONDA_ENV_NAME python -m build
 Set-Location ..
 $mlos_bench_whl = (Resolve-Path mlos_bench/dist/mlos_bench-*-py3-none-any.whl | Select-Object -ExpandProperty Path)
 Write-Host "mlos_bench_whl: $mlos_bench_whl"
@@ -46,7 +46,7 @@ Set-Location mlos_viz
 if (Test-Path dist) {
     Remove-Item -Recurse -Force dist
 }
-conda run -n $env:CONDA_ENV_NAME python setup.py bdist_wheel
+conda run -n $env:CONDA_ENV_NAME python -m build
 Set-Location ..
 $mlos_viz_whl = (Resolve-Path mlos_viz/dist/mlos_viz-*-py3-none-any.whl | Select-Object -ExpandProperty Path)
 Write-Host "mlos_viz_whl: $mlos_viz_whl"
