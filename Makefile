@@ -443,10 +443,10 @@ PUBLISH_DEPS += build/check-doc.build-stamp
 PUBLISH_DEPS += build/linklint-doc.build-stamp
 
 build/publish.${CONDA_ENV_NAME}.%.py.build-stamp: $(PUBLISH_DEPS)
-	test $(ls -1 mlos_core/dist/*.tar.gz | wc -l) -eq 1
-	test $(ls -1 mlos_bench/dist/*.tar.gz | wc -l) -eq 1
-	test $(ls -1 mlos_viz/dist/*.tar.gz | wc -l) -eq 1
-	test $(ls -1 mlos_*/dist/*.tar.gz | wc -l) -eq 3
+	test `ls -1 mlos_core/dist/*.tar.gz | wc -l` -eq 1
+	test `ls -1 mlos_bench/dist/*.tar.gz | wc -l` -eq 1
+	test `ls -1 mlos_viz/dist/*.tar.gz | wc -l` -eq 1
+	test `ls -1 mlos_*/dist/*.tar.gz | wc -l` -eq 3
 	repo_name=`echo "$@" | sed -r -e 's|build/publish\.[^.]+\.||' -e 's|\.py\.build-stamp||'` \
 		&& conda run -n ${CONDA_ENV_NAME} python3 -m twine upload --repository $$repo_name \
 			mlos_*/dist/mlos*-*.tar.gz mlos_*/dist/mlos*-*.whl
