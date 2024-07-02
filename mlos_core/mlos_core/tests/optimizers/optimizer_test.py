@@ -48,7 +48,7 @@ def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace
 
     assert optimizer.parameter_space is not None
 
-    suggestion = optimizer.suggest()
+    suggestion, metadata = optimizer.suggest()
     assert suggestion is not None
 
     myrepr = repr(optimizer)
@@ -56,7 +56,7 @@ def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace
 
     # pending not implemented
     with pytest.raises(NotImplementedError):
-        optimizer.register_pending(suggestion)
+        optimizer.register_pending(configs=suggestion, metadata=metadata)
 
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
@@ -94,8 +94,9 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
         optimizer.get_observations()
 
     for _ in range(max_iterations):
-        suggestion = optimizer.suggest()
+        suggestion, metadata = optimizer.suggest()
         assert isinstance(suggestion, pd.DataFrame)
+        assert metadata is None or isinstance(metadata, pd.DataFrame)
         assert set(suggestion.columns) == {'x', 'y', 'z'}
         # check that suggestion is in the space
         configuration = CS.Configuration(optimizer.parameter_space, suggestion.iloc[0].to_dict())
@@ -103,7 +104,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
         configuration.is_valid_configuration()
         observation = objective(suggestion['x'])
         assert isinstance(observation, pd.DataFrame)
-        optimizer.register(suggestion, observation)
+        optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
 
     (best_config, best_score, best_context) = optimizer.get_best_observations()
     assert isinstance(best_config, pd.DataFrame)
@@ -126,10 +127,10 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
 
     # It would be better to put this into bayesian_optimizer_test but then we'd have to refit the model
     if isinstance(optimizer, BaseBayesianOptimizer):
-        pred_best = optimizer.surrogate_predict(best_config)
+        pred_best = optimizer.surrogate_predict(configs=best_config)
         assert pred_best.shape == (1,)
 
-        pred_all = optimizer.surrogate_predict(all_configs)
+        pred_all = optimizer.surrogate_predict(configs=all_configs)
         assert pred_all.shape == (20,)
 
 
@@ -268,16 +269,16 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
             _LOG.debug("Optimizer is done with random init.")
 
         # loop for optimizer
-        suggestion = optimizer.suggest()
+        suggestion, metadata = optimizer.suggest()
         observation = objective(suggestion)
-        optimizer.register(suggestion, observation)
+        optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
 
         # loop for llamatune-optimizer
-        suggestion = llamatune_optimizer.suggest()
+        suggestion, metadata = llamatune_optimizer.suggest()
         _x, _y = suggestion['x'].iloc[0], suggestion['y'].iloc[0]
         assert _x == pytest.approx(_y, rel=1e-3) or _x + _y == pytest.approx(3., rel=1e-3)  # optimizer explores 1-dimensional space
         observation = objective(suggestion)
-        llamatune_optimizer.register(suggestion, observation)
+        llamatune_optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
 
     # Retrieve best observations
     best_observation = optimizer.get_best_observations()
@@ -311,7 +312,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     # .surrogate_predict method not currently implemented if space adapter is employed
     if isinstance(llamatune_optimizer, BaseBayesianOptimizer):
         with pytest.raises(NotImplementedError):
-            llamatune_optimizer.surrogate_predict(llamatune_best_config)
+            llamatune_optimizer.surrogate_predict(configs=llamatune_best_config)
 
 
 # Dynamically determine all of the optimizers we have implemented.
@@ -375,7 +376,7 @@ def test_mixed_numerics_type_input_space_types(optimizer_type: Optional[Optimize
         optimizer.get_observations()
 
     for _ in range(max_iterations):
-        suggestion = optimizer.suggest()
+        suggestion, metadata = optimizer.suggest()
         assert isinstance(suggestion, pd.DataFrame)
         assert (suggestion.columns == ['x', 'y']).all()
         # Check suggestion values are the expected dtype
@@ -388,7 +389,7 @@ def test_mixed_numerics_type_input_space_types(optimizer_type: Optional[Optimize
         # Test registering the suggested configuration with a score.
         observation = objective(suggestion)
         assert isinstance(observation, pd.DataFrame)
-        optimizer.register(suggestion, observation)
+        optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
 
     (best_config, best_score, best_context) = optimizer.get_best_observations()
     assert isinstance(best_config, pd.DataFrame)

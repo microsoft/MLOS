@@ -80,10 +80,10 @@ jobs:
       with:
         #path: ${{ env.CONDA_DIR }}/envs/${{ env.CONDA_ENV_NAME }}
         path: ${{ env.CONDA_DIR }}/pkgs
-        key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
+        key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
         restore-keys: |
-          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
-          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}
+          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
+          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}
 
     - name: Restore cached pip packages
       id: restore-pip-cache
@@ -91,10 +91,10 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ env.PIP_CACHE_DIR }}
-        key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
+        key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
         restore-keys: |
-          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
-          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}
+          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
+          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}
 
     - name: Log some environment variables for debugging
       run: |

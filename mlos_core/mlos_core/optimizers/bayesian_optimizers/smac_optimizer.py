@@ -9,7 +9,7 @@ See Also: <https://automl.github.io/SMAC3/main/index.html>
 
 from logging import warning
 from pathlib import Path
-from typing import Dict, List, Optional, Union, TYPE_CHECKING
+from typing import Dict, List, Optional, Tuple, Union, TYPE_CHECKING
 from tempfile import TemporaryDirectory
 from warnings import warn
 
@@ -80,10 +80,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
             See Also: mlos_bench.optimizer.bulk_register
 
         max_ratio : Optional[int]
-            Maximum ratio of max_trials to be random configurations to be evaluated
+            Maximum ratio of max_trials to be random configs to be evaluated
             at start to bootstrap the optimizer.
             Useful if you want to explicitly control the number of random
-            configurations evaluated at start.
+            configs evaluated at start.
 
         use_default_config: bool
             Whether to use the default config for the first trial after random initialization.
@@ -168,7 +168,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             initial_design_args['n_configs'] = n_random_init
             if n_random_init > 0.25 * max_trials and max_ratio is None:
                 warning(
-                    'Number of random initial configurations (%d) is ' +
+                    'Number of random initial configs (%d) is ' +
                     'greater than 25%% of max_trials (%d). ' +
                     'Consider setting max_ratio to avoid SMAC overriding n_random_init.',
                     n_random_init,
@@ -241,19 +241,22 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # -- this planned to be fixed in some future release: https://github.com/automl/SMAC3/issues/946
         raise RuntimeError('This function should never be called.')
 
-    def _register(self, configurations: pd.DataFrame,
-                  scores: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
-        """Registers the given configurations and scores.
+    def _register(self, *, configs: pd.DataFrame,
+                  scores: pd.DataFrame, context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
+        """Registers the given configs and scores.
 
         Parameters
         ----------
-        configurations : pd.DataFrame
-            Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
+        configs : pd.DataFrame
+            Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
 
         scores : pd.DataFrame
-            Scores from running the configurations. The index is the same as the index of the configurations.
+            Scores from running the configs. The index is the same as the index of the configs.
 
         context : pd.DataFrame
+            Not Yet Implemented.
+
+        metadata: pd.DataFrame
             Not Yet Implemented.
         """
         from smac.runhistory import StatusType, TrialInfo, TrialValue  # pylint: disable=import-outside-toplevel
@@ -262,7 +265,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
 
         # Register each trial (one-by-one)
-        for (config, (_i, score)) in zip(self._to_configspace_configs(configurations), scores.iterrows()):
+        for (config, (_i, score)) in zip(self._to_configspace_configs(configs=configs), scores.iterrows()):
             # Retrieve previously generated TrialInfo (returned by .ask()) or create new TrialInfo instance
             info: TrialInfo = self.trial_info_map.get(
                 config, TrialInfo(config=config, seed=self.base_optimizer.scenario.seed))
@@ -272,7 +275,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # Save optimizer once we register all configs
         self.base_optimizer.optimizer.save()
 
-    def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def _suggest(self, *, context: Optional[pd.DataFrame] = None) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """Suggests a new configuration.
 
         Parameters
@@ -284,6 +287,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         -------
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
+
+        metadata : Optional[pd.DataFrame]
+            Not yet implemented.
         """
         if TYPE_CHECKING:
             from smac.runhistory import TrialInfo  # pylint: disable=import-outside-toplevel,unused-import
@@ -297,12 +303,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
         assert trial.config.config_space == self.optimizer_parameter_space
         self.trial_info_map[trial.config] = trial
         config_df = pd.DataFrame([trial.config], columns=list(self.optimizer_parameter_space.keys()))
-        return config_df
+        return config_df, None
 
-    def register_pending(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
+    def register_pending(self, *, configs: pd.DataFrame,
+                         context: Optional[pd.DataFrame] = None,
+                         metadata: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
 
-    def surrogate_predict(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
+    def surrogate_predict(self, *, configs: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
         from smac.utils.configspace import convert_configurations_to_array  # pylint: disable=import-outside-toplevel
 
         if context is not None:
@@ -318,11 +326,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if self.base_optimizer._config_selector._model is None:
             raise RuntimeError('Surrogate model is not yet trained')
 
-        configs: npt.NDArray = convert_configurations_to_array(self._to_configspace_configs(configurations))
-        mean_predictions, _ = self.base_optimizer._config_selector._model.predict(configs)
+        config_array: npt.NDArray = convert_configurations_to_array(self._to_configspace_configs(configs=configs))
+        mean_predictions, _ = self.base_optimizer._config_selector._model.predict(config_array)
         return mean_predictions.reshape(-1,)
 
-    def acquisition_function(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
+    def acquisition_function(self, *, configs: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
         if context is not None:
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         if self._space_adapter:
@@ -332,28 +340,28 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if self.base_optimizer._config_selector._acquisition_function is None:
             raise RuntimeError('Acquisition function is not yet initialized')
 
-        configs: list = self._to_configspace_configs(configurations)
-        return self.base_optimizer._config_selector._acquisition_function(configs).reshape(-1,)
+        cs_configs: list = self._to_configspace_configs(configs=configs)
+        return self.base_optimizer._config_selector._acquisition_function(cs_configs).reshape(-1,)
 
     def cleanup(self) -> None:
-        if self._temp_output_directory is not None:
+        if hasattr(self, '_temp_output_directory') and self._temp_output_directory is not None:
             self._temp_output_directory.cleanup()
             self._temp_output_directory = None
 
-    def _to_configspace_configs(self, configurations: pd.DataFrame) -> List[ConfigSpace.Configuration]:
-        """Convert a dataframe of configurations to a list of ConfigSpace configurations.
+    def _to_configspace_configs(self, *, configs: pd.DataFrame) -> List[ConfigSpace.Configuration]:
+        """Convert a dataframe of configs to a list of ConfigSpace configs.
 
         Parameters
         ----------
-        configurations : pd.DataFrame
-            Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
+        configs : pd.DataFrame
+            Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
 
         Returns
         -------
-        configurations : list
-            List of ConfigSpace configurations.
+        configs : list
+            List of ConfigSpace configs.
         """
         return [
             ConfigSpace.Configuration(self.optimizer_parameter_space, values=config.to_dict())
-            for (_, config) in configurations.astype('O').iterrows()
+            for (_, config) in configs.astype('O').iterrows()
         ]

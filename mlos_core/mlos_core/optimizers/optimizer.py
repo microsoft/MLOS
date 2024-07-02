@@ -68,59 +68,64 @@ class BaseOptimizer(metaclass=ABCMeta):
         """Get the space adapter instance (if any)."""
         return self._space_adapter
 
-    def register(self, configurations: pd.DataFrame, scores: pd.DataFrame,
-                 context: Optional[pd.DataFrame] = None) -> None:
-        """Wrapper method, which employs the space adapter (if any), before registering the configurations and scores.
+    def register(self, *, configs: pd.DataFrame, scores: pd.DataFrame,
+                 context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
+        """Wrapper method, which employs the space adapter (if any), before registering the configs and scores.
 
         Parameters
         ----------
-        configurations : pd.DataFrame
-            Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
+        configs : pd.DataFrame
+            Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
         scores : pd.DataFrame
-            Scores from running the configurations. The index is the same as the index of the configurations.
+            Scores from running the configs. The index is the same as the index of the configs.
 
         context : pd.DataFrame
             Not Yet Implemented.
+
+        metadata : Optional[pd.DataFrame]
+            Not Yet Implemented.
         """
         # Do some input validation.
+        assert metadata is None or isinstance(metadata, pd.DataFrame)
         assert set(scores.columns) == set(self._optimization_targets), \
             "Mismatched optimization targets."
         assert self._has_context is None or self._has_context ^ (context is None), \
             "Context must always be added or never be added."
-        assert len(configurations) == len(scores), \
-            "Mismatched number of configurations and scores."
+        assert len(configs) == len(scores), \
+            "Mismatched number of configs and scores."
         if context is not None:
-            assert len(configurations) == len(context), \
-                "Mismatched number of configurations and context."
-        assert configurations.shape[1] == len(self.parameter_space.values()), \
+            assert len(configs) == len(context), \
+                "Mismatched number of configs and context."
+        assert configs.shape[1] == len(self.parameter_space.values()), \
             "Mismatched configuration shape."
-        self._observations.append((configurations, scores, context))
+        self._observations.append((configs, scores, context))
         self._has_context = context is not None
 
         if self._space_adapter:
-            configurations = self._space_adapter.inverse_transform(configurations)
-            assert configurations.shape[1] == len(self.optimizer_parameter_space.values()), \
+            configs = self._space_adapter.inverse_transform(configs)
+            assert configs.shape[1] == len(self.optimizer_parameter_space.values()), \
                 "Mismatched configuration shape after inverse transform."
-        return self._register(configurations, scores, context)
+        return self._register(configs=configs, scores=scores, context=context)
 
     @abstractmethod
-    def _register(self, configurations: pd.DataFrame, scores: pd.DataFrame,
-                  context: Optional[pd.DataFrame] = None) -> None:
-        """Registers the given configurations and scores.
+    def _register(self, *, configs: pd.DataFrame, scores: pd.DataFrame,
+                  context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
+        """Registers the given configs and scores.
 
         Parameters
         ----------
-        configurations : pd.DataFrame
-            Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
+        configs : pd.DataFrame
+            Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
         scores : pd.DataFrame
-            Scores from running the configurations. The index is the same as the index of the configurations.
+            Scores from running the configs. The index is the same as the index of the configs.
 
         context : pd.DataFrame
             Not Yet Implemented.
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
-    def suggest(self, context: Optional[pd.DataFrame] = None, defaults: bool = False) -> pd.DataFrame:
+    def suggest(self, *, context: Optional[pd.DataFrame] = None,
+                defaults: bool = False) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """
         Wrapper method, which employs the space adapter (if any), after suggesting a new configuration.
 
@@ -139,10 +144,11 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         if defaults:
             configuration = config_to_dataframe(self.parameter_space.get_default_configuration())
+            metadata = None
             if self.space_adapter is not None:
                 configuration = self.space_adapter.inverse_transform(configuration)
         else:
-            configuration = self._suggest(context)
+            configuration, metadata = self._suggest(context=context)
             assert len(configuration) == 1, \
                 "Suggest must return a single configuration."
             assert set(configuration.columns).issubset(set(self.optimizer_parameter_space)), \
@@ -151,10 +157,10 @@ class BaseOptimizer(metaclass=ABCMeta):
             configuration = self._space_adapter.transform(configuration)
             assert set(configuration.columns).issubset(set(self.parameter_space)), \
                 "Space adapter produced a configuration that does not match the expected parameter space."
-        return configuration
+        return configuration, metadata
 
     @abstractmethod
-    def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def _suggest(self, *, context: Optional[pd.DataFrame] = None) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """Suggests a new configuration.
 
         Parameters
@@ -166,21 +172,27 @@ class BaseOptimizer(metaclass=ABCMeta):
         -------
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
+
+        metadata : Optional[pd.DataFrame]
+            The metadata associated with the given configuration used for evaluations.
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
-    def register_pending(self, configurations: pd.DataFrame,
-                         context: Optional[pd.DataFrame] = None) -> None:
-        """Registers the given configurations as "pending".
+    def register_pending(self, *, configs: pd.DataFrame,
+                         context: Optional[pd.DataFrame] = None,
+                         metadata: Optional[pd.DataFrame] = None) -> None:
+        """Registers the given configs as "pending".
         That is it say, it has been suggested by the optimizer, and an experiment trial has been started.
         This can be useful for executing multiple trials in parallel, retry logic, etc.
 
         Parameters
         ----------
-        configurations : pd.DataFrame
-            Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
+        configs : pd.DataFrame
+            Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
         context : pd.DataFrame
+            Not Yet Implemented.
+        metadata : Optional[pd.DataFrame]
             Not Yet Implemented.
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
@@ -202,7 +214,7 @@ class BaseOptimizer(metaclass=ABCMeta):
                               for _, _, context in self._observations]).reset_index(drop=True)
         return (configs, scores, contexts if len(contexts.columns) > 0 else None)
 
-    def get_best_observations(self, n_max: int = 1) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]:
+    def get_best_observations(self, *, n_max: int = 1) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]:
         """
         Get the N best observations so far as a triplet of DataFrames (config, score, context).
         Default is N=1. The columns are ordered in ASCENDING order of the optimization targets.
@@ -231,7 +243,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         Redefine this method in optimizers that require cleanup.
         """
 
-    def _from_1hot(self, config: npt.NDArray) -> pd.DataFrame:
+    def _from_1hot(self, *, config: npt.NDArray) -> pd.DataFrame:
         """
         Convert numpy array from one-hot encoding to a DataFrame
         with categoricals and ints in proper columns.
@@ -254,7 +266,7 @@ class BaseOptimizer(metaclass=ABCMeta):
                     j += 1
         return pd.DataFrame(df_dict)
 
-    def _to_1hot(self, config: Union[pd.DataFrame, pd.Series]) -> npt.NDArray:
+    def _to_1hot(self, *, config: Union[pd.DataFrame, pd.Series]) -> npt.NDArray:
         """
         Convert pandas DataFrame to one-hot-encoded numpy array.
         """

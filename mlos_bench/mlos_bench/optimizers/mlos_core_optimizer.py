@@ -117,7 +117,7 @@ class MlosCoreOptimizer(Optimizer):
 
         # TODO: Specify (in the config) which metrics to pass to the optimizer.
         # Issue: https://github.com/microsoft/MLOS/issues/745
-        self._opt.register(df_configs, df_scores[opt_targets].astype(float))
+        self._opt.register(configs=df_configs, scores=df_scores[opt_targets].astype(float))
 
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
@@ -180,7 +180,7 @@ class MlosCoreOptimizer(Optimizer):
         tunables = super().suggest()
         if self._start_with_defaults:
             _LOG.info("Use default values for the first trial")
-        df_config = self._opt.suggest(defaults=self._start_with_defaults)
+        df_config, _metadata = self._opt.suggest(defaults=self._start_with_defaults)
         self._start_with_defaults = False
         _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, df_config)
         return tunables.assign(
@@ -195,7 +195,7 @@ class MlosCoreOptimizer(Optimizer):
             _LOG.debug("Score: %s Dataframe:\n%s", registered_score, df_config)
             # TODO: Specify (in the config) which metrics to pass to the optimizer.
             # Issue: https://github.com/microsoft/MLOS/issues/745
-            self._opt.register(df_config, pd.DataFrame([registered_score], dtype=float))
+            self._opt.register(configs=df_config, scores=pd.DataFrame([registered_score], dtype=float))
         return registered_score
 
     def get_best_observation(self) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
