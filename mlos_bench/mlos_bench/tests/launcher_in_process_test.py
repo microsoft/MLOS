@@ -17,11 +17,14 @@ from mlos_bench.run import _main
     ("argv", "expected_score"), [
         ([
             "--config", "mlos_bench/mlos_bench/tests/config/cli/mock-bench.jsonc",
-        ], 65.6742),
+            "--trial_config_repeat_count", "5",
+            "--mock_env_seed", "-1",  # Deterministic Mock Environment.
+        ], 67.40329),
         ([
             "--config", "mlos_bench/mlos_bench/tests/config/cli/mock-opt.jsonc",
             "--trial_config_repeat_count", "3",
             "--max_suggestions", "3",
+            "--mock_env_seed", "42",  # Noisy Mock Environment.
         ], 64.53897),
     ]
 )
