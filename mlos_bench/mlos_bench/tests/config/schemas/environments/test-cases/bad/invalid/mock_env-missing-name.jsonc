@@ -2,6 +2,6 @@
     // "name": "missing name is invalid",
     "class": "mlos_bench.environments.MockEnv",
     "config": {
-        "seed": 42
+        "mock_env_seed": 42
     }
 }
