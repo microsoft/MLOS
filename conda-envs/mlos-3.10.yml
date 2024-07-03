@@ -25,7 +25,6 @@ dependencies:
   # See comments in mlos.yml.
   #- gcc_linux-64
   - pip:
-    - autopep8>=1.7.0
     - bump2version
     - check-jsonschema
     - isort
