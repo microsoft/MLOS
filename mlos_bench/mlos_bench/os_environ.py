@@ -16,10 +16,6 @@ environ.get('PWD')
 import os
 import sys
 
-
-if sys.platform == 'win32':
-    import nt   # type: ignore[import-not-found]    # pylint: disable=import-error  # (3.8)
-
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
 else:
@@ -32,6 +28,10 @@ else:
 
 # Handle case sensitivity differences between platforms.
 # https://stackoverflow.com/a/19023293
-environ: EnvironType = nt.environ if sys.platform == 'win32' else os.environ    # type: ignore[name-defined]
+if sys.platform == 'win32':
+    import nt   # type: ignore[import-not-found]    # pylint: disable=import-error  # (3.8)
+    environ: EnvironType = nt.environ
+else:
+    environ: EnvironType = os.environ
 
 __all__ = ['environ']
