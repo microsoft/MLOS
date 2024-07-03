@@ -34,7 +34,7 @@ conda-env: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 MLOS_CORE_CONF_FILES := mlos_core/pyproject.toml mlos_core/setup.py mlos_core/MANIFEST.in
 MLOS_BENCH_CONF_FILES := mlos_bench/pyproject.toml mlos_bench/setup.py mlos_bench/MANIFEST.in
 MLOS_VIZ_CONF_FILES := mlos_viz/pyproject.toml mlos_viz/setup.py mlos_viz/MANIFEST.in
-MLOS_GLOBAL_CONF_FILES := setup.cfg # pyproject.toml
+MLOS_GLOBAL_CONF_FILES := setup.cfg pyproject.toml
 
 MLOS_PKGS := mlos_core mlos_bench mlos_viz
 MLOS_PKG_CONF_FILES := $(MLOS_CORE_CONF_FILES) $(MLOS_BENCH_CONF_FILES) $(MLOS_VIZ_CONF_FILES) $(MLOS_GLOBAL_CONF_FILES)
@@ -164,9 +164,7 @@ build/black.%.${CONDA_ENV_NAME}.build-stamp: $(BLACK_COMMON_PREREQS)
 	touch $@
 
 .PHONY: check
-check: pycodestyle pydocstyle pylint mypy # cspell markdown-link-check
-# TODO: Enable isort and black checks
-#check: isort-check black-check pycodestyle pydocstyle pylint mypy # cspell markdown-link-check
+check: isort-check black-check pycodestyle pydocstyle pylint mypy # cspell markdown-link-check
 
 .PHONY: black-check
 black-check: build/black-check.mlos_core.${CONDA_ENV_NAME}.build-stamp
@@ -723,7 +721,10 @@ clean-doc:
 
 .PHONY: clean-format
 clean-format:
-	# TODO: add black and isort rules
+	rm -f build/black.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/black.mlos_*.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/isort.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/isort.mlos_*.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/licenseheaders-prereqs.${CONDA_ENV_NAME}.build-stamp
 
@@ -733,6 +734,11 @@ clean-check:
 	rm -f build/pylint.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pylint.mlos_*.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/mypy.mlos_*.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/black-check.build-stamp
+	rm -f build/black-check.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/black-check.mlos_*.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/isort-check.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/isort-check.mlos_*.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pycodestyle.build-stamp
 	rm -f build/pycodestyle.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pycodestyle.mlos_*.${CONDA_ENV_NAME}.build-stamp
