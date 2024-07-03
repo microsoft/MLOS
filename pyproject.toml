@@ -1,0 +1,9 @@
+[tool.black]
+line-length = 88
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+py_version = 311
+src_paths = ["mlos_core", "mlos_bench", "mlos_viz"]

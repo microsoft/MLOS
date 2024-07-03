@@ -129,9 +129,10 @@
         "--experimental"
     ],
     "[python]": {
-        "editor.defaultFormatter": "ms-python.autopep8",
-        "editor.formatOnSave": true,
-        "editor.formatOnSaveMode": "modifications"
+        // TODO: Enable black formatter
+        //"editor.defaultFormatter": "ms-python.black-formatter",
+        //"editor.formatOnSave": true,
+        //"editor.formatOnSaveMode": "modifications"
     },
     // See Also .vscode/launch.json for environment variable args to pytest during debug sessions.
     // For the rest, see setup.cfg
