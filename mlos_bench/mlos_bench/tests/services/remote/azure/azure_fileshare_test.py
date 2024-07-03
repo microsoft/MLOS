@@ -215,7 +215,7 @@ def process_paths(input_path: str) -> str:
     skip_prefix = os.getcwd()
     # Remove prefix from os.path.abspath if there
     if input_path == os.path.abspath(input_path):
-        result = input_path[len(skip_prefix) + 1 :]
+        result = input_path[(len(skip_prefix) + 1) :]
     else:
         result = input_path
     # Change file seps to unix-style
