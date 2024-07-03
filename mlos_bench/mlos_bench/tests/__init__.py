@@ -6,21 +6,19 @@
 Tests for mlos_bench.
 Used to make mypy happy about multiple conftest.py modules.
 """
+import filecmp
+import os
+import shutil
+import socket
 from datetime import tzinfo
 from logging import debug, warning
 from subprocess import run
 from typing import List, Optional
 
-import filecmp
-import os
-import socket
-import shutil
-
-import pytz
 import pytest
+import pytz
 
 from mlos_bench.util import get_class_from_name, nullable
-
 
 ZONE_NAMES = [
     # Explicit time zones.

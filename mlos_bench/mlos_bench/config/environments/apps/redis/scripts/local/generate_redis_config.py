@@ -9,8 +9,8 @@ Helper script to generate Redis config from tunable parameters JSON.
 Run: `./generate_redis_config.py ./input-params.json ./output-redis.cfg`
 """
 
-import json
 import argparse
+import json
 
 
 def _main(fname_input: str, fname_output: str) -> None:

@@ -38,7 +38,7 @@ def ignore_plotter_warnings(plotter_method: MlosVizMethod = MlosVizMethod.AUTO) 
     """
     base.ignore_plotter_warnings()
     if plotter_method == MlosVizMethod.DABL:
-        import mlos_viz.dabl    # pylint: disable=import-outside-toplevel
+        import mlos_viz.dabl  # pylint: disable=import-outside-toplevel
         mlos_viz.dabl.ignore_plotter_warnings()
     else:
         raise NotImplementedError(f"Unhandled method: {plotter_method}")
@@ -80,7 +80,7 @@ def plot(exp_data: Optional[ExperimentData] = None, *,
     base.plot_top_n_configs(exp_data, results_df=results_df, objectives=objectives, **kwargs)
 
     if MlosVizMethod.DABL:
-        import mlos_viz.dabl    # pylint: disable=import-outside-toplevel
+        import mlos_viz.dabl  # pylint: disable=import-outside-toplevel
         mlos_viz.dabl.plot(exp_data, results_df=results_df, objectives=objectives)
     else:
         raise NotImplementedError(f"Unhandled method: {plotter_method}")

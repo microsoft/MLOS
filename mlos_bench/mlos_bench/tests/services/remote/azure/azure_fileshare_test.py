@@ -7,7 +7,7 @@ Tests for mlos_bench.services.remote.azure.azure_fileshare
 """
 
 import os
-from unittest.mock import MagicMock, Mock, patch, call
+from unittest.mock import MagicMock, Mock, call, patch
 
 from mlos_bench.services.remote.azure.azure_fileshare import AzureFileShareService
 

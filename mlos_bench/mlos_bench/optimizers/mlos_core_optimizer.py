@@ -8,27 +8,28 @@ A wrapper for mlos_core optimizers for mlos_bench.
 
 import logging
 import os
-
 from types import TracebackType
 from typing import Dict, Optional, Sequence, Tuple, Type, Union
-from typing_extensions import Literal
 
 import pandas as pd
-
-from mlos_core.optimizers import (
-    BaseOptimizer, OptimizerType, OptimizerFactory, SpaceAdapterType, DEFAULT_OPTIMIZER_TYPE
-)
+from typing_extensions import Literal
 
 from mlos_bench.environments.status import Status
-from mlos_bench.services.base_service import Service
-from mlos_bench.tunables.tunable import TunableValue
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.base_optimizer import Optimizer
-
 from mlos_bench.optimizers.convert_configspace import (
     TunableValueKind,
     configspace_data_to_tunable_values,
     special_param_names,
+)
+from mlos_bench.services.base_service import Service
+from mlos_bench.tunables.tunable import TunableValue
+from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_core.optimizers import (
+    DEFAULT_OPTIMIZER_TYPE,
+    BaseOptimizer,
+    OptimizerFactory,
+    OptimizerType,
+    SpaceAdapterType,
 )
 
 _LOG = logging.getLogger(__name__)

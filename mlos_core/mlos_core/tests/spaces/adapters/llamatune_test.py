@@ -10,10 +10,9 @@ Tests for LlamaTune space adapter.
 
 from typing import Any, Dict, Iterator, List, Set
 
-import pytest
-
 import ConfigSpace as CS
 import pandas as pd
+import pytest
 
 from mlos_core.spaces.adapters import LlamaTuneAdapter
 

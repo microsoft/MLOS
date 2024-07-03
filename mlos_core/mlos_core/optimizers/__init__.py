@@ -11,11 +11,11 @@ from typing import List, Optional, TypeVar
 
 import ConfigSpace
 
-from mlos_core.optimizers.optimizer import BaseOptimizer
-from mlos_core.optimizers.random_optimizer import RandomOptimizer
 from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
 from mlos_core.optimizers.flaml_optimizer import FlamlOptimizer
-from mlos_core.spaces.adapters import SpaceAdapterType, SpaceAdapterFactory
+from mlos_core.optimizers.optimizer import BaseOptimizer
+from mlos_core.optimizers.random_optimizer import RandomOptimizer
+from mlos_core.spaces.adapters import SpaceAdapterFactory, SpaceAdapterType
 
 __all__ = [
     'SpaceAdapterType',

@@ -9,9 +9,9 @@ import sys
 
 import pytest
 
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.tests.environments import check_env_success
 from mlos_bench.tests.environments.local import create_local_env
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def _run_local_env(tunable_groups: TunableGroups, shell_subcmd: str, expected: dict) -> None:

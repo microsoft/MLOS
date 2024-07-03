@@ -6,19 +6,17 @@
 Common fixtures for mock TunableGroups and Environment objects.
 """
 
+import os
 from typing import Any, Generator, List
 
-import os
-
-from fasteners import InterProcessLock, InterProcessReaderWriterLock
-from pytest_docker.plugin import get_docker_services, Services as DockerServices
-
 import pytest
+from fasteners import InterProcessLock, InterProcessReaderWriterLock
+from pytest_docker.plugin import Services as DockerServices
+from pytest_docker.plugin import get_docker_services
 
 from mlos_bench.environments.mock_env import MockEnv
-from mlos_bench.tunables.tunable_groups import TunableGroups
-
 from mlos_bench.tests import SEED, tunable_groups_fixtures
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
 # -- Ignore pylint complaints about pytest references to

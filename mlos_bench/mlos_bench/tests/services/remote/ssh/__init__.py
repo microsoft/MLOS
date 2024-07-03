@@ -14,7 +14,6 @@ from pytest_docker.plugin import Services as DockerServices
 
 from mlos_bench.tests import check_socket
 
-
 # The SSH test server port and name.
 # See Also: docker-compose.yml
 SSH_TEST_SERVER_PORT = 2254

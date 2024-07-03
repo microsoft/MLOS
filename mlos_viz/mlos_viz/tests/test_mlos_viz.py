@@ -8,13 +8,10 @@ Unit tests for mlos_viz.
 
 import random
 import warnings
-
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
-
 from mlos_viz import MlosVizMethod, plot
-
 from mlos_viz.tests import BASE_MATPLOTLIB_SHOW_PATCH, SEABORN_BOXPLOT_PATCH
 
 

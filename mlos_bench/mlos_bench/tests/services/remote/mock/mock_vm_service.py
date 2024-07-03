@@ -9,8 +9,8 @@ A collection Service functions for mocking managing VMs.
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.types.host_provisioner_type import SupportsHostProvisioning
 from mlos_bench.services.types.host_ops_type import SupportsHostOps
+from mlos_bench.services.types.host_provisioner_type import SupportsHostProvisioning
 from mlos_bench.services.types.os_ops_type import SupportsOSOps
 from mlos_bench.tests.services.remote.mock import mock_operation
 

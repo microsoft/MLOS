@@ -12,10 +12,8 @@ import pytest
 import requests.exceptions as requests_ex
 
 from mlos_bench.environments.status import Status
-
 from mlos_bench.services.remote.azure.azure_auth import AzureAuthService
 from mlos_bench.services.remote.azure.azure_network_services import AzureNetworkService
-
 from mlos_bench.tests.services.remote.azure import make_httplib_json_response
 
 

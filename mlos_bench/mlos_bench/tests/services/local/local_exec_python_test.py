@@ -6,15 +6,14 @@
 Unit tests for LocalExecService to run Python scripts locally.
 """
 
-from typing import Any, Dict
-
 import json
+from typing import Any, Dict
 
 import pytest
 
-from mlos_bench.tunables.tunable import TunableValue
-from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+from mlos_bench.services.local.local_exec import LocalExecService
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.util import path_join
 
 # pylint: disable=redefined-outer-name

@@ -11,10 +11,9 @@ from base64 import b64decode
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from pytz import UTC
-
 import azure.identity as azure_id
 from azure.keyvault.secrets import SecretClient
+from pytz import UTC
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.authenticator_type import SupportsAuth

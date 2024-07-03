@@ -7,19 +7,18 @@ Grid search optimizer for mlos_bench.
 """
 
 import logging
+from typing import Dict, Iterable, Optional, Sequence, Set, Tuple
 
-from typing import Dict, Iterable, Set, Optional, Sequence, Tuple
-
-import numpy as np
 import ConfigSpace
+import numpy as np
 from ConfigSpace.util import generate_grid
 
 from mlos_bench.environments.status import Status
+from mlos_bench.optimizers.convert_configspace import configspace_data_to_tunable_values
+from mlos_bench.optimizers.track_best_optimizer import TrackBestOptimizer
+from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.optimizers.track_best_optimizer import TrackBestOptimizer
-from mlos_bench.optimizers.convert_configspace import configspace_data_to_tunable_values
-from mlos_bench.services.base_service import Service
 
 _LOG = logging.getLogger(__name__)
 

@@ -14,11 +14,11 @@ from typing import Dict, Iterable, Optional, Tuple
 
 from pytz import UTC
 
-from mlos_bench.environments.status import Status
 from mlos_bench.environments.script_env import ScriptEnv
+from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 from mlos_bench.services.types.host_ops_type import SupportsHostOps
+from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 

@@ -8,14 +8,13 @@ Unit tests for the storage subsystem.
 from datetime import datetime, tzinfo
 from typing import Optional
 
+import pytest
 from pytz import UTC
 
-import pytest
-
 from mlos_bench.environments.status import Status
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tests import ZONE_INFO
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def test_exp_load_empty(exp_storage: Storage.Experiment) -> None:

@@ -9,14 +9,12 @@ Test multi-target optimization.
 import logging
 from typing import List, Optional, Type
 
+import ConfigSpace as CS
+import numpy as np
+import pandas as pd
 import pytest
 
-import pandas as pd
-import numpy as np
-import ConfigSpace as CS
-
-from mlos_core.optimizers import OptimizerType, BaseOptimizer
-
+from mlos_core.optimizers import BaseOptimizer, OptimizerType
 from mlos_core.tests import SEED
 
 _LOG = logging.getLogger(__name__)

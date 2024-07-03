@@ -8,16 +8,24 @@ that encapsulate benchmark environments, tunable parameters, and
 service functions.
 """
 
+import json  # For logging only
+import logging
 import os
 import sys
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
-import json    # For logging only
-import logging
-
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, TYPE_CHECKING
-
-import json5    # To read configs with comments and other JSON5 syntax features
-from jsonschema import ValidationError, SchemaError
+import json5  # To read configs with comments and other JSON5 syntax features
+from jsonschema import SchemaError, ValidationError
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
@@ -26,7 +34,12 @@ from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import instantiate_from_config, merge_parameters, path_join, preprocess_dynamic_configs
+from mlos_bench.util import (
+    instantiate_from_config,
+    merge_parameters,
+    path_join,
+    preprocess_dynamic_configs,
+)
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -34,8 +47,8 @@ else:
     from importlib.resources import files
 
 if TYPE_CHECKING:
-    from mlos_bench.storage.base_storage import Storage
     from mlos_bench.schedulers.base_scheduler import Scheduler
+    from mlos_bench.storage.base_storage import Storage
 
 
 _LOG = logging.getLogger(__name__)
@@ -296,7 +309,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             A new instance of the Storage class.
         """
         (class_name, class_config) = self.prepare_class_load(config, global_config)
-        from mlos_bench.storage.base_storage import Storage     # pylint: disable=import-outside-toplevel
+        from mlos_bench.storage.base_storage import (
+            Storage,  # pylint: disable=import-outside-toplevel
+        )
         inst = instantiate_from_config(Storage, class_name,     # type: ignore[type-abstract]
                                        config=class_config,
                                        global_config=global_config,
@@ -335,7 +350,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             A new instance of the Scheduler.
         """
         (class_name, class_config) = self.prepare_class_load(config, global_config)
-        from mlos_bench.schedulers.base_scheduler import Scheduler  # pylint: disable=import-outside-toplevel
+        from mlos_bench.schedulers.base_scheduler import (
+            Scheduler,  # pylint: disable=import-outside-toplevel
+        )
         inst = instantiate_from_config(Scheduler, class_name,  # type: ignore[type-abstract]
                                        config=class_config,
                                        global_config=global_config,

@@ -7,21 +7,20 @@ Test fixtures for mlos_bench storage.
 """
 
 from datetime import datetime
-from random import random, seed as rand_seed
+from random import random
+from random import seed as rand_seed
 from typing import Generator, Optional
 
+import pytest
 from pytz import UTC
 
-import pytest
-
 from mlos_bench.environments.status import Status
+from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.storage import SqlStorage
-from mlos_bench.optimizers.mock_optimizer import MockOptimizer
-from mlos_bench.tunables.tunable_groups import TunableGroups
-
 from mlos_bench.tests import SEED
 from mlos_bench.tests.storage import CONFIG_COUNT, CONFIG_TRIAL_REPEAT_COUNT
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
 

@@ -7,22 +7,28 @@ Tests for mlos_bench.services.remote.ssh.SshService base class.
 """
 
 import asyncio
-from importlib.metadata import version, PackageNotFoundError
 import time
-
+from importlib.metadata import PackageNotFoundError, version
 from subprocess import run
 from threading import Thread
 
 import pytest
 from pytest_lazy_fixtures.lazy_fixture import lf as lazy_fixture
 
-from mlos_bench.services.remote.ssh.ssh_service import SshService
-from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
 from mlos_bench.services.remote.ssh.ssh_fileshare import SshFileShareService
-
-from mlos_bench.tests import requires_docker, requires_ssh, check_socket, resolve_host_name
-from mlos_bench.tests.services.remote.ssh import SshTestServerInfo, ALT_TEST_SERVER_NAME, SSH_TEST_SERVER_NAME
-
+from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
+from mlos_bench.services.remote.ssh.ssh_service import SshService
+from mlos_bench.tests import (
+    check_socket,
+    requires_docker,
+    requires_ssh,
+    resolve_host_name,
+)
+from mlos_bench.tests.services.remote.ssh import (
+    ALT_TEST_SERVER_NAME,
+    SSH_TEST_SERVER_NAME,
+    SshTestServerInfo,
+)
 
 if version("pytest") >= "8.0.0":
     try:

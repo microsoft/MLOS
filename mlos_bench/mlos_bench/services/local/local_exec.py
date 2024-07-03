@@ -12,10 +12,18 @@ import os
 import shlex
 import subprocess
 import sys
-
 from string import Template
 from typing import (
-    Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, TYPE_CHECKING, Union
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
 )
 
 from mlos_bench.os_environ import environ

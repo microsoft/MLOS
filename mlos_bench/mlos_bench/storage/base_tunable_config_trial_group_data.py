@@ -7,7 +7,7 @@ Base interface for accessing the stored benchmark config trial group data.
 """
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import pandas
 

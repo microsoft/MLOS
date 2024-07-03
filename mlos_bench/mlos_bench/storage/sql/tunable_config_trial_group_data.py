@@ -6,13 +6,15 @@
 An interface to access the tunable config trial group data stored in SQL DB.
 """
 
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Optional
 
 import pandas
 from sqlalchemy import Engine, Integer, func
 
 from mlos_bench.storage.base_tunable_config_data import TunableConfigData
-from mlos_bench.storage.base_tunable_config_trial_group_data import TunableConfigTrialGroupData
+from mlos_bench.storage.base_tunable_config_trial_group_data import (
+    TunableConfigTrialGroupData,
+)
 from mlos_bench.storage.sql import common
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.sql.tunable_config_data import TunableConfigSqlData

@@ -5,15 +5,13 @@
 """
 Small wrapper functions for dabl plotting functions via mlos_bench data.
 """
-from typing import Dict, Optional, Literal
-
 import warnings
+from typing import Dict, Literal, Optional
 
 import dabl
 import pandas
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
-
 from mlos_viz.util import expand_results_data_args
 
 

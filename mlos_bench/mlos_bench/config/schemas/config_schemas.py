@@ -6,14 +6,13 @@
 A simple class for describing where to find different config schemas and validating configs against them.
 """
 
+import json  # schema files are pure json - no comments
 import logging
 from enum import Enum
-from os import path, walk, environ
+from os import environ, path, walk
 from typing import Dict, Iterator, Mapping
 
-import json         # schema files are pure json - no comments
 import jsonschema
-
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 

@@ -10,14 +10,16 @@ Tests for space adapter factory.
 
 from typing import List, Optional, Type
 
+import ConfigSpace as CS
 import pytest
 
-import ConfigSpace as CS
-
-from mlos_core.spaces.adapters import SpaceAdapterFactory, SpaceAdapterType, ConcreteSpaceAdapter
+from mlos_core.spaces.adapters import (
+    ConcreteSpaceAdapter,
+    SpaceAdapterFactory,
+    SpaceAdapterType,
+)
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
-
 from mlos_core.tests import get_all_concrete_subclasses
 
 

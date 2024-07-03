@@ -7,7 +7,6 @@ Functions to convert TunableGroups to ConfigSpace for use with the mlos_core opt
 """
 
 import logging
-
 from typing import Dict, List, Optional, Tuple, Union
 
 from ConfigSpace import (
@@ -21,9 +20,10 @@ from ConfigSpace import (
     Normal,
     Uniform,
 )
+
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import try_parse_val, nullable
+from mlos_bench.util import nullable, try_parse_val
 
 _LOG = logging.getLogger(__name__)
 

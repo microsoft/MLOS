@@ -8,7 +8,16 @@ A collection Service functions for mocking local exec.
 
 import logging
 from typing import (
-    Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, TYPE_CHECKING, Union
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
 )
 
 from mlos_bench.services.base_service import Service

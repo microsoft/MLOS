@@ -6,7 +6,6 @@
 Unit tests for scheduling trials for some future time.
 """
 from datetime import datetime, timedelta
-
 from typing import Iterator, Set
 
 from pytz import UTC

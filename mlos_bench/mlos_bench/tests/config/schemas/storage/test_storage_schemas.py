@@ -10,16 +10,15 @@ from os import path
 
 import pytest
 
-from mlos_core.tests import get_all_concrete_subclasses
-
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.storage.base_storage import Storage
-
 from mlos_bench.tests import try_resolve_class_name
-from mlos_bench.tests.config.schemas import (get_schema_test_cases,
-                                             check_test_case_against_schema,
-                                             check_test_case_config_with_extra_param)
-
+from mlos_bench.tests.config.schemas import (
+    check_test_case_against_schema,
+    check_test_case_config_with_extra_param,
+    get_schema_test_cases,
+)
+from mlos_core.tests import get_all_concrete_subclasses
 
 # General testing strategy:
 # - hand code a set of good/bad configs (useful to test editor schema checking)

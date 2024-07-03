@@ -8,9 +8,9 @@ Base class for the service mix-ins.
 
 import json
 import logging
-
 from types import TracebackType
 from typing import Any, Callable, Dict, List, Optional, Set, Type, Union
+
 from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema

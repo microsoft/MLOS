@@ -9,10 +9,9 @@ Unit tests for mock mlos_bench optimizer.
 import pytest
 
 from mlos_bench.environments.status import Status
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
-
 from mlos_bench.tests import SEED
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
 

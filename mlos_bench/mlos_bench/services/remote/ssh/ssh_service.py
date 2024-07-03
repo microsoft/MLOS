@@ -6,21 +6,36 @@
 A collection functions for interacting with SSH servers as file shares.
 """
 
-from abc import ABCMeta
-from asyncio import Event as CoroEvent, Lock as CoroLock
-from warnings import warn
-from types import TracebackType
-from typing import Any, Callable, Coroutine, Dict, List, Literal, Optional, Tuple, Type, Union
-from threading import current_thread
-
 import logging
 import os
+from abc import ABCMeta
+from asyncio import Event as CoroEvent
+from asyncio import Lock as CoroLock
+from threading import current_thread
+from types import TracebackType
+from typing import (
+    Any,
+    Callable,
+    Coroutine,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
+from warnings import warn
 
 import asyncssh
 from asyncssh.connection import SSHClientConnection
 
+from mlos_bench.event_loop_context import (
+    CoroReturnType,
+    EventLoopContext,
+    FutureReturnType,
+)
 from mlos_bench.services.base_service import Service
-from mlos_bench.event_loop_context import EventLoopContext, CoroReturnType, FutureReturnType
 from mlos_bench.util import nullable
 
 _LOG = logging.getLogger(__name__)

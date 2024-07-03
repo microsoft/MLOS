@@ -6,15 +6,13 @@
 Contains space converters for FLAML.
 """
 
-from typing import Dict, TYPE_CHECKING
-
 import sys
+from typing import TYPE_CHECKING, Dict
 
 import ConfigSpace
-import numpy as np
-
 import flaml.tune
 import flaml.tune.sample
+import numpy as np
 
 if TYPE_CHECKING:
     from ConfigSpace.hyperparameters import Hyperparameter

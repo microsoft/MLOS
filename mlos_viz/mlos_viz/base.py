@@ -6,22 +6,19 @@
 Base functions for visualizing, explain, and gain insights from results.
 """
 
-from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, Tuple, Union
-
 import re
 import warnings
-
 from importlib.metadata import version
+from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, Tuple, Union
 
-from matplotlib import pyplot as plt
 import pandas
+import seaborn as sns
+from matplotlib import pyplot as plt
 from pandas.api.types import is_numeric_dtype
 from pandas.core.groupby.generic import SeriesGroupBy
-import seaborn as sns
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_viz.util import expand_results_data_args
-
 
 _SEABORN_VERS = version('seaborn')
 

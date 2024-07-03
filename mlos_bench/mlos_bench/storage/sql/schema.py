@@ -7,12 +7,23 @@ DB schema definition.
 """
 
 import logging
-from typing import List, Any
+from typing import Any, List
 
 from sqlalchemy import (
-    Engine, MetaData, Dialect, create_mock_engine,
-    Table, Column, Sequence, Integer, Float, String, DateTime,
-    PrimaryKeyConstraint, ForeignKeyConstraint, UniqueConstraint,
+    Column,
+    DateTime,
+    Dialect,
+    Engine,
+    Float,
+    ForeignKeyConstraint,
+    Integer,
+    MetaData,
+    PrimaryKeyConstraint,
+    Sequence,
+    String,
+    Table,
+    UniqueConstraint,
+    create_mock_engine,
 )
 
 _LOG = logging.getLogger(__name__)

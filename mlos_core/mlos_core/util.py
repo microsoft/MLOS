@@ -8,8 +8,8 @@ Internal helper functions for mlos_core package.
 
 from typing import Union
 
-from ConfigSpace import Configuration, ConfigurationSpace
 import pandas as pd
+from ConfigSpace import Configuration, ConfigurationSpace
 
 
 def config_to_dataframe(config: Configuration) -> pd.DataFrame:

@@ -8,14 +8,13 @@ Unit tests for telemetry and status of LocalEnv benchmark environment.
 from datetime import datetime, timedelta, tzinfo
 from typing import Optional
 
+import pytest
 from pytz import UTC
 
-import pytest
-
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.tests import ZONE_INFO
-from mlos_bench.tests.environments import check_env_success, check_env_fail_telemetry
+from mlos_bench.tests.environments import check_env_fail_telemetry, check_env_success
 from mlos_bench.tests.environments.local import create_local_env
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def _format_str(zone_info: Optional[tzinfo]) -> str:

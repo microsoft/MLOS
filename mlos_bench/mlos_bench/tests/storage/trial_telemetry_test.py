@@ -8,16 +8,14 @@ Unit tests for saving and restoring the telemetry data.
 from datetime import datetime, timedelta, tzinfo
 from typing import Any, List, Optional, Tuple
 
+import pytest
 from pytz import UTC
 
-import pytest
-
 from mlos_bench.environments.status import Status
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
-from mlos_bench.util import nullable
-
 from mlos_bench.tests import ZONE_INFO
+from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.util import nullable
 
 # pylint: disable=redefined-outer-name
 

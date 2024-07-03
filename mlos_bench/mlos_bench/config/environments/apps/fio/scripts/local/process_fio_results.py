@@ -10,7 +10,6 @@ Script for post-processing FIO results for mlos_bench.
 import argparse
 import itertools
 import json
-
 from typing import Any, Iterator, Tuple
 
 import pandas

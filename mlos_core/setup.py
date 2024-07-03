@@ -8,12 +8,11 @@ Setup instructions for the mlos_core package.
 
 # pylint: disable=duplicate-code
 
+import os
+import re
 from itertools import chain
 from logging import warning
 from typing import Dict, List
-
-import os
-import re
 
 from setuptools import setup
 

@@ -6,14 +6,14 @@
 EventLoopContext class definition.
 """
 
-from asyncio import AbstractEventLoop
-from concurrent.futures import Future
-from typing import Any, Coroutine, Optional, TypeVar
-from threading import Lock as ThreadLock, Thread
-
 import asyncio
 import logging
 import sys
+from asyncio import AbstractEventLoop
+from concurrent.futures import Future
+from threading import Lock as ThreadLock
+from threading import Thread
+from typing import Any, Coroutine, Optional, TypeVar
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias

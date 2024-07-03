@@ -9,7 +9,9 @@ A collection Service functions for mocking managing (Virtual) Networks.
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.types.network_provisioner_type import SupportsNetworkProvisioning
+from mlos_bench.services.types.network_provisioner_type import (
+    SupportsNetworkProvisioning,
+)
 from mlos_bench.tests.services.remote.mock import mock_operation
 
 

@@ -8,9 +8,8 @@ Base class for certain Azure Services classes that do deployments.
 
 import abc
 import json
-import time
 import logging
-
+import time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests

@@ -29,7 +29,7 @@ else:
 # Handle case sensitivity differences between platforms.
 # https://stackoverflow.com/a/19023293
 if sys.platform == 'win32':
-    import nt   # type: ignore[import-not-found]    # pylint: disable=import-error  # (3.8)
+    import nt  # type: ignore[import-not-found]    # pylint: disable=import-error  # (3.8)
     environ: EnvironType = nt.environ
 else:
     environ: EnvironType = os.environ

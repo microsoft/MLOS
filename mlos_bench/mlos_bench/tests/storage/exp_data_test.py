@@ -6,11 +6,10 @@
 Unit tests for loading the experiment metadata.
 """
 
-from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.base_experiment_data import ExperimentData
-from mlos_bench.tunables.tunable_groups import TunableGroups
-
+from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tests.storage import CONFIG_COUNT, CONFIG_TRIAL_REPEAT_COUNT
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def test_load_empty_exp_data(storage: Storage, exp_storage: Storage.Experiment) -> None:

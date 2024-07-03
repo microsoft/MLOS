@@ -9,8 +9,8 @@ Helper script to generate GRUB config from tunable parameters JSON.
 Run: `./generate_grub_config.py ./input-boot-params.json ./output-grub.cfg`
 """
 
-import json
 import argparse
+import json
 
 
 def _main(fname_input: str, fname_output: str) -> None:

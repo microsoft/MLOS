@@ -6,7 +6,6 @@
 A collection Service functions for configuring SaaS instances on Azure.
 """
 import logging
-
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests

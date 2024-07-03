@@ -7,7 +7,7 @@ Protocol interface for Service types that provide helper functions to run
 scripts on a remote host OS.
 """
 
-from typing import Iterable, Tuple, Protocol, runtime_checkable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable, Protocol, Tuple, runtime_checkable
 
 if TYPE_CHECKING:
     from mlos_bench.environments.status import Status

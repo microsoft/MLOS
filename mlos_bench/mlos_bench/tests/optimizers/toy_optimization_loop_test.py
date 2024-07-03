@@ -6,23 +6,20 @@
 Toy optimization loop to test the optimizers on mock benchmark environment.
 """
 
-from typing import Tuple
-
 import logging
+from typing import Tuple
 
 import pytest
 
-from mlos_core.util import config_to_dataframe
-from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
-from mlos_bench.optimizers.convert_configspace import tunable_values_to_configuration
-
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.mock_env import MockEnv
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.base_optimizer import Optimizer
-from mlos_bench.optimizers.mock_optimizer import MockOptimizer
+from mlos_bench.optimizers.convert_configspace import tunable_values_to_configuration
 from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
-
+from mlos_bench.optimizers.mock_optimizer import MockOptimizer
+from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
+from mlos_core.util import config_to_dataframe
 
 # For debugging purposes output some warnings which are captured with failed tests.
 DEBUG = True

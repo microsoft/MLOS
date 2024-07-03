@@ -6,11 +6,10 @@
 Unit tests for grid search mlos_bench optimizer.
 """
 
-from typing import Dict, List
-
 import itertools
 import math
 import random
+from typing import Dict, List
 
 import pytest
 
@@ -18,7 +17,6 @@ from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.grid_search_optimizer import GridSearchOptimizer
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
-
 
 # pylint: disable=redefined-outer-name
 

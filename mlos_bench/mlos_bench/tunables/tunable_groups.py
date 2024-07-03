@@ -6,12 +6,11 @@
 TunableGroups definition.
 """
 import copy
-
 from typing import Dict, Generator, Iterable, Mapping, Optional, Tuple, Union
 
 from mlos_bench.config.schemas import ConfigSchema
-from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
+from mlos_bench.tunables.tunable import Tunable, TunableValue
 
 
 class TunableGroups:

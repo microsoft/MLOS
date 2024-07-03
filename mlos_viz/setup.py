@@ -8,15 +8,13 @@ Setup instructions for the mlos_viz package.
 
 # pylint: disable=duplicate-code
 
-from logging import warning
-from itertools import chain
-from typing import Dict, List
-
 import os
 import re
+from itertools import chain
+from logging import warning
+from typing import Dict, List
 
 from setuptools import setup
-
 
 PKG_NAME = "mlos_viz"
 

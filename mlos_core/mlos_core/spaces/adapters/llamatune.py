@@ -9,14 +9,14 @@ from typing import Dict, Optional
 from warnings import warn
 
 import ConfigSpace
-from ConfigSpace.hyperparameters import NumericalHyperparameter
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+from ConfigSpace.hyperparameters import NumericalHyperparameter
 from sklearn.preprocessing import MinMaxScaler
 
-from mlos_core.util import normalize_config
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
+from mlos_core.util import normalize_config
 
 
 class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-attributes
@@ -350,7 +350,10 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
         ------
             RuntimeError: if reverse mapping computation fails.
         """
-        from scipy.linalg import pinv, LinAlgError  # pylint: disable=import-outside-toplevel
+        from scipy.linalg import (  # pylint: disable=import-outside-toplevel
+            LinAlgError,
+            pinv,
+        )
 
         warn("Trying to register a configuration that was not previously suggested by the optimizer. " +
              "This inverse configuration transformation is typically not supported. " +

@@ -6,17 +6,26 @@
 Protocol interface for helper functions to lookup and load configs.
 """
 
-from typing import Any, Dict, List, Iterable, Optional, Union, Protocol, runtime_checkable, TYPE_CHECKING
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Protocol,
+    Union,
+    runtime_checkable,
+)
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.tunables.tunable import TunableValue
 
-
 # Avoid's circular import issues.
 if TYPE_CHECKING:
-    from mlos_bench.tunables.tunable_groups import TunableGroups
-    from mlos_bench.services.base_service import Service
     from mlos_bench.environments.base_environment import Environment
+    from mlos_bench.services.base_service import Service
+    from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 @runtime_checkable

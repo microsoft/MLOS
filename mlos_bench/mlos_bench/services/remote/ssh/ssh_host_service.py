@@ -6,18 +6,17 @@
 A collection Service functions for managing hosts via SSH.
 """
 
+import logging
 from concurrent.futures import Future
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
-import logging
-
-from asyncssh import SSHCompletedProcess, ConnectionLost, DisconnectError, ProcessError
+from asyncssh import ConnectionLost, DisconnectError, ProcessError, SSHCompletedProcess
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.remote.ssh.ssh_service import SshService
-from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 from mlos_bench.services.types.os_ops_type import SupportsOSOps
+from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 from mlos_bench.util import merge_parameters
 
 _LOG = logging.getLogger(__name__)

@@ -6,11 +6,10 @@
 Common tests for config schemas and their validation and test cases.
 """
 
+import os
 from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any, Dict, Set
-
-import os
 
 import json5
 import jsonschema

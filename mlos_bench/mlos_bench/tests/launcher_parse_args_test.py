@@ -14,11 +14,10 @@ from typing import List
 
 import pytest
 
-from mlos_bench.launcher import Launcher
-from mlos_bench.optimizers import OneShotOptimizer, MlosCoreOptimizer
-from mlos_bench.os_environ import environ
 from mlos_bench.config.schemas import ConfigSchema
-from mlos_bench.util import path_join
+from mlos_bench.launcher import Launcher
+from mlos_bench.optimizers import MlosCoreOptimizer, OneShotOptimizer
+from mlos_bench.os_environ import environ
 from mlos_bench.schedulers import SyncScheduler
 from mlos_bench.services.types import (
     SupportsAuth,
@@ -28,6 +27,7 @@ from mlos_bench.services.types import (
     SupportsRemoteExec,
 )
 from mlos_bench.tests import check_class_name
+from mlos_bench.util import path_join
 
 if sys.version_info < (3, 10):
     from importlib_resources import files

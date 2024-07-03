@@ -6,7 +6,7 @@
 Factory method to create a new Storage instance from configs.
 """
 
-from typing import Any, Optional, List, Dict
+from typing import Any, Dict, List, Optional
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.config_persistence import ConfigPersistenceService

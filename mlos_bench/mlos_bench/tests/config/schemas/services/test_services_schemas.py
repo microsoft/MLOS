@@ -11,20 +11,21 @@ from typing import Any, Dict, List
 
 import pytest
 
-from mlos_core.tests import get_all_concrete_subclasses
-
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.temp_dir_context import TempDirContextService
-from mlos_bench.services.remote.azure.azure_deployment_services import AzureDeploymentService
+from mlos_bench.services.remote.azure.azure_deployment_services import (
+    AzureDeploymentService,
+)
 from mlos_bench.services.remote.ssh.ssh_service import SshService
-
 from mlos_bench.tests import try_resolve_class_name
-from mlos_bench.tests.config.schemas import (get_schema_test_cases,
-                                             check_test_case_against_schema,
-                                             check_test_case_config_with_extra_param)
-
+from mlos_bench.tests.config.schemas import (
+    check_test_case_against_schema,
+    check_test_case_config_with_extra_param,
+    get_schema_test_cases,
+)
+from mlos_core.tests import get_all_concrete_subclasses
 
 # General testing strategy:
 # - hand code a set of good/bad configs (useful to test editor schema checking)

@@ -6,20 +6,19 @@
 Saving and restoring the benchmark data using SQLAlchemy.
 """
 
-import logging
 import hashlib
+import logging
 from datetime import datetime
-from typing import Optional, Tuple, List, Literal, Dict, Iterator, Any
+from typing import Any, Dict, Iterator, List, Literal, Optional, Tuple
 
 from pytz import UTC
-
-from sqlalchemy import Engine, Connection, CursorResult, Table, column, func, select
+from sqlalchemy import Connection, CursorResult, Engine, Table, column, func, select
 
 from mlos_bench.environments.status import Status
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.sql.trial import Trial
+from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import nullable, utcify_timestamp
 
 _LOG = logging.getLogger(__name__)

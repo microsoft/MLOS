@@ -6,24 +6,27 @@
 Tests for Bayesian Optimizers.
 """
 
+import logging
 from copy import deepcopy
 from typing import List, Optional, Type
 
-import logging
+import ConfigSpace as CS
+import numpy as np
+import pandas as pd
 import pytest
 
-import pandas as pd
-import numpy as np
-import ConfigSpace as CS
-
 from mlos_core.optimizers import (
-    OptimizerType, ConcreteOptimizer, OptimizerFactory, BaseOptimizer)
-
-from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer, SmacOptimizer
+    BaseOptimizer,
+    ConcreteOptimizer,
+    OptimizerFactory,
+    OptimizerType,
+)
+from mlos_core.optimizers.bayesian_optimizers import (
+    BaseBayesianOptimizer,
+    SmacOptimizer,
+)
 from mlos_core.spaces.adapters import SpaceAdapterType
-
-from mlos_core.tests import get_all_concrete_subclasses, SEED
-
+from mlos_core.tests import SEED, get_all_concrete_subclasses
 
 _LOG = logging.getLogger(__name__)
 _LOG.setLevel(logging.DEBUG)

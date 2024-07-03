@@ -6,7 +6,7 @@
 Protocol interface for configuring cloud services.
 """
 
-from typing import Any, Dict, Protocol, Tuple, TYPE_CHECKING, runtime_checkable
+from typing import TYPE_CHECKING, Any, Dict, Protocol, Tuple, runtime_checkable
 
 if TYPE_CHECKING:
     from mlos_bench.environments.status import Status

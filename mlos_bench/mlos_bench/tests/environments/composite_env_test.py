@@ -9,8 +9,8 @@ Unit tests for composite environment.
 import pytest
 
 from mlos_bench.environments.composite_env import CompositeEnv
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
 

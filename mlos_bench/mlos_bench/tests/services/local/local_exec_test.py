@@ -8,11 +8,11 @@ Unit tests for the service to run the scripts locally.
 import sys
 import tempfile
 
-import pytest
 import pandas
+import pytest
 
-from mlos_bench.services.local.local_exec import LocalExecService, split_cmdline
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+from mlos_bench.services.local.local_exec import LocalExecService, split_cmdline
 from mlos_bench.util import path_join
 
 # pylint: disable=redefined-outer-name

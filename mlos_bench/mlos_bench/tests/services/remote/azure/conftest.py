@@ -13,9 +13,9 @@ import pytest
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.remote.azure import (
     AzureAuthService,
+    AzureFileShareService,
     AzureNetworkService,
     AzureVMService,
-    AzureFileShareService,
 )
 
 # pylint: disable=redefined-outer-name

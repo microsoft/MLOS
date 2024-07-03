@@ -6,23 +6,21 @@
 Tests for loading storage config examples.
 """
 
-from typing import List
-
 import logging
 import sys
+from typing import List
 
 import pytest
 
-from mlos_bench.tests import check_class_name
-from mlos_bench.tests.config import locate_config_examples, BUILTIN_TEST_CONFIG_PATH
-
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments import Environment
+from mlos_bench.launcher import Launcher
 from mlos_bench.optimizers import Optimizer
-from mlos_bench.storage import Storage
 from mlos_bench.schedulers import Scheduler
 from mlos_bench.services.config_persistence import ConfigPersistenceService
-from mlos_bench.launcher import Launcher
+from mlos_bench.storage import Storage
+from mlos_bench.tests import check_class_name
+from mlos_bench.tests.config import BUILTIN_TEST_CONFIG_PATH, locate_config_examples
 from mlos_bench.util import path_join
 
 if sys.version_info < (3, 10):

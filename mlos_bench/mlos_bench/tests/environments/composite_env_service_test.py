@@ -10,9 +10,9 @@ import os
 import pytest
 
 from mlos_bench.environments.composite_env import CompositeEnv
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService
+from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import path_join
 
 # pylint: disable=redefined-outer-name

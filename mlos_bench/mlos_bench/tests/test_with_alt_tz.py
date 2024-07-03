@@ -6,15 +6,14 @@
 Tests various other test scenarios with alternative default (un-named) TZ info.
 """
 
-from subprocess import run
 import os
 import sys
+from subprocess import run
 from typing import Optional
 
 import pytest
 
 from mlos_bench.tests import ZONE_NAMES
-
 
 DIRNAME = os.path.dirname(__file__)
 TZ_TEST_FILES = [

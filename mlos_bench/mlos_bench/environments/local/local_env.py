@@ -9,20 +9,18 @@ Scheduler-side benchmark environment to run scripts locally.
 import json
 import logging
 import sys
-
+from contextlib import nullcontext
 from datetime import datetime
 from tempfile import TemporaryDirectory
-from contextlib import nullcontext
-
 from types import TracebackType
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Type, Union
-from typing_extensions import Literal
 
 import pandas
+from typing_extensions import Literal
 
-from mlos_bench.environments.status import Status
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.script_env import ScriptEnv
+from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.local_exec_type import SupportsLocalExec
 from mlos_bench.tunables.tunable import TunableValue

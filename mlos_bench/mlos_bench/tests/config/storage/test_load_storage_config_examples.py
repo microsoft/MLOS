@@ -10,13 +10,11 @@ from typing import List
 
 import pytest
 
-from mlos_bench.tests.config import locate_config_examples
-
 from mlos_bench.config.schemas.config_schemas import ConfigSchema
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_storage import Storage
+from mlos_bench.tests.config import locate_config_examples
 from mlos_bench.util import get_class_from_name
-
 
 _LOG = logging.getLogger(__name__)
 _LOG.setLevel(logging.DEBUG)

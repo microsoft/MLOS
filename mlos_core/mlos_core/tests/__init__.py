@@ -7,7 +7,6 @@ Common functions for mlos_core Optimizer tests.
 """
 
 import sys
-
 from importlib import import_module
 from pkgutil import walk_packages
 from typing import List, Optional, Set, Type, TypeVar

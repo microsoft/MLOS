@@ -7,11 +7,10 @@ Contains the wrapper classes for base Bayesian optimizers.
 """
 
 from abc import ABCMeta, abstractmethod
-
 from typing import Optional
 
-import pandas as pd
 import numpy.typing as npt
+import pandas as pd
 
 from mlos_core.optimizers.optimizer import BaseOptimizer
 

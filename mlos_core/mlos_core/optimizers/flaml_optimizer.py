@@ -13,9 +13,9 @@ import ConfigSpace
 import numpy as np
 import pandas as pd
 
-from mlos_core.util import normalize_config
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
+from mlos_core.util import normalize_config
 
 
 class EvaluatedSample(NamedTuple):
@@ -77,7 +77,10 @@ class FlamlOptimizer(BaseOptimizer):
             np.random.seed(seed)
 
         # pylint: disable=import-outside-toplevel
-        from mlos_core.spaces.converters.flaml import configspace_to_flaml_space, FlamlDomain
+        from mlos_core.spaces.converters.flaml import (
+            FlamlDomain,
+            configspace_to_flaml_space,
+        )
 
         self.flaml_parameter_space: Dict[str, FlamlDomain] = configspace_to_flaml_space(self.optimizer_parameter_space)
         self.low_cost_partial_config = low_cost_partial_config

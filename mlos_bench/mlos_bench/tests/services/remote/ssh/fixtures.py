@@ -8,25 +8,25 @@ Fixtures for the SSH service tests.
 Note: these are not in the conftest.py file because they are also used by remote_ssh_env_test.py
 """
 
-from typing import Generator
-from subprocess import run
-
 import os
 import sys
 import tempfile
+from subprocess import run
+from typing import Generator
 
 import pytest
 from pytest_docker.plugin import Services as DockerServices
 
-from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
 from mlos_bench.services.remote.ssh.ssh_fileshare import SshFileShareService
-
+from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
 from mlos_bench.tests import resolve_host_name
-from mlos_bench.tests.services.remote.ssh import (SshTestServerInfo,
-                                                  ALT_TEST_SERVER_NAME,
-                                                  REBOOT_TEST_SERVER_NAME,
-                                                  SSH_TEST_SERVER_NAME,
-                                                  wait_docker_service_socket)
+from mlos_bench.tests.services.remote.ssh import (
+    ALT_TEST_SERVER_NAME,
+    REBOOT_TEST_SERVER_NAME,
+    SSH_TEST_SERVER_NAME,
+    SshTestServerInfo,
+    wait_docker_service_socket,
+)
 
 # pylint: disable=redefined-outer-name
 

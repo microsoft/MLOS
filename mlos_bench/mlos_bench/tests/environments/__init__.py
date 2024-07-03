@@ -12,7 +12,6 @@ from typing import Any, Dict, List, Optional, Tuple
 import pytest
 
 from mlos_bench.environments.base_environment import Environment
-
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 

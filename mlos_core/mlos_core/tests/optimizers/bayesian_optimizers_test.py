@@ -8,10 +8,9 @@ Tests for Bayesian Optimizers.
 
 from typing import Optional, Type
 
-import pytest
-
-import pandas as pd
 import ConfigSpace as CS
+import pandas as pd
+import pytest
 
 from mlos_core.optimizers import BaseOptimizer, OptimizerType
 from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer

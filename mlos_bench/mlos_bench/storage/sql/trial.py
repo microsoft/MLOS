@@ -8,15 +8,15 @@ Saving and updating benchmark data using SQLAlchemy backend.
 
 import logging
 from datetime import datetime
-from typing import List, Literal, Optional, Tuple, Dict, Any
+from typing import Any, Dict, List, Literal, Optional, Tuple
 
-from sqlalchemy import Engine, Connection
+from sqlalchemy import Connection, Engine
 from sqlalchemy.exc import IntegrityError
 
 from mlos_bench.environments.status import Status
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql.schema import DbSchema
+from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import nullable, utcify_timestamp
 
 _LOG = logging.getLogger(__name__)

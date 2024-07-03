@@ -9,8 +9,8 @@ A collection Service functions for mocking file share ops.
 import logging
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-from mlos_bench.services.base_service import Service
 from mlos_bench.services.base_fileshare import FileShareService
+from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.fileshare_type import SupportsFileShareOps
 
 _LOG = logging.getLogger(__name__)

@@ -9,9 +9,9 @@ No-op optimizer for mlos_bench that proposes a single configuration.
 import logging
 from typing import Optional
 
+from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 
 _LOG = logging.getLogger(__name__)
 

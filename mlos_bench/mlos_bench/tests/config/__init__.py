@@ -6,10 +6,9 @@
 Helper functions for config example loading tests.
 """
 
-from typing import Callable, List, Optional
-
 import os
 import sys
+from typing import Callable, List, Optional
 
 from mlos_bench.util import path_join
 

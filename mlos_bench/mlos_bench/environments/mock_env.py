@@ -6,16 +6,16 @@
 Scheduler-side environment to mock the benchmark results.
 """
 
-import random
 import logging
+import random
 from datetime import datetime
 from typing import Dict, Optional, Tuple
 
 import numpy
 
-from mlos_bench.services.base_service import Service
-from mlos_bench.environments.status import Status
 from mlos_bench.environments.base_environment import Environment
+from mlos_bench.environments.status import Status
+from mlos_bench.services.base_service import Service
 from mlos_bench.tunables import Tunable, TunableGroups, TunableValue
 
 _LOG = logging.getLogger(__name__)

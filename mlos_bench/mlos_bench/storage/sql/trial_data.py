@@ -6,20 +6,22 @@
 An interface to access the benchmark trial data stored in SQL DB.
 """
 from datetime import datetime
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import pandas
 from sqlalchemy import Engine
 
+from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_trial_data import TrialData
 from mlos_bench.storage.base_tunable_config_data import TunableConfigData
-from mlos_bench.environments.status import Status
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.sql.tunable_config_data import TunableConfigSqlData
 from mlos_bench.util import utcify_timestamp
 
 if TYPE_CHECKING:
-    from mlos_bench.storage.base_tunable_config_trial_group_data import TunableConfigTrialGroupData
+    from mlos_bench.storage.base_tunable_config_trial_group_data import (
+        TunableConfigTrialGroupData,
+    )
 
 
 class TrialSqlData(TrialData):
@@ -63,7 +65,9 @@ class TrialSqlData(TrialData):
         Retrieve the trial's tunable config group configuration data from the storage.
         """
         # pylint: disable=import-outside-toplevel
-        from mlos_bench.storage.sql.tunable_config_trial_group_data import TunableConfigTrialGroupSqlData
+        from mlos_bench.storage.sql.tunable_config_trial_group_data import (
+            TunableConfigTrialGroupSqlData,
+        )
         return TunableConfigTrialGroupSqlData(engine=self._engine, schema=self._schema,
                                               experiment_id=self._experiment_id,
                                               tunable_config_id=self._tunable_config_id)

@@ -8,9 +8,9 @@ Unit tests for extracting data from LocalEnv stdout.
 
 import sys
 
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.tests.environments import check_env_success
 from mlos_bench.tests.environments.local import create_local_env
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def test_local_env_stdout(tunable_groups: TunableGroups) -> None:

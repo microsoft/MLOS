@@ -8,13 +8,13 @@ Common SQL methods for accessing the stored benchmark data.
 from typing import Dict, Optional
 
 import pandas
-from sqlalchemy import Engine, Integer, func, and_, select
+from sqlalchemy import Engine, Integer, and_, func, select
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.base_trial_data import TrialData
 from mlos_bench.storage.sql.schema import DbSchema
-from mlos_bench.util import utcify_timestamp, utcify_nullable_timestamp
+from mlos_bench.util import utcify_nullable_timestamp, utcify_timestamp
 
 
 def get_trials(
@@ -27,7 +27,9 @@ def get_trials(
     restricted by tunable_config_id.
     Used by both TunableConfigTrialGroupSqlData and ExperimentSqlData.
     """
-    from mlos_bench.storage.sql.trial_data import TrialSqlData  # pylint: disable=import-outside-toplevel,cyclic-import
+    from mlos_bench.storage.sql.trial_data import (
+        TrialSqlData,  # pylint: disable=import-outside-toplevel,cyclic-import
+    )
     with engine.connect() as conn:
         # Build up sql a statement for fetching trials.
         stmt = schema.trial.select().where(

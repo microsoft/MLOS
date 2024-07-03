@@ -7,13 +7,16 @@ A collection Service functions for managing virtual networks on Azure.
 """
 
 import logging
-
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.remote.azure.azure_deployment_services import AzureDeploymentService
-from mlos_bench.services.types.network_provisioner_type import SupportsNetworkProvisioning
+from mlos_bench.services.remote.azure.azure_deployment_services import (
+    AzureDeploymentService,
+)
+from mlos_bench.services.types.network_provisioner_type import (
+    SupportsNetworkProvisioning,
+)
 from mlos_bench.util import merge_parameters
 
 _LOG = logging.getLogger(__name__)

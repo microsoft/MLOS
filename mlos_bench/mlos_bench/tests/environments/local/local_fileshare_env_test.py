@@ -7,12 +7,13 @@ Unit tests for passing shell environment variables into LocalEnv scripts.
 """
 import pytest
 
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.environments.local.local_fileshare_env import LocalFileShareEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService
-
-from mlos_bench.tests.services.remote.mock.mock_fileshare_service import MockFileShareService
+from mlos_bench.tests.services.remote.mock.mock_fileshare_service import (
+    MockFileShareService,
+)
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
 

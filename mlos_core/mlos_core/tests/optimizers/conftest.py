@@ -6,9 +6,8 @@
 Test fixtures for mlos_bench optimizers.
 """
 
-import pytest
-
 import ConfigSpace as CS
+import pytest
 
 
 @pytest.fixture

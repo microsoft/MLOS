@@ -6,13 +6,14 @@
 Network Environment.
 """
 
-from typing import Optional
-
 import logging
+from typing import Optional
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.types.network_provisioner_type import SupportsNetworkProvisioning
+from mlos_bench.services.types.network_provisioner_type import (
+    SupportsNetworkProvisioning,
+)
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)

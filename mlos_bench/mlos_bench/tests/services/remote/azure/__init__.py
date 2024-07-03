@@ -5,9 +5,9 @@
 """
 Tests helpers for mlos_bench.services.remote.azure.
 """
+import json
 from io import BytesIO
 
-import json
 import urllib3
 
 

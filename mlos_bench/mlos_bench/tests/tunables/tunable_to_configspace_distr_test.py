@@ -8,24 +8,22 @@ specified distributions to ConfigSpace.
 """
 
 import pytest
-
 from ConfigSpace import (
-    CategoricalHyperparameter,
     BetaFloatHyperparameter,
     BetaIntegerHyperparameter,
+    CategoricalHyperparameter,
     NormalFloatHyperparameter,
     NormalIntegerHyperparameter,
     UniformFloatHyperparameter,
     UniformIntegerHyperparameter,
 )
 
-from mlos_bench.tunables.tunable import DistributionName
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.convert_configspace import (
     special_param_names,
     tunable_groups_to_configspace,
 )
-
+from mlos_bench.tunables.tunable import DistributionName
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _CS_HYPERPARAMETER = {
     ("float", "beta"): BetaFloatHyperparameter,

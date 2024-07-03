@@ -6,7 +6,6 @@
 Tunable parameter definition.
 """
 import copy
-
 from typing import Dict, Iterable, Union
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue

@@ -11,9 +11,10 @@ from os import path
 import pytest
 
 from mlos_bench.config.schemas import ConfigSchema
-
-from mlos_bench.tests.config.schemas import get_schema_test_cases, check_test_case_against_schema
-
+from mlos_bench.tests.config.schemas import (
+    check_test_case_against_schema,
+    get_schema_test_cases,
+)
 
 # General testing strategy:
 # - hand code a set of good/bad configs (useful to test editor schema checking)

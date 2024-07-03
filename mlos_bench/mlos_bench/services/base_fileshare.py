@@ -7,7 +7,6 @@ Base class for remote file shares.
 """
 
 import logging
-
 from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Union
 

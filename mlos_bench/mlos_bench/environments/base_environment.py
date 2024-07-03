@@ -11,10 +11,21 @@ import json
 import logging
 from datetime import datetime
 from types import TracebackType
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Type, TYPE_CHECKING, Union
-from typing_extensions import Literal
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    Union,
+)
 
 from pytz import UTC
+from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.dict_templater import DictTemplater

@@ -6,23 +6,21 @@
 Tests for mlos_bench.services.remote.ssh.ssh_services
 """
 
+import os
+import tempfile
 from contextlib import contextmanager
 from os.path import basename
 from pathlib import Path
 from tempfile import _TemporaryFileWrapper  # pylint: disable=import-private-name
 from typing import Any, Dict, Generator, List
 
-import os
-import tempfile
-
 import pytest
 
-from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
 from mlos_bench.services.remote.ssh.ssh_fileshare import SshFileShareService
-from mlos_bench.util import path_join
-
+from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
 from mlos_bench.tests import are_dir_trees_equal, requires_docker
 from mlos_bench.tests.services.remote.ssh import SshTestServerInfo
+from mlos_bench.util import path_join
 
 
 @contextmanager

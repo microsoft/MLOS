@@ -10,11 +10,10 @@ from typing import List
 
 import pytest
 
-from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
-
+from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.tests import SEED
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 @pytest.fixture

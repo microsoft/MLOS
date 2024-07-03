@@ -6,12 +6,11 @@
 A collection functions for interacting with SSH servers as file shares.
 """
 
+import logging
 from enum import Enum
 from typing import Tuple, Union
 
-import logging
-
-from asyncssh import scp, SFTPError, SFTPNoSuchFile, SFTPFailure, SSHClientConnection
+from asyncssh import SFTPError, SFTPFailure, SFTPNoSuchFile, SSHClientConnection, scp
 
 from mlos_bench.services.base_fileshare import FileShareService
 from mlos_bench.services.remote.ssh.ssh_service import SshService

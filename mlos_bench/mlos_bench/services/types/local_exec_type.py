@@ -7,10 +7,17 @@ Protocol interface for Service types that provide helper functions to run
 scripts and commands locally on the scheduler side.
 """
 
-from typing import Iterable, Mapping, Optional, Tuple, Union, Protocol, runtime_checkable
-
-import tempfile
 import contextlib
+import tempfile
+from typing import (
+    Iterable,
+    Mapping,
+    Optional,
+    Protocol,
+    Tuple,
+    Union,
+    runtime_checkable,
+)
 
 from mlos_bench.tunables.tunable import TunableValue
 

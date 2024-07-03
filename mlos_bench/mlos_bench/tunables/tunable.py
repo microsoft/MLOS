@@ -5,11 +5,22 @@
 """
 Tunable parameter definition.
 """
-import copy
 import collections
+import copy
 import logging
-
-from typing import Any, Dict, Iterable, List, Literal, Optional, Sequence, Tuple, Type, TypedDict, Union
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypedDict,
+    Union,
+)
 
 import numpy as np
 

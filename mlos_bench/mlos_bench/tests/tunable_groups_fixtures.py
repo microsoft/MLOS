@@ -8,9 +8,8 @@ Common fixtures for mock TunableGroups.
 
 from typing import Any, Dict
 
-import pytest
-
 import json5 as json
+import pytest
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup

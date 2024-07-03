@@ -6,12 +6,11 @@
 Tests for one-hot encoding for certain optimizers.
 """
 
-import pytest
-
-import pandas as pd
+import ConfigSpace as CS
 import numpy as np
 import numpy.typing as npt
-import ConfigSpace as CS
+import pandas as pd
+import pytest
 
 from mlos_core.optimizers import BaseOptimizer, SmacOptimizer
 

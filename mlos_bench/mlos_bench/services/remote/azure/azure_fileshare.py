@@ -6,16 +6,15 @@
 A collection FileShare functions for interacting with Azure File Shares.
 """
 
-import os
 import logging
-
+import os
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
-from azure.storage.fileshare import ShareClient
 from azure.core.exceptions import ResourceNotFoundError
+from azure.storage.fileshare import ShareClient
 
-from mlos_bench.services.base_service import Service
 from mlos_bench.services.base_fileshare import FileShareService
+from mlos_bench.services.base_service import Service
 from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)

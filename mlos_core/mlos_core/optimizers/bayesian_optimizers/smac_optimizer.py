@@ -9,15 +9,17 @@ See Also: <https://automl.github.io/SMAC3/main/index.html>
 
 from logging import warning
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union, TYPE_CHECKING
 from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 from warnings import warn
 
 import ConfigSpace
 import numpy.typing as npt
 import pandas as pd
 
-from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import BaseBayesianOptimizer
+from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import (
+    BaseBayesianOptimizer,
+)
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 
@@ -259,7 +261,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
         metadata: pd.DataFrame
             Not Yet Implemented.
         """
-        from smac.runhistory import StatusType, TrialInfo, TrialValue  # pylint: disable=import-outside-toplevel
+        from smac.runhistory import (  # pylint: disable=import-outside-toplevel
+            StatusType,
+            TrialInfo,
+            TrialValue,
+        )
 
         if context is not None:
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
@@ -292,7 +298,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Not yet implemented.
         """
         if TYPE_CHECKING:
-            from smac.runhistory import TrialInfo  # pylint: disable=import-outside-toplevel,unused-import
+            from smac.runhistory import (
+                TrialInfo,  # pylint: disable=import-outside-toplevel,unused-import
+            )
 
         if context is not None:
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
@@ -311,7 +319,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         raise NotImplementedError()
 
     def surrogate_predict(self, *, configs: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
-        from smac.utils.configspace import convert_configurations_to_array  # pylint: disable=import-outside-toplevel
+        from smac.utils.configspace import (
+            convert_configurations_to_array,  # pylint: disable=import-outside-toplevel
+        )
 
         if context is not None:
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)

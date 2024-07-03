@@ -5,9 +5,8 @@
 """
 An interface to access the experiment benchmark data stored in SQL DB.
 """
-from typing import Dict, Literal, Optional
-
 import logging
+from typing import Dict, Literal, Optional
 
 import pandas
 from sqlalchemy import Engine, Integer, String, func
@@ -15,11 +14,15 @@ from sqlalchemy import Engine, Integer, String, func
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.base_trial_data import TrialData
 from mlos_bench.storage.base_tunable_config_data import TunableConfigData
-from mlos_bench.storage.base_tunable_config_trial_group_data import TunableConfigTrialGroupData
+from mlos_bench.storage.base_tunable_config_trial_group_data import (
+    TunableConfigTrialGroupData,
+)
 from mlos_bench.storage.sql import common
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.sql.tunable_config_data import TunableConfigSqlData
-from mlos_bench.storage.sql.tunable_config_trial_group_data import TunableConfigTrialGroupSqlData
+from mlos_bench.storage.sql.tunable_config_trial_group_data import (
+    TunableConfigTrialGroupSqlData,
+)
 
 _LOG = logging.getLogger(__name__)
 

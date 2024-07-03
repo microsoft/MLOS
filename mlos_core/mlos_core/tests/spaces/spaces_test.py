@@ -11,19 +11,19 @@ Tests for mlos_core.spaces
 from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, List, NoReturn, Union
 
+import ConfigSpace as CS
+import flaml.tune.sample
 import numpy as np
 import numpy.typing as npt
 import pytest
-
 import scipy
-
-import ConfigSpace as CS
 from ConfigSpace.hyperparameters import Hyperparameter, NormalIntegerHyperparameter
 
-import flaml.tune.sample
-
-from mlos_core.spaces.converters.flaml import configspace_to_flaml_space, FlamlDomain, FlamlSpace
-
+from mlos_core.spaces.converters.flaml import (
+    FlamlDomain,
+    FlamlSpace,
+    configspace_to_flaml_space,
+)
 
 OptimizerSpace = Union[FlamlSpace, CS.ConfigurationSpace]
 OptimizerParam = Union[FlamlDomain, Hyperparameter]

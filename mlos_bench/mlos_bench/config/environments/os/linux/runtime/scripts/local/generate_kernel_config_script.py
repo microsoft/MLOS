@@ -9,8 +9,8 @@ Helper script to generate a script to update kernel parameters from tunables JSO
 Run: `./generate_kernel_config_script.py ./kernel-params.json ./kernel-params-meta.json ./config-kernel.sh`
 """
 
-import json
 import argparse
+import json
 
 
 def _main(fname_input: str, fname_meta: str, fname_output: str) -> None:
