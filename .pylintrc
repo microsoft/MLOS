@@ -48,5 +48,5 @@ disable=
     missing-raises-doc
 
 [STRING]
-#check-quote-consistency=yes
+check-quote-consistency=yes
 check-str-concat-over-line-jumps=yes
