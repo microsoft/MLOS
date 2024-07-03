@@ -42,7 +42,7 @@ def mock_env(tunable_groups: TunableGroups) -> MockEnv:
             "mock_env_range": [60, 120],
             "mock_env_metrics": ["score"],
         },
-        tunables=tunable_groups
+        tunables=tunable_groups,
     )
 
 
@@ -59,7 +59,7 @@ def mock_env_no_noise(tunable_groups: TunableGroups) -> MockEnv:
             "mock_env_range": [60, 120],
             "mock_env_metrics": ["score", "other_score"],
         },
-        tunables=tunable_groups
+        tunables=tunable_groups,
     )
 
 
@@ -82,7 +82,9 @@ def docker_compose_file(pytestconfig: pytest.Config) -> List[str]:
     """
     _ = pytestconfig  # unused
     return [
-        os.path.join(os.path.dirname(__file__), "services", "remote", "ssh", "docker-compose.yml"),
+        os.path.join(
+            os.path.dirname(__file__), "services", "remote", "ssh", "docker-compose.yml"
+        ),
         # Add additional configs as necessary here.
     ]
 
@@ -103,7 +105,9 @@ def docker_compose_project_name(short_testrun_uid: str) -> str:
 
 
 @pytest.fixture(scope="session")
-def docker_services_lock(shared_temp_dir: str, short_testrun_uid: str) -> InterProcessReaderWriterLock:
+def docker_services_lock(
+    shared_temp_dir: str, short_testrun_uid: str
+) -> InterProcessReaderWriterLock:
     """
     Gets a pytest session lock for xdist workers to mark when they're using the
     docker services.
@@ -113,11 +117,15 @@ def docker_services_lock(shared_temp_dir: str, short_testrun_uid: str) -> InterP
         A lock to ensure that setup/teardown operations don't happen while a
         worker is using the docker services.
     """
-    return InterProcessReaderWriterLock(f"{shared_temp_dir}/pytest_docker_services-{short_testrun_uid}.lock")
+    return InterProcessReaderWriterLock(
+        f"{shared_temp_dir}/pytest_docker_services-{short_testrun_uid}.lock"
+    )
 
 
 @pytest.fixture(scope="session")
-def docker_setup_teardown_lock(shared_temp_dir: str, short_testrun_uid: str) -> InterProcessLock:
+def docker_setup_teardown_lock(
+    shared_temp_dir: str, short_testrun_uid: str
+) -> InterProcessLock:
     """
     Gets a pytest session lock between xdist workers for the docker
     setup/teardown operations.
@@ -126,7 +134,9 @@ def docker_setup_teardown_lock(shared_temp_dir: str, short_testrun_uid: str) -> 
     ------
         A lock to ensure that only one worker is doing setup/teardown at a time.
     """
-    return InterProcessLock(f"{shared_temp_dir}/pytest_docker_services-setup-teardown-{short_testrun_uid}.lock")
+    return InterProcessLock(
+        f"{shared_temp_dir}/pytest_docker_services-setup-teardown-{short_testrun_uid}.lock"
+    )
 
 
 @pytest.fixture(scope="session")

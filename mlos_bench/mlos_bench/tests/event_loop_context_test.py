@@ -40,16 +40,21 @@ class EventLoopContextCaller:
         self.EVENT_LOOP_CONTEXT.enter()
         self._in_context = True
 
-    def __exit__(self, ex_type: Optional[Type[BaseException]],
-                 ex_val: Optional[BaseException],
-                 ex_tb: Optional[TracebackType]) -> Literal[False]:
+    def __exit__(
+        self,
+        ex_type: Optional[Type[BaseException]],
+        ex_val: Optional[BaseException],
+        ex_tb: Optional[TracebackType],
+    ) -> Literal[False]:
         assert self._in_context
         self.EVENT_LOOP_CONTEXT.exit()
         self._in_context = False
         return False
 
 
-@pytest.mark.filterwarnings("ignore:.*(coroutine 'sleep' was never awaited).*:RuntimeWarning:.*event_loop_context_test.*:0")
+@pytest.mark.filterwarnings(
+    "ignore:.*(coroutine 'sleep' was never awaited).*:RuntimeWarning:.*event_loop_context_test.*:0"
+)
 def test_event_loop_context() -> None:
     """Test event loop context background thread setup/cleanup handling."""
     # pylint: disable=protected-access,too-many-statements
@@ -85,14 +90,20 @@ def test_event_loop_context() -> None:
         with event_loop_caller_instance_2:
             assert event_loop_caller_instance_2._in_context
             assert event_loop_caller_instance_1._in_context
-            assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop_thread_refcnt == 2
+            assert (
+                EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop_thread_refcnt == 2
+            )
             # We should only get one thread for all instances.
-            assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop_thread \
-                is event_loop_caller_instance_1.EVENT_LOOP_CONTEXT._event_loop_thread \
+            assert (
+                EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop_thread
+                is event_loop_caller_instance_1.EVENT_LOOP_CONTEXT._event_loop_thread
                 is event_loop_caller_instance_2.EVENT_LOOP_CONTEXT._event_loop_thread
-            assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop \
-                is event_loop_caller_instance_1.EVENT_LOOP_CONTEXT._event_loop \
+            )
+            assert (
+                EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop
+                is event_loop_caller_instance_1.EVENT_LOOP_CONTEXT._event_loop
                 is event_loop_caller_instance_2.EVENT_LOOP_CONTEXT._event_loop
+            )
 
         assert not event_loop_caller_instance_2._in_context
 
@@ -104,31 +115,43 @@ def test_event_loop_context() -> None:
         assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop.is_running()
 
         start = time.time()
-        future = event_loop_caller_instance_1.EVENT_LOOP_CONTEXT.run_coroutine(asyncio.sleep(0.1, result='foo'))
+        future = event_loop_caller_instance_1.EVENT_LOOP_CONTEXT.run_coroutine(
+            asyncio.sleep(0.1, result="foo")
+        )
         assert 0.0 <= time.time() - start < 0.1
-        assert future.result(timeout=0.2) == 'foo'
+        assert future.result(timeout=0.2) == "foo"
         assert 0.1 <= time.time() - start <= 0.2
 
     # Once we exit the last context, the background thread should be stopped
     # and unusable for running co-routines.
 
-    assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop_thread is None    # type: ignore[unreachable] # (false positives)
+    assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop_thread is None  # type: ignore[unreachable] # (false positives)
     assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop_thread_refcnt == 0
-    assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop is event_loop is not None
+    assert (
+        EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop is event_loop is not None
+    )
     assert not EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop.is_running()
     # Check that the event loop has no more tasks.
-    assert hasattr(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop, '_ready')
+    assert hasattr(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop, "_ready")
     # Windows ProactorEventLoopPolicy adds a dummy task.
-    if sys.platform == 'win32' and isinstance(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop, asyncio.ProactorEventLoop):
+    if sys.platform == "win32" and isinstance(
+        EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop, asyncio.ProactorEventLoop
+    ):
         assert len(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop._ready) == 1
     else:
         assert len(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop._ready) == 0
-    assert hasattr(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop, '_scheduled')
+    assert hasattr(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop, "_scheduled")
     assert len(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop._scheduled) == 0
 
-    with pytest.raises(AssertionError):  # , pytest.warns(RuntimeWarning, match=r".*coroutine 'sleep' was never awaited"):
-        future = event_loop_caller_instance_1.EVENT_LOOP_CONTEXT.run_coroutine(asyncio.sleep(0.1, result='foo'))
-        raise ValueError(f"Future should not have been available to wait on {future.result()}")
+    with pytest.raises(
+        AssertionError
+    ):  # , pytest.warns(RuntimeWarning, match=r".*coroutine 'sleep' was never awaited"):
+        future = event_loop_caller_instance_1.EVENT_LOOP_CONTEXT.run_coroutine(
+            asyncio.sleep(0.1, result="foo")
+        )
+        raise ValueError(
+            f"Future should not have been available to wait on {future.result()}"
+        )
 
     # Test that when re-entering the context we have the same event loop.
     with event_loop_caller_instance_1:
@@ -138,12 +161,14 @@ def test_event_loop_context() -> None:
 
         # Test running again.
         start = time.time()
-        future = event_loop_caller_instance_1.EVENT_LOOP_CONTEXT.run_coroutine(asyncio.sleep(0.1, result='foo'))
+        future = event_loop_caller_instance_1.EVENT_LOOP_CONTEXT.run_coroutine(
+            asyncio.sleep(0.1, result="foo")
+        )
         assert 0.0 <= time.time() - start < 0.1
-        assert future.result(timeout=0.2) == 'foo'
+        assert future.result(timeout=0.2) == "foo"
         assert 0.1 <= time.time() - start <= 0.2
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # For debugging in Windows which has issues with pytest detection in vscode.
     pytest.main(["-n1", "--dist=no", "-k", "test_event_loop_context"])

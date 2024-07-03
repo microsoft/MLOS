@@ -30,5 +30,5 @@ def test_plot(mock_show: Mock, mock_boxplot: Mock, exp_data: ExperimentData) -> 
         warnings.simplefilter("error")
         random.seed(42)
         plot(exp_data, filter_warnings=True)
-    assert mock_show.call_count >= 2        # from the two base plots and anything dabl did
-    assert mock_boxplot.call_count >= 1     # from anything dabl did
+    assert mock_show.call_count >= 2  # from the two base plots and anything dabl did
+    assert mock_boxplot.call_count >= 1  # from anything dabl did

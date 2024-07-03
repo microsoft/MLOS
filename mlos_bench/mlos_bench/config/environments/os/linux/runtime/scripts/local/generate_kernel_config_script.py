@@ -22,7 +22,7 @@ def _main(fname_input: str, fname_meta: str, fname_output: str) -> None:
         tunables_meta = json.load(fh_meta)
 
     with open(fname_output, "wt", encoding="utf-8", newline="") as fh_config:
-        for (key, val) in tunables_data.items():
+        for key, val in tunables_data.items():
             meta = tunables_meta.get(key, {})
             name_prefix = meta.get("name_prefix", "")
             line = f'echo "{val}" > {name_prefix}{key}'
@@ -33,7 +33,8 @@ def _main(fname_input: str, fname_meta: str, fname_output: str) -> None:
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
-        description="generate a script to update kernel parameters from tunables JSON.")
+        description="generate a script to update kernel parameters from tunables JSON."
+    )
 
     parser.add_argument("input", help="JSON file with tunable parameters.")
     parser.add_argument("meta", help="JSON file with tunable parameters metadata.")

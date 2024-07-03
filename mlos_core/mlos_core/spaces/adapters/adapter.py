@@ -22,7 +22,9 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
     """
 
     def __init__(self, *, orig_parameter_space: ConfigSpace.ConfigurationSpace):
-        self._orig_parameter_space: ConfigSpace.ConfigurationSpace = orig_parameter_space
+        self._orig_parameter_space: ConfigSpace.ConfigurationSpace = (
+            orig_parameter_space
+        )
         self._random_state = orig_parameter_space.random
 
     def __repr__(self) -> str:
@@ -46,7 +48,7 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
         """
         Target parameter space that is fed to the underlying optimizer.
         """
-        pass    # pylint: disable=unnecessary-pass # pragma: no cover
+        pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
     def transform(self, configuration: pd.DataFrame) -> pd.DataFrame:
@@ -64,7 +66,7 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
             Pandas dataframe with a single row, containing the translated configuration.
             Column names are the parameter names of the original parameter space.
         """
-        pass    # pylint: disable=unnecessary-pass # pragma: no cover
+        pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
     def inverse_transform(self, configurations: pd.DataFrame) -> pd.DataFrame:
@@ -84,4 +86,4 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
             Dataframe of the translated configurations / parameters.
             The columns are the parameter names of the target parameter space and the rows are the configurations.
         """
-        pass    # pylint: disable=unnecessary-pass # pragma: no cover
+        pass  # pylint: disable=unnecessary-pass # pragma: no cover

@@ -34,7 +34,8 @@ def llamatune_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
             "optimizer_type": "SMAC",
             "seed": SEED,
             # "start_with_defaults": False,
-        })
+        },
+    )
 
 
 @pytest.fixture
@@ -45,7 +46,9 @@ def mock_scores() -> list:
     return [88.88, 66.66, 99.99]
 
 
-def test_llamatune_optimizer(llamatune_opt: MlosCoreOptimizer, mock_scores: list) -> None:
+def test_llamatune_optimizer(
+    llamatune_opt: MlosCoreOptimizer, mock_scores: list
+) -> None:
     """
     Make sure that llamatune+smac optimizer initializes and works correctly.
     """
@@ -61,6 +64,6 @@ def test_llamatune_optimizer(llamatune_opt: MlosCoreOptimizer, mock_scores: list
     assert best_score["score"] == pytest.approx(66.66, 0.01)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # For attaching debugger debugging:
     pytest.main(["-vv", "-n1", "-k", "test_llamatune_optimizer", __file__])

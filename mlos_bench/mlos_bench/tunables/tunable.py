@@ -107,7 +107,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         config : dict
             Python dict that represents a Tunable (e.g., deserialized from JSON)
         """
-        if not isinstance(name, str) or '!' in name:  # TODO: Use a regex here and in JSON schema
+        if (
+            not isinstance(name, str) or "!" in name
+        ):  # TODO: Use a regex here and in JSON schema
             raise ValueError(f"Invalid name of the tunable: {name}")
         self._name = name
         self._type: TunableValueTypeName = config["type"]  # required
@@ -115,7 +117,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             raise ValueError(f"Invalid parameter type: {self._type}")
         self._description = config.get("description")
         self._default = config["default"]
-        self._default = self.dtype(self._default) if self._default is not None else self._default
+        self._default = (
+            self.dtype(self._default) if self._default is not None else self._default
+        )
         self._values = config.get("values")
         if self._values:
             self._values = [str(v) if v is not None else v for v in self._values]
@@ -154,7 +158,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         else:
             raise ValueError(f"Invalid parameter type for tunable {self}: {self._type}")
         if not self.is_valid(self.default):
-            raise ValueError(f"Invalid default value for tunable {self}: {self.default}")
+            raise ValueError(
+                f"Invalid default value for tunable {self}: {self.default}"
+            )
 
     def _sanity_check_categorical(self) -> None:
         """
@@ -163,11 +169,17 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         # pylint: disable=too-complex
         assert self.is_categorical
         if not (self._values and isinstance(self._values, collections.abc.Iterable)):
-            raise ValueError(f"Must specify values for the categorical type tunable {self}")
+            raise ValueError(
+                f"Must specify values for the categorical type tunable {self}"
+            )
         if self._range is not None:
-            raise ValueError(f"Range must be None for the categorical type tunable {self}")
+            raise ValueError(
+                f"Range must be None for the categorical type tunable {self}"
+            )
         if len(set(self._values)) != len(self._values):
-            raise ValueError(f"Values must be unique for the categorical type tunable {self}")
+            raise ValueError(
+                f"Values must be unique for the categorical type tunable {self}"
+            )
         if self._special:
             raise ValueError(f"Categorical tunable cannot have special values: {self}")
         if self._range_weight is not None:
@@ -175,9 +187,13 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         if self._log is not None:
             raise ValueError(f"Categorical tunable cannot have log parameter: {self}")
         if self._quantization is not None:
-            raise ValueError(f"Categorical tunable cannot have quantization parameter: {self}")
+            raise ValueError(
+                f"Categorical tunable cannot have quantization parameter: {self}"
+            )
         if self._distribution is not None:
-            raise ValueError(f"Categorical parameters do not support `distribution`: {self}")
+            raise ValueError(
+                f"Categorical parameters do not support `distribution`: {self}"
+            )
         if self._weights:
             if len(self._weights) != len(self._values):
                 raise ValueError(f"Must specify weights for all values: {self}")
@@ -191,21 +207,31 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         # pylint: disable=too-complex,too-many-branches
         assert self.is_numerical
         if self._values is not None:
-            raise ValueError(f"Values must be None for the numerical type tunable {self}")
+            raise ValueError(
+                f"Values must be None for the numerical type tunable {self}"
+            )
         if not self._range or len(self._range) != 2 or self._range[0] >= self._range[1]:
             raise ValueError(f"Invalid range for tunable {self}: {self._range}")
         if self._quantization is not None:
             if self.dtype == int:
                 if not isinstance(self._quantization, int):
-                    raise ValueError(f"Quantization of a int param should be an int: {self}")
+                    raise ValueError(
+                        f"Quantization of a int param should be an int: {self}"
+                    )
                 if self._quantization <= 1:
                     raise ValueError(f"Number of quantization points is <= 1: {self}")
             if self.dtype == float:
                 if not isinstance(self._quantization, (float, int)):
-                    raise ValueError(f"Quantization of a float param should be a float or int: {self}")
+                    raise ValueError(
+                        f"Quantization of a float param should be a float or int: {self}"
+                    )
                 if self._quantization <= 0:
                     raise ValueError(f"Number of quantization points is <= 0: {self}")
-        if self._distribution is not None and self._distribution not in {"uniform", "normal", "beta"}:
+        if self._distribution is not None and self._distribution not in {
+            "uniform",
+            "normal",
+            "beta",
+        }:
             raise ValueError(f"Invalid distribution: {self}")
         if self._distribution_params and self._distribution is None:
             raise ValueError(f"Must specify the distribution: {self}")
@@ -217,7 +243,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             if any(w < 0 for w in self._weights + [self._range_weight]):
                 raise ValueError(f"All weights must be non-negative: {self}")
         elif self._range_weight is not None:
-            raise ValueError(f"Must specify both weights and range_weight or none: {self}")
+            raise ValueError(
+                f"Must specify both weights and range_weight or none: {self}"
+            )
 
     def __repr__(self) -> str:
         """
@@ -251,12 +279,14 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         if not isinstance(other, Tunable):
             return False
         return bool(
-            self._name == other._name and
-            self._type == other._type and
-            self._current_value == other._current_value
+            self._name == other._name
+            and self._type == other._type
+            and self._current_value == other._current_value
         )
 
-    def __lt__(self, other: object) -> bool:    # pylint: disable=too-many-return-statements
+    def __lt__(
+        self, other: object
+    ) -> bool:  # pylint: disable=too-many-return-statements
         """
         Compare the two Tunable objects. We mostly need this to create a canonical list
         of tunable objects when hashing a TunableGroup.
@@ -336,18 +366,33 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
                 assert value is not None
                 coerced_value = self.dtype(value)
         except Exception:
-            _LOG.error("Impossible conversion: %s %s <- %s %s",
-                       self._type, self._name, type(value), value)
+            _LOG.error(
+                "Impossible conversion: %s %s <- %s %s",
+                self._type,
+                self._name,
+                type(value),
+                value,
+            )
             raise
 
         if self._type == "int" and isinstance(value, float) and value != coerced_value:
-            _LOG.error("Loss of precision: %s %s <- %s %s",
-                       self._type, self._name, type(value), value)
+            _LOG.error(
+                "Loss of precision: %s %s <- %s %s",
+                self._type,
+                self._name,
+                type(value),
+                value,
+            )
             raise ValueError(f"Loss of precision: {self._name}={value}")
 
         if not self.is_valid(coerced_value):
-            _LOG.error("Invalid assignment: %s %s <- %s %s",
-                       self._type, self._name, type(value), value)
+            _LOG.error(
+                "Invalid assignment: %s %s <- %s %s",
+                self._type,
+                self._name,
+                type(value),
+                value,
+            )
             raise ValueError(f"Invalid value for the tunable: {self._name}={value}")
 
         self._current_value = coerced_value
@@ -392,7 +437,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             if isinstance(value, (int, float)):
                 return self.in_range(value) or value in self._special
             else:
-                raise ValueError(f"Invalid value type for tunable {self}: {value}={type(value)}")
+                raise ValueError(
+                    f"Invalid value type for tunable {self}: {value}={type(value)}"
+                )
         else:
             raise ValueError(f"Invalid parameter type: {self._type}")
 
@@ -403,10 +450,10 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         Return False if the tunable or value is categorical or None.
         """
         return (
-            isinstance(value, (float, int)) and
-            self.is_numerical and
-            self._range is not None and
-            bool(self._range[0] <= value <= self._range[1])
+            isinstance(value, (float, int))
+            and self.is_numerical
+            and self._range is not None
+            and bool(self._range[0] <= value <= self._range[1])
         )
 
     @property
@@ -626,12 +673,19 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             # Be sure to return python types instead of numpy types.
             cardinality = self.cardinality
             assert isinstance(cardinality, int)
-            return (float(x) for x in np.linspace(start=num_range[0],
-                                                  stop=num_range[1],
-                                                  num=cardinality,
-                                                  endpoint=True))
+            return (
+                float(x)
+                for x in np.linspace(
+                    start=num_range[0],
+                    stop=num_range[1],
+                    num=cardinality,
+                    endpoint=True,
+                )
+            )
         assert self.type == "int", f"Unhandled tunable type: {self}"
-        return range(int(num_range[0]), int(num_range[1]) + 1, int(self._quantization or 1))
+        return range(
+            int(num_range[0]), int(num_range[1]) + 1, int(self._quantization or 1)
+        )
 
     @property
     def cardinality(self) -> Union[int, float]:
@@ -706,7 +760,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._values
 
     @property
-    def values(self) -> Optional[Union[Iterable[Optional[str]], Iterable[int], Iterable[float]]]:
+    def values(
+        self,
+    ) -> Optional[Union[Iterable[Optional[str]], Iterable[int], Iterable[float]]]:
         """
         Gets the categories or quantized values for this tunable.
 

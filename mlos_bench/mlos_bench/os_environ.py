@@ -22,16 +22,19 @@ else:
     from typing_extensions import TypeAlias
 
 if sys.version_info >= (3, 9):
-    EnvironType: TypeAlias = os._Environ[str]   # pylint: disable=protected-access,disable=unsubscriptable-object
+    EnvironType: TypeAlias = os._Environ[
+        str
+    ]  # pylint: disable=protected-access,disable=unsubscriptable-object
 else:
-    EnvironType: TypeAlias = os._Environ        # pylint: disable=protected-access
+    EnvironType: TypeAlias = os._Environ  # pylint: disable=protected-access
 
 # Handle case sensitivity differences between platforms.
 # https://stackoverflow.com/a/19023293
-if sys.platform == 'win32':
+if sys.platform == "win32":
     import nt  # type: ignore[import-not-found]    # pylint: disable=import-error  # (3.8)
+
     environ: EnvironType = nt.environ
 else:
     environ: EnvironType = os.environ
 
-__all__ = ['environ']
+__all__ = ["environ"]

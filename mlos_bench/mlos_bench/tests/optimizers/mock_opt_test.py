@@ -20,24 +20,33 @@ def mock_configurations_no_defaults() -> list:
     A list of 2-tuples of (tunable_values, score) to test the optimizers.
     """
     return [
-        ({
-            "vmSize": "Standard_B4ms",
-            "idle": "halt",
-            "kernel_sched_migration_cost_ns": 13112,
-            "kernel_sched_latency_ns": 796233790,
-        }, 88.88),
-        ({
-            "vmSize": "Standard_B2ms",
-            "idle": "halt",
-            "kernel_sched_migration_cost_ns": 117026,
-            "kernel_sched_latency_ns": 149827706,
-        }, 66.66),
-        ({
-            "vmSize": "Standard_B4ms",
-            "idle": "halt",
-            "kernel_sched_migration_cost_ns": 354785,
-            "kernel_sched_latency_ns": 795285932,
-        }, 99.99),
+        (
+            {
+                "vmSize": "Standard_B4ms",
+                "idle": "halt",
+                "kernel_sched_migration_cost_ns": 13112,
+                "kernel_sched_latency_ns": 796233790,
+            },
+            88.88,
+        ),
+        (
+            {
+                "vmSize": "Standard_B2ms",
+                "idle": "halt",
+                "kernel_sched_migration_cost_ns": 117026,
+                "kernel_sched_latency_ns": 149827706,
+            },
+            66.66,
+        ),
+        (
+            {
+                "vmSize": "Standard_B4ms",
+                "idle": "halt",
+                "kernel_sched_migration_cost_ns": 354785,
+                "kernel_sched_latency_ns": 795285932,
+            },
+            99.99,
+        ),
     ]
 
 
@@ -47,12 +56,15 @@ def mock_configurations(mock_configurations_no_defaults: list) -> list:
     A list of 2-tuples of (tunable_values, score) to test the optimizers.
     """
     return [
-        ({
-            "vmSize": "Standard_B4ms",
-            "idle": "halt",
-            "kernel_sched_migration_cost_ns": -1,
-            "kernel_sched_latency_ns": 2000000,
-        }, 88.88),
+        (
+            {
+                "vmSize": "Standard_B4ms",
+                "idle": "halt",
+                "kernel_sched_migration_cost_ns": -1,
+                "kernel_sched_latency_ns": 2000000,
+            },
+            88.88,
+        ),
     ] + mock_configurations_no_defaults
 
 
@@ -60,7 +72,7 @@ def _optimize(mock_opt: MockOptimizer, mock_configurations: list) -> float:
     """
     Run several iterations of the optimizer and return the best score.
     """
-    for (tunable_values, score) in mock_configurations:
+    for tunable_values, score in mock_configurations:
         assert mock_opt.not_converged()
         tunables = mock_opt.suggest()
         assert tunables.get_param_values() == tunable_values
@@ -80,8 +92,9 @@ def test_mock_optimizer(mock_opt: MockOptimizer, mock_configurations: list) -> N
     assert score == pytest.approx(66.66, 0.01)
 
 
-def test_mock_optimizer_no_defaults(mock_opt_no_defaults: MockOptimizer,
-                                    mock_configurations_no_defaults: list) -> None:
+def test_mock_optimizer_no_defaults(
+    mock_opt_no_defaults: MockOptimizer, mock_configurations_no_defaults: list
+) -> None:
     """
     Make sure that mock optimizer produces consistent suggestions.
     """
@@ -89,7 +102,9 @@ def test_mock_optimizer_no_defaults(mock_opt_no_defaults: MockOptimizer,
     assert score == pytest.approx(66.66, 0.01)
 
 
-def test_mock_optimizer_max(mock_opt_max: MockOptimizer, mock_configurations: list) -> None:
+def test_mock_optimizer_max(
+    mock_opt_max: MockOptimizer, mock_configurations: list
+) -> None:
     """
     Check the maximization mode of the mock optimizer.
     """

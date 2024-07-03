@@ -24,7 +24,9 @@ TZ_TEST_FILES = [
 ]
 
 
-@pytest.mark.skipif(sys.platform == 'win32', reason="TZ environment variable is a UNIXism")
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="TZ environment variable is a UNIXism"
+)
 @pytest.mark.parametrize(("tz_name"), ZONE_NAMES)
 @pytest.mark.parametrize(("test_file"), TZ_TEST_FILES)
 def test_trial_telemetry_alt_tz(tz_name: Optional[str], test_file: str) -> None:
@@ -45,4 +47,6 @@ def test_trial_telemetry_alt_tz(tz_name: Optional[str], test_file: str) -> None:
     if cmd.returncode != 0:
         print(cmd.stdout.decode())
         print(cmd.stderr.decode())
-        raise AssertionError(f"Test(s) failed: # TZ='{tz_name}' '{sys.executable}' -m pytest -n0 '{test_file}'")
+        raise AssertionError(
+            f"Test(s) failed: # TZ='{tz_name}' '{sys.executable}' -m pytest -n0 '{test_file}'"
+        )
