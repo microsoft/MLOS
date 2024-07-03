@@ -7,6 +7,7 @@ dependencies:
   # All other dependencies for the mlos modules come from pip.
   - pip
   - pylint
+  - black
   - pycodestyle
   - pydocstyle
   - flake8
@@ -26,6 +27,7 @@ dependencies:
     - autopep8>=1.7.0
     - bump2version
     - check-jsonschema
+    - isort
     - licenseheaders
     - mypy
     - pandas-stubs
