@@ -92,9 +92,9 @@ class MlosCoreOptimizer(Optimizer):
         return f"{self.__class__.__name__}:{self._opt.__class__.__name__}"
 
     def bulk_register(self,
-                      configs: Sequence[dict],
-                      scores: Sequence[Optional[Dict[str, TunableValue]]],
-                      status: Optional[Sequence[Status]] = None) -> bool:
+                  configs: Sequence[dict],
+                  scores: Sequence[Optional[Dict[str, TunableValue]]],
+                  status: Optional[Sequence[Status]] = None) -> bool:
 
         if not super().bulk_register(configs, scores, status):
             return False
@@ -103,6 +103,9 @@ class MlosCoreOptimizer(Optimizer):
 
         df_scores = self._adjust_signs_df(
             pd.DataFrame([{} if score is None else score for score in scores]))
+
+        # Convert all score columns to numeric, coercing errors to NaN
+        df_scores = df_scores.apply(pd.to_numeric, errors='coerce')
 
         opt_targets = list(self._opt_targets)
         if status is not None:
@@ -124,6 +127,7 @@ class MlosCoreOptimizer(Optimizer):
             _LOG.debug("Warm-up END: %s :: %s", self, score)
 
         return True
+
 
     def _adjust_signs_df(self, df_scores: pd.DataFrame) -> pd.DataFrame:
         """

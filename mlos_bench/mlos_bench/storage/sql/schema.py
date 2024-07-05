@@ -47,7 +47,7 @@ class DbSchema:
     # pylint: disable=too-many-instance-attributes
 
     # Common string column sizes.
-    _ID_LEN = 512
+    _ID_LEN = 256
     _PARAM_VALUE_LEN = 1024
     _METRIC_VALUE_LEN = 255
     _STATUS_LEN = 16
