@@ -10,6 +10,11 @@
     "deploymentName": "$experiment_id",
     "vmName": "os-autotune-linux-vm",
 
+    "subscription": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "managedIdentityClientId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "managedIdentityName": "mlos-managed-identity",
+    "tenantId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+
     "resourceGroup": "os-autotune",
     "location": "westus2",
 

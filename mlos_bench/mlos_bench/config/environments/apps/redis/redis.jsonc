@@ -51,19 +51,22 @@
                         "trial_id"
                     ],
                     "setup": [
-                        "$mountPoint/$experiment_id/$trial_id/scripts/setup-workload.sh",
-                        "$mountPoint/$experiment_id/$trial_id/scripts/setup-app.sh"
+                        "sudo /usr/local/bin/azure_file_share_service --function 'download' --local_path $mountPoint/$experiment_id/$trial_id/scripts/ --remote_path $experiment_id/$trial_id/scripts",
+                        "sudo /usr/local/bin/azure_file_share_service --function 'download' --local_path $mountPoint/$experiment_id/$trial_id/input/redis.cfg --remote_path $experiment_id/$trial_id/input/redis.cfg",
+                        "sudo bash $mountPoint/$experiment_id/$trial_id/scripts/setup-workload.sh",
+                        "sudo bash $mountPoint/$experiment_id/$trial_id/scripts/setup-app.sh"
                     ],
                     "run": [
-                        "mkdir -p /tmp/mlos_bench/output/",
-                        "$mountPoint/$experiment_id/$trial_id/scripts/run-workload.sh",
-                        "mkdir -p $mountPoint/$experiment_id/$trial_id/output/",
-                        "cp -r /tmp/mlos_bench/output/* $mountPoint/$experiment_id/$trial_id/output/"
+                        "sudo mkdir -p /tmp/mlos_bench/output/",
+                        "sudo bash $mountPoint/$experiment_id/$trial_id/scripts/run-workload.sh",
+                        "sudo /usr/local/bin/azure_file_share_service --function 'upload' --local_path /tmp/mlos_bench/output/ --remote_path $experiment_id/$trial_id/output"
+                        // "mkdir -p $mountPoint/$experiment_id/$trial_id/output/",
+                        // "cp -r /tmp/mlos_bench/output/* $mountPoint/$experiment_id/$trial_id/output/"
                     ],
                     "teardown": [
-                        "$mountPoint/$experiment_id/$trial_id/scripts/cleanup-workload.sh",
-                        "$mountPoint/$experiment_id/$trial_id/scripts/cleanup-app.sh",
-                        "rm -r /tmp/mlos_bench/"
+                        "sudo bash $mountPoint/$experiment_id/$trial_id/scripts/cleanup-workload.sh",
+                        "sudo bash $mountPoint/$experiment_id/$trial_id/scripts/cleanup-app.sh"
+                        // "rm -r /tmp/mlos_bench/"
                     ]
                 }
             },

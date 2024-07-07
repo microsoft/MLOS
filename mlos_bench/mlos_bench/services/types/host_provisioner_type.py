@@ -90,3 +90,35 @@ class SupportsHostProvisioning(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+
+    def assign_managed_identity(self, params: dict) -> Tuple["Status", dict]:
+        """
+        Assigns a managed identity to the Host/VM.
+
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result. The result is always {}.
+            Status is one of {PENDING, SUCCEEDED, FAILED}
+        """
+
+    def wait_host_managed_identity_assignment(self, params: dict) -> Tuple["Status", dict]:
+        """
+        Waits for a pending managed identity assignment operation to resolve to SUCCEEDED or FAILED.
+
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result. The result is always {}.
+            Status is one of {PENDING, SUCCEEDED, FAILED}
+        """

@@ -131,6 +131,8 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
             config, global_config, parent,
             self.merge_methods(methods, [
                 # SupportsHostProvisioning
+                self.assign_managed_identity,
+                self.wait_host_managed_identity_assignment,
                 self.provision_host,
                 self.deprovision_host,
                 self.deallocate_host,
@@ -164,10 +166,11 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
 
     def _set_default_params(self, params: dict) -> dict:    # pylint: disable=no-self-use
         # Try and provide a semi sane default for the deploymentName if not provided
-        # since this is a common way to set the deploymentName and can same some
+        # since this is a common way to set the deploymentName and can save some
         # config work for the caller.
-        if "vmName" in params and "deploymentName" not in params:
-            params["deploymentName"] = f"{params['vmName']}-deployment"
+        deploy_params = super().deploy_params
+        if "vmName" in deploy_params and "deploymentName" not in params:
+            params["deploymentName"] = f"{deploy_params['vmName']}-deployment"
             _LOG.info("deploymentName missing from params. Defaulting to '%s'.", params["deploymentName"])
         return params
 
@@ -191,6 +194,25 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
         return self._wait_deployment(params, is_setup=is_setup)
+
+    def wait_host_managed_identity_assignment(self, params: dict) -> Tuple[Status, dict]:
+        """
+        Waits for a pending identity assignment on an Azure VM to resolve to SUCCEEDED or FAILED.
+        Return TIMED_OUT when timing out.
+
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+
+        Returns
+        -------
+        result : (Status, dict)
+            A pair of Status and result.
+            Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+            Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+        """
+        return self._wait_host_managed_identity_assignment(params)
 
     def wait_host_operation(self, params: dict) -> Tuple[Status, dict]:
         """
@@ -273,6 +295,26 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
         ))
+
+    def assign_managed_identity(self, params: dict) -> Tuple[Status, dict]:
+        """
+        Assign managed identity to Azure VM
+
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+            HostEnv tunables are variable parameters that, together with the
+            HostEnv configuration, are sufficient to provision a VM.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result. The result is the input `params` plus the
+            parameters extracted from the response JSON, or {} if the status is FAILED.
+            Status is one of {PENDING, SUCCEEDED, FAILED}
+        """
+        return self._assign_managed_identity(params)
 
     def deallocate_host(self, params: dict) -> Tuple[Status, dict]:
         """

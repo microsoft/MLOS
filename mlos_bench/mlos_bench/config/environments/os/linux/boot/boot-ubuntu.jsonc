@@ -52,34 +52,51 @@
                 "config": {
                     "required_args": [
                         "vmName",
+                        "tenantId",
+                        "managedIdentityClientId",
                         "storageAccountName",
                         "storageFileShareName",
-                        "storageAccountKey",
                         "mountPoint",
                         "experiment_id",
                         "trial_id"
                     ],
                     "wait_boot": true,
                     "shell_env_params": [
+                        "tenantId",
+                        "managedIdentityClientId",
                         "storageAccountName",
                         "storageFileShareName",
-                        "storageAccountKey",
                         "mountPoint",
                         "experiment_id",
                         "trial_id"
                     ],
                     "setup": [
                         "sudo mkdir -p $mountPoint",
-                        "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=\"$storageAccountKey\",serverino,nosharesock,actimeo=30",
+                        "sudo chmod +x $mountPoint",
+                        "sudo apt install software-properties-common -y",
+                        "sudo add-apt-repository ppa:deadsnakes/ppa -y",
+                        "sudo apt-get update -y",
+                        "sudo apt-get install python3.8 -y",
+                        "sudo apt install python3-pip -y",
+                        "sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1",
+                        "sudo python -m pip install --upgrade pip setuptools wheel",
+                        "sudo python -m pip install azure-file-share-service",
+                        "echo storageAccountName=$storageAccountName | sudo tee -a /etc/environment",
+                        "echo storageFileShareName=$storageFileShareName | sudo tee -a /etc/environment",
+                        "echo managedIdentityClientId=$managedIdentityClientId | sudo tee -a /etc/environment",
+                        "echo tenantId=$tenantId | sudo tee -a /etc/environment",
+                        "source /etc/environment"
+
+                        // "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=\"$storageAccountKey\",serverino,nosharesock,actimeo=30",
                         // TODO: Apply GRUB parameters from config on shared storage at:
                         // "$mountPoint/$experiment_id/$trial_id/input/grub.cfg"
                         // "sudo update-grub",
                         // "sudo shutdown -r now"  // Reboot to apply the parameters
-                        "cat $mountPoint/$experiment_id/$trial_id/input/grub.cfg"
+                        // "cat $mountPoint/$experiment_id/$trial_id/input/grub.cfg"
                     ],
                     "teardown": [
                         // "sudo umount $mountPoint"
-                        "echo sudo umount $mountPoint"
+                        "echo sudo rm -rf $mountPoint"
                     ]
                 }
             }

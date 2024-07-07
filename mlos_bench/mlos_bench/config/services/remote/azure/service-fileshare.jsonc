@@ -3,6 +3,7 @@
     "config": {
         "storageAccountName": "PLACEHOLDER; e.g.: osatsharedstorage",
         "storageFileShareName": "PLACEHOLDER; e.g.: os-autotune-file-share",
-        "storageAccountKey": "PLACEHOLDER; comes from global config"
+        "managedIdentityClientId": "PLACEHOLDER; comes from global config",
+        "tenantId": "PLACEHOLDER; comes from global config"
     }
 }

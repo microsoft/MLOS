@@ -20,6 +20,10 @@
                             "description": "The name of the resource group to place the deployment in (typically provided in the global config in order to omit from source control).",
                             "type": "string"
                         },
+                        "managedIdentityName": {
+                            "description": "The name of the managed identity used for storage authentication (typically provided in the global config in order to omit from source control).",
+                            "type": "string"
+                        },
                         "deploymentTemplatePath": {
                             "description": "Path to an ARM template file, or null if it should be skipped.",
                             "type": ["string", "null"],

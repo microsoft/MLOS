@@ -84,7 +84,11 @@ class HostEnv(Environment):
         if status.is_pending():
             (status, _) = self._host_service.wait_host_deployment(params, is_setup=True)
 
-        self._is_ready = status.is_succeeded()
+        (status_id_assign, params) = self._host_service.assign_managed_identity(self._params)
+        if status_id_assign.is_pending():
+            (status_id_assign, _) = self._host_service.wait_host_managed_identity_assignment(params)
+
+        self._is_ready = status.is_succeeded() and status_id_assign.is_succeeded()
         return self._is_ready
 
     def teardown(self) -> None:

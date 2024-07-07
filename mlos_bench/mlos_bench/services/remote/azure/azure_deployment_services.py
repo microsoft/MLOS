@@ -48,6 +48,15 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         "?api-version=2022-05-01"
     )
 
+    _URL_ASSIGN_IDENTITY = (
+        "https://management.azure.com" +
+        "/subscriptions/{subscription}" +
+        "/resourceGroups/{resource_group}" +
+        "/providers/Microsoft.Compute" +
+        "/virtualMachines/{vm_name}" +
+        "?api-version=2022-03-01"
+    )
+
     def __init__(self,
                  config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
@@ -73,6 +82,7 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         check_required_params(self.config, [
             "subscription",
             "resourceGroup",
+            "managedIdentityName"
         ])
 
         # These parameters can come from command line as strings, so conversion is needed.
@@ -392,6 +402,101 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         _LOG.error("Response: %s :: %s", response, response.text)
         return (Status.FAILED, {})
 
+    def _wait_host_managed_identity_assignment(self, params: dict) -> Tuple[Status, dict]:
+        """
+        Waits for a pending operation on an Azure resource to resolve to SUCCEEDED or FAILED.
+        Return TIMED_OUT when timing out.
+
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+
+        Returns
+        -------
+        result : (Status, dict)
+            A pair of Status and result.
+            Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+            Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+        """
+        params = self._set_default_params(params)
+        _LOG.info("Wait for %s to %s", self._deploy_params["vmName"], "be assigned managed identity")
+        return self._wait_while(self._check_managed_identity_assinment, Status.PENDING, params)
+
+    def _check_managed_identity_assinment(self, params: dict) -> Tuple[Status, dict]:   # pylint: disable=too-many-return-statements
+        """
+        Check if the identity is assigned to the VM.
+        Return SUCCEEDED if true, PENDING otherwise.
+
+        Parameters
+        ----------
+        _params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+            This parameter is not used; we need it for compatibility with
+            other polling functions used in `_wait_while()`.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result. The result is always {}.
+            Status is one of {SUCCEEDED, PENDING, FAILED}
+        """
+        params = self._set_default_params(params)
+        config = merge_parameters(
+            dest=self.config.copy(),
+            source=params,
+            required_keys=[
+                "subscription",
+                "resourceGroup",
+                "managedIdentityName",
+            ]
+        )
+
+        vmName = self._deploy_params["vmName"]
+        subscriptionId = config["subscription"]
+        resourceGroup = config["resourceGroup"]
+        managedIdentityName = config["managedIdentityName"]
+
+        _LOG.info("Check identity assignment: %s", vmName)
+
+        url = self._URL_ASSIGN_IDENTITY.format(
+            subscription=subscriptionId,
+            resource_group=resourceGroup,
+            vm_name=vmName,
+        )
+
+        session = self._get_session(params)
+        try:
+            response = session.get(url, timeout=self._request_timeout)
+        except requests.exceptions.ReadTimeout:
+            _LOG.warning("Request timed out after %.2f s: %s", self._request_timeout, url)
+            return Status.RUNNING, {}
+        except requests.exceptions.RequestException as ex:
+            _LOG.exception("Error in request checking deployment", exc_info=ex)
+            return (Status.FAILED, {})
+
+        _LOG.debug("Response: %s", response)
+
+        if response.status_code == 200:
+            output = response.json()
+            state = output.get("properties", {}).get("provisioningState", "")
+            print("state", state)
+
+            print(output)
+            mid = f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{managedIdentityName}"
+            if state == "Succeeded" and "identity" in output and mid in output["identity"]["userAssignedIdentities"]:
+                return (Status.SUCCEEDED, {})
+            elif state in {"Accepted", "Creating", "Deleting", "Running", "Updating"}:
+                return (Status.PENDING, {})
+            else:
+                _LOG.error("Response: %s :: %s", response, json.dumps(output, indent=2))
+                return (Status.FAILED, {})
+        elif response.status_code == 404:
+            return (Status.PENDING, {})
+
+        _LOG.error("Response: %s :: %s", response, response.text)
+        return (Status.FAILED, {})
+
     def _provision_resource(self, params: dict) -> Tuple[Status, dict]:
         """
         Attempts to (re)deploy a resource.
@@ -443,6 +548,77 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
 
         response = requests.put(url, json=json_req,
                                 headers=self._get_headers(), timeout=self._request_timeout)
+
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("Response: %s\n%s", response,
+                       json.dumps(response.json(), indent=2)
+                       if response.content else "")
+        else:
+            _LOG.info("Response: %s", response)
+
+        if response.status_code == 200:
+            return (Status.PENDING, config)
+        elif response.status_code == 201:
+            output = self._extract_arm_parameters(response.json())
+            if _LOG.isEnabledFor(logging.DEBUG):
+                _LOG.debug("Extracted parameters:\n%s", json.dumps(output, indent=2))
+            params.update(output)
+            params.setdefault("asyncResultsUrl", url)
+            params.setdefault("deploymentName", config["deploymentName"])
+            return (Status.PENDING, params)
+        else:
+            _LOG.error("Response: %s :: %s", response, response.text)
+            # _LOG.error("Bad Request:\n%s", response.request.body)
+            return (Status.FAILED, {})
+
+    def _assign_managed_identity(self, params: dict) -> Tuple[Status, dict]:
+        """
+        Attempts to assign a managed identity to resource.
+
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+            Tunables are variable parameters that, together with the
+            Environment configuration, are sufficient to provision the resource.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result. The result is the input `params` plus the
+            parameters extracted from the response JSON, or {} if the status is FAILED.
+            Status is one of {PENDING, SUCCEEDED, FAILED}
+        """
+        params = self._set_default_params(params)
+        config = merge_parameters(dest=self.config.copy(), source=params)
+
+        vmName = self._deploy_params["vmName"]
+        subscriptionId = config["subscription"]
+        resourceGroup = config["resourceGroup"]
+        managedIdentityName = config["managedIdentityName"]
+
+        _LOG.info("Assign managed identity: %s :: %s", vmName, params)
+
+        url = self._URL_ASSIGN_IDENTITY.format(
+            subscription=subscriptionId,
+            resource_group=resourceGroup,
+            vm_name=vmName,
+        )
+
+        json_req = {
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{managedIdentityName}": {}
+                }
+            }
+        }
+
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("Request: PATCH %s\n%s", url, json.dumps(json_req, indent=2))
+
+        response = requests.patch(url, json=json_req,
+                                  headers=self._get_headers(), timeout=self._request_timeout)
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Response: %s\n%s", response,
