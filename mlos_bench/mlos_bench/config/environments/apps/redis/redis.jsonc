@@ -65,8 +65,8 @@
                     ],
                     "teardown": [
                         "sudo bash $mountPoint/$experiment_id/$trial_id/scripts/cleanup-workload.sh",
-                        "sudo bash $mountPoint/$experiment_id/$trial_id/scripts/cleanup-app.sh"
-                        // "rm -r /tmp/mlos_bench/"
+                        "sudo bash $mountPoint/$experiment_id/$trial_id/scripts/cleanup-app.sh",
+                        "rm -r /tmp/mlos_bench/"
                     ]
                 }
             },
