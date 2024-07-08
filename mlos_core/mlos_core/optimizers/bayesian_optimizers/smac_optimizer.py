@@ -466,7 +466,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     def get_best_observations(self, *, n_max: int = 1
                               ) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame]]:
-        """Returns the best observation so far as a dataframe.
+        """
+        Returns the best observation so far as a dataframe.
 
         Returns
         -------
