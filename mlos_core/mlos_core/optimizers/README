@@ -25,5 +25,5 @@ The interface for these classes can be described as follows:
    Some optimizers will return additional metadata for evaluation, that should be used during the register phase.
    This function can also optionally take context (not yet implemented), and an argument to force the function to return the default configuration.
 - `register_pending`: registers a configuration and metadata pair as pending to the optimizer.
-- `get_observations`: returns all observations reported to the optimizer as a triplet of DataFrames (config, score, context, metadata).
+- `get_observations`: returns all observations reported to the optimizer as a triplet of DataFrames `(config, score, context, metadata)`.
 - `get_best_observations`: returns the best observation as a triplet of best `(config, score, context, metadata)` DataFrames.
