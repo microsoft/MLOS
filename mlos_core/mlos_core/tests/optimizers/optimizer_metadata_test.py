@@ -96,4 +96,4 @@ def test_optimizer_metadata(optimizer_type: OptimizerType, verify: Callable[[pd.
     assert isinstance(best_scores, pd.DataFrame)
     assert best_contexts is None
     assert isinstance(best_metadata, pd.DataFrame)
-    assert smac_verify_best(best_metadata)
+    assert verifier(best_metadata)
