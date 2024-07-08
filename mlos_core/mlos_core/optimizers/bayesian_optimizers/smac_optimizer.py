@@ -213,7 +213,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 assert isinstance(max_ratio, float) and 0.0 <= max_ratio <= 1.0
                 initial_design_args['max_ratio'] = max_ratio
 
-        # build the initial design for SMAC.
+        # Build the initial design for SMAC.
         # (currently defaults SOBOL instead of LatinHypercube due to better uniformity
         # for initial sampling which results in lower overall samples required)
         initial_design = initial_design_class(**initial_design_args)  # type: ignore[arg-type]
