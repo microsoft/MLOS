@@ -12,4 +12,3 @@ src_paths = ["mlos_core", "mlos_bench", "mlos_viz"]
 recursive = true
 black = true
 style = "numpy"
-blank = true
