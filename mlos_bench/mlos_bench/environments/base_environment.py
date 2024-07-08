@@ -280,8 +280,8 @@ class Environment(metaclass=abc.ABCMeta):
 
     def pprint(self, indent: int = 4, level: int = 0) -> str:
         """
-        Pretty-print the environment configuration.
-        For composite environments, print all children environments as well.
+        Pretty-print the environment configuration. For composite environments, print
+        all children environments as well.
 
         Parameters
         ----------
@@ -300,10 +300,9 @@ class Environment(metaclass=abc.ABCMeta):
 
     def _combine_tunables(self, tunables: TunableGroups) -> Dict[str, TunableValue]:
         """
-        Plug tunable values into the base config.\
-        If the tunable group is unknown, ignore it (it might belong to another
-        environment).
-        This method should never mutate the original config or the tunables.
+        Plug tunable values into the base config. If the tunable group is unknown,
+        ignore it (it might belong to another environment). This method should never
+        mutate the original config or the tunables.
 
         Parameters
         ----------
