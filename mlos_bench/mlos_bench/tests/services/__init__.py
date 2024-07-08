@@ -12,8 +12,8 @@ from .local import MockLocalExecService
 from .remote import MockFileShareService, MockRemoteExecService, MockVMService
 
 __all__ = [
-    'MockLocalExecService',
-    'MockFileShareService',
-    'MockRemoteExecService',
-    'MockVMService',
+    "MockLocalExecService",
+    "MockFileShareService",
+    "MockRemoteExecService",
+    "MockVMService",
 ]

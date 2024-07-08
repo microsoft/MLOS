@@ -19,7 +19,7 @@ else:
     from typing_extensions import TypeAlias
 
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 def get_all_submodules(pkg: TypeAlias) -> List[str]:
@@ -29,7 +29,9 @@ def get_all_submodules(pkg: TypeAlias) -> List[str]:
     Useful for dynamically enumerating subclasses.
     """
     submodules = []
-    for _, submodule_name, _ in walk_packages(pkg.__path__, prefix=f"{pkg.__name__}.", onerror=lambda x: None):
+    for _, submodule_name, _ in walk_packages(
+        pkg.__path__, prefix=f"{pkg.__name__}.", onerror=lambda x: None
+    ):
         submodules.append(submodule_name)
     return submodules
 
@@ -41,7 +43,8 @@ def _get_all_subclasses(cls: Type[T]) -> Set[Type[T]]:
     Useful for dynamically enumerating expected test cases.
     """
     return set(cls.__subclasses__()).union(
-        s for c in cls.__subclasses__() for s in _get_all_subclasses(c))
+        s for c in cls.__subclasses__() for s in _get_all_subclasses(c)
+    )
 
 
 def get_all_concrete_subclasses(cls: Type[T], pkg_name: Optional[str] = None) -> List[Type[T]]:
@@ -57,5 +60,11 @@ def get_all_concrete_subclasses(cls: Type[T], pkg_name: Optional[str] = None) ->
         pkg = import_module(pkg_name)
         submodules = get_all_submodules(pkg)
         assert submodules
-    return sorted([subclass for subclass in _get_all_subclasses(cls) if not getattr(subclass, "__abstractmethods__", None)],
-                  key=lambda c: (c.__module__, c.__name__))
+    return sorted(
+        [
+            subclass
+            for subclass in _get_all_subclasses(cls)
+            if not getattr(subclass, "__abstractmethods__", None)
+        ],
+        key=lambda c: (c.__module__, c.__name__),
+    )

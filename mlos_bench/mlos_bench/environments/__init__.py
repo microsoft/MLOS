@@ -13,11 +13,11 @@ from mlos_bench.environments.remote.remote_env import RemoteEnv
 from mlos_bench.environments.status import Status
 
 __all__ = [
-    'Status',
-    'Environment',
-    'MockEnv',
-    'RemoteEnv',
-    'LocalEnv',
-    'LocalFileShareEnv',
-    'CompositeEnv',
+    "Status",
+    "Environment",
+    "MockEnv",
+    "RemoteEnv",
+    "LocalEnv",
+    "LocalFileShareEnv",
+    "CompositeEnv",
 ]

@@ -92,10 +92,12 @@ class CovariantTunableGroup:
             return False
         # TODO: May need to provide logic to relax the equality check on the
         # tunables (e.g. "compatible" vs. "equal").
-        return (self._name == other._name and
-                self._cost == other._cost and
-                self._is_updated == other._is_updated and
-                self._tunables == other._tunables)
+        return (
+            self._name == other._name
+            and self._cost == other._cost
+            and self._is_updated == other._is_updated
+            and self._tunables == other._tunables
+        )
 
     def equals_defaults(self, other: "CovariantTunableGroup") -> bool:
         """
@@ -233,7 +235,11 @@ class CovariantTunableGroup:
     def __getitem__(self, tunable: Union[str, Tunable]) -> TunableValue:
         return self.get_tunable(tunable).value
 
-    def __setitem__(self, tunable: Union[str, Tunable], tunable_value: Union[TunableValue, Tunable]) -> TunableValue:
-        value: TunableValue = tunable_value.value if isinstance(tunable_value, Tunable) else tunable_value
+    def __setitem__(
+        self, tunable: Union[str, Tunable], tunable_value: Union[TunableValue, Tunable]
+    ) -> TunableValue:
+        value: TunableValue = (
+            tunable_value.value if isinstance(tunable_value, Tunable) else tunable_value
+        )
         self._is_updated |= self.get_tunable(tunable).update(value)
         return value

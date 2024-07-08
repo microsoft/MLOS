@@ -19,29 +19,29 @@ def mock_configs() -> List[dict]:
     """Mock configurations of earlier experiments."""
     return [
         {
-            'vmSize': 'Standard_B4ms',
-            'idle': 'halt',
-            'kernel_sched_migration_cost_ns': 50000,
-            'kernel_sched_latency_ns': 1000000,
+            "vmSize": "Standard_B4ms",
+            "idle": "halt",
+            "kernel_sched_migration_cost_ns": 50000,
+            "kernel_sched_latency_ns": 1000000,
         },
         {
-            'vmSize': 'Standard_B4ms',
-            'idle': 'halt',
-            'kernel_sched_migration_cost_ns': 40000,
-            'kernel_sched_latency_ns': 2000000,
+            "vmSize": "Standard_B4ms",
+            "idle": "halt",
+            "kernel_sched_migration_cost_ns": 40000,
+            "kernel_sched_latency_ns": 2000000,
         },
         {
-            'vmSize': 'Standard_B4ms',
-            'idle': 'mwait',
-            'kernel_sched_migration_cost_ns': -1,  # Special value
-            'kernel_sched_latency_ns': 3000000,
+            "vmSize": "Standard_B4ms",
+            "idle": "mwait",
+            "kernel_sched_migration_cost_ns": -1,  # Special value
+            "kernel_sched_latency_ns": 3000000,
         },
         {
-            'vmSize': 'Standard_B2s',
-            'idle': 'mwait',
-            'kernel_sched_migration_cost_ns': 200000,
-            'kernel_sched_latency_ns': 4000000,
-        }
+            "vmSize": "Standard_B2s",
+            "idle": "mwait",
+            "kernel_sched_migration_cost_ns": 200000,
+            "kernel_sched_latency_ns": 4000000,
+        },
     ]
 
 
@@ -55,7 +55,7 @@ def mock_opt_no_defaults(tunable_groups: TunableGroups) -> MockOptimizer:
             "optimization_targets": {"score": "min"},
             "max_suggestions": 5,
             "start_with_defaults": False,
-            "seed": SEED
+            "seed": SEED,
         },
     )
 
@@ -66,11 +66,7 @@ def mock_opt(tunable_groups: TunableGroups) -> MockOptimizer:
     return MockOptimizer(
         tunables=tunable_groups,
         service=None,
-        config={
-            "optimization_targets": {"score": "min"},
-            "max_suggestions": 5,
-            "seed": SEED
-        },
+        config={"optimization_targets": {"score": "min"}, "max_suggestions": 5, "seed": SEED},
     )
 
 
@@ -80,11 +76,7 @@ def mock_opt_max(tunable_groups: TunableGroups) -> MockOptimizer:
     return MockOptimizer(
         tunables=tunable_groups,
         service=None,
-        config={
-            "optimization_targets": {"score": "max"},
-            "max_suggestions": 10,
-            "seed": SEED
-        },
+        config={"optimization_targets": {"score": "max"}, "max_suggestions": 10, "seed": SEED},
     )
 
 

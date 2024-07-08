@@ -7,5 +7,5 @@
 from mlos_bench.services.local.local_exec import LocalExecService
 
 __all__ = [
-    'LocalExecService',
+    "LocalExecService",
 ]

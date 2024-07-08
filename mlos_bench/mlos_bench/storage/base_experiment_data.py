@@ -30,12 +30,15 @@ class ExperimentData(metaclass=ABCMeta):
     RESULT_COLUMN_PREFIX = "result."
     CONFIG_COLUMN_PREFIX = "config."
 
-    def __init__(self, *,
-                 experiment_id: str,
-                 description: str,
-                 root_env_config: str,
-                 git_repo: str,
-                 git_commit: str):
+    def __init__(
+        self,
+        *,
+        experiment_id: str,
+        description: str,
+        root_env_config: str,
+        git_repo: str,
+        git_commit: str,
+    ):
         self._experiment_id = experiment_id
         self._description = description
         self._root_env_config = root_env_config
@@ -137,9 +140,9 @@ class ExperimentData(metaclass=ABCMeta):
         trials_items = sorted(self.trials.items())
         if not trials_items:
             return None
-        for (_trial_id, trial) in trials_items:
+        for _trial_id, trial in trials_items:
             # Take the first config id marked as "defaults" when it was instantiated.
-            if strtobool(str(trial.metadata_dict.get('is_defaults', False))):
+            if strtobool(str(trial.metadata_dict.get("is_defaults", False))):
                 return trial.tunable_config_id
         # Fallback (min trial_id)
         return trials_items[0][1].tunable_config_id
@@ -154,7 +157,8 @@ class ExperimentData(metaclass=ABCMeta):
         -------
         results : pandas.DataFrame
             A DataFrame with configurations and results from all trials of the experiment.
-            Has columns [trial_id, tunable_config_id, tunable_config_trial_group_id, ts_start, ts_end, status]
+            Has columns
+            [trial_id, tunable_config_id, tunable_config_trial_group_id, ts_start, ts_end, status]
             followed by tunable config parameters (prefixed with "config.") and
             trial results (prefixed with "result."). The latter can be NULLs if the
             trial was not successful.

@@ -18,12 +18,12 @@ from mlos_bench.services.types.remote_config_type import SupportsRemoteConfig
 from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 
 __all__ = [
-    'SupportsAuth',
-    'SupportsConfigLoading',
-    'SupportsFileShareOps',
-    'SupportsHostProvisioning',
-    'SupportsLocalExec',
-    'SupportsNetworkProvisioning',
-    'SupportsRemoteConfig',
-    'SupportsRemoteExec',
+    "SupportsAuth",
+    "SupportsConfigLoading",
+    "SupportsFileShareOps",
+    "SupportsHostProvisioning",
+    "SupportsLocalExec",
+    "SupportsNetworkProvisioning",
+    "SupportsRemoteConfig",
+    "SupportsRemoteExec",
 ]

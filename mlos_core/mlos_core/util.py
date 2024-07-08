@@ -27,7 +27,9 @@ def config_to_dataframe(config: Configuration) -> pd.DataFrame:
     return pd.DataFrame([dict(config)])
 
 
-def normalize_config(config_space: ConfigurationSpace, config: Union[Configuration, dict]) -> Configuration:
+def normalize_config(
+    config_space: ConfigurationSpace, config: Union[Configuration, dict]
+) -> Configuration:
     """
     Convert a dictionary to a valid ConfigSpace configuration.
 
@@ -48,8 +50,6 @@ def normalize_config(config_space: ConfigurationSpace, config: Union[Configurati
     """
     cs_config = Configuration(config_space, values=config, allow_inactive_with_values=True)
     return Configuration(
-        config_space, values={
-            key: cs_config[key]
-            for key in config_space.get_active_hyperparameters(cs_config)
-        }
+        config_space,
+        values={key: cs_config[key] for key in config_space.get_active_hyperparameters(cs_config)},
     )

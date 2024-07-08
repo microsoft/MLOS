@@ -42,7 +42,8 @@ class SupportsNetworkProvisioning(Protocol):
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
         is_setup : bool
-            If True, wait for Network being deployed; otherwise, wait for successful deprovisioning.
+            If True, wait for Network being deployed; otherwise, wait for successful
+            deprovisioning.
 
         Returns
         -------
@@ -52,7 +53,9 @@ class SupportsNetworkProvisioning(Protocol):
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
 
-    def deprovision_network(self, params: dict, ignore_errors: bool = True) -> Tuple["Status", dict]:
+    def deprovision_network(
+        self, params: dict, ignore_errors: bool = True
+    ) -> Tuple["Status", dict]:
         """
         Deprovisions the Network by deleting it.
 

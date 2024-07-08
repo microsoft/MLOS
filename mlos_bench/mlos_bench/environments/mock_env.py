@@ -25,13 +25,15 @@ class MockEnv(Environment):
     _NOISE_VAR = 0.2
     """Variance of the Gaussian noise added to the benchmark value."""
 
-    def __init__(self,
-                 *,
-                 name: str,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 tunables: Optional[TunableGroups] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        *,
+        name: str,
+        config: dict,
+        global_config: Optional[dict] = None,
+        tunables: Optional[TunableGroups] = None,
+        service: Optional[Service] = None,
+    ):
         """
         Create a new environment that produces mock benchmark data.
 
@@ -51,8 +53,13 @@ class MockEnv(Environment):
         service: Service
             An optional service object. Not used by this class.
         """
-        super().__init__(name=name, config=config, global_config=global_config,
-                         tunables=tunables, service=service)
+        super().__init__(
+            name=name,
+            config=config,
+            global_config=global_config,
+            tunables=tunables,
+            service=service,
+        )
         seed = int(self.config.get("mock_env_seed", -1))
         self._random = random.Random(seed or None) if seed >= 0 else None
         self._range = self.config.get("mock_env_range")
@@ -77,9 +84,9 @@ class MockEnv(Environment):
             return result
 
         # Simple convex function of all tunable parameters.
-        score = numpy.mean(numpy.square([
-            self._normalized(tunable) for (tunable, _group) in self._tunable_params
-        ]))
+        score = numpy.mean(
+            numpy.square([self._normalized(tunable) for (tunable, _group) in self._tunable_params])
+        )
 
         # Add noise and shift the benchmark value from [0, 1] to a given range.
         noise = self._random.gauss(0, self._NOISE_VAR) if self._random else 0
@@ -98,11 +105,11 @@ class MockEnv(Environment):
         """
         val = None
         if tunable.is_categorical:
-            val = (tunable.categories.index(tunable.category) /
-                   float(len(tunable.categories) - 1))
+            val = tunable.categories.index(tunable.category) / float(len(tunable.categories) - 1)
         elif tunable.is_numerical:
-            val = ((tunable.numerical_value - tunable.range[0]) /
-                   float(tunable.range[1] - tunable.range[0]))
+            val = (tunable.numerical_value - tunable.range[0]) / float(
+                tunable.range[1] - tunable.range[0]
+            )
         else:
             raise ValueError("Invalid parameter type: " + tunable.type)
         # Explicitly clip the value in case of numerical errors.

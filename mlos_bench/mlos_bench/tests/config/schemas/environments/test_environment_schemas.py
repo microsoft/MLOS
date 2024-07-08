@@ -31,17 +31,23 @@ TEST_CASES = get_schema_test_cases(path.join(path.dirname(__file__), "test-cases
 # Dynamically enumerate some of the cases we want to make sure we cover.
 
 NON_CONFIG_ENV_CLASSES = {
-    ScriptEnv   # ScriptEnv is ABCMeta abstract, but there's no good way to test that dynamically in Python.
+    # ScriptEnv is ABCMeta abstract, but there's no good way to test that
+    # dynamically in Python.
+    ScriptEnv,
 }
-expected_environment_class_names = [subclass.__module__ + "." + subclass.__name__
-                                    for subclass
-                                    in get_all_concrete_subclasses(Environment, pkg_name='mlos_bench')
-                                    if subclass not in NON_CONFIG_ENV_CLASSES]
+expected_environment_class_names = [
+    subclass.__module__ + "." + subclass.__name__
+    for subclass in get_all_concrete_subclasses(Environment, pkg_name="mlos_bench")
+    if subclass not in NON_CONFIG_ENV_CLASSES
+]
 assert expected_environment_class_names
 
 COMPOSITE_ENV_CLASS_NAME = CompositeEnv.__module__ + "." + CompositeEnv.__name__
-expected_leaf_environment_class_names = [subclass_name for subclass_name in expected_environment_class_names
-                                         if subclass_name != COMPOSITE_ENV_CLASS_NAME]
+expected_leaf_environment_class_names = [
+    subclass_name
+    for subclass_name in expected_environment_class_names
+    if subclass_name != COMPOSITE_ENV_CLASS_NAME
+]
 
 
 # Do the full cross product of all the test cases and all the Environment types.
@@ -55,10 +61,12 @@ def test_case_coverage_mlos_bench_environment_type(test_case_subtype: str, env_c
         if try_resolve_class_name(test_case.config.get("class")) == env_class:
             return
     raise NotImplementedError(
-        f"Missing test case for subtype {test_case_subtype} for Environment class {env_class}")
+        f"Missing test case for subtype {test_case_subtype} for Environment class {env_class}"
+    )
 
 
 # Now we actually perform all of those validation tests.
+
 
 @pytest.mark.parametrize("test_case_name", sorted(TEST_CASES.by_path))
 def test_environment_configs_against_schema(test_case_name: str) -> None:
@@ -72,5 +80,9 @@ def test_environment_configs_with_extra_param(test_case_name: str) -> None:
     """Checks that the environment config fails to validate if extra params are present
     in certain places.
     """
-    check_test_case_config_with_extra_param(TEST_CASES.by_type["good"][test_case_name], ConfigSchema.ENVIRONMENT)
-    check_test_case_config_with_extra_param(TEST_CASES.by_type["good"][test_case_name], ConfigSchema.UNIFIED)
+    check_test_case_config_with_extra_param(
+        TEST_CASES.by_type["good"][test_case_name], ConfigSchema.ENVIRONMENT
+    )
+    check_test_case_config_with_extra_param(
+        TEST_CASES.by_type["good"][test_case_name], ConfigSchema.UNIFIED
+    )

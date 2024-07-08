@@ -27,13 +27,15 @@ class LocalFileShareEnv(LocalEnv):
     to the shared file storage.
     """
 
-    def __init__(self,
-                 *,
-                 name: str,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 tunables: Optional[TunableGroups] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        *,
+        name: str,
+        config: dict,
+        global_config: Optional[dict] = None,
+        tunables: Optional[TunableGroups] = None,
+        service: Optional[Service] = None,
+    ):
         """
         Create a new application environment with a given config.
 
@@ -57,14 +59,22 @@ class LocalFileShareEnv(LocalEnv):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
+        super().__init__(
+            name=name,
+            config=config,
+            global_config=global_config,
+            tunables=tunables,
+            service=service,
+        )
 
-        assert self._service is not None and isinstance(self._service, SupportsLocalExec), \
-            "LocalEnv requires a service that supports local execution"
+        assert self._service is not None and isinstance(
+            self._service, SupportsLocalExec
+        ), "LocalEnv requires a service that supports local execution"
         self._local_exec_service: SupportsLocalExec = self._service
 
-        assert self._service is not None and isinstance(self._service, SupportsFileShareOps), \
-            "LocalEnv requires a service that supports file upload/download operations"
+        assert self._service is not None and isinstance(
+            self._service, SupportsFileShareOps
+        ), "LocalEnv requires a service that supports file upload/download operations"
         self._file_share_service: SupportsFileShareOps = self._service
 
         self._upload = self._template_from_to("upload")
@@ -74,14 +84,12 @@ class LocalFileShareEnv(LocalEnv):
         """Convert a list of {"from": "...", "to": "..."} to a list of pairs of
         string.Template objects so that we can plug in self._params into it later.
         """
-        return [
-            (Template(d['from']), Template(d['to']))
-            for d in self.config.get(config_key, [])
-        ]
+        return [(Template(d["from"]), Template(d["to"])) for d in self.config.get(config_key, [])]
 
     @staticmethod
-    def _expand(from_to: Iterable[Tuple[Template, Template]],
-                params: Mapping[str, TunableValue]) -> Generator[Tuple[str, str], None, None]:
+    def _expand(
+        from_to: Iterable[Tuple[Template, Template]], params: Mapping[str, TunableValue]
+    ) -> Generator[Tuple[str, str], None, None]:
         """
         Substitute $var parameters in from/to path templates.
 
@@ -117,9 +125,14 @@ class LocalFileShareEnv(LocalEnv):
             assert self._temp_dir is not None
             params = self._get_env_params(restrict=False)
             params["PWD"] = self._temp_dir
-            for (path_from, path_to) in self._expand(self._upload, params):
-                self._file_share_service.upload(self._params, self._config_loader_service.resolve_path(
-                    path_from, extra_paths=[self._temp_dir]), path_to)
+            for path_from, path_to in self._expand(self._upload, params):
+                self._file_share_service.upload(
+                    self._params,
+                    self._config_loader_service.resolve_path(
+                        path_from, extra_paths=[self._temp_dir]
+                    ),
+                    path_to,
+                )
         return self._is_ready
 
     def _download_files(self, ignore_missing: bool = False) -> None:
@@ -135,11 +148,15 @@ class LocalFileShareEnv(LocalEnv):
         assert self._temp_dir is not None
         params = self._get_env_params(restrict=False)
         params["PWD"] = self._temp_dir
-        for (path_from, path_to) in self._expand(self._download, params):
+        for path_from, path_to in self._expand(self._download, params):
             try:
-                self._file_share_service.download(self._params,
-                                                  path_from, self._config_loader_service.resolve_path(
-                                                      path_to, extra_paths=[self._temp_dir]))
+                self._file_share_service.download(
+                    self._params,
+                    path_from,
+                    self._config_loader_service.resolve_path(
+                        path_to, extra_paths=[self._temp_dir]
+                    ),
+                )
             except FileNotFoundError as ex:
                 _LOG.warning("Cannot download: %s", path_from)
                 if not ignore_missing:

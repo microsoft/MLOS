@@ -10,6 +10,6 @@ from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import (
 from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
 
 __all__ = [
-    'BaseBayesianOptimizer',
-    'SmacOptimizer',
+    "BaseBayesianOptimizer",
+    "SmacOptimizer",
 ]

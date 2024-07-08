@@ -50,11 +50,12 @@ def test_run_python_script(local_exec_service: LocalExecService) -> None:
             json.dump(params_meta, fh_meta)
 
         script_path = local_exec_service.config_loader_service.resolve_path(
-            "environments/os/linux/runtime/scripts/local/generate_kernel_config_script.py")
+            "environments/os/linux/runtime/scripts/local/generate_kernel_config_script.py"
+        )
 
-        (return_code, _stdout, stderr) = local_exec_service.local_exec([
-            f"{script_path} {input_file} {meta_file} {output_file}"
-        ], cwd=temp_dir, env=params)
+        (return_code, _stdout, stderr) = local_exec_service.local_exec(
+            [f"{script_path} {input_file} {meta_file} {output_file}"], cwd=temp_dir, env=params
+        )
 
         assert stderr.strip() == ""
         assert return_code == 0

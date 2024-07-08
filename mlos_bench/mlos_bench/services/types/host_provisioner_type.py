@@ -42,7 +42,8 @@ class SupportsHostProvisioning(Protocol):
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
         is_setup : bool
-            If True, wait for Host/VM being deployed; otherwise, wait for successful deprovisioning.
+            If True, wait for Host/VM being deployed; otherwise, wait for successful
+            deprovisioning.
 
         Returns
         -------

@@ -29,28 +29,33 @@ def zoned_telemetry_data(zone_info: Optional[tzinfo]) -> List[Tuple[datetime, st
     """
     timestamp1 = datetime.now(zone_info)
     timestamp2 = timestamp1 + timedelta(seconds=1)
-    return sorted([
-        (timestamp1, "cpu_load", 10.1),
-        (timestamp1, "memory", 20),
-        (timestamp1, "setup", "prod"),
-        (timestamp2, "cpu_load", 30.1),
-        (timestamp2, "memory", 40),
-        (timestamp2, "setup", "prod"),
-    ])
+    return sorted(
+        [
+            (timestamp1, "cpu_load", 10.1),
+            (timestamp1, "memory", 20),
+            (timestamp1, "setup", "prod"),
+            (timestamp2, "cpu_load", 30.1),
+            (timestamp2, "memory", 40),
+            (timestamp2, "setup", "prod"),
+        ]
+    )
 
 
-def _telemetry_str(data: List[Tuple[datetime, str, Any]]
-                   ) -> List[Tuple[datetime, str, Optional[str]]]:
+def _telemetry_str(
+    data: List[Tuple[datetime, str, Any]]
+) -> List[Tuple[datetime, str, Optional[str]]]:
     """Convert telemetry values to strings."""
     # All retrieved timestamps should have been converted to UTC.
     return [(ts.astimezone(UTC), key, nullable(str, val)) for (ts, key, val) in data]
 
 
 @pytest.mark.parametrize(("origin_zone_info"), ZONE_INFO)
-def test_update_telemetry(storage: Storage,
-                          exp_storage: Storage.Experiment,
-                          tunable_groups: TunableGroups,
-                          origin_zone_info: Optional[tzinfo]) -> None:
+def test_update_telemetry(
+    storage: Storage,
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+    origin_zone_info: Optional[tzinfo],
+) -> None:
     """Make sure update_telemetry() and load_telemetry() methods work."""
     telemetry_data = zoned_telemetry_data(origin_zone_info)
     trial = exp_storage.new_trial(tunable_groups)
@@ -67,9 +72,11 @@ def test_update_telemetry(storage: Storage,
 
 
 @pytest.mark.parametrize(("origin_zone_info"), ZONE_INFO)
-def test_update_telemetry_twice(exp_storage: Storage.Experiment,
-                                tunable_groups: TunableGroups,
-                                origin_zone_info: Optional[tzinfo]) -> None:
+def test_update_telemetry_twice(
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+    origin_zone_info: Optional[tzinfo],
+) -> None:
     """Make sure update_telemetry() call is idempotent."""
     telemetry_data = zoned_telemetry_data(origin_zone_info)
     trial = exp_storage.new_trial(tunable_groups)

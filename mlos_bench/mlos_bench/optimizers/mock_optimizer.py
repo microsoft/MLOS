@@ -20,11 +20,13 @@ _LOG = logging.getLogger(__name__)
 class MockOptimizer(TrackBestOptimizer):
     """Mock optimizer to test the Environment API."""
 
-    def __init__(self,
-                 tunables: TunableGroups,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        tunables: TunableGroups,
+        config: dict,
+        global_config: Optional[dict] = None,
+        service: Optional[Service] = None,
+    ):
         super().__init__(tunables, config, global_config, service)
         rnd = random.Random(self.seed)
         self._random: Dict[str, Callable[[Tunable], TunableValue]] = {
@@ -33,15 +35,17 @@ class MockOptimizer(TrackBestOptimizer):
             "int": lambda tunable: rnd.randint(*tunable.range),
         }
 
-    def bulk_register(self,
-                      configs: Sequence[dict],
-                      scores: Sequence[Optional[Dict[str, TunableValue]]],
-                      status: Optional[Sequence[Status]] = None) -> bool:
+    def bulk_register(
+        self,
+        configs: Sequence[dict],
+        scores: Sequence[Optional[Dict[str, TunableValue]]],
+        status: Optional[Sequence[Status]] = None,
+    ) -> bool:
         if not super().bulk_register(configs, scores, status):
             return False
         if status is None:
             status = [Status.SUCCEEDED] * len(configs)
-        for (params, score, trial_status) in zip(configs, scores, status):
+        for params, score, trial_status in zip(configs, scores, status):
             tunables = self._tunables.copy().assign(params)
             self.register(tunables, trial_status, score)
         if _LOG.isEnabledFor(logging.DEBUG):
@@ -56,7 +60,7 @@ class MockOptimizer(TrackBestOptimizer):
             _LOG.info("Use default tunable values")
             self._start_with_defaults = False
         else:
-            for (tunable, _group) in tunables:
+            for tunable, _group in tunables:
                 tunable.value = self._random[tunable.type](tunable)
         _LOG.info("Iteration %d :: Suggest: %s", self._iter, tunables)
         return tunables

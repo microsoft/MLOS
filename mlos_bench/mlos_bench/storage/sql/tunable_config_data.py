@@ -18,10 +18,7 @@ class TunableConfigSqlData(TunableConfigData):
     A configuration in this context is the set of tunable parameter values.
     """
 
-    def __init__(self, *,
-                 engine: Engine,
-                 schema: DbSchema,
-                 tunable_config_id: int):
+    def __init__(self, *, engine: Engine, schema: DbSchema, tunable_config_id: int):
         super().__init__(tunable_config_id=tunable_config_id)
         self._engine = engine
         self._schema = schema
@@ -30,12 +27,13 @@ class TunableConfigSqlData(TunableConfigData):
     def config_df(self) -> pandas.DataFrame:
         with self._engine.connect() as conn:
             cur_config = conn.execute(
-                self._schema.config_param.select().where(
-                    self._schema.config_param.c.config_id == self._tunable_config_id
-                ).order_by(
+                self._schema.config_param.select()
+                .where(self._schema.config_param.c.config_id == self._tunable_config_id)
+                .order_by(
                     self._schema.config_param.c.param_id,
                 )
             )
             return pandas.DataFrame(
                 [(row.param_id, row.param_value) for row in cur_config.fetchall()],
-                columns=['parameter', 'value'])
+                columns=["parameter", "value"],
+            )

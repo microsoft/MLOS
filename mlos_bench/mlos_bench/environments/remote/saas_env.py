@@ -19,13 +19,15 @@ _LOG = logging.getLogger(__name__)
 class SaaSEnv(Environment):
     """Cloud-based (configurable) SaaS environment."""
 
-    def __init__(self,
-                 *,
-                 name: str,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 tunables: Optional[TunableGroups] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        *,
+        name: str,
+        config: dict,
+        global_config: Optional[dict] = None,
+        tunables: Optional[TunableGroups] = None,
+        service: Optional[Service] = None,
+    ):
         """
         Create a new environment for (configurable) cloud-based SaaS instance.
 
@@ -46,15 +48,22 @@ class SaaSEnv(Environment):
             An optional service object
             (e.g., providing methods to configure the remote service).
         """
-        super().__init__(name=name, config=config, global_config=global_config,
-                         tunables=tunables, service=service)
+        super().__init__(
+            name=name,
+            config=config,
+            global_config=global_config,
+            tunables=tunables,
+            service=service,
+        )
 
-        assert self._service is not None and isinstance(self._service, SupportsHostOps), \
-            "RemoteEnv requires a service that supports host operations"
+        assert self._service is not None and isinstance(
+            self._service, SupportsHostOps
+        ), "RemoteEnv requires a service that supports host operations"
         self._host_service: SupportsHostOps = self._service
 
-        assert self._service is not None and isinstance(self._service, SupportsRemoteConfig), \
-            "SaaSEnv requires a service that supports remote host configuration API"
+        assert self._service is not None and isinstance(
+            self._service, SupportsRemoteConfig
+        ), "SaaSEnv requires a service that supports remote host configuration API"
         self._config_service: SupportsRemoteConfig = self._service
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
@@ -80,7 +89,8 @@ class SaaSEnv(Environment):
             return False
 
         (status, _) = self._config_service.configure(
-            self._params, self._tunable_params.get_param_values())
+            self._params, self._tunable_params.get_param_values()
+        )
         if not status.is_succeeded():
             return False
 
@@ -89,7 +99,7 @@ class SaaSEnv(Environment):
             return False
 
         # Azure Flex DB instances currently require a VM reboot after reconfiguration.
-        if res.get('isConfigPendingRestart') or res.get('isConfigPendingReboot'):
+        if res.get("isConfigPendingRestart") or res.get("isConfigPendingReboot"):
             _LOG.info("Restarting: %s", self)
             (status, params) = self._host_service.restart_host(self._params)
             if status.is_pending():

@@ -34,25 +34,31 @@ def test_remote_ssh_env(ssh_test_server: SshTestServerInfo) -> None:
         "ssh_priv_key_path": ssh_test_server.id_rsa_path,
     }
 
-    service = ConfigPersistenceService(config={"config_path": [str(files("mlos_bench.tests.config"))]})
+    service = ConfigPersistenceService(
+        config={"config_path": [str(files("mlos_bench.tests.config"))]}
+    )
     config_path = service.resolve_path("environments/remote/test_ssh_env.jsonc")
-    env = service.load_environment(config_path, TunableGroups(), global_config=global_config, service=service)
+    env = service.load_environment(
+        config_path, TunableGroups(), global_config=global_config, service=service
+    )
 
     check_env_success(
-        env, env.tunable_params,
+        env,
+        env.tunable_params,
         expected_results={
             "hostname": ssh_test_server.service_name,
             "username": ssh_test_server.username,
             "score": 0.9,
-            "ssh_priv_key_path": np.nan,    # empty strings are returned as "not a number"
+            "ssh_priv_key_path": np.nan,  # empty strings are returned as "not a number"
             "test_param": "unset",
             "FOO": "unset",
             "ssh_username": "unset",
         },
         expected_telemetry=[],
     )
-    assert not os.path.exists(os.path.join(os.getcwd(), "output-downloaded.csv")), \
-        "output-downloaded.csv should have been cleaned up by temp_dir context"
+    assert not os.path.exists(
+        os.path.join(os.getcwd(), "output-downloaded.csv")
+    ), "output-downloaded.csv should have been cleaned up by temp_dir context"
 
 
 if __name__ == "__main__":

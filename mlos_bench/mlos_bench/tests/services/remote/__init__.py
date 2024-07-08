@@ -13,7 +13,7 @@ from .mock.mock_remote_exec_service import MockRemoteExecService
 from .mock.mock_vm_service import MockVMService
 
 __all__ = [
-    'MockFileShareService',
-    'MockRemoteExecService',
-    'MockVMService',
+    "MockFileShareService",
+    "MockRemoteExecService",
+    "MockVMService",
 ]

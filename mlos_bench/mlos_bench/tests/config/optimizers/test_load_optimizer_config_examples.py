@@ -28,12 +28,16 @@ def filter_configs(configs_to_filter: List[str]) -> List[str]:
     return configs_to_filter
 
 
-configs = locate_config_examples(ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE, filter_configs)
+configs = locate_config_examples(
+    ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE, filter_configs
+)
 assert configs
 
 
 @pytest.mark.parametrize("config_path", configs)
-def test_load_optimizer_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
+def test_load_optimizer_config_examples(
+    config_loader_service: ConfigPersistenceService, config_path: str
+) -> None:
     """Tests loading a config example."""
     config = config_loader_service.load_config(config_path, ConfigSchema.OPTIMIZER)
     assert isinstance(config, dict)

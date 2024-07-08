@@ -23,11 +23,13 @@ class OneShotOptimizer(MockOptimizer):
 
     # TODO: Add support for multiple explicit configs (i.e., FewShot or Manual Optimizer) - #344
 
-    def __init__(self,
-                 tunables: TunableGroups,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        tunables: TunableGroups,
+        config: dict,
+        global_config: Optional[dict] = None,
+        service: Optional[Service] = None,
+    ):
         super().__init__(tunables, config, global_config, service)
         _LOG.info("Run a single iteration for: %s", self._tunables)
         self._max_iter = 1  # Always run for just one iteration.

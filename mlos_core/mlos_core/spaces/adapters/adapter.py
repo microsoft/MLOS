@@ -41,7 +41,7 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
     @abstractmethod
     def target_parameter_space(self) -> ConfigSpace.ConfigurationSpace:
         """Target parameter space that is fed to the underlying optimizer."""
-        pass    # pylint: disable=unnecessary-pass # pragma: no cover
+        pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
     def transform(self, configuration: pd.DataFrame) -> pd.DataFrame:
@@ -53,7 +53,8 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
         Parameters
         ----------
         configuration : pd.DataFrame
-            Pandas dataframe with a single row. Column names are the parameter names of the target parameter space.
+            Pandas dataframe with a single row. Column names are the parameter names
+            of the target parameter space.
 
         Returns
         -------
@@ -61,7 +62,7 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
             Pandas dataframe with a single row, containing the translated configuration.
             Column names are the parameter names of the original parameter space.
         """
-        pass    # pylint: disable=unnecessary-pass # pragma: no cover
+        pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
     def inverse_transform(self, configurations: pd.DataFrame) -> pd.DataFrame:
@@ -75,12 +76,14 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
         ----------
         configurations : pd.DataFrame
             Dataframe of configurations / parameters, which belong to the original parameter space.
-            The columns are the parameter names the original parameter space and the rows are the configurations.
+            The columns are the parameter names the original parameter space and the
+            rows are the configurations.
 
         Returns
         -------
         configurations : pd.DataFrame
             Dataframe of the translated configurations / parameters.
-            The columns are the parameter names of the target parameter space and the rows are the configurations.
+            The columns are the parameter names of the target parameter space and
+            the rows are the configurations.
         """
-        pass    # pylint: disable=unnecessary-pass # pragma: no cover
+        pass  # pylint: disable=unnecessary-pass # pragma: no cover

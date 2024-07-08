@@ -29,13 +29,16 @@ class TrialData(metaclass=ABCMeta):
     tunable parameters).
     """
 
-    def __init__(self, *,
-                 experiment_id: str,
-                 trial_id: int,
-                 tunable_config_id: int,
-                 ts_start: datetime,
-                 ts_end: Optional[datetime],
-                 status: Status):
+    def __init__(
+        self,
+        *,
+        experiment_id: str,
+        trial_id: int,
+        tunable_config_id: int,
+        ts_start: datetime,
+        ts_end: Optional[datetime],
+        status: Status,
+    ):
         self._experiment_id = experiment_id
         self._trial_id = trial_id
         self._tunable_config_id = tunable_config_id
@@ -46,7 +49,10 @@ class TrialData(metaclass=ABCMeta):
         self._status = status
 
     def __repr__(self) -> str:
-        return f"Trial :: {self._experiment_id}:{self._trial_id} cid:{self._tunable_config_id} {self._status.name}"
+        return (
+            f"Trial :: {self._experiment_id}:{self._trial_id} "
+            f"cid:{self._tunable_config_id} {self._status.name}"
+        )
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, self.__class__):

@@ -32,7 +32,7 @@ def storage() -> SqlStorage:
             "drivername": "sqlite",
             "database": ":memory:",
             # "database": "mlos_bench.pytest.db",
-        }
+        },
     )
 
 
@@ -106,7 +106,9 @@ def mixed_numerics_exp_storage(
     assert not exp._in_context
 
 
-def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: Optional[str]) -> SqlStorage.Experiment:
+def _dummy_run_exp(
+    exp: SqlStorage.Experiment, tunable_name: Optional[str]
+) -> SqlStorage.Experiment:
     """Generates data by doing a simulated run of the given experiment."""
     # Add some trials to that experiment.
     # Note: we're just fabricating some made up function for the ML libraries to try and learn.
@@ -117,24 +119,31 @@ def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: Optional[str]) -> S
         (tunable_min, tunable_max) = tunable.range
         tunable_range = tunable_max - tunable_min
     rand_seed(SEED)
-    opt = MockOptimizer(tunables=exp.tunables, config={
-        "seed": SEED,
-        # This should be the default, so we leave it omitted for now to test the default.
-        # But the test logic relies on this (e.g., trial 1 is config 1 is the default values for the tunable params)
-        # "start_with_defaults": True,
-    })
+    opt = MockOptimizer(
+        tunables=exp.tunables,
+        config={
+            "seed": SEED,
+            # This should be the default, so we leave it omitted for now to test the default.
+            # But the test logic relies on this (e.g., trial 1 is config 1 is the
+            # default values for the tunable params)
+            # "start_with_defaults": True,
+        },
+    )
     assert opt.start_with_defaults
     for config_i in range(CONFIG_COUNT):
         tunables = opt.suggest()
         for repeat_j in range(CONFIG_TRIAL_REPEAT_COUNT):
-            trial = exp.new_trial(tunables=tunables.copy(), config={
-                "trial_number": config_i * CONFIG_TRIAL_REPEAT_COUNT + repeat_j + 1,
-                **{
-                    f"opt_{key}_{i}": val
-                    for (i, opt_target) in enumerate(exp.opt_targets.items())
-                    for (key, val) in zip(["target", "direction"], opt_target)
-                }
-            })
+            trial = exp.new_trial(
+                tunables=tunables.copy(),
+                config={
+                    "trial_number": config_i * CONFIG_TRIAL_REPEAT_COUNT + repeat_j + 1,
+                    **{
+                        f"opt_{key}_{i}": val
+                        for (i, opt_target) in enumerate(exp.opt_targets.items())
+                        for (key, val) in zip(["target", "direction"], opt_target)
+                    },
+                },
+            )
             if exp.tunables:
                 assert trial.tunable_config_id == config_i + 1
             else:
@@ -145,14 +154,23 @@ def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: Optional[str]) -> S
             else:
                 tunable_value_norm = 0
             timestamp = datetime.now(UTC)
-            trial.update_telemetry(status=Status.RUNNING, timestamp=timestamp, metrics=[
-                (timestamp, "some-metric", tunable_value_norm + random() / 100),
-            ])
-            trial.update(Status.SUCCEEDED, timestamp, metrics={
-                # Give some variance on the score.
-                # And some influence from the tunable value.
-                "score": tunable_value_norm + random() / 100
-            })
+            trial.update_telemetry(
+                status=Status.RUNNING,
+                timestamp=timestamp,
+                metrics=[
+                    (timestamp, "some-metric", tunable_value_norm + random() / 100),
+                ],
+            )
+            trial.update(
+                Status.SUCCEEDED,
+                timestamp,
+                metrics={
+                    # Give some variance on the score.
+                    # And some influence from the tunable value.
+                    "score": tunable_value_norm
+                    + random() / 100
+                },
+            )
     return exp
 
 
@@ -163,32 +181,42 @@ def exp_storage_with_trials(exp_storage: SqlStorage.Experiment) -> SqlStorage.Ex
 
 
 @pytest.fixture
-def exp_no_tunables_storage_with_trials(exp_no_tunables_storage: SqlStorage.Experiment) -> SqlStorage.Experiment:
+def exp_no_tunables_storage_with_trials(
+    exp_no_tunables_storage: SqlStorage.Experiment,
+) -> SqlStorage.Experiment:
     """Test fixture for Experiment using in-memory SQLite3 storage."""
     assert not exp_no_tunables_storage.tunables
     return _dummy_run_exp(exp_no_tunables_storage, tunable_name=None)
 
 
 @pytest.fixture
-def mixed_numerics_exp_storage_with_trials(mixed_numerics_exp_storage: SqlStorage.Experiment) -> SqlStorage.Experiment:
+def mixed_numerics_exp_storage_with_trials(
+    mixed_numerics_exp_storage: SqlStorage.Experiment,
+) -> SqlStorage.Experiment:
     """Test fixture for Experiment using in-memory SQLite3 storage."""
     tunable = next(iter(mixed_numerics_exp_storage.tunables))[0]
     return _dummy_run_exp(mixed_numerics_exp_storage, tunable_name=tunable.name)
 
 
 @pytest.fixture
-def exp_data(storage: SqlStorage, exp_storage_with_trials: SqlStorage.Experiment) -> ExperimentData:
+def exp_data(
+    storage: SqlStorage, exp_storage_with_trials: SqlStorage.Experiment
+) -> ExperimentData:
     """Test fixture for ExperimentData."""
     return storage.experiments[exp_storage_with_trials.experiment_id]
 
 
 @pytest.fixture
-def exp_no_tunables_data(storage: SqlStorage, exp_no_tunables_storage_with_trials: SqlStorage.Experiment) -> ExperimentData:
+def exp_no_tunables_data(
+    storage: SqlStorage, exp_no_tunables_storage_with_trials: SqlStorage.Experiment
+) -> ExperimentData:
     """Test fixture for ExperimentData with no tunable configs."""
     return storage.experiments[exp_no_tunables_storage_with_trials.experiment_id]
 
 
 @pytest.fixture
-def mixed_numerics_exp_data(storage: SqlStorage, mixed_numerics_exp_storage_with_trials: SqlStorage.Experiment) -> ExperimentData:
+def mixed_numerics_exp_data(
+    storage: SqlStorage, mixed_numerics_exp_storage_with_trials: SqlStorage.Experiment
+) -> ExperimentData:
     """Test fixture for ExperimentData with mixed numerical tunable types."""
     return storage.experiments[mixed_numerics_exp_storage_with_trials.experiment_id]

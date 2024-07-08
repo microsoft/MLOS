@@ -16,10 +16,13 @@ from mlos_bench.tests.services.remote.mock import mock_operation
 class MockNetworkService(Service, SupportsNetworkProvisioning):
     """Mock Network service for testing."""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None,
-                 global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None,
-                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional[Service] = None,
+        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+    ):
         """
         Create a new instance of mock network services proxy.
 
@@ -34,13 +37,19 @@ class MockNetworkService(Service, SupportsNetworkProvisioning):
             Parent service that can provide mixin functions.
         """
         super().__init__(
-            config, global_config, parent,
-            self.merge_methods(methods, {
-                name: mock_operation for name in (
-                    # SupportsNetworkProvisioning:
-                    "provision_network",
-                    "deprovision_network",
-                    "wait_network_deployment",
-                )
-            })
+            config,
+            global_config,
+            parent,
+            self.merge_methods(
+                methods,
+                {
+                    name: mock_operation
+                    for name in (
+                        # SupportsNetworkProvisioning:
+                        "provision_network",
+                        "deprovision_network",
+                        "wait_network_deployment",
+                    )
+                },
+            ),
         )

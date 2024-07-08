@@ -14,8 +14,7 @@ if TYPE_CHECKING:
 class SupportsRemoteConfig(Protocol):
     """Protocol interface for configuring cloud services."""
 
-    def configure(self, config: Dict[str, Any],
-                  params: Dict[str, Any]) -> Tuple["Status", dict]:
+    def configure(self, config: Dict[str, Any], params: Dict[str, Any]) -> Tuple["Status", dict]:
         """
         Update the parameters of a SaaS service in the cloud.
 

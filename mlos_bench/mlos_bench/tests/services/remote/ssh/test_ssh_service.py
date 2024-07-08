@@ -33,7 +33,9 @@ if version("pytest") >= "8.0.0":
         # We replaced pytest-lazy-fixture with pytest-lazy-fixtures:
         # https://github.com/TvoroG/pytest-lazy-fixture/issues/65
         if version("pytest-lazy-fixture"):
-            raise UserWarning("pytest-lazy-fixture conflicts with pytest>=8.0.0.  Please remove it.")
+            raise UserWarning(
+                "pytest-lazy-fixture conflicts with pytest>=8.0.0.  Please remove it."
+            )
     except PackageNotFoundError:
         # OK: pytest-lazy-fixture not installed
         pass
@@ -41,12 +43,14 @@ if version("pytest") >= "8.0.0":
 
 @requires_docker
 @requires_ssh
-@pytest.mark.parametrize(["ssh_test_server_info", "server_name"], [
-    (lazy_fixture("ssh_test_server"), SSH_TEST_SERVER_NAME),
-    (lazy_fixture("alt_test_server"), ALT_TEST_SERVER_NAME),
-])
-def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo,
-                                server_name: str) -> None:
+@pytest.mark.parametrize(
+    ["ssh_test_server_info", "server_name"],
+    [
+        (lazy_fixture("ssh_test_server"), SSH_TEST_SERVER_NAME),
+        (lazy_fixture("alt_test_server"), ALT_TEST_SERVER_NAME),
+    ],
+)
+def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo, server_name: str) -> None:
     """Check for the pytest-docker ssh test infra."""
     assert ssh_test_server_info.service_name == server_name
 
@@ -55,17 +59,18 @@ def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo,
 
     local_port = ssh_test_server_info.get_port()
     assert check_socket(ip_addr, local_port)
-    ssh_cmd = "ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new " \
-        + f"-l {ssh_test_server_info.username} -i {ssh_test_server_info.id_rsa_path} " \
+    ssh_cmd = (
+        "ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new "
+        + f"-l {ssh_test_server_info.username} -i {ssh_test_server_info.id_rsa_path} "
         + f"-p {local_port} {ssh_test_server_info.hostname} hostname"
-    cmd = run(ssh_cmd.split(),
-              capture_output=True,
-              text=True,
-              check=True)
+    )
+    cmd = run(ssh_cmd.split(), capture_output=True, text=True, check=True)
     assert cmd.stdout.strip() == server_name
 
 
-@pytest.mark.filterwarnings("ignore:.*(coroutine 'sleep' was never awaited).*:RuntimeWarning:.*event_loop_context_test.*:0")
+@pytest.mark.filterwarnings(
+    "ignore:.*(coroutine 'sleep' was never awaited).*:RuntimeWarning:.*event_loop_context_test.*:0"
+)
 def test_ssh_service_context_handler() -> None:
     """
     Test the SSH service context manager handling.
@@ -86,7 +91,9 @@ def test_ssh_service_context_handler() -> None:
     # After we enter the SshService instance context, we should have a background thread.
     with ssh_host_service:
         assert ssh_host_service._in_context
-        assert isinstance(SshService._EVENT_LOOP_CONTEXT._event_loop_thread, Thread)  # type: ignore[unreachable]
+        assert (  # type: ignore[unreachable]
+            isinstance(SshService._EVENT_LOOP_CONTEXT._event_loop_thread, Thread)
+        )
         # Give the thread a chance to start.
         # Mostly important on the underpowered Windows CI machines.
         time.sleep(0.25)
@@ -99,17 +106,23 @@ def test_ssh_service_context_handler() -> None:
         with ssh_fileshare_service:
             assert ssh_fileshare_service._in_context
             assert ssh_host_service._in_context
-            assert SshService._EVENT_LOOP_CONTEXT._event_loop_thread \
-                is ssh_host_service._EVENT_LOOP_CONTEXT._event_loop_thread \
+            assert (
+                SshService._EVENT_LOOP_CONTEXT._event_loop_thread
+                is ssh_host_service._EVENT_LOOP_CONTEXT._event_loop_thread
                 is ssh_fileshare_service._EVENT_LOOP_CONTEXT._event_loop_thread
-            assert SshService._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE \
-                is ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE \
+            )
+            assert (
+                SshService._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE
+                is ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE
                 is ssh_fileshare_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE
+            )
 
         assert not ssh_fileshare_service._in_context
         # And that instance should be unusable after we are outside the context.
-        with pytest.raises(AssertionError):  # , pytest.warns(RuntimeWarning, match=r".*coroutine 'sleep' was never awaited"):
-            future = ssh_fileshare_service._run_coroutine(asyncio.sleep(0.1, result='foo'))
+        with pytest.raises(
+            AssertionError
+        ):  # , pytest.warns(RuntimeWarning, match=r".*coroutine 'sleep' was never awaited"):
+            future = ssh_fileshare_service._run_coroutine(asyncio.sleep(0.1, result="foo"))
             raise ValueError(f"Future should not have been available to wait on {future.result()}")
 
         # The background thread should remain running since we have another context still open.
@@ -117,6 +130,6 @@ def test_ssh_service_context_handler() -> None:
         assert SshService._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE is not None
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # For debugging in Windows which has issues with pytest detection in vscode.
     pytest.main(["-n1", "--dist=no", "-k", "test_ssh_service_background_thread"])

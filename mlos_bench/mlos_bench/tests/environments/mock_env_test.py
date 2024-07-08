@@ -36,20 +36,22 @@ def test_mock_env_no_noise(mock_env_no_noise: MockEnv, tunable_groups: TunableGr
             assert data["score"] == pytest.approx(75.0, 0.01)
 
 
-@pytest.mark.parametrize(('tunable_values', 'expected_score'), [
-    ({
-        "vmSize": "Standard_B2ms",
-        "idle": "halt",
-        "kernel_sched_migration_cost_ns": 250000
-    }, 66.4),
-    ({
-        "vmSize": "Standard_B4ms",
-        "idle": "halt",
-        "kernel_sched_migration_cost_ns": 40000
-    }, 74.06),
-])
-def test_mock_env_assign(mock_env: MockEnv, tunable_groups: TunableGroups,
-                         tunable_values: dict, expected_score: float) -> None:
+@pytest.mark.parametrize(
+    ("tunable_values", "expected_score"),
+    [
+        (
+            {"vmSize": "Standard_B2ms", "idle": "halt", "kernel_sched_migration_cost_ns": 250000},
+            66.4,
+        ),
+        (
+            {"vmSize": "Standard_B4ms", "idle": "halt", "kernel_sched_migration_cost_ns": 40000},
+            74.06,
+        ),
+    ],
+)
+def test_mock_env_assign(
+    mock_env: MockEnv, tunable_groups: TunableGroups, tunable_values: dict, expected_score: float
+) -> None:
     """Check the benchmark values of the mock environment after the assignment."""
     with mock_env as env_context:
         tunable_groups.assign(tunable_values)
@@ -60,21 +62,25 @@ def test_mock_env_assign(mock_env: MockEnv, tunable_groups: TunableGroups,
         assert data["score"] == pytest.approx(expected_score, 0.01)
 
 
-@pytest.mark.parametrize(('tunable_values', 'expected_score'), [
-    ({
-        "vmSize": "Standard_B2ms",
-        "idle": "halt",
-        "kernel_sched_migration_cost_ns": 250000
-    }, 67.5),
-    ({
-        "vmSize": "Standard_B4ms",
-        "idle": "halt",
-        "kernel_sched_migration_cost_ns": 40000
-    }, 75.1),
-])
-def test_mock_env_no_noise_assign(mock_env_no_noise: MockEnv,
-                                  tunable_groups: TunableGroups,
-                                  tunable_values: dict, expected_score: float) -> None:
+@pytest.mark.parametrize(
+    ("tunable_values", "expected_score"),
+    [
+        (
+            {"vmSize": "Standard_B2ms", "idle": "halt", "kernel_sched_migration_cost_ns": 250000},
+            67.5,
+        ),
+        (
+            {"vmSize": "Standard_B4ms", "idle": "halt", "kernel_sched_migration_cost_ns": 40000},
+            75.1,
+        ),
+    ],
+)
+def test_mock_env_no_noise_assign(
+    mock_env_no_noise: MockEnv,
+    tunable_groups: TunableGroups,
+    tunable_values: dict,
+    expected_score: float,
+) -> None:
     """Check the benchmark values of the noiseless mock environment after the
     assignment.
     """

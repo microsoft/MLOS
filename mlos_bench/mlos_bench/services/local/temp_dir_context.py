@@ -26,11 +26,13 @@ class TempDirContextService(Service, metaclass=abc.ABCMeta):
     supposed to be used as a standalone service.
     """
 
-    def __init__(self,
-                 config: Optional[Dict[str, Any]] = None,
-                 global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None,
-                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional[Service] = None,
+        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+    ):
         """
         Create a new instance of a service that provides temporary directory context for
         local exec service.
@@ -48,8 +50,7 @@ class TempDirContextService(Service, metaclass=abc.ABCMeta):
             New methods to register with the service.
         """
         super().__init__(
-            config, global_config, parent,
-            self.merge_methods(methods, [self.temp_dir_context])
+            config, global_config, parent, self.merge_methods(methods, [self.temp_dir_context])
         )
         self._temp_dir = self.config.get("temp_dir")
         if self._temp_dir:
@@ -59,7 +60,9 @@ class TempDirContextService(Service, metaclass=abc.ABCMeta):
             self._temp_dir = self._config_loader_service.resolve_path(self._temp_dir)
         _LOG.info("%s: temp dir: %s", self, self._temp_dir)
 
-    def temp_dir_context(self, path: Optional[str] = None) -> Union[TemporaryDirectory, nullcontext]:
+    def temp_dir_context(
+        self, path: Optional[str] = None
+    ) -> Union[TemporaryDirectory, nullcontext]:
         """
         Create a temp directory or use the provided path.
 

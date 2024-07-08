@@ -6,5 +6,5 @@
 from mlos_bench.storage.sql.storage import SqlStorage
 
 __all__ = [
-    'SqlStorage',
+    "SqlStorage",
 ]

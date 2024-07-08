@@ -8,8 +8,9 @@ from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
-def test_trial_data_tunable_config_data(exp_data: ExperimentData,
-                                        tunable_groups: TunableGroups) -> None:
+def test_trial_data_tunable_config_data(
+    exp_data: ExperimentData, tunable_groups: TunableGroups
+) -> None:
     """Check expected return values for TunableConfigData."""
     trial_id = 1
     expected_config_id = 1
@@ -23,12 +24,12 @@ def test_trial_data_tunable_config_data(exp_data: ExperimentData,
 
 def test_trial_metadata(exp_data: ExperimentData) -> None:
     """Check expected return values for TunableConfigData metadata."""
-    assert exp_data.objectives == {'score': 'min'}
-    for (trial_id, trial) in exp_data.trials.items():
+    assert exp_data.objectives == {"score": "min"}
+    for trial_id, trial in exp_data.trials.items():
         assert trial.metadata_dict == {
-            'opt_target_0': 'score',
-            'opt_direction_0': 'min',
-            'trial_number': trial_id,
+            "opt_target_0": "score",
+            "opt_direction_0": "min",
+            "trial_number": trial_id,
         }
 
 
@@ -40,12 +41,12 @@ def test_trial_data_no_tunables_config_data(exp_no_tunables_data: ExperimentData
 
 
 def test_mixed_numerics_exp_trial_data(
-        mixed_numerics_exp_data: ExperimentData,
-        mixed_numerics_tunable_groups: TunableGroups) -> None:
+    mixed_numerics_exp_data: ExperimentData, mixed_numerics_tunable_groups: TunableGroups
+) -> None:
     """Tests that data type conversions are retained when loading experiment data with
     mixed numeric tunable types.
     """
     trial = next(iter(mixed_numerics_exp_data.trials.values()))
     config = trial.tunable_config.config_dict
-    for (tunable, _group) in mixed_numerics_tunable_groups:
+    for tunable, _group in mixed_numerics_tunable_groups:
         assert isinstance(config[tunable.name], tunable.dtype)

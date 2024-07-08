@@ -24,11 +24,13 @@ _LOG = logging.getLogger(__name__)
 class GridSearchOptimizer(TrackBestOptimizer):
     """Grid search optimizer."""
 
-    def __init__(self,
-                 tunables: TunableGroups,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        tunables: TunableGroups,
+        config: dict,
+        global_config: Optional[dict] = None,
+        service: Optional[Service] = None,
+    ):
         super().__init__(tunables, config, global_config, service)
 
         # Track the grid as a set of tuples of tunable values and reconstruct the
@@ -47,11 +49,19 @@ class GridSearchOptimizer(TrackBestOptimizer):
     def _sanity_check(self) -> None:
         size = np.prod([tunable.cardinality for (tunable, _group) in self._tunables])
         if size == np.inf:
-            raise ValueError(f"Unquantized tunables are not supported for grid search: {self._tunables}")
+            raise ValueError(
+                f"Unquantized tunables are not supported for grid search: {self._tunables}"
+            )
         if size > 10000:
-            _LOG.warning("Large number %d of config points requested for grid search: %s", size, self._tunables)
+            _LOG.warning(
+                "Large number %d of config points requested for grid search: %s",
+                size,
+                self._tunables,
+            )
         if size > self._max_iter:
-            _LOG.warning("Grid search size %d, is greater than max iterations %d", size, self._max_iter)
+            _LOG.warning(
+                "Grid search size %d, is greater than max iterations %d", size, self._max_iter
+            )
 
     def _get_grid(self) -> Tuple[Tuple[str, ...], Dict[Tuple[TunableValue, ...], None]]:
         """
@@ -64,12 +74,14 @@ class GridSearchOptimizer(TrackBestOptimizer):
         # names instead of the order given by TunableGroups.
         configs = [
             configspace_data_to_tunable_values(dict(config))
-            for config in
-            generate_grid(self.config_space, {
-                tunable.name: int(tunable.cardinality)
-                for (tunable, _group) in self._tunables
-                if tunable.quantization or tunable.type == "int"
-            })
+            for config in generate_grid(
+                self.config_space,
+                {
+                    tunable.name: int(tunable.cardinality)
+                    for (tunable, _group) in self._tunables
+                    if tunable.quantization or tunable.type == "int"
+                },
+            )
         ]
         names = set(tuple(configs.keys()) for configs in configs)
         assert len(names) == 1
@@ -99,15 +111,17 @@ class GridSearchOptimizer(TrackBestOptimizer):
         # See NOTEs above.
         return (dict(zip(self._config_keys, config)) for config in self._suggested_configs)
 
-    def bulk_register(self,
-                      configs: Sequence[dict],
-                      scores: Sequence[Optional[Dict[str, TunableValue]]],
-                      status: Optional[Sequence[Status]] = None) -> bool:
+    def bulk_register(
+        self,
+        configs: Sequence[dict],
+        scores: Sequence[Optional[Dict[str, TunableValue]]],
+        status: Optional[Sequence[Status]] = None,
+    ) -> bool:
         if not super().bulk_register(configs, scores, status):
             return False
         if status is None:
             status = [Status.SUCCEEDED] * len(configs)
-        for (params, score, trial_status) in zip(configs, scores, status):
+        for params, score, trial_status in zip(configs, scores, status):
             tunables = self._tunables.copy().assign(params)
             self.register(tunables, trial_status, score)
         if _LOG.isEnabledFor(logging.DEBUG):
@@ -146,20 +160,35 @@ class GridSearchOptimizer(TrackBestOptimizer):
         _LOG.info("Iteration %d :: Suggest: %s", self._iter, tunables)
         return tunables
 
-    def register(self, tunables: TunableGroups, status: Status,
-                 score: Optional[Dict[str, TunableValue]] = None) -> Optional[Dict[str, float]]:
+    def register(
+        self,
+        tunables: TunableGroups,
+        status: Status,
+        score: Optional[Dict[str, TunableValue]] = None,
+    ) -> Optional[Dict[str, float]]:
         registered_score = super().register(tunables, status, score)
         try:
-            config = dict(ConfigSpace.Configuration(self.config_space, values=tunables.get_param_values()))
+            config = dict(
+                ConfigSpace.Configuration(self.config_space, values=tunables.get_param_values())
+            )
             self._suggested_configs.remove(tuple(config.values()))
         except KeyError:
-            _LOG.warning("Attempted to remove missing config (previously registered?) from suggested set: %s", tunables)
+            _LOG.warning(
+                (
+                    "Attempted to remove missing config "
+                    "(previously registered?) from suggested set: %s"
+                ),
+                tunables,
+            )
         return registered_score
 
     def not_converged(self) -> bool:
         if self._iter > self._max_iter:
             if bool(self._pending_configs):
-                _LOG.warning("Exceeded max iterations, but still have %d pending configs: %s",
-                             len(self._pending_configs), list(self._pending_configs.keys()))
+                _LOG.warning(
+                    "Exceeded max iterations, but still have %d pending configs: %s",
+                    len(self._pending_configs),
+                    list(self._pending_configs.keys()),
+                )
             return False
         return bool(self._pending_configs)
