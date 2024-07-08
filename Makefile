@@ -69,9 +69,9 @@ ifneq (,$(filter format,$(MAKECMDGOALS)))
 endif
 
 build/format.${CONDA_ENV_NAME}.build-stamp: build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
-# TODO: enable isort and black formatters
-#build/format.${CONDA_ENV_NAME}.build-stamp: build/isort.${CONDA_ENV_NAME}.build-stamp
-#build/format.${CONDA_ENV_NAME}.build-stamp: build/black.${CONDA_ENV_NAME}.build-stamp
+build/format.${CONDA_ENV_NAME}.build-stamp: build/isort.${CONDA_ENV_NAME}.build-stamp
+build/format.${CONDA_ENV_NAME}.build-stamp: build/black.${CONDA_ENV_NAME}.build-stamp
+build/format.${CONDA_ENV_NAME}.build-stamp: build/docformatter.${CONDA_ENV_NAME}.build-stamp
 build/format.${CONDA_ENV_NAME}.build-stamp:
 	touch $@
 
@@ -111,8 +111,8 @@ build/isort.${CONDA_ENV_NAME}.build-stamp:
 # NOTE: when using pattern rules (involving %) we can only add one line of
 # prerequisities, so we use this pattern to compose the list as variables.
 
-# Both isort and licenseheaders alter files, so only run one at a time, by
-# making licenseheaders an order-only prerequisite.
+# black, licenseheaders, isort, and docformatter all alter files, so only run
+# one at a time, by adding prerequisites, but only as necessary.
 ISORT_COMMON_PREREQS :=
 ifneq (,$(filter format licenseheaders,$(MAKECMDGOALS)))
 ISORT_COMMON_PREREQS += build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
@@ -142,8 +142,8 @@ build/black.${CONDA_ENV_NAME}.build-stamp: build/black.mlos_viz.${CONDA_ENV_NAME
 build/black.${CONDA_ENV_NAME}.build-stamp:
 	touch $@
 
-# Both black, licenseheaders, and isort all alter files, so only run one at a time, by
-# making licenseheaders and isort an order-only prerequisite.
+# black, licenseheaders, isort, and docformatter all alter files, so only run
+# one at a time, by adding prerequisites, but only as necessary.
 BLACK_COMMON_PREREQS :=
 ifneq (,$(filter format licenseheaders,$(MAKECMDGOALS)))
 BLACK_COMMON_PREREQS += build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
@@ -163,8 +163,46 @@ build/black.%.${CONDA_ENV_NAME}.build-stamp: $(BLACK_COMMON_PREREQS)
 	conda run -n ${CONDA_ENV_NAME} black $(filter %.py,$?)
 	touch $@
 
+.PHONY: docformatter
+docformatter: build/docformatter.${CONDA_ENV_NAME}.build-stamp
+
+ifneq (,$(filter docformatter,$(MAKECMDGOALS)))
+    FORMAT_PREREQS += build/docformatter.${CONDA_ENV_NAME}.build-stamp
+endif
+
+build/docformatter.${CONDA_ENV_NAME}.build-stamp: build/docformatter.mlos_core.${CONDA_ENV_NAME}.build-stamp
+build/docformatter.${CONDA_ENV_NAME}.build-stamp: build/docformatter.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+build/docformatter.${CONDA_ENV_NAME}.build-stamp: build/docformatter.mlos_viz.${CONDA_ENV_NAME}.build-stamp
+build/docformatter.${CONDA_ENV_NAME}.build-stamp:
+	touch $@
+
+# black, licenseheaders, isort, and docformatter all alter files, so only run
+# one at a time, by adding prerequisites, but only as necessary.
+DOCFORMATTER_COMMON_PREREQS :=
+ifneq (,$(filter format licenseheaders,$(MAKECMDGOALS)))
+DOCFORMATTER_COMMON_PREREQS += build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
+endif
+ifneq (,$(filter format isort,$(MAKECMDGOALS)))
+DOCFORMATTER_COMMON_PREREQS += build/isort.${CONDA_ENV_NAME}.build-stamp
+endif
+ifneq (,$(filter format black,$(MAKECMDGOALS)))
+DOCFORMATTER_COMMON_PREREQS += build/black.${CONDA_ENV_NAME}.build-stamp
+endif
+DOCFORMATTER_COMMON_PREREQS += build/conda-env.${CONDA_ENV_NAME}.build-stamp
+DOCFORMATTER_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
+
+build/docformatter.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
+build/docformatter.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
+build/docformatter.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
+
+build/docformatter.%.${CONDA_ENV_NAME}.build-stamp: $(DOCFORMATTER_COMMON_PREREQS)
+	# Reformat python file docstrings with docformatter.
+	conda run -n ${CONDA_ENV_NAME} docformatter $(filter %.py,$?)
+	touch $@
+
+
 .PHONY: check
-check: isort-check black-check pycodestyle pydocstyle pylint mypy # cspell markdown-link-check
+check: isort-check black-check docformatter-check pycodestyle pydocstyle pylint mypy # cspell markdown-link-check
 
 .PHONY: black-check
 black-check: build/black-check.mlos_core.${CONDA_ENV_NAME}.build-stamp
@@ -184,6 +222,26 @@ build/black-check.%.${CONDA_ENV_NAME}.build-stamp: $(BLACK_CHECK_COMMON_PREREQS)
 	# Check for import sort order.
 	# Note: if this fails use "make format" or "make black" to fix it.
 	conda run -n ${CONDA_ENV_NAME} black --verbose --check --diff $(filter %.py,$?)
+	touch $@
+
+.PHONY: docformatter-check
+docformatter-check: build/docformatter-check.mlos_core.${CONDA_ENV_NAME}.build-stamp
+docformatter-check: build/docformatter-check.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+docformatter-check: build/docformatter-check.mlos_viz.${CONDA_ENV_NAME}.build-stamp
+
+# Make sure docformatter format rules run before docformatter-check rules.
+build/docformatter-check.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
+build/docformatter-check.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
+build/docformatter-check.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
+
+BLACK_CHECK_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
+BLACK_CHECK_COMMON_PREREQS += $(FORMAT_PREREQS)
+BLACK_CHECK_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
+
+build/docformatter-check.%.${CONDA_ENV_NAME}.build-stamp: $(BLACK_CHECK_COMMON_PREREQS)
+	# Check for import sort order.
+	# Note: if this fails use "make format" or "make docformatter" to fix it.
+	conda run -n ${CONDA_ENV_NAME} docformatter --check $(filter %.py,$?)
 	touch $@
 
 .PHONY: isort-check
@@ -723,6 +781,8 @@ clean-doc:
 clean-format:
 	rm -f build/black.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/black.mlos_*.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/docformatter.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/docformatter.mlos_*.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/isort.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/isort.mlos_*.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
@@ -737,6 +797,8 @@ clean-check:
 	rm -f build/black-check.build-stamp
 	rm -f build/black-check.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/black-check.mlos_*.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/docformatter-check.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/docformatter-check.mlos_*.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/isort-check.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/isort-check.mlos_*.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pycodestyle.build-stamp
