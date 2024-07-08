@@ -541,7 +541,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
 
 def _extract_metadata(trial: TrialInfo) -> pd.DataFrame:
-    """Convert TrialInfo to a metadata DataFrame.
+    """
+    Convert TrialInfo to a metadata DataFrame.
 
     Parameters
     ----------
