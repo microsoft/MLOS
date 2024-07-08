@@ -27,15 +27,13 @@ class NetworkEnv(Environment):
     but no real tuning is expected for it ... yet.
     """
 
-    def __init__(
-        self,
-        *,
-        name: str,
-        config: dict,
-        global_config: Optional[dict] = None,
-        tunables: Optional[TunableGroups] = None,
-        service: Optional[Service] = None,
-    ):
+    def __init__(self,
+                 *,
+                 name: str,
+                 config: dict,
+                 global_config: Optional[dict] = None,
+                 tunables: Optional[TunableGroups] = None,
+                 service: Optional[Service] = None):
         """
         Create a new environment for network operations.
 
@@ -56,26 +54,17 @@ class NetworkEnv(Environment):
             An optional service object (e.g., providing methods to
             deploy a network, etc.).
         """
-        super().__init__(
-            name=name,
-            config=config,
-            global_config=global_config,
-            tunables=tunables,
-            service=service,
-        )
+        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
 
         # Virtual networks can be used for more than one experiment, so by default
         # we don't attempt to deprovision them.
         self._deprovision_on_teardown = config.get("deprovision_on_teardown", False)
 
-        assert self._service is not None and isinstance(
-            self._service, SupportsNetworkProvisioning
-        ), "NetworkEnv requires a service that supports network provisioning"
+        assert self._service is not None and isinstance(self._service, SupportsNetworkProvisioning), \
+            "NetworkEnv requires a service that supports network provisioning"
         self._network_service: SupportsNetworkProvisioning = self._service
 
-    def setup(
-        self, tunables: TunableGroups, global_config: Optional[dict] = None
-    ) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
         Check if network is ready. Provision, if necessary.
 
@@ -102,9 +91,7 @@ class NetworkEnv(Environment):
 
         (status, params) = self._network_service.provision_network(self._params)
         if status.is_pending():
-            (status, _) = self._network_service.wait_network_deployment(
-                params, is_setup=True
-            )
+            (status, _) = self._network_service.wait_network_deployment(params, is_setup=True)
 
         self._is_ready = status.is_succeeded()
         return self._is_ready
@@ -118,13 +105,9 @@ class NetworkEnv(Environment):
             return
         # Else
         _LOG.info("Network tear down: %s", self)
-        (status, params) = self._network_service.deprovision_network(
-            self._params, ignore_errors=True
-        )
+        (status, params) = self._network_service.deprovision_network(self._params, ignore_errors=True)
         if status.is_pending():
-            (status, _) = self._network_service.wait_network_deployment(
-                params, is_setup=False
-            )
+            (status, _) = self._network_service.wait_network_deployment(params, is_setup=False)
 
         super().teardown()
         _LOG.debug("Final status of Network deprovisioning: %s :: %s", self, status)

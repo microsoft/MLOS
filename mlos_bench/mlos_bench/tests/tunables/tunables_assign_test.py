@@ -19,14 +19,12 @@ def test_tunables_assign_unknown_param(tunable_groups: TunableGroups) -> None:
     that don't exist in the TunableGroups object.
     """
     with pytest.raises(KeyError):
-        tunable_groups.assign(
-            {
-                "vmSize": "Standard_B2ms",
-                "idle": "mwait",
-                "UnknownParam_1": 1,
-                "UnknownParam_2": "invalid-value",
-            }
-        )
+        tunable_groups.assign({
+            "vmSize": "Standard_B2ms",
+            "idle": "mwait",
+            "UnknownParam_1": 1,
+            "UnknownParam_2": "invalid-value"
+        })
 
 
 def test_tunables_assign_categorical(tunable_categorical: Tunable) -> None:
@@ -108,7 +106,7 @@ def test_tunable_assign_str_to_int(tunable_int: Tunable) -> None:
     Check str to int coercion.
     """
     tunable_int.value = "10"
-    assert tunable_int.value == 10  # type: ignore[comparison-overlap]
+    assert tunable_int.value == 10      # type: ignore[comparison-overlap]
     assert not tunable_int.is_special
 
 
@@ -117,7 +115,7 @@ def test_tunable_assign_str_to_float(tunable_float: Tunable) -> None:
     Check str to float coercion.
     """
     tunable_float.value = "0.5"
-    assert tunable_float.value == 0.5  # type: ignore[comparison-overlap]
+    assert tunable_float.value == 0.5   # type: ignore[comparison-overlap]
     assert not tunable_float.is_special
 
 
@@ -151,12 +149,12 @@ def test_tunable_assign_null_to_categorical() -> None:
     }
     """
     config = json.loads(json_config)
-    categorical_tunable = Tunable(name="categorical_test", config=config)
+    categorical_tunable = Tunable(name='categorical_test', config=config)
     assert categorical_tunable
     assert categorical_tunable.category == "foo"
     categorical_tunable.value = None
     assert categorical_tunable.value is None
-    assert categorical_tunable.value != "None"
+    assert categorical_tunable.value != 'None'
     assert categorical_tunable.category is None
 
 
@@ -167,7 +165,7 @@ def test_tunable_assign_null_to_int(tunable_int: Tunable) -> None:
     with pytest.raises((TypeError, AssertionError)):
         tunable_int.value = None
     with pytest.raises((TypeError, AssertionError)):
-        tunable_int.numerical_value = None  # type: ignore[assignment]
+        tunable_int.numerical_value = None    # type: ignore[assignment]
 
 
 def test_tunable_assign_null_to_float(tunable_float: Tunable) -> None:
@@ -177,7 +175,7 @@ def test_tunable_assign_null_to_float(tunable_float: Tunable) -> None:
     with pytest.raises((TypeError, AssertionError)):
         tunable_float.value = None
     with pytest.raises((TypeError, AssertionError)):
-        tunable_float.numerical_value = None  # type: ignore[assignment]
+        tunable_float.numerical_value = None    # type: ignore[assignment]
 
 
 def test_tunable_assign_special(tunable_int: Tunable) -> None:

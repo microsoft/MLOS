@@ -20,9 +20,8 @@ class SupportsRemoteExec(Protocol):
     scripts on a remote host OS.
     """
 
-    def remote_exec(
-        self, script: Iterable[str], config: dict, env_params: dict
-    ) -> Tuple["Status", dict]:
+    def remote_exec(self, script: Iterable[str], config: dict,
+                    env_params: dict) -> Tuple["Status", dict]:
         """
         Run a command on remote host OS.
 

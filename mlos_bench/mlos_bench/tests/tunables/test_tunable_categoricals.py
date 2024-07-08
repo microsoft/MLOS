@@ -38,7 +38,7 @@ def test_tunable_categorical_types() -> None:
                     "values": ["a", "b", "c"],
                     "default": "a",
                 },
-            },
+            }
         }
     }
     tunable_groups = TunableGroups(tunable_params)

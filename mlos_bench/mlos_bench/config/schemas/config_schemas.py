@@ -27,14 +27,9 @@ CONFIG_SCHEMA_DIR = path_join(path.dirname(__file__), abs_path=True)
 # It is used in `ConfigSchema.validate()` method below.
 # NOTE: this may cause pytest to fail if it's expecting exceptions
 # to be raised for invalid configs.
-_VALIDATION_ENV_FLAG = "MLOS_BENCH_SKIP_SCHEMA_VALIDATION"
-_SKIP_VALIDATION = environ.get(_VALIDATION_ENV_FLAG, "false").lower() in {
-    "true",
-    "y",
-    "yes",
-    "on",
-    "1",
-}
+_VALIDATION_ENV_FLAG = 'MLOS_BENCH_SKIP_SCHEMA_VALIDATION'
+_SKIP_VALIDATION = (environ.get(_VALIDATION_ENV_FLAG, 'false').lower()
+                    in {'true', 'y', 'yes', 'on', '1'})
 
 
 # Note: we separate out the SchemaStore from a class method on ConfigSchema
@@ -85,12 +80,10 @@ class SchemaStore(Mapping):
         """Also store them in a Registry object for referencing by recent versions of jsonschema."""
         if not cls._SCHEMA_STORE:
             cls._load_schemas()
-        cls._REGISTRY = Registry().with_resources(
-            [
-                (url, Resource.from_contents(schema, default_specification=DRAFT202012))
-                for url, schema in cls._SCHEMA_STORE.items()
-            ]
-        )
+        cls._REGISTRY = Registry().with_resources([
+            (url, Resource.from_contents(schema, default_specification=DRAFT202012))
+            for url, schema in cls._SCHEMA_STORE.items()
+        ])
 
     @property
     def registry(self) -> Registry:

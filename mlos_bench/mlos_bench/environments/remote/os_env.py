@@ -24,15 +24,13 @@ class OSEnv(Environment):
     OS Level Environment for a host.
     """
 
-    def __init__(
-        self,
-        *,
-        name: str,
-        config: dict,
-        global_config: Optional[dict] = None,
-        tunables: Optional[TunableGroups] = None,
-        service: Optional[Service] = None,
-    ):
+    def __init__(self,
+                 *,
+                 name: str,
+                 config: dict,
+                 global_config: Optional[dict] = None,
+                 tunables: Optional[TunableGroups] = None,
+                 service: Optional[Service] = None):
         """
         Create a new environment for remote execution.
 
@@ -55,27 +53,17 @@ class OSEnv(Environment):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(
-            name=name,
-            config=config,
-            global_config=global_config,
-            tunables=tunables,
-            service=service,
-        )
+        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
 
-        assert self._service is not None and isinstance(
-            self._service, SupportsHostOps
-        ), "RemoteEnv requires a service that supports host operations"
+        assert self._service is not None and isinstance(self._service, SupportsHostOps), \
+            "RemoteEnv requires a service that supports host operations"
         self._host_service: SupportsHostOps = self._service
 
-        assert self._service is not None and isinstance(
-            self._service, SupportsOSOps
-        ), "RemoteEnv requires a service that supports host operations"
+        assert self._service is not None and isinstance(self._service, SupportsOSOps), \
+            "RemoteEnv requires a service that supports host operations"
         self._os_service: SupportsOSOps = self._service
 
-    def setup(
-        self, tunables: TunableGroups, global_config: Optional[dict] = None
-    ) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
         Check if the host is up and running; boot it, if necessary.
 

@@ -42,9 +42,7 @@ if TYPE_CHECKING:
     from mlos_bench.storage.base_storage import Storage
 
 # BaseTypeVar is a generic with a constraint of the three base classes.
-BaseTypeVar = TypeVar(
-    "BaseTypeVar", "Environment", "Optimizer", "Scheduler", "Service", "Storage"
-)
+BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Scheduler", "Service", "Storage")
 BaseTypes = Union["Environment", "Optimizer", "Scheduler", "Service", "Storage"]
 
 
@@ -73,12 +71,8 @@ def preprocess_dynamic_configs(*, dest: dict, source: Optional[dict] = None) -> 
     return dest
 
 
-def merge_parameters(
-    *,
-    dest: dict,
-    source: Optional[dict] = None,
-    required_keys: Optional[Iterable[str]] = None,
-) -> dict:
+def merge_parameters(*, dest: dict, source: Optional[dict] = None,
+                     required_keys: Optional[Iterable[str]] = None) -> dict:
     """
     Merge the source config dict into the destination config.
     Pick from the source configs *ONLY* the keys that are already present
@@ -138,9 +132,8 @@ def path_join(*args: str, abs_path: bool = False) -> str:
     return os.path.normpath(path).replace("\\", "/")
 
 
-def prepare_class_load(
-    config: dict, global_config: Optional[Dict[str, Any]] = None
-) -> Tuple[str, Dict[str, Any]]:
+def prepare_class_load(config: dict,
+                       global_config: Optional[Dict[str, Any]] = None) -> Tuple[str, Dict[str, Any]]:
     """
     Extract the class instantiation parameters from the configuration.
 
@@ -162,11 +155,8 @@ def prepare_class_load(
     merge_parameters(dest=class_config, source=global_config)
 
     if _LOG.isEnabledFor(logging.DEBUG):
-        _LOG.debug(
-            "Instantiating: %s with config:\n%s",
-            class_name,
-            json.dumps(class_config, indent=2),
-        )
+        _LOG.debug("Instantiating: %s with config:\n%s",
+                   class_name, json.dumps(class_config, indent=2))
 
     return (class_name, class_config)
 
@@ -197,9 +187,8 @@ def get_class_from_name(class_name: str) -> type:
 
 
 # FIXME: Technically, this should return a type "class_name" derived from "base_class".
-def instantiate_from_config(
-    base_class: Type[BaseTypeVar], class_name: str, *args: Any, **kwargs: Any
-) -> BaseTypeVar:
+def instantiate_from_config(base_class: Type[BaseTypeVar], class_name: str,
+                            *args: Any, **kwargs: Any) -> BaseTypeVar:
     """
     Factory method for a new class instantiated from config.
 
@@ -231,9 +220,7 @@ def instantiate_from_config(
     return ret
 
 
-def check_required_params(
-    config: Mapping[str, Any], required_params: Iterable[str]
-) -> None:
+def check_required_params(config: Mapping[str, Any], required_params: Iterable[str]) -> None:
     """
     Check if all required parameters are present in the configuration.
     Raise ValueError if any of the parameters are missing.
@@ -251,8 +238,7 @@ def check_required_params(
     if missing_params:
         raise ValueError(
             "The following parameters must be provided in the configuration"
-            + f" or as command line arguments: {missing_params}"
-        )
+            + f" or as command line arguments: {missing_params}")
 
 
 def get_git_info(path: str = __file__) -> Tuple[str, str, str]:
@@ -271,14 +257,11 @@ def get_git_info(path: str = __file__) -> Tuple[str, str, str]:
     """
     dirname = os.path.dirname(path)
     git_repo = subprocess.check_output(
-        ["git", "-C", dirname, "remote", "get-url", "origin"], text=True
-    ).strip()
+        ["git", "-C", dirname, "remote", "get-url", "origin"], text=True).strip()
     git_commit = subprocess.check_output(
-        ["git", "-C", dirname, "rev-parse", "HEAD"], text=True
-    ).strip()
+        ["git", "-C", dirname, "rev-parse", "HEAD"], text=True).strip()
     git_root = subprocess.check_output(
-        ["git", "-C", dirname, "rev-parse", "--show-toplevel"], text=True
-    ).strip()
+        ["git", "-C", dirname, "rev-parse", "--show-toplevel"], text=True).strip()
     _LOG.debug("Current git branch: %s %s", git_repo, git_commit)
     rel_path = os.path.relpath(os.path.abspath(path), os.path.abspath(git_root))
     return (git_repo, git_commit, rel_path.replace("\\", "/"))
@@ -334,9 +317,7 @@ def nullable(func: Callable, value: Optional[Any]) -> Optional[Any]:
     return None if value is None else func(value)
 
 
-def utcify_timestamp(
-    timestamp: datetime, *, origin: Literal["utc", "local"]
-) -> datetime:
+def utcify_timestamp(timestamp: datetime, *, origin: Literal["utc", "local"]) -> datetime:
     """
     Augment a timestamp with zoneinfo if missing and convert it to UTC.
 
@@ -374,9 +355,7 @@ def utcify_timestamp(
         raise ValueError(f"Invalid origin: {origin}")
 
 
-def utcify_nullable_timestamp(
-    timestamp: Optional[datetime], *, origin: Literal["utc", "local"]
-) -> Optional[datetime]:
+def utcify_nullable_timestamp(timestamp: Optional[datetime], *, origin: Literal["utc", "local"]) -> Optional[datetime]:
     """
     A nullable version of utcify_timestamp.
     """
@@ -388,9 +367,7 @@ def utcify_nullable_timestamp(
 _MIN_TS = datetime(2024, 1, 1, 0, 0, 0, tzinfo=pytz.UTC)
 
 
-def datetime_parser(
-    datetime_col: pandas.Series, *, origin: Literal["utc", "local"]
-) -> pandas.Series:
+def datetime_parser(datetime_col: pandas.Series, *, origin: Literal["utc", "local"]) -> pandas.Series:
     """
     Attempt to convert a pandas column to a datetime format.
 
@@ -424,7 +401,7 @@ def datetime_parser(
         new_datetime_col = new_datetime_col.dt.tz_localize(tzinfo)
     assert new_datetime_col.dt.tz is not None
     # And convert it to UTC.
-    new_datetime_col = new_datetime_col.dt.tz_convert("UTC")
+    new_datetime_col = new_datetime_col.dt.tz_convert('UTC')
     if new_datetime_col.isna().any():
         raise ValueError(f"Invalid date format in the data: {datetime_col}")
     if new_datetime_col.le(_MIN_TS).any():

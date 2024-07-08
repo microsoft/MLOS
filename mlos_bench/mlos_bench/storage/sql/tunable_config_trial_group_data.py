@@ -33,15 +33,12 @@ class TunableConfigTrialGroupSqlData(TunableConfigTrialGroupData):
     (e.g., for repeats), which we call a (tunable) config trial group.
     """
 
-    def __init__(
-        self,
-        *,
-        engine: Engine,
-        schema: DbSchema,
-        experiment_id: str,
-        tunable_config_id: int,
-        tunable_config_trial_group_id: Optional[int] = None,
-    ):
+    def __init__(self, *,
+                 engine: Engine,
+                 schema: DbSchema,
+                 experiment_id: str,
+                 tunable_config_id: int,
+                 tunable_config_trial_group_id: Optional[int] = None):
         super().__init__(
             experiment_id=experiment_id,
             tunable_config_id=tunable_config_id,
@@ -56,28 +53,20 @@ class TunableConfigTrialGroupSqlData(TunableConfigTrialGroupData):
         """
         with self._engine.connect() as conn:
             tunable_config_trial_group = conn.execute(
-                self._schema.trial.select()
-                .with_only_columns(
-                    func.min(self._schema.trial.c.trial_id)
-                    .cast(Integer)
-                    .label(  # pylint: disable=not-callable
-                        "tunable_config_trial_group_id"
-                    ),
-                )
-                .where(
+                self._schema.trial.select().with_only_columns(
+                    func.min(self._schema.trial.c.trial_id).cast(Integer).label(    # pylint: disable=not-callable
+                        'tunable_config_trial_group_id'),
+                ).where(
                     self._schema.trial.c.exp_id == self._experiment_id,
                     self._schema.trial.c.config_id == self._tunable_config_id,
-                )
-                .group_by(
+                ).group_by(
                     self._schema.trial.c.exp_id,
                     self._schema.trial.c.config_id,
                 )
             )
             row = tunable_config_trial_group.fetchone()
             assert row is not None
-            return row._tuple()[
-                0
-            ]  # pylint: disable=protected-access  # following DeprecationWarning in sqlalchemy
+            return row._tuple()[0]  # pylint: disable=protected-access  # following DeprecationWarning in sqlalchemy
 
     @property
     def tunable_config(self) -> TunableConfigData:
@@ -97,12 +86,8 @@ class TunableConfigTrialGroupSqlData(TunableConfigTrialGroupData):
         trials : Dict[int, TrialData]
             A dictionary of the trials' data, keyed by trial id.
         """
-        return common.get_trials(
-            self._engine, self._schema, self._experiment_id, self._tunable_config_id
-        )
+        return common.get_trials(self._engine, self._schema, self._experiment_id, self._tunable_config_id)
 
     @property
     def results_df(self) -> pandas.DataFrame:
-        return common.get_results_df(
-            self._engine, self._schema, self._experiment_id, self._tunable_config_id
-        )
+        return common.get_results_df(self._engine, self._schema, self._experiment_id, self._tunable_config_id)

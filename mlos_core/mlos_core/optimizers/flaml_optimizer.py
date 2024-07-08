@@ -33,16 +33,13 @@ class FlamlOptimizer(BaseOptimizer):
     # The name of an internal objective attribute that is calculated as a weighted average of the user provided objective metrics.
     _METRIC_NAME = "FLAML_score"
 
-    def __init__(
-        self,
-        *,  # pylint: disable=too-many-arguments
-        parameter_space: ConfigSpace.ConfigurationSpace,
-        optimization_targets: List[str],
-        objective_weights: Optional[List[float]] = None,
-        space_adapter: Optional[BaseSpaceAdapter] = None,
-        low_cost_partial_config: Optional[dict] = None,
-        seed: Optional[int] = None,
-    ):
+    def __init__(self, *,   # pylint: disable=too-many-arguments
+                 parameter_space: ConfigSpace.ConfigurationSpace,
+                 optimization_targets: List[str],
+                 objective_weights: Optional[List[float]] = None,
+                 space_adapter: Optional[BaseSpaceAdapter] = None,
+                 low_cost_partial_config: Optional[dict] = None,
+                 seed: Optional[int] = None):
         """
         Create an MLOS wrapper for FLAML.
 
@@ -85,22 +82,14 @@ class FlamlOptimizer(BaseOptimizer):
             configspace_to_flaml_space,
         )
 
-        self.flaml_parameter_space: Dict[str, FlamlDomain] = configspace_to_flaml_space(
-            self.optimizer_parameter_space
-        )
+        self.flaml_parameter_space: Dict[str, FlamlDomain] = configspace_to_flaml_space(self.optimizer_parameter_space)
         self.low_cost_partial_config = low_cost_partial_config
 
         self.evaluated_samples: Dict[ConfigSpace.Configuration, EvaluatedSample] = {}
         self._suggested_config: Optional[dict]
 
-    def _register(
-        self,
-        *,
-        configs: pd.DataFrame,
-        scores: pd.DataFrame,
-        context: Optional[pd.DataFrame] = None,
-        metadata: Optional[pd.DataFrame] = None,
-    ) -> None:
+    def _register(self, *, configs: pd.DataFrame, scores: pd.DataFrame,
+                  context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configs and scores.
 
         Parameters
@@ -118,34 +107,21 @@ class FlamlOptimizer(BaseOptimizer):
             Not Yet Implemented.
         """
         if context is not None:
-            warn(
-                f"Not Implemented: Ignoring context {list(context.columns)}",
-                UserWarning,
-            )
+            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         if metadata is not None:
-            warn(
-                f"Not Implemented: Ignoring metadata {list(metadata.columns)}",
-                UserWarning,
-            )
+            warn(f"Not Implemented: Ignoring metadata {list(metadata.columns)}", UserWarning)
 
-        for (_, config), (_, score) in zip(
-            configs.astype("O").iterrows(), scores.iterrows()
-        ):
+        for (_, config), (_, score) in zip(configs.astype('O').iterrows(), scores.iterrows()):
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
-                self.optimizer_parameter_space, values=config.to_dict()
-            )
+                self.optimizer_parameter_space, values=config.to_dict())
             if cs_config in self.evaluated_samples:
                 warn(f"Configuration {config} was already registered", UserWarning)
             self.evaluated_samples[cs_config] = EvaluatedSample(
                 config=config.to_dict(),
-                score=float(
-                    np.average(score.astype(float), weights=self._objective_weights)
-                ),
+                score=float(np.average(score.astype(float), weights=self._objective_weights)),
             )
 
-    def _suggest(
-        self, *, context: Optional[pd.DataFrame] = None
-    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
+    def _suggest(self, *, context: Optional[pd.DataFrame] = None) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
@@ -164,20 +140,12 @@ class FlamlOptimizer(BaseOptimizer):
             Not implemented.
         """
         if context is not None:
-            warn(
-                f"Not Implemented: Ignoring context {list(context.columns)}",
-                UserWarning,
-            )
+            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         config: dict = self._get_next_config()
         return pd.DataFrame(config, index=[0]), None
 
-    def register_pending(
-        self,
-        *,
-        configs: pd.DataFrame,
-        context: Optional[pd.DataFrame] = None,
-        metadata: Optional[pd.DataFrame] = None,
-    ) -> None:
+    def register_pending(self, *, configs: pd.DataFrame,
+                         context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
 
     def _target_function(self, config: dict) -> Union[dict, None]:
@@ -232,14 +200,16 @@ class FlamlOptimizer(BaseOptimizer):
                 dict(normalize_config(self.optimizer_parameter_space, conf))
                 for conf in self.evaluated_samples
             ]
-            evaluated_rewards = [s.score for s in self.evaluated_samples.values()]
+            evaluated_rewards = [
+                s.score for s in self.evaluated_samples.values()
+            ]
 
         # Warm start FLAML optimizer
         self._suggested_config = None
         tune.run(
             self._target_function,
             config=self.flaml_parameter_space,
-            mode="min",
+            mode='min',
             metric=self._METRIC_NAME,
             points_to_evaluate=points_to_evaluate,
             evaluated_rewards=evaluated_rewards,
@@ -248,6 +218,6 @@ class FlamlOptimizer(BaseOptimizer):
             verbose=0,
         )
         if self._suggested_config is None:
-            raise RuntimeError("FLAML did not produce a suggestion")
+            raise RuntimeError('FLAML did not produce a suggestion')
 
         return self._suggested_config  # type: ignore[unreachable]

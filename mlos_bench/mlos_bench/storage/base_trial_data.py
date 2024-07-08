@@ -31,23 +31,18 @@ class TrialData(metaclass=ABCMeta):
     of tunable parameters).
     """
 
-    def __init__(
-        self,
-        *,
-        experiment_id: str,
-        trial_id: int,
-        tunable_config_id: int,
-        ts_start: datetime,
-        ts_end: Optional[datetime],
-        status: Status,
-    ):
+    def __init__(self, *,
+                 experiment_id: str,
+                 trial_id: int,
+                 tunable_config_id: int,
+                 ts_start: datetime,
+                 ts_end: Optional[datetime],
+                 status: Status):
         self._experiment_id = experiment_id
         self._trial_id = trial_id
         self._tunable_config_id = tunable_config_id
         assert ts_start.tzinfo == UTC, "ts_start must be in UTC"
-        assert (
-            ts_end is None or ts_end.tzinfo == UTC
-        ), "ts_end must be in UTC if not None"
+        assert ts_end is None or ts_end.tzinfo == UTC, "ts_end must be in UTC if not None"
         self._ts_start = ts_start
         self._ts_end = ts_end
         self._status = status
@@ -58,10 +53,7 @@ class TrialData(metaclass=ABCMeta):
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, self.__class__):
             return False
-        return (
-            self._experiment_id == other._experiment_id
-            and self._trial_id == other._trial_id
-        )
+        return self._experiment_id == other._experiment_id and self._trial_id == other._trial_id
 
     @property
     def experiment_id(self) -> str:

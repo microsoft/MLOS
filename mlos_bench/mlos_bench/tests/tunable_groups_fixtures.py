@@ -119,26 +119,24 @@ def mixed_numerics_tunable_groups() -> TunableGroups:
     tunable_groups : TunableGroups
         A new TunableGroups object for testing.
     """
-    tunables = TunableGroups(
-        {
-            "mix-numerics": {
-                "cost": 1,
-                "params": {
-                    "int": {
-                        "description": "An integer",
-                        "type": "int",
-                        "default": 0,
-                        "range": [0, 100],
-                    },
-                    "float": {
-                        "description": "A float",
-                        "type": "float",
-                        "default": 0,
-                        "range": [0, 1],
-                    },
+    tunables = TunableGroups({
+        "mix-numerics": {
+            "cost": 1,
+            "params": {
+                "int": {
+                    "description": "An integer",
+                    "type": "int",
+                    "default": 0,
+                    "range": [0, 100],
                 },
-            },
-        }
-    )
+                "float": {
+                    "description": "A float",
+                    "type": "float",
+                    "default": 0,
+                    "range": [0, 1],
+                },
+            }
+        },
+    })
     tunables.reset()
     return tunables

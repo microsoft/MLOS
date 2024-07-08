@@ -18,9 +18,7 @@ def test_tunable_name() -> None:
     """
     with pytest.raises(ValueError):
         # ! characters are currently disallowed in tunable names
-        Tunable(
-            name="test!tunable", config={"type": "float", "range": [0, 1], "default": 0}
-        )
+        Tunable(name='test!tunable', config={"type": "float", "range": [0, 1], "default": 0})
 
 
 def test_categorical_required_params() -> None:
@@ -36,7 +34,7 @@ def test_categorical_required_params() -> None:
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
-        Tunable(name="test", config=config)
+        Tunable(name='test', config=config)
 
 
 def test_categorical_weights() -> None:
@@ -52,7 +50,7 @@ def test_categorical_weights() -> None:
     }
     """
     config = json.loads(json_config)
-    tunable = Tunable(name="test", config=config)
+    tunable = Tunable(name='test', config=config)
     assert tunable.weights == [25, 25, 50]
 
 
@@ -70,7 +68,7 @@ def test_categorical_weights_wrong_count() -> None:
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
-        Tunable(name="test", config=config)
+        Tunable(name='test', config=config)
 
 
 def test_categorical_weights_wrong_values() -> None:
@@ -87,7 +85,7 @@ def test_categorical_weights_wrong_values() -> None:
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
-        Tunable(name="test", config=config)
+        Tunable(name='test', config=config)
 
 
 def test_categorical_wrong_params() -> None:
@@ -104,7 +102,7 @@ def test_categorical_wrong_params() -> None:
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
-        Tunable(name="test", config=config)
+        Tunable(name='test', config=config)
 
 
 def test_categorical_disallow_special_values() -> None:
@@ -121,7 +119,7 @@ def test_categorical_disallow_special_values() -> None:
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
-        Tunable(name="test", config=config)
+        Tunable(name='test', config=config)
 
 
 def test_categorical_tunable_disallow_repeats() -> None:
@@ -129,50 +127,37 @@ def test_categorical_tunable_disallow_repeats() -> None:
     Disallow duplicate values in categorical tunables.
     """
     with pytest.raises(ValueError):
-        Tunable(
-            name="test",
-            config={
-                "type": "categorical",
-                "values": ["foo", "bar", "foo"],
-                "default": "foo",
-            },
-        )
+        Tunable(name='test', config={
+            "type": "categorical",
+            "values": ["foo", "bar", "foo"],
+            "default": "foo",
+        })
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_tunable_disallow_null_default(
-    tunable_type: TunableValueTypeName,
-) -> None:
+def test_numerical_tunable_disallow_null_default(tunable_type: TunableValueTypeName) -> None:
     """
     Disallow null values as default for numerical tunables.
     """
     with pytest.raises(ValueError):
-        Tunable(
-            name=f"test_{tunable_type}",
-            config={
-                "type": tunable_type,
-                "range": [0, 10],
-                "default": None,
-            },
-        )
+        Tunable(name=f'test_{tunable_type}', config={
+            "type": tunable_type,
+            "range": [0, 10],
+            "default": None,
+        })
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
-def test_numerical_tunable_disallow_out_of_range(
-    tunable_type: TunableValueTypeName,
-) -> None:
+def test_numerical_tunable_disallow_out_of_range(tunable_type: TunableValueTypeName) -> None:
     """
     Disallow out of range values as default for numerical tunables.
     """
     with pytest.raises(ValueError):
-        Tunable(
-            name=f"test_{tunable_type}",
-            config={
-                "type": tunable_type,
-                "range": [0, 10],
-                "default": 11,
-            },
-        )
+        Tunable(name=f'test_{tunable_type}', config={
+            "type": tunable_type,
+            "range": [0, 10],
+            "default": 11,
+        })
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
@@ -181,15 +166,12 @@ def test_numerical_tunable_wrong_params(tunable_type: TunableValueTypeName) -> N
     Disallow values param for numerical tunables.
     """
     with pytest.raises(ValueError):
-        Tunable(
-            name=f"test_{tunable_type}",
-            config={
-                "type": tunable_type,
-                "range": [0, 10],
-                "values": ["foo", "bar"],
-                "default": 0,
-            },
-        )
+        Tunable(name=f'test_{tunable_type}', config={
+            "type": tunable_type,
+            "range": [0, 10],
+            "values": ["foo", "bar"],
+            "default": 0,
+        })
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
@@ -206,7 +188,7 @@ def test_numerical_tunable_required_params(tunable_type: TunableValueTypeName) -
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
-        Tunable(name=f"test_{tunable_type}", config=config)
+        Tunable(name=f'test_{tunable_type}', config=config)
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
@@ -223,7 +205,7 @@ def test_numerical_tunable_invalid_range(tunable_type: TunableValueTypeName) -> 
     """
     config = json.loads(json_config)
     with pytest.raises(AssertionError):
-        Tunable(name=f"test_{tunable_type}", config=config)
+        Tunable(name=f'test_{tunable_type}', config=config)
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
@@ -240,7 +222,7 @@ def test_numerical_tunable_reversed_range(tunable_type: TunableValueTypeName) ->
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
-        Tunable(name=f"test_{tunable_type}", config=config)
+        Tunable(name=f'test_{tunable_type}', config=config)
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
@@ -259,7 +241,7 @@ def test_numerical_weights(tunable_type: TunableValueTypeName) -> None:
     }}
     """
     config = json.loads(json_config)
-    tunable = Tunable(name="test", config=config)
+    tunable = Tunable(name='test', config=config)
     assert tunable.special == [0]
     assert tunable.weights == [0.1]
     assert tunable.range_weight == 0.9
@@ -279,7 +261,7 @@ def test_numerical_quantization(tunable_type: TunableValueTypeName) -> None:
     }}
     """
     config = json.loads(json_config)
-    tunable = Tunable(name="test", config=config)
+    tunable = Tunable(name='test', config=config)
     assert tunable.quantization == 10
     assert not tunable.is_log
 
@@ -298,7 +280,7 @@ def test_numerical_log(tunable_type: TunableValueTypeName) -> None:
     }}
     """
     config = json.loads(json_config)
-    tunable = Tunable(name="test", config=config)
+    tunable = Tunable(name='test', config=config)
     assert tunable.is_log
 
 
@@ -317,7 +299,7 @@ def test_numerical_weights_no_specials(tunable_type: TunableValueTypeName) -> No
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
-        Tunable(name="test", config=config)
+        Tunable(name='test', config=config)
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
@@ -337,7 +319,7 @@ def test_numerical_weights_non_normalized(tunable_type: TunableValueTypeName) ->
     }}
     """
     config = json.loads(json_config)
-    tunable = Tunable(name="test", config=config)
+    tunable = Tunable(name='test', config=config)
     assert tunable.special == [-1, 0]
     assert tunable.weights == [0, 10]  # Zero weights are ok
     assert tunable.range_weight == 90
@@ -360,7 +342,7 @@ def test_numerical_weights_wrong_count(tunable_type: TunableValueTypeName) -> No
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
-        Tunable(name="test", config=config)
+        Tunable(name='test', config=config)
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
@@ -379,7 +361,7 @@ def test_numerical_weights_no_range_weight(tunable_type: TunableValueTypeName) -
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
-        Tunable(name="test", config=config)
+        Tunable(name='test', config=config)
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
@@ -398,7 +380,7 @@ def test_numerical_range_weight_no_weights(tunable_type: TunableValueTypeName) -
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
-        Tunable(name="test", config=config)
+        Tunable(name='test', config=config)
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
@@ -416,7 +398,7 @@ def test_numerical_range_weight_no_specials(tunable_type: TunableValueTypeName) 
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
-        Tunable(name="test", config=config)
+        Tunable(name='test', config=config)
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
@@ -436,7 +418,7 @@ def test_numerical_weights_wrong_values(tunable_type: TunableValueTypeName) -> N
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
-        Tunable(name="test", config=config)
+        Tunable(name='test', config=config)
 
 
 @pytest.mark.parametrize("tunable_type", ["int", "float"])
@@ -454,7 +436,7 @@ def test_numerical_quantization_wrong(tunable_type: TunableValueTypeName) -> Non
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
-        Tunable(name="test", config=config)
+        Tunable(name='test', config=config)
 
 
 def test_bad_type() -> None:
@@ -470,4 +452,4 @@ def test_bad_type() -> None:
     """
     config = json.loads(json_config)
     with pytest.raises(ValueError):
-        Tunable(name="test_bad_type", config=config)
+        Tunable(name='test_bad_type', config=config)

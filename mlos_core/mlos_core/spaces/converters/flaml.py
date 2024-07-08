@@ -27,9 +27,7 @@ FlamlDomain: TypeAlias = flaml.tune.sample.Domain
 FlamlSpace: TypeAlias = Dict[str, flaml.tune.sample.Domain]
 
 
-def configspace_to_flaml_space(
-    config_space: ConfigSpace.ConfigurationSpace,
-) -> Dict[str, FlamlDomain]:
+def configspace_to_flaml_space(config_space: ConfigSpace.ConfigurationSpace) -> Dict[str, FlamlDomain]:
     """Converts a ConfigSpace.ConfigurationSpace to dict.
 
     Parameters
@@ -52,23 +50,13 @@ def configspace_to_flaml_space(
     def _one_parameter_convert(parameter: "Hyperparameter") -> FlamlDomain:
         if isinstance(parameter, ConfigSpace.UniformFloatHyperparameter):
             # FIXME: upper isn't included in the range
-            return flaml_numeric_type[(type(parameter), parameter.log)](
-                parameter.lower, parameter.upper
-            )
+            return flaml_numeric_type[(type(parameter), parameter.log)](parameter.lower, parameter.upper)
         elif isinstance(parameter, ConfigSpace.UniformIntegerHyperparameter):
-            return flaml_numeric_type[(type(parameter), parameter.log)](
-                parameter.lower, parameter.upper + 1
-            )
+            return flaml_numeric_type[(type(parameter), parameter.log)](parameter.lower, parameter.upper + 1)
         elif isinstance(parameter, ConfigSpace.CategoricalHyperparameter):
             if len(np.unique(parameter.probabilities)) > 1:
-                raise ValueError(
-                    "FLAML doesn't support categorical parameters with non-uniform probabilities."
-                )
-            return flaml.tune.choice(parameter.choices)  # TODO: set order?
-        raise ValueError(
-            f"Type of parameter {parameter} ({type(parameter)}) not supported."
-        )
+                raise ValueError("FLAML doesn't support categorical parameters with non-uniform probabilities.")
+            return flaml.tune.choice(parameter.choices)     # TODO: set order?
+        raise ValueError(f"Type of parameter {parameter} ({type(parameter)}) not supported.")
 
-    return {
-        param.name: _one_parameter_convert(param) for param in config_space.values()
-    }
+    return {param.name: _one_parameter_convert(param) for param in config_space.values()}

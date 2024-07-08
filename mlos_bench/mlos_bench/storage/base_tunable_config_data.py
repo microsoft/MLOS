@@ -21,7 +21,8 @@ class TunableConfigData(metaclass=ABCMeta):
     A configuration in this context is the set of tunable parameter values.
     """
 
-    def __init__(self, *, tunable_config_id: int):
+    def __init__(self, *,
+                 tunable_config_id: int):
         self._tunable_config_id = tunable_config_id
 
     def __repr__(self) -> str:

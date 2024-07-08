@@ -26,9 +26,7 @@ def _format_str(zone_info: Optional[tzinfo]) -> str:
 
 # FIXME: This fails with zone_info = None when run with `TZ="America/Chicago pytest -n0 ...`
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
-def test_composite_env(
-    tunable_groups: TunableGroups, zone_info: Optional[tzinfo]
-) -> None:
+def test_composite_env(tunable_groups: TunableGroups, zone_info: Optional[tzinfo]) -> None:
     """
     Produce benchmark and telemetry data in TWO local environments
     and combine the results.
@@ -45,7 +43,7 @@ def test_composite_env(
     time_str1 = ts1.strftime(format_str)
     time_str2 = ts2.strftime(format_str)
 
-    (var_prefix, var_suffix) = ("%", "%") if sys.platform == "win32" else ("$", "")
+    (var_prefix, var_suffix) = ("%", "%") if sys.platform == 'win32' else ("$", "")
 
     env = create_composite_local_env(
         tunable_groups=tunable_groups,
@@ -69,8 +67,8 @@ def test_composite_env(
                 "required_args": ["errors", "reads"],
                 "shell_env_params": [
                     "latency",  # const_args overridden by the composite env
-                    "errors",  # Comes from the parent const_args
-                    "reads",  # const_args overridden by the global config
+                    "errors",   # Comes from the parent const_args
+                    "reads"     # const_args overridden by the global config
                 ],
                 "run": [
                     "echo 'metric,value' > output.csv",
@@ -92,9 +90,9 @@ def test_composite_env(
                 },
                 "required_args": ["writes"],
                 "shell_env_params": [
-                    "throughput",  # const_args overridden by the composite env
-                    "score",  # Comes from the local const_args
-                    "writes",  # Comes straight from the global config
+                    "throughput",   # const_args overridden by the composite env
+                    "score",        # Comes from the local const_args
+                    "writes"        # Comes straight from the global config
                 ],
                 "run": [
                     "echo 'metric,value' > output.csv",
@@ -108,13 +106,12 @@ def test_composite_env(
                 ],
                 "read_results_file": "output.csv",
                 "read_telemetry_file": "telemetry.csv",
-            },
-        ],
+            }
+        ]
     )
 
     check_env_success(
-        env,
-        tunable_groups,
+        env, tunable_groups,
         expected_results={
             "latency": 4.2,
             "throughput": 768.0,

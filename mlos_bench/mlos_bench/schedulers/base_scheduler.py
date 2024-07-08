@@ -31,16 +31,13 @@ class Scheduler(metaclass=ABCMeta):
     Base class for the optimization loop scheduling policies.
     """
 
-    def __init__(
-        self,
-        *,
-        config: Dict[str, Any],
-        global_config: Dict[str, Any],
-        environment: Environment,
-        optimizer: Optimizer,
-        storage: Storage,
-        root_env_config: str,
-    ):
+    def __init__(self, *,
+                 config: Dict[str, Any],
+                 global_config: Dict[str, Any],
+                 environment: Environment,
+                 optimizer: Optimizer,
+                 storage: Storage,
+                 root_env_config: str):
         """
         Create a new instance of the scheduler. The constructor of this
         and the derived classes is called by the persistence service
@@ -63,11 +60,8 @@ class Scheduler(metaclass=ABCMeta):
             Path to the root environment configuration.
         """
         self.global_config = global_config
-        config = merge_parameters(
-            dest=config.copy(),
-            source=global_config,
-            required_keys=["experiment_id", "trial_id"],
-        )
+        config = merge_parameters(dest=config.copy(), source=global_config,
+                                  required_keys=["experiment_id", "trial_id"])
 
         self._experiment_id = config["experiment_id"].strip()
         self._trial_id = int(config["trial_id"])
@@ -75,13 +69,9 @@ class Scheduler(metaclass=ABCMeta):
         self._max_trials = int(config.get("max_trials", -1))
         self._trial_count = 0
 
-        self._trial_config_repeat_count = int(
-            config.get("trial_config_repeat_count", 1)
-        )
+        self._trial_config_repeat_count = int(config.get("trial_config_repeat_count", 1))
         if self._trial_config_repeat_count <= 0:
-            raise ValueError(
-                f"Invalid trial_config_repeat_count: {self._trial_config_repeat_count}"
-            )
+            raise ValueError(f"Invalid trial_config_repeat_count: {self._trial_config_repeat_count}")
 
         self._do_teardown = bool(config.get("teardown", True))
 
@@ -105,7 +95,7 @@ class Scheduler(metaclass=ABCMeta):
         """
         return self.__class__.__name__
 
-    def __enter__(self) -> "Scheduler":
+    def __enter__(self) -> 'Scheduler':
         """
         Enter the scheduler's context.
         """
@@ -127,12 +117,10 @@ class Scheduler(metaclass=ABCMeta):
         ).__enter__()
         return self
 
-    def __exit__(
-        self,
-        ex_type: Optional[Type[BaseException]],
-        ex_val: Optional[BaseException],
-        ex_tb: Optional[TracebackType],
-    ) -> Literal[False]:
+    def __exit__(self,
+                 ex_type: Optional[Type[BaseException]],
+                 ex_val: Optional[BaseException],
+                 ex_tb: Optional[TracebackType]) -> Literal[False]:
         """
         Exit the context of the scheduler.
         """
@@ -154,12 +142,8 @@ class Scheduler(metaclass=ABCMeta):
         Start the optimization loop.
         """
         assert self.experiment is not None
-        _LOG.info(
-            "START: Experiment: %s Env: %s Optimizer: %s",
-            self.experiment,
-            self.environment,
-            self.optimizer,
-        )
+        _LOG.info("START: Experiment: %s Env: %s Optimizer: %s",
+                  self.experiment, self.environment, self.optimizer)
         if _LOG.isEnabledFor(logging.INFO):
             _LOG.info("Root Environment:\n%s", self.environment.pprint())
 
@@ -176,9 +160,7 @@ class Scheduler(metaclass=ABCMeta):
         if self._do_teardown:
             self.environment.teardown()
 
-    def get_best_observation(
-        self,
-    ) -> Tuple[Optional[Dict[str, float]], Optional[TunableGroups]]:
+    def get_best_observation(self) -> Tuple[Optional[Dict[str, float]], Optional[TunableGroups]]:
         """
         Get the best observation from the optimizer.
         """
@@ -195,9 +177,7 @@ class Scheduler(metaclass=ABCMeta):
         tunables = self.environment.tunable_params.assign(tunable_values)
         _LOG.info("Load config from storage: %d", config_id)
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug(
-                "Config %d ::\n%s", config_id, json.dumps(tunable_values, indent=2)
-            )
+            _LOG.debug("Config %d ::\n%s", config_id, json.dumps(tunable_values, indent=2))
         return tunables
 
     def _schedule_new_optimizer_suggestions(self) -> bool:
@@ -224,33 +204,27 @@ class Scheduler(metaclass=ABCMeta):
         Add a configuration to the queue of trials.
         """
         for repeat_i in range(1, self._trial_config_repeat_count + 1):
-            self._add_trial_to_queue(
-                tunables,
-                config={
-                    # Add some additional metadata to track for the trial such as the
-                    # optimizer config used.
-                    # Note: these values are unfortunately mutable at the moment.
-                    # Consider them as hints of what the config was the trial *started*.
-                    # It is possible that the experiment configs were changed
-                    # between resuming the experiment (since that is not currently
-                    # prevented).
-                    "optimizer": self.optimizer.name,
-                    "repeat_i": repeat_i,
-                    "is_defaults": tunables.is_defaults,
-                    **{
-                        f"opt_{key}_{i}": val
-                        for (i, opt_target) in enumerate(self.optimizer.targets.items())
-                        for (key, val) in zip(["target", "direction"], opt_target)
-                    },
-                },
-            )
+            self._add_trial_to_queue(tunables, config={
+                # Add some additional metadata to track for the trial such as the
+                # optimizer config used.
+                # Note: these values are unfortunately mutable at the moment.
+                # Consider them as hints of what the config was the trial *started*.
+                # It is possible that the experiment configs were changed
+                # between resuming the experiment (since that is not currently
+                # prevented).
+                "optimizer": self.optimizer.name,
+                "repeat_i": repeat_i,
+                "is_defaults": tunables.is_defaults,
+                **{
+                    f"opt_{key}_{i}": val
+                    for (i, opt_target) in enumerate(self.optimizer.targets.items())
+                    for (key, val) in zip(["target", "direction"], opt_target)
+                }
+            })
 
-    def _add_trial_to_queue(
-        self,
-        tunables: TunableGroups,
-        ts_start: Optional[datetime] = None,
-        config: Optional[Dict[str, Any]] = None,
-    ) -> None:
+    def _add_trial_to_queue(self, tunables: TunableGroups,
+                            ts_start: Optional[datetime] = None,
+                            config: Optional[Dict[str, Any]] = None) -> None:
         """
         Add a configuration to the queue of trials.
         A wrapper for the `Experiment.new_trial` method.
@@ -283,9 +257,4 @@ class Scheduler(metaclass=ABCMeta):
         """
         assert self.experiment is not None
         self._trial_count += 1
-        _LOG.info(
-            "QUEUE: Execute trial # %d/%d :: %s",
-            self._trial_count,
-            self._max_trials,
-            trial,
-        )
+        _LOG.info("QUEUE: Execute trial # %d/%d :: %s", self._trial_count, self._max_trials, trial)

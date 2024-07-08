@@ -27,15 +27,13 @@ class AzureAuthService(Service, SupportsAuth):
     Helper methods to get access to Azure services.
     """
 
-    _REQ_INTERVAL = 300  # = 5 min
+    _REQ_INTERVAL = 300   # = 5 min
 
-    def __init__(
-        self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
-    ):
+    def __init__(self,
+                 config: Optional[Dict[str, Any]] = None,
+                 global_config: Optional[Dict[str, Any]] = None,
+                 parent: Optional[Service] = None,
+                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
         """
         Create a new instance of Azure authentication services proxy.
 
@@ -52,27 +50,18 @@ class AzureAuthService(Service, SupportsAuth):
             New methods to register with the service.
         """
         super().__init__(
-            config,
-            global_config,
-            parent,
-            self.merge_methods(
-                methods,
-                [
-                    self.get_access_token,
-                    self.get_auth_headers,
-                ],
-            ),
+            config, global_config, parent,
+            self.merge_methods(methods, [
+                self.get_access_token,
+                self.get_auth_headers,
+            ])
         )
 
         # This parameter can come from command line as strings, so conversion is needed.
-        self._req_interval = float(
-            self.config.get("tokenRequestInterval", self._REQ_INTERVAL)
-        )
+        self._req_interval = float(self.config.get("tokenRequestInterval", self._REQ_INTERVAL))
 
         self._access_token = "RENEW *NOW*"
-        self._token_expiration_ts = datetime.now(
-            UTC
-        )  # Typically, some future timestamp.
+        self._token_expiration_ts = datetime.now(UTC)  # Typically, some future timestamp.
 
         # Login as ourselves
         self._cred: Union[azure_id.AzureCliCredential, azure_id.CertificateCredential]
@@ -81,13 +70,12 @@ class AzureAuthService(Service, SupportsAuth):
         # Verify info required for SP auth early
         if "spClientId" in self.config:
             check_required_params(
-                self.config,
-                {
+                self.config, {
                     "spClientId",
                     "keyVaultName",
                     "certName",
                     "tenant",
-                },
+                }
             )
 
     def _init_sp(self) -> None:
@@ -116,9 +104,7 @@ class AzureAuthService(Service, SupportsAuth):
         cert_bytes = b64decode(secret.value)
 
         # Reauthenticate as the service principal.
-        self._cred = azure_id.CertificateCredential(
-            tenant_id=tenant_id, client_id=sp_client_id, certificate_data=cert_bytes
-        )
+        self._cred = azure_id.CertificateCredential(tenant_id=tenant_id, client_id=sp_client_id, certificate_data=cert_bytes)
 
     def get_access_token(self) -> str:
         """
@@ -135,9 +121,7 @@ class AzureAuthService(Service, SupportsAuth):
             res = self._cred.get_token("https://management.azure.com/.default")
             self._token_expiration_ts = datetime.fromtimestamp(res.expires_on, tz=UTC)
             self._access_token = res.token
-            _LOG.info(
-                "Got new accessToken. Expiration time: %s", self._token_expiration_ts
-            )
+            _LOG.info("Got new accessToken. Expiration time: %s", self._token_expiration_ts)
         return self._access_token
 
     def get_auth_headers(self) -> dict:

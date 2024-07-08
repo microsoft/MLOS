@@ -40,10 +40,7 @@ def test_service_method_register_without_constructor() -> None:
     # somehow having it in a different scope makes a difference
     if isinstance(mixin_service, SupportsSomeMethod):
         assert mixin_service.some_method() == f"{some_base_service}: base.some_method"
-        assert (
-            mixin_service.some_other_method()
-            == f"{some_base_service}: base.some_other_method"
-        )
+        assert mixin_service.some_other_method() == f"{some_base_service}: base.some_other_method"
 
         # register the child service
         mixin_service.register(some_child_service.export())
@@ -51,9 +48,6 @@ def test_service_method_register_without_constructor() -> None:
         assert mixin_service._services == {some_child_service}
         # check that the inheritance works as expected
         assert mixin_service.some_method() == f"{some_child_service}: child.some_method"
-        assert (
-            mixin_service.some_other_method()
-            == f"{some_child_service}: base.some_other_method"
-        )
+        assert mixin_service.some_other_method() == f"{some_child_service}: base.some_other_method"
     else:
         assert False

@@ -53,9 +53,7 @@ class SyncScheduler(Scheduler):
             trial.update(Status.FAILED, datetime.now(UTC))
             return
 
-        (status, timestamp, results) = (
-            self.environment.run()
-        )  # Block and wait for the final result.
+        (status, timestamp, results) = self.environment.run()  # Block and wait for the final result.
         _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
 
         # In async mode (TODO), poll the environment for status and telemetry
