@@ -14,3 +14,5 @@ black = true
 style = "numpy"
 pre-summary-newline = true
 close-quotes-on-newline = true
+
+# TODO: move pylintrc and some setup.cfg configs here
