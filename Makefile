@@ -197,7 +197,7 @@ build/docformatter.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FIL
 
 build/docformatter.%.${CONDA_ENV_NAME}.build-stamp: $(DOCFORMATTER_COMMON_PREREQS)
 	# Reformat python file docstrings with docformatter.
-	conda run -n ${CONDA_ENV_NAME} docformatter $(filter %.py,$?)
+	conda run -n ${CONDA_ENV_NAME} docformatter --in-place $(filter %.py,$?)
 	touch $@
 
 
@@ -241,7 +241,7 @@ BLACK_CHECK_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 build/docformatter-check.%.${CONDA_ENV_NAME}.build-stamp: $(BLACK_CHECK_COMMON_PREREQS)
 	# Check for import sort order.
 	# Note: if this fails use "make format" or "make docformatter" to fix it.
-	conda run -n ${CONDA_ENV_NAME} docformatter --check $(filter %.py,$?)
+	conda run -n ${CONDA_ENV_NAME} docformatter --check --diff $(filter %.py,$?)
 	touch $@
 
 .PHONY: isort-check
