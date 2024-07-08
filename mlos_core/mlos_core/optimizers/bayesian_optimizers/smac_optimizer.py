@@ -105,7 +105,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
 
         facade: AbstractFacade
-            Sets the facade to use for SMAC.
+            Sets the facade to use for SMAC. More information about the facade can be found here: https://automl.github.io/SMAC3/main/api/smac.facade.html
 
         intensifier: Optional[Type[AbstractIntensifier]]
             Sets the intensifier type to use in the optimizer. If not set, the
