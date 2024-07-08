@@ -197,7 +197,8 @@ build/docformatter.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FIL
 
 build/docformatter.%.${CONDA_ENV_NAME}.build-stamp: $(DOCFORMATTER_COMMON_PREREQS)
 	# Reformat python file docstrings with docformatter.
-	conda run -n ${CONDA_ENV_NAME} docformatter --in-place $(filter %.py,$?)
+	conda run -n ${CONDA_ENV_NAME} docformatter --in-place $(filter %.py,$?) || true
+	conda run -n ${CONDA_ENV_NAME} docformatter --check --diff $(filter %.py,$?)
 	touch $@
 
 
