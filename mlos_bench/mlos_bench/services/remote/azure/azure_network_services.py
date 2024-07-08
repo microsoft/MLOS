@@ -32,20 +32,22 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
 
     # From: https://learn.microsoft.com/en-us/rest/api/virtualnetwork/virtual-networks?view=rest-virtualnetwork-2023-05-01
     _URL_DEPROVISION = (
-        "https://management.azure.com" +
-        "/subscriptions/{subscription}" +
-        "/resourceGroups/{resource_group}" +
-        "/providers/Microsoft.Network" +
-        "/virtualNetwork/{vnet_name}" +
-        "/delete" +
-        "?api-version=2023-05-01"
+        "https://management.azure.com"
+        + "/subscriptions/{subscription}"
+        + "/resourceGroups/{resource_group}"
+        + "/providers/Microsoft.Network"
+        + "/virtualNetwork/{vnet_name}"
+        + "/delete"
+        + "?api-version=2023-05-01"
     )
 
-    def __init__(self,
-                 config: Optional[Dict[str, Any]] = None,
-                 global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None,
-                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional[Service] = None,
+        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+    ):
         """
         Create a new instance of Azure Network services proxy.
 
@@ -62,25 +64,34 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
             New methods to register with the service.
         """
         super().__init__(
-            config, global_config, parent,
-            self.merge_methods(methods, [
-                # SupportsNetworkProvisioning
-                self.provision_network,
-                self.deprovision_network,
-                self.wait_network_deployment,
-            ])
+            config,
+            global_config,
+            parent,
+            self.merge_methods(
+                methods,
+                [
+                    # SupportsNetworkProvisioning
+                    self.provision_network,
+                    self.deprovision_network,
+                    self.wait_network_deployment,
+                ],
+            ),
         )
         if not self._deploy_template:
-            raise ValueError("AzureNetworkService requires a deployment template:\n"
-                             + f"config={config}\nglobal_config={global_config}")
+            raise ValueError(
+                "AzureNetworkService requires a deployment template:\n"
+                + f"config={config}\nglobal_config={global_config}"
+            )
 
-    def _set_default_params(self, params: dict) -> dict:    # pylint: disable=no-self-use
+    def _set_default_params(self, params: dict) -> dict:  # pylint: disable=no-self-use
         # Try and provide a semi sane default for the deploymentName if not provided
         # since this is a common way to set the deploymentName and can same some
         # config work for the caller.
         if "vnetName" in params and "deploymentName" not in params:
             params["deploymentName"] = f"{params['vnetName']}-deployment"
-            _LOG.info("deploymentName missing from params. Defaulting to '%s'.", params["deploymentName"])
+            _LOG.info(
+                "deploymentName missing from params. Defaulting to '%s'.", params["deploymentName"]
+            )
         return params
 
     def wait_network_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
@@ -151,15 +162,18 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
                 "resourceGroup",
                 "deploymentName",
                 "vnetName",
-            ]
+            ],
         )
         _LOG.info("Deprovision Network: %s", config["vnetName"])
         _LOG.info("Deprovision deployment: %s", config["deploymentName"])
-        (status, results) = self._azure_rest_api_post_helper(config, self._URL_DEPROVISION.format(
-            subscription=config["subscription"],
-            resource_group=config["resourceGroup"],
-            vnet_name=config["vnetName"],
-        ))
+        (status, results) = self._azure_rest_api_post_helper(
+            config,
+            self._URL_DEPROVISION.format(
+                subscription=config["subscription"],
+                resource_group=config["resourceGroup"],
+                vnet_name=config["vnetName"],
+            ),
+        )
         if ignore_errors and status == Status.FAILED:
             _LOG.warning("Ignoring error: %s", results)
             status = Status.SUCCEEDED

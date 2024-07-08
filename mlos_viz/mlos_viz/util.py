@@ -49,11 +49,14 @@ def expand_results_data_args(
             raise ValueError("Must provide either exp_data or both results_df and objectives.")
         objectives = exp_data.objectives
     objs_cols: Dict[str, bool] = {}
-    for (opt_tgt, opt_dir) in objectives.items():
+    for opt_tgt, opt_dir in objectives.items():
         if opt_dir not in ["min", "max"]:
             raise ValueError(f"Unexpected optimization direction for target {opt_tgt}: {opt_dir}")
         ascending = opt_dir == "min"
-        if opt_tgt.startswith(ExperimentData.RESULT_COLUMN_PREFIX) and opt_tgt in results_df.columns:
+        if (
+            opt_tgt.startswith(ExperimentData.RESULT_COLUMN_PREFIX)
+            and opt_tgt in results_df.columns
+        ):
             objs_cols[opt_tgt] = ascending
         elif ExperimentData.RESULT_COLUMN_PREFIX + opt_tgt in results_df.columns:
             objs_cols[ExperimentData.RESULT_COLUMN_PREFIX + opt_tgt] = ascending

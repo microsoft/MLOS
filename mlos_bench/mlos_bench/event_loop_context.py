@@ -20,7 +20,7 @@ if sys.version_info >= (3, 10):
 else:
     from typing_extensions import TypeAlias
 
-CoroReturnType = TypeVar('CoroReturnType')  # pylint: disable=invalid-name
+CoroReturnType = TypeVar("CoroReturnType")  # pylint: disable=invalid-name
 if sys.version_info >= (3, 9):
     FutureReturnType: TypeAlias = Future[CoroReturnType]
 else:

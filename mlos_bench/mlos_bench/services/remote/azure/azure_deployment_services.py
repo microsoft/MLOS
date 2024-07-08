@@ -29,9 +29,9 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
     Helper methods to manage and deploy Azure resources via REST APIs.
     """
 
-    _POLL_INTERVAL = 4     # seconds
-    _POLL_TIMEOUT = 300    # seconds
-    _REQUEST_TIMEOUT = 5   # seconds
+    _POLL_INTERVAL = 4  # seconds
+    _POLL_TIMEOUT = 300  # seconds
+    _REQUEST_TIMEOUT = 5  # seconds
     _REQUEST_TOTAL_RETRIES = 10  # Total number retries for each request
     _REQUEST_RETRY_BACKOFF_FACTOR = 0.3  # Delay (seconds) between retries: {backoff factor} * (2 ** ({number of previous retries}))
 
@@ -39,19 +39,21 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
     # https://docs.microsoft.com/en-us/rest/api/resources/deployments
 
     _URL_DEPLOY = (
-        "https://management.azure.com" +
-        "/subscriptions/{subscription}" +
-        "/resourceGroups/{resource_group}" +
-        "/providers/Microsoft.Resources" +
-        "/deployments/{deployment_name}" +
-        "?api-version=2022-05-01"
+        "https://management.azure.com"
+        + "/subscriptions/{subscription}"
+        + "/resourceGroups/{resource_group}"
+        + "/providers/Microsoft.Resources"
+        + "/deployments/{deployment_name}"
+        + "?api-version=2022-05-01"
     )
 
-    def __init__(self,
-                 config: Optional[Dict[str, Any]] = None,
-                 global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None,
-                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional[Service] = None,
+        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+    ):
         """
         Create a new instance of an Azure Services proxy.
 
@@ -69,32 +71,44 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         """
         super().__init__(config, global_config, parent, methods)
 
-        check_required_params(self.config, [
-            "subscription",
-            "resourceGroup",
-        ])
+        check_required_params(
+            self.config,
+            [
+                "subscription",
+                "resourceGroup",
+            ],
+        )
 
         # These parameters can come from command line as strings, so conversion is needed.
         self._poll_interval = float(self.config.get("pollInterval", self._POLL_INTERVAL))
         self._poll_timeout = float(self.config.get("pollTimeout", self._POLL_TIMEOUT))
         self._request_timeout = float(self.config.get("requestTimeout", self._REQUEST_TIMEOUT))
-        self._total_retries = int(self.config.get("requestTotalRetries", self._REQUEST_TOTAL_RETRIES))
-        self._backoff_factor = float(self.config.get("requestBackoffFactor", self._REQUEST_RETRY_BACKOFF_FACTOR))
+        self._total_retries = int(
+            self.config.get("requestTotalRetries", self._REQUEST_TOTAL_RETRIES)
+        )
+        self._backoff_factor = float(
+            self.config.get("requestBackoffFactor", self._REQUEST_RETRY_BACKOFF_FACTOR)
+        )
 
         self._deploy_template = {}
         self._deploy_params = {}
         if self.config.get("deploymentTemplatePath") is not None:
             # TODO: Provide external schema validation?
             template = self.config_loader_service.load_config(
-                self.config['deploymentTemplatePath'], schema_type=None)
+                self.config["deploymentTemplatePath"], schema_type=None
+            )
             assert template is not None and isinstance(template, dict)
             self._deploy_template = template
 
             # Allow for recursive variable expansion as we do with global params and const_args.
-            deploy_params = DictTemplater(self.config['deploymentTemplateParameters']).expand_vars(extra_source_dict=global_config)
+            deploy_params = DictTemplater(self.config["deploymentTemplateParameters"]).expand_vars(
+                extra_source_dict=global_config
+            )
             self._deploy_params = merge_parameters(dest=deploy_params, source=global_config)
         else:
-            _LOG.info("No deploymentTemplatePath provided. Deployment services will be unavailable.")
+            _LOG.info(
+                "No deploymentTemplatePath provided. Deployment services will be unavailable."
+            )
 
     @property
     def deploy_params(self) -> dict:
@@ -129,7 +143,8 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         session = requests.Session()
         session.mount(
             "https://",
-            HTTPAdapter(max_retries=Retry(total=total_retries, backoff_factor=backoff_factor)))
+            HTTPAdapter(max_retries=Retry(total=total_retries, backoff_factor=backoff_factor)),
+        )
         session.headers.update(self._get_headers())
         return session
 
@@ -137,8 +152,9 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         """
         Get the headers for the REST API calls.
         """
-        assert self._parent is not None and isinstance(self._parent, SupportsAuth), \
-            "Authorization service not provided. Include service-auth.jsonc?"
+        assert self._parent is not None and isinstance(
+            self._parent, SupportsAuth
+        ), "Authorization service not provided. Include service-auth.jsonc?"
         return self._parent.get_auth_headers()
 
     @staticmethod
@@ -234,9 +250,11 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
             return (Status.FAILED, {})
 
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Response: %s\n%s", response,
-                       json.dumps(response.json(), indent=2)
-                       if response.content else "")
+            _LOG.debug(
+                "Response: %s\n%s",
+                response,
+                json.dumps(response.json(), indent=2) if response.content else "",
+            )
 
         if response.status_code == 200:
             output = response.json()
@@ -269,12 +287,16 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
         params = self._set_default_params(params)
-        _LOG.info("Wait for %s to %s", params.get("deploymentName"),
-                  "provision" if is_setup else "deprovision")
+        _LOG.info(
+            "Wait for %s to %s",
+            params.get("deploymentName"),
+            "provision" if is_setup else "deprovision",
+        )
         return self._wait_while(self._check_deployment, Status.PENDING, params)
 
-    def _wait_while(self, func: Callable[[dict], Tuple[Status, dict]],
-                    loop_status: Status, params: dict) -> Tuple[Status, dict]:
+    def _wait_while(
+        self, func: Callable[[dict], Tuple[Status, dict]], loop_status: Status, params: dict
+    ) -> Tuple[Status, dict]:
         """
         Invoke `func` periodically while the status is equal to `loop_status`.
         Return TIMED_OUT when timing out.
@@ -296,12 +318,18 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         """
         params = self._set_default_params(params)
         config = merge_parameters(
-            dest=self.config.copy(), source=params, required_keys=["deploymentName"])
+            dest=self.config.copy(), source=params, required_keys=["deploymentName"]
+        )
 
         poll_period = params.get("pollInterval", self._poll_interval)
 
-        _LOG.debug("Wait for %s status %s :: poll %.2f timeout %d s",
-                   config["deploymentName"], loop_status, poll_period, self._poll_timeout)
+        _LOG.debug(
+            "Wait for %s status %s :: poll %.2f timeout %d s",
+            config["deploymentName"],
+            loop_status,
+            poll_period,
+            self._poll_timeout,
+        )
 
         ts_timeout = time.time() + self._poll_timeout
         poll_delay = poll_period
@@ -325,7 +353,9 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         _LOG.warning("Request timed out: %s", params)
         return (Status.TIMED_OUT, {})
 
-    def _check_deployment(self, params: dict) -> Tuple[Status, dict]:   # pylint: disable=too-many-return-statements
+    def _check_deployment(
+        self, params: dict
+    ) -> Tuple[Status, dict]:  # pylint: disable=too-many-return-statements
         """
         Check if Azure deployment exists.
         Return SUCCEEDED if true, PENDING otherwise.
@@ -351,7 +381,7 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
                 "subscription",
                 "resourceGroup",
                 "deploymentName",
-            ]
+            ],
         )
 
         _LOG.info("Check deployment: %s", config["deploymentName"])
@@ -412,13 +442,18 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         if not self._deploy_template:
             raise ValueError(f"Missing deployment template: {self}")
         params = self._set_default_params(params)
-        config = merge_parameters(dest=self.config.copy(), source=params, required_keys=["deploymentName"])
+        config = merge_parameters(
+            dest=self.config.copy(), source=params, required_keys=["deploymentName"]
+        )
         _LOG.info("Deploy: %s :: %s", config["deploymentName"], params)
 
         params = merge_parameters(dest=self._deploy_params.copy(), source=params)
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Deploy: %s merged params ::\n%s",
-                       config["deploymentName"], json.dumps(params, indent=2))
+            _LOG.debug(
+                "Deploy: %s merged params ::\n%s",
+                config["deploymentName"],
+                json.dumps(params, indent=2),
+            )
 
         url = self._URL_DEPLOY.format(
             subscription=config["subscription"],
@@ -431,22 +466,26 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
                 "mode": "Incremental",
                 "template": self._deploy_template,
                 "parameters": {
-                    key: {"value": val} for (key, val) in params.items()
+                    key: {"value": val}
+                    for (key, val) in params.items()
                     if key in self._deploy_template.get("parameters", {})
-                }
+                },
             }
         }
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Request: PUT %s\n%s", url, json.dumps(json_req, indent=2))
 
-        response = requests.put(url, json=json_req,
-                                headers=self._get_headers(), timeout=self._request_timeout)
+        response = requests.put(
+            url, json=json_req, headers=self._get_headers(), timeout=self._request_timeout
+        )
 
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Response: %s\n%s", response,
-                       json.dumps(response.json(), indent=2)
-                       if response.content else "")
+            _LOG.debug(
+                "Response: %s\n%s",
+                response,
+                json.dumps(response.json(), indent=2) if response.content else "",
+            )
         else:
             _LOG.info("Response: %s", response)
 

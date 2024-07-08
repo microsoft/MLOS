@@ -27,13 +27,15 @@ class AzureAuthService(Service, SupportsAuth):
     Helper methods to get access to Azure services.
     """
 
-    _REQ_INTERVAL = 300   # = 5 min
+    _REQ_INTERVAL = 300  # = 5 min
 
-    def __init__(self,
-                 config: Optional[Dict[str, Any]] = None,
-                 global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None,
-                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional[Service] = None,
+        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+    ):
         """
         Create a new instance of Azure authentication services proxy.
 
@@ -50,11 +52,16 @@ class AzureAuthService(Service, SupportsAuth):
             New methods to register with the service.
         """
         super().__init__(
-            config, global_config, parent,
-            self.merge_methods(methods, [
-                self.get_access_token,
-                self.get_auth_headers,
-            ])
+            config,
+            global_config,
+            parent,
+            self.merge_methods(
+                methods,
+                [
+                    self.get_access_token,
+                    self.get_auth_headers,
+                ],
+            ),
         )
 
         # This parameter can come from command line as strings, so conversion is needed.
@@ -70,12 +77,13 @@ class AzureAuthService(Service, SupportsAuth):
         # Verify info required for SP auth early
         if "spClientId" in self.config:
             check_required_params(
-                self.config, {
+                self.config,
+                {
                     "spClientId",
                     "keyVaultName",
                     "certName",
                     "tenant",
-                }
+                },
             )
 
     def _init_sp(self) -> None:
@@ -104,7 +112,9 @@ class AzureAuthService(Service, SupportsAuth):
         cert_bytes = b64decode(secret.value)
 
         # Reauthenticate as the service principal.
-        self._cred = azure_id.CertificateCredential(tenant_id=tenant_id, client_id=sp_client_id, certificate_data=cert_bytes)
+        self._cred = azure_id.CertificateCredential(
+            tenant_id=tenant_id, client_id=sp_client_id, certificate_data=cert_bytes
+        )
 
     def get_access_token(self) -> str:
         """

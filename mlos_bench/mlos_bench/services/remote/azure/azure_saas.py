@@ -32,20 +32,22 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
     # https://learn.microsoft.com/en-us/rest/api/mariadb/configurations
 
     _URL_CONFIGURE = (
-        "https://management.azure.com" +
-        "/subscriptions/{subscription}" +
-        "/resourceGroups/{resource_group}" +
-        "/providers/{provider}" +
-        "/{server_type}/{vm_name}" +
-        "/{update}" +
-        "?api-version={api_version}"
+        "https://management.azure.com"
+        + "/subscriptions/{subscription}"
+        + "/resourceGroups/{resource_group}"
+        + "/providers/{provider}"
+        + "/{server_type}/{vm_name}"
+        + "/{update}"
+        + "?api-version={api_version}"
     )
 
-    def __init__(self,
-                 config: Optional[Dict[str, Any]] = None,
-                 global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None,
-                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional[Service] = None,
+        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+    ):
         """
         Create a new instance of Azure services proxy.
 
@@ -62,18 +64,20 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             New methods to register with the service.
         """
         super().__init__(
-            config, global_config, parent,
-            self.merge_methods(methods, [
-                self.configure,
-                self.is_config_pending
-            ])
+            config,
+            global_config,
+            parent,
+            self.merge_methods(methods, [self.configure, self.is_config_pending]),
         )
 
-        check_required_params(self.config, {
-            "subscription",
-            "resourceGroup",
-            "provider",
-        })
+        check_required_params(
+            self.config,
+            {
+                "subscription",
+                "resourceGroup",
+                "provider",
+            },
+        )
 
         # Provide sane defaults for known DB providers.
         provider = self.config.get("provider")
@@ -117,8 +121,7 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
         # These parameters can come from command line as strings, so conversion is needed.
         self._request_timeout = float(self.config.get("requestTimeout", self._REQUEST_TIMEOUT))
 
-    def configure(self, config: Dict[str, Any],
-                  params: Dict[str, Any]) -> Tuple[Status, dict]:
+    def configure(self, config: Dict[str, Any], params: Dict[str, Any]) -> Tuple[Status, dict]:
         """
         Update the parameters of an Azure DB service.
 
@@ -156,33 +159,38 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             If "isConfigPendingReboot" is set to True, rebooting a VM is necessary.
             Status is one of {PENDING, TIMED_OUT, SUCCEEDED, FAILED}
         """
-        config = merge_parameters(
-            dest=self.config.copy(), source=config, required_keys=["vmName"])
+        config = merge_parameters(dest=self.config.copy(), source=config, required_keys=["vmName"])
         url = self._url_config_get.format(vm_name=config["vmName"])
         _LOG.debug("Request: GET %s", url)
-        response = requests.put(
-            url, headers=self._get_headers(), timeout=self._request_timeout)
+        response = requests.put(url, headers=self._get_headers(), timeout=self._request_timeout)
         _LOG.debug("Response: %s :: %s", response, response.text)
         if response.status_code == 504:
             return (Status.TIMED_OUT, {})
         if response.status_code != 200:
             return (Status.FAILED, {})
         # Currently, Azure Flex servers require a VM reboot.
-        return (Status.SUCCEEDED, {"isConfigPendingReboot": any(
-            {'False': False, 'True': True}[val['properties']['isConfigPendingRestart']]
-            for val in response.json()['value']
-        )})
+        return (
+            Status.SUCCEEDED,
+            {
+                "isConfigPendingReboot": any(
+                    {"False": False, "True": True}[val["properties"]["isConfigPendingRestart"]]
+                    for val in response.json()["value"]
+                )
+            },
+        )
 
     def _get_headers(self) -> dict:
         """
         Get the headers for the REST API calls.
         """
-        assert self._parent is not None and isinstance(self._parent, SupportsAuth), \
-            "Authorization service not provided. Include service-auth.jsonc?"
+        assert self._parent is not None and isinstance(
+            self._parent, SupportsAuth
+        ), "Authorization service not provided. Include service-auth.jsonc?"
         return self._parent.get_auth_headers()
 
-    def _config_one(self, config: Dict[str, Any],
-                    param_name: str, param_value: Any) -> Tuple[Status, dict]:
+    def _config_one(
+        self, config: Dict[str, Any], param_name: str, param_value: Any
+    ) -> Tuple[Status, dict]:
         """
         Update a single parameter of the Azure DB service.
 
@@ -201,13 +209,15 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
-        config = merge_parameters(
-            dest=self.config.copy(), source=config, required_keys=["vmName"])
+        config = merge_parameters(dest=self.config.copy(), source=config, required_keys=["vmName"])
         url = self._url_config_set.format(vm_name=config["vmName"], param_name=param_name)
         _LOG.debug("Request: PUT %s", url)
-        response = requests.put(url, headers=self._get_headers(),
-                                json={"properties": {"value": str(param_value)}},
-                                timeout=self._request_timeout)
+        response = requests.put(
+            url,
+            headers=self._get_headers(),
+            json={"properties": {"value": str(param_value)}},
+            timeout=self._request_timeout,
+        )
         _LOG.debug("Response: %s :: %s", response, response.text)
         if response.status_code == 504:
             return (Status.TIMED_OUT, {})
@@ -215,8 +225,7 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             return (Status.SUCCEEDED, {})
         return (Status.FAILED, {})
 
-    def _config_many(self, config: Dict[str, Any],
-                     params: Dict[str, Any]) -> Tuple[Status, dict]:
+    def _config_many(self, config: Dict[str, Any], params: Dict[str, Any]) -> Tuple[Status, dict]:
         """
         Update the parameters of an Azure DB service one-by-one.
         (If batch API is not available for it).
@@ -234,14 +243,13 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
-        for (param_name, param_value) in params.items():
+        for param_name, param_value in params.items():
             (status, result) = self._config_one(config, param_name, param_value)
             if not status.is_succeeded():
                 return (status, result)
         return (Status.SUCCEEDED, {})
 
-    def _config_batch(self, config: Dict[str, Any],
-                      params: Dict[str, Any]) -> Tuple[Status, dict]:
+    def _config_batch(self, config: Dict[str, Any], params: Dict[str, Any]) -> Tuple[Status, dict]:
         """
         Batch update the parameters of an Azure DB service.
 
@@ -258,19 +266,18 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
-        config = merge_parameters(
-            dest=self.config.copy(), source=config, required_keys=["vmName"])
+        config = merge_parameters(dest=self.config.copy(), source=config, required_keys=["vmName"])
         url = self._url_config_set.format(vm_name=config["vmName"])
         json_req = {
             "value": [
-                {"name": key, "properties": {"value": str(val)}}
-                for (key, val) in params.items()
+                {"name": key, "properties": {"value": str(val)}} for (key, val) in params.items()
             ],
             # "resetAllToDefault": "True"
         }
         _LOG.debug("Request: POST %s", url)
-        response = requests.post(url, headers=self._get_headers(),
-                                 json=json_req, timeout=self._request_timeout)
+        response = requests.post(
+            url, headers=self._get_headers(), json=json_req, timeout=self._request_timeout
+        )
         _LOG.debug("Response: %s :: %s", response, response.text)
         if response.status_code == 504:
             return (Status.TIMED_OUT, {})

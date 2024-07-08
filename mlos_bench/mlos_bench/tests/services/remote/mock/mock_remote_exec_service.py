@@ -18,10 +18,13 @@ class MockRemoteExecService(Service, SupportsRemoteExec):
     Mock remote script execution service.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None,
-                 global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None,
-                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional[Service] = None,
+        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+    ):
         """
         Create a new instance of mock remote exec service.
 
@@ -36,9 +39,14 @@ class MockRemoteExecService(Service, SupportsRemoteExec):
             Parent service that can provide mixin functions.
         """
         super().__init__(
-            config, global_config, parent,
-            self.merge_methods(methods, {
-                "remote_exec": mock_operation,
-                "get_remote_exec_results": mock_operation,
-            })
+            config,
+            global_config,
+            parent,
+            self.merge_methods(
+                methods,
+                {
+                    "remote_exec": mock_operation,
+                    "get_remote_exec_results": mock_operation,
+                },
+            ),
         )

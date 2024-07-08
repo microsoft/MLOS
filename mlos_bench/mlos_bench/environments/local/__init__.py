@@ -10,6 +10,6 @@ from mlos_bench.environments.local.local_env import LocalEnv
 from mlos_bench.environments.local.local_fileshare_env import LocalFileShareEnv
 
 __all__ = [
-    'LocalEnv',
-    'LocalFileShareEnv',
+    "LocalEnv",
+    "LocalFileShareEnv",
 ]

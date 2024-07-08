@@ -22,9 +22,11 @@ else:
 @pytest.fixture
 def config_loader_service() -> ConfigPersistenceService:
     """Config loader service fixture."""
-    return ConfigPersistenceService(config={
-        "config_path": [
-            str(files("mlos_bench.tests.config")),
-            path_join(str(files("mlos_bench.tests.config")), "globals"),
-        ]
-    })
+    return ConfigPersistenceService(
+        config={
+            "config_path": [
+                str(files("mlos_bench.tests.config")),
+                path_join(str(files("mlos_bench.tests.config")), "globals"),
+            ]
+        }
+    )

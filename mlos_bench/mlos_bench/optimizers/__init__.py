@@ -12,8 +12,8 @@ from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.optimizers.one_shot_optimizer import OneShotOptimizer
 
 __all__ = [
-    'Optimizer',
-    'MockOptimizer',
-    'OneShotOptimizer',
-    'MlosCoreOptimizer',
+    "Optimizer",
+    "MockOptimizer",
+    "OneShotOptimizer",
+    "MlosCoreOptimizer",
 ]

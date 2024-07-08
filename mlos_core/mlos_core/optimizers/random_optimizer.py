@@ -24,8 +24,14 @@ class RandomOptimizer(BaseOptimizer):
         The parameter space to optimize.
     """
 
-    def _register(self, *, configs: pd.DataFrame, scores: pd.DataFrame,
-                  context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
+    def _register(
+        self,
+        *,
+        configs: pd.DataFrame,
+        scores: pd.DataFrame,
+        context: Optional[pd.DataFrame] = None,
+        metadata: Optional[pd.DataFrame] = None,
+    ) -> None:
         """Registers the given configs and scores.
 
         Doesn't do anything on the RandomOptimizer except storing configs for logging.
@@ -50,7 +56,9 @@ class RandomOptimizer(BaseOptimizer):
             warn(f"Not Implemented: Ignoring context {list(metadata.columns)}", UserWarning)
         # should we pop them from self.pending_observations?
 
-    def _suggest(self, *, context: Optional[pd.DataFrame] = None) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
+    def _suggest(
+        self, *, context: Optional[pd.DataFrame] = None
+    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
@@ -71,9 +79,17 @@ class RandomOptimizer(BaseOptimizer):
         if context is not None:
             # not sure how that works here?
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
-        return pd.DataFrame(dict(self.optimizer_parameter_space.sample_configuration()), index=[0]), None
+        return (
+            pd.DataFrame(dict(self.optimizer_parameter_space.sample_configuration()), index=[0]),
+            None,
+        )
 
-    def register_pending(self, *, configs: pd.DataFrame,
-                         context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
+    def register_pending(
+        self,
+        *,
+        configs: pd.DataFrame,
+        context: Optional[pd.DataFrame] = None,
+        metadata: Optional[pd.DataFrame] = None,
+    ) -> None:
         raise NotImplementedError()
         # self._pending_observations.append((configs, context))

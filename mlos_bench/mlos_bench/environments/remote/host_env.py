@@ -22,13 +22,15 @@ class HostEnv(Environment):
     Remote host environment.
     """
 
-    def __init__(self,
-                 *,
-                 name: str,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 tunables: Optional[TunableGroups] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        *,
+        name: str,
+        config: dict,
+        global_config: Optional[dict] = None,
+        tunables: Optional[TunableGroups] = None,
+        service: Optional[Service] = None,
+    ):
         """
         Create a new environment for host operations.
 
@@ -49,10 +51,17 @@ class HostEnv(Environment):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM/host, etc.).
         """
-        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
+        super().__init__(
+            name=name,
+            config=config,
+            global_config=global_config,
+            tunables=tunables,
+            service=service,
+        )
 
-        assert self._service is not None and isinstance(self._service, SupportsHostProvisioning), \
-            "HostEnv requires a service that supports host provisioning operations"
+        assert self._service is not None and isinstance(
+            self._service, SupportsHostProvisioning
+        ), "HostEnv requires a service that supports host provisioning operations"
         self._host_service: SupportsHostProvisioning = self._service
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
