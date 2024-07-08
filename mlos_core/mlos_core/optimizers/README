@@ -16,6 +16,7 @@ The following definitions are useful for understanding the implementation
    For instance, a descriptor of the VM size (vCore count and # of GB of RAM), and some descriptor of the workload.
    The intent being to allow either sharing or indexing of trial info between "similar" experiments in order to help make the optimization process more efficient for new scenarios.
    > Note: This is not yet implemented.
+
 The interface for these classes can be described as follows:
 
 - `register`: this is a function that takes a configuration, a score, and, optionally, metadata about the evaluation to update the model for future evaluations.
