@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Mock optimizer for mlos_bench.
-"""
+"""Mock optimizer for mlos_bench."""
 
 import logging
 from abc import ABCMeta
@@ -20,9 +18,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class TrackBestOptimizer(Optimizer, metaclass=ABCMeta):
-    """
-    Base Optimizer class that keeps track of the best score and configuration.
-    """
+    """Base Optimizer class that keeps track of the best score and configuration."""
 
     def __init__(self,
                  tunables: TunableGroups,
@@ -42,9 +38,7 @@ class TrackBestOptimizer(Optimizer, metaclass=ABCMeta):
         return registered_score
 
     def _is_better(self, registered_score: Optional[Dict[str, float]]) -> bool:
-        """
-        Compare the optimization scores to the best ones so far lexicographically.
-        """
+        """Compare the optimization scores to the best ones so far lexicographically."""
         if self._best_score is None:
             return True
         assert registered_score is not None

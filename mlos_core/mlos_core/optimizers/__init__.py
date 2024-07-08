@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Basic initializer module for the mlos_core optimizers.
-"""
+"""Basic initializer module for the mlos_core optimizers."""
 
 from enum import Enum
 from typing import List, Optional, TypeVar
@@ -31,13 +29,13 @@ class OptimizerType(Enum):
     """Enumerate supported MlosCore optimizers."""
 
     RANDOM = RandomOptimizer
-    """An instance of RandomOptimizer class will be used"""
+    """An instance of RandomOptimizer class will be used."""
 
     FLAML = FlamlOptimizer
-    """An instance of FlamlOptimizer class will be used"""
+    """An instance of FlamlOptimizer class will be used."""
 
     SMAC = SmacOptimizer
-    """An instance of SmacOptimizer class will be used"""
+    """An instance of SmacOptimizer class will be used."""
 
 
 # To make mypy happy, we need to define a type variable for each optimizer type.
@@ -55,7 +53,7 @@ DEFAULT_OPTIMIZER_TYPE = OptimizerType.FLAML
 
 
 class OptimizerFactory:
-    """Simple factory class for creating BaseOptimizer-derived objects"""
+    """Simple factory class for creating BaseOptimizer-derived objects."""
 
     # pylint: disable=too-few-public-methods
 
@@ -68,8 +66,8 @@ class OptimizerFactory:
                space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
                space_adapter_kwargs: Optional[dict] = None) -> ConcreteOptimizer:   # type: ignore[type-var]
         """
-        Create a new optimizer instance, given the parameter space, optimizer type,
-        and potential optimizer options.
+        Create a new optimizer instance, given the parameter space, optimizer type, and
+        potential optimizer options.
 
         Parameters
         ----------

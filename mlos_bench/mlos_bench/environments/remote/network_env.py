@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Network Environment.
-"""
+"""Network Environment."""
 
 import logging
 from typing import Optional
@@ -97,9 +95,7 @@ class NetworkEnv(Environment):
         return self._is_ready
 
     def teardown(self) -> None:
-        """
-        Shut down the Network and releases it.
-        """
+        """Shut down the Network and releases it."""
         if not self._deprovision_on_teardown:
             _LOG.info("Skipping Network deprovision: %s", self)
             return

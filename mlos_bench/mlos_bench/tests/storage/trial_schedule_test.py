@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for scheduling trials for some future time.
-"""
+"""Unit tests for scheduling trials for some future time."""
 from datetime import datetime, timedelta
 from typing import Iterator, Set
 
@@ -16,16 +14,14 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def _trial_ids(trials: Iterator[Storage.Trial]) -> Set[int]:
-    """
-    Extract trial IDs from a list of trials.
-    """
+    """Extract trial IDs from a list of trials."""
     return set(t.trial_id for t in trials)
 
 
 def test_schedule_trial(exp_storage: Storage.Experiment,
                         tunable_groups: TunableGroups) -> None:
-    """
-    Schedule several trials for future execution and retrieve them later at certain timestamps.
+    """Schedule several trials for future execution and retrieve them later at certain
+    timestamps.
     """
     timestamp = datetime.now(UTC)
     timedelta_1min = timedelta(minutes=1)

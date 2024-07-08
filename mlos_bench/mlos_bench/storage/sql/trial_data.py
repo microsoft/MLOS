@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-An interface to access the benchmark trial data stored in SQL DB.
-"""
+"""An interface to access the benchmark trial data stored in SQL DB."""
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
@@ -25,9 +23,7 @@ if TYPE_CHECKING:
 
 
 class TrialSqlData(TrialData):
-    """
-    An interface to access the trial data stored in the SQL DB.
-    """
+    """An interface to access the trial data stored in the SQL DB."""
 
     def __init__(self, *,
                  engine: Engine,
@@ -61,8 +57,8 @@ class TrialSqlData(TrialData):
 
     @property
     def tunable_config_trial_group(self) -> "TunableConfigTrialGroupData":
-        """
-        Retrieve the trial's tunable config group configuration data from the storage.
+        """Retrieve the trial's tunable config group configuration data from the
+        storage.
         """
         # pylint: disable=import-outside-toplevel
         from mlos_bench.storage.sql.tunable_config_trial_group_data import (
@@ -74,9 +70,7 @@ class TrialSqlData(TrialData):
 
     @property
     def results_df(self) -> pandas.DataFrame:
-        """
-        Retrieve the trials' results from the storage.
-        """
+        """Retrieve the trials' results from the storage."""
         with self._engine.connect() as conn:
             cur_results = conn.execute(
                 self._schema.trial_result.select().where(
@@ -92,9 +86,7 @@ class TrialSqlData(TrialData):
 
     @property
     def telemetry_df(self) -> pandas.DataFrame:
-        """
-        Retrieve the trials' telemetry from the storage.
-        """
+        """Retrieve the trials' telemetry from the storage."""
         with self._engine.connect() as conn:
             cur_telemetry = conn.execute(
                 self._schema.trial_telemetry.select().where(

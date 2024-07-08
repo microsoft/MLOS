@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Composite benchmark environment.
-"""
+"""Composite benchmark environment."""
 
 import logging
 from datetime import datetime
@@ -23,9 +21,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class CompositeEnv(Environment):
-    """
-    Composite benchmark environment.
-    """
+    """Composite benchmark environment."""
 
     def __init__(self,
                  *,
@@ -111,9 +107,7 @@ class CompositeEnv(Environment):
 
     @property
     def children(self) -> List[Environment]:
-        """
-        Return the list of child environments.
-        """
+        """Return the list of child environments."""
         return self._children
 
     def pprint(self, indent: int = 4, level: int = 0) -> str:
@@ -138,6 +132,7 @@ class CompositeEnv(Environment):
     def _add_child(self, env: Environment, tunables: TunableGroups) -> None:
         """
         Add a new child environment to the composite environment.
+
         This method is called from the constructor only.
         """
         _LOG.debug("Merge tunables: '%s' <- '%s' :: %s", self, env, env.tunable_params)
@@ -170,9 +165,10 @@ class CompositeEnv(Environment):
 
     def teardown(self) -> None:
         """
-        Tear down the children environments. This method is idempotent,
-        i.e., calling it several times is equivalent to a single call.
-        The environments are being torn down in the reverse order.
+        Tear down the children environments.
+
+        This method is idempotent, i.e., calling it several times is equivalent to a
+        single call. The environments are being torn down in the reverse order.
         """
         assert self._in_context
         for env_context in reversed(self._child_contexts):
@@ -181,9 +177,9 @@ class CompositeEnv(Environment):
 
     def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
         """
-        Submit a new experiment to the environment.
-        Return the result of the *last* child environment if successful,
-        or the status of the last failed environment otherwise.
+        Submit a new experiment to the environment. Return the result of the *last*
+        child environment if successful, or the status of the last failed environment
+        otherwise.
 
         Returns
         -------

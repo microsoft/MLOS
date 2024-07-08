@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for loading the trial metadata.
-"""
+"""Unit tests for loading the trial metadata."""
 
 from datetime import datetime
 
@@ -15,9 +13,7 @@ from mlos_bench.storage.base_experiment_data import ExperimentData
 
 
 def test_exp_trial_data(exp_data: ExperimentData) -> None:
-    """
-    Check expected return values for TrialData.
-    """
+    """Check expected return values for TrialData."""
     trial_id = 1
     expected_config_id = 1
     trial = exp_data.trials[trial_id]

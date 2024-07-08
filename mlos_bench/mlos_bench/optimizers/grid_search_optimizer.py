@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Grid search optimizer for mlos_bench.
-"""
+"""Grid search optimizer for mlos_bench."""
 
 import logging
 from typing import Dict, Iterable, Optional, Sequence, Set, Tuple
@@ -24,9 +22,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class GridSearchOptimizer(TrackBestOptimizer):
-    """
-    Grid search optimizer.
-    """
+    """Grid search optimizer."""
 
     def __init__(self,
                  tunables: TunableGroups,
@@ -120,9 +116,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
         return True
 
     def suggest(self) -> TunableGroups:
-        """
-        Generate the next grid search suggestion.
-        """
+        """Generate the next grid search suggestion."""
         tunables = super().suggest()
         if self._start_with_defaults:
             _LOG.info("Use default values for the first trial")

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Various helper functions for mlos_bench.
-"""
+"""Various helper functions for mlos_bench."""
 
 # NOTE: This has to be placed in the top-level mlos_bench package to avoid circular imports.
 
@@ -48,8 +46,8 @@ BaseTypes = Union["Environment", "Optimizer", "Scheduler", "Service", "Storage"]
 
 def preprocess_dynamic_configs(*, dest: dict, source: Optional[dict] = None) -> dict:
     """
-    Replaces all $name values in the destination config with the corresponding
-    value from the source config.
+    Replaces all $name values in the destination config with the corresponding value
+    from the source config.
 
     Parameters
     ----------
@@ -74,9 +72,8 @@ def preprocess_dynamic_configs(*, dest: dict, source: Optional[dict] = None) -> 
 def merge_parameters(*, dest: dict, source: Optional[dict] = None,
                      required_keys: Optional[Iterable[str]] = None) -> dict:
     """
-    Merge the source config dict into the destination config.
-    Pick from the source configs *ONLY* the keys that are already present
-    in the destination config.
+    Merge the source config dict into the destination config. Pick from the source
+    configs *ONLY* the keys that are already present in the destination config.
 
     Parameters
     ----------
@@ -222,8 +219,8 @@ def instantiate_from_config(base_class: Type[BaseTypeVar], class_name: str,
 
 def check_required_params(config: Mapping[str, Any], required_params: Iterable[str]) -> None:
     """
-    Check if all required parameters are present in the configuration.
-    Raise ValueError if any of the parameters are missing.
+    Check if all required parameters are present in the configuration. Raise ValueError
+    if any of the parameters are missing.
 
     Parameters
     ----------
@@ -356,9 +353,7 @@ def utcify_timestamp(timestamp: datetime, *, origin: Literal["utc", "local"]) ->
 
 
 def utcify_nullable_timestamp(timestamp: Optional[datetime], *, origin: Literal["utc", "local"]) -> Optional[datetime]:
-    """
-    A nullable version of utcify_timestamp.
-    """
+    """A nullable version of utcify_timestamp."""
     return utcify_timestamp(timestamp, origin=origin) if timestamp is not None else None
 
 

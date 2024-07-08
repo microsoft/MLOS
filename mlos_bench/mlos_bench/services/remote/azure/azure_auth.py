@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A collection Service functions for managing VMs on Azure.
-"""
+"""A collection Service functions for managing VMs on Azure."""
 
 import logging
 from base64 import b64decode
@@ -23,9 +21,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class AzureAuthService(Service, SupportsAuth):
-    """
-    Helper methods to get access to Azure services.
-    """
+    """Helper methods to get access to Azure services."""
 
     _REQ_INTERVAL = 300   # = 5 min
 
@@ -107,9 +103,7 @@ class AzureAuthService(Service, SupportsAuth):
         self._cred = azure_id.CertificateCredential(tenant_id=tenant_id, client_id=sp_client_id, certificate_data=cert_bytes)
 
     def get_access_token(self) -> str:
-        """
-        Get the access token from Azure CLI, if expired.
-        """
+        """Get the access token from Azure CLI, if expired."""
         # Ensure we are logged as the Service Principal, if provided
         if "spClientId" in self.config:
             self._init_sp()
@@ -125,7 +119,5 @@ class AzureAuthService(Service, SupportsAuth):
         return self._access_token
 
     def get_auth_headers(self) -> dict:
-        """
-        Get the authorization part of HTTP headers for REST API calls.
-        """
+        """Get the authorization part of HTTP headers for REST API calls."""
         return {"Authorization": "Bearer " + self.get_access_token()}

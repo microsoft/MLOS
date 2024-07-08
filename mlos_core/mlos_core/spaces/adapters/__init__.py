@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Basic initializer module for the mlos_core space adapters.
-"""
+"""Basic initializer module for the mlos_core space adapters."""
 
 from enum import Enum
 from typing import Optional, TypeVar
@@ -24,10 +22,10 @@ class SpaceAdapterType(Enum):
     """Enumerate supported MlosCore space adapters."""
 
     IDENTITY = IdentityAdapter
-    """A no-op adapter will be used"""
+    """A no-op adapter will be used."""
 
     LLAMATUNE = LlamaTuneAdapter
-    """An instance of LlamaTuneAdapter class will be used"""
+    """An instance of LlamaTuneAdapter class will be used."""
 
 
 # To make mypy happy, we need to define a type variable for each optimizer type.
@@ -42,7 +40,7 @@ ConcreteSpaceAdapter = TypeVar(
 
 
 class SpaceAdapterFactory:
-    """Simple factory class for creating BaseSpaceAdapter-derived objects"""
+    """Simple factory class for creating BaseSpaceAdapter-derived objects."""
 
     # pylint: disable=too-few-public-methods
 

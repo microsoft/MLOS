@@ -2,8 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Service types for implementing declaring Service behavior for Environments to use in mlos_bench.
+"""Service types for implementing declaring Service behavior for Environments to use in
+mlos_bench.
 """
 
 from mlos_bench.services.types.authenticator_type import SupportsAuth

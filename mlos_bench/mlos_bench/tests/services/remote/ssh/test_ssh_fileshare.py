@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for mlos_bench.services.remote.ssh.ssh_services
-"""
+"""Tests for mlos_bench.services.remote.ssh.ssh_services."""
 
 import os
 import tempfile
@@ -26,8 +24,8 @@ from mlos_bench.util import path_join
 @contextmanager
 def closeable_temp_file(**kwargs: Any) -> Generator[_TemporaryFileWrapper, None, None]:
     """
-    Provides a context manager for a temporary file that can be closed and
-    still unlinked.
+    Provides a context manager for a temporary file that can be closed and still
+    unlinked.
 
     Since Windows doesn't allow us to reopen the file while it's still open we
     need to handle deletion ourselves separately.

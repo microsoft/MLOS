@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-No-op optimizer for mlos_bench that proposes a single configuration.
-"""
+"""No-op optimizer for mlos_bench that proposes a single configuration."""
 
 import logging
 from typing import Optional
@@ -19,6 +17,7 @@ _LOG = logging.getLogger(__name__)
 class OneShotOptimizer(MockOptimizer):
     """
     Mock optimizer that proposes a single configuration and returns.
+
     Explicit configs (partial or full) are possible using configuration files.
     """
 

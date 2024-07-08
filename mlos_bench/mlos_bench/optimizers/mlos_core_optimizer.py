@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A wrapper for mlos_core optimizers for mlos_bench.
-"""
+"""A wrapper for mlos_core optimizers for mlos_bench."""
 
 import logging
 import os
@@ -36,9 +34,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class MlosCoreOptimizer(Optimizer):
-    """
-    A wrapper class for the mlos_core optimizers.
-    """
+    """A wrapper class for the mlos_core optimizers."""
 
     def __init__(self,
                  tunables: TunableGroups,
@@ -127,17 +123,15 @@ class MlosCoreOptimizer(Optimizer):
         return True
 
     def _adjust_signs_df(self, df_scores: pd.DataFrame) -> pd.DataFrame:
-        """
-        In-place adjust the signs of the scores for MINIMIZATION problem.
-        """
+        """In-place adjust the signs of the scores for MINIMIZATION problem."""
         for (opt_target, opt_dir) in self._opt_targets.items():
             df_scores[opt_target] *= opt_dir
         return df_scores
 
     def _to_df(self, configs: Sequence[Dict[str, TunableValue]]) -> pd.DataFrame:
         """
-        Select from past trials only the columns required in this experiment and
-        impute default values for the tunables that are missing in the dataframe.
+        Select from past trials only the columns required in this experiment and impute
+        default values for the tunables that are missing in the dataframe.
 
         Parameters
         ----------

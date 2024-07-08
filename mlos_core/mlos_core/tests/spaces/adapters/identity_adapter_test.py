@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for Identity space adapter.
-"""
+"""Tests for Identity space adapter."""
 
 # pylint: disable=missing-function-docstring
 
@@ -15,9 +13,7 @@ from mlos_core.spaces.adapters import IdentityAdapter
 
 
 def test_identity_adapter() -> None:
-    """
-    Tests identity adapter
-    """
+    """Tests identity adapter."""
     input_space = CS.ConfigurationSpace(seed=1234)
     input_space.add_hyperparameter(
         CS.UniformIntegerHyperparameter(name='int_1', lower=0, upper=100))

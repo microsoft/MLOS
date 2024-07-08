@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Contains the RandomOptimizer class.
-"""
+"""Contains the RandomOptimizer class."""
 
 from typing import Optional, Tuple
 from warnings import warn
@@ -15,8 +13,9 @@ from mlos_core.optimizers.optimizer import BaseOptimizer
 
 
 class RandomOptimizer(BaseOptimizer):
-    """Optimizer class that produces random suggestions.
-    Useful for baseline comparison against Bayesian optimizers.
+    """
+    Optimizer class that produces random suggestions. Useful for baseline comparison
+    against Bayesian optimizers.
 
     Parameters
     ----------
@@ -26,7 +25,8 @@ class RandomOptimizer(BaseOptimizer):
 
     def _register(self, *, configs: pd.DataFrame, scores: pd.DataFrame,
                   context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
-        """Registers the given configs and scores.
+        """
+        Registers the given configs and scores.
 
         Doesn't do anything on the RandomOptimizer except storing configs for logging.
 
@@ -51,7 +51,8 @@ class RandomOptimizer(BaseOptimizer):
         # should we pop them from self.pending_observations?
 
     def _suggest(self, *, context: Optional[pd.DataFrame] = None) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
-        """Suggests a new configuration.
+        """
+        Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
 

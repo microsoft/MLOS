@@ -2,8 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A simple class for describing where to find different config schemas and validating configs against them.
+"""A simple class for describing where to find different config schemas and validating
+configs against them.
 """
 
 import json  # schema files are pure json - no comments
@@ -35,8 +35,8 @@ _SKIP_VALIDATION = (environ.get(_VALIDATION_ENV_FLAG, 'false').lower()
 # Note: we separate out the SchemaStore from a class method on ConfigSchema
 # because of issues with mypy/pylint and non-Enum-member class members.
 class SchemaStore(Mapping):
-    """
-    A simple class for storing schemas and subschemas for the validator to reference.
+    """A simple class for storing schemas and subschemas for the validator to
+    reference.
     """
 
     # A class member mapping of schema id to schema object.
@@ -57,7 +57,9 @@ class SchemaStore(Mapping):
 
     @classmethod
     def _load_schemas(cls) -> None:
-        """Loads all schemas and subschemas into the schema store for the validator to reference."""
+        """Loads all schemas and subschemas into the schema store for the validator to
+        reference.
+        """
         if cls._SCHEMA_STORE:
             return
         for root, _, files in walk(CONFIG_SCHEMA_DIR):
@@ -77,7 +79,9 @@ class SchemaStore(Mapping):
 
     @classmethod
     def _load_registry(cls) -> None:
-        """Also store them in a Registry object for referencing by recent versions of jsonschema."""
+        """Also store them in a Registry object for referencing by recent versions of
+        jsonschema.
+        """
         if not cls._SCHEMA_STORE:
             cls._load_schemas()
         cls._REGISTRY = Registry().with_resources([
@@ -97,9 +101,7 @@ SCHEMA_STORE = SchemaStore()
 
 
 class ConfigSchema(Enum):
-    """
-    An enum to help describe schema types and help validate configs against them.
-    """
+    """An enum to help describe schema types and help validate configs against them."""
 
     CLI = path_join(CONFIG_SCHEMA_DIR, "cli/cli-schema.json")
     GLOBALS = path_join(CONFIG_SCHEMA_DIR, "cli/globals-schema.json")

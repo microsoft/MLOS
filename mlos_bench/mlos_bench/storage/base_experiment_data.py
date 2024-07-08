@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Base interface for accessing the stored benchmark experiment data.
-"""
+"""Base interface for accessing the stored benchmark experiment data."""
 
 from abc import ABCMeta, abstractmethod
 from distutils.util import strtobool  # pylint: disable=deprecated-module
@@ -46,16 +44,12 @@ class ExperimentData(metaclass=ABCMeta):
 
     @property
     def experiment_id(self) -> str:
-        """
-        ID of the experiment.
-        """
+        """ID of the experiment."""
         return self._experiment_id
 
     @property
     def description(self) -> str:
-        """
-        Description of the experiment.
-        """
+        """Description of the experiment."""
         return self._description
 
     @property
@@ -125,7 +119,8 @@ class ExperimentData(metaclass=ABCMeta):
     @property
     def default_tunable_config_id(self) -> Optional[int]:
         """
-        Retrieves the (tunable) config id for the default tunable values for this experiment.
+        Retrieves the (tunable) config id for the default tunable values for this
+        experiment.
 
         Note: this is by *default* the first trial executed for this experiment.
         However, it is currently possible that the user changed the tunables config

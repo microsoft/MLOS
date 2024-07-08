@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for the service to run the scripts locally.
-"""
+"""Unit tests for the service to run the scripts locally."""
 import sys
 import tempfile
 
@@ -21,9 +19,7 @@ from mlos_bench.util import path_join
 
 
 def test_split_cmdline() -> None:
-    """
-    Test splitting a commandline into subcommands.
-    """
+    """Test splitting a commandline into subcommands."""
     cmdline = ". env.sh && (echo hello && echo world | tee > /tmp/test || echo foo && echo $var; true)"
     assert list(split_cmdline(cmdline)) == [
         ['.', 'env.sh'],
@@ -48,9 +44,7 @@ def test_split_cmdline() -> None:
 
 @pytest.fixture
 def local_exec_service() -> LocalExecService:
-    """
-    Test fixture for LocalExecService.
-    """
+    """Test fixture for LocalExecService."""
     config = {
         "abort_on_error": True,
     }
@@ -58,9 +52,7 @@ def local_exec_service() -> LocalExecService:
 
 
 def test_resolve_script(local_exec_service: LocalExecService) -> None:
-    """
-    Test local script resolution logic with complex subcommand names.
-    """
+    """Test local script resolution logic with complex subcommand names."""
     script = "os/linux/runtime/scripts/local/generate_kernel_config_script.py"
     script_abspath = local_exec_service.config_loader_service.resolve_path(script)
     orig_cmdline = f". env.sh && {script} --input foo"
@@ -74,9 +66,7 @@ def test_resolve_script(local_exec_service: LocalExecService) -> None:
 
 
 def test_run_script(local_exec_service: LocalExecService) -> None:
-    """
-    Run a script locally and check the results.
-    """
+    """Run a script locally and check the results."""
     # `echo` should work on all platforms
     (return_code, stdout, stderr) = local_exec_service.local_exec(["echo hello"])
     assert return_code == 0
@@ -85,9 +75,7 @@ def test_run_script(local_exec_service: LocalExecService) -> None:
 
 
 def test_run_script_multiline(local_exec_service: LocalExecService) -> None:
-    """
-    Run a multiline script locally and check the results.
-    """
+    """Run a multiline script locally and check the results."""
     # `echo` should work on all platforms
     (return_code, stdout, stderr) = local_exec_service.local_exec([
         "echo hello",
@@ -99,9 +87,7 @@ def test_run_script_multiline(local_exec_service: LocalExecService) -> None:
 
 
 def test_run_script_multiline_env(local_exec_service: LocalExecService) -> None:
-    """
-    Run a multiline script locally and pass the environment variables to it.
-    """
+    """Run a multiline script locally and pass the environment variables to it."""
     # `echo` should work on all platforms
     (return_code, stdout, stderr) = local_exec_service.local_exec([
         r"echo $var",  # Unix shell
@@ -116,9 +102,7 @@ def test_run_script_multiline_env(local_exec_service: LocalExecService) -> None:
 
 
 def test_run_script_read_csv(local_exec_service: LocalExecService) -> None:
-    """
-    Run a script locally and read the resulting CSV file.
-    """
+    """Run a script locally and read the resulting CSV file."""
     with local_exec_service.temp_dir_context() as temp_dir:
 
         (return_code, stdout, stderr) = local_exec_service.local_exec([
@@ -143,9 +127,7 @@ def test_run_script_read_csv(local_exec_service: LocalExecService) -> None:
 
 
 def test_run_script_write_read_txt(local_exec_service: LocalExecService) -> None:
-    """
-    Write data a temp location and run a script that updates it there.
-    """
+    """Write data a temp location and run a script that updates it there."""
     with local_exec_service.temp_dir_context() as temp_dir:
 
         input_file = "input.txt"
@@ -166,18 +148,14 @@ def test_run_script_write_read_txt(local_exec_service: LocalExecService) -> None
 
 
 def test_run_script_fail(local_exec_service: LocalExecService) -> None:
-    """
-    Try to run a non-existent command.
-    """
+    """Try to run a non-existent command."""
     (return_code, stdout, _stderr) = local_exec_service.local_exec(["foo_bar_baz hello"])
     assert return_code != 0
     assert stdout.strip() == ""
 
 
 def test_run_script_middle_fail_abort(local_exec_service: LocalExecService) -> None:
-    """
-    Try to run a series of commands, one of which fails, and abort early.
-    """
+    """Try to run a series of commands, one of which fails, and abort early."""
     (return_code, stdout, _stderr) = local_exec_service.local_exec([
         "echo hello",
         "cmd /c 'exit 1'" if sys.platform == 'win32' else "false",
@@ -188,9 +166,7 @@ def test_run_script_middle_fail_abort(local_exec_service: LocalExecService) -> N
 
 
 def test_run_script_middle_fail_pass(local_exec_service: LocalExecService) -> None:
-    """
-    Try to run a series of commands, one of which fails, but let it pass.
-    """
+    """Try to run a series of commands, one of which fails, but let it pass."""
     local_exec_service.abort_on_error = False
     (return_code, stdout, _stderr) = local_exec_service.local_exec([
         "echo hello",
@@ -205,9 +181,7 @@ def test_run_script_middle_fail_pass(local_exec_service: LocalExecService) -> No
 
 
 def test_temp_dir_path_expansion() -> None:
-    """
-    Test that we can control the temp_dir path using globals expansion.
-    """
+    """Test that we can control the temp_dir path using globals expansion."""
     # Create a temp dir for the test.
     # Normally this would be a real path set on the CLI or in a global config,
     # but for test purposes we still want it to be dynamic and cleaned up after

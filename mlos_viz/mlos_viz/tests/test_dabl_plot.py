@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for mlos_viz.dabl.plot.
-"""
+"""Unit tests for mlos_viz.dabl.plot."""
 
 import warnings
 from unittest.mock import Mock, patch

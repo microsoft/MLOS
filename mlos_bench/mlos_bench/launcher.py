@@ -3,8 +3,8 @@
 # Licensed under the MIT License.
 #
 """
-A helper class to load the configuration files, parse the command line parameters,
-and instantiate the main components of mlos_bench system.
+A helper class to load the configuration files, parse the command line parameters, and
+instantiate the main components of mlos_bench system.
 
 It is used in `mlos_bench.run` module to run the benchmark/optimizer from the
 command line.
@@ -40,9 +40,7 @@ _LOG = logging.getLogger(__name__)
 
 class Launcher:
     # pylint: disable=too-few-public-methods,too-many-instance-attributes
-    """
-    Command line launcher for mlos_bench and mlos_core.
-    """
+    """Command line launcher for mlos_bench and mlos_core."""
 
     def __init__(self, description: str, long_text: str = "", argv: Optional[List[str]] = None):
         # pylint: disable=too-many-statements
@@ -143,23 +141,17 @@ class Launcher:
 
     @property
     def config_loader(self) -> ConfigPersistenceService:
-        """
-        Get the config loader service.
-        """
+        """Get the config loader service."""
         return self._config_loader
 
     @property
     def service(self) -> Service:
-        """
-        Get the parent service.
-        """
+        """Get the parent service."""
         return self._parent_service
 
     @staticmethod
     def _parse_args(parser: argparse.ArgumentParser, argv: Optional[List[str]]) -> Tuple[argparse.Namespace, List[str]]:
-        """
-        Parse the command line arguments.
-        """
+        """Parse the command line arguments."""
         parser.add_argument(
             '--config', required=False,
             help='Main JSON5 configuration file. Its keys are the same as the' +
@@ -259,9 +251,7 @@ class Launcher:
 
     @staticmethod
     def _try_parse_extra_args(cmdline: Iterable[str]) -> Dict[str, TunableValue]:
-        """
-        Helper function to parse global key/value pairs from the command line.
-        """
+        """Helper function to parse global key/value pairs from the command line."""
         _LOG.debug("Extra args: %s", cmdline)
 
         config: Dict[str, TunableValue] = {}
@@ -293,9 +283,8 @@ class Launcher:
                      config_path: Iterable[str],
                      args_rest: Iterable[str],
                      global_config: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Get key/value pairs of the global configuration parameters
-        from the specified config files (if any) and command line arguments.
+        """Get key/value pairs of the global configuration parameters from the specified
+        config files (if any) and command line arguments.
         """
         for config_file in (args_globals or []):
             conf = self._config_loader.load_config(config_file, ConfigSchema.GLOBALS)
@@ -308,9 +297,8 @@ class Launcher:
 
     def _init_tunable_values(self, random_init: bool, seed: Optional[int],
                              args_tunables: Optional[str]) -> TunableGroups:
-        """
-        Initialize the tunables and load key/value pairs of the tunable values
-        from given JSON files, if specified.
+        """Initialize the tunables and load key/value pairs of the tunable values from
+        given JSON files, if specified.
         """
         tunables = self.environment.tunable_params
         _LOG.debug("Init tunables: default = %s", tunables)
@@ -332,9 +320,11 @@ class Launcher:
 
     def _load_optimizer(self, args_optimizer: Optional[str]) -> Optimizer:
         """
-        Instantiate the Optimizer object from JSON config file, if specified
-        in the --optimizer command line option. If config file not specified,
-        create a one-shot optimizer to run a single benchmark trial.
+        Instantiate the Optimizer object from JSON config file, if specified in the
+        --optimizer command line option.
+
+        If config file not specified, create a one-shot optimizer to run a single
+        benchmark trial.
         """
         if args_optimizer is None:
             # global_config may contain additional properties, so we need to
@@ -352,9 +342,10 @@ class Launcher:
 
     def _load_storage(self, args_storage: Optional[str]) -> Storage:
         """
-        Instantiate the Storage object from JSON file provided in the --storage
-        command line parameter. If omitted, create an ephemeral in-memory SQL
-        storage instead.
+        Instantiate the Storage object from JSON file provided in the --storage command
+        line parameter.
+
+        If omitted, create an ephemeral in-memory SQL storage instead.
         """
         if args_storage is None:
             # pylint: disable=import-outside-toplevel
@@ -376,6 +367,7 @@ class Launcher:
         """
         Instantiate the Scheduler object from JSON file provided in the --scheduler
         command line parameter.
+
         Create a simple synchronous single-threaded scheduler if omitted.
         """
         # Set `teardown` for scheduler only to prevent conflicts with other configs.

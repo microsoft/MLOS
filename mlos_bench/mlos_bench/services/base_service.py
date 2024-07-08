@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Base class for the service mix-ins.
-"""
+"""Base class for the service mix-ins."""
 
 import json
 import logging
@@ -21,9 +19,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class Service:
-    """
-    An abstract base of all Environment Services and used to build up mix-ins.
-    """
+    """An abstract base of all Environment Services and used to build up mix-ins."""
 
     @classmethod
     def new(cls,
@@ -105,8 +101,9 @@ class Service:
                       local_methods: Union[Dict[str, Callable], List[Callable]]) -> Dict[str, Callable]:
         """
         Merge methods from the external caller with the local ones.
-        This function is usually called by the derived class constructor
-        just before invoking the constructor of the base class.
+
+        This function is usually called by the derived class constructor just before
+        invoking the constructor of the base class.
         """
         if isinstance(local_methods, dict):
             local_methods = local_methods.copy()
@@ -170,8 +167,8 @@ class Service:
         """
         Enters the context for this particular Service instance.
 
-        Called by the base __enter__ method of the Service class so it can be
-        used with mix-ins and overridden by subclasses.
+        Called by the base __enter__ method of the Service class so it can be used with
+        mix-ins and overridden by subclasses.
         """
         assert not self._in_context
         self._in_context = True
@@ -183,8 +180,8 @@ class Service:
         """
         Exits the context for this particular Service instance.
 
-        Called by the base __enter__ method of the Service class so it can be
-        used with mix-ins and overridden by subclasses.
+        Called by the base __enter__ method of the Service class so it can be used with
+        mix-ins and overridden by subclasses.
         """
         # pylint: disable=unused-argument
         assert self._in_context
@@ -192,10 +189,9 @@ class Service:
         return False
 
     def _validate_json_config(self, config: dict) -> None:
-        """
-        Reconstructs a basic json config that this class might have been
-        instantiated from in order to validate configs provided outside the
-        file loading mechanism.
+        """Reconstructs a basic json config that this class might have been instantiated
+        from in order to validate configs provided outside the file loading
+        mechanism.
         """
         if self.__class__ == Service:
             # Skip over the case where instantiate a bare base Service class in order to build up a mix-in.
@@ -212,9 +208,7 @@ class Service:
         return f"{self.__class__.__name__}@{hex(id(self))}"
 
     def pprint(self) -> str:
-        """
-        Produce a human-readable string listing all public methods of the service.
-        """
+        """Produce a human-readable string listing all public methods of the service."""
         return f"{self} ::\n" + "\n".join(
             f'  "{key}": {getattr(val, "__self__", "stand-alone")}'
             for (key, val) in self._service_methods.items()

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for space adapter factory.
-"""
+"""Tests for space adapter factory."""
 
 # pylint: disable=missing-function-docstring
 
@@ -29,9 +27,7 @@ from mlos_core.tests import get_all_concrete_subclasses
     *list(SpaceAdapterType),
 ])
 def test_concrete_optimizer_type(space_adapter_type: SpaceAdapterType) -> None:
-    """
-    Test that all optimizer types are listed in the ConcreteOptimizer constraints.
-    """
+    """Test that all optimizer types are listed in the ConcreteOptimizer constraints."""
     # pylint: disable=no-member
     assert space_adapter_type.value in ConcreteSpaceAdapter.__constraints__     # type: ignore[attr-defined]
 
@@ -86,8 +82,6 @@ assert space_adapter_subclasses
 
 @pytest.mark.parametrize(('space_adapter_class'), space_adapter_subclasses)
 def test_space_adapter_type_defs(space_adapter_class: Type[BaseSpaceAdapter]) -> None:
-    """
-    Test that all space adapter classes are listed in the SpaceAdapterType enum.
-    """
+    """Test that all space adapter classes are listed in the SpaceAdapterType enum."""
     space_adapter_type_classes = {space_adapter_type.value for space_adapter_type in SpaceAdapterType}
     assert space_adapter_class in space_adapter_type_classes

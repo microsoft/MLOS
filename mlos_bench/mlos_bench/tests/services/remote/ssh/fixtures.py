@@ -51,14 +51,13 @@ def ssh_test_server(ssh_test_server_hostname: str,
                     docker_compose_project_name: str,
                     locked_docker_services: DockerServices) -> Generator[SshTestServerInfo, None, None]:
     """
-    Fixture for getting the ssh test server services setup via docker-compose
-    using pytest-docker.
+    Fixture for getting the ssh test server services setup via docker-compose using
+    pytest-docker.
 
     Yields the (hostname, port, username, id_rsa_path) of the test server.
 
-    Once the session is over, the docker containers are torn down, and the
-    temporary file holding the dynamically generated private key of the test
-    server is deleted.
+    Once the session is over, the docker containers are torn down, and the temporary
+    file holding the dynamically generated private key of the test server is deleted.
     """
     # Get a copy of the ssh id_rsa key from the test ssh server.
     with tempfile.NamedTemporaryFile() as id_rsa_file:
@@ -85,6 +84,7 @@ def alt_test_server(ssh_test_server: SshTestServerInfo,
                     locked_docker_services: DockerServices) -> SshTestServerInfo:
     """
     Fixture for getting the second ssh test server info from the docker-compose.yml.
+
     See additional notes in the ssh_test_server fixture above.
     """
     # Note: The alt-server uses the same image as the ssh-server container, so
@@ -105,6 +105,7 @@ def reboot_test_server(ssh_test_server: SshTestServerInfo,
                        locked_docker_services: DockerServices) -> SshTestServerInfo:
     """
     Fixture for getting the third ssh test server info from the docker-compose.yml.
+
     See additional notes in the ssh_test_server fixture above.
     """
     # Note: The reboot-server uses the same image as the ssh-server container, so

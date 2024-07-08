@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Protocol interface for helper functions to lookup and load configs.
-"""
+"""Protocol interface for helper functions to lookup and load configs."""
 
 from typing import (
     TYPE_CHECKING,
@@ -30,15 +28,13 @@ if TYPE_CHECKING:
 
 @runtime_checkable
 class SupportsConfigLoading(Protocol):
-    """
-    Protocol interface for helper functions to lookup and load configs.
-    """
+    """Protocol interface for helper functions to lookup and load configs."""
 
     def resolve_path(self, file_path: str,
                      extra_paths: Optional[Iterable[str]] = None) -> str:
         """
-        Prepend the suitable `_config_path` to `path` if the latter is not absolute.
-        If `_config_path` is `None` or `path` is absolute, return `path` as is.
+        Prepend the suitable `_config_path` to `path` if the latter is not absolute. If
+        `_config_path` is `None` or `path` is absolute, return `path` as is.
 
         Parameters
         ----------
@@ -55,9 +51,8 @@ class SupportsConfigLoading(Protocol):
 
     def load_config(self, json_file_name: str, schema_type: Optional[ConfigSchema]) -> Union[dict, List[dict]]:
         """
-        Load JSON config file. Search for a file relative to `_config_path`
-        if the input path is not absolute.
-        This method is exported to be used as a service.
+        Load JSON config file. Search for a file relative to `_config_path` if the input
+        path is not absolute. This method is exported to be used as a service.
 
         Parameters
         ----------
@@ -141,8 +136,8 @@ class SupportsConfigLoading(Protocol):
                       global_config: Optional[Dict[str, Any]] = None,
                       parent: Optional["Service"] = None) -> "Service":
         """
-        Read the configuration files and bundle all service methods
-        from those configs into a single Service object.
+        Read the configuration files and bundle all service methods from those configs
+        into a single Service object.
 
         Parameters
         ----------

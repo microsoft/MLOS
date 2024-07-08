@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for mlos_core.spaces
-"""
+"""Tests for mlos_core.spaces."""
 
 # pylint: disable=missing-function-docstring
 
@@ -67,16 +65,12 @@ def test_is_log_uniform() -> None:
 
 
 def invalid_conversion_function(*args: Any) -> NoReturn:
-    """
-    A quick dummy function for the base class to make pylint happy.
-    """
+    """A quick dummy function for the base class to make pylint happy."""
     raise NotImplementedError('subclass must override conversion_function')
 
 
 class BaseConversion(metaclass=ABCMeta):
-    """
-    Base class for testing optimizer space conversions.
-    """
+    """Base class for testing optimizer space conversions."""
     conversion_function: Callable[..., OptimizerSpace] = invalid_conversion_function
 
     @abstractmethod
@@ -116,9 +110,7 @@ class BaseConversion(metaclass=ABCMeta):
 
     @abstractmethod
     def test_dimensionality(self) -> None:
-        """
-        Check that the dimensionality of the converted space is correct.
-        """
+        """Check that the dimensionality of the converted space is correct."""
 
     def test_unsupported_hyperparameter(self) -> None:
         input_space = CS.ConfigurationSpace()
@@ -175,9 +167,7 @@ class BaseConversion(metaclass=ABCMeta):
 
 
 class TestFlamlConversion(BaseConversion):
-    """
-    Tests for ConfigSpace to Flaml parameter conversions.
-    """
+    """Tests for ConfigSpace to Flaml parameter conversions."""
 
     conversion_function = staticmethod(configspace_to_flaml_space)
 

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for mock mlos_bench optimizer.
-"""
+"""Unit tests for mock mlos_bench optimizer."""
 import os
 import shutil
 import sys
@@ -22,9 +20,7 @@ _OUTPUT_DIR = '_test_output_dir'  # Will be deleted after the test.
 
 
 def test_init_mlos_core_smac_opt_bad_trial_count(tunable_groups: TunableGroups) -> None:
-    """
-    Test invalid max_trials initialization of mlos_core SMAC optimizer.
-    """
+    """Test invalid max_trials initialization of mlos_core SMAC optimizer."""
     test_opt_config = {
         'optimizer_type': 'SMAC',
         'max_trials': 10,
@@ -37,9 +33,7 @@ def test_init_mlos_core_smac_opt_bad_trial_count(tunable_groups: TunableGroups) 
 
 
 def test_init_mlos_core_smac_opt_max_trials(tunable_groups: TunableGroups) -> None:
-    """
-    Test max_trials initialization of mlos_core SMAC optimizer.
-    """
+    """Test max_trials initialization of mlos_core SMAC optimizer."""
     test_opt_config = {
         'optimizer_type': 'SMAC',
         'max_suggestions': 123,
@@ -52,8 +46,8 @@ def test_init_mlos_core_smac_opt_max_trials(tunable_groups: TunableGroups) -> No
 
 
 def test_init_mlos_core_smac_absolute_output_directory(tunable_groups: TunableGroups) -> None:
-    """
-    Test absolute path output directory initialization of mlos_core SMAC optimizer.
+    """Test absolute path output directory initialization of mlos_core SMAC
+    optimizer.
     """
     output_dir = path_join(_OUTPUT_DIR_PATH_BASE, _OUTPUT_DIR)
     test_opt_config = {
@@ -72,8 +66,8 @@ def test_init_mlos_core_smac_absolute_output_directory(tunable_groups: TunableGr
 
 
 def test_init_mlos_core_smac_relative_output_directory(tunable_groups: TunableGroups) -> None:
-    """
-    Test relative path output directory initialization of mlos_core SMAC optimizer.
+    """Test relative path output directory initialization of mlos_core SMAC
+    optimizer.
     """
     test_opt_config = {
         'optimizer_type': 'SMAC',
@@ -90,8 +84,8 @@ def test_init_mlos_core_smac_relative_output_directory(tunable_groups: TunableGr
 
 
 def test_init_mlos_core_smac_relative_output_directory_with_run_name(tunable_groups: TunableGroups) -> None:
-    """
-    Test relative path output directory initialization of mlos_core SMAC optimizer.
+    """Test relative path output directory initialization of mlos_core SMAC
+    optimizer.
     """
     test_opt_config = {
         'optimizer_type': 'SMAC',
@@ -109,8 +103,8 @@ def test_init_mlos_core_smac_relative_output_directory_with_run_name(tunable_gro
 
 
 def test_init_mlos_core_smac_relative_output_directory_with_experiment_id(tunable_groups: TunableGroups) -> None:
-    """
-    Test relative path output directory initialization of mlos_core SMAC optimizer.
+    """Test relative path output directory initialization of mlos_core SMAC
+    optimizer.
     """
     test_opt_config = {
         'optimizer_type': 'SMAC',
@@ -130,9 +124,7 @@ def test_init_mlos_core_smac_relative_output_directory_with_experiment_id(tunabl
 
 
 def test_init_mlos_core_smac_temp_output_directory(tunable_groups: TunableGroups) -> None:
-    """
-    Test random output directory initialization of mlos_core SMAC optimizer.
-    """
+    """Test random output directory initialization of mlos_core SMAC optimizer."""
     test_opt_config = {
         'optimizer_type': 'SMAC',
         'output_directory': None,

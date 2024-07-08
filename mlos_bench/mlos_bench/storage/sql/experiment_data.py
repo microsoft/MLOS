@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-An interface to access the experiment benchmark data stored in SQL DB.
-"""
+"""An interface to access the experiment benchmark data stored in SQL DB."""
 import logging
 from typing import Dict, Literal, Optional
 
@@ -127,7 +125,8 @@ class ExperimentSqlData(ExperimentData):
     @property
     def default_tunable_config_id(self) -> Optional[int]:
         """
-        Retrieves the (tunable) config id for the default tunable values for this experiment.
+        Retrieves the (tunable) config id for the default tunable values for this
+        experiment.
 
         Note: this is by *default* the first trial executed for this experiment.
         However, it is currently possible that the user changed the tunables config

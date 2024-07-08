@@ -2,8 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Functions to convert TunableGroups to ConfigSpace for use with the mlos_core optimizers.
+"""Functions to convert TunableGroups to ConfigSpace for use with the mlos_core
+optimizers.
 """
 
 import logging
@@ -31,6 +31,7 @@ _LOG = logging.getLogger(__name__)
 class TunableValueKind:
     """
     Enum for the kind of the tunable value (special or not).
+
     It is not a true enum because ConfigSpace wants string values.
     """
 
@@ -40,9 +41,7 @@ class TunableValueKind:
 
 
 def _normalize_weights(weights: List[float]) -> List[float]:
-    """
-    Helper function for normalizing weights to probabilities.
-    """
+    """Helper function for normalizing weights to probabilities."""
     total = sum(weights)
     return [w / total for w in weights]
 
@@ -219,6 +218,7 @@ def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
 def configspace_data_to_tunable_values(data: dict) -> Dict[str, TunableValue]:
     """
     Remove the fields that correspond to special values in ConfigSpace.
+
     In particular, remove and keys suffixes added by `special_param_names`.
     """
     data = data.copy()
@@ -240,8 +240,8 @@ def configspace_data_to_tunable_values(data: dict) -> Dict[str, TunableValue]:
 
 def special_param_names(name: str) -> Tuple[str, str]:
     """
-    Generate the names of the auxiliary hyperparameters that correspond
-    to a tunable that can have special values.
+    Generate the names of the auxiliary hyperparameters that correspond to a tunable
+    that can have special values.
 
     NOTE: `!` characters are currently disallowed in Tunable names in order handle this logic.
 

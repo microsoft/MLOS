@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Saving and restoring the benchmark data in SQL database.
-"""
+"""Saving and restoring the benchmark data in SQL database."""
 
 import logging
 from typing import Dict, Literal, Optional
@@ -23,9 +21,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class SqlStorage(Storage):
-    """
-    An implementation of the Storage interface using SQLAlchemy backend.
-    """
+    """An implementation of the Storage interface using SQLAlchemy backend."""
 
     def __init__(self,
                  config: dict,

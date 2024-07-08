@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A collection Service functions for managing VMs on Azure.
-"""
+"""A collection Service functions for managing VMs on Azure."""
 
 import json
 import logging
@@ -27,9 +25,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsHostOps, SupportsOSOps, SupportsRemoteExec):
-    """
-    Helper methods to manage VMs on Azure.
-    """
+    """Helper methods to manage VMs on Azure."""
 
     # pylint: disable=too-many-ancestors
 
@@ -277,7 +273,8 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
 
     def deallocate_host(self, params: dict) -> Tuple[Status, dict]:
         """
-        Deallocates the VM on Azure by shutting it down then releasing the compute resources.
+        Deallocates the VM on Azure by shutting it down then releasing the compute
+        resources.
 
         Note: This can cause the VM to arrive on a new host node when its
         restarted, which may have different performance characteristics.

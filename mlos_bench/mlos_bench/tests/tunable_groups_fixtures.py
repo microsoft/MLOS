@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Common fixtures for mock TunableGroups.
-"""
+"""Common fixtures for mock TunableGroups."""
 
 from typing import Any, Dict
 
@@ -72,9 +70,7 @@ TUNABLE_GROUPS_JSON = """
 
 @pytest.fixture
 def tunable_groups_config() -> Dict[str, Any]:
-    """
-    Fixture to get the JSON string for the tunable groups.
-    """
+    """Fixture to get the JSON string for the tunable groups."""
     conf = json.loads(TUNABLE_GROUPS_JSON)
     assert isinstance(conf, dict)
     ConfigSchema.TUNABLE_PARAMS.validate(conf)

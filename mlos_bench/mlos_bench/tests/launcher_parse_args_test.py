@@ -55,8 +55,9 @@ def config_paths() -> List[str]:
 
 def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     """
-    Test that using multiple --globals arguments works and that multiple space
-    separated options to --config-paths works.
+    Test that using multiple --globals arguments works and that multiple space separated
+    options to --config-paths works.
+
     Check $var expansion and Environment loading.
     """
     # The VSCode pytest wrapper actually starts in a different directory before
@@ -113,8 +114,7 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
 
 
 def test_launcher_args_parse_2(config_paths: List[str]) -> None:
-    """
-    Test multiple --config-path instances, --config file vs --arg, --var=val
+    """Test multiple --config-path instances, --config file vs --arg, --var=val
     overrides, $var templates, option args, --random-init, etc.
     """
     # The VSCode pytest wrapper actually starts in a different directory before

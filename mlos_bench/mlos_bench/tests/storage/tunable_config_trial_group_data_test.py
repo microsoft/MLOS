@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for loading the TunableConfigTrialGroupData.
-"""
+"""Unit tests for loading the TunableConfigTrialGroupData."""
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.tests.storage import CONFIG_TRIAL_REPEAT_COUNT

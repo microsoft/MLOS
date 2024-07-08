@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Helper functions to run scripts and commands locally on the scheduler side.
-"""
+"""Helper functions to run scripts and commands locally on the scheduler side."""
 
 import errno
 import logging
@@ -39,9 +37,9 @@ _LOG = logging.getLogger(__name__)
 
 def split_cmdline(cmdline: str) -> Iterable[List[str]]:
     """
-    A single command line may contain multiple commands separated by
-    special characters (e.g., &&, ||, etc.) so further split the
-    commandline into an array of subcommand arrays.
+    A single command line may contain multiple commands separated by special characters
+    (e.g., &&, ||, etc.) so further split the commandline into an array of subcommand
+    arrays.
 
     Parameters
     ----------
@@ -74,9 +72,11 @@ def split_cmdline(cmdline: str) -> Iterable[List[str]]:
 
 class LocalExecService(TempDirContextService, SupportsLocalExec):
     """
-    Collection of methods to run scripts and commands in an external process
-    on the node acting as the scheduler. Can be useful for data processing
-    due to reduced dependency management complications vs the target environment.
+    Collection of methods to run scripts and commands in an external process on the node
+    acting as the scheduler.
+
+    Can be useful for data processing due to reduced dependency management complications
+    vs the target environment.
     """
 
     def __init__(self,
@@ -149,8 +149,8 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
 
     def _resolve_cmdline_script_path(self, subcmd_tokens: List[str]) -> List[str]:
         """
-        Resolves local script path (first token) in the (sub)command line
-        tokens to its full path.
+        Resolves local script path (first token) in the (sub)command line tokens to its
+        full path.
 
         Parameters
         ----------

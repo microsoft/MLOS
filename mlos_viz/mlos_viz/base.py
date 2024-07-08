@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Base functions for visualizing, explain, and gain insights from results.
-"""
+"""Base functions for visualizing, explain, and gain insights from results."""
 
 import re
 import warnings
@@ -37,8 +35,7 @@ def _get_kwarg_defaults(target: Callable, **kwargs: Any) -> Dict[str, Any]:
 
 
 def ignore_plotter_warnings() -> None:
-    """
-    Suppress some annoying warnings from third-party data visualization packages by
+    """Suppress some annoying warnings from third-party data visualization packages by
     adding them to the warnings filter.
     """
     warnings.filterwarnings("ignore", category=FutureWarning)
@@ -192,8 +189,8 @@ def limit_top_n_configs(exp_data: Optional[ExperimentData] = None,
                         ) -> Tuple[pandas.DataFrame, List[int], Dict[str, bool]]:
     # pylint: disable=too-many-locals
     """
-    Utility function to process the results and determine the best performing
-    configs including potential repeats to help assess variability.
+    Utility function to process the results and determine the best performing configs
+    including potential repeats to help assess variability.
 
     Parameters
     ----------

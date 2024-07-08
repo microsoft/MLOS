@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for LocalExecService to run Python scripts locally.
-"""
+"""Unit tests for LocalExecService to run Python scripts locally."""
 
 import json
 from typing import Any, Dict
@@ -21,16 +19,12 @@ from mlos_bench.util import path_join
 
 @pytest.fixture
 def local_exec_service() -> LocalExecService:
-    """
-    Test fixture for LocalExecService.
-    """
+    """Test fixture for LocalExecService."""
     return LocalExecService(parent=ConfigPersistenceService())
 
 
 def test_run_python_script(local_exec_service: LocalExecService) -> None:
-    """
-    Run a Python script using a local_exec service.
-    """
+    """Run a Python script using a local_exec service."""
     input_file = "./input-params.json"
     meta_file = "./input-params-meta.json"
     output_file = "./config-kernel.sh"

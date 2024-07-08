@@ -77,8 +77,8 @@ class RemoteEnv(ScriptEnv):
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
-        Check if the environment is ready and set up the application
-        and benchmarks on a remote host.
+        Check if the environment is ready and set up the application and benchmarks on a
+        remote host.
 
         Parameters
         ----------
@@ -143,9 +143,7 @@ class RemoteEnv(ScriptEnv):
         return (status, timestamp, output)
 
     def teardown(self) -> None:
-        """
-        Clean up and shut down the remote environment.
-        """
+        """Clean up and shut down the remote environment."""
         if self._script_teardown:
             _LOG.info("Remote teardown: %s", self)
             (status, _timestamp, _output) = self._remote_exec(self._script_teardown)

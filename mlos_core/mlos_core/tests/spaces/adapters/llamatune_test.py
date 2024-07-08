@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for LlamaTune space adapter.
-"""
+"""Tests for LlamaTune space adapter."""
 
 # pylint: disable=missing-function-docstring
 
@@ -23,9 +21,7 @@ def construct_parameter_space(
     n_categorical_params: int = 0,
     seed: int = 1234,
 ) -> CS.ConfigurationSpace:
-    """
-    Helper function for construct an instance of `ConfigSpace.ConfigurationSpace`.
-    """
+    """Helper function for construct an instance of `ConfigSpace.ConfigurationSpace`."""
     input_space = CS.ConfigurationSpace(seed=seed)
 
     for idx in range(n_continuous_params):
@@ -58,9 +54,7 @@ def construct_parameter_space(
     )
 ]))
 def test_num_low_dims(num_target_space_dims: int, param_space_kwargs: dict) -> None:    # pylint: disable=too-many-locals
-    """
-    Tests LlamaTune's low-to-high space projection method.
-    """
+    """Tests LlamaTune's low-to-high space projection method."""
     input_space = construct_parameter_space(**param_space_kwargs)
 
     # Number of target parameter space dimensions should be fewer than those of the original space
@@ -107,8 +101,8 @@ def test_num_low_dims(num_target_space_dims: int, param_space_kwargs: dict) -> N
 
 
 def test_special_parameter_values_validation() -> None:
-    """
-    Tests LlamaTune's validation process of user-provided special parameter values dictionary.
+    """Tests LlamaTune's validation process of user-provided special parameter values
+    dictionary.
     """
     input_space = CS.ConfigurationSpace(seed=1234)
     input_space.add_hyperparameter(
@@ -199,9 +193,7 @@ def gen_random_configs(adapter: LlamaTuneAdapter, num_configs: int) -> Iterator[
 
 
 def test_special_parameter_values_biasing() -> None:    # pylint: disable=too-complex
-    """
-    Tests LlamaTune's special parameter values biasing methodology
-    """
+    """Tests LlamaTune's special parameter values biasing methodology."""
     input_space = CS.ConfigurationSpace(seed=1234)
     input_space.add_hyperparameter(
         CS.UniformIntegerHyperparameter(name='int_1', lower=0, upper=100))
@@ -290,9 +282,7 @@ def test_special_parameter_values_biasing() -> None:    # pylint: disable=too-co
 
 
 def test_max_unique_values_per_param() -> None:
-    """
-    Tests LlamaTune's parameter values discretization implementation.
-    """
+    """Tests LlamaTune's parameter values discretization implementation."""
     # Define config space with a mix of different parameter types
     input_space = CS.ConfigurationSpace(seed=1234)
     input_space.add_hyperparameter(
@@ -346,8 +336,8 @@ def test_max_unique_values_per_param() -> None:
     )
 ]))
 def test_approx_inverse_mapping(num_target_space_dims: int, param_space_kwargs: dict) -> None:  # pylint: disable=too-many-locals
-    """
-    Tests LlamaTune's approximate high-to-low space projection method, using pseudo-inverse.
+    """Tests LlamaTune's approximate high-to-low space projection method, using pseudo-
+    inverse.
     """
     input_space = construct_parameter_space(**param_space_kwargs)
 
@@ -403,9 +393,7 @@ def test_approx_inverse_mapping(num_target_space_dims: int, param_space_kwargs: 
     for max_unique_values_per_param in (50, 250)
 ]))
 def test_llamatune_pipeline(num_low_dims: int, special_param_values: dict, max_unique_values_per_param: int) -> None:
-    """
-    Tests LlamaTune space adapter when all components are active.
-    """
+    """Tests LlamaTune space adapter when all components are active."""
     # pylint: disable=too-many-locals
 
     # Define config space with a mix of different parameter types
@@ -475,8 +463,8 @@ def test_llamatune_pipeline(num_low_dims: int, special_param_values: dict, max_u
     )
 ]))
 def test_deterministic_behavior_for_same_seed(num_target_space_dims: int, param_space_kwargs: dict) -> None:
-    """
-    Tests LlamaTune's space adapter deterministic behavior when given same seed in the input parameter space.
+    """Tests LlamaTune's space adapter deterministic behavior when given same seed in
+    the input parameter space.
     """
     def generate_target_param_space_configs(seed: int) -> List[CS.Configuration]:
         input_space = construct_parameter_space(**param_space_kwargs, seed=seed)

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Base interface for saving and restoring the benchmark data.
-"""
+"""Base interface for saving and restoring the benchmark data."""
 
 import logging
 from abc import ABCMeta, abstractmethod
@@ -25,9 +23,8 @@ _LOG = logging.getLogger(__name__)
 
 
 class Storage(metaclass=ABCMeta):
-    """
-    An abstract interface between the benchmarking framework
-    and storage systems (e.g., SQLite or MLFLow).
+    """An abstract interface between the benchmarking framework and storage systems
+    (e.g., SQLite or MLFLow).
     """
 
     def __init__(self,
@@ -49,10 +46,9 @@ class Storage(metaclass=ABCMeta):
         self._global_config = global_config or {}
 
     def _validate_json_config(self, config: dict) -> None:
-        """
-        Reconstructs a basic json config that this class might have been
-        instantiated from in order to validate configs provided outside the
-        file loading mechanism.
+        """Reconstructs a basic json config that this class might have been instantiated
+        from in order to validate configs provided outside the file loading
+        mechanism.
         """
         json_config: dict = {
             "class": self.__class__.__module__ + "." + self.__class__.__name__,
@@ -113,6 +109,7 @@ class Storage(metaclass=ABCMeta):
         # pylint: disable=too-many-instance-attributes
         """
         Base interface for storing the results of the experiment.
+
         This class is instantiated in the `Storage.experiment()` method.
         """
 
@@ -169,7 +166,8 @@ class Storage(metaclass=ABCMeta):
 
         def _setup(self) -> None:
             """
-            Create a record of the new experiment or find an existing one in the storage.
+            Create a record of the new experiment or find an existing one in the
+            storage.
 
             This method is called by `Storage.Experiment.__enter__()`.
             """
@@ -188,36 +186,34 @@ class Storage(metaclass=ABCMeta):
 
         @property
         def experiment_id(self) -> str:
-            """Get the Experiment's ID"""
+            """Get the Experiment's ID."""
             return self._experiment_id
 
         @property
         def trial_id(self) -> int:
-            """Get the current Trial ID"""
+            """Get the current Trial ID."""
             return self._trial_id
 
         @property
         def description(self) -> str:
-            """Get the Experiment's description"""
+            """Get the Experiment's description."""
             return self._description
 
         @property
         def tunables(self) -> TunableGroups:
-            """Get the Experiment's tunables"""
+            """Get the Experiment's tunables."""
             return self._tunables
 
         @property
         def opt_targets(self) -> Dict[str, Literal["min", "max"]]:
-            """
-            Get the Experiment's optimization targets and directions
-            """
+            """Get the Experiment's optimization targets and directions."""
             return self._opt_targets
 
         @abstractmethod
         def merge(self, experiment_ids: List[str]) -> None:
             """
-            Merge in the results of other (compatible) experiments trials.
-            Used to help warm up the optimizer for this experiment.
+            Merge in the results of other (compatible) experiments trials. Used to help
+            warm up the optimizer for this experiment.
 
             Parameters
             ----------
@@ -227,9 +223,7 @@ class Storage(metaclass=ABCMeta):
 
         @abstractmethod
         def load_tunable_config(self, config_id: int) -> Dict[str, Any]:
-            """
-            Load tunable values for a given config ID.
-            """
+            """Load tunable values for a given config ID."""
 
         @abstractmethod
         def load_telemetry(self, trial_id: int) -> List[Tuple[datetime, str, Any]]:
@@ -271,8 +265,8 @@ class Storage(metaclass=ABCMeta):
         @abstractmethod
         def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator['Storage.Trial']:
             """
-            Return an iterator over the pending trials that are scheduled to run
-            on or before the specified timestamp.
+            Return an iterator over the pending trials that are scheduled to run on or
+            before the specified timestamp.
 
             Parameters
             ----------
@@ -314,6 +308,7 @@ class Storage(metaclass=ABCMeta):
         # pylint: disable=too-many-instance-attributes
         """
         Base interface for storing the results of a single run of the experiment.
+
         This class is instantiated in the `Storage.Experiment.trial()` method.
         """
 
@@ -333,29 +328,23 @@ class Storage(metaclass=ABCMeta):
 
         @property
         def trial_id(self) -> int:
-            """
-            ID of the current trial.
-            """
+            """ID of the current trial."""
             return self._trial_id
 
         @property
         def tunable_config_id(self) -> int:
-            """
-            ID of the current trial (tunable) configuration.
-            """
+            """ID of the current trial (tunable) configuration."""
             return self._tunable_config_id
 
         @property
         def opt_targets(self) -> Dict[str, Literal["min", "max"]]:
-            """
-            Get the Trial's optimization targets and directions.
-            """
+            """Get the Trial's optimization targets and directions."""
             return self._opt_targets
 
         @property
         def tunables(self) -> TunableGroups:
             """
-            Tunable parameters of the current trial
+            Tunable parameters of the current trial.
 
             (e.g., application Environment's "config")
             """
@@ -363,8 +352,8 @@ class Storage(metaclass=ABCMeta):
 
         def config(self, global_config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
             """
-            Produce a copy of the global configuration updated
-            with the parameters of the current trial.
+            Produce a copy of the global configuration updated with the parameters of
+            the current trial.
 
             Note: this is not the target Environment's "config" (i.e., tunable
             params), but rather the internal "config" which consists of a

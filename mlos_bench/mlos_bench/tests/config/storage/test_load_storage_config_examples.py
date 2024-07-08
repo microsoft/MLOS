@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for loading storage config examples.
-"""
+"""Tests for loading storage config examples."""
 import logging
 from typing import List
 

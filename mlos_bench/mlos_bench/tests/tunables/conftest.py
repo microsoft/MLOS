@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Test fixtures for individual Tunable objects.
-"""
+"""Test fixtures for individual Tunable objects."""
 
 import pytest
 

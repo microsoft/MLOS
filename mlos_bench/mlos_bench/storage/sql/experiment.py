@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Saving and restoring the benchmark data using SQLAlchemy.
-"""
+"""Saving and restoring the benchmark data using SQLAlchemy."""
 
 import hashlib
 import logging
@@ -25,9 +23,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class Experiment(Storage.Experiment):
-    """
-    Logic for retrieving and storing the results of a single experiment.
-    """
+    """Logic for retrieving and storing the results of a single experiment."""
 
     def __init__(self, *,
                  engine: Engine,
@@ -169,6 +165,7 @@ class Experiment(Storage.Experiment):
     def _get_key_val(conn: Connection, table: Table, field: str, **kwargs: Any) -> Dict[str, Any]:
         """
         Helper method to retrieve key-value pairs from the database.
+
         (E.g., configurations, results, and telemetry).
         """
         cur_result: CursorResult[Tuple[str, Any]] = conn.execute(
@@ -232,8 +229,9 @@ class Experiment(Storage.Experiment):
 
     def _get_config_id(self, conn: Connection, tunables: TunableGroups) -> int:
         """
-        Get the config ID for the given tunables. If the config does not exist,
-        create a new record for it.
+        Get the config ID for the given tunables.
+
+        If the config does not exist, create a new record for it.
         """
         config_hash = hashlib.sha256(str(tunables).encode('utf-8')).hexdigest()
         cur_config = conn.execute(self._schema.config.select().where(

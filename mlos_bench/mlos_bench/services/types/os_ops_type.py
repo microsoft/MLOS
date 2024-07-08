@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Protocol interface for Host/OS operations.
-"""
+"""Protocol interface for Host/OS operations."""
 
 from typing import TYPE_CHECKING, Protocol, Tuple, runtime_checkable
 
@@ -14,9 +12,7 @@ if TYPE_CHECKING:
 
 @runtime_checkable
 class SupportsOSOps(Protocol):
-    """
-    Protocol interface for Host/OS operations.
-    """
+    """Protocol interface for Host/OS operations."""
 
     def shutdown(self, params: dict, force: bool = False) -> Tuple["Status", dict]:
         """
@@ -56,8 +52,8 @@ class SupportsOSOps(Protocol):
 
     def wait_os_operation(self, params: dict) -> Tuple["Status", dict]:
         """
-        Waits for a pending operation on an OS to resolve to SUCCEEDED or FAILED.
-        Return TIMED_OUT when timing out.
+        Waits for a pending operation on an OS to resolve to SUCCEEDED or FAILED. Return
+        TIMED_OUT when timing out.
 
         Parameters
         ----------

@@ -4,6 +4,7 @@
 #
 """
 Tests for mlos_bench.
+
 Used to make mypy happy about multiple conftest.py modules.
 """
 import filecmp
@@ -59,9 +60,7 @@ SEED = 42
 
 
 def try_resolve_class_name(class_name: Optional[str]) -> Optional[str]:
-    """
-    Gets the full class name from the given name or None on error.
-    """
+    """Gets the full class name from the given name or None on error."""
     if class_name is None:
         return None
     try:
@@ -72,9 +71,7 @@ def try_resolve_class_name(class_name: Optional[str]) -> Optional[str]:
 
 
 def check_class_name(obj: object, expected_class_name: str) -> bool:
-    """
-    Compares the class name of the given object with the given name.
-    """
+    """Compares the class name of the given object with the given name."""
     full_class_name = obj.__class__.__module__ + "." + obj.__class__.__name__
     return full_class_name == try_resolve_class_name(expected_class_name)
 
@@ -119,15 +116,13 @@ def resolve_host_name(host: str) -> Optional[str]:
 
 def are_dir_trees_equal(dir1: str, dir2: str) -> bool:
     """
-    Compare two directories recursively. Files in each directory are
-    assumed to be equal if their names and contents are equal.
+    Compare two directories recursively. Files in each directory are assumed to be equal
+    if their names and contents are equal.
 
-    @param dir1: First directory path
-    @param dir2: Second directory path
+    @param dir1: First directory path @param dir2: Second directory path
 
-    @return: True if the directory trees are the same and
-        there were no errors while accessing the directories or files,
-        False otherwise.
+    @return: True if the directory trees are the same and     there were no errors while
+    accessing the directories or files,     False otherwise.
     """
     # See Also: https://stackoverflow.com/a/6681395
     dirs_cmp = filecmp.dircmp(dir1, dir2)

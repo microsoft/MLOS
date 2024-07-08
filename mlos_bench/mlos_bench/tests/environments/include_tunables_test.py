@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Test the selection of tunables / tunable groups for the environment.
-"""
+"""Test the selection of tunables / tunable groups for the environment."""
 
 from mlos_bench.environments.mock_env import MockEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
@@ -12,9 +10,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def test_one_group(tunable_groups: TunableGroups) -> None:
-    """
-    Make sure only one tunable group is available to the environment.
-    """
+    """Make sure only one tunable group is available to the environment."""
     env = MockEnv(
         name="Test Env",
         config={"tunable_params": ["provision"]},
@@ -26,9 +22,7 @@ def test_one_group(tunable_groups: TunableGroups) -> None:
 
 
 def test_two_groups(tunable_groups: TunableGroups) -> None:
-    """
-    Make sure only the selected tunable groups are available to the environment.
-    """
+    """Make sure only the selected tunable groups are available to the environment."""
     env = MockEnv(
         name="Test Env",
         config={"tunable_params": ["provision", "kernel"]},
@@ -42,9 +36,8 @@ def test_two_groups(tunable_groups: TunableGroups) -> None:
 
 
 def test_two_groups_setup(tunable_groups: TunableGroups) -> None:
-    """
-    Make sure only the selected tunable groups are available to the environment,
-    the set is not changed after calling the `.setup()` method.
+    """Make sure only the selected tunable groups are available to the environment, the
+    set is not changed after calling the `.setup()` method.
     """
     env = MockEnv(
         name="Test Env",
@@ -77,9 +70,7 @@ def test_two_groups_setup(tunable_groups: TunableGroups) -> None:
 
 
 def test_zero_groups_implicit(tunable_groups: TunableGroups) -> None:
-    """
-    Make sure that no tunable groups are available to the environment by default.
-    """
+    """Make sure that no tunable groups are available to the environment by default."""
     env = MockEnv(
         name="Test Env",
         config={},
@@ -89,9 +80,8 @@ def test_zero_groups_implicit(tunable_groups: TunableGroups) -> None:
 
 
 def test_zero_groups_explicit(tunable_groups: TunableGroups) -> None:
-    """
-    Make sure that no tunable groups are available to the environment
-    when explicitly specifying an empty list of tunable_params.
+    """Make sure that no tunable groups are available to the environment when explicitly
+    specifying an empty list of tunable_params.
     """
     env = MockEnv(
         name="Test Env",
@@ -102,9 +92,8 @@ def test_zero_groups_explicit(tunable_groups: TunableGroups) -> None:
 
 
 def test_zero_groups_implicit_setup(tunable_groups: TunableGroups) -> None:
-    """
-    Make sure that no tunable groups are available to the environment by default
-    and it does not change after the setup.
+    """Make sure that no tunable groups are available to the environment by default and
+    it does not change after the setup.
     """
     env = MockEnv(
         name="Test Env",
@@ -130,9 +119,8 @@ def test_zero_groups_implicit_setup(tunable_groups: TunableGroups) -> None:
 
 
 def test_loader_level_include() -> None:
-    """
-    Make sure only the selected tunable groups are available to the environment,
-    the set is not changed after calling the `.setup()` method.
+    """Make sure only the selected tunable groups are available to the environment, the
+    set is not changed after calling the `.setup()` method.
     """
     env_json = {
         "class": "mlos_bench.environments.mock_env.MockEnv",

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for mock mlos_bench optimizer.
-"""
+"""Unit tests for mock mlos_bench optimizer."""
 
 import pytest
 
@@ -18,9 +16,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 @pytest.fixture
 def llamatune_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
-    """
-    Test fixture for mlos_core SMAC optimizer.
-    """
+    """Test fixture for mlos_core SMAC optimizer."""
     return MlosCoreOptimizer(
         tunables=tunable_groups,
         service=None,
@@ -39,16 +35,12 @@ def llamatune_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
 
 @pytest.fixture
 def mock_scores() -> list:
-    """
-    A list of fake benchmark scores to test the optimizers.
-    """
+    """A list of fake benchmark scores to test the optimizers."""
     return [88.88, 66.66, 99.99]
 
 
 def test_llamatune_optimizer(llamatune_opt: MlosCoreOptimizer, mock_scores: list) -> None:
-    """
-    Make sure that llamatune+smac optimizer initializes and works correctly.
-    """
+    """Make sure that llamatune+smac optimizer initializes and works correctly."""
     for score in mock_scores:
         assert llamatune_opt.not_converged()
         tunables = llamatune_opt.suggest()

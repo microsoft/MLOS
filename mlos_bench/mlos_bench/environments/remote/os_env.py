@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-OS-level remote Environment on Azure.
-"""
+"""OS-level remote Environment on Azure."""
 
 import logging
 from typing import Optional
@@ -20,9 +18,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class OSEnv(Environment):
-    """
-    OS Level Environment for a host.
-    """
+    """OS Level Environment for a host."""
 
     def __init__(self,
                  *,
@@ -97,9 +93,7 @@ class OSEnv(Environment):
         return self._is_ready
 
     def teardown(self) -> None:
-        """
-        Clean up and shut down the host without deprovisioning it.
-        """
+        """Clean up and shut down the host without deprovisioning it."""
         _LOG.info("OS tear down: %s", self)
         (status, params) = self._os_service.shutdown(self._params)
         if status.is_pending():

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for passing shell environment variables into LocalEnv scripts.
-"""
+"""Unit tests for passing shell environment variables into LocalEnv scripts."""
 import pytest
 
 from mlos_bench.environments.local.local_fileshare_env import LocalFileShareEnv
@@ -20,9 +18,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 @pytest.fixture(scope="module")
 def mock_fileshare_service() -> MockFileShareService:
-    """
-    Create a new mock FileShareService instance.
-    """
+    """Create a new mock FileShareService instance."""
     return MockFileShareService(
         config={"fileShareName": "MOCK_FILESHARE"},
         parent=LocalExecService(parent=ConfigPersistenceService())
@@ -32,9 +28,7 @@ def mock_fileshare_service() -> MockFileShareService:
 @pytest.fixture
 def local_fileshare_env(tunable_groups: TunableGroups,
                         mock_fileshare_service: MockFileShareService) -> LocalFileShareEnv:
-    """
-    Create a LocalFileShareEnv instance.
-    """
+    """Create a LocalFileShareEnv instance."""
     env = LocalFileShareEnv(
         name="TestLocalFileShareEnv",
         config={
@@ -76,9 +70,8 @@ def local_fileshare_env(tunable_groups: TunableGroups,
 def test_local_fileshare_env(tunable_groups: TunableGroups,
                              mock_fileshare_service: MockFileShareService,
                              local_fileshare_env: LocalFileShareEnv) -> None:
-    """
-    Test that the LocalFileShareEnv correctly expands the `$VAR` variables
-    in the upload and download sections of the config.
+    """Test that the LocalFileShareEnv correctly expands the `$VAR` variables in the
+    upload and download sections of the config.
     """
     with local_fileshare_env as env_context:
         assert env_context.setup(tunable_groups)

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Remote host Environment.
-"""
+"""Remote host Environment."""
 
 import logging
 from typing import Optional
@@ -18,9 +16,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class HostEnv(Environment):
-    """
-    Remote host environment.
-    """
+    """Remote host environment."""
 
     def __init__(self,
                  *,
@@ -87,9 +83,7 @@ class HostEnv(Environment):
         return self._is_ready
 
     def teardown(self) -> None:
-        """
-        Shut down the Host and release it.
-        """
+        """Shut down the Host and release it."""
         _LOG.info("Host tear down: %s", self)
         (status, params) = self._host_service.deprovision_host(self._params)
         if status.is_pending():

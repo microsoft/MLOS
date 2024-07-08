@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Azure-specific benchmark environments for mlos_bench.
-"""
+"""Azure-specific benchmark environments for mlos_bench."""
 
 from mlos_bench.services.remote.azure.azure_auth import AzureAuthService
 from mlos_bench.services.remote.azure.azure_fileshare import AzureFileShareService

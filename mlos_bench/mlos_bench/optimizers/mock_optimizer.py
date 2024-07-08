@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Mock optimizer for mlos_bench.
-"""
+"""Mock optimizer for mlos_bench."""
 
 import logging
 import random
@@ -20,9 +18,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class MockOptimizer(TrackBestOptimizer):
-    """
-    Mock optimizer to test the Environment API.
-    """
+    """Mock optimizer to test the Environment API."""
 
     def __init__(self,
                  tunables: TunableGroups,
@@ -54,9 +50,7 @@ class MockOptimizer(TrackBestOptimizer):
         return True
 
     def suggest(self) -> TunableGroups:
-        """
-        Generate the next (random) suggestion.
-        """
+        """Generate the next (random) suggestion."""
         tunables = super().suggest()
         if self._start_with_defaults:
             _LOG.info("Use default tunable values")

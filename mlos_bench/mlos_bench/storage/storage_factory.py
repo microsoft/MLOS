@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Factory method to create a new Storage instance from configs.
-"""
+"""Factory method to create a new Storage instance from configs."""
 
 from typing import Any, Dict, List, Optional
 

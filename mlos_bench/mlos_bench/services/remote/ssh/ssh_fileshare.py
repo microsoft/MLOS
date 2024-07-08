@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A collection functions for interacting with SSH servers as file shares.
-"""
+"""A collection functions for interacting with SSH servers as file shares."""
 
 import logging
 from enum import Enum
@@ -20,9 +18,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class CopyMode(Enum):
-    """
-    Copy mode enum.
-    """
+    """Copy mode enum."""
 
     DOWNLOAD = 1
     UPLOAD = 2
@@ -36,7 +32,7 @@ class SshFileShareService(FileShareService, SshService):
                                recursive: bool = True) -> None:
         # pylint: disable=too-many-arguments
         """
-        Starts a file copy operation
+        Starts a file copy operation.
 
         Parameters
         ----------

@@ -4,6 +4,7 @@
 #
 """
 Contains the wrapper class for SMAC Bayesian optimizers.
+
 See Also: <https://automl.github.io/SMAC3/main/index.html>
 """
 
@@ -25,9 +26,7 @@ from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 
 
 class SmacOptimizer(BaseBayesianOptimizer):
-    """
-    Wrapper class for SMAC based Bayesian optimization.
-    """
+    """Wrapper class for SMAC based Bayesian optimization."""
 
     def __init__(self, *,  # pylint: disable=too-many-locals,too-many-arguments
                  parameter_space: ConfigSpace.ConfigurationSpace,
@@ -212,7 +211,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
     @property
     def n_random_init(self) -> int:
         """
-        Gets the number of random samples to use to initialize the optimizer's search space sampling.
+        Gets the number of random samples to use to initialize the optimizer's search
+        space sampling.
 
         Note: This may not be equal to the value passed to the initializer, due to logic present in the SMAC.
         See Also: max_ratio
@@ -227,7 +227,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     @staticmethod
     def _dummy_target_func(config: ConfigSpace.Configuration, seed: int = 0) -> None:
-        """Dummy target function for SMAC optimizer.
+        """
+        Dummy target function for SMAC optimizer.
 
         Since we only use the ask-and-tell interface, this is never called.
 
@@ -245,7 +246,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     def _register(self, *, configs: pd.DataFrame,
                   scores: pd.DataFrame, context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
-        """Registers the given configs and scores.
+        """
+        Registers the given configs and scores.
 
         Parameters
         ----------
@@ -282,7 +284,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         self.base_optimizer.optimizer.save()
 
     def _suggest(self, *, context: Optional[pd.DataFrame] = None) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
-        """Suggests a new configuration.
+        """
+        Suggests a new configuration.
 
         Parameters
         ----------
@@ -359,7 +362,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
             self._temp_output_directory = None
 
     def _to_configspace_configs(self, *, configs: pd.DataFrame) -> List[ConfigSpace.Configuration]:
-        """Convert a dataframe of configs to a list of ConfigSpace configs.
+        """
+        Convert a dataframe of configs to a list of ConfigSpace configs.
 
         Parameters
         ----------

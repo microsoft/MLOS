@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A collection Service functions for managing virtual networks on Azure.
-"""
+"""A collection Service functions for managing virtual networks on Azure."""
 
 import logging
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
@@ -23,9 +21,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
-    """
-    Helper methods to manage Virtual Networks on Azure.
-    """
+    """Helper methods to manage Virtual Networks on Azure."""
 
     # Azure Compute REST API calls as described in
     # https://learn.microsoft.com/en-us/rest/api/virtualnetwork/virtual-networks?view=rest-virtualnetwork-2023-05-01

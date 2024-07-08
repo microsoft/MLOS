@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for the composition of several LocalEnv benchmark environments.
-"""
+"""Unit tests for the composition of several LocalEnv benchmark environments."""
 import sys
 from datetime import datetime, timedelta, tzinfo
 from typing import Optional
@@ -28,8 +26,9 @@ def _format_str(zone_info: Optional[tzinfo]) -> str:
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_composite_env(tunable_groups: TunableGroups, zone_info: Optional[tzinfo]) -> None:
     """
-    Produce benchmark and telemetry data in TWO local environments
-    and combine the results.
+    Produce benchmark and telemetry data in TWO local environments and combine the
+    results.
+
     Also checks that global configs flow down at least one level of CompositeEnv
     to its children without being explicitly specified in the CompositeEnv so they
     can be used in the shell_envs by its children.

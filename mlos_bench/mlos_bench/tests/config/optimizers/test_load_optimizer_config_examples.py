@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for loading optimizer config examples.
-"""
+"""Tests for loading optimizer config examples."""
 import logging
 from typing import List
 

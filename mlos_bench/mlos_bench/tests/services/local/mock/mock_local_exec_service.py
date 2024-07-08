@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A collection Service functions for mocking local exec.
-"""
+"""A collection Service functions for mocking local exec."""
 
 import logging
 from typing import (
@@ -31,9 +29,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class MockLocalExecService(TempDirContextService, SupportsLocalExec):
-    """
-    Mock methods for LocalExecService testing.
-    """
+    """Mock methods for LocalExecService testing."""
 
     def __init__(self, config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,

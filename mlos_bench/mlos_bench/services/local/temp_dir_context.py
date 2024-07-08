@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Helper functions to work with temp files locally on the scheduler side.
-"""
+"""Helper functions to work with temp files locally on the scheduler side."""
 
 import abc
 import logging
@@ -21,11 +19,11 @@ _LOG = logging.getLogger(__name__)
 
 class TempDirContextService(Service, metaclass=abc.ABCMeta):
     """
-    A *base* service class that provides a method to create a temporary
-    directory context for local scripts.
+    A *base* service class that provides a method to create a temporary directory
+    context for local scripts.
 
-    It is inherited by LocalExecService and MockLocalExecService.
-    This class is not supposed to be used as a standalone service.
+    It is inherited by LocalExecService and MockLocalExecService. This class is not
+    supposed to be used as a standalone service.
     """
 
     def __init__(self,
@@ -34,8 +32,8 @@ class TempDirContextService(Service, metaclass=abc.ABCMeta):
                  parent: Optional[Service] = None,
                  methods: Union[Dict[str, Callable], List[Callable], None] = None):
         """
-        Create a new instance of a service that provides temporary directory context
-        for local exec service.
+        Create a new instance of a service that provides temporary directory context for
+        local exec service.
 
         Parameters
         ----------

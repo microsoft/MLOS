@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A collection FileShare functions for interacting with Azure File Shares.
-"""
+"""A collection FileShare functions for interacting with Azure File Shares."""
 
 import logging
 import os
@@ -21,9 +19,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class AzureFileShareService(FileShareService):
-    """
-    Helper methods for interacting with Azure File Share
-    """
+    """Helper methods for interacting with Azure File Share."""
 
     _SHARE_URL = "https://{account_name}.file.core.windows.net/{fs_name}"
 
@@ -100,10 +96,9 @@ class AzureFileShareService(FileShareService):
 
     def _upload(self, local_path: str, remote_path: str, recursive: bool, seen: Set[str]) -> None:
         """
-        Upload contents from a local path to an Azure file share.
-        This method is called from `.upload()` above. We need it to avoid exposing
-        the `seen` parameter and to make `.upload()` match the base class' virtual
-        method.
+        Upload contents from a local path to an Azure file share. This method is called
+        from `.upload()` above. We need it to avoid exposing the `seen` parameter and to
+        make `.upload()` match the base class' virtual method.
 
         Parameters
         ----------
@@ -142,8 +137,8 @@ class AzureFileShareService(FileShareService):
 
     def _remote_makedirs(self, remote_path: str) -> None:
         """
-        Create remote directories for the entire path.
-        Succeeds even some or all directories along the path already exist.
+        Create remote directories for the entire path. Succeeds even some or all
+        directories along the path already exist.
 
         Parameters
         ----------

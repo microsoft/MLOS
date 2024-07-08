@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Protocol interface for Host/VM boot operations.
-"""
+"""Protocol interface for Host/VM boot operations."""
 
 from typing import TYPE_CHECKING, Protocol, Tuple, runtime_checkable
 
@@ -14,9 +12,7 @@ if TYPE_CHECKING:
 
 @runtime_checkable
 class SupportsHostOps(Protocol):
-    """
-    Protocol interface for Host/VM boot operations.
-    """
+    """Protocol interface for Host/VM boot operations."""
 
     def start_host(self, params: dict) -> Tuple["Status", dict]:
         """

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for mlos_bench.services.remote.ssh.ssh_host_service
-"""
+"""Tests for mlos_bench.services.remote.ssh.ssh_host_service."""
 
 import logging
 import time
@@ -33,8 +31,8 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
     """
     Test the SshHostService remote_exec.
 
-    This checks state of the service across multiple invocations and states to
-    check for internal cache handling logic as well.
+    This checks state of the service across multiple invocations and states to check for
+    internal cache handling logic as well.
     """
     # pylint: disable=protected-access
     with ssh_host_service:
@@ -138,9 +136,7 @@ def check_ssh_service_reboot(docker_services: DockerServices,
                              reboot_test_server: SshTestServerInfo,
                              ssh_host_service: SshHostService,
                              graceful: bool) -> None:
-    """
-    Check the SshHostService reboot operation.
-    """
+    """Check the SshHostService reboot operation."""
     # Note: rebooting changes the port number unfortunately, but makes it
     # easier to check for success.
     # Also, it may cause issues with other parallel unit tests, so we run it as
@@ -211,9 +207,7 @@ def check_ssh_service_reboot(docker_services: DockerServices,
 def test_ssh_service_reboot(locked_docker_services: DockerServices,
                             reboot_test_server: SshTestServerInfo,
                             ssh_host_service: SshHostService) -> None:
-    """
-    Test the SshHostService reboot operation.
-    """
+    """Test the SshHostService reboot operation."""
     # Grouped together to avoid parallel runner interactions.
     check_ssh_service_reboot(locked_docker_services, reboot_test_server, ssh_host_service, graceful=True)
     check_ssh_service_reboot(locked_docker_services, reboot_test_server, ssh_host_service, graceful=False)

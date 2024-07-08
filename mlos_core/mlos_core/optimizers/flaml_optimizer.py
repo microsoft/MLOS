@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Contains the FlamlOptimizer class.
-"""
+"""Contains the FlamlOptimizer class."""
 
 from typing import Dict, List, NamedTuple, Optional, Tuple, Union
 from warnings import warn
@@ -26,9 +24,7 @@ class EvaluatedSample(NamedTuple):
 
 
 class FlamlOptimizer(BaseOptimizer):
-    """
-    Wrapper class for FLAML Optimizer: A fast library for AutoML and tuning.
-    """
+    """Wrapper class for FLAML Optimizer: A fast library for AutoML and tuning."""
 
     # The name of an internal objective attribute that is calculated as a weighted average of the user provided objective metrics.
     _METRIC_NAME = "FLAML_score"
@@ -90,7 +86,8 @@ class FlamlOptimizer(BaseOptimizer):
 
     def _register(self, *, configs: pd.DataFrame, scores: pd.DataFrame,
                   context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
-        """Registers the given configs and scores.
+        """
+        Registers the given configs and scores.
 
         Parameters
         ----------
@@ -122,7 +119,8 @@ class FlamlOptimizer(BaseOptimizer):
             )
 
     def _suggest(self, *, context: Optional[pd.DataFrame] = None) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
-        """Suggests a new configuration.
+        """
+        Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
 
@@ -149,7 +147,8 @@ class FlamlOptimizer(BaseOptimizer):
         raise NotImplementedError()
 
     def _target_function(self, config: dict) -> Union[dict, None]:
-        """Configuration evaluation function called by FLAML optimizer.
+        """
+        Configuration evaluation function called by FLAML optimizer.
 
         FLAML may suggest the same configuration multiple times (due to its warm-start mechanism).
         Once FLAML suggests an unseen configuration, we store it, and stop the optimization process.
@@ -173,7 +172,9 @@ class FlamlOptimizer(BaseOptimizer):
         return None  # Returning None stops the process
 
     def _get_next_config(self) -> dict:
-        """Warm-starts a new instance of FLAML, and returns a recommended, unseen new configuration.
+        """
+        Warm-starts a new instance of FLAML, and returns a recommended, unseen new
+        configuration.
 
         Since FLAML does not provide an ask-and-tell interface, we need to create a new instance of FLAML
         each time we get asked for a new suggestion. This is suboptimal performance-wise, but works.

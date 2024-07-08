@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Internal helper functions for mlos_core package.
-"""
+"""Internal helper functions for mlos_core package."""
 
 from typing import Union
 
@@ -13,7 +11,8 @@ from ConfigSpace import Configuration, ConfigurationSpace
 
 
 def config_to_dataframe(config: Configuration) -> pd.DataFrame:
-    """Converts a ConfigSpace config to a DataFrame
+    """
+    Converts a ConfigSpace config to a DataFrame.
 
     Parameters
     ----------

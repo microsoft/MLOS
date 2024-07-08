@@ -2,9 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Scheduler-side Environment to run scripts locally
-and upload/download data to the shared storage.
+"""Scheduler-side Environment to run scripts locally and upload/download data to the
+shared storage.
 """
 
 import logging
@@ -24,9 +23,8 @@ _LOG = logging.getLogger(__name__)
 
 
 class LocalFileShareEnv(LocalEnv):
-    """
-    Scheduler-side Environment that runs scripts locally
-    and uploads/downloads data to the shared file storage.
+    """Scheduler-side Environment that runs scripts locally and uploads/downloads data
+    to the shared file storage.
     """
 
     def __init__(self,
@@ -73,9 +71,8 @@ class LocalFileShareEnv(LocalEnv):
         self._download = self._template_from_to("download")
 
     def _template_from_to(self, config_key: str) -> List[Tuple[Template, Template]]:
-        """
-        Convert a list of {"from": "...", "to": "..."} to a list of pairs
-        of string.Template objects so that we can plug in self._params into it later.
+        """Convert a list of {"from": "...", "to": "..."} to a list of pairs of
+        string.Template objects so that we can plug in self._params into it later.
         """
         return [
             (Template(d['from']), Template(d['to']))
@@ -87,6 +84,7 @@ class LocalFileShareEnv(LocalEnv):
                 params: Mapping[str, TunableValue]) -> Generator[Tuple[str, str], None, None]:
         """
         Substitute $var parameters in from/to path templates.
+
         Return a generator of (str, str) pairs of paths.
         """
         return (
@@ -152,8 +150,8 @@ class LocalFileShareEnv(LocalEnv):
 
     def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
         """
-        Download benchmark results from the shared storage
-        and run post-processing scripts locally.
+        Download benchmark results from the shared storage and run post-processing
+        scripts locally.
 
         Returns
         -------

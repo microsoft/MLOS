@@ -2,9 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Base class for an interface between the benchmarking framework
-and mlos_core optimizers.
+"""Base class for an interface between the benchmarking framework and mlos_core
+optimizers.
 """
 
 import logging
@@ -27,8 +26,8 @@ _LOG = logging.getLogger(__name__)
 
 
 class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attributes
-    """
-    An abstract interface between the benchmarking framework and mlos_core optimizers.
+    """An abstract interface between the benchmarking framework and mlos_core
+    optimizers.
     """
 
     # See Also: mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json
@@ -45,7 +44,8 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
                  global_config: Optional[dict] = None,
                  service: Optional[Service] = None):
         """
-        Create a new optimizer for the given configuration space defined by the tunables.
+        Create a new optimizer for the given configuration space defined by the
+        tunables.
 
         Parameters
         ----------
@@ -88,10 +88,9 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
                 raise ValueError(f"Invalid optimization direction: {opt_dir} for {opt_target}")
 
     def _validate_json_config(self, config: dict) -> None:
-        """
-        Reconstructs a basic json config that this class might have been
-        instantiated from in order to validate configs provided outside the
-        file loading mechanism.
+        """Reconstructs a basic json config that this class might have been instantiated
+        from in order to validate configs provided outside the file loading
+        mechanism.
         """
         json_config: dict = {
             "class": self.__class__.__module__ + "." + self.__class__.__name__,
@@ -108,9 +107,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         return f"{self.name}({opt_targets},config={self._config})"
 
     def __enter__(self) -> 'Optimizer':
-        """
-        Enter the optimizer's context.
-        """
+        """Enter the optimizer's context."""
         _LOG.debug("Optimizer START :: %s", self)
         assert not self._in_context
         self._in_context = True
@@ -119,9 +116,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     def __exit__(self, ex_type: Optional[Type[BaseException]],
                  ex_val: Optional[BaseException],
                  ex_tb: Optional[TracebackType]) -> Literal[False]:
-        """
-        Exit the context of the optimizer.
-        """
+        """Exit the context of the optimizer."""
         if ex_val is None:
             _LOG.debug("Optimizer END :: %s", self)
         else:
@@ -153,15 +148,14 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
 
     @property
     def seed(self) -> int:
-        """
-        The random seed for the optimizer.
-        """
+        """The random seed for the optimizer."""
         return self._seed
 
     @property
     def start_with_defaults(self) -> bool:
         """
         Return True if the optimizer should start with the default values.
+
         Note: This parameter is mutable and will be reset to False after the
         defaults are first suggested.
         """
@@ -197,16 +191,16 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     @property
     def name(self) -> str:
         """
-        The name of the optimizer. We save this information in
-        mlos_bench storage to track the source of each configuration.
+        The name of the optimizer.
+
+        We save this information in mlos_bench storage to track the source of each
+        configuration.
         """
         return self.__class__.__name__
 
     @property
     def targets(self) -> Dict[str, Literal['min', 'max']]:
-        """
-        A dictionary of {target: direction} of optimization targets.
-        """
+        """A dictionary of {target: direction} of optimization targets."""
         return {
             opt_target: "min" if opt_dir == 1 else "max"
             for (opt_target, opt_dir) in self._opt_targets.items()
@@ -214,8 +208,8 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
 
     @property
     def supports_preload(self) -> bool:
-        """
-        Return True if the optimizer supports pre-loading the data from previous experiments.
+        """Return True if the optimizer supports pre-loading the data from previous
+        experiments.
         """
         return True
 
@@ -255,9 +249,8 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
 
     def suggest(self) -> TunableGroups:
         """
-        Generate the next suggestion.
-        Base class' implementation increments the iteration count
-        and returns the current values of the tunables.
+        Generate the next suggestion. Base class' implementation increments the
+        iteration count and returns the current values of the tunables.
 
         Returns
         -------
@@ -303,8 +296,8 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
                     scores: Optional[Union[Dict[str, TunableValue], Dict[str, float]]]
                     ) -> Optional[Dict[str, float]]:
         """
-        Extract a scalar benchmark score from the dataframe.
-        Change the sign if we are maximizing.
+        Extract a scalar benchmark score from the dataframe. Change the sign if we are
+        maximizing.
 
         Parameters
         ----------
@@ -340,6 +333,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     def not_converged(self) -> bool:
         """
         Return True if not converged, False otherwise.
+
         Base implementation just checks the iteration count.
         """
         return self._iter < self._max_iter

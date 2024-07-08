@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-An interface to access the tunable config trial group data stored in SQL DB.
-"""
+"""An interface to access the tunable config trial group data stored in SQL DB."""
 
 from typing import TYPE_CHECKING, Dict, Optional
 
@@ -25,8 +23,8 @@ if TYPE_CHECKING:
 
 class TunableConfigTrialGroupSqlData(TunableConfigTrialGroupData):
     """
-    SQL interface for accessing the stored experiment benchmark tunable config
-    trial group data.
+    SQL interface for accessing the stored experiment benchmark tunable config trial
+    group data.
 
     A (tunable) config is used to define an instance of values for a set of tunable
     parameters for a given experiment and can be used by one or more trial instances
@@ -48,9 +46,7 @@ class TunableConfigTrialGroupSqlData(TunableConfigTrialGroupData):
         self._schema = schema
 
     def _get_tunable_config_trial_group_id(self) -> int:
-        """
-        Retrieve the trial's tunable_config_trial_group_id from the storage.
-        """
+        """Retrieve the trial's tunable_config_trial_group_id from the storage."""
         with self._engine.connect() as conn:
             tunable_config_trial_group = conn.execute(
                 self._schema.trial.select().with_only_columns(
@@ -79,7 +75,8 @@ class TunableConfigTrialGroupSqlData(TunableConfigTrialGroupData):
     @property
     def trials(self) -> Dict[int, "TrialData"]:
         """
-        Retrieve the trials' data for this (tunable) config trial group from the storage.
+        Retrieve the trials' data for this (tunable) config trial group from the
+        storage.
 
         Returns
         -------

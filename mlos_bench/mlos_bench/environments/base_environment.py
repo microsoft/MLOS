@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A hierarchy of benchmark environments.
-"""
+"""A hierarchy of benchmark environments."""
 
 import abc
 import json
@@ -43,9 +41,7 @@ _LOG = logging.getLogger(__name__)
 
 class Environment(metaclass=abc.ABCMeta):
     # pylint: disable=too-many-instance-attributes
-    """
-    An abstract base of all benchmark environments.
-    """
+    """An abstract base of all benchmark environments."""
 
     @classmethod
     def new(cls,
@@ -164,10 +160,9 @@ class Environment(metaclass=abc.ABCMeta):
                        name, json.dumps(self.config, indent=2))
 
     def _validate_json_config(self, config: dict, name: str) -> None:
-        """
-        Reconstructs a basic json config that this class might have been
-        instantiated from in order to validate configs provided outside the
-        file loading mechanism.
+        """Reconstructs a basic json config that this class might have been instantiated
+        from in order to validate configs provided outside the file loading
+        mechanism.
         """
         json_config: dict = {
             "class": self.__class__.__module__ + "." + self.__class__.__name__,
@@ -211,9 +206,7 @@ class Environment(metaclass=abc.ABCMeta):
 
     @staticmethod
     def _expand_vars(params: Dict[str, TunableValue], global_config: Dict[str, TunableValue]) -> dict:
-        """
-        Expand `$var` into actual values of the variables.
-        """
+        """Expand `$var` into actual values of the variables."""
         return DictTemplater(params).expand_vars(extra_source_dict=global_config)
 
     @property
@@ -222,9 +215,7 @@ class Environment(metaclass=abc.ABCMeta):
         return self._service.config_loader_service
 
     def __enter__(self) -> 'Environment':
-        """
-        Enter the environment's benchmarking context.
-        """
+        """Enter the environment's benchmarking context."""
         _LOG.debug("Environment START :: %s", self)
         assert not self._in_context
         if self._service:
@@ -235,9 +226,7 @@ class Environment(metaclass=abc.ABCMeta):
     def __exit__(self, ex_type: Optional[Type[BaseException]],
                  ex_val: Optional[BaseException],
                  ex_tb: Optional[TracebackType]) -> Literal[False]:
-        """
-        Exit the context of the benchmarking environment.
-        """
+        """Exit the context of the benchmarking environment."""
         ex_throw = None
         if ex_val is None:
             _LOG.debug("Environment END :: %s", self)
@@ -267,8 +256,8 @@ class Environment(metaclass=abc.ABCMeta):
 
     def pprint(self, indent: int = 4, level: int = 0) -> str:
         """
-        Pretty-print the environment configuration.
-        For composite environments, print all children environments as well.
+        Pretty-print the environment configuration. For composite environments, print
+        all children environments as well.
 
         Parameters
         ----------
@@ -288,8 +277,8 @@ class Environment(metaclass=abc.ABCMeta):
     def _combine_tunables(self, tunables: TunableGroups) -> Dict[str, TunableValue]:
         """
         Plug tunable values into the base config. If the tunable group is unknown,
-        ignore it (it might belong to another environment). This method should
-        never mutate the original config or the tunables.
+        ignore it (it might belong to another environment). This method should never
+        mutate the original config or the tunables.
 
         Parameters
         ----------
@@ -321,8 +310,9 @@ class Environment(metaclass=abc.ABCMeta):
     @property
     def parameters(self) -> Dict[str, TunableValue]:
         """
-        Key/value pairs of all environment parameters (i.e., `const_args` and `tunable_params`).
-        Note that before `.setup()` is called, all tunables will be set to None.
+        Key/value pairs of all environment parameters (i.e., `const_args` and
+        `tunable_params`). Note that before `.setup()` is called, all tunables will be
+        set to None.
 
         Returns
         -------
@@ -334,8 +324,8 @@ class Environment(metaclass=abc.ABCMeta):
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
         Set up a new benchmark environment, if necessary. This method must be
-        idempotent, i.e., calling it several times in a row should be
-        equivalent to a single call.
+        idempotent, i.e., calling it several times in a row should be equivalent to a
+        single call.
 
         Parameters
         ----------
@@ -382,9 +372,10 @@ class Environment(metaclass=abc.ABCMeta):
 
     def teardown(self) -> None:
         """
-        Tear down the benchmark environment. This method must be idempotent,
-        i.e., calling it several times in a row should be equivalent to a
-        single call.
+        Tear down the benchmark environment.
+
+        This method must be idempotent, i.e., calling it several times in a row should
+        be equivalent to a single call.
         """
         _LOG.info("Teardown %s", self)
         # Make sure we create a context before invoking setup/run/status/teardown

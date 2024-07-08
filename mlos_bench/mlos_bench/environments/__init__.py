@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tunable Environments for mlos_bench.
-"""
+"""Tunable Environments for mlos_bench."""
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.composite_env import CompositeEnv
@@ -16,7 +14,6 @@ from mlos_bench.environments.status import Status
 
 __all__ = [
     'Status',
-
     'Environment',
     'MockEnv',
     'RemoteEnv',

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Saving and updating benchmark data using SQLAlchemy backend.
-"""
+"""Saving and updating benchmark data using SQLAlchemy backend."""
 
 import logging
 from datetime import datetime
@@ -23,9 +21,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class Trial(Storage.Trial):
-    """
-    Store the results of a single run of the experiment in SQL database.
-    """
+    """Store the results of a single run of the experiment in SQL database."""
 
     def __init__(self, *,
                  engine: Engine,
@@ -136,6 +132,7 @@ class Trial(Storage.Trial):
     def _update_status(self, conn: Connection, status: Status, timestamp: datetime) -> None:
         """
         Insert a new status record into the database.
+
         This call is idempotent.
         """
         # Make sure to convert the timestamp to UTC before storing it in the database.

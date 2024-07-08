@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for mlos_bench.event_loop_context background thread logic.
-"""
+"""Tests for mlos_bench.event_loop_context background thread logic."""
 
 import asyncio
 import sys
@@ -23,6 +21,7 @@ from mlos_bench.event_loop_context import EventLoopContext
 class EventLoopContextCaller:
     """
     Simple class to test the EventLoopContext.
+
     See Also: SshService
     """
 

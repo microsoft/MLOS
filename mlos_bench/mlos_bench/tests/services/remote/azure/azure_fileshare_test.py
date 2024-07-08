@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for mlos_bench.services.remote.azure.azure_fileshare
-"""
+"""Tests for mlos_bench.services.remote.azure.azure_fileshare."""
 
 import os
 from unittest.mock import MagicMock, Mock, call, patch
@@ -142,7 +140,7 @@ def test_upload_file(mock_isdir: MagicMock, mock_open: MagicMock, azure_fileshar
 
 class MyDirEntry:
     # pylint: disable=too-few-public-methods
-    """Dummy class for os.DirEntry"""
+    """Dummy class for os.DirEntry."""
     def __init__(self, name: str, is_a_dir: bool):
         self.name = name
         self.is_a_dir = is_a_dir

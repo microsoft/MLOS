@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for service schema validation.
-"""
+"""Tests for service schema validation."""
 
 from os import path
 from typing import Any, Dict, List
@@ -55,8 +53,8 @@ assert expected_service_class_names
 @pytest.mark.parametrize("test_case_subtype", sorted(TEST_CASES.by_subtype))
 @pytest.mark.parametrize("service_class", expected_service_class_names)
 def test_case_coverage_mlos_bench_service_type(test_case_subtype: str, service_class: str) -> None:
-    """
-    Checks to see if there is a given type of test case for the given mlos_bench Service type.
+    """Checks to see if there is a given type of test case for the given mlos_bench
+    Service type.
     """
     for test_case in TEST_CASES.by_subtype[test_case_subtype].values():
         config_list: List[Dict[str, Any]]
@@ -77,17 +75,15 @@ def test_case_coverage_mlos_bench_service_type(test_case_subtype: str, service_c
 
 @pytest.mark.parametrize("test_case_name", sorted(TEST_CASES.by_path))
 def test_service_configs_against_schema(test_case_name: str) -> None:
-    """
-    Checks that the service config validates against the schema.
-    """
+    """Checks that the service config validates against the schema."""
     check_test_case_against_schema(TEST_CASES.by_path[test_case_name], ConfigSchema.SERVICE)
     check_test_case_against_schema(TEST_CASES.by_path[test_case_name], ConfigSchema.UNIFIED)
 
 
 @pytest.mark.parametrize("test_case_name", sorted(TEST_CASES.by_type["good"]))
 def test_service_configs_with_extra_param(test_case_name: str) -> None:
-    """
-    Checks that the service config fails to validate if extra params are present in certain places.
+    """Checks that the service config fails to validate if extra params are present in
+    certain places.
     """
     check_test_case_config_with_extra_param(TEST_CASES.by_type["good"][test_case_name], ConfigSchema.SERVICE)
     check_test_case_config_with_extra_param(TEST_CASES.by_type["good"][test_case_name], ConfigSchema.UNIFIED)

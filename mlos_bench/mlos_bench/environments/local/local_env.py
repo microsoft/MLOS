@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Scheduler-side benchmark environment to run scripts locally.
-"""
+"""Scheduler-side benchmark environment to run scripts locally."""
 
 import json
 import logging
@@ -32,9 +30,7 @@ _LOG = logging.getLogger(__name__)
 
 class LocalEnv(ScriptEnv):
     # pylint: disable=too-many-instance-attributes
-    """
-    Scheduler-side Environment that runs scripts locally.
-    """
+    """Scheduler-side Environment that runs scripts locally."""
 
     def __init__(self,
                  *,
@@ -90,9 +86,7 @@ class LocalEnv(ScriptEnv):
     def __exit__(self, ex_type: Optional[Type[BaseException]],
                  ex_val: Optional[BaseException],
                  ex_tb: Optional[TracebackType]) -> Literal[False]:
-        """
-        Exit the context of the benchmarking environment.
-        """
+        """Exit the context of the benchmarking environment."""
         assert not (self._temp_dir is None or self._temp_dir_context is None)
         self._temp_dir_context.__exit__(ex_type, ex_val, ex_tb)
         self._temp_dir = None
@@ -101,8 +95,8 @@ class LocalEnv(ScriptEnv):
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
-        Check if the environment is ready and set up the application
-        and benchmarks, if necessary.
+        Check if the environment is ready and set up the application and benchmarks, if
+        necessary.
 
         Parameters
         ----------
@@ -203,9 +197,7 @@ class LocalEnv(ScriptEnv):
 
     @staticmethod
     def _normalize_columns(data: pandas.DataFrame) -> pandas.DataFrame:
-        """
-        Strip trailing spaces from column names (Windows only).
-        """
+        """Strip trailing spaces from column names (Windows only)."""
         # Windows cmd interpretation of > redirect symbols can leave trailing spaces in
         # the final column, which leads to misnamed columns.
         # For now, we simply strip trailing spaces from column names to account for that.
@@ -254,9 +246,7 @@ class LocalEnv(ScriptEnv):
         ])
 
     def teardown(self) -> None:
-        """
-        Clean up the local environment.
-        """
+        """Clean up the local environment."""
         if self._script_teardown:
             _LOG.info("Local teardown: %s", self)
             (return_code, _output) = self._local_exec(self._script_teardown)

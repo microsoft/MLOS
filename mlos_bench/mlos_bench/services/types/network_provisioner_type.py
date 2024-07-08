@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Protocol interface for Network provisioning operations.
-"""
+"""Protocol interface for Network provisioning operations."""
 
 from typing import TYPE_CHECKING, Protocol, Tuple, runtime_checkable
 
@@ -14,9 +12,7 @@ if TYPE_CHECKING:
 
 @runtime_checkable
 class SupportsNetworkProvisioning(Protocol):
-    """
-    Protocol interface for Network provisioning operations.
-    """
+    """Protocol interface for Network provisioning operations."""
 
     def provision_network(self, params: dict) -> Tuple["Status", dict]:
         """

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A collection Service functions for mocking managing (Virtual) Networks.
-"""
+"""A collection Service functions for mocking managing (Virtual) Networks."""
 
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -16,9 +14,7 @@ from mlos_bench.tests.services.remote.mock import mock_operation
 
 
 class MockNetworkService(Service, SupportsNetworkProvisioning):
-    """
-    Mock Network service for testing.
-    """
+    """Mock Network service for testing."""
 
     def __init__(self, config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,

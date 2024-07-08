@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Test fixtures for mlos_bench storage.
-"""
+"""Test fixtures for mlos_bench storage."""
 
 from datetime import datetime
 from random import random
@@ -27,9 +25,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 @pytest.fixture
 def storage() -> SqlStorage:
-    """
-    Test fixture for in-memory SQLite3 storage.
-    """
+    """Test fixture for in-memory SQLite3 storage."""
     return SqlStorage(
         service=None,
         config={
@@ -47,6 +43,7 @@ def exp_storage(
 ) -> Generator[SqlStorage.Experiment, None, None]:
     """
     Test fixture for Experiment using in-memory SQLite3 storage.
+
     Note: It has already entered the context upon return.
     """
     with storage.experiment(
@@ -68,6 +65,7 @@ def exp_no_tunables_storage(
 ) -> Generator[SqlStorage.Experiment, None, None]:
     """
     Test fixture for Experiment using in-memory SQLite3 storage.
+
     Note: It has already entered the context upon return.
     """
     empty_config: dict = {}
@@ -90,7 +88,9 @@ def mixed_numerics_exp_storage(
     mixed_numerics_tunable_groups: TunableGroups,
 ) -> Generator[SqlStorage.Experiment, None, None]:
     """
-    Test fixture for an Experiment with mixed numerics tunables using in-memory SQLite3 storage.
+    Test fixture for an Experiment with mixed numerics tunables using in-memory SQLite3
+    storage.
+
     Note: It has already entered the context upon return.
     """
     with storage.experiment(
@@ -107,9 +107,7 @@ def mixed_numerics_exp_storage(
 
 
 def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: Optional[str]) -> SqlStorage.Experiment:
-    """
-    Generates data by doing a simulated run of the given experiment.
-    """
+    """Generates data by doing a simulated run of the given experiment."""
     # Add some trials to that experiment.
     # Note: we're just fabricating some made up function for the ML libraries to try and learn.
     base_score = 10.0
@@ -160,49 +158,37 @@ def _dummy_run_exp(exp: SqlStorage.Experiment, tunable_name: Optional[str]) -> S
 
 @pytest.fixture
 def exp_storage_with_trials(exp_storage: SqlStorage.Experiment) -> SqlStorage.Experiment:
-    """
-    Test fixture for Experiment using in-memory SQLite3 storage.
-    """
+    """Test fixture for Experiment using in-memory SQLite3 storage."""
     return _dummy_run_exp(exp_storage, tunable_name="kernel_sched_latency_ns")
 
 
 @pytest.fixture
 def exp_no_tunables_storage_with_trials(exp_no_tunables_storage: SqlStorage.Experiment) -> SqlStorage.Experiment:
-    """
-    Test fixture for Experiment using in-memory SQLite3 storage.
-    """
+    """Test fixture for Experiment using in-memory SQLite3 storage."""
     assert not exp_no_tunables_storage.tunables
     return _dummy_run_exp(exp_no_tunables_storage, tunable_name=None)
 
 
 @pytest.fixture
 def mixed_numerics_exp_storage_with_trials(mixed_numerics_exp_storage: SqlStorage.Experiment) -> SqlStorage.Experiment:
-    """
-    Test fixture for Experiment using in-memory SQLite3 storage.
-    """
+    """Test fixture for Experiment using in-memory SQLite3 storage."""
     tunable = next(iter(mixed_numerics_exp_storage.tunables))[0]
     return _dummy_run_exp(mixed_numerics_exp_storage, tunable_name=tunable.name)
 
 
 @pytest.fixture
 def exp_data(storage: SqlStorage, exp_storage_with_trials: SqlStorage.Experiment) -> ExperimentData:
-    """
-    Test fixture for ExperimentData.
-    """
+    """Test fixture for ExperimentData."""
     return storage.experiments[exp_storage_with_trials.experiment_id]
 
 
 @pytest.fixture
 def exp_no_tunables_data(storage: SqlStorage, exp_no_tunables_storage_with_trials: SqlStorage.Experiment) -> ExperimentData:
-    """
-    Test fixture for ExperimentData with no tunable configs.
-    """
+    """Test fixture for ExperimentData with no tunable configs."""
     return storage.experiments[exp_no_tunables_storage_with_trials.experiment_id]
 
 
 @pytest.fixture
 def mixed_numerics_exp_data(storage: SqlStorage, mixed_numerics_exp_storage_with_trials: SqlStorage.Experiment) -> ExperimentData:
-    """
-    Test fixture for ExperimentData with mixed numerical tunable types.
-    """
+    """Test fixture for ExperimentData with mixed numerical tunable types."""
     return storage.experiments[mixed_numerics_exp_storage_with_trials.experiment_id]

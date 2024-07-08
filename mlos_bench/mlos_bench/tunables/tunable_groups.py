@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-TunableGroups definition.
-"""
+"""TunableGroups definition."""
 import copy
 from typing import Dict, Generator, Iterable, Mapping, Optional, Tuple, Union
 
@@ -14,9 +12,7 @@ from mlos_bench.tunables.tunable import Tunable, TunableValue
 
 
 class TunableGroups:
-    """
-    A collection of covariant groups of tunable parameters.
-    """
+    """A collection of covariant groups of tunable parameters."""
 
     def __init__(self, config: Optional[dict] = None):
         """
@@ -138,23 +134,17 @@ class TunableGroups:
             for tunable in sorted(group._tunables.values())) + " }"
 
     def __contains__(self, tunable: Union[str, Tunable]) -> bool:
-        """
-        Checks if the given name/tunable is in this tunable group.
-        """
+        """Checks if the given name/tunable is in this tunable group."""
         name: str = tunable.name if isinstance(tunable, Tunable) else tunable
         return name in self._index
 
     def __getitem__(self, tunable: Union[str, Tunable]) -> TunableValue:
-        """
-        Get the current value of a single tunable parameter.
-        """
+        """Get the current value of a single tunable parameter."""
         name: str = tunable.name if isinstance(tunable, Tunable) else tunable
         return self._index[name][name]
 
     def __setitem__(self, tunable: Union[str, Tunable], tunable_value: Union[TunableValue, Tunable]) -> TunableValue:
-        """
-        Update the current value of a single tunable parameter.
-        """
+        """Update the current value of a single tunable parameter."""
         # Use double index to make sure we set the is_updated flag of the group
         name: str = tunable.name if isinstance(tunable, Tunable) else tunable
         value: TunableValue = tunable_value.value if isinstance(tunable_value, Tunable) else tunable_value
@@ -175,8 +165,8 @@ class TunableGroups:
 
     def get_tunable(self, tunable: Union[str, Tunable]) -> Tuple[Tunable, CovariantTunableGroup]:
         """
-        Access the entire Tunable (not just its value) and its covariant group.
-        Throw KeyError if the tunable is not found.
+        Access the entire Tunable (not just its value) and its covariant group. Throw
+        KeyError if the tunable is not found.
 
         Parameters
         ----------
@@ -205,8 +195,8 @@ class TunableGroups:
 
     def subgroup(self, group_names: Iterable[str]) -> "TunableGroups":
         """
-        Select the covariance groups from the current set and create a new
-        TunableGroups object that consists of those covariance groups.
+        Select the covariance groups from the current set and create a new TunableGroups
+        object that consists of those covariance groups.
 
         Note: The new TunableGroup will include *references* (not copies) to
         original ones, so each will get updated together.
@@ -235,7 +225,8 @@ class TunableGroups:
     def get_param_values(self, group_names: Optional[Iterable[str]] = None,
                          into_params: Optional[Dict[str, TunableValue]] = None) -> Dict[str, TunableValue]:
         """
-        Get the current values of the tunables that belong to the specified covariance groups.
+        Get the current values of the tunables that belong to the specified covariance
+        groups.
 
         Parameters
         ----------
@@ -277,7 +268,8 @@ class TunableGroups:
 
     def is_defaults(self) -> bool:
         """
-        Checks whether the currently assigned values of all tunables are at their defaults.
+        Checks whether the currently assigned values of all tunables are at their
+        defaults.
 
         Returns
         -------
@@ -323,8 +315,8 @@ class TunableGroups:
 
     def assign(self, param_values: Mapping[str, TunableValue]) -> "TunableGroups":
         """
-        In-place update the values of the tunables from the dictionary
-        of (key, value) pairs.
+        In-place update the values of the tunables from the dictionary of (key, value)
+        pairs.
 
         Parameters
         ----------

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Base class for certain Azure Services classes that do deployments.
-"""
+"""Base class for certain Azure Services classes that do deployments."""
 
 import abc
 import json
@@ -25,9 +23,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
-    """
-    Helper methods to manage and deploy Azure resources via REST APIs.
-    """
+    """Helper methods to manage and deploy Azure resources via REST APIs."""
 
     _POLL_INTERVAL = 4     # seconds
     _POLL_TIMEOUT = 300    # seconds
@@ -98,9 +94,7 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
 
     @property
     def deploy_params(self) -> dict:
-        """
-        Get the deployment parameters.
-        """
+        """Get the deployment parameters."""
         return self._deploy_params
 
     @abc.abstractmethod
@@ -121,8 +115,8 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         raise NotImplementedError("Should be overridden by subclass.")
 
     def _get_session(self, params: dict) -> requests.Session:
-        """
-        Get a session object that includes automatic retries and headers for REST API calls.
+        """Get a session object that includes automatic retries and headers for REST API
+        calls.
         """
         total_retries = params.get("requestTotalRetries", self._total_retries)
         backoff_factor = params.get("requestBackoffFactor", self._backoff_factor)
@@ -134,9 +128,7 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         return session
 
     def _get_headers(self) -> dict:
-        """
-        Get the headers for the REST API calls.
-        """
+        """Get the headers for the REST API calls."""
         assert self._parent is not None and isinstance(self._parent, SupportsAuth), \
             "Authorization service not provided. Include service-auth.jsonc?"
         return self._parent.get_auth_headers()
@@ -251,8 +243,8 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
 
     def _wait_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
         """
-        Waits for a pending operation on an Azure resource to resolve to SUCCEEDED or FAILED.
-        Return TIMED_OUT when timing out.
+        Waits for a pending operation on an Azure resource to resolve to SUCCEEDED or
+        FAILED. Return TIMED_OUT when timing out.
 
         Parameters
         ----------
@@ -276,8 +268,8 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
     def _wait_while(self, func: Callable[[dict], Tuple[Status, dict]],
                     loop_status: Status, params: dict) -> Tuple[Status, dict]:
         """
-        Invoke `func` periodically while the status is equal to `loop_status`.
-        Return TIMED_OUT when timing out.
+        Invoke `func` periodically while the status is equal to `loop_status`. Return
+        TIMED_OUT when timing out.
 
         Parameters
         ----------
@@ -327,8 +319,7 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
 
     def _check_deployment(self, params: dict) -> Tuple[Status, dict]:   # pylint: disable=too-many-return-statements
         """
-        Check if Azure deployment exists.
-        Return SUCCEEDED if true, PENDING otherwise.
+        Check if Azure deployment exists. Return SUCCEEDED if true, PENDING otherwise.
 
         Parameters
         ----------

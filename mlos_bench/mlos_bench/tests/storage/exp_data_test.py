@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for loading the experiment metadata.
-"""
+"""Unit tests for loading the experiment metadata."""
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.base_storage import Storage
@@ -13,9 +11,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def test_load_empty_exp_data(storage: Storage, exp_storage: Storage.Experiment) -> None:
-    """
-    Try to retrieve old experimental data from the empty storage.
-    """
+    """Try to retrieve old experimental data from the empty storage."""
     exp = storage.experiments[exp_storage.experiment_id]
     assert exp.experiment_id == exp_storage.experiment_id
     assert exp.description == exp_storage.description
@@ -23,7 +19,7 @@ def test_load_empty_exp_data(storage: Storage, exp_storage: Storage.Experiment) 
 
 
 def test_exp_data_root_env_config(exp_storage: Storage.Experiment, exp_data: ExperimentData) -> None:
-    """Tests the root_env_config property of ExperimentData"""
+    """Tests the root_env_config property of ExperimentData."""
     # pylint: disable=protected-access
     assert exp_data.root_env_config == (exp_storage._root_env_config, exp_storage._git_repo, exp_storage._git_commit)
 
@@ -31,9 +27,7 @@ def test_exp_data_root_env_config(exp_storage: Storage.Experiment, exp_data: Exp
 def test_exp_trial_data_objectives(storage: Storage,
                                    exp_storage: Storage.Experiment,
                                    tunable_groups: TunableGroups) -> None:
-    """
-    Start a new trial and check the storage for the trial data.
-    """
+    """Start a new trial and check the storage for the trial data."""
 
     trial_opt_new = exp_storage.new_trial(tunable_groups, config={
         "opt_target": "some-other-target",
@@ -67,7 +61,7 @@ def test_exp_trial_data_objectives(storage: Storage,
 
 
 def test_exp_data_results_df(exp_data: ExperimentData, tunable_groups: TunableGroups) -> None:
-    """Tests the results_df property of ExperimentData"""
+    """Tests the results_df property of ExperimentData."""
     results_df = exp_data.results_df
     expected_trials_count = CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT
     assert len(results_df) == expected_trials_count
@@ -81,7 +75,7 @@ def test_exp_data_results_df(exp_data: ExperimentData, tunable_groups: TunableGr
 
 def test_exp_data_tunable_config_trial_group_id_in_results_df(exp_data: ExperimentData) -> None:
     """
-    Tests the tunable_config_trial_group_id property of ExperimentData.results_df
+    Tests the tunable_config_trial_group_id property of ExperimentData.results_df.
 
     See Also: test_exp_trial_data_tunable_config_trial_group_id()
     """
@@ -109,7 +103,7 @@ def test_exp_data_tunable_config_trial_group_id_in_results_df(exp_data: Experime
 
 def test_exp_data_tunable_config_trial_groups(exp_data: ExperimentData) -> None:
     """
-    Tests the tunable_config_trial_groups property of ExperimentData
+    Tests the tunable_config_trial_groups property of ExperimentData.
 
     This tests bulk loading of the tunable_config_trial_groups.
     """
@@ -126,7 +120,7 @@ def test_exp_data_tunable_config_trial_groups(exp_data: ExperimentData) -> None:
 
 
 def test_exp_data_tunable_configs(exp_data: ExperimentData) -> None:
-    """Tests the tunable_configs property of ExperimentData"""
+    """Tests the tunable_configs property of ExperimentData."""
     # Should be keyed by config_id.
     assert list(exp_data.tunable_configs.keys()) == list(range(1, CONFIG_COUNT + 1))
     # Which should match the objects.
@@ -136,5 +130,5 @@ def test_exp_data_tunable_configs(exp_data: ExperimentData) -> None:
 
 
 def test_exp_data_default_config_id(exp_data: ExperimentData) -> None:
-    """Tests the default_tunable_config_id property of ExperimentData"""
+    """Tests the default_tunable_config_id property of ExperimentData."""
     assert exp_data.default_tunable_config_id == 1

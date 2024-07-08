@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Scheduler-side environment to mock the benchmark results.
-"""
+"""Scheduler-side environment to mock the benchmark results."""
 
 import logging
 import random
@@ -22,9 +20,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class MockEnv(Environment):
-    """
-    Scheduler-side environment to mock the benchmark results.
-    """
+    """Scheduler-side environment to mock the benchmark results."""
 
     _NOISE_VAR = 0.2
     """Variance of the Gaussian noise added to the benchmark value."""
@@ -97,6 +93,7 @@ class MockEnv(Environment):
     def _normalized(tunable: Tunable) -> float:
         """
         Get the NORMALIZED value of a tunable.
+
         That is, map current value to the [0, 1] range.
         """
         val = None

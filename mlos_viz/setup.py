@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Setup instructions for the mlos_viz package.
-"""
+"""Setup instructions for the mlos_viz package."""
 
 # pylint: disable=duplicate-code
 

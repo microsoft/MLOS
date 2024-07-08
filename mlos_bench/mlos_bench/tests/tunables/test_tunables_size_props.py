@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for checking tunable size properties.
-"""
+"""Unit tests for checking tunable size properties."""
 
 import numpy as np
 import pytest
@@ -16,7 +14,7 @@ from mlos_bench.tunables.tunable import Tunable
 
 
 def test_tunable_int_size_props() -> None:
-    """Test tunable int size properties"""
+    """Test tunable int size properties."""
     tunable = Tunable(
         name="test",
         config={
@@ -32,7 +30,7 @@ def test_tunable_int_size_props() -> None:
 
 
 def test_tunable_float_size_props() -> None:
-    """Test tunable float size properties"""
+    """Test tunable float size properties."""
     tunable = Tunable(
         name="test",
         config={
@@ -47,7 +45,7 @@ def test_tunable_float_size_props() -> None:
 
 
 def test_tunable_categorical_size_props() -> None:
-    """Test tunable categorical size properties"""
+    """Test tunable categorical size properties."""
     tunable = Tunable(
         name="test",
         config={
@@ -64,7 +62,7 @@ def test_tunable_categorical_size_props() -> None:
 
 
 def test_tunable_quantized_int_size_props() -> None:
-    """Test quantized tunable int size properties"""
+    """Test quantized tunable int size properties."""
     tunable = Tunable(
         name="test",
         config={
@@ -81,7 +79,7 @@ def test_tunable_quantized_int_size_props() -> None:
 
 
 def test_tunable_quantized_float_size_props() -> None:
-    """Test quantized tunable float size properties"""
+    """Test quantized tunable float size properties."""
     tunable = Tunable(
         name="test",
         config={

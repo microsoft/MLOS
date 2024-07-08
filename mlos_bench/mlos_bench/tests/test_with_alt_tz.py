@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests various other test scenarios with alternative default (un-named) TZ info.
-"""
+"""Tests various other test scenarios with alternative default (un-named) TZ info."""
 
 import os
 import sys
@@ -28,9 +26,7 @@ TZ_TEST_FILES = [
 @pytest.mark.parametrize(("tz_name"), ZONE_NAMES)
 @pytest.mark.parametrize(("test_file"), TZ_TEST_FILES)
 def test_trial_telemetry_alt_tz(tz_name: Optional[str], test_file: str) -> None:
-    """
-    Run the tests under alternative default (un-named) TZ info.
-    """
+    """Run the tests under alternative default (un-named) TZ info."""
     env = os.environ.copy()
     if tz_name is None:
         env.pop("TZ", None)

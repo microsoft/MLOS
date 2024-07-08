@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Export test fixtures for mlos_bench storage.
-"""
+"""Export test fixtures for mlos_bench storage."""
 
 import mlos_bench.tests.storage.sql.fixtures as sql_storage_fixtures
 

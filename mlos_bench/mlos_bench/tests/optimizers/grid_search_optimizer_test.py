@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for grid search mlos_bench optimizer.
-"""
+"""Unit tests for grid search mlos_bench optimizer."""
 
 import itertools
 import math
@@ -23,9 +21,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 @pytest.fixture
 def grid_search_tunables_config() -> dict:
-    """
-    Test fixture for grid search optimizer tunables config.
-    """
+    """Test fixture for grid search optimizer tunables config."""
     return {
         "grid": {
             "cost": 1,
@@ -55,6 +51,7 @@ def grid_search_tunables_config() -> dict:
 def grid_search_tunables_grid(grid_search_tunables: TunableGroups) -> List[Dict[str, TunableValue]]:
     """
     Test fixture for grid from tunable groups.
+
     Used to check that the grids are the same (ignoring order).
     """
     tunables_params_values = [tunable.values for tunable, _group in grid_search_tunables if tunable.values is not None]
@@ -64,18 +61,14 @@ def grid_search_tunables_grid(grid_search_tunables: TunableGroups) -> List[Dict[
 
 @pytest.fixture
 def grid_search_tunables(grid_search_tunables_config: dict) -> TunableGroups:
-    """
-    Test fixture for grid search optimizer tunables.
-    """
+    """Test fixture for grid search optimizer tunables."""
     return TunableGroups(grid_search_tunables_config)
 
 
 @pytest.fixture
 def grid_search_opt(grid_search_tunables: TunableGroups,
                     grid_search_tunables_grid: List[Dict[str, TunableValue]]) -> GridSearchOptimizer:
-    """
-    Test fixture for grid search optimizer.
-    """
+    """Test fixture for grid search optimizer."""
     assert len(grid_search_tunables) == 3
     # Test the convergence logic by controlling the number of iterations to be not a
     # multiple of the number of elements in the grid.
@@ -89,9 +82,7 @@ def grid_search_opt(grid_search_tunables: TunableGroups,
 def test_grid_search_grid(grid_search_opt: GridSearchOptimizer,
                           grid_search_tunables: TunableGroups,
                           grid_search_tunables_grid: List[Dict[str, TunableValue]]) -> None:
-    """
-    Make sure that grid search optimizer initializes and works correctly.
-    """
+    """Make sure that grid search optimizer initializes and works correctly."""
     # Check the size.
     expected_grid_size = math.prod(tunable.cardinality for tunable, _group in grid_search_tunables)
     assert expected_grid_size > len(grid_search_tunables)
@@ -118,9 +109,7 @@ def test_grid_search_grid(grid_search_opt: GridSearchOptimizer,
 def test_grid_search(grid_search_opt: GridSearchOptimizer,
                      grid_search_tunables: TunableGroups,
                      grid_search_tunables_grid: List[Dict[str, TunableValue]]) -> None:
-    """
-    Make sure that grid search optimizer initializes and works correctly.
-    """
+    """Make sure that grid search optimizer initializes and works correctly."""
     score: Dict[str, TunableValue] = {"score": 1.0, "other_score": 2.0}
     status = Status.SUCCEEDED
     suggestion = grid_search_opt.suggest()
@@ -190,8 +179,7 @@ def test_grid_search(grid_search_opt: GridSearchOptimizer,
 
 
 def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
-    """
-    Make sure that grid search optimizer works correctly when suggest and register
+    """Make sure that grid search optimizer works correctly when suggest and register
     are called out of order.
     """
     # pylint: disable=too-many-locals
@@ -258,9 +246,7 @@ def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
 
 def test_grid_search_register(grid_search_opt: GridSearchOptimizer,
                               grid_search_tunables: TunableGroups) -> None:
-    """
-    Make sure that the `.register()` method adjusts the score signs correctly.
-    """
+    """Make sure that the `.register()` method adjusts the score signs correctly."""
     assert grid_search_opt.register(
         grid_search_tunables, Status.SUCCEEDED, {
             "score": 1.0,

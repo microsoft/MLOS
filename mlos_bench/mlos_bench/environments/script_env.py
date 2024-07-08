@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Base scriptable benchmark environment.
-"""
+"""Base scriptable benchmark environment."""
 
 import abc
 import logging
@@ -21,9 +19,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class ScriptEnv(Environment, metaclass=abc.ABCMeta):
-    """
-    Base Environment that runs scripts for setup/run/teardown.
-    """
+    """Base Environment that runs scripts for setup/run/teardown."""
 
     _RE_INVALID = re.compile(r"[^a-zA-Z0-9_]")
 

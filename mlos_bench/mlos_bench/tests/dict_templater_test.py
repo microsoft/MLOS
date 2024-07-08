@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for DictTemplater class.
-"""
+"""Unit tests for DictTemplater class."""
 
 from copy import deepcopy
 from typing import Any, Dict
@@ -46,9 +44,7 @@ def source_template_dict() -> Dict[str, Any]:
 
 
 def test_no_side_effects(source_template_dict: Dict[str, Any]) -> None:
-    """
-    Test that the templater does not modify the source dictionary.
-    """
+    """Test that the templater does not modify the source dictionary."""
     source_template_dict_copy = deepcopy(source_template_dict)
     results = DictTemplater(source_template_dict_copy).expand_vars()
     assert results
@@ -56,9 +52,7 @@ def test_no_side_effects(source_template_dict: Dict[str, Any]) -> None:
 
 
 def test_secondary_expansion(source_template_dict: Dict[str, Any]) -> None:
-    """
-    Test that internal expansions work as expected.
-    """
+    """Test that internal expansions work as expected."""
     results = DictTemplater(source_template_dict).expand_vars()
     assert results == {
         "extra_str-ref": "$extra_str-ref",
@@ -85,9 +79,7 @@ def test_secondary_expansion(source_template_dict: Dict[str, Any]) -> None:
 
 
 def test_os_env_expansion(source_template_dict: Dict[str, Any]) -> None:
-    """
-    Test that expansions from OS env work as expected.
-    """
+    """Test that expansions from OS env work as expected."""
     environ["extra_str"] = "os-env-extra_str"
     environ["string"] = "shouldn't be used"
 
@@ -117,9 +109,7 @@ def test_os_env_expansion(source_template_dict: Dict[str, Any]) -> None:
 
 
 def test_from_extras_expansion(source_template_dict: Dict[str, Any]) -> None:
-    """
-    Test that
-    """
+    """Test that."""
     extra_source_dict = {
         "extra_str": "str-from-extras",
         "string": "shouldn't be used",

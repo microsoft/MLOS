@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for telemetry and status of LocalEnv benchmark environment.
-"""
+"""Unit tests for telemetry and status of LocalEnv benchmark environment."""
 from datetime import datetime, timedelta, tzinfo
 from typing import Optional
 
@@ -26,9 +24,7 @@ def _format_str(zone_info: Optional[tzinfo]) -> str:
 # FIXME: This fails with zone_info = None when run with `TZ="America/Chicago pytest -n0 ...`
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_local_env_telemetry(tunable_groups: TunableGroups, zone_info: Optional[tzinfo]) -> None:
-    """
-    Produce benchmark and telemetry data in a local script and read it.
-    """
+    """Produce benchmark and telemetry data in a local script and read it."""
     ts1 = datetime.now(zone_info)
     ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=1)
@@ -73,9 +69,7 @@ def test_local_env_telemetry(tunable_groups: TunableGroups, zone_info: Optional[
 # FIXME: This fails with zone_info = None when run with `TZ="America/Chicago pytest -n0 ...`
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_local_env_telemetry_no_header(tunable_groups: TunableGroups, zone_info: Optional[tzinfo]) -> None:
-    """
-    Read the telemetry data with no header.
-    """
+    """Read the telemetry data with no header."""
     ts1 = datetime.now(zone_info)
     ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=1)
@@ -109,9 +103,7 @@ def test_local_env_telemetry_no_header(tunable_groups: TunableGroups, zone_info:
 @pytest.mark.filterwarnings("ignore:.*(Could not infer format, so each element will be parsed individually, falling back to `dateutil`).*:UserWarning::0")  # pylint: disable=line-too-long # noqa
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_local_env_telemetry_wrong_header(tunable_groups: TunableGroups, zone_info: Optional[tzinfo]) -> None:
-    """
-    Read the telemetry data with incorrect header.
-    """
+    """Read the telemetry data with incorrect header."""
     ts1 = datetime.now(zone_info)
     ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=1)
@@ -136,9 +128,7 @@ def test_local_env_telemetry_wrong_header(tunable_groups: TunableGroups, zone_in
 
 
 def test_local_env_telemetry_invalid(tunable_groups: TunableGroups) -> None:
-    """
-    Fail when the telemetry data has wrong format.
-    """
+    """Fail when the telemetry data has wrong format."""
     zone_info = UTC
     ts1 = datetime.now(zone_info)
     ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
@@ -163,9 +153,7 @@ def test_local_env_telemetry_invalid(tunable_groups: TunableGroups) -> None:
 
 
 def test_local_env_telemetry_invalid_ts(tunable_groups: TunableGroups) -> None:
-    """
-    Fail when the telemetry data has wrong format.
-    """
+    """Fail when the telemetry data has wrong format."""
     local_env = create_local_env(tunable_groups, {
         "run": [
             # Error: field 1 must be a timestamp

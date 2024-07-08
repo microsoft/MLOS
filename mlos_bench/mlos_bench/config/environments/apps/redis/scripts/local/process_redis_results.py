@@ -3,9 +3,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Script for post-processing redis-benchmark results.
-"""
+"""Script for post-processing redis-benchmark results."""
 
 import argparse
 
@@ -13,9 +11,7 @@ import pandas as pd
 
 
 def _main(input_file: str, output_file: str) -> None:
-    """
-    Re-shape Redis benchmark CSV results from wide to long.
-    """
+    """Re-shape Redis benchmark CSV results from wide to long."""
     df_wide = pd.read_csv(input_file)
 
     # Format the results from wide to long

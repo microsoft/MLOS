@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for passing shell environment variables into LocalEnv scripts.
-"""
+"""Unit tests for passing shell environment variables into LocalEnv scripts."""
 import sys
 
 import pytest
@@ -15,9 +13,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def _run_local_env(tunable_groups: TunableGroups, shell_subcmd: str, expected: dict) -> None:
-    """
-    Check that LocalEnv can set shell environment variables.
-    """
+    """Check that LocalEnv can set shell environment variables."""
     local_env = create_local_env(tunable_groups, {
         "const_args": {
             "const_arg": 111,  # Passed into "shell_env_params"
@@ -40,9 +36,7 @@ def _run_local_env(tunable_groups: TunableGroups, shell_subcmd: str, expected: d
 
 @pytest.mark.skipif(sys.platform == 'win32', reason="sh-like shell only")
 def test_local_env_vars_shell(tunable_groups: TunableGroups) -> None:
-    """
-    Check that LocalEnv can set shell environment variables in sh-like shell.
-    """
+    """Check that LocalEnv can set shell environment variables in sh-like shell."""
     _run_local_env(
         tunable_groups,
         shell_subcmd="$const_arg,$other_arg,$unknown_arg,$kernel_sched_latency_ns",
@@ -57,8 +51,8 @@ def test_local_env_vars_shell(tunable_groups: TunableGroups) -> None:
 
 @pytest.mark.skipif(sys.platform != 'win32', reason="Windows only")
 def test_local_env_vars_windows(tunable_groups: TunableGroups) -> None:
-    """
-    Check that LocalEnv can set shell environment variables on Windows / cmd shell.
+    """Check that LocalEnv can set shell environment variables on Windows / cmd
+    shell.
     """
     _run_local_env(
         tunable_groups,

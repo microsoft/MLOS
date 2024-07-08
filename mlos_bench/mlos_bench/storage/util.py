@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Utility functions for the storage subsystem.
-"""
+"""Utility functions for the storage subsystem."""
 
 from typing import Dict, Optional
 

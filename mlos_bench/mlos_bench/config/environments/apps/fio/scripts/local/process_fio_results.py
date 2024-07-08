@@ -3,9 +3,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Script for post-processing FIO results for mlos_bench.
-"""
+"""Script for post-processing FIO results for mlos_bench."""
 
 import argparse
 import itertools
@@ -16,9 +14,7 @@ import pandas
 
 
 def _flat_dict(data: Any, path: str) -> Iterator[Tuple[str, Any]]:
-    """
-    Flatten every dict in the hierarchy and rename the keys with the dict path.
-    """
+    """Flatten every dict in the hierarchy and rename the keys with the dict path."""
     if isinstance(data, dict):
         for (key, val) in data.items():
             yield from _flat_dict(val, f"{path}.{key}")
@@ -27,9 +23,7 @@ def _flat_dict(data: Any, path: str) -> Iterator[Tuple[str, Any]]:
 
 
 def _main(input_file: str, output_file: str, prefix: str) -> None:
-    """
-    Convert FIO read data from JSON to tall CSV.
-    """
+    """Convert FIO read data from JSON to tall CSV."""
     with open(input_file, mode='r', encoding='utf-8') as fh_input:
         json_data = json.load(fh_input)
 

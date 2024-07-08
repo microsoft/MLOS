@@ -2,9 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Protocol interface for Service types that provide helper functions to run
-scripts and commands locally on the scheduler side.
+"""Protocol interface for Service types that provide helper functions to run scripts and
+commands locally on the scheduler side.
 """
 
 import contextlib
@@ -25,11 +24,11 @@ from mlos_bench.tunables.tunable import TunableValue
 @runtime_checkable
 class SupportsLocalExec(Protocol):
     """
-    Protocol interface for a collection of methods to run scripts and commands
-    in an external process on the node acting as the scheduler. Can be useful
-    for data processing due to reduced dependency management complications vs
-    the target environment.
-    Used in LocalEnv and provided by LocalExecService.
+    Protocol interface for a collection of methods to run scripts and commands in an
+    external process on the node acting as the scheduler.
+
+    Can be useful for data processing due to reduced dependency management complications
+    vs the target environment. Used in LocalEnv and provided by LocalExecService.
     """
 
     def local_exec(self, script_lines: Iterable[str],

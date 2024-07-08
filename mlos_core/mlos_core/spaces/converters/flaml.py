@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Contains space converters for FLAML.
-"""
+"""Contains space converters for FLAML."""
 
 import sys
 from typing import TYPE_CHECKING, Dict
@@ -28,7 +26,8 @@ FlamlSpace: TypeAlias = Dict[str, flaml.tune.sample.Domain]
 
 
 def configspace_to_flaml_space(config_space: ConfigSpace.ConfigurationSpace) -> Dict[str, FlamlDomain]:
-    """Converts a ConfigSpace.ConfigurationSpace to dict.
+    """
+    Converts a ConfigSpace.ConfigurationSpace to dict.
 
     Parameters
     ----------

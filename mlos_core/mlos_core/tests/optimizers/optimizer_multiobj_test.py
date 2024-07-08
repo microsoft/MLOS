@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Test multi-target optimization.
-"""
+"""Test multi-target optimization."""
 
 import logging
 from typing import List, Optional, Type
@@ -24,8 +22,7 @@ _LOG = logging.getLogger(__name__)
     *[(member.value, {}) for member in OptimizerType],
 ])
 def test_multi_target_opt_wrong_weights(optimizer_class: Type[BaseOptimizer], kwargs: dict) -> None:
-    """
-    Make sure that the optimizer raises an error if the number of objective weights
+    """Make sure that the optimizer raises an error if the number of objective weights
     does not match the number of optimization targets.
     """
     with pytest.raises(ValueError):
@@ -48,9 +45,8 @@ def test_multi_target_opt_wrong_weights(optimizer_class: Type[BaseOptimizer], kw
 def test_multi_target_opt(objective_weights: Optional[List[float]],
                           optimizer_class: Type[BaseOptimizer],
                           kwargs: dict) -> None:
-    """
-    Toy multi-target optimization problem to test the optimizers with
-    mixed numeric types to ensure that original dtypes are retained.
+    """Toy multi-target optimization problem to test the optimizers with mixed numeric
+    types to ensure that original dtypes are retained.
     """
     max_iterations = 10
 

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Check how the services get inherited and overridden in child environments.
-"""
+"""Check how the services get inherited and overridden in child environments."""
 import os
 
 import pytest
@@ -20,9 +18,7 @@ from mlos_bench.util import path_join
 
 @pytest.fixture
 def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
-    """
-    Test fixture for CompositeEnv with services included on multiple levels.
-    """
+    """Test fixture for CompositeEnv with services included on multiple levels."""
     return CompositeEnv(
         name="Root",
         config={
@@ -58,9 +54,7 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
 
 
 def test_composite_services(composite_env: CompositeEnv) -> None:
-    """
-    Check that each environment gets its own instance of the services.
-    """
+    """Check that each environment gets its own instance of the services."""
     for (i, path) in ((0, "_test_tmp_global"), (1, "_test_tmp_other_2"), (2, "_test_tmp_other_3")):
         service = composite_env.children[i]._service  # pylint: disable=protected-access
         assert service is not None and hasattr(service, "temp_dir_context")

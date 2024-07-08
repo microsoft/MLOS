@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A collection Service functions for configuring SaaS instances on Azure.
-"""
+"""A collection Service functions for configuring SaaS instances on Azure."""
 import logging
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -20,9 +18,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class AzureSaaSConfigService(Service, SupportsRemoteConfig):
-    """
-    Helper methods to configure Azure Flex services.
-    """
+    """Helper methods to configure Azure Flex services."""
 
     _REQUEST_TIMEOUT = 5  # seconds
 
@@ -174,9 +170,7 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
         )})
 
     def _get_headers(self) -> dict:
-        """
-        Get the headers for the REST API calls.
-        """
+        """Get the headers for the REST API calls."""
         assert self._parent is not None and isinstance(self._parent, SupportsAuth), \
             "Authorization service not provided. Include service-auth.jsonc?"
         return self._parent.get_auth_headers()
@@ -218,8 +212,8 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
     def _config_many(self, config: Dict[str, Any],
                      params: Dict[str, Any]) -> Tuple[Status, dict]:
         """
-        Update the parameters of an Azure DB service one-by-one.
-        (If batch API is not available for it).
+        Update the parameters of an Azure DB service one-by-one. (If batch API is not
+        available for it).
 
         Parameters
         ----------

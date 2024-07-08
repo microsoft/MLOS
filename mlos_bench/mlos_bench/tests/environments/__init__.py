@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests helpers for mlos_bench.environments.
-"""
+"""Tests helpers for mlos_bench.environments."""
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
@@ -55,8 +53,8 @@ def check_env_success(env: Environment,
 
 def check_env_fail_telemetry(env: Environment, tunable_groups: TunableGroups) -> None:
     """
-    Set up a local environment and run a test experiment there;
-    Make sure the environment `.status()` call fails.
+    Set up a local environment and run a test experiment there; Make sure the
+    environment `.status()` call fails.
 
     Parameters
     ----------

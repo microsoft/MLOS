@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A collection functions for interacting with SSH servers as file shares.
-"""
+"""A collection functions for interacting with SSH servers as file shares."""
 
 import logging
 import os
@@ -45,9 +43,9 @@ class SshClient(asyncssh.SSHClient):
     """
     Wrapper around SSHClient to help provide connection caching and reconnect logic.
 
-    Used by the SshService to try and maintain a single connection to hosts,
-    handle reconnects if possible, and use that to run commands rather than
-    reconnect for each command.
+    Used by the SshService to try and maintain a single connection to hosts, handle
+    reconnects if possible, and use that to run commands rather than reconnect for each
+    command.
     """
 
     _CONNECTION_PENDING = 'INIT'
@@ -99,9 +97,7 @@ class SshClient(asyncssh.SSHClient):
         return super().connection_lost(exc)
 
     async def connection(self) -> Optional[SSHClientConnection]:
-        """
-        Waits for and returns the SSHClientConnection to be established or lost.
-        """
+        """Waits for and returns the SSHClientConnection to be established or lost."""
         _LOG.debug("%s: Waiting for connection to be available.", current_thread().name)
         await self._conn_event.wait()
         _LOG.debug("%s: Connection available for %s", current_thread().name, self._connection_id)
@@ -111,6 +107,7 @@ class SshClient(asyncssh.SSHClient):
 class SshClientCache:
     """
     Manages a cache of SshClient connections.
+
     Note: Only one per event loop thread supported.
     See additional details in SshService comments.
     """
@@ -129,6 +126,7 @@ class SshClientCache:
     def enter(self) -> None:
         """
         Manages the cache lifecycle with reference counting.
+
         To be used in the __enter__ method of a caller's context manager.
         """
         self._refcnt += 1
@@ -136,6 +134,7 @@ class SshClientCache:
     def exit(self) -> None:
         """
         Manages the cache lifecycle with reference counting.
+
         To be used in the __exit__ method of a caller's context manager.
         """
         self._refcnt -= 1
@@ -182,18 +181,14 @@ class SshClientCache:
             return self._cache[connection_id]
 
     def cleanup(self) -> None:
-        """
-        Closes all cached connections.
-        """
+        """Closes all cached connections."""
         for (connection, _) in self._cache.values():
             connection.close()
         self._cache = {}
 
 
 class SshService(Service, metaclass=ABCMeta):
-    """
-    Base class for SSH services.
-    """
+    """Base class for SSH services."""
 
     # AsyncSSH requires an asyncio event loop to be running to work.
     # However, running that event loop blocks the main thread.
@@ -291,6 +286,7 @@ class SshService(Service, metaclass=ABCMeta):
     def clear_client_cache(cls) -> None:
         """
         Clears the cache of client connections.
+
         Note: This may cause in flight operations to fail.
         """
         cls._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE.cleanup()

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Base class for remote file shares.
-"""
+"""Base class for remote file shares."""
 
 import logging
 from abc import ABCMeta, abstractmethod
@@ -17,9 +15,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class FileShareService(Service, SupportsFileShareOps, metaclass=ABCMeta):
-    """
-    An abstract base of all file shares.
-    """
+    """An abstract base of all file shares."""
 
     def __init__(self, config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,

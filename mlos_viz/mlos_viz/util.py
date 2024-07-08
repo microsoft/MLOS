@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Utility functions for manipulating experiment results data.
-"""
+"""Utility functions for manipulating experiment results data."""
 from typing import Dict, Literal, Optional, Tuple
 
 import pandas

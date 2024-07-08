@@ -2,9 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Protocol interface for Service types that provide helper functions to run
-scripts on a remote host OS.
+"""Protocol interface for Service types that provide helper functions to run scripts on
+a remote host OS.
 """
 
 from typing import TYPE_CHECKING, Iterable, Protocol, Tuple, runtime_checkable
@@ -15,9 +14,8 @@ if TYPE_CHECKING:
 
 @runtime_checkable
 class SupportsRemoteExec(Protocol):
-    """
-    Protocol interface for Service types that provide helper functions to run
-    scripts on a remote host OS.
+    """Protocol interface for Service types that provide helper functions to run scripts
+    on a remote host OS.
     """
 
     def remote_exec(self, script: Iterable[str], config: dict,

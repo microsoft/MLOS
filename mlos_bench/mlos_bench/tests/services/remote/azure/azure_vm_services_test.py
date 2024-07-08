@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for mlos_bench.services.remote.azure.azure_vm_services
-"""
+"""Tests for mlos_bench.services.remote.azure.azure_vm_services."""
 
 from copy import deepcopy
 from unittest.mock import MagicMock, patch
@@ -29,9 +27,7 @@ def test_wait_host_deployment_retry(mock_getconn: MagicMock,
                                     total_retries: int,
                                     operation_status: Status,
                                     azure_vm_service: AzureVMService) -> None:
-    """
-    Test retries of the host deployment operation.
-    """
+    """Test retries of the host deployment operation."""
     # Simulate intermittent connection issues with multiple connection errors
     # Sufficient retry attempts should result in success, otherwise a graceful failure state
     mock_getconn.return_value.getresponse.side_effect = [
@@ -55,9 +51,7 @@ def test_wait_host_deployment_retry(mock_getconn: MagicMock,
 
 
 def test_azure_vm_service_recursive_template_params(azure_auth_service: AzureAuthService) -> None:
-    """
-    Test expanding template params recursively.
-    """
+    """Test expanding template params recursively."""
     config = {
         "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
         "subscription": "TEST_SUB1",
@@ -80,9 +74,7 @@ def test_azure_vm_service_recursive_template_params(azure_auth_service: AzureAut
 
 
 def test_azure_vm_service_custom_data(azure_auth_service: AzureAuthService) -> None:
-    """
-    Test loading custom data from a file.
-    """
+    """Test loading custom data from a file."""
     config = {
         "customDataFile": "services/remote/azure/cloud-init/alt-ssh.yml",
         "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
@@ -129,9 +121,7 @@ def test_vm_operation_status(mock_requests: MagicMock,
                              accepts_params: bool,
                              http_status_code: int,
                              operation_status: Status) -> None:
-    """
-    Test VM operation status.
-    """
+    """Test VM operation status."""
     mock_response = MagicMock()
     mock_response.status_code = http_status_code
     mock_requests.post.return_value = mock_response
@@ -151,9 +141,7 @@ def test_vm_operation_status(mock_requests: MagicMock,
 def test_vm_operation_invalid(azure_vm_service_remote_exec_only: AzureVMService,
                               operation_name: str,
                               accepts_params: bool) -> None:
-    """
-    Test VM operation status for an incomplete service config.
-    """
+    """Test VM operation status for an incomplete service config."""
     operation = getattr(azure_vm_service_remote_exec_only, operation_name)
     with pytest.raises(ValueError):
         (_, _) = operation({"vmName": "test-vm"}) if accepts_params else operation()
@@ -163,9 +151,7 @@ def test_vm_operation_invalid(azure_vm_service_remote_exec_only: AzureVMService,
 @patch("mlos_bench.services.remote.azure.azure_deployment_services.requests.Session")
 def test_wait_vm_operation_ready(mock_session: MagicMock, mock_sleep: MagicMock,
                                  azure_vm_service: AzureVMService) -> None:
-    """
-    Test waiting for the completion of the remote VM operation.
-    """
+    """Test waiting for the completion of the remote VM operation."""
     # Mock response header
     async_url = "DUMMY_ASYNC_URL"
     retry_after = 12345
@@ -191,9 +177,7 @@ def test_wait_vm_operation_ready(mock_session: MagicMock, mock_sleep: MagicMock,
 @patch("mlos_bench.services.remote.azure.azure_deployment_services.requests.Session")
 def test_wait_vm_operation_timeout(mock_session: MagicMock,
                                    azure_vm_service: AzureVMService) -> None:
-    """
-    Test the time out of the remote VM operation.
-    """
+    """Test the time out of the remote VM operation."""
     # Mock response header
     params = {
         "asyncResultsUrl": "DUMMY_ASYNC_URL",
@@ -222,9 +206,7 @@ def test_wait_vm_operation_retry(mock_getconn: MagicMock,
                                  total_retries: int,
                                  operation_status: Status,
                                  azure_vm_service: AzureVMService) -> None:
-    """
-    Test the retries of the remote VM operation.
-    """
+    """Test the retries of the remote VM operation."""
     # Simulate intermittent connection issues with multiple connection errors
     # Sufficient retry attempts should result in success, otherwise a graceful failure state
     mock_getconn.return_value.getresponse.side_effect = [
@@ -255,9 +237,7 @@ def test_wait_vm_operation_retry(mock_getconn: MagicMock,
 @patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
 def test_remote_exec_status(mock_requests: MagicMock, azure_vm_service_remote_exec_only: AzureVMService,
                             http_status_code: int, operation_status: Status) -> None:
-    """
-    Test waiting for completion of the remote execution on Azure.
-    """
+    """Test waiting for completion of the remote execution on Azure."""
     script = ["command_1", "command_2"]
 
     mock_response = MagicMock()
@@ -275,9 +255,7 @@ def test_remote_exec_status(mock_requests: MagicMock, azure_vm_service_remote_ex
 @patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
 def test_remote_exec_headers_output(mock_requests: MagicMock,
                                     azure_vm_service_remote_exec_only: AzureVMService) -> None:
-    """
-    Check if HTTP headers from the remote execution on Azure are correct.
-    """
+    """Check if HTTP headers from the remote execution on Azure are correct."""
     async_url_key = "asyncResultsUrl"
     async_url_value = "DUMMY_ASYNC_URL"
     script = ["command_1", "command_2"]
@@ -330,9 +308,7 @@ def test_remote_exec_headers_output(mock_requests: MagicMock,
     ])
 def test_get_remote_exec_results(azure_vm_service_remote_exec_only: AzureVMService, operation_status: Status,
                                  wait_output: dict, results_output: dict) -> None:
-    """
-    Test getting the results of the remote execution on Azure.
-    """
+    """Test getting the results of the remote execution on Azure."""
     params = {"asyncResultsUrl": "DUMMY_ASYNC_URL"}
 
     mock_wait_host_operation = MagicMock()

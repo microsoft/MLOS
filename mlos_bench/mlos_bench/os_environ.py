@@ -3,8 +3,8 @@
 # Licensed under the MIT License.
 #
 """
-Simple platform agnostic abstraction for the OS environment variables.
-Meant as a replacement for os.environ vs nt.environ.
+Simple platform agnostic abstraction for the OS environment variables. Meant as a
+replacement for os.environ vs nt.environ.
 
 Example
 -------

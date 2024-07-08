@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Common data classes for the SSH service tests.
-"""
+"""Common data classes for the SSH service tests."""
 
 from dataclasses import dataclass
 from subprocess import run
@@ -24,9 +22,7 @@ REBOOT_TEST_SERVER_NAME = 'reboot-server'
 
 @dataclass
 class SshTestServerInfo:
-    """
-    A data class for SshTestServerInfo.
-    """
+    """A data class for SshTestServerInfo."""
 
     compose_project_name: str
     service_name: str
@@ -59,6 +55,7 @@ class SshTestServerInfo:
     def to_connect_params(self, uncached: bool = False) -> dict:
         """
         Convert to a connect_params dict for SshClient.
+
         See Also: mlos_bench.services.remote.ssh.ssh_service.SshService._get_connect_params()
         """
         return {

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Common tests for config schemas and their validation and test cases.
-"""
+"""Common tests for config schemas and their validation and test cases."""
 
 import os
 from copy import deepcopy
@@ -22,9 +20,7 @@ from mlos_bench.tests.config import locate_config_examples
 # A dataclass to make pylint happy.
 @dataclass
 class SchemaTestType:
-    """
-    The different type of schema test cases we expect to have.
-    """
+    """The different type of schema test cases we expect to have."""
 
     test_case_type: str
     test_case_subtypes: Set[str]
@@ -42,9 +38,7 @@ _SCHEMA_TEST_TYPES = {x.test_case_type: x for x in (
 
 @dataclass
 class SchemaTestCaseInfo():
-    """
-    Some basic info about a schema test case.
-    """
+    """Some basic info about a schema test case."""
 
     config: Dict[str, Any]
     test_case_file: str
@@ -56,9 +50,8 @@ class SchemaTestCaseInfo():
 
 
 def check_schema_dir_layout(test_cases_root: str) -> None:
-    """
-    Makes sure the directory layout matches what we expect so we aren't missing
-    any extra configs or test cases.
+    """Makes sure the directory layout matches what we expect so we aren't missing any
+    extra configs or test cases.
     """
     for test_case_dir in os.listdir(test_cases_root):
         if test_case_dir == 'README.md':
@@ -74,9 +67,7 @@ def check_schema_dir_layout(test_cases_root: str) -> None:
 
 @dataclass
 class TestCases:
-    """
-    A container for test cases by type.
-    """
+    """A container for test cases by type."""
 
     by_path: Dict[str, SchemaTestCaseInfo]
     by_type: Dict[str, Dict[str, SchemaTestCaseInfo]]
@@ -84,9 +75,7 @@ class TestCases:
 
 
 def get_schema_test_cases(test_cases_root: str) -> TestCases:
-    """
-    Gets a dict of schema test cases from the given root.
-    """
+    """Gets a dict of schema test cases from the given root."""
     test_cases = TestCases(by_path={},
                            by_type={x: {} for x in _SCHEMA_TEST_TYPES},
                            by_subtype={y: {} for x in _SCHEMA_TEST_TYPES for y in _SCHEMA_TEST_TYPES[x].test_case_subtypes})
@@ -143,8 +132,8 @@ def check_test_case_against_schema(test_case: SchemaTestCaseInfo, schema_type: C
 
 
 def check_test_case_config_with_extra_param(test_case: SchemaTestCaseInfo, schema_type: ConfigSchema) -> None:
-    """
-    Checks that the config fails to validate if extra params are present in certain places.
+    """Checks that the config fails to validate if extra params are present in certain
+    places.
     """
     config = deepcopy(test_case.config)
     schema_type.validate(config)

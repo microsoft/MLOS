@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Common functions for mlos_core Optimizer tests.
-"""
+"""Common functions for mlos_core Optimizer tests."""
 
 import sys
 from importlib import import_module
@@ -27,6 +25,7 @@ T = TypeVar('T')
 def get_all_submodules(pkg: TypeAlias) -> List[str]:
     """
     Imports all submodules for a package and returns their names.
+
     Useful for dynamically enumerating subclasses.
     """
     submodules = []
@@ -38,6 +37,7 @@ def get_all_submodules(pkg: TypeAlias) -> List[str]:
 def _get_all_subclasses(cls: Type[T]) -> Set[Type[T]]:
     """
     Gets the set of all of the subclasses of the given class.
+
     Useful for dynamically enumerating expected test cases.
     """
     return set(cls.__subclasses__()).union(
@@ -46,8 +46,8 @@ def _get_all_subclasses(cls: Type[T]) -> Set[Type[T]]:
 
 def get_all_concrete_subclasses(cls: Type[T], pkg_name: Optional[str] = None) -> List[Type[T]]:
     """
-    Gets a sorted list of all of the concrete subclasses of the given class.
-    Useful for dynamically enumerating expected test cases.
+    Gets a sorted list of all of the concrete subclasses of the given class. Useful for
+    dynamically enumerating expected test cases.
 
     Note: For abstract types, mypy will complain at the call site.
     Use "# type: ignore[type-abstract]" to suppress the warning.

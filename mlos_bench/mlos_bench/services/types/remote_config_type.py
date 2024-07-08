@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Protocol interface for configuring cloud services.
-"""
+"""Protocol interface for configuring cloud services."""
 
 from typing import TYPE_CHECKING, Any, Dict, Protocol, Tuple, runtime_checkable
 
@@ -14,9 +12,7 @@ if TYPE_CHECKING:
 
 @runtime_checkable
 class SupportsRemoteConfig(Protocol):
-    """
-    Protocol interface for configuring cloud services.
-    """
+    """Protocol interface for configuring cloud services."""
 
     def configure(self, config: Dict[str, Any],
                   params: Dict[str, Any]) -> Tuple["Status", dict]:

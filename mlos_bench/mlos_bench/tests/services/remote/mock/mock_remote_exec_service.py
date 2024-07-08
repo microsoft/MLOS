@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A collection Service functions for mocking remote script execution.
-"""
+"""A collection Service functions for mocking remote script execution."""
 
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -14,9 +12,7 @@ from mlos_bench.tests.services.remote.mock import mock_operation
 
 
 class MockRemoteExecService(Service, SupportsRemoteExec):
-    """
-    Mock remote script execution service.
-    """
+    """Mock remote script execution service."""
 
     def __init__(self, config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,

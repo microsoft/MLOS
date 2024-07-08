@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for mlos_bench.services.remote.azure.azure_network_services
-"""
+"""Tests for mlos_bench.services.remote.azure.azure_network_services."""
 
 from unittest.mock import MagicMock, patch
 
@@ -28,9 +26,7 @@ def test_wait_network_deployment_retry(mock_getconn: MagicMock,
                                        total_retries: int,
                                        operation_status: Status,
                                        azure_network_service: AzureNetworkService) -> None:
-    """
-    Test retries of the network deployment operation.
-    """
+    """Test retries of the network deployment operation."""
     # Simulate intermittent connection issues with multiple connection errors
     # Sufficient retry attempts should result in success, otherwise a graceful failure state
     mock_getconn.return_value.getresponse.side_effect = [
@@ -73,9 +69,7 @@ def test_network_operation_status(mock_requests: MagicMock,
                                   accepts_params: bool,
                                   http_status_code: int,
                                   operation_status: Status) -> None:
-    """
-    Test network operation status.
-    """
+    """Test network operation status."""
     mock_response = MagicMock()
     mock_response.status_code = http_status_code
     mock_requests.post.return_value = mock_response
@@ -90,9 +84,7 @@ def test_network_operation_status(mock_requests: MagicMock,
 
 @pytest.fixture
 def test_azure_network_service_no_deployment_template(azure_auth_service: AzureAuthService) -> None:
-    """
-    Tests creating a network services without a deployment template (should fail).
-    """
+    """Tests creating a network services without a deployment template (should fail)."""
     with pytest.raises(ValueError):
         _ = AzureNetworkService(config={
             "deploymentTemplatePath": None,

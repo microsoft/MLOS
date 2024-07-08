@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for extracting data from LocalEnv stdout.
-"""
+"""Unit tests for extracting data from LocalEnv stdout."""
 
 import sys
 
@@ -14,9 +12,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def test_local_env_stdout(tunable_groups: TunableGroups) -> None:
-    """
-    Print benchmark results to stdout and capture them in the LocalEnv.
-    """
+    """Print benchmark results to stdout and capture them in the LocalEnv."""
     local_env = create_local_env(tunable_groups, {
         "run": [
             "echo 'Benchmark results:'",  # This line should be ignored
@@ -42,9 +38,7 @@ def test_local_env_stdout(tunable_groups: TunableGroups) -> None:
 
 
 def test_local_env_stdout_anchored(tunable_groups: TunableGroups) -> None:
-    """
-    Print benchmark results to stdout and capture them in the LocalEnv.
-    """
+    """Print benchmark results to stdout and capture them in the LocalEnv."""
     local_env = create_local_env(tunable_groups, {
         "run": [
             "echo 'Benchmark results:'",  # This line should be ignored
@@ -69,8 +63,8 @@ def test_local_env_stdout_anchored(tunable_groups: TunableGroups) -> None:
 
 
 def test_local_env_file_stdout(tunable_groups: TunableGroups) -> None:
-    """
-    Print benchmark results to *BOTH* stdout and a file and extract the results from both.
+    """Print benchmark results to *BOTH* stdout and a file and extract the results from
+    both.
     """
     local_env = create_local_env(tunable_groups, {
         "run": [

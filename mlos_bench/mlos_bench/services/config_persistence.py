@@ -2,10 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Helper functions to load, instantiate, and serialize Python objects
-that encapsulate benchmark environments, tunable parameters, and
-service functions.
+"""Helper functions to load, instantiate, and serialize Python objects that encapsulate
+benchmark environments, tunable parameters, and service functions.
 """
 
 import json  # For logging only
@@ -55,8 +53,8 @@ _LOG = logging.getLogger(__name__)
 
 
 class ConfigPersistenceService(Service, SupportsConfigLoading):
-    """
-    Collection of methods to deserialize the Environment, Service, and TunableGroups objects.
+    """Collection of methods to deserialize the Environment, Service, and TunableGroups
+    objects.
     """
 
     BUILTIN_CONFIG_PATH = str(files("mlos_bench.config").joinpath("")).replace("\\", "/")
@@ -123,8 +121,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
     def resolve_path(self, file_path: str,
                      extra_paths: Optional[Iterable[str]] = None) -> str:
         """
-        Prepend the suitable `_config_path` to `path` if the latter is not absolute.
-        If `_config_path` is `None` or `path` is absolute, return `path` as is.
+        Prepend the suitable `_config_path` to `path` if the latter is not absolute. If
+        `_config_path` is `None` or `path` is absolute, return `path` as is.
 
         Parameters
         ----------
@@ -156,9 +154,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                     schema_type: Optional[ConfigSchema],
                     ) -> Dict[str, Any]:
         """
-        Load JSON config file. Search for a file relative to `_config_path`
-        if the input path is not absolute.
-        This method is exported to be used as a service.
+        Load JSON config file. Search for a file relative to `_config_path` if the input
+        path is not absolute. This method is exported to be used as a service.
 
         Parameters
         ----------
@@ -200,9 +197,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                            global_config: Optional[Dict[str, Any]] = None,
                            parent_args: Optional[Dict[str, TunableValue]] = None) -> Tuple[str, Dict[str, Any]]:
         """
-        Extract the class instantiation parameters from the configuration.
-        Mix-in the global parameters and resolve the local file system paths,
-        where it is required.
+        Extract the class instantiation parameters from the configuration. Mix-in the
+        global parameters and resolve the local file system paths, where it is required.
 
         Parameters
         ----------
@@ -252,8 +248,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                         config: Dict[str, Any],
                         global_config: Optional[Dict[str, Any]] = None) -> Optimizer:
         """
-        Instantiation of mlos_bench Optimizer
-        that depend on Service and TunableGroups.
+        Instantiation of mlos_bench Optimizer that depend on Service and TunableGroups.
 
         A class *MUST* have a constructor that takes four named arguments:
         (tunables, config, global_config, service)
@@ -589,8 +584,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                       global_config: Optional[Dict[str, Any]] = None,
                       parent: Optional[Service] = None) -> Service:
         """
-        Read the configuration files and bundle all service methods
-        from those configs into a single Service object.
+        Read the configuration files and bundle all service methods from those configs
+        into a single Service object.
 
         Parameters
         ----------

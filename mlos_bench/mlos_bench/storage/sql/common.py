@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Common SQL methods for accessing the stored benchmark data.
-"""
+"""Common SQL methods for accessing the stored benchmark data."""
 from typing import Dict, Optional
 
 import pandas
@@ -23,8 +21,9 @@ def get_trials(
         experiment_id: str,
         tunable_config_id: Optional[int] = None) -> Dict[int, TrialData]:
     """
-    Gets TrialData for the given experiment_data and optionally additionally
-    restricted by tunable_config_id.
+    Gets TrialData for the given experiment_data and optionally additionally restricted
+    by tunable_config_id.
+
     Used by both TunableConfigTrialGroupSqlData and ExperimentSqlData.
     """
     from mlos_bench.storage.sql.trial_data import (
@@ -65,8 +64,9 @@ def get_results_df(
         experiment_id: str,
         tunable_config_id: Optional[int] = None) -> pandas.DataFrame:
     """
-    Gets TrialData for the given experiment_data and optionally additionally
-    restricted by tunable_config_id.
+    Gets TrialData for the given experiment_data and optionally additionally restricted
+    by tunable_config_id.
+
     Used by both TunableConfigTrialGroupSqlData and ExperimentSqlData.
     """
     # pylint: disable=too-many-locals

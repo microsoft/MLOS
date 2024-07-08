@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests to check the main CLI launcher.
-"""
+"""Unit tests to check the main CLI launcher."""
 import os
 import re
 from typing import List
@@ -20,17 +18,13 @@ from mlos_bench.util import path_join
 
 @pytest.fixture
 def root_path() -> str:
-    """
-    Root path of mlos_bench project.
-    """
+    """Root path of mlos_bench project."""
     return path_join(os.path.dirname(__file__), "../../..", abs_path=True)
 
 
 @pytest.fixture
 def local_exec_service() -> LocalExecService:
-    """
-    Test fixture for LocalExecService.
-    """
+    """Test fixture for LocalExecService."""
     return LocalExecService(parent=ConfigPersistenceService({
         "config_path": [
             "mlos_bench/config",
@@ -41,9 +35,8 @@ def local_exec_service() -> LocalExecService:
 
 def _launch_main_app(root_path: str, local_exec_service: LocalExecService,
                      cli_config: str, re_expected: List[str]) -> None:
-    """
-    Run mlos_bench command-line application with given config
-    and check the results in the log.
+    """Run mlos_bench command-line application with given config and check the results
+    in the log.
     """
     with local_exec_service.temp_dir_context() as temp_dir:
 
@@ -74,9 +67,8 @@ _RE_DATE = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}"
 
 
 def test_launch_main_app_bench(root_path: str, local_exec_service: LocalExecService) -> None:
-    """
-    Run mlos_bench command-line application with mock benchmark config
-    and default tunable values and check the results in the log.
+    """Run mlos_bench command-line application with mock benchmark config and default
+    tunable values and check the results in the log.
     """
     _launch_main_app(
         root_path, local_exec_service,
@@ -92,9 +84,8 @@ def test_launch_main_app_bench(root_path: str, local_exec_service: LocalExecServ
 
 def test_launch_main_app_bench_values(
         root_path: str, local_exec_service: LocalExecService) -> None:
-    """
-    Run mlos_bench command-line application with mock benchmark config
-    and user-specified tunable values and check the results in the log.
+    """Run mlos_bench command-line application with mock benchmark config and user-
+    specified tunable values and check the results in the log.
     """
     _launch_main_app(
         root_path, local_exec_service,
@@ -110,9 +101,8 @@ def test_launch_main_app_bench_values(
 
 
 def test_launch_main_app_opt(root_path: str, local_exec_service: LocalExecService) -> None:
-    """
-    Run mlos_bench command-line application with mock optimization config
-    and check the results in the log.
+    """Run mlos_bench command-line application with mock optimization config and check
+    the results in the log.
     """
     _launch_main_app(
         root_path, local_exec_service,

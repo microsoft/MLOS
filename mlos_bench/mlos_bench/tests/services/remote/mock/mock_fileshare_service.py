@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A collection Service functions for mocking file share ops.
-"""
+"""A collection Service functions for mocking file share ops."""
 
 import logging
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
@@ -17,9 +15,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class MockFileShareService(FileShareService, SupportsFileShareOps):
-    """
-    A collection Service functions for mocking file share ops.
-    """
+    """A collection Service functions for mocking file share ops."""
 
     def __init__(self, config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
@@ -39,13 +35,9 @@ class MockFileShareService(FileShareService, SupportsFileShareOps):
         self._download.append((remote_path, local_path))
 
     def get_upload(self) -> List[Tuple[str, str]]:
-        """
-        Get the list of files that were uploaded.
-        """
+        """Get the list of files that were uploaded."""
         return self._upload
 
     def get_download(self) -> List[Tuple[str, str]]:
-        """
-        Get the list of files that were downloaded.
-        """
+        """Get the list of files that were downloaded."""
         return self._download

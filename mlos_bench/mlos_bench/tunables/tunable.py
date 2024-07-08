@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tunable parameter definition.
-"""
+"""Tunable parameter definition."""
 import collections
 import copy
 import logging
@@ -27,34 +25,26 @@ import numpy as np
 from mlos_bench.util import nullable
 
 _LOG = logging.getLogger(__name__)
-
-
 """A tunable parameter value type alias."""
 TunableValue = Union[int, float, Optional[str]]
-
 """Tunable value type."""
 TunableValueType = Union[Type[int], Type[float], Type[str]]
-
 """
 Tunable value type tuple.
+
 For checking with isinstance()
 """
 TunableValueTypeTuple = (int, float, str, type(None))
-
 """The string name of a tunable value type."""
 TunableValueTypeName = Literal["int", "float", "categorical"]
-
-"""Tunable values dictionary type"""
+"""Tunable values dictionary type."""
 TunableValuesDict = Dict[str, TunableValue]
-
-"""Tunable value distribution type"""
+"""Tunable value distribution type."""
 DistributionName = Literal["uniform", "normal", "beta"]
 
 
 class DistributionDict(TypedDict, total=False):
-    """
-    A typed dict for tunable parameters' distributions.
-    """
+    """A typed dict for tunable parameters' distributions."""
 
     type: DistributionName
     params: Optional[Dict[str, float]]
@@ -85,9 +75,7 @@ class TunableDict(TypedDict, total=False):
 
 
 class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-methods
-    """
-    A tunable parameter definition and its current value.
-    """
+    """A tunable parameter definition and its current value."""
 
     # Maps tunable types to their corresponding Python types by name.
     _DTYPE: Dict[TunableValueTypeName, TunableValueType] = {
@@ -144,8 +132,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         self.value = self._default
 
     def _sanity_check(self) -> None:
-        """
-        Check if the status of the Tunable is valid, and throw ValueError if it is not.
+        """Check if the status of the Tunable is valid, and throw ValueError if it is
+        not.
         """
         if self.is_categorical:
             self._sanity_check_categorical()
@@ -157,8 +145,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             raise ValueError(f"Invalid default value for tunable {self}: {self.default}")
 
     def _sanity_check_categorical(self) -> None:
-        """
-        Check if the status of the categorical Tunable is valid, and throw ValueError if it is not.
+        """Check if the status of the categorical Tunable is valid, and throw ValueError
+        if it is not.
         """
         # pylint: disable=too-complex
         assert self.is_categorical
@@ -185,8 +173,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
                 raise ValueError(f"All weights must be non-negative: {self}")
 
     def _sanity_check_numerical(self) -> None:
-        """
-        Check if the status of the numerical Tunable is valid, and throw ValueError if it is not.
+        """Check if the status of the numerical Tunable is valid, and throw ValueError
+        if it is not.
         """
         # pylint: disable=too-complex,too-many-branches
         assert self.is_numerical
@@ -303,29 +291,23 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     @property
     def default(self) -> TunableValue:
-        """
-        Get the default value of the tunable.
-        """
+        """Get the default value of the tunable."""
         return self._default
 
     def is_default(self) -> TunableValue:
-        """
-        Checks whether the currently assigned value of the tunable is at its default.
+        """Checks whether the currently assigned value of the tunable is at its
+        default.
         """
         return self._default == self._current_value
 
     @property
     def value(self) -> TunableValue:
-        """
-        Get the current value of the tunable.
-        """
+        """Get the current value of the tunable."""
         return self._current_value
 
     @value.setter
     def value(self, value: TunableValue) -> TunableValue:
-        """
-        Set the current value of the tunable.
-        """
+        """Set the current value of the tunable."""
         # We need this coercion for the values produced by some optimizers
         # (e.g., scikit-optimize) and for data restored from certain storage
         # systems (where values can be strings).
@@ -355,7 +337,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     def update(self, value: TunableValue) -> bool:
         """
-        Assign the value to the tunable. Return True if it is a new value, False otherwise.
+        Assign the value to the tunable. Return True if it is a new value, False
+        otherwise.
 
         Parameters
         ----------
@@ -399,8 +382,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     def in_range(self, value: Union[int, float, str, None]) -> bool:
         """
         Check if the value is within the range of the tunable.
-        Do *NOT* check for special values.
-        Return False if the tunable or value is categorical or None.
+
+        Do *NOT* check for special values. Return False if the tunable or value is
+        categorical or None.
         """
         return (
             isinstance(value, (float, int)) and
@@ -411,9 +395,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     @property
     def category(self) -> Optional[str]:
-        """
-        Get the current value of the tunable as a number.
-        """
+        """Get the current value of the tunable as a number."""
         if self.is_categorical:
             return nullable(str, self._current_value)
         else:
@@ -421,9 +403,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     @category.setter
     def category(self, new_value: Optional[str]) -> Optional[str]:
-        """
-        Set the current value of the tunable.
-        """
+        """Set the current value of the tunable."""
         assert self.is_categorical
         assert isinstance(new_value, (str, type(None)))
         self.value = new_value
@@ -431,9 +411,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     @property
     def numerical_value(self) -> Union[int, float]:
-        """
-        Get the current value of the tunable as a number.
-        """
+        """Get the current value of the tunable as a number."""
         assert self._current_value is not None
         if self._type == "int":
             return int(self._current_value)
@@ -444,9 +422,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     @numerical_value.setter
     def numerical_value(self, new_value: Union[int, float]) -> Union[int, float]:
-        """
-        Set the current numerical value of the tunable.
-        """
+        """Set the current numerical value of the tunable."""
         # We need this coercion for the values produced by some optimizers
         # (e.g., scikit-optimize) and for data restored from certain storage
         # systems (where values can be strings).
@@ -456,9 +432,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     @property
     def name(self) -> str:
-        """
-        Get the name / string ID of the tunable.
-        """
+        """Get the name / string ID of the tunable."""
         return self._name
 
     @property
@@ -488,8 +462,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @property
     def weights(self) -> Optional[List[float]]:
         """
-        Get the weights of the categories or special values of the tunable.
-        Return None if there are none.
+        Get the weights of the categories or special values of the tunable. Return None
+        if there are none.
 
         Returns
         -------
@@ -501,8 +475,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @property
     def range_weight(self) -> Optional[float]:
         """
-        Get weight of the range of the numeric tunable.
-        Return None if there are no weights or a tunable is categorical.
+        Get weight of the range of the numeric tunable. Return None if there are no
+        weights or a tunable is categorical.
 
         Returns
         -------
@@ -693,8 +667,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @property
     def categories(self) -> List[Optional[str]]:
         """
-        Get the list of all possible values of a categorical tunable.
-        Return None if the tunable is not categorical.
+        Get the list of all possible values of a categorical tunable. Return None if the
+        tunable is not categorical.
 
         Returns
         -------
@@ -723,7 +697,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @property
     def meta(self) -> Dict[str, Any]:
         """
-        Get the tunable's metadata. This is a free-form dictionary that can be used to
-        store any additional information about the tunable (e.g., the unit information).
+        Get the tunable's metadata.
+
+        This is a free-form dictionary that can be used to store any additional
+        information about the tunable (e.g., the unit information).
         """
         return self._meta

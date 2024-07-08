@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for RemoveEnv benchmark environment via local SSH test services.
-"""
+"""Unit tests for RemoveEnv benchmark environment via local SSH test services."""
 
 import os
 import sys
@@ -28,9 +26,7 @@ else:
 
 @requires_docker
 def test_remote_ssh_env(ssh_test_server: SshTestServerInfo) -> None:
-    """
-    Produce benchmark and telemetry data in a local script and read it.
-    """
+    """Produce benchmark and telemetry data in a local script and read it."""
     global_config: Dict[str, TunableValue] = {
         "ssh_hostname": ssh_test_server.hostname,
         "ssh_port": ssh_test_server.get_port(),

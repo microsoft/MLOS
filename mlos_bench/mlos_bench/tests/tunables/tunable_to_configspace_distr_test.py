@@ -2,9 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for converting tunable parameters with explicitly
-specified distributions to ConfigSpace.
+"""Unit tests for converting tunable parameters with explicitly specified distributions
+to ConfigSpace.
 """
 
 import pytest
@@ -44,9 +43,7 @@ _CS_HYPERPARAMETER = {
 def test_convert_numerical_distributions(param_type: str,
                                          distr_name: DistributionName,
                                          distr_params: dict) -> None:
-    """
-    Convert a numerical Tunable with explicit distribution to ConfigSpace.
-    """
+    """Convert a numerical Tunable with explicit distribution to ConfigSpace."""
     tunable_name = "x"
     tunable_groups = TunableGroups({
         "tunable_group": {

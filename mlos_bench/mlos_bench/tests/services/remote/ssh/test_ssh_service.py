@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for mlos_bench.services.remote.ssh.SshService base class.
-"""
+"""Tests for mlos_bench.services.remote.ssh.SshService base class."""
 
 import asyncio
 import time
@@ -71,6 +69,7 @@ def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo,
 def test_ssh_service_context_handler() -> None:
     """
     Test the SSH service context manager handling.
+
     See Also: test_event_loop_context
     """
     # pylint: disable=protected-access

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Small wrapper functions for dabl plotting functions via mlos_bench data.
-"""
+"""Small wrapper functions for dabl plotting functions via mlos_bench data."""
 import warnings
 from typing import Dict, Literal, Optional
 
@@ -39,9 +37,7 @@ def plot(exp_data: Optional[ExperimentData] = None, *,
 
 
 def ignore_plotter_warnings() -> None:
-    """
-    Add some filters to ignore warnings from the plotter.
-    """
+    """Add some filters to ignore warnings from the plotter."""
     # pylint: disable=import-outside-toplevel
     warnings.filterwarnings("ignore", category=FutureWarning)
     warnings.filterwarnings("ignore", module="dabl", category=UserWarning, message="Could not infer format")

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for Bayesian Optimizers.
-"""
+"""Tests for Bayesian Optimizers."""
 
 import logging
 from copy import deepcopy
@@ -37,9 +35,7 @@ _LOG.setLevel(logging.DEBUG)
 ])
 def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace,
                                       optimizer_class: Type[BaseOptimizer], kwargs: Optional[dict]) -> None:
-    """
-    Test that we can create an optimizer and get a suggestion from it.
-    """
+    """Test that we can create an optimizer and get a suggestion from it."""
     if kwargs is None:
         kwargs = {}
     optimizer = optimizer_class(
@@ -67,9 +63,7 @@ def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace
 ])
 def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
                                      optimizer_class: Type[BaseOptimizer], kwargs: Optional[dict]) -> None:
-    """
-    Toy problem to test the optimizers.
-    """
+    """Toy problem to test the optimizers."""
     # pylint: disable=too-many-locals
     max_iterations = 20
     if kwargs is None:
@@ -143,9 +137,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
     *list(OptimizerType),
 ])
 def test_concrete_optimizer_type(optimizer_type: OptimizerType) -> None:
-    """
-    Test that all optimizer types are listed in the ConcreteOptimizer constraints.
-    """
+    """Test that all optimizer types are listed in the ConcreteOptimizer constraints."""
     assert optimizer_type.value in ConcreteOptimizer.__constraints__    # type: ignore[attr-defined]  # pylint: disable=no-member
 
 
@@ -158,9 +150,7 @@ def test_concrete_optimizer_type(optimizer_type: OptimizerType) -> None:
 ])
 def test_create_optimizer_with_factory_method(configuration_space: CS.ConfigurationSpace,
                                               optimizer_type: Optional[OptimizerType], kwargs: Optional[dict]) -> None:
-    """
-    Test that we can create an optimizer via a factory.
-    """
+    """Test that we can create an optimizer via a factory."""
     if kwargs is None:
         kwargs = {}
     if optimizer_type is None:
@@ -199,9 +189,7 @@ def test_create_optimizer_with_factory_method(configuration_space: CS.Configurat
     }),
 ])
 def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optional[dict]) -> None:
-    """
-    Toy problem to test the optimizers with llamatune space adapter.
-    """
+    """Toy problem to test the optimizers with llamatune space adapter."""
     # pylint: disable=too-complex,disable=too-many-statements,disable=too-many-locals
     num_iters = 50
     if kwargs is None:
@@ -327,9 +315,7 @@ assert optimizer_subclasses
 
 @pytest.mark.parametrize(('optimizer_class'), optimizer_subclasses)
 def test_optimizer_type_defs(optimizer_class: Type[BaseOptimizer]) -> None:
-    """
-    Test that all optimizer classes are listed in the OptimizerType enum.
-    """
+    """Test that all optimizer classes are listed in the OptimizerType enum."""
     optimizer_type_classes = {member.value for member in OptimizerType}
     assert optimizer_class in optimizer_type_classes
 
@@ -342,8 +328,8 @@ def test_optimizer_type_defs(optimizer_class: Type[BaseOptimizer]) -> None:
     # Optimizer with non-empty kwargs argument
 ])
 def test_mixed_numerics_type_input_space_types(optimizer_type: Optional[OptimizerType], kwargs: Optional[dict]) -> None:
-    """
-    Toy problem to test the optimizers with mixed numeric types to ensure that original dtypes are retained.
+    """Toy problem to test the optimizers with mixed numeric types to ensure that
+    original dtypes are retained.
     """
     max_iterations = 10
     if kwargs is None:

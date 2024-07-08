@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for environment schema validation.
-"""
+"""Tests for environment schema validation."""
 
 from os import path
 
@@ -50,8 +48,8 @@ expected_leaf_environment_class_names = [subclass_name for subclass_name in expe
 @pytest.mark.parametrize("test_case_subtype", sorted(TEST_CASES.by_subtype))
 @pytest.mark.parametrize("env_class", expected_environment_class_names)
 def test_case_coverage_mlos_bench_environment_type(test_case_subtype: str, env_class: str) -> None:
-    """
-    Checks to see if there is a given type of test case for the given mlos_bench Environment type.
+    """Checks to see if there is a given type of test case for the given mlos_bench
+    Environment type.
     """
     for test_case in TEST_CASES.by_subtype[test_case_subtype].values():
         if try_resolve_class_name(test_case.config.get("class")) == env_class:
@@ -64,17 +62,15 @@ def test_case_coverage_mlos_bench_environment_type(test_case_subtype: str, env_c
 
 @pytest.mark.parametrize("test_case_name", sorted(TEST_CASES.by_path))
 def test_environment_configs_against_schema(test_case_name: str) -> None:
-    """
-    Checks that the environment config validates against the schema.
-    """
+    """Checks that the environment config validates against the schema."""
     check_test_case_against_schema(TEST_CASES.by_path[test_case_name], ConfigSchema.ENVIRONMENT)
     check_test_case_against_schema(TEST_CASES.by_path[test_case_name], ConfigSchema.UNIFIED)
 
 
 @pytest.mark.parametrize("test_case_name", sorted(TEST_CASES.by_type["good"]))
 def test_environment_configs_with_extra_param(test_case_name: str) -> None:
-    """
-    Checks that the environment config fails to validate if extra params are present in certain places.
+    """Checks that the environment config fails to validate if extra params are present
+    in certain places.
     """
     check_test_case_config_with_extra_param(TEST_CASES.by_type["good"][test_case_name], ConfigSchema.ENVIRONMENT)
     check_test_case_config_with_extra_param(TEST_CASES.by_type["good"][test_case_name], ConfigSchema.UNIFIED)

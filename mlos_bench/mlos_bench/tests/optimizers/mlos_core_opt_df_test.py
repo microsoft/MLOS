@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for internal methods of the `MlosCoreOptimizer`.
-"""
+"""Unit tests for internal methods of the `MlosCoreOptimizer`."""
 
 from typing import List
 
@@ -20,9 +18,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 @pytest.fixture
 def mlos_core_optimizer(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
-    """
-    An instance of a mlos_core optimizer (FLAML-based).
-    """
+    """An instance of a mlos_core optimizer (FLAML-based)."""
     test_opt_config = {
         'optimizer_type': 'FLAML',
         'max_suggestions': 10,
@@ -32,9 +28,7 @@ def mlos_core_optimizer(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
 
 
 def test_df(mlos_core_optimizer: MlosCoreOptimizer, mock_configs: List[dict]) -> None:
-    """
-    Test `MlosCoreOptimizer._to_df()` method on tunables that have special values.
-    """
+    """Test `MlosCoreOptimizer._to_df()` method on tunables that have special values."""
     df_config = mlos_core_optimizer._to_df(mock_configs)
     assert isinstance(df_config, pandas.DataFrame)
     assert df_config.shape == (4, 6)

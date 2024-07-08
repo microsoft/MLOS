@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for LocalEnv benchmark environment.
-"""
+"""Unit tests for LocalEnv benchmark environment."""
 import pytest
 
 from mlos_bench.tests.environments import check_env_success
@@ -13,9 +11,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def test_local_env(tunable_groups: TunableGroups) -> None:
-    """
-    Produce benchmark and telemetry data in a local script and read it.
-    """
+    """Produce benchmark and telemetry data in a local script and read it."""
     local_env = create_local_env(tunable_groups, {
         "run": [
             "echo 'metric,value' > output.csv",
@@ -38,8 +34,8 @@ def test_local_env(tunable_groups: TunableGroups) -> None:
 
 
 def test_local_env_service_context(tunable_groups: TunableGroups) -> None:
-    """
-    Basic check that context support for Service mixins are handled when environment contexts are entered.
+    """Basic check that context support for Service mixins are handled when environment
+    contexts are entered.
     """
     local_env = create_local_env(tunable_groups, {
         "run": ["echo NA"]
@@ -60,9 +56,7 @@ def test_local_env_service_context(tunable_groups: TunableGroups) -> None:
 
 
 def test_local_env_results_no_header(tunable_groups: TunableGroups) -> None:
-    """
-    Fail if the results are not in the expected format.
-    """
+    """Fail if the results are not in the expected format."""
     local_env = create_local_env(tunable_groups, {
         "run": [
             # No header
@@ -80,9 +74,7 @@ def test_local_env_results_no_header(tunable_groups: TunableGroups) -> None:
 
 
 def test_local_env_wide(tunable_groups: TunableGroups) -> None:
-    """
-    Produce benchmark data in wide format and read it.
-    """
+    """Produce benchmark data in wide format and read it."""
     local_env = create_local_env(tunable_groups, {
         "run": [
             "echo 'latency,throughput,score' > output.csv",

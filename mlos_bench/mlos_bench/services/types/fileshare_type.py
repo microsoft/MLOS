@@ -2,18 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Protocol interface for file share operations.
-"""
+"""Protocol interface for file share operations."""
 
 from typing import Protocol, runtime_checkable
 
 
 @runtime_checkable
 class SupportsFileShareOps(Protocol):
-    """
-    Protocol interface for file share operations.
-    """
+    """Protocol interface for file share operations."""
 
     def download(self, params: dict, remote_path: str, local_path: str, recursive: bool = True) -> None:
         """

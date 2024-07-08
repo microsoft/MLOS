@@ -2,19 +2,17 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests to make sure we always produce a string representation
-of a TunableGroup in canonical form.
+"""Unit tests to make sure we always produce a string representation of a TunableGroup
+in canonical form.
 """
 
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def test_tunable_groups_str(tunable_groups: TunableGroups) -> None:
-    """
-    Check that we produce the same string representation of TunableGroups,
-    regardless of the order in which we declare the covariant groups and
-    tunables within each covariant group.
+    """Check that we produce the same string representation of TunableGroups, regardless
+    of the order in which we declare the covariant groups and tunables within each
+    covariant group.
     """
     # Same as `tunable_groups` (defined in the `conftest.py` file), but in different order:
     tunables_other = TunableGroups({

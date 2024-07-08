@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for composite environment.
-"""
+"""Unit tests for composite environment."""
 
 import pytest
 
@@ -17,9 +15,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 @pytest.fixture
 def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
-    """
-    Test fixture for CompositeEnv.
-    """
+    """Test fixture for CompositeEnv."""
     return CompositeEnv(
         name="Composite Test Environment",
         config={
@@ -86,7 +82,9 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
 
 def test_composite_env_params(composite_env: CompositeEnv) -> None:
     """
-    Check that the const_args from the parent environment get propagated to the children.
+    Check that the const_args from the parent environment get propagated to the
+    children.
+
     NOTE: The current logic is that variables flow down via required_args and const_args, parent
     """
     assert composite_env.children[0].parameters == {
@@ -115,9 +113,7 @@ def test_composite_env_params(composite_env: CompositeEnv) -> None:
 
 
 def test_composite_env_setup(composite_env: CompositeEnv, tunable_groups: TunableGroups) -> None:
-    """
-    Check that the child environments update their tunable parameters.
-    """
+    """Check that the child environments update their tunable parameters."""
     tunable_groups.assign({
         "vmSize": "Standard_B2s",
         "idle": "mwait",
@@ -153,9 +149,7 @@ def test_composite_env_setup(composite_env: CompositeEnv, tunable_groups: Tunabl
 
 @pytest.fixture
 def nested_composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
-    """
-    Test fixture for CompositeEnv.
-    """
+    """Test fixture for CompositeEnv."""
     return CompositeEnv(
         name="Composite Test Environment",
         config={
@@ -239,7 +233,9 @@ def nested_composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
 
 def test_nested_composite_env_params(nested_composite_env: CompositeEnv) -> None:
     """
-    Check that the const_args from the parent environment get propagated to the children.
+    Check that the const_args from the parent environment get propagated to the
+    children.
+
     NOTE: The current logic is that variables flow down via required_args and const_args, parent
     """
     assert isinstance(nested_composite_env.children[0], CompositeEnv)
@@ -263,9 +259,7 @@ def test_nested_composite_env_params(nested_composite_env: CompositeEnv) -> None
 
 
 def test_nested_composite_env_setup(nested_composite_env: CompositeEnv, tunable_groups: TunableGroups) -> None:
-    """
-    Check that the child environments update their tunable parameters.
-    """
+    """Check that the child environments update their tunable parameters."""
     tunable_groups.assign({
         "vmSize": "Standard_B2s",
         "idle": "mwait",

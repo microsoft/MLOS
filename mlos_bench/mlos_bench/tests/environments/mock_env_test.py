@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for mock benchmark environment.
-"""
+"""Unit tests for mock benchmark environment."""
 import pytest
 
 from mlos_bench.environments.mock_env import MockEnv
@@ -12,9 +10,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def test_mock_env_default(mock_env: MockEnv, tunable_groups: TunableGroups) -> None:
-    """
-    Check the default values of the mock environment.
-    """
+    """Check the default values of the mock environment."""
     with mock_env as env_context:
         assert env_context.setup(tunable_groups)
         (status, _ts, data) = env_context.run()
@@ -29,9 +25,7 @@ def test_mock_env_default(mock_env: MockEnv, tunable_groups: TunableGroups) -> N
 
 
 def test_mock_env_no_noise(mock_env_no_noise: MockEnv, tunable_groups: TunableGroups) -> None:
-    """
-    Check the default values of the mock environment.
-    """
+    """Check the default values of the mock environment."""
     with mock_env_no_noise as env_context:
         assert env_context.setup(tunable_groups)
         for _ in range(10):
@@ -56,9 +50,7 @@ def test_mock_env_no_noise(mock_env_no_noise: MockEnv, tunable_groups: TunableGr
 ])
 def test_mock_env_assign(mock_env: MockEnv, tunable_groups: TunableGroups,
                          tunable_values: dict, expected_score: float) -> None:
-    """
-    Check the benchmark values of the mock environment after the assignment.
-    """
+    """Check the benchmark values of the mock environment after the assignment."""
     with mock_env as env_context:
         tunable_groups.assign(tunable_values)
         assert env_context.setup(tunable_groups)
@@ -83,8 +75,8 @@ def test_mock_env_assign(mock_env: MockEnv, tunable_groups: TunableGroups,
 def test_mock_env_no_noise_assign(mock_env_no_noise: MockEnv,
                                   tunable_groups: TunableGroups,
                                   tunable_values: dict, expected_score: float) -> None:
-    """
-    Check the benchmark values of the noiseless mock environment after the assignment.
+    """Check the benchmark values of the noiseless mock environment after the
+    assignment.
     """
     with mock_env_no_noise as env_context:
         tunable_groups.assign(tunable_values)

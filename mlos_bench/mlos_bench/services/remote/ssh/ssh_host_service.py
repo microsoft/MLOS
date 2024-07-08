@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A collection Service functions for managing hosts via SSH.
-"""
+"""A collection Service functions for managing hosts via SSH."""
 
 import logging
 from concurrent.futures import Future
@@ -23,9 +21,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
-    """
-    Helper methods to manage machines via SSH.
-    """
+    """Helper methods to manage machines via SSH."""
 
     # pylint: disable=too-many-instance-attributes
 
@@ -166,7 +162,8 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             return (Status.FAILED, {"result": result})
 
     def _exec_os_op(self, cmd_opts_list: List[str], params: dict) -> Tuple[Status, dict]:
-        """_summary_
+        """
+        _summary_
 
         Parameters
         ----------
@@ -258,8 +255,8 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
 
     def wait_os_operation(self, params: dict) -> Tuple[Status, dict]:
         """
-        Waits for a pending operation on an OS to resolve to SUCCEEDED or FAILED.
-        Return TIMED_OUT when timing out.
+        Waits for a pending operation on an OS to resolve to SUCCEEDED or FAILED. Return
+        TIMED_OUT when timing out.
 
         Parameters
         ----------

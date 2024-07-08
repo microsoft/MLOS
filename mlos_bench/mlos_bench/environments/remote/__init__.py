@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Remote Tunable Environments for mlos_bench.
-"""
+"""Remote Tunable Environments for mlos_bench."""
 
 from mlos_bench.environments.remote.host_env import HostEnv
 from mlos_bench.environments.remote.network_env import NetworkEnv

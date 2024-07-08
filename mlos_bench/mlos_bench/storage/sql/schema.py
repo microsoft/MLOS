@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-DB schema definition.
-"""
+"""DB schema definition."""
 
 import logging
 from typing import Any, List
@@ -49,9 +47,7 @@ class _DDL:
 
 
 class DbSchema:
-    """
-    A class to define and create the DB schema.
-    """
+    """A class to define and create the DB schema."""
 
     # This class is internal to SqlStorage and is mostly a struct
     # for all DB tables, so it's ok to disable the warnings.
@@ -64,9 +60,7 @@ class DbSchema:
     _STATUS_LEN = 16
 
     def __init__(self, engine: Engine):
-        """
-        Declare the SQLAlchemy schema for the database.
-        """
+        """Declare the SQLAlchemy schema for the database."""
         _LOG.info("Create the DB schema for: %s", engine)
         self._engine = engine
         # TODO: bind for automatic schema updates? (#649)
@@ -204,17 +198,15 @@ class DbSchema:
         _LOG.debug("Schema: %s", self._meta)
 
     def create(self) -> 'DbSchema':
-        """
-        Create the DB schema.
-        """
+        """Create the DB schema."""
         _LOG.info("Create the DB schema")
         self._meta.create_all(self._engine)
         return self
 
     def __repr__(self) -> str:
         """
-        Produce a string with all SQL statements required to create the schema
-        from scratch in current SQL dialect.
+        Produce a string with all SQL statements required to create the schema from
+        scratch in current SQL dialect.
 
         That is, return a collection of CREATE TABLE statements and such.
         NOTE: this method is quite heavy! We use it only once at startup

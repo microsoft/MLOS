@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Cloud-based (configurable) SaaS environment.
-"""
+"""Cloud-based (configurable) SaaS environment."""
 
 import logging
 from typing import Optional
@@ -19,9 +17,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class SaaSEnv(Environment):
-    """
-    Cloud-based (configurable) SaaS environment.
-    """
+    """Cloud-based (configurable) SaaS environment."""
 
     def __init__(self,
                  *,
