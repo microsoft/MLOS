@@ -31,6 +31,7 @@ dependencies:
     - bump2version
     - check-jsonschema
     - isort
+    - docformatter
     - licenseheaders
     - mypy
     - pandas-stubs
