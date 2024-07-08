@@ -109,8 +109,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         intensifier: Optional[Type[AbstractIntensifier]]
             Sets the intensifier type to use in the optimizer. If not set, the
-            default intensifier
-            from the facade will be used
+            default intensifier from the facade will be used
 
         initial_design_class: AbstractInitialDesign
             Sets the initial design class to be used in the optimizer.
