@@ -10,6 +10,6 @@ from mlos_bench.schedulers.base_scheduler import Scheduler
 from mlos_bench.schedulers.sync_scheduler import SyncScheduler
 
 __all__ = [
-    "Scheduler",
-    "SyncScheduler",
+    'Scheduler',
+    'SyncScheduler',
 ]

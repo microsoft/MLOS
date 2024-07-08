@@ -29,19 +29,15 @@ def config_persistence_service() -> ConfigPersistenceService:
     """
     Test fixture for ConfigPersistenceService.
     """
-    return ConfigPersistenceService(
-        {
-            "config_path": [
-                "./non-existent-dir/test/foo/bar",  # Non-existent config path
-                ".",  # cwd
-                str(
-                    files("mlos_bench.tests.config").joinpath("")
-                ),  # Test configs (relative to mlos_bench/tests)
-                # Shouldn't be necessary since we automatically add this.
-                # str(files("mlos_bench.config").joinpath("")),         # Stock configs
-            ]
-        }
-    )
+    return ConfigPersistenceService({
+        "config_path": [
+            "./non-existent-dir/test/foo/bar",                      # Non-existent config path
+            ".",                                                    # cwd
+            str(files("mlos_bench.tests.config").joinpath("")),     # Test configs (relative to mlos_bench/tests)
+            # Shouldn't be necessary since we automatically add this.
+            # str(files("mlos_bench.config").joinpath("")),         # Stock configs
+        ]
+    })
 
 
 def test_cwd_in_explicit_search_path(config_persistence_service: ConfigPersistenceService) -> None:
@@ -82,7 +78,7 @@ def test_resolve_stock_path(config_persistence_service: ConfigPersistenceService
     assert os.path.exists(path)
     assert os.path.samefile(
         ConfigPersistenceService.BUILTIN_CONFIG_PATH,
-        os.path.commonpath([ConfigPersistenceService.BUILTIN_CONFIG_PATH, path]),
+        os.path.commonpath([ConfigPersistenceService.BUILTIN_CONFIG_PATH, path])
     )
 
 
@@ -110,9 +106,8 @@ def test_load_config(config_persistence_service: ConfigPersistenceService) -> No
     """
     Check if we can successfully load a config file located relative to `config_path`.
     """
-    tunables_data = config_persistence_service.load_config(
-        "tunable-values/tunable-values-example.jsonc", ConfigSchema.TUNABLE_VALUES
-    )
+    tunables_data = config_persistence_service.load_config("tunable-values/tunable-values-example.jsonc",
+                                                           ConfigSchema.TUNABLE_VALUES)
     assert tunables_data is not None
     assert isinstance(tunables_data, dict)
     assert len(tunables_data) >= 1

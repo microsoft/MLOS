@@ -10,9 +10,7 @@ from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
-def test_tunable_group_indexing(
-    tunable_groups: TunableGroups, tunable_categorical: Tunable
-) -> None:
+def test_tunable_group_indexing(tunable_groups: TunableGroups, tunable_categorical: Tunable) -> None:
     """
     Check that various types of indexing work for the tunable group.
     """

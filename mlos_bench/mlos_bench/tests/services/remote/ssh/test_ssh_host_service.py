@@ -27,11 +27,9 @@ _LOG = logging.getLogger(__name__)
 
 
 @requires_docker
-def test_ssh_service_remote_exec(
-    ssh_test_server: SshTestServerInfo,
-    alt_test_server: SshTestServerInfo,
-    ssh_host_service: SshHostService,
-) -> None:
+def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
+                                 alt_test_server: SshTestServerInfo,
+                                 ssh_host_service: SshHostService) -> None:
     """
     Test the SshHostService remote_exec.
 
@@ -44,9 +42,7 @@ def test_ssh_service_remote_exec(
 
         connection_id = SshClient.id_from_params(ssh_test_server.to_connect_params())
         assert ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE is not None
-        connection_client = ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE._cache.get(
-            connection_id
-        )
+        connection_client = ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE._cache.get(connection_id)
         assert connection_client is None
 
         (status, results_info) = ssh_host_service.remote_exec(
@@ -61,9 +57,7 @@ def test_ssh_service_remote_exec(
         assert results["stdout"].strip() == SSH_TEST_SERVER_NAME
 
         # Check that the client caching is behaving as expected.
-        connection, client = ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE._cache[
-            connection_id
-        ]
+        connection, client = ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE._cache[connection_id]
         assert connection is not None
         assert connection._username == ssh_test_server.username
         assert connection._host == ssh_test_server.hostname
@@ -97,15 +91,13 @@ def test_ssh_service_remote_exec(
             },
         )
         status, results = ssh_host_service.get_remote_exec_results(results_info)
-        assert status.is_failed()  # should retain exit code from "false"
+        assert status.is_failed()   # should retain exit code from "false"
         stdout = str(results["stdout"])
         assert stdout.splitlines() == [
             "BAR=bar",
             "UNUSED=",
         ]
-        connection, client = ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE._cache[
-            connection_id
-        ]
+        connection, client = ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE._cache[connection_id]
         assert connection._local_port == local_port
 
         # Close the connection (gracefully)
@@ -122,7 +114,7 @@ def test_ssh_service_remote_exec(
             config=config,
             # Also test interacting with environment_variables.
             env_params={
-                "FOO": "foo",
+                'FOO': 'foo',
             },
         )
         status, results = ssh_host_service.get_remote_exec_results(results_info)
@@ -135,21 +127,17 @@ def test_ssh_service_remote_exec(
             "BAZ=",
         ]
         # Make sure it looks like we reconnected.
-        connection, client = ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE._cache[
-            connection_id
-        ]
+        connection, client = ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE._cache[connection_id]
         assert connection._local_port != local_port
 
     # Make sure the cache is cleaned up on context exit.
     assert len(SshHostService._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE) == 0
 
 
-def check_ssh_service_reboot(
-    docker_services: DockerServices,
-    reboot_test_server: SshTestServerInfo,
-    ssh_host_service: SshHostService,
-    graceful: bool,
-) -> None:
+def check_ssh_service_reboot(docker_services: DockerServices,
+                             reboot_test_server: SshTestServerInfo,
+                             ssh_host_service: SshHostService,
+                             graceful: bool) -> None:
     """
     Check the SshHostService reboot operation.
     """
@@ -160,7 +148,11 @@ def check_ssh_service_reboot(
     with ssh_host_service:
         reboot_test_srv_ssh_svc_conf = reboot_test_server.to_ssh_service_config(uncached=True)
         (status, results_info) = ssh_host_service.remote_exec(
-            script=['echo "sleeping..."', "sleep 30", 'echo "should not reach this point"'],
+            script=[
+                'echo "sleeping..."',
+                'sleep 30',
+                'echo "should not reach this point"'
+            ],
             config=reboot_test_srv_ssh_svc_conf,
             env_params={},
         )
@@ -169,9 +161,8 @@ def check_ssh_service_reboot(
         time.sleep(1)
 
         # Now try to restart the server.
-        (status, reboot_results_info) = ssh_host_service.reboot(
-            params=reboot_test_srv_ssh_svc_conf, force=not graceful
-        )
+        (status, reboot_results_info) = ssh_host_service.reboot(params=reboot_test_srv_ssh_svc_conf,
+                                                                force=not graceful)
         assert status.is_pending()
 
         (status, reboot_results_info) = ssh_host_service.wait_os_operation(reboot_results_info)
@@ -192,34 +183,19 @@ def check_ssh_service_reboot(
             time.sleep(1)
             # try to reconnect and see if the port changed
             try:
-                run_res = run(
-                    "docker ps | grep mlos_bench-test- | grep reboot",
-                    shell=True,
-                    capture_output=True,
-                    check=False,
-                )
+                run_res = run("docker ps | grep mlos_bench-test- | grep reboot", shell=True, capture_output=True, check=False)
                 print(run_res.stdout.decode())
                 print(run_res.stderr.decode())
-                reboot_test_srv_ssh_svc_conf_new = reboot_test_server.to_ssh_service_config(
-                    uncached=True
-                )
-                if (
-                    reboot_test_srv_ssh_svc_conf_new["ssh_port"]
-                    != reboot_test_srv_ssh_svc_conf["ssh_port"]
-                ):
+                reboot_test_srv_ssh_svc_conf_new = reboot_test_server.to_ssh_service_config(uncached=True)
+                if reboot_test_srv_ssh_svc_conf_new["ssh_port"] != reboot_test_srv_ssh_svc_conf["ssh_port"]:
                     break
             except CalledProcessError as ex:
                 _LOG.info("Failed to check port for reboot test server: %s", ex)
-        assert (
-            reboot_test_srv_ssh_svc_conf_new["ssh_port"]
-            != reboot_test_srv_ssh_svc_conf["ssh_port"]
-        )
+        assert reboot_test_srv_ssh_svc_conf_new["ssh_port"] != reboot_test_srv_ssh_svc_conf["ssh_port"]
 
-        wait_docker_service_socket(
-            docker_services,
-            reboot_test_server.hostname,
-            reboot_test_srv_ssh_svc_conf_new["ssh_port"],
-        )
+        wait_docker_service_socket(docker_services,
+                                   reboot_test_server.hostname,
+                                   reboot_test_srv_ssh_svc_conf_new["ssh_port"])
 
         (status, results_info) = ssh_host_service.remote_exec(
             script=["hostname"],
@@ -232,18 +208,12 @@ def check_ssh_service_reboot(
 
 
 @requires_docker
-def test_ssh_service_reboot(
-    locked_docker_services: DockerServices,
-    reboot_test_server: SshTestServerInfo,
-    ssh_host_service: SshHostService,
-) -> None:
+def test_ssh_service_reboot(locked_docker_services: DockerServices,
+                            reboot_test_server: SshTestServerInfo,
+                            ssh_host_service: SshHostService) -> None:
     """
     Test the SshHostService reboot operation.
     """
     # Grouped together to avoid parallel runner interactions.
-    check_ssh_service_reboot(
-        locked_docker_services, reboot_test_server, ssh_host_service, graceful=True
-    )
-    check_ssh_service_reboot(
-        locked_docker_services, reboot_test_server, ssh_host_service, graceful=False
-    )
+    check_ssh_service_reboot(locked_docker_services, reboot_test_server, ssh_host_service, graceful=True)
+    check_ssh_service_reboot(locked_docker_services, reboot_test_server, ssh_host_service, graceful=False)

@@ -38,23 +38,17 @@ def configuration_space() -> ConfigurationSpace:
     configuration_space : ConfigurationSpace
         A new ConfigurationSpace object for testing.
     """
-    (kernel_sched_migration_cost_ns_special, kernel_sched_migration_cost_ns_type) = (
-        special_param_names("kernel_sched_migration_cost_ns")
-    )
+    (kernel_sched_migration_cost_ns_special,
+     kernel_sched_migration_cost_ns_type) = special_param_names("kernel_sched_migration_cost_ns")
 
-    spaces = ConfigurationSpace(
-        space={
-            "vmSize": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"],
-            "idle": ["halt", "mwait", "noidle"],
-            "kernel_sched_migration_cost_ns": (0, 500000),
-            kernel_sched_migration_cost_ns_special: [-1, 0],
-            kernel_sched_migration_cost_ns_type: [
-                TunableValueKind.SPECIAL,
-                TunableValueKind.RANGE,
-            ],
-            "kernel_sched_latency_ns": (0, 1000000000),
-        }
-    )
+    spaces = ConfigurationSpace(space={
+        "vmSize": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"],
+        "idle": ["halt", "mwait", "noidle"],
+        "kernel_sched_migration_cost_ns": (0, 500000),
+        kernel_sched_migration_cost_ns_special: [-1, 0],
+        kernel_sched_migration_cost_ns_type: [TunableValueKind.SPECIAL, TunableValueKind.RANGE],
+        "kernel_sched_latency_ns": (0, 1000000000),
+    })
 
     # NOTE: FLAML requires distribution to be uniform
     spaces["vmSize"].default_value = "Standard_B4ms"
@@ -66,25 +60,18 @@ def configuration_space() -> ConfigurationSpace:
     spaces[kernel_sched_migration_cost_ns_type].probabilities = (0.5, 0.5)
     spaces["kernel_sched_latency_ns"].default_value = 2000000
 
-    spaces.add_condition(
-        EqualsCondition(
-            spaces[kernel_sched_migration_cost_ns_special],
-            spaces[kernel_sched_migration_cost_ns_type],
-            TunableValueKind.SPECIAL,
-        )
-    )
-    spaces.add_condition(
-        EqualsCondition(
-            spaces["kernel_sched_migration_cost_ns"],
-            spaces[kernel_sched_migration_cost_ns_type],
-            TunableValueKind.RANGE,
-        )
-    )
+    spaces.add_condition(EqualsCondition(
+        spaces[kernel_sched_migration_cost_ns_special],
+        spaces[kernel_sched_migration_cost_ns_type], TunableValueKind.SPECIAL))
+    spaces.add_condition(EqualsCondition(
+        spaces["kernel_sched_migration_cost_ns"],
+        spaces[kernel_sched_migration_cost_ns_type], TunableValueKind.RANGE))
 
     return spaces
 
 
-def _cmp_tunable_hyperparameter_categorical(tunable: Tunable, space: ConfigurationSpace) -> None:
+def _cmp_tunable_hyperparameter_categorical(
+        tunable: Tunable, space: ConfigurationSpace) -> None:
     """
     Check if categorical Tunable and ConfigSpace Hyperparameter actually match.
     """
@@ -94,7 +81,8 @@ def _cmp_tunable_hyperparameter_categorical(tunable: Tunable, space: Configurati
     assert param.default_value == tunable.value
 
 
-def _cmp_tunable_hyperparameter_numerical(tunable: Tunable, space: ConfigurationSpace) -> None:
+def _cmp_tunable_hyperparameter_numerical(
+        tunable: Tunable, space: ConfigurationSpace) -> None:
     """
     Check if integer Tunable and ConfigSpace Hyperparameter actually match.
     """
@@ -142,13 +130,12 @@ def test_tunable_groups_to_hyperparameters(tunable_groups: TunableGroups) -> Non
     Make sure that the corresponding Tunable and Hyperparameter objects match.
     """
     space = tunable_groups_to_configspace(tunable_groups)
-    for tunable, _group in tunable_groups:
+    for (tunable, _group) in tunable_groups:
         _CMP_FUNC[tunable.type](tunable, space)
 
 
 def test_tunable_groups_to_configspace(
-    tunable_groups: TunableGroups, configuration_space: ConfigurationSpace
-) -> None:
+        tunable_groups: TunableGroups, configuration_space: ConfigurationSpace) -> None:
     """
     Check the conversion of the entire TunableGroups collection
     to a single ConfigurationSpace object.

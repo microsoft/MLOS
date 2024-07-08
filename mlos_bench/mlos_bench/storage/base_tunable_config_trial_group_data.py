@@ -27,13 +27,10 @@ class TunableConfigTrialGroupData(metaclass=ABCMeta):
     (e.g., for repeats), which we call a (tunable) config trial group.
     """
 
-    def __init__(
-        self,
-        *,
-        experiment_id: str,
-        tunable_config_id: int,
-        tunable_config_trial_group_id: Optional[int] = None,
-    ):
+    def __init__(self, *,
+                 experiment_id: str,
+                 tunable_config_id: int,
+                 tunable_config_trial_group_id: Optional[int] = None):
         self._experiment_id = experiment_id
         self._tunable_config_id = tunable_config_id
         # can be lazily initialized as necessary:
@@ -80,10 +77,7 @@ class TunableConfigTrialGroupData(metaclass=ABCMeta):
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, self.__class__):
             return False
-        return (
-            self._tunable_config_id == other._tunable_config_id
-            and self._experiment_id == other._experiment_id
-        )
+        return self._tunable_config_id == other._tunable_config_id and self._experiment_id == other._experiment_id
 
     @property
     @abstractmethod

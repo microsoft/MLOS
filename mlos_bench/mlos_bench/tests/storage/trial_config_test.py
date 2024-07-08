@@ -13,7 +13,8 @@ from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
-def test_exp_trial_pending(exp_storage: Storage.Experiment, tunable_groups: TunableGroups) -> None:
+def test_exp_trial_pending(exp_storage: Storage.Experiment,
+                           tunable_groups: TunableGroups) -> None:
     """
     Schedule a trial and check that it is pending and has the right configuration.
     """
@@ -30,12 +31,13 @@ def test_exp_trial_pending(exp_storage: Storage.Experiment, tunable_groups: Tuna
     }
 
 
-def test_exp_trial_configs(exp_storage: Storage.Experiment, tunable_groups: TunableGroups) -> None:
+def test_exp_trial_configs(exp_storage: Storage.Experiment,
+                           tunable_groups: TunableGroups) -> None:
     """
     Start multiple trials with two different configs and check that
     we store only two config objects in the DB.
     """
-    config1 = tunable_groups.copy().assign({"idle": "mwait"})
+    config1 = tunable_groups.copy().assign({'idle': 'mwait'})
     trials1 = [
         exp_storage.new_trial(config1),
         exp_storage.new_trial(config1),
@@ -44,7 +46,7 @@ def test_exp_trial_configs(exp_storage: Storage.Experiment, tunable_groups: Tuna
     assert trials1[0].tunable_config_id == trials1[1].tunable_config_id
     assert trials1[0].tunable_config_id == trials1[2].tunable_config_id
 
-    config2 = tunable_groups.copy().assign({"idle": "halt"})
+    config2 = tunable_groups.copy().assign({'idle': 'halt'})
     trials2 = [
         exp_storage.new_trial(config2),
         exp_storage.new_trial(config2),

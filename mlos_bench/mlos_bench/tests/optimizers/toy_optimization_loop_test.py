@@ -56,7 +56,7 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
             (status, _ts, output) = env_context.run()
             assert status.is_succeeded()
             assert output is not None
-            score = output["score"]
+            score = output['score']
             assert isinstance(score, float)
             assert 60 <= score <= 120
             logger("score: %s", str(score))
@@ -69,7 +69,8 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
     return (best_score["score"], best_tunables)
 
 
-def test_mock_optimization_loop(mock_env_no_noise: MockEnv, mock_opt: MockOptimizer) -> None:
+def test_mock_optimization_loop(mock_env_no_noise: MockEnv,
+                                mock_opt: MockOptimizer) -> None:
     """
     Toy optimization loop with mock environment and optimizer.
     """
@@ -83,9 +84,8 @@ def test_mock_optimization_loop(mock_env_no_noise: MockEnv, mock_opt: MockOptimi
     }
 
 
-def test_mock_optimization_loop_no_defaults(
-    mock_env_no_noise: MockEnv, mock_opt_no_defaults: MockOptimizer
-) -> None:
+def test_mock_optimization_loop_no_defaults(mock_env_no_noise: MockEnv,
+                                            mock_opt_no_defaults: MockOptimizer) -> None:
     """
     Toy optimization loop with mock environment and optimizer.
     """
@@ -99,7 +99,8 @@ def test_mock_optimization_loop_no_defaults(
     }
 
 
-def test_flaml_optimization_loop(mock_env_no_noise: MockEnv, flaml_opt: MlosCoreOptimizer) -> None:
+def test_flaml_optimization_loop(mock_env_no_noise: MockEnv,
+                                 flaml_opt: MlosCoreOptimizer) -> None:
     """
     Toy optimization loop with mock environment and FLAML optimizer.
     """
@@ -114,7 +115,8 @@ def test_flaml_optimization_loop(mock_env_no_noise: MockEnv, flaml_opt: MlosCore
 
 
 # @pytest.mark.skip(reason="SMAC is not deterministic")
-def test_smac_optimization_loop(mock_env_no_noise: MockEnv, smac_opt: MlosCoreOptimizer) -> None:
+def test_smac_optimization_loop(mock_env_no_noise: MockEnv,
+                                smac_opt: MlosCoreOptimizer) -> None:
     """
     Toy optimization loop with mock environment and SMAC optimizer.
     """

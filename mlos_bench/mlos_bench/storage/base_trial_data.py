@@ -31,16 +31,13 @@ class TrialData(metaclass=ABCMeta):
     of tunable parameters).
     """
 
-    def __init__(
-        self,
-        *,
-        experiment_id: str,
-        trial_id: int,
-        tunable_config_id: int,
-        ts_start: datetime,
-        ts_end: Optional[datetime],
-        status: Status,
-    ):
+    def __init__(self, *,
+                 experiment_id: str,
+                 trial_id: int,
+                 tunable_config_id: int,
+                 ts_start: datetime,
+                 ts_end: Optional[datetime],
+                 status: Status):
         self._experiment_id = experiment_id
         self._trial_id = trial_id
         self._tunable_config_id = tunable_config_id

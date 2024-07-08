@@ -32,7 +32,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import try_parse_val
 
 _LOG_LEVEL = logging.INFO
-_LOG_FORMAT = "%(asctime)s %(filename)s:%(lineno)d %(funcName)s %(levelname)s %(message)s"
+_LOG_FORMAT = '%(asctime)s %(filename)s:%(lineno)d %(funcName)s %(levelname)s %(message)s'
 logging.basicConfig(level=_LOG_LEVEL, format=_LOG_FORMAT)
 
 _LOG = logging.getLogger(__name__)
@@ -54,7 +54,8 @@ class Launcher:
             For additional details, please see the website or the README.md files in the source tree:
             <https://github.com/microsoft/MLOS/tree/main/mlos_bench/>
             """
-        parser = argparse.ArgumentParser(description=f"{description} : {long_text}", epilog=epilog)
+        parser = argparse.ArgumentParser(description=f"{description} : {long_text}",
+                                         epilog=epilog)
         (args, args_rest) = self._parse_args(parser, argv)
 
         # Bootstrap config loader: command line takes priority.
@@ -95,13 +96,13 @@ class Launcher:
         # experiment_id is generally taken from --globals files, but we also allow overriding it on the CLI.
         # It's useful to keep it there explicitly mostly for the --help output.
         if args.experiment_id:
-            self.global_config["experiment_id"] = args.experiment_id
+            self.global_config['experiment_id'] = args.experiment_id
         # trial_config_repeat_count is a scheduler property but it's convenient to set it via command line
         if args.trial_config_repeat_count:
             self.global_config["trial_config_repeat_count"] = args.trial_config_repeat_count
         # Ensure that the trial_id is present since it gets used by some other
         # configs but is typically controlled by the run optimize loop.
-        self.global_config.setdefault("trial_id", 1)
+        self.global_config.setdefault('trial_id', 1)
 
         self.global_config = DictTemplater(self.global_config).expand_vars(use_os_env=True)
         assert isinstance(self.global_config, dict)
@@ -109,29 +110,24 @@ class Launcher:
         # --service cli args should override the config file values.
         service_files: List[str] = config.get("services", []) + (args.service or [])
         assert isinstance(self._parent_service, SupportsConfigLoading)
-        self._parent_service = self._parent_service.load_services(
-            service_files, self.global_config, self._parent_service
-        )
+        self._parent_service = self._parent_service.load_services(service_files, self.global_config, self._parent_service)
 
         env_path = args.environment or config.get("environment")
         if not env_path:
             _LOG.error("No environment config specified.")
-            parser.error(
-                "At least the Environment config must be specified."
-                + " Run `mlos_bench --help` and consult `README.md` for more info."
-            )
+            parser.error("At least the Environment config must be specified." +
+                         " Run `mlos_bench --help` and consult `README.md` for more info.")
         self.root_env_config = self._config_loader.resolve_path(env_path)
 
         self.environment: Environment = self._config_loader.load_environment(
-            self.root_env_config, TunableGroups(), self.global_config, service=self._parent_service
-        )
+            self.root_env_config, TunableGroups(), self.global_config, service=self._parent_service)
         _LOG.info("Init environment: %s", self.environment)
 
         # NOTE: Init tunable values *after* the Environment, but *before* the Optimizer
         self.tunables = self._init_tunable_values(
             args.random_init or config.get("random_init", False),
             config.get("random_seed") if args.random_seed is None else args.random_seed,
-            config.get("tunable_values", []) + (args.tunable_values or []),
+            config.get("tunable_values", []) + (args.tunable_values or [])
         )
         _LOG.info("Init tunables: %s", self.tunables)
 
@@ -141,11 +137,7 @@ class Launcher:
         self.storage = self._load_storage(args.storage or config.get("storage"))
         _LOG.info("Init storage: %s", self.storage)
 
-        self.teardown: bool = (
-            bool(args.teardown)
-            if args.teardown is not None
-            else bool(config.get("teardown", True))
-        )
+        self.teardown: bool = bool(args.teardown) if args.teardown is not None else bool(config.get("teardown", True))
         self.scheduler = self._load_scheduler(args.scheduler or config.get("scheduler"))
         _LOG.info("Init scheduler: %s", self.scheduler)
 
@@ -164,146 +156,87 @@ class Launcher:
         return self._parent_service
 
     @staticmethod
-    def _parse_args(
-        parser: argparse.ArgumentParser, argv: Optional[List[str]]
-    ) -> Tuple[argparse.Namespace, List[str]]:
+    def _parse_args(parser: argparse.ArgumentParser, argv: Optional[List[str]]) -> Tuple[argparse.Namespace, List[str]]:
         """
         Parse the command line arguments.
         """
         parser.add_argument(
-            "--config",
-            required=False,
-            help="Main JSON5 configuration file. Its keys are the same as the"
-            + " command line options and can be overridden by the latter.\n"
-            + "\n"
-            + " See the `mlos_bench/config/` tree at https://github.com/microsoft/MLOS/ "
-            + " for additional config examples for this and other arguments.",
-        )
+            '--config', required=False,
+            help='Main JSON5 configuration file. Its keys are the same as the' +
+                 ' command line options and can be overridden by the latter.\n' +
+                 '\n' +
+                 ' See the `mlos_bench/config/` tree at https://github.com/microsoft/MLOS/ ' +
+                 ' for additional config examples for this and other arguments.')
 
         parser.add_argument(
-            "--log_file",
-            "--log-file",
-            required=False,
-            help="Path to the log file. Use stdout if omitted.",
-        )
+            '--log_file', '--log-file', required=False,
+            help='Path to the log file. Use stdout if omitted.')
 
         parser.add_argument(
-            "--log_level",
-            "--log-level",
-            required=False,
-            type=str,
-            help=f"Logging level. Default is {logging.getLevelName(_LOG_LEVEL)}."
-            + " Set to DEBUG for debug, WARNING for warnings only.",
-        )
+            '--log_level', '--log-level', required=False, type=str,
+            help=f'Logging level. Default is {logging.getLevelName(_LOG_LEVEL)}.' +
+                 ' Set to DEBUG for debug, WARNING for warnings only.')
 
         parser.add_argument(
-            "--config_path",
-            "--config-path",
-            "--config-paths",
-            "--config_paths",
-            nargs="+",
-            action="extend",
-            required=False,
-            help="One or more locations of JSON config files.",
-        )
+            '--config_path', '--config-path', '--config-paths', '--config_paths',
+            nargs="+", action='extend', required=False,
+            help='One or more locations of JSON config files.')
 
         parser.add_argument(
-            "--service",
-            "--services",
-            nargs="+",
-            action="extend",
-            required=False,
-            help="Path to JSON file with the configuration of the service(s) for environment(s) to use.",
-        )
+            '--service', '--services',
+            nargs='+', action='extend', required=False,
+            help='Path to JSON file with the configuration of the service(s) for environment(s) to use.')
 
         parser.add_argument(
-            "--environment",
-            required=False,
-            help="Path to JSON file with the configuration of the benchmarking environment(s).",
-        )
+            '--environment', required=False,
+            help='Path to JSON file with the configuration of the benchmarking environment(s).')
 
         parser.add_argument(
-            "--optimizer",
-            required=False,
-            help="Path to the optimizer configuration file. If omitted, run"
-            + " a single trial with default (or specified in --tunable_values).",
-        )
+            '--optimizer', required=False,
+            help='Path to the optimizer configuration file. If omitted, run' +
+                 ' a single trial with default (or specified in --tunable_values).')
 
         parser.add_argument(
-            "--trial_config_repeat_count",
-            "--trial-config-repeat-count",
-            required=False,
-            type=int,
-            help="Number of times to repeat each config. Default is 1 trial per config, though more may be advised.",
-        )
+            '--trial_config_repeat_count', '--trial-config-repeat-count', required=False, type=int,
+            help='Number of times to repeat each config. Default is 1 trial per config, though more may be advised.')
 
         parser.add_argument(
-            "--scheduler",
-            required=False,
-            help="Path to the scheduler configuration file. By default, use"
-            + " a single worker synchronous scheduler.",
-        )
+            '--scheduler', required=False,
+            help='Path to the scheduler configuration file. By default, use' +
+                 ' a single worker synchronous scheduler.')
 
         parser.add_argument(
-            "--storage",
-            required=False,
-            help="Path to the storage configuration file."
-            + " If omitted, use the ephemeral in-memory SQL storage.",
-        )
+            '--storage', required=False,
+            help='Path to the storage configuration file.' +
+                 ' If omitted, use the ephemeral in-memory SQL storage.')
 
         parser.add_argument(
-            "--random_init",
-            "--random-init",
-            required=False,
-            default=False,
-            dest="random_init",
-            action="store_true",
-            help="Initialize tunables with random values. (Before applying --tunable_values).",
-        )
+            '--random_init', '--random-init', required=False, default=False,
+            dest='random_init', action='store_true',
+            help='Initialize tunables with random values. (Before applying --tunable_values).')
 
         parser.add_argument(
-            "--random_seed",
-            "--random-seed",
-            required=False,
-            type=int,
-            help="Seed to use with --random_init",
-        )
+            '--random_seed', '--random-seed', required=False, type=int,
+            help='Seed to use with --random_init')
 
         parser.add_argument(
-            "--tunable_values",
-            "--tunable-values",
-            nargs="+",
-            action="extend",
-            required=False,
-            help="Path to one or more JSON files that contain values of the tunable"
-            + " parameters. This can be used for a single trial (when no --optimizer"
-            + " is specified) or as default values for the first run in optimization.",
-        )
+            '--tunable_values', '--tunable-values', nargs="+", action='extend', required=False,
+            help='Path to one or more JSON files that contain values of the tunable' +
+                 ' parameters. This can be used for a single trial (when no --optimizer' +
+                 ' is specified) or as default values for the first run in optimization.')
 
         parser.add_argument(
-            "--globals",
-            nargs="+",
-            action="extend",
-            required=False,
-            help="Path to one or more JSON files that contain additional"
-            + " [private] parameters of the benchmarking environment.",
-        )
+            '--globals', nargs="+", action='extend', required=False,
+            help='Path to one or more JSON files that contain additional' +
+                 ' [private] parameters of the benchmarking environment.')
 
         parser.add_argument(
-            "--no_teardown",
-            "--no-teardown",
-            required=False,
-            default=None,
-            dest="teardown",
-            action="store_false",
-            help="Disable teardown of the environment after the benchmark.",
-        )
+            '--no_teardown', '--no-teardown', required=False, default=None,
+            dest='teardown', action='store_false',
+            help='Disable teardown of the environment after the benchmark.')
 
         parser.add_argument(
-            "--experiment_id",
-            "--experiment-id",
-            required=False,
-            default=None,
+            '--experiment_id', '--experiment-id', required=False, default=None,
             help="""
                 Experiment ID to use for the benchmark.
                 If omitted, the value from the --cli config or --globals is used.
@@ -313,7 +246,7 @@ class Launcher:
                 changes are made to config files, scripts, versions, etc.
                 This is left as a manual operation as detection of what is
                 "incompatible" is not easily automatable across systems.
-                """,
+                """
         )
 
         # By default we use the command line arguments, but allow the caller to
@@ -355,18 +288,16 @@ class Launcher:
         _LOG.debug("Parsed config: %s", config)
         return config
 
-    def _load_config(
-        self,
-        args_globals: Iterable[str],
-        config_path: Iterable[str],
-        args_rest: Iterable[str],
-        global_config: Dict[str, Any],
-    ) -> Dict[str, Any]:
+    def _load_config(self,
+                     args_globals: Iterable[str],
+                     config_path: Iterable[str],
+                     args_rest: Iterable[str],
+                     global_config: Dict[str, Any]) -> Dict[str, Any]:
         """
         Get key/value pairs of the global configuration parameters
         from the specified config files (if any) and command line arguments.
         """
-        for config_file in args_globals or []:
+        for config_file in (args_globals or []):
             conf = self._config_loader.load_config(config_file, ConfigSchema.GLOBALS)
             assert isinstance(conf, dict)
             global_config.update(conf)
@@ -375,9 +306,8 @@ class Launcher:
             global_config["config_path"] = config_path
         return global_config
 
-    def _init_tunable_values(
-        self, random_init: bool, seed: Optional[int], args_tunables: Optional[str]
-    ) -> TunableGroups:
+    def _init_tunable_values(self, random_init: bool, seed: Optional[int],
+                             args_tunables: Optional[str]) -> TunableGroups:
         """
         Initialize the tunables and load key/value pairs of the tunable values
         from given JSON files, if specified.
@@ -387,10 +317,8 @@ class Launcher:
 
         if random_init:
             tunables = MockOptimizer(
-                tunables=tunables,
-                service=None,
-                config={"start_with_defaults": False, "seed": seed},
-            ).suggest()
+                tunables=tunables, service=None,
+                config={"start_with_defaults": False, "seed": seed}).suggest()
             _LOG.debug("Init tunables: random = %s", tunables)
 
         if args_tunables is not None:
@@ -411,20 +339,15 @@ class Launcher:
         if args_optimizer is None:
             # global_config may contain additional properties, so we need to
             # strip those out before instantiating the basic oneshot optimizer.
-            config = {
-                key: val
-                for key, val in self.global_config.items()
-                if key in OneShotOptimizer.BASE_SUPPORTED_CONFIG_PROPS
-            }
-            return OneShotOptimizer(self.tunables, config=config, service=self._parent_service)
+            config = {key: val for key, val in self.global_config.items() if key in OneShotOptimizer.BASE_SUPPORTED_CONFIG_PROPS}
+            return OneShotOptimizer(
+                self.tunables, config=config, service=self._parent_service)
         class_config = self._config_loader.load_config(args_optimizer, ConfigSchema.OPTIMIZER)
         assert isinstance(class_config, Dict)
-        optimizer = self._config_loader.build_optimizer(
-            tunables=self.tunables,
-            service=self._parent_service,
-            config=class_config,
-            global_config=self.global_config,
-        )
+        optimizer = self._config_loader.build_optimizer(tunables=self.tunables,
+                                                        service=self._parent_service,
+                                                        config=class_config,
+                                                        global_config=self.global_config)
         return optimizer
 
     def _load_storage(self, args_storage: Optional[str]) -> Storage:
@@ -436,20 +359,17 @@ class Launcher:
         if args_storage is None:
             # pylint: disable=import-outside-toplevel
             from mlos_bench.storage.sql.storage import SqlStorage
-
-            return SqlStorage(
-                service=self._parent_service,
-                config={
-                    "drivername": "sqlite",
-                    "database": ":memory:",
-                    "lazy_schema_create": True,
-                },
-            )
+            return SqlStorage(service=self._parent_service,
+                              config={
+                                  "drivername": "sqlite",
+                                  "database": ":memory:",
+                                  "lazy_schema_create": True,
+                              })
         class_config = self._config_loader.load_config(args_storage, ConfigSchema.STORAGE)
         assert isinstance(class_config, Dict)
-        storage = self._config_loader.build_storage(
-            service=self._parent_service, config=class_config, global_config=self.global_config
-        )
+        storage = self._config_loader.build_storage(service=self._parent_service,
+                                                    config=class_config,
+                                                    global_config=self.global_config)
         return storage
 
     def _load_scheduler(self, args_scheduler: Optional[str]) -> Scheduler:
@@ -464,7 +384,6 @@ class Launcher:
         if args_scheduler is None:
             # pylint: disable=import-outside-toplevel
             from mlos_bench.schedulers.sync_scheduler import SyncScheduler
-
             return SyncScheduler(
                 # All config values can be overridden from global config
                 config={

@@ -28,7 +28,7 @@ def test_tunable_int_name_lt(tunable_int: Tunable) -> None:
     Tests that the __lt__ operator works as expected.
     """
     tunable_int_2 = tunable_int.copy()
-    tunable_int_2._name = "aaa"  # pylint: disable=protected-access
+    tunable_int_2._name = "aaa"     # pylint: disable=protected-access
     assert tunable_int_2 < tunable_int
 
 
@@ -38,8 +38,7 @@ def test_tunable_categorical_value_lt(tunable_categorical: Tunable) -> None:
     """
     tunable_categorical_2 = tunable_categorical.copy()
     new_value = [
-        x
-        for x in tunable_categorical.categories
+        x for x in tunable_categorical.categories
         if x != tunable_categorical.category and x is not None
     ][0]
     assert tunable_categorical.category is not None
@@ -60,7 +59,7 @@ def test_tunable_categorical_lt_null() -> None:
             "type": "categorical",
             "values": ["floof", "fuzz"],
             "default": "floof",
-        },
+        }
     )
     tunable_dog = Tunable(
         name="same-name",
@@ -68,7 +67,7 @@ def test_tunable_categorical_lt_null() -> None:
             "type": "categorical",
             "values": [None, "doggo"],
             "default": None,
-        },
+        }
     )
     assert tunable_dog < tunable_cat
 
@@ -83,7 +82,7 @@ def test_tunable_lt_same_name_different_type() -> None:
             "type": "categorical",
             "values": ["floof", "fuzz"],
             "default": "floof",
-        },
+        }
     )
     tunable_int = Tunable(
         name="same-name",
@@ -91,7 +90,7 @@ def test_tunable_lt_same_name_different_type() -> None:
             "type": "int",
             "range": [1, 3],
             "default": 2,
-        },
+        }
     )
     assert tunable_cat < tunable_int
 
@@ -102,7 +101,7 @@ def test_tunable_lt_different_object(tunable_int: Tunable) -> None:
     """
     assert (tunable_int < "foo") is False
     with pytest.raises(TypeError):
-        assert "foo" < tunable_int  # type: ignore[operator]
+        assert "foo" < tunable_int      # type: ignore[operator]
 
 
 def test_tunable_group_ne_object(tunable_groups: TunableGroups) -> None:

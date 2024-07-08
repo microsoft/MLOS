@@ -22,7 +22,8 @@ def _trial_ids(trials: Iterator[Storage.Trial]) -> Set[int]:
     return set(t.trial_id for t in trials)
 
 
-def test_schedule_trial(exp_storage: Storage.Experiment, tunable_groups: TunableGroups) -> None:
+def test_schedule_trial(exp_storage: Storage.Experiment,
+                        tunable_groups: TunableGroups) -> None:
     """
     Schedule several trials for future execution and retrieve them later at certain timestamps.
     """
@@ -43,14 +44,16 @@ def test_schedule_trial(exp_storage: Storage.Experiment, tunable_groups: Tunable
     # Scheduler side: get trials ready to run at certain timestamps:
 
     # Pretend 1 minute has passed, get trials scheduled to run:
-    pending_ids = _trial_ids(exp_storage.pending_trials(timestamp + timedelta_1min, running=False))
+    pending_ids = _trial_ids(
+        exp_storage.pending_trials(timestamp + timedelta_1min, running=False))
     assert pending_ids == {
         trial_now1.trial_id,
         trial_now2.trial_id,
     }
 
     # Get trials scheduled to run within the next 1 hour:
-    pending_ids = _trial_ids(exp_storage.pending_trials(timestamp + timedelta_1hr, running=False))
+    pending_ids = _trial_ids(
+        exp_storage.pending_trials(timestamp + timedelta_1hr, running=False))
     assert pending_ids == {
         trial_now1.trial_id,
         trial_now2.trial_id,
@@ -59,8 +62,7 @@ def test_schedule_trial(exp_storage: Storage.Experiment, tunable_groups: Tunable
 
     # Get trials scheduled to run within the next 3 hours:
     pending_ids = _trial_ids(
-        exp_storage.pending_trials(timestamp + timedelta_1hr * 3, running=False)
-    )
+        exp_storage.pending_trials(timestamp + timedelta_1hr * 3, running=False))
     assert pending_ids == {
         trial_now1.trial_id,
         trial_now2.trial_id,
@@ -82,8 +84,7 @@ def test_schedule_trial(exp_storage: Storage.Experiment, tunable_groups: Tunable
 
     # Get trials scheduled to run within the next 3 hours:
     pending_ids = _trial_ids(
-        exp_storage.pending_trials(timestamp + timedelta_1hr * 3, running=False)
-    )
+        exp_storage.pending_trials(timestamp + timedelta_1hr * 3, running=False))
     assert pending_ids == {
         trial_1h.trial_id,
         trial_2h.trial_id,
@@ -91,8 +92,7 @@ def test_schedule_trial(exp_storage: Storage.Experiment, tunable_groups: Tunable
 
     # Get trials scheduled to run OR running within the next 3 hours:
     pending_ids = _trial_ids(
-        exp_storage.pending_trials(timestamp + timedelta_1hr * 3, running=True)
-    )
+        exp_storage.pending_trials(timestamp + timedelta_1hr * 3, running=True))
     assert pending_ids == {
         trial_now1.trial_id,
         trial_now2.trial_id,
@@ -114,9 +114,7 @@ def test_schedule_trial(exp_storage: Storage.Experiment, tunable_groups: Tunable
     assert trial_status == [Status.SUCCEEDED, Status.FAILED, Status.SUCCEEDED]
 
     # Get only trials completed after trial_now2:
-    (trial_ids, trial_configs, trial_scores, trial_status) = exp_storage.load(
-        last_trial_id=trial_now2.trial_id
-    )
+    (trial_ids, trial_configs, trial_scores, trial_status) = exp_storage.load(last_trial_id=trial_now2.trial_id)
     assert trial_ids == [trial_1h.trial_id]
     assert len(trial_configs) == len(trial_scores) == 1
     assert trial_status == [Status.SUCCEEDED]

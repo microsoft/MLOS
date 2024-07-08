@@ -25,14 +25,13 @@ def mock_fileshare_service() -> MockFileShareService:
     """
     return MockFileShareService(
         config={"fileShareName": "MOCK_FILESHARE"},
-        parent=LocalExecService(parent=ConfigPersistenceService()),
+        parent=LocalExecService(parent=ConfigPersistenceService())
     )
 
 
 @pytest.fixture
-def local_fileshare_env(
-    tunable_groups: TunableGroups, mock_fileshare_service: MockFileShareService
-) -> LocalFileShareEnv:
+def local_fileshare_env(tunable_groups: TunableGroups,
+                        mock_fileshare_service: MockFileShareService) -> LocalFileShareEnv:
     """
     Create a LocalFileShareEnv instance.
     """
@@ -41,12 +40,12 @@ def local_fileshare_env(
         config={
             "const_args": {
                 "experiment_id": "EXP_ID",  # Passed into "shell_env_params"
-                "trial_id": 222,  # NOT passed into "shell_env_params"
+                "trial_id": 222,            # NOT passed into "shell_env_params"
             },
             "tunable_params": ["boot"],
             "shell_env_params": [
-                "trial_id",  # From "const_arg"
-                "idle",  # From "tunable_params", == "halt"
+                "trial_id",                 # From "const_arg"
+                "idle",                     # From "tunable_params", == "halt"
             ],
             "upload": [
                 {
@@ -58,7 +57,9 @@ def local_fileshare_env(
                     "to": "$experiment_id/$trial_id/input/data_$idle.csv",
                 },
             ],
-            "run": ["echo No-op run"],
+            "run": [
+                "echo No-op run"
+            ],
             "download": [
                 {
                     "from": "$experiment_id/$trial_id/$idle/data.csv",
@@ -72,11 +73,9 @@ def local_fileshare_env(
     return env
 
 
-def test_local_fileshare_env(
-    tunable_groups: TunableGroups,
-    mock_fileshare_service: MockFileShareService,
-    local_fileshare_env: LocalFileShareEnv,
-) -> None:
+def test_local_fileshare_env(tunable_groups: TunableGroups,
+                             mock_fileshare_service: MockFileShareService,
+                             local_fileshare_env: LocalFileShareEnv) -> None:
     """
     Test that the LocalFileShareEnv correctly expands the `$VAR` variables
     in the upload and download sections of the config.
