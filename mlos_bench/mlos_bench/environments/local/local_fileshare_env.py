@@ -88,7 +88,8 @@ class LocalFileShareEnv(LocalEnv):
 
     @staticmethod
     def _expand(
-        from_to: Iterable[Tuple[Template, Template]], params: Mapping[str, TunableValue]
+        from_to: Iterable[Tuple[Template, Template]],
+        params: Mapping[str, TunableValue],
     ) -> Generator[Tuple[str, str], None, None]:
         """
         Substitute $var parameters in from/to path templates.
@@ -129,7 +130,8 @@ class LocalFileShareEnv(LocalEnv):
                 self._file_share_service.upload(
                     self._params,
                     self._config_loader_service.resolve_path(
-                        path_from, extra_paths=[self._temp_dir]
+                        path_from,
+                        extra_paths=[self._temp_dir],
                     ),
                     path_to,
                 )
@@ -154,7 +156,8 @@ class LocalFileShareEnv(LocalEnv):
                     self._params,
                     path_from,
                     self._config_loader_service.resolve_path(
-                        path_to, extra_paths=[self._temp_dir]
+                        path_to,
+                        extra_paths=[self._temp_dir],
                     ),
                 )
             except FileNotFoundError as ex:

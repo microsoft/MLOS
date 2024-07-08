@@ -202,7 +202,9 @@ class MlosCoreOptimizer(Optimizer):
         score: Optional[Dict[str, TunableValue]] = None,
     ) -> Optional[Dict[str, float]]:
         registered_score = super().register(
-            tunables, status, score
+            tunables,
+            status,
+            score,
         )  # Sign-adjusted for MINIMIZATION
         if status.is_completed():
             assert registered_score is not None
@@ -211,7 +213,8 @@ class MlosCoreOptimizer(Optimizer):
             # TODO: Specify (in the config) which metrics to pass to the optimizer.
             # Issue: https://github.com/microsoft/MLOS/issues/745
             self._opt.register(
-                configs=df_config, scores=pd.DataFrame([registered_score], dtype=float)
+                configs=df_config,
+                scores=pd.DataFrame([registered_score], dtype=float),
             )
         return registered_score
 

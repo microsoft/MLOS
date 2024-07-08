@@ -78,13 +78,21 @@ class CompositeEnv(Environment):
 
         for child_config_file in config.get("include_children", []):
             for env in self._config_loader_service.load_environment_list(
-                child_config_file, tunables, global_config, self._const_args, self._service
+                child_config_file,
+                tunables,
+                global_config,
+                self._const_args,
+                self._service,
             ):
                 self._add_child(env, tunables)
 
         for child_config in config.get("children", []):
             env = self._config_loader_service.build_environment(
-                child_config, tunables, global_config, self._const_args, self._service
+                child_config,
+                tunables,
+                global_config,
+                self._const_args,
+                self._service,
             )
             self._add_child(env, tunables)
 

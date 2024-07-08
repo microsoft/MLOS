@@ -111,7 +111,8 @@ class NetworkEnv(Environment):
         # Else
         _LOG.info("Network tear down: %s", self)
         (status, params) = self._network_service.deprovision_network(
-            self._params, ignore_errors=True
+            self._params,
+            ignore_errors=True,
         )
         if status.is_pending():
             (status, _) = self._network_service.wait_network_deployment(params, is_setup=False)

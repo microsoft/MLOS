@@ -60,7 +60,9 @@ class GridSearchOptimizer(TrackBestOptimizer):
             )
         if size > self._max_iter:
             _LOG.warning(
-                "Grid search size %d, is greater than max iterations %d", size, self._max_iter
+                "Grid search size %d, is greater than max iterations %d",
+                size,
+                self._max_iter,
             )
 
     def _get_grid(self) -> Tuple[Tuple[str, ...], Dict[Tuple[TunableValue, ...], None]]:

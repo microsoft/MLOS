@@ -89,7 +89,8 @@ class SaaSEnv(Environment):
             return False
 
         (status, _) = self._config_service.configure(
-            self._params, self._tunable_params.get_param_values()
+            self._params,
+            self._tunable_params.get_param_values(),
         )
         if not status.is_succeeded():
             return False

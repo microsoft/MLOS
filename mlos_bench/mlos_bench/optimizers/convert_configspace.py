@@ -47,7 +47,9 @@ def _normalize_weights(weights: List[float]) -> List[float]:
 
 
 def _tunable_to_configspace(
-    tunable: Tunable, group_name: Optional[str] = None, cost: int = 0
+    tunable: Tunable,
+    group_name: Optional[str] = None,
+    cost: int = 0,
 ) -> ConfigurationSpace:
     """
     Convert a single Tunable to an equivalent set of ConfigSpace Hyperparameter objects,
@@ -88,11 +90,13 @@ def _tunable_to_configspace(
         distribution = Uniform()
     elif tunable.distribution == "normal":
         distribution = Normal(
-            mu=tunable.distribution_params["mu"], sigma=tunable.distribution_params["sigma"]
+            mu=tunable.distribution_params["mu"],
+            sigma=tunable.distribution_params["sigma"],
         )
     elif tunable.distribution == "beta":
         distribution = Beta(
-            alpha=tunable.distribution_params["alpha"], beta=tunable.distribution_params["beta"]
+            alpha=tunable.distribution_params["alpha"],
+            beta=tunable.distribution_params["beta"],
         )
     elif tunable.distribution is not None:
         raise TypeError(f"Invalid Distribution Type: {tunable.distribution}")
@@ -170,7 +174,8 @@ def _tunable_to_configspace(
 
 
 def tunable_groups_to_configspace(
-    tunables: TunableGroups, seed: Optional[int] = None
+    tunables: TunableGroups,
+    seed: Optional[int] = None,
 ) -> ConfigurationSpace:
     """
     Convert TunableGroups to  hyperparameters in ConfigurationSpace.
@@ -194,7 +199,9 @@ def tunable_groups_to_configspace(
             prefix="",
             delimiter="",
             configuration_space=_tunable_to_configspace(
-                tunable, group.name, group.get_current_cost()
+                tunable,
+                group.name,
+                group.get_current_cost(),
             ),
         )
     return space

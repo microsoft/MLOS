@@ -150,7 +150,8 @@ class Environment(metaclass=abc.ABCMeta):
             tunables = TunableGroups()
 
         groups = self._expand_groups(
-            config.get("tunable_params", []), (global_config or {}).get("tunable_params_map", {})
+            config.get("tunable_params", []),
+            (global_config or {}).get("tunable_params_map", {}),
         )
         _LOG.debug("Tunable groups for: '%s' :: %s", name, groups)
 
@@ -185,7 +186,8 @@ class Environment(metaclass=abc.ABCMeta):
 
     @staticmethod
     def _expand_groups(
-        groups: Iterable[str], groups_exp: Dict[str, Union[str, Sequence[str]]]
+        groups: Iterable[str],
+        groups_exp: Dict[str, Union[str, Sequence[str]]],
     ) -> List[str]:
         """
         Expand `$tunable_group` into actual names of the tunable groups.
@@ -222,7 +224,8 @@ class Environment(metaclass=abc.ABCMeta):
 
     @staticmethod
     def _expand_vars(
-        params: Dict[str, TunableValue], global_config: Dict[str, TunableValue]
+        params: Dict[str, TunableValue],
+        global_config: Dict[str, TunableValue],
     ) -> dict:
         """Expand `$var` into actual values of the variables."""
         return DictTemplater(params).expand_vars(extra_source_dict=global_config)
@@ -277,8 +280,8 @@ class Environment(metaclass=abc.ABCMeta):
 
     def pprint(self, indent: int = 4, level: int = 0) -> str:
         """
-        Pretty-print the environment configuration. For composite environments, print
-        all children environments as well.
+        Pretty-print the environment configuration.
+        For composite environments, print all children environments as well.
 
         Parameters
         ----------
@@ -297,9 +300,10 @@ class Environment(metaclass=abc.ABCMeta):
 
     def _combine_tunables(self, tunables: TunableGroups) -> Dict[str, TunableValue]:
         """
-        Plug tunable values into the base config. If the tunable group is unknown,
-        ignore it (it might belong to another environment). This method should never
-        mutate the original config or the tunables.
+        Plug tunable values into the base config.\
+        If the tunable group is unknown, ignore it (it might belong to another
+        environment).
+        This method should never mutate the original config or the tunables.
 
         Parameters
         ----------

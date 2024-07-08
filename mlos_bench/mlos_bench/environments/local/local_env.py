@@ -88,7 +88,7 @@ class LocalEnv(ScriptEnv):
     def __enter__(self) -> Environment:
         assert self._temp_dir is None and self._temp_dir_context is None
         self._temp_dir_context = self._local_exec_service.temp_dir_context(
-            self.config.get("temp_dir")
+            self.config.get("temp_dir"),
         )
         self._temp_dir = self._temp_dir_context.__enter__()
         return super().__enter__()
@@ -194,7 +194,8 @@ class LocalEnv(ScriptEnv):
         data = self._normalize_columns(
             pandas.read_csv(
                 self._config_loader_service.resolve_path(
-                    self._read_results_file, extra_paths=[self._temp_dir]
+                    self._read_results_file,
+                    extra_paths=[self._temp_dir],
                 ),
                 index_col=False,
             )
@@ -208,7 +209,6 @@ class LocalEnv(ScriptEnv):
             )
             data = pandas.DataFrame([data.value.to_list()], columns=data.metric.to_list())
             # Try to convert string metrics to numbers.
-            # type: ignore[assignment]  # (false positive)
             data = data.apply(  # type: ignore[assignment]  # (false positive)
                 pandas.to_numeric,
                 errors="coerce",
@@ -241,7 +241,8 @@ class LocalEnv(ScriptEnv):
         assert self._temp_dir is not None
         try:
             fname = self._config_loader_service.resolve_path(
-                self._read_telemetry_file, extra_paths=[self._temp_dir]
+                self._read_telemetry_file,
+                extra_paths=[self._temp_dir],
             )
 
             # TODO: Use the timestamp of the CSV file as our status timestamp?
@@ -303,7 +304,9 @@ class LocalEnv(ScriptEnv):
         env_params = self._get_env_params()
         _LOG.info("Run script locally on: %s at %s with env %s", self, cwd, env_params)
         (return_code, stdout, stderr) = self._local_exec_service.local_exec(
-            script, env=env_params, cwd=cwd
+            script,
+            env=env_params,
+            cwd=cwd,
         )
         if return_code != 0:
             _LOG.warning("ERROR: Local script returns code %d stderr:\n%s", return_code, stderr)
