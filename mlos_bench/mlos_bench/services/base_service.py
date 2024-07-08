@@ -210,7 +210,8 @@ class Service:
         file loading mechanism.
         """
         if self.__class__ == Service:
-            # Skip over the case where instantiate a bare base Service class in order to build up a mix-in.
+            # Skip over the case where instantiate a bare base Service class in
+            # order to build up a mix-in.
             assert config == {}
             return
         json_config: dict = {

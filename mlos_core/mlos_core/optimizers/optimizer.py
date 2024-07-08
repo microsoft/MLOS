@@ -80,12 +80,15 @@ class BaseOptimizer(metaclass=ABCMeta):
         context: Optional[pd.DataFrame] = None,
         metadata: Optional[pd.DataFrame] = None,
     ) -> None:
-        """Wrapper method, which employs the space adapter (if any), before registering the configs and scores.
+        """
+        Wrapper method, which employs the space adapter (if any), before
+        registering the configs and scores.
 
         Parameters
         ----------
         configs : pd.DataFrame
-            Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
+            Dataframe of configs / parameters. The columns are parameter names
+            and the rows are the configs.
         scores : pd.DataFrame
             Scores from running the configs. The index is the same as the index of the configs.
 
@@ -133,7 +136,8 @@ class BaseOptimizer(metaclass=ABCMeta):
         Parameters
         ----------
         configs : pd.DataFrame
-            Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
+            Dataframe of configs / parameters. The columns are parameter names
+            and the rows are the configs.
         scores : pd.DataFrame
             Scores from running the configs. The index is the same as the index of the configs.
 
@@ -146,7 +150,8 @@ class BaseOptimizer(metaclass=ABCMeta):
         self, *, context: Optional[pd.DataFrame] = None, defaults: bool = False
     ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """
-        Wrapper method, which employs the space adapter (if any), after suggesting a new configuration.
+        Wrapper method, which employs the space adapter (if any), after
+        suggesting a new configuration.
 
         Parameters
         ----------
@@ -209,13 +214,15 @@ class BaseOptimizer(metaclass=ABCMeta):
         metadata: Optional[pd.DataFrame] = None,
     ) -> None:
         """Registers the given configs as "pending".
-        That is it say, it has been suggested by the optimizer, and an experiment trial has been started.
+        That is it say, it has been suggested by the optimizer, and an
+        experiment trial has been started.
         This can be useful for executing multiple trials in parallel, retry logic, etc.
 
         Parameters
         ----------
         configs : pd.DataFrame
-            Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
+            Dataframe of configs / parameters. The columns are parameter names
+            and the rows are the configs.
         context : pd.DataFrame
             Not Yet Implemented.
         metadata : Optional[pd.DataFrame]

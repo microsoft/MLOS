@@ -30,7 +30,8 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
     # Azure Compute REST API calls as described in
     # https://learn.microsoft.com/en-us/rest/api/virtualnetwork/virtual-networks?view=rest-virtualnetwork-2023-05-01
 
-    # From: https://learn.microsoft.com/en-us/rest/api/virtualnetwork/virtual-networks?view=rest-virtualnetwork-2023-05-01
+    # From:
+    # https://learn.microsoft.com/en-us/rest/api/virtualnetwork/virtual-networks?view=rest-virtualnetwork-2023-05-01
     _URL_DEPROVISION = (
         "https://management.azure.com"
         + "/subscriptions/{subscription}"

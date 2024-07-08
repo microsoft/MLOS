@@ -162,7 +162,8 @@ class ExperimentData(metaclass=ABCMeta):
         -------
         results : pandas.DataFrame
             A DataFrame with configurations and results from all trials of the experiment.
-            Has columns [trial_id, tunable_config_id, tunable_config_trial_group_id, ts_start, ts_end, status]
+            Has columns
+            [trial_id, tunable_config_id, tunable_config_trial_group_id, ts_start, ts_end, status]
             followed by tunable config parameters (prefixed with "config.") and
             trial results (prefixed with "result."). The latter can be NULLs if the
             trial was not successful.

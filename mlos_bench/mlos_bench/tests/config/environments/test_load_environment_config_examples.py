@@ -125,8 +125,10 @@ def test_load_composite_env_config_examples(
                 assert child_group is composite_group
                 checked_child_env_groups.add(child_group.name)
 
-            # Check that when we change a child env, it's value is reflected in the composite env as well.
-            # That is to say, they refer to the same objects, despite having potentially been loaded from separate configs.
+            # Check that when we change a child env, it's value is reflected in
+            # the composite env as well.
+            # That is to say, they refer to the same objects, despite having
+            # potentially been loaded from separate configs.
             if child_tunable.is_categorical:
                 old_cat_value = child_tunable.category
                 assert child_tunable.value == old_cat_value

@@ -39,7 +39,8 @@ class SshTestServerInfo:
         """
         Gets the port that the SSH test server is listening on.
 
-        Note: this value can change when the service restarts so we can't rely on the DockerServices.
+        Note: this value can change when the service restarts so we can't rely
+        on the DockerServices.
         """
         if self._port is None or uncached:
             port_cmd = run(

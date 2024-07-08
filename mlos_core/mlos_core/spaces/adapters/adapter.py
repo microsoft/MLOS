@@ -50,13 +50,16 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
 
     @abstractmethod
     def transform(self, configuration: pd.DataFrame) -> pd.DataFrame:
-        """Translates a configuration, which belongs to the target parameter space, to the original parameter space.
+        """
+        Translates a configuration, which belongs to the target parameter
+        space, to the original parameter space.
         This method is called by the `suggest` method of the `BaseOptimizer` class.
 
         Parameters
         ----------
         configuration : pd.DataFrame
-            Pandas dataframe with a single row. Column names are the parameter names of the target parameter space.
+            Pandas dataframe with a single row. Column names are the parameter
+            names of the target parameter space.
 
         Returns
         -------
@@ -68,20 +71,25 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
 
     @abstractmethod
     def inverse_transform(self, configurations: pd.DataFrame) -> pd.DataFrame:
-        """Translates a configuration, which belongs to the original parameter space, to the target parameter space.
-        This method is called by the `register` method of the `BaseOptimizer` class, and performs the inverse operation
+        """
+        Translates a configuration, which belongs to the original parameter
+        space, to the target parameter space.
+        This method is called by the `register` method of the `BaseOptimizer`
+        class, and performs the inverse operation
         of `BaseSpaceAdapter.transform` method.
 
         Parameters
         ----------
         configurations : pd.DataFrame
             Dataframe of configurations / parameters, which belong to the original parameter space.
-            The columns are the parameter names the original parameter space and the rows are the configurations.
+            The columns are the parameter names the original parameter space
+            and the rows are the configurations.
 
         Returns
         -------
         configurations : pd.DataFrame
             Dataframe of the translated configurations / parameters.
-            The columns are the parameter names of the target parameter space and the rows are the configurations.
+            The columns are the parameter names of the target parameter space
+            and the rows are the configurations.
         """
         pass  # pylint: disable=unnecessary-pass # pragma: no cover

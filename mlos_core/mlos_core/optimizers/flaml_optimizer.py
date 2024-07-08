@@ -30,7 +30,8 @@ class FlamlOptimizer(BaseOptimizer):
     Wrapper class for FLAML Optimizer: A fast library for AutoML and tuning.
     """
 
-    # The name of an internal objective attribute that is calculated as a weighted average of the user provided objective metrics.
+    # The name of an internal objective attribute that is calculated as a
+    # weighted average of the user provided objective metrics.
     _METRIC_NAME = "FLAML_score"
 
     def __init__(
@@ -62,10 +63,12 @@ class FlamlOptimizer(BaseOptimizer):
 
         low_cost_partial_config : dict
             A dictionary from a subset of controlled dimensions to the initial low-cost values.
-            More info: https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
+            More info:
+            https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
 
         seed : Optional[int]
-            If provided, calls np.random.seed() with the provided value to set the seed globally at init.
+            If provided, calls np.random.seed() with the provided value to set
+            the seed globally at init.
         """
         super().__init__(
             parameter_space=parameter_space,
@@ -106,7 +109,8 @@ class FlamlOptimizer(BaseOptimizer):
         Parameters
         ----------
         configs : pd.DataFrame
-            Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
+            Dataframe of configs / parameters. The columns are parameter names
+            and the rows are the configs.
 
         scores : pd.DataFrame
             Scores from running the configs. The index is the same as the index of the configs.
@@ -170,19 +174,23 @@ class FlamlOptimizer(BaseOptimizer):
     def _target_function(self, config: dict) -> Union[dict, None]:
         """Configuration evaluation function called by FLAML optimizer.
 
-        FLAML may suggest the same configuration multiple times (due to its warm-start mechanism).
-        Once FLAML suggests an unseen configuration, we store it, and stop the optimization process.
+        FLAML may suggest the same configuration multiple times (due to its
+        warm-start mechanism).
+        Once FLAML suggests an unseen configuration, we store it, and stop the
+        optimization process.
 
         Parameters
         ----------
         config: dict
             Next configuration to be evaluated, as suggested by FLAML.
-            This config is stored internally and is returned to user, via `.suggest()` method.
+            This config is stored internally and is returned to user, via
+            `.suggest()` method.
 
         Returns
         -------
         result: Union[dict, None]
-            Dictionary with a single key, `FLAML_score`, if config already evaluated; `None` otherwise.
+            Dictionary with a single key, `FLAML_score`, if config already
+            evaluated; `None` otherwise.
         """
         cs_config = normalize_config(self.optimizer_parameter_space, config)
         if cs_config in self.evaluated_samples:
@@ -192,12 +200,16 @@ class FlamlOptimizer(BaseOptimizer):
         return None  # Returning None stops the process
 
     def _get_next_config(self) -> dict:
-        """Warm-starts a new instance of FLAML, and returns a recommended, unseen new configuration.
+        """
+        Warm-starts a new instance of FLAML, and returns a recommended, unseen
+        new configuration.
 
-        Since FLAML does not provide an ask-and-tell interface, we need to create a new instance of FLAML
-        each time we get asked for a new suggestion. This is suboptimal performance-wise, but works.
-        To do so, we use any previously evaluated configs to bootstrap FLAML (i.e., warm-start).
-        For more info: https://microsoft.github.io/FLAML/docs/Use-Cases/Tune-User-Defined-Function#warm-start
+        Since FLAML does not provide an ask-and-tell interface, we need to
+        create a new instance of FLAML each time we get asked for a new
+        suggestion. This is suboptimal performance-wise, but works.  To do so,
+        we use any previously evaluated configs to bootstrap FLAML (i.e.,
+        warm-start).  For more info:
+        https://microsoft.github.io/FLAML/docs/Use-Cases/Tune-User-Defined-Function#warm-start
 
         Returns
         -------

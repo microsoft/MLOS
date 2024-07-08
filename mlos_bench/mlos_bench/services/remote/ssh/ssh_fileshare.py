@@ -46,7 +46,8 @@ class SshFileShareService(FileShareService, SshService):
         Parameters
         ----------
         params : dict
-            Flat dictionary of (key, value) pairs of parameters (used for establishing the connection).
+            Flat dictionary of (key, value) pairs of parameters (used for
+            establishing the connection).
         mode : CopyMode
             Whether to download or upload the file.
         local_path : str

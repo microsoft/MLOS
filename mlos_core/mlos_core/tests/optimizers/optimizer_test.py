@@ -85,8 +85,10 @@ def test_basic_interface_toy_problem(
     if kwargs is None:
         kwargs = {}
     if optimizer_class == OptimizerType.SMAC.value:
-        # SMAC sets the initial random samples as a percentage of the max iterations, which defaults to 100.
-        # To avoid having to train more than 25 model iterations, we set a lower number of max iterations.
+        # SMAC sets the initial random samples as a percentage of the max
+        # iterations, which defaults to 100.
+        # To avoid having to train more than 25 model iterations, we set a
+        # lower number of max iterations.
         kwargs["max_trials"] = max_iterations * 2
 
     def objective(x: pd.Series) -> pd.DataFrame:
@@ -136,7 +138,8 @@ def test_basic_interface_toy_problem(
     assert all_configs.shape == (20, 3)
     assert all_scores.shape == (20, 1)
 
-    # It would be better to put this into bayesian_optimizer_test but then we'd have to refit the model
+    # It would be better to put this into bayesian_optimizer_test but then we'd
+    # have to refit the model
     if isinstance(optimizer, BaseBayesianOptimizer):
         pred_best = optimizer.surrogate_predict(configs=best_config)
         assert pred_best.shape == (1,)
@@ -322,7 +325,8 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     (best_config, best_score, _context) = best_observation
     (llamatune_best_config, llamatune_best_score, _context) = llamatune_best_observation
 
-    # LlamaTune's optimizer score should better (i.e., lower) than plain optimizer's one, or close to that
+    # LlamaTune's optimizer score should better (i.e., lower) than plain
+    # optimizer's one, or close to that
     assert (
         best_score.score.iloc[0] > llamatune_best_score.score.iloc[0]
         or best_score.score.iloc[0] + 1e-3 > llamatune_best_score.score.iloc[0]
@@ -378,7 +382,8 @@ def test_mixed_numerics_type_input_space_types(
     optimizer_type: Optional[OptimizerType], kwargs: Optional[dict]
 ) -> None:
     """
-    Toy problem to test the optimizers with mixed numeric types to ensure that original dtypes are retained.
+    Toy problem to test the optimizers with mixed numeric types to ensure that
+    original dtypes are retained.
     """
     max_iterations = 10
     if kwargs is None:

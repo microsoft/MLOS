@@ -39,7 +39,8 @@ TEST_CASES = get_schema_test_cases(path.join(path.dirname(__file__), "test-cases
 
 NON_CONFIG_SERVICE_CLASSES = {
     ConfigPersistenceService,  # configured thru the launcher cli args
-    TempDirContextService,  # ABCMeta abstract class, but no good way to test that dynamically in Python.
+    # ABCMeta abstract class, but no good way to test that dynamically in Python.
+    TempDirContextService,  
     AzureDeploymentService,  # ABCMeta abstract base class
     SshService,  # ABCMeta abstract base class
 }

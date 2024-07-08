@@ -41,7 +41,8 @@ expected_mlos_bench_optimizer_class_names = [
 ]
 assert expected_mlos_bench_optimizer_class_names
 
-# Also make sure that we check for configs where the optimizer_type or space_adapter_type are left unspecified (None).
+# Also make sure that we check for configs where the optimizer_type or
+# space_adapter_type are left unspecified (None).
 
 expected_mlos_core_optimizer_types = list(OptimizerType) + [None]
 assert expected_mlos_core_optimizer_types

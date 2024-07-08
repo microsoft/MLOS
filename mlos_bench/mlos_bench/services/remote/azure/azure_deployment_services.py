@@ -277,7 +277,8 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
         is_setup : bool
-            If True, wait for resource being deployed; otherwise, wait for successful deprovisioning.
+            If True, wait for resource being deployed; otherwise, wait for
+            successful deprovisioning.
 
         Returns
         -------

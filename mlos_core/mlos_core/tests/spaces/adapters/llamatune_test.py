@@ -562,7 +562,8 @@ def test_deterministic_behavior_for_same_seed(
     num_target_space_dims: int, param_space_kwargs: dict
 ) -> None:
     """
-    Tests LlamaTune's space adapter deterministic behavior when given same seed in the input parameter space.
+    Tests LlamaTune's space adapter deterministic behavior when given same seed
+    in the input parameter space.
     """
 
     def generate_target_param_space_configs(seed: int) -> List[CS.Configuration]:

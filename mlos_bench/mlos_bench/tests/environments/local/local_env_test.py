@@ -43,7 +43,8 @@ def test_local_env(tunable_groups: TunableGroups) -> None:
 
 def test_local_env_service_context(tunable_groups: TunableGroups) -> None:
     """
-    Basic check that context support for Service mixins are handled when environment contexts are entered.
+    Basic check that context support for Service mixins are handled when
+    environment contexts are entered.
     """
     local_env = create_local_env(tunable_groups, {"run": ["echo NA"]})
     # pylint: disable=protected-access
