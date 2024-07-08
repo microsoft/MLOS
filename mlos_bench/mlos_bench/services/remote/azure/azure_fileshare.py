@@ -16,6 +16,7 @@ from azure.core.exceptions import ResourceNotFoundError
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.base_fileshare import FileShareService
+from mlos_bench.services.types.authenticator_type import SupportsAuth
 from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)
@@ -58,7 +59,6 @@ class AzureFileShareService(FileShareService):
             self.config, {
                 "storageAccountName",
                 "storageFileShareName",
-                "storageAccountKey",
             }
         )
 
@@ -67,8 +67,17 @@ class AzureFileShareService(FileShareService):
                 account_name=self.config["storageAccountName"],
                 fs_name=self.config["storageFileShareName"],
             ),
-            credential=self.config["storageAccountKey"],
+            credential=self._get_access_token(),
+            token_intent="backup",
         )
+
+    def _get_access_token(self) -> str:
+        """
+        Get the access token for Azure file share.
+        """
+        assert self._parent is not None and isinstance(self._parent, SupportsAuth), \
+            "Authorization service not provided. Include service-auth.jsonc?"
+        return self._parent.get_access_token()
 
     def download(self, params: dict, remote_path: str, local_path: str, recursive: bool = True) -> None:
         super().download(params, remote_path, local_path, recursive)
