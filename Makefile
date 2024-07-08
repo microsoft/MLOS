@@ -195,6 +195,8 @@ build/docformatter.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_F
 build/docformatter.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
 build/docformatter.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
 
+# docformatter returns non-zero when it changes anything so instead we ignore that
+# return code and just have it recheck itself immediately
 build/docformatter.%.${CONDA_ENV_NAME}.build-stamp: $(DOCFORMATTER_COMMON_PREREQS)
 	# Reformat python file docstrings with docformatter.
 	conda run -n ${CONDA_ENV_NAME} docformatter --in-place $(filter %.py,$+) || true
