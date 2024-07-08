@@ -38,7 +38,10 @@ def _main(input_file: str, output_file: str) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Post-process Redis benchmark results.")
-    parser.add_argument("input", help="Redis benchmark results (downloaded from a remote VM).")
+    parser.add_argument(
+        "input",
+        help="Redis benchmark results (downloaded from a remote VM).",
+    )
     parser.add_argument(
         "output",
         help="Converted Redis benchmark data (to be consumed by OS Autotune framework).",
