@@ -451,7 +451,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
             self._temp_output_directory = None
 
     def get_observations_full(self) -> pd.DataFrame:
-        """Returns the observations as a dataframe with additional info.
+        """
+        Returns the observations as a dataframe with additional info.
 
         Returns
         -------
