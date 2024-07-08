@@ -102,7 +102,10 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
             New methods to register with the service.
         """
         super().__init__(
-            config, global_config, parent, self.merge_methods(methods, [self.local_exec])
+            config,
+            global_config,
+            parent,
+            self.merge_methods(methods, [self.local_exec]),
         )
         self.abort_on_error = self.config.get("abort_on_error", True)
 
@@ -180,7 +183,10 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
         return subcmd_tokens
 
     def _local_exec_script(
-        self, script_line: str, env_params: Optional[Mapping[str, "TunableValue"]], cwd: str
+        self,
+        script_line: str,
+        env_params: Optional[Mapping[str, "TunableValue"]],
+        cwd: str,
     ) -> Tuple[int, str, str]:
         """
         Execute the script from `script_path` in a local process.

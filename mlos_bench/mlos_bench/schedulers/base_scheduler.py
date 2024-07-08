@@ -60,7 +60,9 @@ class Scheduler(metaclass=ABCMeta):
         """
         self.global_config = global_config
         config = merge_parameters(
-            dest=config.copy(), source=global_config, required_keys=["experiment_id", "trial_id"]
+            dest=config.copy(),
+            source=global_config,
+            required_keys=["experiment_id", "trial_id"],
         )
 
         self._experiment_id = config["experiment_id"].strip()

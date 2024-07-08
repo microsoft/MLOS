@@ -50,7 +50,10 @@ class TempDirContextService(Service, metaclass=abc.ABCMeta):
             New methods to register with the service.
         """
         super().__init__(
-            config, global_config, parent, self.merge_methods(methods, [self.temp_dir_context])
+            config,
+            global_config,
+            parent,
+            self.merge_methods(methods, [self.temp_dir_context]),
         )
         self._temp_dir = self.config.get("temp_dir")
         if self._temp_dir:
@@ -61,7 +64,8 @@ class TempDirContextService(Service, metaclass=abc.ABCMeta):
         _LOG.info("%s: temp dir: %s", self, self._temp_dir)
 
     def temp_dir_context(
-        self, path: Optional[str] = None
+        self,
+        path: Optional[str] = None,
     ) -> Union[TemporaryDirectory, nullcontext]:
         """
         Create a temp directory or use the provided path.

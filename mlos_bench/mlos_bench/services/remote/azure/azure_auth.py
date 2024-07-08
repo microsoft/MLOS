@@ -109,7 +109,9 @@ class AzureAuthService(Service, SupportsAuth):
 
         # Reauthenticate as the service principal.
         self._cred = azure_id.CertificateCredential(
-            tenant_id=tenant_id, client_id=sp_client_id, certificate_data=cert_bytes
+            tenant_id=tenant_id,
+            client_id=sp_client_id,
+            certificate_data=cert_bytes,
         )
 
     def get_access_token(self) -> str:
