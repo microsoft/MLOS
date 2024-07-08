@@ -12,7 +12,8 @@ import pandas as pd
 
 def to_metadata(metadata: Optional[pd.DataFrame]) -> Optional[List[pd.Series]]:
     """
-    Converts a list of metadata dataframe objects to a list of metadata objects
+    Converts a list of metadata dataframe objects to a list of metadata series objects.
+
     Parameters
     ----------
     metadata : Optional[pd.DataFrame]
@@ -21,7 +22,7 @@ def to_metadata(metadata: Optional[pd.DataFrame]) -> Optional[List[pd.Series]]:
     Returns
     -------
     Optional[List[pd.Series]]
-        The created metadata object
+        The list of metadata series objects
     """
     if metadata is None:
         return None

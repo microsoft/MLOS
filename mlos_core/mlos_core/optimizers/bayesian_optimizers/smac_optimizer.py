@@ -213,7 +213,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 initial_design_args['max_ratio'] = max_ratio
 
         # Build the initial design for SMAC.
-        # (currently defaults SOBOL instead of LatinHypercube due to better uniformity
+        # (currently defaults to SOBOL instead of LatinHypercube due to better uniformity
         # for initial sampling which results in lower overall samples required)
         initial_design = initial_design_class(**initial_design_args)  # type: ignore[arg-type]
 
@@ -450,7 +450,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
             self._temp_output_directory = None
 
     def get_observations_full(self) -> pd.DataFrame:
-        """Returns the observations as a dataframe with additional info.
+        """
+        Returns the observations as a dataframe with additional info.
 
         Returns
         -------
@@ -464,7 +465,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     def get_best_observations(self, *, n_max: int = 1
                               ) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame]]:
-        """Returns the best observation so far as a dataframe.
+        """
+        Returns the best observation so far as a dataframe.
 
         Returns
         -------
@@ -518,7 +520,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         ]
 
     def _extract_config(self, trial: TrialInfo) -> pd.DataFrame:
-        """Convert TrialInfo to a config DataFrame.
+        """
+        Convert TrialInfo to a config DataFrame.
 
         Parameters
         ----------
@@ -537,7 +540,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
 
 def _extract_metadata(trial: TrialInfo) -> pd.DataFrame:
-    """Convert TrialInfo to a metadata DataFrame.
+    """
+    Convert TrialInfo to a metadata DataFrame.
 
     Parameters
     ----------
