@@ -214,7 +214,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 initial_design_args['max_ratio'] = max_ratio
 
         # Build the initial design for SMAC.
-        # (currently defaults SOBOL instead of LatinHypercube due to better uniformity
+        # (currently defaults to SOBOL instead of LatinHypercube due to better uniformity
         # for initial sampling which results in lower overall samples required)
         initial_design = initial_design_class(**initial_design_args)  # type: ignore[arg-type]
 
