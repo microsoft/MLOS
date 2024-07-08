@@ -196,7 +196,7 @@
       "identity": {
         "type": "userAssigned",
         "userAssignedIdentities": {
-            "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities/',parameters('managedIdentityName'))]": {}
+            "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('managedIdentityName'))]": {}
         }
       },
       "properties": {
