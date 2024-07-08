@@ -79,8 +79,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         Parameters
         ----------
         params : dict
-            Flat dictionary of (key, value) pairs of parameters (used for
-            establishing the connection).
+            Flat dictionary of (key, value) pairs of parameters (used for establishing the connection).
         cmd : str
             Command(s) to run via shell.
 
@@ -93,8 +92,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             # Script should be an iterable of lines, not an iterable string.
             script = [script]
         connection, _ = await self._get_client_connection(params)
-        # Note: passing environment variables to SSH servers is typically
-        # restricted to just some LC_* values.
+        # Note: passing environment variables to SSH servers is typically restricted to just some LC_* values.
         # Handle transferring environment variables by making a script to set them.
         env_script_lines = [f"export {name}='{value}'" for (name, value) in env_params.items()]
         script_lines = env_script_lines + [

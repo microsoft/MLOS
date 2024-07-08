@@ -274,8 +274,7 @@ class SshService(Service, metaclass=ABCMeta):
             # available can confuse some commands, though we may need to make
             # this configurable in the future.
             "request_pty": False,
-            # By default disable known_hosts checking (since most VMs expected
-            # to be dynamically created).
+            # By default disable known_hosts checking (since most VMs expected to be dynamically created).
             "known_hosts": None,
         }
 

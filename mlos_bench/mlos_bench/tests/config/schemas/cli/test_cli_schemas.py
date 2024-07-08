@@ -35,9 +35,8 @@ def test_cli_configs_against_schema(test_case_name: str) -> None:
     check_test_case_against_schema(TEST_CASES.by_path[test_case_name], ConfigSchema.CLI)
     if TEST_CASES.by_path[test_case_name].test_case_type != "bad":
         # Unified schema has a hard time validating bad configs, so we skip it.
-        # The trouble is that tunable-values, cli, globals all look like flat
-        # dicts with minor constraints on them, so adding/removing params
-        # doesn't invalidate it against all of the config types.
+        # The trouble is that tunable-values, cli, globals all look like flat dicts with minor constraints on them,
+        # so adding/removing params doesn't invalidate it against all of the config types.
         check_test_case_against_schema(TEST_CASES.by_path[test_case_name], ConfigSchema.UNIFIED)
 
 
@@ -51,7 +50,6 @@ def test_cli_configs_with_extra_param(test_case_name: str) -> None:
     )
     if TEST_CASES.by_path[test_case_name].test_case_type != "bad":
         # Unified schema has a hard time validating bad configs, so we skip it.
-        # The trouble is that tunable-values, cli, globals all look like flat
-        # dicts with minor constraints on them, so adding/removing params
-        # doesn't invalidate it against all of the config types.
+        # The trouble is that tunable-values, cli, globals all look like flat dicts with minor constraints on them,
+        # so adding/removing params doesn't invalidate it against all of the config types.
         check_test_case_against_schema(TEST_CASES.by_path[test_case_name], ConfigSchema.UNIFIED)

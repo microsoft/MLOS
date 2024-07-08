@@ -74,8 +74,7 @@ class ExperimentSqlData(ExperimentData):
                 for objective in objectives_db_data.fetchall()
             }
 
-    # TODO: provide a way to get individual data to avoid repeated bulk fetches
-    # where only small amounts of data is accessed.
+    # TODO: provide a way to get individual data to avoid repeated bulk fetches where only small amounts of data is accessed.
     # Or else make the TrialData object lazily populate.
 
     @property

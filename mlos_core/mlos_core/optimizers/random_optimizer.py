@@ -39,8 +39,7 @@ class RandomOptimizer(BaseOptimizer):
         Parameters
         ----------
         configs : pd.DataFrame
-            Dataframe of configs / parameters. The columns are parameter names
-            and the rows are the configs.
+            Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
 
         scores : pd.DataFrame
             Scores from running the configs. The index is the same as the index of the configs.

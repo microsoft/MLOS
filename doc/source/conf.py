@@ -89,8 +89,7 @@ numpydoc_class_members_toctree = False
 autodoc_default_options = {
     'members': True,
     'undoc-members': True,
-    # Don't generate documentation for some (non-private) functions that are
-    # more for internal implementation use.
+    # Don't generate documentation for some (non-private) functions that are more for internal implementation use.
     'exclude-members': 'mlos_bench.util.check_required_params'
 }
 

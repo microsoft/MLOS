@@ -167,8 +167,7 @@ def augment_results_df_with_config_trial_group_stats(
         agg: Union[Literal["mean"], Literal["var"], Literal["std"]],
     ) -> None:
         results_groups_perf_aggs = results_groups_perf.agg(agg)  # TODO: avoid recalculating?
-        # Compute the zscore of the chosen aggregate performance of each group
-        # into each row in the dataframe.
+        # Compute the zscore of the chosen aggregate performance of each group into each row in the dataframe.
         stats_df[result_col + f".{agg}_mean"] = results_groups_perf_aggs.mean()
         stats_df[result_col + f".{agg}_stddev"] = results_groups_perf_aggs.std()
         stats_df[result_col + f".{agg}_zscore"] = (
@@ -227,14 +226,12 @@ def limit_top_n_configs(
     results_df : Optional[pandas.DataFrame]
         The results dataframe to augment, by default None to use the results_df property.
     objectives : Iterable[str], optional
-        Which result column(s) to use for sorting the configs, and in which
-        direction ("min" or "max").
+        Which result column(s) to use for sorting the configs, and in which direction ("min" or "max").
         By default None to automatically select the experiment objectives.
     top_n_configs : int, optional
         How many configs to return, including the default, by default 20.
     method: Literal["mean", "median", "p50", "p75", "p90", "p95", "p99"] = "mean",
-        Which statistical method to use when sorting the config groups before
-        determining the cutoff, by default "mean".
+        Which statistical method to use when sorting the config groups before determining the cutoff, by default "mean".
 
     Returns
     -------

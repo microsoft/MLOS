@@ -36,8 +36,7 @@ def expand_results_data_args(
     Returns
     -------
     Tuple[pandas.DataFrame, Dict[str, bool]]
-        The results dataframe and the objectives columns in the dataframe, plus
-        whether or not they are in ascending order.
+        The results dataframe and the objectives columns in the dataframe, plus whether or not they are in ascending order.
     """
     # Prepare the orderby columns.
     if results_df is None:

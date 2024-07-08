@@ -218,8 +218,7 @@ class Experiment(Storage.Experiment):
             .select_from(table)
             .where(*[column(key) == val for (key, val) in kwargs.items()])
         )
-        # NOTE: `Row._tuple()` is NOT a protected member; the class uses `_` to
-        # avoid naming conflicts.
+        # NOTE: `Row._tuple()` is NOT a protected member; the class uses `_` to avoid naming conflicts.
         return dict(
             row._tuple() for row in cur_result.fetchall()
         )  # pylint: disable=protected-access

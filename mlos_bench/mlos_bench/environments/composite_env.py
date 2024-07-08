@@ -254,6 +254,5 @@ class CompositeEnv(Environment):
 
         final_status = final_status or status
         _LOG.info("Final status: %s :: %s", self, final_status)
-        # Return the status and the timestamp of the last child environment or
-        # the first failed child environment.
+        # Return the status and the timestamp of the last child environment or the first failed child environment.
         return (final_status, timestamp, joint_telemetry)

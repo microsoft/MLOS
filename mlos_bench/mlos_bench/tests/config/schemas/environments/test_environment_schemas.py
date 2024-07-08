@@ -33,9 +33,7 @@ TEST_CASES = get_schema_test_cases(path.join(path.dirname(__file__), "test-cases
 # Dynamically enumerate some of the cases we want to make sure we cover.
 
 NON_CONFIG_ENV_CLASSES = {
-    # ScriptEnv is ABCMeta abstract, but there's no good way to test that
-    # dynamically in Python.
-    ScriptEnv  
+    ScriptEnv  # ScriptEnv is ABCMeta abstract, but there's no good way to test that dynamically in Python.
 }
 expected_environment_class_names = [
     subclass.__module__ + "." + subclass.__name__
@@ -82,8 +80,7 @@ def test_environment_configs_against_schema(test_case_name: str) -> None:
 @pytest.mark.parametrize("test_case_name", sorted(TEST_CASES.by_type["good"]))
 def test_environment_configs_with_extra_param(test_case_name: str) -> None:
     """
-    Checks that the environment config fails to validate if extra params are
-    present in certain places.
+    Checks that the environment config fails to validate if extra params are present in certain places.
     """
     check_test_case_config_with_extra_param(
         TEST_CASES.by_type["good"][test_case_name], ConfigSchema.ENVIRONMENT

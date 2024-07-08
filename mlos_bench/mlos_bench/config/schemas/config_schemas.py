@@ -3,8 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-A simple class for describing where to find different config schemas and
-validating configs against them.
+A simple class for describing where to find different config schemas and validating configs against them.
 """
 
 import json  # schema files are pure json - no comments
@@ -63,10 +62,7 @@ class SchemaStore(Mapping):
 
     @classmethod
     def _load_schemas(cls) -> None:
-        """
-        Loads all schemas and subschemas into the schema store for the
-        validator to reference.
-        """
+        """Loads all schemas and subschemas into the schema store for the validator to reference."""
         if cls._SCHEMA_STORE:
             return
         for root, _, files in walk(CONFIG_SCHEMA_DIR):
@@ -86,10 +82,7 @@ class SchemaStore(Mapping):
 
     @classmethod
     def _load_registry(cls) -> None:
-        """
-        Also store them in a Registry object for referencing by recent versions
-        of jsonschema.
-        """
+        """Also store them in a Registry object for referencing by recent versions of jsonschema."""
         if not cls._SCHEMA_STORE:
             cls._load_schemas()
         cls._REGISTRY = Registry().with_resources(

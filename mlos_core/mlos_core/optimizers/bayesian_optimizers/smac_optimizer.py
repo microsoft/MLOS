@@ -64,21 +64,18 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         seed : Optional[int]
             By default SMAC uses a known seed (0) to keep results reproducible.
-            However, if a `None` seed is explicitly provided, we let a random
-            seed be produced by SMAC.
+            However, if a `None` seed is explicitly provided, we let a random seed be produced by SMAC.
 
         run_name : Optional[str]
             Name of this run. This is used to easily distinguish across different runs.
             If set to `None` (default), SMAC will generate a hash from metadata.
 
         output_directory : Optional[str]
-            The directory where SMAC output will saved. If set to `None`
-            (default), a temporary dir will be used.
+            The directory where SMAC output will saved. If set to `None` (default), a temporary dir will be used.
 
         max_trials : int
             Maximum number of trials (i.e., function evaluations) to be run. Defaults to 100.
-            Note that modifying this value directly affects the value of
-            `n_random_init`, if latter is set to `None`.
+            Note that modifying this value directly affects the value of `n_random_init`, if latter is set to `None`.
 
         n_random_init : Optional[int]
             Number of points evaluated at start to bootstrap the optimizer.
@@ -122,8 +119,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         self.trial_info_map: Dict[ConfigSpace.Configuration, TrialInfo] = {}
 
         # The default when not specified is to use a known seed (0) to keep results reproducible.
-        # However, if a `None` seed is explicitly provided, we let a random
-        # seed be produced by SMAC.
+        # However, if a `None` seed is explicitly provided, we let a random seed be produced by SMAC.
         # https://automl.github.io/SMAC3/main/api/smac.scenario.html#smac.scenario.Scenario
         seed = -1 if seed is None else seed
 
@@ -228,11 +224,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
     @property
     def n_random_init(self) -> int:
         """
-        Gets the number of random samples to use to initialize the optimizer's
-        search space sampling.
+        Gets the number of random samples to use to initialize the optimizer's search space sampling.
 
-        Note: This may not be equal to the value passed to the initializer, due
-        to logic present in the SMAC.
+        Note: This may not be equal to the value passed to the initializer, due to logic present in the SMAC.
         See Also: max_ratio
 
         Returns
@@ -257,10 +251,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         seed : int
             Random seed to use for the target function. Not actually used.
         """
-        # NOTE: Providing a target function when using the ask-and-tell
-        # interface is an imperfection of the API -- this is planned to be
-        # fixed in some future release:
-        # https://github.com/automl/SMAC3/issues/946
+        # NOTE: Providing a target function when using the ask-and-tell interface is an imperfection of the API
+        # -- this planned to be fixed in some future release: https://github.com/automl/SMAC3/issues/946
         raise RuntimeError("This function should never be called.")
 
     def _register(
@@ -276,8 +268,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         Parameters
         ----------
         configs : pd.DataFrame
-            Dataframe of configs / parameters. The columns are parameter names
-            and the rows are the configs.
+            Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
 
         scores : pd.DataFrame
             Scores from running the configs. The index is the same as the index of the configs.
@@ -301,8 +292,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         for config, (_i, score) in zip(
             self._to_configspace_configs(configs=configs), scores.iterrows()
         ):
-            # Retrieve previously generated TrialInfo (returned by .ask()) or
-            # create new TrialInfo instance
+            # Retrieve previously generated TrialInfo (returned by .ask()) or create new TrialInfo instance
             info: TrialInfo = self.trial_info_map.get(
                 config, TrialInfo(config=config, seed=self.base_optimizer.scenario.seed)
             )
@@ -414,8 +404,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         Parameters
         ----------
         configs : pd.DataFrame
-            Dataframe of configs / parameters. The columns are parameter names
-            and the rows are the configs.
+            Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
 
         Returns
         -------

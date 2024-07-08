@@ -192,8 +192,7 @@ def test_grid_search(
     assert not list(grid_search_opt.suggested_configs)
     assert not grid_search_opt.not_converged()
 
-    # But if we still have iterations left, we should be able to suggest again
-    # by refilling the grid.
+    # But if we still have iterations left, we should be able to suggest again by refilling the grid.
     assert grid_search_opt.current_iteration < grid_search_opt.max_iterations
     assert grid_search_opt.suggest()
     assert list(grid_search_opt.pending_configs)
