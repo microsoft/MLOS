@@ -21,7 +21,7 @@ def to_metadata(metadata: Optional[pd.DataFrame]) -> Optional[List[pd.Series]]:
     Returns
     -------
     Optional[List[pd.Series]]
-        The created metadata object
+        The list of metadata series objects
     """
     if metadata is None:
         return None
