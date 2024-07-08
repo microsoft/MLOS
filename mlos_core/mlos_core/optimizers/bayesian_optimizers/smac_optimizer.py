@@ -521,7 +521,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         ]
 
     def _extract_config(self, trial: TrialInfo) -> pd.DataFrame:
-        """Convert TrialInfo to a config DataFrame.
+        """
+        Convert TrialInfo to a config DataFrame.
 
         Parameters
         ----------
