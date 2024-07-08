@@ -10,12 +10,12 @@ The following definitions are useful for understanding the implementation
 
 - `configuration`: a vector representation of a configuration of a system to be evaluated.
 - `score`: the objective(s) associated with a configuration
-- `metadata`: additional information about the evaluation, such as the runtime budget used during evaluation.
-   This data is typically specific to the given optimizer backend and may be returned during a `suggest` call and expected to be provided again during the subsequent `register` call.
 - `context`: additional (static) information about the evaluation used to extend the internal model used for suggesting samples.
    For instance, a descriptor of the VM size (vCore count and # of GB of RAM), and some descriptor of the workload.
    The intent being to allow either sharing or indexing of trial info between "similar" experiments in order to help make the optimization process more efficient for new scenarios.
    > Note: This is not yet implemented.
+- `metadata`: additional information about the evaluation, such as the runtime budget used during evaluation.
+   This data is typically specific to the given optimizer backend and may be returned during a `suggest` call and expected to be provided again during the subsequent `register` call.
 
 The interface for these classes can be described as follows:
 

@@ -220,9 +220,9 @@ class BaseOptimizer(metaclass=ABCMeta):
         scores = pd.concat([score for _, score, _, _ in observations]).reset_index(drop=True)
         contexts = pd.concat([pd.DataFrame() if context is None else context
                               for _, _, context, _ in observations]).reset_index(drop=True)
-        metadatas = pd.concat([pd.DataFrame() if metadata is None else metadata
+        metadatum = pd.concat([pd.DataFrame() if metadata is None else metadata
                               for _, _, _, metadata in observations]).reset_index(drop=True)
-        return (configs, scores, contexts if len(contexts.columns) > 0 else None, metadatas if len(metadatas.columns) > 0 else None)
+        return (configs, scores, contexts if len(contexts.columns) > 0 else None, metadatum if len(metadatum.columns) > 0 else None)
 
     def get_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame]]:
         """
@@ -254,11 +254,11 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         if len(self._observations) == 0:
             raise ValueError("No observations registered yet.")
-        (configs, scores, contexts, metadatas) = self.get_observations()
+        (configs, scores, contexts, metadatum) = self.get_observations()
         idx = scores.nsmallest(n_max, columns=self._optimization_targets, keep="first").index
         return (configs.loc[idx], scores.loc[idx],
                 None if contexts is None else contexts.loc[idx],
-                None if metadatas is None else metadatas.loc[idx])
+                None if metadatum is None else metadatum.loc[idx])
 
     def cleanup(self) -> None:
         """

@@ -314,13 +314,13 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         with self.lock:
             # Register each trial (one-by-one)
-            metadatas: Union[List[pd.Series], List[None]] = to_metadata(metadata) or [
+            metadatum: Union[List[pd.Series], List[None]] = to_metadata(metadata) or [
                 None for _ in scores   # type: ignore[misc]
             ]
             for config, score, ctx in zip(
                 self._to_configspace_configs(configs=configs),
                 scores.values.tolist(),
-                metadatas,
+                metadatum,
             ):
                 value: TrialValue = TrialValue(
                     cost=score, time=0.0, status=StatusType.SUCCESS
@@ -493,12 +493,12 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 if metadata is not None and metadata["budget"].max() == max_budget
             ]
 
-        configs, scores, contexts, metadatas = self._get_observations(observations)
+        configs, scores, contexts, metadatum = self._get_observations(observations)
 
         idx = scores.nsmallest(n_max, columns=self._optimization_targets, keep="first").index
         return (configs.loc[idx], scores.loc[idx],
                 None if contexts is None else contexts.loc[idx],
-                None if metadatas is None else metadatas.loc[idx])
+                None if metadatum is None else metadatum.loc[idx])
 
     def _to_configspace_configs(self, *, configs: pd.DataFrame) -> List[ConfigSpace.Configuration]:
         """Convert a dataframe of configs to a list of ConfigSpace configs.
