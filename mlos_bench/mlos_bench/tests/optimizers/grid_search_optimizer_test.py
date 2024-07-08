@@ -20,6 +20,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
 
+
 @pytest.fixture
 def grid_search_tunables_config() -> dict:
     """

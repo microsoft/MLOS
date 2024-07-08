@@ -14,6 +14,7 @@ from mlos_bench.tunables.tunable import Tunable
 # Note: these test do *not* check the ConfigSpace conversions for those same Tunables.
 # That is checked indirectly via grid_search_optimizer_test.py
 
+
 def test_tunable_int_size_props() -> None:
     """Test tunable int size properties"""
     tunable = Tunable(
