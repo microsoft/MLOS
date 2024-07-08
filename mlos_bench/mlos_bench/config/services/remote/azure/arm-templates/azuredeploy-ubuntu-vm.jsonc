@@ -20,6 +20,12 @@
         "description": "OS Autotune Linux VM"
       }
     },
+    "managedIdentityName": {
+        "type": "string",
+        "metadata": {
+            "description": "User managed identity name"
+        }
+    },
     "customData": {
       "type": "string",
       "defaultValue": "",
@@ -187,6 +193,12 @@
       "apiVersion": "2021-11-01",
       "name": "[parameters('vmName')]",
       "location": "[parameters('location')]",
+      "identity": {
+        "type": "userAssigned",
+        "userAssignedIdentities": {
+            "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities/',parameters('managedIdentityName'))]": {}
+        }
+      },
       "properties": {
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"

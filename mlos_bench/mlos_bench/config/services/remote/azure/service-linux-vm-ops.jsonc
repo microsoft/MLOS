@@ -10,13 +10,12 @@
                 // can be overridden by the parameters pushed from the caller Environment.
                 "subscription": "PLACEHOLDER; AZURE SUBSCRIPTION ID",
                 "resourceGroup": "PLACEHOLDER; e.g., os-autotune",
-                "managedIdentityName": "PLACEHOLDER; e.g., mlos-managed-identity",
 
                 "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
 
                 // Make sure to list all ARM template parameters that can be overridden by the caller.
                 "deploymentTemplateParameters": {
-
+                    "managedIdentityName": "PLACEHOLDER; e.g., mlos-managed-identity",
                     "storageAccountName": "PLACEHOLDER; e.g., osatsharedstorage",
                     "storageFileShareName": "PLACEHOLDER; e.g., os-autotune-file-share",
                     "location": "PLACEHOLDER; e.g., westus2",
