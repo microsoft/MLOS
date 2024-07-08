@@ -105,7 +105,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
 
         facade: AbstractFacade
-            Sets the facade to use for SMAC. More information about the facade can be found here: https://automl.github.io/SMAC3/main/api/smac.facade.html
+            Sets the facade to use for SMAC. More information about the facade
+            can be found here: https://automl.github.io/SMAC3/main/api/smac.facade.html
 
         intensifier: Optional[Type[AbstractIntensifier]]
             Sets the intensifier type to use in the optimizer. If not set, the
@@ -237,6 +238,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
             **filter_kwargs(facade, **kwargs),
         )
 
+        # This lock is required because pandas SMAC3 using the ask and tell interface
+        #   are not thread safe. To fix this we need to lock around a few critical
+        #   sections when interacting with SMAC3 or updating our pandas data structures
         self.lock = threading.Lock()
 
     def __del__(self) -> None:
@@ -264,7 +268,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         config: ConfigSpace.Configuration,
         seed: int = 0,
         budget: float = 1,
-        instance: object = None,
+        instance: Optional[str] = None,
     ) -> None:
         """Dummy target function for SMAC optimizer.
 
@@ -281,7 +285,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         budget : int
             The budget that was used for evaluating the configuration.
 
-        instance : object
+        instance : Optional[str]
             The instance that the configuration was evaluated on.
         """
         # NOTE: Providing a target function when using the ask-and-tell interface is an imperfection of the API
@@ -325,6 +329,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
                     cost=score, time=0.0, status=StatusType.SUCCESS
                 )
 
+                # Find existing entries in our run history that match the config + metadata
                 matching: pd.Series[bool]
                 if ctx is None:
                     matching = self.trial_info_df["Configuration"] == config
@@ -335,12 +340,13 @@ class SmacOptimizer(BaseBayesianOptimizer):
                         [df_ctx.equals(ctx) for df_ctx in self.trial_info_df["Metadata"]]
                     )
 
-                # make a new entry
+                # If no entry exists, make a new entry
                 if sum(matching) > 0:
                     info = self.trial_info_df[matching]["TrialInfo"].iloc[-1]
                     self.trial_info_df.at[list(matching).index(True), "TrialValue"] = (
                         value
                     )
+                # Otherwise update the existing entry with our new information
                 else:
                     if ctx is None or "budget" not in ctx or "instance" not in ctx:
                         info = TrialInfo(
@@ -352,6 +358,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
                             info,
                             value,
                         ]
+                    # If important metadata exists, rebuild the SMAC specific object
                     else:
                         info = TrialInfo(
                             config=config,
@@ -554,6 +561,7 @@ def _extract_metadata(trial: TrialInfo) -> pd.DataFrame:
         Pandas dataframe with a single row containing the metadata.
         Column names are the budget and instance of the evaluation, if valid.
     """
+    # Note that the columns extracted are the only columns that exist currently in SMAC
     return pd.DataFrame(
         [[trial.instance, trial.seed, trial.budget]],
         columns=["instance", "seed", "budget"],

@@ -25,7 +25,7 @@ _LOG = logging.getLogger(__name__)
 _LOG.setLevel(logging.DEBUG)
 
 
-def smac_verify_best(metadata: pd.DataFrame) -> bool:
+def smac_verify_best(metadata: pd.DataFrame, best: bool = False) -> bool:
     """
     Function to verify if the metadata used by SMAC is in a legal state
 
@@ -34,23 +34,43 @@ def smac_verify_best(metadata: pd.DataFrame) -> bool:
     metadata : pd.DataFrame
         metadata returned by SMAC
 
+    best: bool
+        If we are testing just the best contexts or not
+
     Returns
     -------
     bool
         if the metadata that is returned is valid
     """
+
     max_budget = metadata["budget"].max()
-    if isinstance(max_budget, float):
-        return max_budget == 9
-    return False
+    assert isinstance(max_budget, float)
+    assert max_budget == 9
+
+    if not best:
+        min_budget = metadata["budget"].min()
+        assert isinstance(min_budget, float)
+        assert min_budget == 1
+
+    return True
 
 
 @pytest.mark.parametrize(('optimizer_type', 'verify', 'kwargs'), [
     # Enumerate all supported Optimizers
-    *[(member, verify, {"seed": SEED, "facade": MFFacade, "intensifier": SuccessiveHalving, "min_budget": 1, "max_budget": 9})
-      for member, verify in [(OptimizerType.SMAC, smac_verify_best)]],
+    *[(member, verify, kwargs)
+        for member, verify, kwargs in [(
+            OptimizerType.SMAC,
+            smac_verify_best,
+            {
+                "seed": SEED,
+                "facade": MFFacade,
+                "intensifier": SuccessiveHalving,
+                "min_budget": 1,
+                "max_budget": 9
+            }
+        )]],
 ])
-def test_optimizer_metadata(optimizer_type: OptimizerType, verify: Callable[[pd.DataFrame], bool], kwargs: dict) -> None:
+def test_optimizer_metadata(optimizer_type: OptimizerType, verify: Callable[[pd.DataFrame, bool], bool], kwargs: dict) -> None:
     """
     Toy problem to test if metadata is properly being handled for each supporting optimizer
     """
@@ -89,11 +109,11 @@ def test_optimizer_metadata(optimizer_type: OptimizerType, verify: Callable[[pd.
     assert isinstance(all_scores, pd.DataFrame)
     assert all_contexts is None
     assert isinstance(all_metadata, pd.DataFrame)
-    assert smac_verify_best(all_metadata)
+    assert verify(all_metadata, False)
 
     (best_configs, best_scores, best_contexts, best_metadata) = optimizer.get_best_observations()
     assert isinstance(best_configs, pd.DataFrame)
     assert isinstance(best_scores, pd.DataFrame)
     assert best_contexts is None
     assert isinstance(best_metadata, pd.DataFrame)
-    assert verifier(best_metadata)
+    assert verify(best_metadata, True)
