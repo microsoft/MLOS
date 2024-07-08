@@ -16,8 +16,12 @@ _LOG = logging.getLogger(__name__)
 
 class OneShotOptimizer(MockOptimizer):
     """
+<<<<<<< HEAD
     Mock optimizer that proposes a single configuration and returns.
 
+=======
+    No-op optimizer that proposes a single configuration and returns.
+>>>>>>> main
     Explicit configs (partial or full) are possible using configuration files.
     """
 
@@ -33,6 +37,12 @@ class OneShotOptimizer(MockOptimizer):
         super().__init__(tunables, config, global_config, service)
         _LOG.info("Run a single iteration for: %s", self._tunables)
         self._max_iter = 1  # Always run for just one iteration.
+
+    def suggest(self) -> TunableGroups:
+        """Always produce the same (initial) suggestion."""
+        tunables = super().suggest()
+        self._start_with_defaults = True
+        return tunables
 
     @property
     def supports_preload(self) -> bool:
