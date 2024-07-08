@@ -126,7 +126,7 @@ build/isort.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
 
 build/isort.%.${CONDA_ENV_NAME}.build-stamp: $(ISORT_COMMON_PREREQS)
 	# Reformat python file imports with isort.
-	conda run -n ${CONDA_ENV_NAME} isort --verbose --only-modified --atomic -j0 $(filter %.py,$?)
+	conda run -n ${CONDA_ENV_NAME} isort --verbose --only-modified --atomic -j0 $(filter %.py,$+)
 	touch $@
 
 .PHONY: black
@@ -160,7 +160,7 @@ build/black.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
 
 build/black.%.${CONDA_ENV_NAME}.build-stamp: $(BLACK_COMMON_PREREQS)
 	# Reformat python files with black.
-	conda run -n ${CONDA_ENV_NAME} black $(filter %.py,$?)
+	conda run -n ${CONDA_ENV_NAME} black $(filter %.py,$+)
 	touch $@
 
 .PHONY: docformatter
@@ -197,8 +197,8 @@ build/docformatter.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FIL
 
 build/docformatter.%.${CONDA_ENV_NAME}.build-stamp: $(DOCFORMATTER_COMMON_PREREQS)
 	# Reformat python file docstrings with docformatter.
-	conda run -n ${CONDA_ENV_NAME} docformatter --in-place $(filter %.py,$?) || true
-	conda run -n ${CONDA_ENV_NAME} docformatter --check --diff $(filter %.py,$?)
+	conda run -n ${CONDA_ENV_NAME} docformatter --in-place $(filter %.py,$+) || true
+	conda run -n ${CONDA_ENV_NAME} docformatter --check --diff $(filter %.py,$+)
 	touch $@
 
 
@@ -222,7 +222,7 @@ BLACK_CHECK_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 build/black-check.%.${CONDA_ENV_NAME}.build-stamp: $(BLACK_CHECK_COMMON_PREREQS)
 	# Check for import sort order.
 	# Note: if this fails use "make format" or "make black" to fix it.
-	conda run -n ${CONDA_ENV_NAME} black --verbose --check --diff $(filter %.py,$?)
+	conda run -n ${CONDA_ENV_NAME} black --verbose --check --diff $(filter %.py,$+)
 	touch $@
 
 .PHONY: docformatter-check
@@ -242,7 +242,7 @@ BLACK_CHECK_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 build/docformatter-check.%.${CONDA_ENV_NAME}.build-stamp: $(BLACK_CHECK_COMMON_PREREQS)
 	# Check for import sort order.
 	# Note: if this fails use "make format" or "make docformatter" to fix it.
-	conda run -n ${CONDA_ENV_NAME} docformatter --check --diff $(filter %.py,$?)
+	conda run -n ${CONDA_ENV_NAME} docformatter --check --diff $(filter %.py,$+)
 	touch $@
 
 .PHONY: isort-check
@@ -261,7 +261,7 @@ ISORT_CHECK_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 
 build/isort-check.%.${CONDA_ENV_NAME}.build-stamp: $(ISORT_CHECK_COMMON_PREREQS)
 	# Note: if this fails use "make format" or "make isort" to fix it.
-	conda run -n ${CONDA_ENV_NAME} isort --only-modified --check --diff -j0 $(filter %.py,$?)
+	conda run -n ${CONDA_ENV_NAME} isort --only-modified --check --diff -j0 $(filter %.py,$+)
 	touch $@
 
 .PHONY: pycodestyle
