@@ -54,34 +54,34 @@ class AzureFileShareService(FileShareService):
             config, global_config, parent,
             self.merge_methods(methods, [self.upload, self.download])
         )
-
         check_required_params(
             self.config, {
                 "storageAccountName",
                 "storageFileShareName",
             }
         )
+        self._share_client: Optional[ShareClient] = None
 
-        self._share_client = ShareClient.from_share_url(
-            AzureFileShareService._SHARE_URL.format(
-                account_name=self.config["storageAccountName"],
-                fs_name=self.config["storageFileShareName"],
-            ),
-            credential=self._get_access_token(),
-            token_intent="backup",
-        )
-
-    def _get_access_token(self) -> str:
+    def _get_share_client(self) -> ShareClient:
         """
-        Get the access token for Azure file share.
+        Get the Azure file share client object.
         """
-        assert self._parent is not None and isinstance(self._parent, SupportsAuth), \
-            "Authorization service not provided. Include service-auth.jsonc?"
-        return self._parent.get_access_token()
+        if self._share_client is None:
+            assert self._parent is not None and isinstance(self._parent, SupportsAuth), \
+                "Authorization service not provided. Include service-auth.jsonc?"
+            self._share_client = ShareClient.from_share_url(
+                AzureFileShareService._SHARE_URL.format(
+                    account_name=self.config["storageAccountName"],
+                    fs_name=self.config["storageFileShareName"],
+                ),
+                credential=self._parent.get_access_token(),
+                token_intent="backup",
+            )
+        return self._share_client
 
     def download(self, params: dict, remote_path: str, local_path: str, recursive: bool = True) -> None:
         super().download(params, remote_path, local_path, recursive)
-        dir_client = self._share_client.get_directory_client(remote_path)
+        dir_client = self._get_share_client().get_directory_client(remote_path)
         if dir_client.exists():
             os.makedirs(local_path, exist_ok=True)
             for content in dir_client.list_directories_and_files():
@@ -94,7 +94,7 @@ class AzureFileShareService(FileShareService):
             # Ensure parent folders exist
             folder, _ = os.path.split(local_path)
             os.makedirs(folder, exist_ok=True)
-            file_client = self._share_client.get_file_client(remote_path)
+            file_client = self._get_share_client().get_file_client(remote_path)
             try:
                 data = file_client.download_file()
                 with open(local_path, "wb") as output_file:
@@ -145,7 +145,7 @@ class AzureFileShareService(FileShareService):
             # Ensure parent folders exist
             folder, _ = os.path.split(remote_path)
             self._remote_makedirs(folder)
-            file_client = self._share_client.get_file_client(remote_path)
+            file_client = self._get_share_client().get_file_client(remote_path)
             with open(local_path, "rb") as file_data:
                 _LOG.debug("Upload file: %s -> %s", local_path, remote_path)
                 file_client.upload_file(file_data)
@@ -165,6 +165,6 @@ class AzureFileShareService(FileShareService):
             if not folder:
                 continue
             path += folder + "/"
-            dir_client = self._share_client.get_directory_client(path)
+            dir_client = self._get_share_client().get_directory_client(path)
             if not dir_client.exists():
                 dir_client.create_directory()
