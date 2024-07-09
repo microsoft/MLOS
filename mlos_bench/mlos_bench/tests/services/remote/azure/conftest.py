@@ -104,5 +104,4 @@ def azure_fileshare(azure_auth_service: AzureAuthService) -> AzureFileShareServi
         return AzureFileShareService(config={
             "storageAccountName": "TEST_ACCOUNT_NAME",
             "storageFileShareName": "TEST_FS_NAME",
-            "storageAccountKey": "TEST_ACCOUNT_KEY"
         }, global_config={}, parent=azure_auth_service)
