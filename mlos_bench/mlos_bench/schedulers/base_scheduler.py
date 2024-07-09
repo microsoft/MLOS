@@ -215,7 +215,7 @@ class Scheduler(metaclass=ABCMeta):
                 # prevented).
                 "optimizer": self.optimizer.name,
                 "repeat_i": repeat_i,
-                "is_defaults": tunables.is_defaults,
+                "is_defaults": tunables.is_defaults(),
                 **{
                     f"opt_{key}_{i}": val
                     for (i, opt_target) in enumerate(self.optimizer.targets.items())
