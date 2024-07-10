@@ -98,7 +98,11 @@ class AzureFileShareService(FileShareService):
                 raise FileNotFoundError(f"Cannot download: {remote_path}") from ex
 
     def upload(
-        self, params: dict, local_path: str, remote_path: str, recursive: bool = True
+        self,
+        params: dict,
+        local_path: str,
+        remote_path: str,
+        recursive: bool = True,
     ) -> None:
         super().upload(params, local_path, remote_path, recursive)
         self._upload(local_path, remote_path, recursive, set())

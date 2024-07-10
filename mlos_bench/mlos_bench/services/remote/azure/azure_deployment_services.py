@@ -37,11 +37,11 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
 
     _URL_DEPLOY = (
         "https://management.azure.com"
-        + "/subscriptions/{subscription}"
-        + "/resourceGroups/{resource_group}"
-        + "/providers/Microsoft.Resources"
-        + "/deployments/{deployment_name}"
-        + "?api-version=2022-05-01"
+        "/subscriptions/{subscription}"
+        "/resourceGroups/{resource_group}"
+        "/providers/Microsoft.Resources"
+        "/deployments/{deployment_name}"
+        "?api-version=2022-05-01"
     )
 
     def __init__(
@@ -289,7 +289,10 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         return self._wait_while(self._check_deployment, Status.PENDING, params)
 
     def _wait_while(
-        self, func: Callable[[dict], Tuple[Status, dict]], loop_status: Status, params: dict
+        self,
+        func: Callable[[dict], Tuple[Status, dict]],
+        loop_status: Status,
+        params: dict,
     ) -> Tuple[Status, dict]:
         """
         Invoke `func` periodically while the status is equal to `loop_status`. Return
@@ -312,7 +315,9 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         """
         params = self._set_default_params(params)
         config = merge_parameters(
-            dest=self.config.copy(), source=params, required_keys=["deploymentName"]
+            dest=self.config.copy(),
+            source=params,
+            required_keys=["deploymentName"],
         )
 
         poll_period = params.get("pollInterval", self._poll_interval)
@@ -347,9 +352,8 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         _LOG.warning("Request timed out: %s", params)
         return (Status.TIMED_OUT, {})
 
-    def _check_deployment(
-        self, params: dict
-    ) -> Tuple[Status, dict]:  # pylint: disable=too-many-return-statements
+    def _check_deployment(self, params: dict) -> Tuple[Status, dict]:
+        # pylint: disable=too-many-return-statements
         """
         Check if Azure deployment exists. Return SUCCEEDED if true, PENDING otherwise.
 
@@ -436,7 +440,9 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
             raise ValueError(f"Missing deployment template: {self}")
         params = self._set_default_params(params)
         config = merge_parameters(
-            dest=self.config.copy(), source=params, required_keys=["deploymentName"]
+            dest=self.config.copy(),
+            source=params,
+            required_keys=["deploymentName"],
         )
         _LOG.info("Deploy: %s :: %s", config["deploymentName"], params)
 
@@ -470,7 +476,10 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
             _LOG.debug("Request: PUT %s\n%s", url, json.dumps(json_req, indent=2))
 
         response = requests.put(
-            url, json=json_req, headers=self._get_headers(), timeout=self._request_timeout
+            url,
+            json=json_req,
+            headers=self._get_headers(),
+            timeout=self._request_timeout,
         )
 
         if _LOG.isEnabledFor(logging.DEBUG):

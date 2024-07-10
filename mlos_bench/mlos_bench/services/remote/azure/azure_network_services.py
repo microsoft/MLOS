@@ -29,12 +29,12 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
     # From: https://learn.microsoft.com/en-us/rest/api/virtualnetwork/virtual-networks?view=rest-virtualnetwork-2023-05-01  # pylint: disable=line-too-long # noqa
     _URL_DEPROVISION = (
         "https://management.azure.com"
-        + "/subscriptions/{subscription}"
-        + "/resourceGroups/{resource_group}"
-        + "/providers/Microsoft.Network"
-        + "/virtualNetwork/{vnet_name}"
-        + "/delete"
-        + "?api-version=2023-05-01"
+        "/subscriptions/{subscription}"
+        "/resourceGroups/{resource_group}"
+        "/providers/Microsoft.Network"
+        "/virtualNetwork/{vnet_name}"
+        "/delete"
+        "?api-version=2023-05-01"
     )
 
     def __init__(

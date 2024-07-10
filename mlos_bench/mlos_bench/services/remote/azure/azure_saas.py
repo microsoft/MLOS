@@ -29,12 +29,12 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
 
     _URL_CONFIGURE = (
         "https://management.azure.com"
-        + "/subscriptions/{subscription}"
-        + "/resourceGroups/{resource_group}"
-        + "/providers/{provider}"
-        + "/{server_type}/{vm_name}"
-        + "/{update}"
-        + "?api-version={api_version}"
+        "/subscriptions/{subscription}"
+        "/resourceGroups/{resource_group}"
+        "/providers/{provider}"
+        "/{server_type}/{vm_name}"
+        "/{update}"
+        "?api-version={api_version}"
     )
 
     def __init__(
@@ -183,7 +183,10 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
         return self._parent.get_auth_headers()
 
     def _config_one(
-        self, config: Dict[str, Any], param_name: str, param_value: Any
+        self,
+        config: Dict[str, Any],
+        param_name: str,
+        param_value: Any,
     ) -> Tuple[Status, dict]:
         """
         Update a single parameter of the Azure DB service.
@@ -270,7 +273,10 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
         }
         _LOG.debug("Request: POST %s", url)
         response = requests.post(
-            url, headers=self._get_headers(), json=json_req, timeout=self._request_timeout
+            url,
+            headers=self._get_headers(),
+            json=json_req,
+            timeout=self._request_timeout,
         )
         _LOG.debug("Response: %s :: %s", response, response.text)
         if response.status_code == 504:

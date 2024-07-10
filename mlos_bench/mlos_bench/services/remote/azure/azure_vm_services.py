@@ -41,34 +41,34 @@ class AzureVMService(
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/start
     _URL_START = (
         "https://management.azure.com"
-        + "/subscriptions/{subscription}"
-        + "/resourceGroups/{resource_group}"
-        + "/providers/Microsoft.Compute"
-        + "/virtualMachines/{vm_name}"
-        + "/start"
-        + "?api-version=2022-03-01"
+        "/subscriptions/{subscription}"
+        "/resourceGroups/{resource_group}"
+        "/providers/Microsoft.Compute"
+        "/virtualMachines/{vm_name}"
+        "/start"
+        "?api-version=2022-03-01"
     )
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/power-off
     _URL_STOP = (
         "https://management.azure.com"
-        + "/subscriptions/{subscription}"
-        + "/resourceGroups/{resource_group}"
-        + "/providers/Microsoft.Compute"
-        + "/virtualMachines/{vm_name}"
-        + "/powerOff"
-        + "?api-version=2022-03-01"
+        "/subscriptions/{subscription}"
+        "/resourceGroups/{resource_group}"
+        "/providers/Microsoft.Compute"
+        "/virtualMachines/{vm_name}"
+        "/powerOff"
+        "?api-version=2022-03-01"
     )
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/deallocate
     _URL_DEALLOCATE = (
         "https://management.azure.com"
-        + "/subscriptions/{subscription}"
-        + "/resourceGroups/{resource_group}"
-        + "/providers/Microsoft.Compute"
-        + "/virtualMachines/{vm_name}"
-        + "/deallocate"
-        + "?api-version=2022-03-01"
+        "/subscriptions/{subscription}"
+        "/resourceGroups/{resource_group}"
+        "/providers/Microsoft.Compute"
+        "/virtualMachines/{vm_name}"
+        "/deallocate"
+        "?api-version=2022-03-01"
     )
 
     # TODO: This is probably the more correct URL to use for the deprovision operation.
@@ -79,35 +79,35 @@ class AzureVMService(
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/delete
     # _URL_DEPROVISION = (
-    #    "https://management.azure.com" +
-    #    "/subscriptions/{subscription}" +
-    #    "/resourceGroups/{resource_group}" +
-    #    "/providers/Microsoft.Compute" +
-    #    "/virtualMachines/{vm_name}" +
-    #    "/delete" +
+    #    "https://management.azure.com"
+    #    "/subscriptions/{subscription}"
+    #    "/resourceGroups/{resource_group}"
+    #    "/providers/Microsoft.Compute"
+    #    "/virtualMachines/{vm_name}"
+    #    "/delete"
     #    "?api-version=2022-03-01"
     # )
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/restart
     _URL_REBOOT = (
         "https://management.azure.com"
-        + "/subscriptions/{subscription}"
-        + "/resourceGroups/{resource_group}"
-        + "/providers/Microsoft.Compute"
-        + "/virtualMachines/{vm_name}"
-        + "/restart"
-        + "?api-version=2022-03-01"
+        "/subscriptions/{subscription}"
+        "/resourceGroups/{resource_group}"
+        "/providers/Microsoft.Compute"
+        "/virtualMachines/{vm_name}"
+        "/restart"
+        "?api-version=2022-03-01"
     )
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/run-command
     _URL_REXEC_RUN = (
         "https://management.azure.com"
-        + "/subscriptions/{subscription}"
-        + "/resourceGroups/{resource_group}"
-        + "/providers/Microsoft.Compute"
-        + "/virtualMachines/{vm_name}"
-        + "/runCommand"
-        + "?api-version=2022-03-01"
+        "/subscriptions/{subscription}"
+        "/resourceGroups/{resource_group}"
+        "/providers/Microsoft.Compute"
+        "/virtualMachines/{vm_name}"
+        "/runCommand"
+        "?api-version=2022-03-01"
     )
 
     def __init__(
@@ -181,7 +181,8 @@ class AzureVMService(
         if "vmName" in params and "deploymentName" not in params:
             params["deploymentName"] = f"{params['vmName']}-deployment"
             _LOG.info(
-                "deploymentName missing from params. Defaulting to '%s'.", params["deploymentName"]
+                "deploymentName missing from params. Defaulting to '%s'.",
+                params["deploymentName"],
             )
         return params
 
