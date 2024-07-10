@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm>=8.1.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mlos-bench"
+description = "MLOS Bench Python interface for benchmark automation and optimization."
+keywords = [
+    "autotuning",
+    "benchmarking",
+    "optimization",
+    "systems",
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+license = { "text" = "MIT" }
+requires-python = ">=3.8"
+authors = [
+    { name = "Microsoft", email = "mlos-maintainers@service.microsoft.com" },
+]
+maintainers = [
+    { name = "Microsoft", email = "mlos-maintainers@service.microsoft.com" },
+]
+dynamic = [
+    "readme",   # urls get dynamically mutated by the build process
+    "version",  # managed by setuptools_scm
+    # managed in combination with version from setuptools_scm
+    "dependencies",
+    "optional-dependencies",
+]
+
+[project.scripts]
+mlos_bench = "mlos_bench.run:_main"
+
+[project.urls]
+Documentation = "https://microsoft.github.io/MLOS/source_tree_docs/mlos_bench/"
+Repository = "https://github.com/microsoft/MLOS/"
+Issues = "https://github.com/microsoft/MLOS/issues"
+"Package Source" = "https://github.com/microsoft/MLOS/tree/main/mlos_bench/"
+
+# Tell setuptools_scm to use the root directory for git info.
+# Note: when setuptools_scm is involved we also need to use MANIFEST.in to include/exclude files.
+[tool.setuptools_scm]
+root = ".."
+
+# Tell setuptools where to find the package.
+[tool.setuptools.packages.find]
+exclude = ["*.tests", "*.tests.*"]
+
+[tool.setuptools.package-data]
+mlos_bench = [
+    "py.typed", "**/*.pyi",
+    "config/**/*.md",
+    "config/**/*.jsonc",
+    "config/**/*.json",
+    "config/**/*.py",
+    "config/**/*.sh",
+    "config/**/*.cmd",
+    "config/**/*.ps1",
+]
+
+[tool.distutils.bdist_wheel]
+# Command option bdist_wheel.universal is not defined
+#universal = 1
+# https://github.com/pypa/wheel/issues/582
+py-limited-api = "cp38"
