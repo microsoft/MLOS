@@ -104,20 +104,19 @@ class MlosCoreOptimizer(Optimizer):
         df_scores = self._adjust_signs_df(
             pd.DataFrame([{} if score is None else score for score in scores]))
 
-        opt_targets = list(self._opt_targets)
         if status is not None:
             # Select only the completed trials, set scores for failed trials to +inf.
             df_status = pd.Series(status)
             # TODO: Be more flexible with values used for failed trials (not just +inf).
             # Issue: https://github.com/microsoft/MLOS/issues/523
-            df_scores.loc[df_status != Status.SUCCEEDED, opt_targets] = float("inf")
+            df_scores[df_status != Status.SUCCEEDED] = float("inf")
             df_status_completed = df_status.apply(Status.is_completed)
             df_configs = df_configs[df_status_completed]
             df_scores = df_scores[df_status_completed]
 
         # TODO: Specify (in the config) which metrics to pass to the optimizer.
         # Issue: https://github.com/microsoft/MLOS/issues/745
-        self._opt.register(configs=df_configs, scores=df_scores[opt_targets].astype(float))
+        self._opt.register(configs=df_configs, scores=df_scores)
 
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
@@ -127,11 +126,12 @@ class MlosCoreOptimizer(Optimizer):
 
     def _adjust_signs_df(self, df_scores: pd.DataFrame) -> pd.DataFrame:
         """
-        In-place adjust the signs of the scores for MINIMIZATION problem.
+        Coerce optimization target scores to floats
+        and adjust the signs for MINIMIZATION problem.
         """
-        for (opt_target, opt_dir) in self._opt_targets.items():
-            df_scores[opt_target] *= opt_dir
-        return df_scores
+        # NOTE: We use `.astype()` instead of `.apply(pd.to_numeric)`
+        # to catch incorrect values early.
+        return df_scores[list(self._opt_targets)].astype(float) * self._opt_targets.values()
 
     def _to_df(self, configs: Sequence[Dict[str, TunableValue]]) -> pd.DataFrame:
         """
