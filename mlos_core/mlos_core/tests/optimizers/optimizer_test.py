@@ -470,4 +470,3 @@ def test_hierarchical_input_space(optimizer_type: Optional[OptimizerType], kwarg
         observation = objective(suggestion)
         assert isinstance(observation, pd.DataFrame)
         optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
-
