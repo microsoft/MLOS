@@ -67,7 +67,10 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         self._shell = self.config.get("ssh_shell", "/bin/bash")
 
     async def _run_cmd(
-        self, params: dict, script: Iterable[str], env_params: dict
+        self,
+        params: dict,
+        script: Iterable[str],
+        env_params: dict,
     ) -> SSHCompletedProcess:
         """
         Runs a command asynchronously on a host via SSH.
@@ -100,11 +103,17 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         script_str = "\n".join(script_lines)
         _LOG.debug("Running script on %s:\n%s", connection, script_str)
         return await connection.run(
-            script_str, check=False, timeout=self._request_timeout, env=env_params
+            script_str,
+            check=False,
+            timeout=self._request_timeout,
+            env=env_params,
         )
 
     def remote_exec(
-        self, script: Iterable[str], config: dict, env_params: dict
+        self,
+        script: Iterable[str],
+        config: dict,
+        env_params: dict,
     ) -> Tuple["Status", dict]:
         """
         Start running a command on remote host OS.
@@ -135,7 +144,11 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             ],
         )
         config["asyncRemoteExecResultsFuture"] = self._run_coroutine(
-            self._run_cmd(config, script, env_params)
+            self._run_cmd(
+                config,
+                script,
+                env_params,
+            )
         )
         return (Status.PENDING, config)
 

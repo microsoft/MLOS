@@ -76,7 +76,11 @@ class SshFileShareService(FileShareService, SshService):
         return await scp(srcpaths=srcpaths, dstpath=dstpath, recurse=recursive, preserve=True)
 
     def download(
-        self, params: dict, remote_path: str, local_path: str, recursive: bool = True
+        self,
+        params: dict,
+        remote_path: str,
+        local_path: str,
+        recursive: bool = True,
     ) -> None:
         params = merge_parameters(
             dest=self.config.copy(),
@@ -87,13 +91,23 @@ class SshFileShareService(FileShareService, SshService):
         )
         super().download(params, remote_path, local_path, recursive)
         file_copy_future = self._run_coroutine(
-            self._start_file_copy(params, CopyMode.DOWNLOAD, local_path, remote_path, recursive)
+            self._start_file_copy(
+                params,
+                CopyMode.DOWNLOAD,
+                local_path,
+                remote_path,
+                recursive,
+            )
         )
         try:
             file_copy_future.result()
         except (OSError, SFTPError) as ex:
             _LOG.error(
-                "Failed to download %s to %s from %s: %s", remote_path, local_path, params, ex
+                "Failed to download %s to %s from %s: %s",
+                remote_path,
+                local_path,
+                params,
+                ex,
             )
             if isinstance(ex, SFTPNoSuchFile) or (
                 isinstance(ex, SFTPFailure)
@@ -108,7 +122,11 @@ class SshFileShareService(FileShareService, SshService):
             raise ex
 
     def upload(
-        self, params: dict, local_path: str, remote_path: str, recursive: bool = True
+        self,
+        params: dict,
+        local_path: str,
+        remote_path: str,
+        recursive: bool = True,
     ) -> None:
         params = merge_parameters(
             dest=self.config.copy(),
