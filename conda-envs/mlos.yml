@@ -37,6 +37,9 @@ dependencies:
     - types-pygments
     - types-requests
     - types-setuptools
-    - "--editable ../mlos_core[full-tests]"
-    - "--editable ../mlos_bench[full-tests]"
-    - "--editable ../mlos_viz[full-tests]"
+    # Workaround a pylance issue in vscode that prevents it finding the latest
+    # method of pip installing editable modules.
+    # https://github.com/microsoft/pylance-release/issues/3473
+    - "--config-settings editable_mode=compat --editable ../mlos_core[full-tests]"
+    - "--config-settings editable_mode=compat --editable ../mlos_bench[full-tests]"
+    - "--config-settings editable_mode=compat --editable ../mlos_viz[full-tests]"
