@@ -81,8 +81,10 @@ def test_environment_configs_with_extra_param(test_case_name: str) -> None:
     in certain places.
     """
     check_test_case_config_with_extra_param(
-        TEST_CASES.by_type["good"][test_case_name], ConfigSchema.ENVIRONMENT
+        TEST_CASES.by_type["good"][test_case_name],
+        ConfigSchema.ENVIRONMENT,
     )
     check_test_case_config_with_extra_param(
-        TEST_CASES.by_type["good"][test_case_name], ConfigSchema.UNIFIED
+        TEST_CASES.by_type["good"][test_case_name],
+        ConfigSchema.UNIFIED,
     )

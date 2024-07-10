@@ -43,7 +43,8 @@ def test_cli_configs_with_extra_param(test_case_name: str) -> None:
     certain places.
     """
     check_test_case_config_with_extra_param(
-        TEST_CASES.by_type["good"][test_case_name], ConfigSchema.CLI
+        TEST_CASES.by_type["good"][test_case_name],
+        ConfigSchema.CLI,
     )
     if TEST_CASES.by_path[test_case_name].test_case_type != "bad":
         # Unified schema has a hard time validating bad configs, so we skip it.

@@ -97,14 +97,16 @@ def load_environment_config_examples(
 
 
 composite_configs = locate_config_examples(
-    ConfigPersistenceService.BUILTIN_CONFIG_PATH, "environments/root/"
+    ConfigPersistenceService.BUILTIN_CONFIG_PATH,
+    "environments/root/",
 )
 assert composite_configs
 
 
 @pytest.mark.parametrize("config_path", composite_configs)
 def test_load_composite_env_config_examples(
-    config_loader_service: ConfigPersistenceService, config_path: str
+    config_loader_service: ConfigPersistenceService,
+    config_path: str,
 ) -> None:
     """Tests loading a composite env config example."""
     envs = load_environment_config_examples(config_loader_service, config_path)
@@ -124,9 +126,8 @@ def test_load_composite_env_config_examples(
             (composite_tunable, composite_group) = composite_env.tunable_params.get_tunable(
                 child_tunable
             )
-            assert (
-                child_tunable is composite_tunable
-            )  # Check that the tunables are the same object.
+            # Check that the tunables are the same object.
+            assert child_tunable is composite_tunable
             if child_group.name not in checked_child_env_groups:
                 assert child_group is composite_group
                 checked_child_env_groups.add(child_group.name)
