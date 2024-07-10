@@ -192,7 +192,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                 )
                 raise ValueError(
                     f"Failed to validate config {json_file_name} against "
-                    + f"schema type {schema_type.name} at {schema_type.value}"
+                    f"schema type {schema_type.name} at {schema_type.value}"
                 ) from ex
             if isinstance(config, dict) and config.get("$schema"):
                 # Remove $schema attributes from the config after we've validated
@@ -382,9 +382,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         (class_name, class_config) = self.prepare_class_load(config, global_config)
         # pylint: disable=import-outside-toplevel
-        from mlos_bench.schedulers.base_scheduler import (
-            Scheduler,
-        )
+        from mlos_bench.schedulers.base_scheduler import Scheduler
 
         inst = instantiate_from_config(
             Scheduler,  # type: ignore[type-abstract]
@@ -670,7 +668,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         return service
 
     def _load_tunables(
-        self, json_file_names: Iterable[str], parent: TunableGroups
+        self,
+        json_file_names: Iterable[str],
+        parent: TunableGroups,
     ) -> TunableGroups:
         """
         Load a collection of tunable parameters from JSON files into the parent
