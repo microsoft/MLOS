@@ -54,7 +54,9 @@ class SupportsNetworkProvisioning(Protocol):
         """
 
     def deprovision_network(
-        self, params: dict, ignore_errors: bool = True
+        self,
+        params: dict,
+        ignore_errors: bool = True,
     ) -> Tuple["Status", dict]:
         """
         Deprovisions the Network by deleting it.

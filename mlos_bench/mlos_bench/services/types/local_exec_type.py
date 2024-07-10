@@ -58,7 +58,8 @@ class SupportsLocalExec(Protocol):
         """
 
     def temp_dir_context(
-        self, path: Optional[str] = None
+        self,
+        path: Optional[str] = None,
     ) -> Union[tempfile.TemporaryDirectory, contextlib.nullcontext]:
         """
         Create a temp directory or use the provided path.

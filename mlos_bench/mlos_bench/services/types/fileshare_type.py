@@ -12,7 +12,11 @@ class SupportsFileShareOps(Protocol):
     """Protocol interface for file share operations."""
 
     def download(
-        self, params: dict, remote_path: str, local_path: str, recursive: bool = True
+        self,
+        params: dict,
+        remote_path: str,
+        local_path: str,
+        recursive: bool = True,
     ) -> None:
         """
         Downloads contents from a remote share path to a local path.
@@ -32,7 +36,11 @@ class SupportsFileShareOps(Protocol):
         """
 
     def upload(
-        self, params: dict, local_path: str, remote_path: str, recursive: bool = True
+        self,
+        params: dict,
+        local_path: str,
+        remote_path: str,
+        recursive: bool = True,
     ) -> None:
         """
         Uploads contents from a local path to remote share path.
