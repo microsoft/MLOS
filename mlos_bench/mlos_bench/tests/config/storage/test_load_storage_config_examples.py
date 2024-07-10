@@ -28,7 +28,9 @@ def filter_configs(configs_to_filter: List[str]) -> List[str]:
 
 
 configs = locate_config_examples(
-    ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE, filter_configs
+    ConfigPersistenceService.BUILTIN_CONFIG_PATH,
+    CONFIG_TYPE,
+    filter_configs,
 )
 assert configs
 

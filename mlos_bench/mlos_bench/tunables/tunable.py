@@ -614,7 +614,10 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             return (
                 float(x)
                 for x in np.linspace(
-                    start=num_range[0], stop=num_range[1], num=cardinality, endpoint=True
+                    start=num_range[0],
+                    stop=num_range[1],
+                    num=cardinality,
+                    endpoint=True,
                 )
             )
         assert self.type == "int", f"Unhandled tunable type: {self}"

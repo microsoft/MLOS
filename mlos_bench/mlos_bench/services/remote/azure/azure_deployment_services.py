@@ -104,7 +104,7 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
             self._deploy_params = merge_parameters(dest=deploy_params, source=global_config)
         else:
             _LOG.info(
-                "No deploymentTemplatePath provided. Deployment services will be unavailable."
+                "No deploymentTemplatePath provided. Deployment services will be unavailable.",
             )
 
     @property

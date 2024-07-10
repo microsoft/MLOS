@@ -466,7 +466,9 @@ def test_llamatune_pipeline(
 
     # Define config space with a mix of different parameter types
     input_space = construct_parameter_space(
-        n_continuous_params=10, n_integer_params=10, n_categorical_params=5
+        n_continuous_params=10,
+        n_integer_params=10,
+        n_categorical_params=5,
     )
     adapter = LlamaTuneAdapter(
         orig_parameter_space=input_space,

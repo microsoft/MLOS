@@ -49,7 +49,10 @@ def ignore_plotter_warnings() -> None:
         "ignore", module="dabl", category=UserWarning, message="(Dropped|Discarding) .* outliers"
     )
     warnings.filterwarnings(
-        "ignore", module="dabl", category=UserWarning, message="Not plotting highly correlated"
+        "ignore",
+        module="dabl",
+        category=UserWarning,
+        message="Not plotting highly correlated",
     )
     warnings.filterwarnings(
         "ignore",

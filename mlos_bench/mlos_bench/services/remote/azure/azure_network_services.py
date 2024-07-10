@@ -86,7 +86,8 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
         if "vnetName" in params and "deploymentName" not in params:
             params["deploymentName"] = f"{params['vnetName']}-deployment"
             _LOG.info(
-                "deploymentName missing from params. Defaulting to '%s'.", params["deploymentName"]
+                "deploymentName missing from params. Defaulting to '%s'.",
+                params["deploymentName"],
             )
         return params
 

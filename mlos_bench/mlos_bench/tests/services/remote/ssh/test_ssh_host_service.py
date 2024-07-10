@@ -240,5 +240,8 @@ def test_ssh_service_reboot(
         locked_docker_services, reboot_test_server, ssh_host_service, graceful=True
     )
     check_ssh_service_reboot(
-        locked_docker_services, reboot_test_server, ssh_host_service, graceful=False
+        locked_docker_services,
+        reboot_test_server,
+        ssh_host_service,
+        graceful=False,
     )

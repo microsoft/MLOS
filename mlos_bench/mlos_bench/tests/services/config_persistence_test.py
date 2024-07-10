@@ -97,7 +97,8 @@ def test_load_config(config_persistence_service: ConfigPersistenceService) -> No
     `config_path`.
     """
     tunables_data = config_persistence_service.load_config(
-        "tunable-values/tunable-values-example.jsonc", ConfigSchema.TUNABLE_VALUES
+        "tunable-values/tunable-values-example.jsonc",
+        ConfigSchema.TUNABLE_VALUES,
     )
     assert tunables_data is not None
     assert isinstance(tunables_data, dict)

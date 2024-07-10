@@ -54,7 +54,9 @@ def test_run_python_script(local_exec_service: LocalExecService) -> None:
         )
 
         (return_code, _stdout, stderr) = local_exec_service.local_exec(
-            [f"{script_path} {input_file} {meta_file} {output_file}"], cwd=temp_dir, env=params
+            [f"{script_path} {input_file} {meta_file} {output_file}"],
+            cwd=temp_dir,
+            env=params,
         )
 
         assert stderr.strip() == ""

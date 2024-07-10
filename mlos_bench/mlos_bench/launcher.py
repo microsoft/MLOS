@@ -450,7 +450,9 @@ class Launcher:
         class_config = self._config_loader.load_config(args_storage, ConfigSchema.STORAGE)
         assert isinstance(class_config, Dict)
         storage = self._config_loader.build_storage(
-            service=self._parent_service, config=class_config, global_config=self.global_config
+            service=self._parent_service,
+            config=class_config,
+            global_config=self.global_config,
         )
         return storage
 

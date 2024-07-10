@@ -129,7 +129,9 @@ def test_init_mlos_core_smac_relative_output_directory_with_experiment_id(
     assert isinstance(opt._opt, SmacOptimizer)
     assert path_join(str(opt._opt.base_optimizer.scenario.output_directory)).startswith(
         path_join(
-            os.getcwd(), str(test_opt_config["output_directory"]), global_config["experiment_id"]
+            os.getcwd(),
+            str(test_opt_config["output_directory"]),
+            global_config["experiment_id"],
         )
     )
     shutil.rmtree(_OUTPUT_DIR)

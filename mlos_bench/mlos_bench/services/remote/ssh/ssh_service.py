@@ -377,7 +377,8 @@ class SshService(Service, metaclass=ABCMeta):
             connect_params["username"] = str(self.config["ssh_username"])
 
         priv_key_file: Optional[str] = params.get(
-            "ssh_priv_key_path", self.config["ssh_priv_key_path"]
+            "ssh_priv_key_path",
+            self.config["ssh_priv_key_path"],
         )
         if priv_key_file:
             priv_key_file = os.path.expanduser(priv_key_file)

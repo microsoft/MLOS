@@ -244,5 +244,7 @@ def get_results_df(
 
         # Concat the trials, configs, and results.
         return trials_df.merge(configs_df, on=["trial_id", "tunable_config_id"], how="left").merge(
-            results_df, on="trial_id", how="left"
+            results_df,
+            on="trial_id",
+            how="left",
         )

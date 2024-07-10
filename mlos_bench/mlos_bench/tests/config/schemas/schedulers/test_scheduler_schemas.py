@@ -75,7 +75,8 @@ def test_scheduler_configs_with_extra_param(test_case_name: str) -> None:
         TEST_CASES.by_type["good"][test_case_name], ConfigSchema.SCHEDULER
     )
     check_test_case_config_with_extra_param(
-        TEST_CASES.by_type["good"][test_case_name], ConfigSchema.UNIFIED
+        TEST_CASES.by_type["good"][test_case_name],
+        ConfigSchema.UNIFIED,
     )
 
 

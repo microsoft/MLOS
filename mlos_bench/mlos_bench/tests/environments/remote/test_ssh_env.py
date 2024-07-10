@@ -39,7 +39,10 @@ def test_remote_ssh_env(ssh_test_server: SshTestServerInfo) -> None:
     )
     config_path = service.resolve_path("environments/remote/test_ssh_env.jsonc")
     env = service.load_environment(
-        config_path, TunableGroups(), global_config=global_config, service=service
+        config_path,
+        TunableGroups(),
+        global_config=global_config,
+        service=service,
     )
 
     check_env_success(

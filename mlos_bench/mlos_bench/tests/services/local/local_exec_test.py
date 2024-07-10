@@ -212,5 +212,7 @@ def test_temp_dir_path_expansion() -> None:
         # pylint: disable=protected-access
         assert isinstance(local_exec_service._temp_dir, str)
         assert path_join(local_exec_service._temp_dir, abs_path=True) == path_join(
-            temp_dir, "temp", abs_path=True
+            temp_dir,
+            "temp",
+            abs_path=True,
         )

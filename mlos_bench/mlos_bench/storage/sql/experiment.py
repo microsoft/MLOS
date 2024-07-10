@@ -256,7 +256,10 @@ class Experiment(Storage.Experiment):
             )
             for trial in cur_trials.fetchall():
                 tunables = self._get_key_val(
-                    conn, self._schema.config_param, "param", config_id=trial.config_id
+                    conn,
+                    self._schema.config_param,
+                    "param",
+                    config_id=trial.config_id,
                 )
                 config = self._get_key_val(
                     conn,

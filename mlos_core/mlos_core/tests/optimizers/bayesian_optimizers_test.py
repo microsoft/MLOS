@@ -32,7 +32,9 @@ def test_context_not_implemented_warning(
     if kwargs is None:
         kwargs = {}
     optimizer = optimizer_class(
-        parameter_space=configuration_space, optimization_targets=["score"], **kwargs
+        parameter_space=configuration_space,
+        optimization_targets=["score"],
+        **kwargs,
     )
     suggestion, _metadata = optimizer.suggest()
     scores = pd.DataFrame({"score": [1]})

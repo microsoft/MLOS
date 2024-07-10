@@ -500,7 +500,10 @@ class AzureVMService(
             _LOG.debug("Request: POST %s\n%s", url, json.dumps(json_req, indent=2))
 
         response = requests.post(
-            url, json=json_req, headers=self._get_headers(), timeout=self._request_timeout
+            url,
+            json=json_req,
+            headers=self._get_headers(),
+            timeout=self._request_timeout,
         )
 
         if _LOG.isEnabledFor(logging.DEBUG):

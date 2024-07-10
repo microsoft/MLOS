@@ -457,7 +457,7 @@ def plot_top_n_configs(
     )
 
     (top_n_config_results_df, _groupby_columns, groupby_column) = _add_groupby_desc_column(
-        top_n_config_results_df
+        top_n_config_results_df,
     )
     top_n = len(top_n_config_results_df[groupby_column].unique()) - 1
 
