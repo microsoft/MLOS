@@ -123,7 +123,8 @@ def get_schema_test_cases(test_cases_root: str) -> TestCases:
 
 
 def check_test_case_against_schema(
-    test_case: SchemaTestCaseInfo, schema_type: ConfigSchema
+    test_case: SchemaTestCaseInfo,
+    schema_type: ConfigSchema,
 ) -> None:
     """
     Checks the given test case against the given schema.
@@ -150,7 +151,8 @@ def check_test_case_against_schema(
 
 
 def check_test_case_config_with_extra_param(
-    test_case: SchemaTestCaseInfo, schema_type: ConfigSchema
+    test_case: SchemaTestCaseInfo,
+    schema_type: ConfigSchema,
 ) -> None:
     """Checks that the config fails to validate if extra params are present in certain
     places.
