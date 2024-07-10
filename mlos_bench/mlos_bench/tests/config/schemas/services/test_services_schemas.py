@@ -93,7 +93,8 @@ def test_service_configs_with_extra_param(test_case_name: str) -> None:
     certain places.
     """
     check_test_case_config_with_extra_param(
-        TEST_CASES.by_type["good"][test_case_name], ConfigSchema.SERVICE
+        TEST_CASES.by_type["good"][test_case_name],
+        ConfigSchema.SERVICE,
     )
     check_test_case_config_with_extra_param(
         TEST_CASES.by_type["good"][test_case_name],

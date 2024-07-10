@@ -34,7 +34,8 @@ TEST_CASES = get_schema_test_cases(path.join(path.dirname(__file__), "test-cases
 expected_mlos_bench_optimizer_class_names = [
     subclass.__module__ + "." + subclass.__name__
     for subclass in get_all_concrete_subclasses(
-        Optimizer, pkg_name="mlos_bench"  # type: ignore[type-abstract]
+        Optimizer,  # type: ignore[type-abstract]
+        pkg_name="mlos_bench",
     )
 ]
 assert expected_mlos_bench_optimizer_class_names
@@ -53,7 +54,8 @@ assert expected_mlos_core_space_adapter_types
 @pytest.mark.parametrize("test_case_subtype", sorted(TEST_CASES.by_subtype))
 @pytest.mark.parametrize("mlos_bench_optimizer_type", expected_mlos_bench_optimizer_class_names)
 def test_case_coverage_mlos_bench_optimizer_type(
-    test_case_subtype: str, mlos_bench_optimizer_type: str
+    test_case_subtype: str,
+    mlos_bench_optimizer_type: str,
 ) -> None:
     """Checks to see if there is a given type of test case for the given mlos_bench
     optimizer type.
@@ -75,7 +77,8 @@ def test_case_coverage_mlos_bench_optimizer_type(
 # @pytest.mark.parametrize("test_case_subtype", sorted(TEST_CASES.by_subtype))
 @pytest.mark.parametrize("mlos_core_optimizer_type", expected_mlos_core_optimizer_types)
 def test_case_coverage_mlos_core_optimizer_type(
-    test_case_type: str, mlos_core_optimizer_type: Optional[OptimizerType]
+    test_case_type: str,
+    mlos_core_optimizer_type: Optional[OptimizerType],
 ) -> None:
     """Checks to see if there is a given type of test case for the given mlos_core
     optimizer type.
@@ -101,7 +104,8 @@ def test_case_coverage_mlos_core_optimizer_type(
 # @pytest.mark.parametrize("test_case_subtype", sorted(TEST_CASES.by_subtype))
 @pytest.mark.parametrize("mlos_core_space_adapter_type", expected_mlos_core_space_adapter_types)
 def test_case_coverage_mlos_core_space_adapter_type(
-    test_case_type: str, mlos_core_space_adapter_type: Optional[SpaceAdapterType]
+    test_case_type: str,
+    mlos_core_space_adapter_type: Optional[SpaceAdapterType],
 ) -> None:
     """Checks to see if there is a given type of test case for the given mlos_core space
     adapter type.
@@ -141,7 +145,8 @@ def test_optimizer_configs_with_extra_param(test_case_name: str) -> None:
     certain places.
     """
     check_test_case_config_with_extra_param(
-        TEST_CASES.by_type["good"][test_case_name], ConfigSchema.OPTIMIZER
+        TEST_CASES.by_type["good"][test_case_name],
+        ConfigSchema.OPTIMIZER,
     )
     check_test_case_config_with_extra_param(
         TEST_CASES.by_type["good"][test_case_name],

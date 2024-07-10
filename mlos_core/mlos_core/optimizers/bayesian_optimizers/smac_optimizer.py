@@ -130,9 +130,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if output_directory is None:
             # pylint: disable=consider-using-with
             try:
-                self._temp_output_directory = TemporaryDirectory(
-                    ignore_cleanup_errors=True
-                )  # Argument added in Python 3.10
+                # Argument added in Python 3.10
+                self._temp_output_directory = TemporaryDirectory(ignore_cleanup_errors=True)
             except TypeError:
                 self._temp_output_directory = TemporaryDirectory()
             output_directory = self._temp_output_directory.name
@@ -155,10 +154,12 @@ class SmacOptimizer(BaseBayesianOptimizer):
             n_workers=1,  # Use a single thread for evaluating trials
         )
         intensifier: AbstractIntensifier = Optimizer_Smac.get_intensifier(
-            scenario, max_config_calls=1
+            scenario,
+            max_config_calls=1,
         )
         config_selector: ConfigSelector = Optimizer_Smac.get_config_selector(
-            scenario, retrain_after=1
+            scenario,
+            retrain_after=1,
         )
 
         # TODO: When bulk registering prior configs to rewarm the optimizer,
@@ -207,7 +208,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # get_random_design static method when random_design is None.
         assert isinstance(n_random_probability, float) and n_random_probability >= 0
         random_design = ProbabilityRandomDesign(
-            probability=n_random_probability, seed=scenario.seed
+            probability=n_random_probability,
+            seed=scenario.seed,
         )
 
         self.base_optimizer = Optimizer_Smac(
@@ -218,7 +220,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
             random_design=random_design,
             config_selector=config_selector,
             multi_objective_algorithm=Optimizer_Smac.get_multi_objective_algorithm(
-                scenario, objective_weights=self._objective_weights
+                scenario,
+                objective_weights=self._objective_weights,
             ),
             overwrite=True,
             logging_level=False,  # Use the existing logger
@@ -309,7 +312,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
             # Retrieve previously generated TrialInfo (returned by .ask()) or create
             # new TrialInfo instance
             info: TrialInfo = self.trial_info_map.get(
-                config, TrialInfo(config=config, seed=self.base_optimizer.scenario.seed)
+                config,
+                TrialInfo(config=config, seed=self.base_optimizer.scenario.seed),
             )
             value = TrialValue(cost=list(score.astype(float)), time=0.0, status=StatusType.SUCCESS)
             self.base_optimizer.tell(info, value, save=False)
@@ -318,7 +322,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         self.base_optimizer.optimizer.save()
 
     def _suggest(
-        self, *, context: Optional[pd.DataFrame] = None
+        self,
+        *,
+        context: Optional[pd.DataFrame] = None,
     ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """
         Suggests a new configuration.
@@ -363,7 +369,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
         raise NotImplementedError()
 
     def surrogate_predict(
-        self, *, configs: pd.DataFrame, context: Optional[pd.DataFrame] = None
+        self,
+        *,
+        configs: pd.DataFrame,
+        context: Optional[pd.DataFrame] = None,
     ) -> npt.NDArray:
         # pylint: disable=import-outside-toplevel
         from smac.utils.configspace import convert_configurations_to_array
@@ -392,7 +401,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
         )
 
     def acquisition_function(
-        self, *, configs: pd.DataFrame, context: Optional[pd.DataFrame] = None
+        self,
+        *,
+        configs: pd.DataFrame,
+        context: Optional[pd.DataFrame] = None,
     ) -> npt.NDArray:
         if context is not None:
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)

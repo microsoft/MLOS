@@ -64,7 +64,8 @@ def construct_parameter_space(
     ),
 )
 def test_num_low_dims(
-    num_target_space_dims: int, param_space_kwargs: dict
+    num_target_space_dims: int,
+    param_space_kwargs: dict,
 ) -> None:  # pylint: disable=too-many-locals
     """Tests LlamaTune's low-to-high space projection method."""
     input_space = construct_parameter_space(**param_space_kwargs)
@@ -100,7 +101,8 @@ def test_num_low_dims(
 
         # Sampled config and this should be the same
         target_config = CS.Configuration(
-            adapter.target_parameter_space, values=target_config_df.iloc[0].to_dict()
+            adapter.target_parameter_space,
+            values=target_config_df.iloc[0].to_dict(),
         )
         assert target_config == sampled_config
 
@@ -213,7 +215,8 @@ def gen_random_configs(adapter: LlamaTuneAdapter, num_configs: int) -> Iterator[
         )
         orig_config_df = adapter.transform(sampled_config_df)
         orig_config = CS.Configuration(
-            adapter.orig_parameter_space, values=orig_config_df.iloc[0].to_dict()
+            adapter.orig_parameter_space,
+            values=orig_config_df.iloc[0].to_dict(),
         )
         yield orig_config
 
@@ -320,7 +323,9 @@ def test_max_unique_values_per_param() -> None:
     """Tests LlamaTune's parameter values discretization implementation."""
     # Define config space with a mix of different parameter types
     input_space = CS.ConfigurationSpace(seed=1234)
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="cont_1", lower=0, upper=5))
+    input_space.add_hyperparameter(
+        CS.UniformFloatHyperparameter(name="cont_1", lower=0, upper=5),
+    )
     input_space.add_hyperparameter(
         CS.UniformFloatHyperparameter(name="cont_2", lower=1, upper=100)
     )
@@ -380,7 +385,8 @@ def test_max_unique_values_per_param() -> None:
     ),
 )
 def test_approx_inverse_mapping(
-    num_target_space_dims: int, param_space_kwargs: dict
+    num_target_space_dims: int,
+    param_space_kwargs: dict,
 ) -> None:  # pylint: disable=too-many-locals
     """Tests LlamaTune's approximate high-to-low space projection method, using pseudo-
     inverse.
@@ -421,7 +427,8 @@ def test_approx_inverse_mapping(
         target_config_df = adapter.inverse_transform(sampled_config_df)
         # Low-dim (i.e., target) config should be valid
         target_config = CS.Configuration(
-            adapter.target_parameter_space, values=target_config_df.iloc[0].to_dict()
+            adapter.target_parameter_space,
+            values=target_config_df.iloc[0].to_dict(),
         )
         adapter.target_parameter_space.check_configuration(target_config)
 
@@ -434,7 +441,8 @@ def test_approx_inverse_mapping(
         target_config_df = adapter.inverse_transform(sampled_config_df)
         # Low-dim (i.e., target) config should be valid
         target_config = CS.Configuration(
-            adapter.target_parameter_space, values=target_config_df.iloc[0].to_dict()
+            adapter.target_parameter_space,
+            values=target_config_df.iloc[0].to_dict(),
         )
         adapter.target_parameter_space.check_configuration(target_config)
 
@@ -459,7 +467,9 @@ def test_approx_inverse_mapping(
     ),
 )
 def test_llamatune_pipeline(
-    num_low_dims: int, special_param_values: dict, max_unique_values_per_param: int
+    num_low_dims: int,
+    special_param_values: dict,
+    max_unique_values_per_param: int,
 ) -> None:
     """Tests LlamaTune space adapter when all components are active."""
     # pylint: disable=too-many-locals
@@ -499,7 +509,8 @@ def test_llamatune_pipeline(
         target_config_df = adapter.inverse_transform(orig_config_df)
         # Sampled config and this should be the same
         target_config = CS.Configuration(
-            adapter.target_parameter_space, values=target_config_df.iloc[0].to_dict()
+            adapter.target_parameter_space,
+            values=target_config_df.iloc[0].to_dict(),
         )
         assert target_config == config
 
@@ -550,7 +561,8 @@ def test_llamatune_pipeline(
     ),
 )
 def test_deterministic_behavior_for_same_seed(
-    num_target_space_dims: int, param_space_kwargs: dict
+    num_target_space_dims: int,
+    param_space_kwargs: dict,
 ) -> None:
     """Tests LlamaTune's space adapter deterministic behavior when given same seed in
     the input parameter space.

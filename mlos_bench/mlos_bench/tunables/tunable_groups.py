@@ -157,7 +157,9 @@ class TunableGroups:
         return self._index[name][name]
 
     def __setitem__(
-        self, tunable: Union[str, Tunable], tunable_value: Union[TunableValue, Tunable]
+        self,
+        tunable: Union[str, Tunable],
+        tunable_value: Union[TunableValue, Tunable],
     ) -> TunableValue:
         """Update the current value of a single tunable parameter."""
         # Use double index to make sure we set the is_updated flag of the group

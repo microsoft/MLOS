@@ -246,7 +246,9 @@ def limit_top_n_configs(
 
     # Prepare the orderby columns.
     (results_df, objs_cols) = expand_results_data_args(
-        exp_data, results_df=results_df, objectives=objectives
+        exp_data,
+        results_df=results_df,
+        objectives=objectives,
     )
     assert isinstance(results_df, pandas.DataFrame)
 
@@ -327,7 +329,8 @@ def limit_top_n_configs(
     # Place the default config at the top of the list.
     top_n_config_ids.insert(0, default_config_id)
     top_n_config_results_df = pandas.concat(
-        [default_config_results_df, top_n_config_results_df], axis=0
+        [default_config_results_df, top_n_config_results_df],
+        axis=0,
     )
     return (top_n_config_results_df, top_n_config_ids, orderby_cols)
 
@@ -453,7 +456,8 @@ def plot_top_n_configs(
     if "objectives" not in top_n_config_args:
         top_n_config_args["objectives"] = objectives
     (top_n_config_results_df, _top_n_config_ids, orderby_cols) = limit_top_n_configs(
-        exp_data=exp_data, **top_n_config_args
+        exp_data=exp_data,
+        **top_n_config_args,
     )
 
     (top_n_config_results_df, _groupby_columns, groupby_column) = _add_groupby_desc_column(

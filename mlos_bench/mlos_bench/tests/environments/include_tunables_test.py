@@ -12,7 +12,9 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 def test_one_group(tunable_groups: TunableGroups) -> None:
     """Make sure only one tunable group is available to the environment."""
     env = MockEnv(
-        name="Test Env", config={"tunable_params": ["provision"]}, tunables=tunable_groups
+        name="Test Env",
+        config={"tunable_params": ["provision"]},
+        tunables=tunable_groups,
     )
     assert env.tunable_params.get_param_values() == {
         "vmSize": "Standard_B4ms",

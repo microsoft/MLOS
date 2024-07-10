@@ -92,7 +92,8 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         if self.config.get("deploymentTemplatePath") is not None:
             # TODO: Provide external schema validation?
             template = self.config_loader_service.load_config(
-                self.config["deploymentTemplatePath"], schema_type=None
+                self.config["deploymentTemplatePath"],
+                schema_type=None,
             )
             assert template is not None and isinstance(template, dict)
             self._deploy_template = template

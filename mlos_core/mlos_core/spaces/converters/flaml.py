@@ -52,11 +52,13 @@ def configspace_to_flaml_space(
         if isinstance(parameter, ConfigSpace.UniformFloatHyperparameter):
             # FIXME: upper isn't included in the range
             return flaml_numeric_type[(type(parameter), parameter.log)](
-                parameter.lower, parameter.upper
+                parameter.lower,
+                parameter.upper,
             )
         elif isinstance(parameter, ConfigSpace.UniformIntegerHyperparameter):
             return flaml_numeric_type[(type(parameter), parameter.log)](
-                parameter.lower, parameter.upper + 1
+                parameter.lower,
+                parameter.upper + 1,
             )
         elif isinstance(parameter, ConfigSpace.CategoricalHyperparameter):
             if len(np.unique(parameter.probabilities)) > 1:

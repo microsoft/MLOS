@@ -75,7 +75,8 @@ def grid_search_tunables(grid_search_tunables_config: dict) -> TunableGroups:
 
 @pytest.fixture
 def grid_search_opt(
-    grid_search_tunables: TunableGroups, grid_search_tunables_grid: List[Dict[str, TunableValue]]
+    grid_search_tunables: TunableGroups,
+    grid_search_tunables_grid: List[Dict[str, TunableValue]],
 ) -> GridSearchOptimizer:
     """Test fixture for grid search optimizer."""
     assert len(grid_search_tunables) == 3
@@ -280,7 +281,8 @@ def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
 
 
 def test_grid_search_register(
-    grid_search_opt: GridSearchOptimizer, grid_search_tunables: TunableGroups
+    grid_search_opt: GridSearchOptimizer,
+    grid_search_tunables: TunableGroups,
 ) -> None:
     """Make sure that the `.register()` method adjusts the score signs correctly."""
     assert grid_search_opt.register(

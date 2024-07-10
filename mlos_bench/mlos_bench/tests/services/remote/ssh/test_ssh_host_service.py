@@ -167,7 +167,8 @@ def check_ssh_service_reboot(
 
         # Now try to restart the server.
         (status, reboot_results_info) = ssh_host_service.reboot(
-            params=reboot_test_srv_ssh_svc_conf, force=not graceful
+            params=reboot_test_srv_ssh_svc_conf,
+            force=not graceful,
         )
         assert status.is_pending()
 
@@ -237,7 +238,10 @@ def test_ssh_service_reboot(
     """Test the SshHostService reboot operation."""
     # Grouped together to avoid parallel runner interactions.
     check_ssh_service_reboot(
-        locked_docker_services, reboot_test_server, ssh_host_service, graceful=True
+        locked_docker_services,
+        reboot_test_server,
+        ssh_host_service,
+        graceful=True,
     )
     check_ssh_service_reboot(
         locked_docker_services,

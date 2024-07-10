@@ -99,7 +99,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         target_configurations = []
         for _, config in configurations.astype("O").iterrows():
             configuration = ConfigSpace.Configuration(
-                self.orig_parameter_space, values=config.to_dict()
+                self.orig_parameter_space,
+                values=config.to_dict(),
             )
 
             target_config = self._suggested_configs.get(configuration, None)
@@ -135,7 +136,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
                 vector = self._config_scaler.inverse_transform([config_vector])[0]
                 target_config_vector = self._pinv_matrix.dot(vector)
                 target_config = ConfigSpace.Configuration(
-                    self.target_parameter_space, vector=target_config_vector
+                    self.target_parameter_space,
+                    vector=target_config_vector,
                 )
 
             target_configurations.append(target_config)
@@ -153,7 +155,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
 
         target_values_dict = configuration.iloc[0].to_dict()
         target_configuration = ConfigSpace.Configuration(
-            self.target_parameter_space, values=target_values_dict
+            self.target_parameter_space,
+            values=target_values_dict,
         )
 
         orig_values_dict = self._transform(target_values_dict)
@@ -167,7 +170,9 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         )
 
     def _construct_low_dim_space(
-        self, num_low_dims: int, max_unique_values_per_param: Optional[int]
+        self,
+        num_low_dims: int,
+        max_unique_values_per_param: Optional[int],
     ) -> None:
         """
         Constructs the low-dimensional parameter (potentially discretized) search space.
@@ -197,7 +202,9 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
             # range, used by HeSBO projection.
             hyperparameters = [
                 ConfigSpace.UniformIntegerHyperparameter(
-                    name=f"dim_{idx}", lower=1, upper=max_unique_values_per_param
+                    name=f"dim_{idx}",
+                    lower=1,
+                    upper=max_unique_values_per_param,
                 )
                 for idx in range(num_low_dims)
             ]
@@ -213,9 +220,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
 
         # Construct low-dimensional parameter search space
         config_space = ConfigSpace.ConfigurationSpace(name=self.orig_parameter_space.name)
-        config_space.random = (
-            self._random_state
-        )  # use same random state as in original parameter space
+        # use same random state as in original parameter space
+        config_space.random = self._random_state
         config_space.add_hyperparameters(hyperparameters)
         self._target_config_space = config_space
 
@@ -278,7 +284,9 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         return original_config
 
     def _special_param_value_scaler(
-        self, param: ConfigSpace.UniformIntegerHyperparameter, input_value: float
+        self,
+        param: ConfigSpace.UniformIntegerHyperparameter,
+        input_value: float,
     ) -> float:
         """
         Biases the special value(s) of this parameter, by shifting the normalized

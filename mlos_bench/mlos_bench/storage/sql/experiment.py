@@ -182,7 +182,10 @@ class Experiment(Storage.Experiment):
                 trial_ids.append(trial.trial_id)
                 configs.append(
                     self._get_key_val(
-                        conn, self._schema.config_param, "param", config_id=trial.config_id
+                        conn,
+                        self._schema.config_param,
+                        "param",
+                        config_id=trial.config_id,
                     )
                 )
                 if stat.is_succeeded():
@@ -223,7 +226,10 @@ class Experiment(Storage.Experiment):
 
     @staticmethod
     def _save_params(
-        conn: Connection, table: Table, params: Dict[str, Any], **kwargs: Any
+        conn: Connection,
+        table: Table,
+        params: Dict[str, Any],
+        **kwargs: Any,
     ) -> None:
         if not params:
             return

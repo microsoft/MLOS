@@ -51,7 +51,8 @@ if DOCKER:
         debug("Docker is available but missing support for targeting linux platform.")
         DOCKER = None
 requires_docker = pytest.mark.skipif(
-    not DOCKER, reason="Docker with Linux support is not available on this system."
+    not DOCKER,
+    reason="Docker with Linux support is not available on this system.",
 )
 
 # A decorator for tests that require ssh.

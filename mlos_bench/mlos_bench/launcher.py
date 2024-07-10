@@ -113,7 +113,9 @@ class Launcher:
         service_files: List[str] = config.get("services", []) + (args.service or [])
         assert isinstance(self._parent_service, SupportsConfigLoading)
         self._parent_service = self._parent_service.load_services(
-            service_files, self.global_config, self._parent_service
+            service_files,
+            self.global_config,
+            self._parent_service,
         )
 
         env_path = args.environment or config.get("environment")
@@ -164,7 +166,8 @@ class Launcher:
 
     @staticmethod
     def _parse_args(
-        parser: argparse.ArgumentParser, argv: Optional[List[str]]
+        parser: argparse.ArgumentParser,
+        argv: Optional[List[str]],
     ) -> Tuple[argparse.Namespace, List[str]]:
         """Parse the command line arguments."""
         parser.add_argument(
@@ -376,7 +379,10 @@ class Launcher:
         return global_config
 
     def _init_tunable_values(
-        self, random_init: bool, seed: Optional[int], args_tunables: Optional[str]
+        self,
+        random_init: bool,
+        seed: Optional[int],
+        args_tunables: Optional[str],
     ) -> TunableGroups:
         """Initialize the tunables and load key/value pairs of the tunable values from
         given JSON files, if specified.

@@ -43,10 +43,16 @@ def ignore_plotter_warnings() -> None:
     # pylint: disable=import-outside-toplevel
     warnings.filterwarnings("ignore", category=FutureWarning)
     warnings.filterwarnings(
-        "ignore", module="dabl", category=UserWarning, message="Could not infer format"
+        "ignore",
+        module="dabl",
+        category=UserWarning,
+        message="Could not infer format",
     )
     warnings.filterwarnings(
-        "ignore", module="dabl", category=UserWarning, message="(Dropped|Discarding) .* outliers"
+        "ignore",
+        module="dabl",
+        category=UserWarning,
+        message="(Dropped|Discarding) .* outliers",
     )
     warnings.filterwarnings(
         "ignore",

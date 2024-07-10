@@ -45,7 +45,9 @@ def test_create_optimizer_and_suggest(
     if kwargs is None:
         kwargs = {}
     optimizer = optimizer_class(
-        parameter_space=configuration_space, optimization_targets=["score"], **kwargs
+        parameter_space=configuration_space,
+        optimization_targets=["score"],
+        **kwargs,
     )
     assert optimizer is not None
 
@@ -91,7 +93,9 @@ def test_basic_interface_toy_problem(
     # Emukit doesn't allow specifying a random state, so we set the global seed.
     np.random.seed(SEED)
     optimizer = optimizer_class(
-        parameter_space=configuration_space, optimization_targets=["score"], **kwargs
+        parameter_space=configuration_space,
+        optimization_targets=["score"],
+        **kwargs,
     )
 
     with pytest.raises(ValueError, match="No observations"):
@@ -294,9 +298,8 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
         # loop for llamatune-optimizer
         suggestion, metadata = llamatune_optimizer.suggest()
         _x, _y = suggestion["x"].iloc[0], suggestion["y"].iloc[0]
-        assert _x == pytest.approx(_y, rel=1e-3) or _x + _y == pytest.approx(
-            3.0, rel=1e-3
-        )  # optimizer explores 1-dimensional space
+        # optimizer explores 1-dimensional space
+        assert _x == pytest.approx(_y, rel=1e-3) or _x + _y == pytest.approx(3.0, rel=1e-3)
         observation = objective(suggestion)
         llamatune_optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
 
@@ -343,7 +346,8 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
 # Dynamically determine all of the optimizers we have implemented.
 # Note: these must be sorted.
 optimizer_subclasses: List[Type[BaseOptimizer]] = get_all_concrete_subclasses(
-    BaseOptimizer, pkg_name="mlos_core"  # type: ignore[type-abstract]
+    BaseOptimizer,  # type: ignore[type-abstract]
+    pkg_name="mlos_core",
 )
 assert optimizer_subclasses
 
@@ -366,7 +370,8 @@ def test_optimizer_type_defs(optimizer_class: Type[BaseOptimizer]) -> None:
     ],
 )
 def test_mixed_numerics_type_input_space_types(
-    optimizer_type: Optional[OptimizerType], kwargs: Optional[dict]
+    optimizer_type: Optional[OptimizerType],
+    kwargs: Optional[dict],
 ) -> None:
     """Toy problem to test the optimizers with mixed numeric types to ensure that
     original dtypes are retained.

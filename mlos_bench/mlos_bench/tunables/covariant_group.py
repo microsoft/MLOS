@@ -236,7 +236,9 @@ class CovariantTunableGroup:
         return self.get_tunable(tunable).value
 
     def __setitem__(
-        self, tunable: Union[str, Tunable], tunable_value: Union[TunableValue, Tunable]
+        self,
+        tunable: Union[str, Tunable],
+        tunable_value: Union[TunableValue, Tunable],
     ) -> TunableValue:
         value: TunableValue = (
             tunable_value.value if isinstance(tunable_value, Tunable) else tunable_value

@@ -37,10 +37,12 @@ def test_wait_host_deployment_retry(
     mock_getconn.return_value.getresponse.side_effect = [
         make_httplib_json_response(200, {"properties": {"provisioningState": "Running"}}),
         requests_ex.ConnectionError(
-            "Connection aborted", OSError(107, "Transport endpoint is not connected")
+            "Connection aborted",
+            OSError(107, "Transport endpoint is not connected"),
         ),
         requests_ex.ConnectionError(
-            "Connection aborted", OSError(107, "Transport endpoint is not connected")
+            "Connection aborted",
+            OSError(107, "Transport endpoint is not connected"),
         ),
         make_httplib_json_response(200, {"properties": {"provisioningState": "Running"}}),
         make_httplib_json_response(200, {"properties": {"provisioningState": "Succeeded"}}),
@@ -166,7 +168,9 @@ def test_vm_operation_status(
     ],
 )
 def test_vm_operation_invalid(
-    azure_vm_service_remote_exec_only: AzureVMService, operation_name: str, accepts_params: bool
+    azure_vm_service_remote_exec_only: AzureVMService,
+    operation_name: str,
+    accepts_params: bool,
 ) -> None:
     """Test VM operation status for an incomplete service config."""
     operation = getattr(azure_vm_service_remote_exec_only, operation_name)
@@ -177,7 +181,9 @@ def test_vm_operation_invalid(
 @patch("mlos_bench.services.remote.azure.azure_deployment_services.time.sleep")
 @patch("mlos_bench.services.remote.azure.azure_deployment_services.requests.Session")
 def test_wait_vm_operation_ready(
-    mock_session: MagicMock, mock_sleep: MagicMock, azure_vm_service: AzureVMService
+    mock_session: MagicMock,
+    mock_sleep: MagicMock,
+    azure_vm_service: AzureVMService,
 ) -> None:
     """Test waiting for the completion of the remote VM operation."""
     # Mock response header
@@ -204,7 +210,8 @@ def test_wait_vm_operation_ready(
 
 @patch("mlos_bench.services.remote.azure.azure_deployment_services.requests.Session")
 def test_wait_vm_operation_timeout(
-    mock_session: MagicMock, azure_vm_service: AzureVMService
+    mock_session: MagicMock,
+    azure_vm_service: AzureVMService,
 ) -> None:
     """Test the time out of the remote VM operation."""
     # Mock response header
@@ -241,10 +248,12 @@ def test_wait_vm_operation_retry(
     mock_getconn.return_value.getresponse.side_effect = [
         make_httplib_json_response(200, {"status": "InProgress"}),
         requests_ex.ConnectionError(
-            "Connection aborted", OSError(107, "Transport endpoint is not connected")
+            "Connection aborted",
+            OSError(107, "Transport endpoint is not connected"),
         ),
         requests_ex.ConnectionError(
-            "Connection aborted", OSError(107, "Transport endpoint is not connected")
+            "Connection aborted",
+            OSError(107, "Transport endpoint is not connected"),
         ),
         make_httplib_json_response(200, {"status": "InProgress"}),
         make_httplib_json_response(200, {"status": "Succeeded"}),
@@ -290,7 +299,9 @@ def test_remote_exec_status(
     mock_requests.post.return_value = mock_response
 
     status, _ = azure_vm_service_remote_exec_only.remote_exec(
-        script, config={"vmName": "test-vm"}, env_params={}
+        script,
+        config={"vmName": "test-vm"},
+        env_params={},
     )
 
     assert status == operation_status
@@ -298,7 +309,8 @@ def test_remote_exec_status(
 
 @patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
 def test_remote_exec_headers_output(
-    mock_requests: MagicMock, azure_vm_service_remote_exec_only: AzureVMService
+    mock_requests: MagicMock,
+    azure_vm_service_remote_exec_only: AzureVMService,
 ) -> None:
     """Check if HTTP headers from the remote execution on Azure are correct."""
     async_url_key = "asyncResultsUrl"
