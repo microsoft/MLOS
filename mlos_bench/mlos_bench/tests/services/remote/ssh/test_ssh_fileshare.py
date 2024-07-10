@@ -51,7 +51,8 @@ def closeable_temp_file(**kwargs: Any) -> Generator[_TemporaryFileWrapper, None,
 
 @requires_docker
 def test_ssh_fileshare_single_file(
-    ssh_test_server: SshTestServerInfo, ssh_fileshare_service: SshFileShareService
+    ssh_test_server: SshTestServerInfo,
+    ssh_fileshare_service: SshFileShareService,
 ) -> None:
     """Test the SshFileShareService single file download/upload."""
     with ssh_fileshare_service:
@@ -92,7 +93,8 @@ def test_ssh_fileshare_single_file(
 
 @requires_docker
 def test_ssh_fileshare_recursive(
-    ssh_test_server: SshTestServerInfo, ssh_fileshare_service: SshFileShareService
+    ssh_test_server: SshTestServerInfo,
+    ssh_fileshare_service: SshFileShareService,
 ) -> None:
     """Test the SshFileShareService recursive download/upload."""
     with ssh_fileshare_service:

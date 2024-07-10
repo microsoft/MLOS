@@ -17,7 +17,9 @@ from mlos_bench.services.remote.azure.azure_fileshare import AzureFileShareServi
 @patch("mlos_bench.services.remote.azure.azure_fileshare.open")
 @patch("mlos_bench.services.remote.azure.azure_fileshare.os.makedirs")
 def test_download_file(
-    mock_makedirs: MagicMock, mock_open: MagicMock, azure_fileshare: AzureFileShareService
+    mock_makedirs: MagicMock,
+    mock_open: MagicMock,
+    azure_fileshare: AzureFileShareService,
 ) -> None:
     filename = "test.csv"
     remote_folder = "a/remote/folder"
@@ -71,7 +73,9 @@ def make_dir_client_returns(remote_folder: str) -> dict:
 @patch("mlos_bench.services.remote.azure.azure_fileshare.open")
 @patch("mlos_bench.services.remote.azure.azure_fileshare.os.makedirs")
 def test_download_folder_non_recursive(
-    mock_makedirs: MagicMock, mock_open: MagicMock, azure_fileshare: AzureFileShareService
+    mock_makedirs: MagicMock,
+    mock_open: MagicMock,
+    azure_fileshare: AzureFileShareService,
 ) -> None:
     remote_folder = "a/remote/folder"
     local_folder = "some/local/folder"
@@ -103,7 +107,9 @@ def test_download_folder_non_recursive(
 @patch("mlos_bench.services.remote.azure.azure_fileshare.open")
 @patch("mlos_bench.services.remote.azure.azure_fileshare.os.makedirs")
 def test_download_folder_recursive(
-    mock_makedirs: MagicMock, mock_open: MagicMock, azure_fileshare: AzureFileShareService
+    mock_makedirs: MagicMock,
+    mock_open: MagicMock,
+    azure_fileshare: AzureFileShareService,
 ) -> None:
     remote_folder = "a/remote/folder"
     local_folder = "some/local/folder"

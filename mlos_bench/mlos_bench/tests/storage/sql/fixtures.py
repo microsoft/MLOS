@@ -107,7 +107,8 @@ def mixed_numerics_exp_storage(
 
 
 def _dummy_run_exp(
-    exp: SqlStorage.Experiment, tunable_name: Optional[str]
+    exp: SqlStorage.Experiment,
+    tunable_name: Optional[str],
 ) -> SqlStorage.Experiment:
     """Generates data by doing a simulated run of the given experiment."""
     # Add some trials to that experiment.
@@ -200,7 +201,8 @@ def mixed_numerics_exp_storage_with_trials(
 
 @pytest.fixture
 def exp_data(
-    storage: SqlStorage, exp_storage_with_trials: SqlStorage.Experiment
+    storage: SqlStorage,
+    exp_storage_with_trials: SqlStorage.Experiment,
 ) -> ExperimentData:
     """Test fixture for ExperimentData."""
     return storage.experiments[exp_storage_with_trials.experiment_id]
@@ -208,7 +210,8 @@ def exp_data(
 
 @pytest.fixture
 def exp_no_tunables_data(
-    storage: SqlStorage, exp_no_tunables_storage_with_trials: SqlStorage.Experiment
+    storage: SqlStorage,
+    exp_no_tunables_storage_with_trials: SqlStorage.Experiment,
 ) -> ExperimentData:
     """Test fixture for ExperimentData with no tunable configs."""
     return storage.experiments[exp_no_tunables_storage_with_trials.experiment_id]

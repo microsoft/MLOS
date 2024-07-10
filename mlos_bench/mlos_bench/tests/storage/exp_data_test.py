@@ -19,7 +19,8 @@ def test_load_empty_exp_data(storage: Storage, exp_storage: Storage.Experiment) 
 
 
 def test_exp_data_root_env_config(
-    exp_storage: Storage.Experiment, exp_data: ExperimentData
+    exp_storage: Storage.Experiment,
+    exp_data: ExperimentData,
 ) -> None:
     """Tests the root_env_config property of ExperimentData."""
     # pylint: disable=protected-access

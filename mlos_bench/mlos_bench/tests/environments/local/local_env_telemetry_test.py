@@ -73,7 +73,8 @@ def test_local_env_telemetry(tunable_groups: TunableGroups, zone_info: Optional[
 # FIXME: This fails with zone_info = None when run with `TZ="America/Chicago pytest -n0 ...`
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_local_env_telemetry_no_header(
-    tunable_groups: TunableGroups, zone_info: Optional[tzinfo]
+    tunable_groups: TunableGroups,
+    zone_info: Optional[tzinfo],
 ) -> None:
     """Read the telemetry data with no header."""
     ts1 = datetime.now(zone_info)

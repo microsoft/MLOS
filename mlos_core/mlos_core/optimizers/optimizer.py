@@ -144,7 +144,10 @@ class BaseOptimizer(metaclass=ABCMeta):
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
     def suggest(
-        self, *, context: Optional[pd.DataFrame] = None, defaults: bool = False
+        self,
+        *,
+        context: Optional[pd.DataFrame] = None,
+        defaults: bool = False,
     ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """
         Wrapper method, which employs the space adapter (if any), after suggesting a new
@@ -185,7 +188,9 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     @abstractmethod
     def _suggest(
-        self, *, context: Optional[pd.DataFrame] = None
+        self,
+        *,
+        context: Optional[pd.DataFrame] = None,
     ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """
         Suggests a new configuration.

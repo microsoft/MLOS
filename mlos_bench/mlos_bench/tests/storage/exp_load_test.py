@@ -32,7 +32,9 @@ def test_exp_pending_empty(exp_storage: Storage.Experiment) -> None:
 
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_exp_trial_pending(
-    exp_storage: Storage.Experiment, tunable_groups: TunableGroups, zone_info: Optional[tzinfo]
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+    zone_info: Optional[tzinfo],
 ) -> None:
     """Start a trial and check that it is pending."""
     trial = exp_storage.new_trial(tunable_groups)
@@ -43,7 +45,9 @@ def test_exp_trial_pending(
 
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_exp_trial_pending_many(
-    exp_storage: Storage.Experiment, tunable_groups: TunableGroups, zone_info: Optional[tzinfo]
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+    zone_info: Optional[tzinfo],
 ) -> None:
     """Start THREE trials and check that both are pending."""
     config1 = tunable_groups.copy().assign({"idle": "mwait"})
@@ -63,7 +67,9 @@ def test_exp_trial_pending_many(
 
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_exp_trial_pending_fail(
-    exp_storage: Storage.Experiment, tunable_groups: TunableGroups, zone_info: Optional[tzinfo]
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+    zone_info: Optional[tzinfo],
 ) -> None:
     """Start a trial, fail it, and and check that it is NOT pending."""
     trial = exp_storage.new_trial(tunable_groups)
@@ -74,7 +80,9 @@ def test_exp_trial_pending_fail(
 
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_exp_trial_success(
-    exp_storage: Storage.Experiment, tunable_groups: TunableGroups, zone_info: Optional[tzinfo]
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+    zone_info: Optional[tzinfo],
 ) -> None:
     """Start a trial, finish it successfully, and and check that it is NOT pending."""
     trial = exp_storage.new_trial(tunable_groups)
@@ -85,7 +93,9 @@ def test_exp_trial_success(
 
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_exp_trial_update_categ(
-    exp_storage: Storage.Experiment, tunable_groups: TunableGroups, zone_info: Optional[tzinfo]
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+    zone_info: Optional[tzinfo],
 ) -> None:
     """Update the trial with multiple metrics, some of which are categorical."""
     trial = exp_storage.new_trial(tunable_groups)
@@ -107,7 +117,9 @@ def test_exp_trial_update_categ(
 
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_exp_trial_update_twice(
-    exp_storage: Storage.Experiment, tunable_groups: TunableGroups, zone_info: Optional[tzinfo]
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+    zone_info: Optional[tzinfo],
 ) -> None:
     """Update the trial status twice and receive an error."""
     trial = exp_storage.new_trial(tunable_groups)

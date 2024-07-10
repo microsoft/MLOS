@@ -9,7 +9,8 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def test_trial_data_tunable_config_data(
-    exp_data: ExperimentData, tunable_groups: TunableGroups
+    exp_data: ExperimentData,
+    tunable_groups: TunableGroups,
 ) -> None:
     """Check expected return values for TunableConfigData."""
     trial_id = 1

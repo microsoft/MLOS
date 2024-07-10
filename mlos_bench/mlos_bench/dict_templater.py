@@ -29,7 +29,10 @@ class DictTemplater:  # pylint: disable=too-few-public-methods
         self._dict: Dict[str, Any] = {}
 
     def expand_vars(
-        self, *, extra_source_dict: Optional[Dict[str, Any]] = None, use_os_env: bool = False
+        self,
+        *,
+        extra_source_dict: Optional[Dict[str, Any]] = None,
+        use_os_env: bool = False,
     ) -> Dict[str, Any]:
         """
         Expand the template variables in the destination dictionary.

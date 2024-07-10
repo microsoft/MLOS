@@ -97,7 +97,8 @@ def ssh_test_server(
 
 @pytest.fixture(scope="session")
 def alt_test_server(
-    ssh_test_server: SshTestServerInfo, locked_docker_services: DockerServices
+    ssh_test_server: SshTestServerInfo,
+    locked_docker_services: DockerServices,
 ) -> SshTestServerInfo:
     """
     Fixture for getting the second ssh test server info from the docker-compose.yml.

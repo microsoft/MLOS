@@ -70,7 +70,10 @@ def preprocess_dynamic_configs(*, dest: dict, source: Optional[dict] = None) -> 
 
 
 def merge_parameters(
-    *, dest: dict, source: Optional[dict] = None, required_keys: Optional[Iterable[str]] = None
+    *,
+    dest: dict,
+    source: Optional[dict] = None,
+    required_keys: Optional[Iterable[str]] = None,
 ) -> dict:
     """
     Merge the source config dict into the destination config. Pick from the source
@@ -131,7 +134,8 @@ def path_join(*args: str, abs_path: bool = False) -> str:
 
 
 def prepare_class_load(
-    config: dict, global_config: Optional[Dict[str, Any]] = None
+    config: dict,
+    global_config: Optional[Dict[str, Any]] = None,
 ) -> Tuple[str, Dict[str, Any]]:
     """
     Extract the class instantiation parameters from the configuration.
@@ -188,7 +192,10 @@ def get_class_from_name(class_name: str) -> type:
 
 # FIXME: Technically, this should return a type "class_name" derived from "base_class".
 def instantiate_from_config(
-    base_class: Type[BaseTypeVar], class_name: str, *args: Any, **kwargs: Any
+    base_class: Type[BaseTypeVar],
+    class_name: str,
+    *args: Any,
+    **kwargs: Any,
 ) -> BaseTypeVar:
     """
     Factory method for a new class instantiated from config.
@@ -361,7 +368,9 @@ def utcify_timestamp(timestamp: datetime, *, origin: Literal["utc", "local"]) ->
 
 
 def utcify_nullable_timestamp(
-    timestamp: Optional[datetime], *, origin: Literal["utc", "local"]
+    timestamp: Optional[datetime],
+    *,
+    origin: Literal["utc", "local"],
 ) -> Optional[datetime]:
     """A nullable version of utcify_timestamp."""
     return utcify_timestamp(timestamp, origin=origin) if timestamp is not None else None

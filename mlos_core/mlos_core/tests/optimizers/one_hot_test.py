@@ -91,28 +91,36 @@ def optimizer(configuration_space: CS.ConfigurationSpace) -> BaseOptimizer:
 
 
 def test_to_1hot_data_frame(
-    optimizer: BaseOptimizer, data_frame: pd.DataFrame, one_hot_data_frame: npt.NDArray
+    optimizer: BaseOptimizer,
+    data_frame: pd.DataFrame,
+    one_hot_data_frame: npt.NDArray,
 ) -> None:
     """Toy problem to test one-hot encoding of dataframe."""
     assert optimizer._to_1hot(config=data_frame) == pytest.approx(one_hot_data_frame)
 
 
 def test_to_1hot_series(
-    optimizer: BaseOptimizer, series: pd.Series, one_hot_series: npt.NDArray
+    optimizer: BaseOptimizer,
+    series: pd.Series,
+    one_hot_series: npt.NDArray,
 ) -> None:
     """Toy problem to test one-hot encoding of series."""
     assert optimizer._to_1hot(config=series) == pytest.approx(one_hot_series)
 
 
 def test_from_1hot_data_frame(
-    optimizer: BaseOptimizer, data_frame: pd.DataFrame, one_hot_data_frame: npt.NDArray
+    optimizer: BaseOptimizer,
+    data_frame: pd.DataFrame,
+    one_hot_data_frame: npt.NDArray,
 ) -> None:
     """Toy problem to test one-hot decoding of dataframe."""
     assert optimizer._from_1hot(config=one_hot_data_frame).to_dict() == data_frame.to_dict()
 
 
 def test_from_1hot_series(
-    optimizer: BaseOptimizer, series: pd.Series, one_hot_series: npt.NDArray
+    optimizer: BaseOptimizer,
+    series: pd.Series,
+    one_hot_series: npt.NDArray,
 ) -> None:
     """Toy problem to test one-hot decoding of series."""
     one_hot_df = optimizer._from_1hot(config=one_hot_series)

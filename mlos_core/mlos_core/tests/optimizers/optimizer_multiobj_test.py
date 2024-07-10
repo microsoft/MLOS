@@ -25,7 +25,8 @@ _LOG = logging.getLogger(__name__)
     ],
 )
 def test_multi_target_opt_wrong_weights(
-    optimizer_class: Type[BaseOptimizer], kwargs: dict
+    optimizer_class: Type[BaseOptimizer],
+    kwargs: dict,
 ) -> None:
     """Make sure that the optimizer raises an error if the number of objective weights
     does not match the number of optimization targets.

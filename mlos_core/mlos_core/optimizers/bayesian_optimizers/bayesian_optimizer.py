@@ -18,7 +18,10 @@ class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
 
     @abstractmethod
     def surrogate_predict(
-        self, *, configs: pd.DataFrame, context: Optional[pd.DataFrame] = None
+        self,
+        *,
+        configs: pd.DataFrame,
+        context: Optional[pd.DataFrame] = None,
     ) -> npt.NDArray:
         """
         Obtain a prediction from this Bayesian optimizer's surrogate model for the given
