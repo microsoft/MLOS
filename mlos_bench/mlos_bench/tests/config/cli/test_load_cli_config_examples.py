@@ -42,9 +42,15 @@ def filter_configs(configs_to_filter: List[str]) -> List[str]:
 
 configs = [
     *locate_config_examples(
-        ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE, filter_configs
+        ConfigPersistenceService.BUILTIN_CONFIG_PATH,
+        CONFIG_TYPE,
+        filter_configs,
     ),
-    *locate_config_examples(BUILTIN_TEST_CONFIG_PATH, CONFIG_TYPE, filter_configs),
+    *locate_config_examples(
+        BUILTIN_TEST_CONFIG_PATH,
+        CONFIG_TYPE,
+        filter_configs,
+    ),
 ]
 assert configs
 
@@ -52,7 +58,8 @@ assert configs
 @pytest.mark.skip(reason="Use full Launcher test (below) instead now.")
 @pytest.mark.parametrize("config_path", configs)
 def test_load_cli_config_examples(
-    config_loader_service: ConfigPersistenceService, config_path: str
+    config_loader_service: ConfigPersistenceService,
+    config_path: str,
 ) -> None:  # pragma: no cover
     """Tests loading a config example."""
     # pylint: disable=too-complex
@@ -101,7 +108,8 @@ def test_load_cli_config_examples(
 
 @pytest.mark.parametrize("config_path", configs)
 def test_load_cli_config_examples_via_launcher(
-    config_loader_service: ConfigPersistenceService, config_path: str
+    config_loader_service: ConfigPersistenceService,
+    config_path: str,
 ) -> None:
     """Tests loading a config example via the Launcher."""
     config = config_loader_service.load_config(config_path, ConfigSchema.CLI)
@@ -154,28 +162,32 @@ def test_load_cli_config_examples_via_launcher(
 
     assert isinstance(launcher.environment, Environment)
     env_config = launcher.config_loader.load_config(
-        config["environment"], ConfigSchema.ENVIRONMENT
+        config["environment"],
+        ConfigSchema.ENVIRONMENT,
     )
     assert check_class_name(launcher.environment, env_config["class"])
 
     assert isinstance(launcher.optimizer, Optimizer)
     if "optimizer" in config:
         opt_config = launcher.config_loader.load_config(
-            config["optimizer"], ConfigSchema.OPTIMIZER
+            config["optimizer"],
+            ConfigSchema.OPTIMIZER,
         )
         assert check_class_name(launcher.optimizer, opt_config["class"])
 
     assert isinstance(launcher.storage, Storage)
     if "storage" in config:
         storage_config = launcher.config_loader.load_config(
-            config["storage"], ConfigSchema.STORAGE
+            config["storage"],
+            ConfigSchema.STORAGE,
         )
         assert check_class_name(launcher.storage, storage_config["class"])
 
     assert isinstance(launcher.scheduler, Scheduler)
     if "scheduler" in config:
         scheduler_config = launcher.config_loader.load_config(
-            config["scheduler"], ConfigSchema.SCHEDULER
+            config["scheduler"],
+            ConfigSchema.SCHEDULER,
         )
         assert check_class_name(launcher.scheduler, scheduler_config["class"])
 

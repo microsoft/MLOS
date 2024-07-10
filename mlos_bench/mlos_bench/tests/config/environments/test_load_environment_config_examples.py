@@ -41,7 +41,8 @@ assert configs
 
 @pytest.mark.parametrize("config_path", configs)
 def test_load_environment_config_examples(
-    config_loader_service: ConfigPersistenceService, config_path: str
+    config_loader_service: ConfigPersistenceService,
+    config_path: str,
 ) -> None:
     """Tests loading an environment config example."""
     envs = load_environment_config_examples(config_loader_service, config_path)
@@ -51,12 +52,14 @@ def test_load_environment_config_examples(
 
 
 def load_environment_config_examples(
-    config_loader_service: ConfigPersistenceService, config_path: str
+    config_loader_service: ConfigPersistenceService,
+    config_path: str,
 ) -> List[Environment]:
     """Loads an environment config example."""
     # Make sure that any "required_args" are provided.
     global_config = config_loader_service.load_config(
-        "experiments/experiment_test_config.jsonc", ConfigSchema.GLOBALS
+        "experiments/experiment_test_config.jsonc",
+        ConfigSchema.GLOBALS,
     )
     global_config.setdefault("trial_id", 1)  # normally populated by Launcher
 
@@ -74,16 +77,21 @@ def load_environment_config_examples(
 
     for mock_service_config_path in mock_service_configs:
         mock_service_config = config_loader_service.load_config(
-            mock_service_config_path, ConfigSchema.SERVICE
+            mock_service_config_path,
+            ConfigSchema.SERVICE,
         )
         config_loader_service.register(
             config_loader_service.build_service(
-                config=mock_service_config, parent=config_loader_service
+                config=mock_service_config,
+                parent=config_loader_service,
             ).export()
         )
 
     envs = config_loader_service.load_environment_list(
-        config_path, tunable_groups, global_config, service=config_loader_service
+        config_path,
+        tunable_groups,
+        global_config,
+        service=config_loader_service,
     )
     return envs
 
