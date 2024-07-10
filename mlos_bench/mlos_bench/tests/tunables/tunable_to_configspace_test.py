@@ -136,7 +136,8 @@ def test_tunable_groups_to_hyperparameters(tunable_groups: TunableGroups) -> Non
 
 
 def test_tunable_groups_to_configspace(
-    tunable_groups: TunableGroups, configuration_space: ConfigurationSpace
+    tunable_groups: TunableGroups,
+    configuration_space: ConfigurationSpace,
 ) -> None:
     """Check the conversion of the entire TunableGroups collection to a single
     ConfigurationSpace object.

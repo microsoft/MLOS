@@ -42,7 +42,7 @@ def zoned_telemetry_data(zone_info: Optional[tzinfo]) -> List[Tuple[datetime, st
 
 
 def _telemetry_str(
-    data: List[Tuple[datetime, str, Any]]
+    data: List[Tuple[datetime, str, Any]],
 ) -> List[Tuple[datetime, str, Optional[str]]]:
     """Convert telemetry values to strings."""
     # All retrieved timestamps should have been converted to UTC.

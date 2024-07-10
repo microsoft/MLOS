@@ -54,7 +54,9 @@ def test_multi_target_opt_wrong_weights(
     ],
 )
 def test_multi_target_opt(
-    objective_weights: Optional[List[float]], optimizer_class: Type[BaseOptimizer], kwargs: dict
+    objective_weights: Optional[List[float]],
+    optimizer_class: Type[BaseOptimizer],
+    kwargs: dict,
 ) -> None:
     """Toy multi-target optimization problem to test the optimizers with mixed numeric
     types to ensure that original dtypes are retained.

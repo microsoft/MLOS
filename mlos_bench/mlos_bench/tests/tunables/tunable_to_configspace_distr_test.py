@@ -44,7 +44,9 @@ _CS_HYPERPARAMETER = {
     ],
 )
 def test_convert_numerical_distributions(
-    param_type: str, distr_name: DistributionName, distr_params: dict
+    param_type: str,
+    distr_name: DistributionName,
+    distr_params: dict,
 ) -> None:
     """Convert a numerical Tunable with explicit distribution to ConfigSpace."""
     tunable_name = "x"

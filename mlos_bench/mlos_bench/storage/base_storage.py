@@ -400,7 +400,10 @@ class Storage(metaclass=ABCMeta):
 
         @abstractmethod
         def update(
-            self, status: Status, timestamp: datetime, metrics: Optional[Dict[str, Any]] = None
+            self,
+            status: Status,
+            timestamp: datetime,
+            metrics: Optional[Dict[str, Any]] = None,
         ) -> Optional[Dict[str, Any]]:
             """
             Update the storage with the results of the experiment.

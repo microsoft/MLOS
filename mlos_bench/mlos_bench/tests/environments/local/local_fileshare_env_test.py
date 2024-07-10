@@ -27,7 +27,8 @@ def mock_fileshare_service() -> MockFileShareService:
 
 @pytest.fixture
 def local_fileshare_env(
-    tunable_groups: TunableGroups, mock_fileshare_service: MockFileShareService
+    tunable_groups: TunableGroups,
+    mock_fileshare_service: MockFileShareService,
 ) -> LocalFileShareEnv:
     """Create a LocalFileShareEnv instance."""
     env = LocalFileShareEnv(

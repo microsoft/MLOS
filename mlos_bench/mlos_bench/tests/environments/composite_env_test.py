@@ -256,7 +256,8 @@ def test_nested_composite_env_params(nested_composite_env: CompositeEnv) -> None
 
 
 def test_nested_composite_env_setup(
-    nested_composite_env: CompositeEnv, tunable_groups: TunableGroups
+    nested_composite_env: CompositeEnv,
+    tunable_groups: TunableGroups,
 ) -> None:
     """Check that the child environments update their tunable parameters."""
     tunable_groups.assign(

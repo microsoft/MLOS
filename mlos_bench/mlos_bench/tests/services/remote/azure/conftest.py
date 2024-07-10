@@ -27,7 +27,8 @@ def config_persistence_service() -> ConfigPersistenceService:
 
 @pytest.fixture
 def azure_auth_service(
-    config_persistence_service: ConfigPersistenceService, monkeypatch: pytest.MonkeyPatch
+    config_persistence_service: ConfigPersistenceService,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> AzureAuthService:
     """Creates a dummy AzureAuthService for tests that require it."""
     auth = AzureAuthService(config={}, global_config={}, parent=config_persistence_service)

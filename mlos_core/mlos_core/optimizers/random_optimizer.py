@@ -58,7 +58,9 @@ class RandomOptimizer(BaseOptimizer):
         # should we pop them from self.pending_observations?
 
     def _suggest(
-        self, *, context: Optional[pd.DataFrame] = None
+        self,
+        *,
+        context: Optional[pd.DataFrame] = None,
     ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """
         Suggests a new configuration.

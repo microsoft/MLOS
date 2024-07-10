@@ -252,7 +252,9 @@ class BaseOptimizer(metaclass=ABCMeta):
         return (configs, scores, contexts if len(contexts.columns) > 0 else None)
 
     def get_best_observations(
-        self, *, n_max: int = 1
+        self,
+        *,
+        n_max: int = 1,
     ) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]:
         """
         Get the N best observations so far as a triplet of DataFrames (config, score,

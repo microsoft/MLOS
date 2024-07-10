@@ -28,7 +28,8 @@ def config_to_dataframe(config: Configuration) -> pd.DataFrame:
 
 
 def normalize_config(
-    config_space: ConfigurationSpace, config: Union[Configuration, dict]
+    config_space: ConfigurationSpace,
+    config: Union[Configuration, dict],
 ) -> Configuration:
     """
     Convert a dictionary to a valid ConfigSpace configuration.

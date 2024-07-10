@@ -140,7 +140,9 @@ def test_download_folder_recursive(
 @patch("mlos_bench.services.remote.azure.azure_fileshare.open")
 @patch("mlos_bench.services.remote.azure.azure_fileshare.os.path.isdir")
 def test_upload_file(
-    mock_isdir: MagicMock, mock_open: MagicMock, azure_fileshare: AzureFileShareService
+    mock_isdir: MagicMock,
+    mock_open: MagicMock,
+    azure_fileshare: AzureFileShareService,
 ) -> None:
     filename = "test.csv"
     remote_folder = "a/remote/folder"

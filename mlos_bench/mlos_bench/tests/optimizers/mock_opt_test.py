@@ -83,7 +83,8 @@ def test_mock_optimizer(mock_opt: MockOptimizer, mock_configurations: list) -> N
 
 
 def test_mock_optimizer_no_defaults(
-    mock_opt_no_defaults: MockOptimizer, mock_configurations_no_defaults: list
+    mock_opt_no_defaults: MockOptimizer,
+    mock_configurations_no_defaults: list,
 ) -> None:
     """Make sure that mock optimizer produces consistent suggestions."""
     score = _optimize(mock_opt_no_defaults, mock_configurations_no_defaults)

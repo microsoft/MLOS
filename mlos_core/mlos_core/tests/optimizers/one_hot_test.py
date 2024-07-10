@@ -137,7 +137,8 @@ def test_round_trip_series(optimizer: BaseOptimizer, series: pd.DataFrame) -> No
 
 
 def test_round_trip_reverse_data_frame(
-    optimizer: BaseOptimizer, one_hot_data_frame: npt.NDArray
+    optimizer: BaseOptimizer,
+    one_hot_data_frame: npt.NDArray,
 ) -> None:
     """Round-trip test for one-hot-decoding and then encoding of a numpy array."""
     round_trip = optimizer._to_1hot(config=optimizer._from_1hot(config=one_hot_data_frame))

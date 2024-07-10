@@ -71,7 +71,11 @@ class AzureFileShareService(FileShareService):
         )
 
     def download(
-        self, params: dict, remote_path: str, local_path: str, recursive: bool = True
+        self,
+        params: dict,
+        remote_path: str,
+        local_path: str,
+        recursive: bool = True,
     ) -> None:
         super().download(params, remote_path, local_path, recursive)
         dir_client = self._share_client.get_directory_client(remote_path)

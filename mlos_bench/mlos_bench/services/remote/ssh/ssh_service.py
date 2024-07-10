@@ -163,7 +163,8 @@ class SshClientCache:
                 self._cache_lock.release()
 
     async def get_client_connection(
-        self, connect_params: dict
+        self,
+        connect_params: dict,
     ) -> Tuple[SSHClientConnection, SshClient]:
         """
         Gets a (possibly cached) client connection.

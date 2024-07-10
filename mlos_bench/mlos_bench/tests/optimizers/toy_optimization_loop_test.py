@@ -78,7 +78,8 @@ def test_mock_optimization_loop(mock_env_no_noise: MockEnv, mock_opt: MockOptimi
 
 
 def test_mock_optimization_loop_no_defaults(
-    mock_env_no_noise: MockEnv, mock_opt_no_defaults: MockOptimizer
+    mock_env_no_noise: MockEnv,
+    mock_opt_no_defaults: MockOptimizer,
 ) -> None:
     """Toy optimization loop with mock environment and optimizer."""
     (score, tunables) = _optimize(mock_env_no_noise, mock_opt_no_defaults)

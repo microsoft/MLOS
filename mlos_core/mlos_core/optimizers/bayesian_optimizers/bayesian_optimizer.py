@@ -37,7 +37,10 @@ class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
 
     @abstractmethod
     def acquisition_function(
-        self, *, configs: pd.DataFrame, context: Optional[pd.DataFrame] = None
+        self,
+        *,
+        configs: pd.DataFrame,
+        context: Optional[pd.DataFrame] = None,
     ) -> npt.NDArray:
         """
         Invokes the acquisition function from this Bayesian optimizer for the given

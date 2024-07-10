@@ -49,7 +49,9 @@ class SupportsConfigLoading(Protocol):
         """
 
     def load_config(
-        self, json_file_name: str, schema_type: Optional[ConfigSchema]
+        self,
+        json_file_name: str,
+        schema_type: Optional[ConfigSchema],
     ) -> Union[dict, List[dict]]:
         """
         Load JSON config file. Search for a file relative to `_config_path` if the input

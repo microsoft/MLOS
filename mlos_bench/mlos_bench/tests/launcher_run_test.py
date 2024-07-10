@@ -91,7 +91,8 @@ def test_launch_main_app_bench(root_path: str, local_exec_service: LocalExecServ
 
 
 def test_launch_main_app_bench_values(
-    root_path: str, local_exec_service: LocalExecService
+    root_path: str,
+    local_exec_service: LocalExecService,
 ) -> None:
     """Run mlos_bench command-line application with mock benchmark config and user-
     specified tunable values and check the results in the log.

@@ -216,7 +216,8 @@ def exp_no_tunables_data(
 
 @pytest.fixture
 def mixed_numerics_exp_data(
-    storage: SqlStorage, mixed_numerics_exp_storage_with_trials: SqlStorage.Experiment
+    storage: SqlStorage,
+    mixed_numerics_exp_storage_with_trials: SqlStorage.Experiment,
 ) -> ExperimentData:
     """Test fixture for ExperimentData with mixed numerical tunable types."""
     return storage.experiments[mixed_numerics_exp_storage_with_trials.experiment_id]

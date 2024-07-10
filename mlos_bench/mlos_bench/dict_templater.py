@@ -52,7 +52,10 @@ class DictTemplater:  # pylint: disable=too-few-public-methods
         return self._dict
 
     def _expand_vars(
-        self, value: Any, extra_source_dict: Optional[Dict[str, Any]], use_os_env: bool
+        self,
+        value: Any,
+        extra_source_dict: Optional[Dict[str, Any]],
+        use_os_env: bool,
     ) -> Any:
         """Recursively expand $var strings in the currently operating dictionary."""
         if isinstance(value, str):

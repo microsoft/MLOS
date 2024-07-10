@@ -47,7 +47,10 @@ class Trial(Storage.Trial):
         self._schema = schema
 
     def update(
-        self, status: Status, timestamp: datetime, metrics: Optional[Dict[str, Any]] = None
+        self,
+        status: Status,
+        timestamp: datetime,
+        metrics: Optional[Dict[str, Any]] = None,
     ) -> Optional[Dict[str, Any]]:
         # Make sure to convert the timestamp to UTC before storing it in the database.
         timestamp = utcify_timestamp(timestamp, origin="local")

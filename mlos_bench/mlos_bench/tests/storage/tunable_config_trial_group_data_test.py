@@ -53,7 +53,8 @@ def test_exp_trial_data_tunable_config_trial_group_id(exp_data: ExperimentData) 
 
 
 def test_tunable_config_trial_group_results_df(
-    exp_data: ExperimentData, tunable_groups: TunableGroups
+    exp_data: ExperimentData,
+    tunable_groups: TunableGroups,
 ) -> None:
     """Tests the results_df property of the TunableConfigTrialGroup."""
     tunable_config_id = 2

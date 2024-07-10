@@ -98,7 +98,8 @@ def docker_compose_project_name(short_testrun_uid: str) -> str:
 
 @pytest.fixture(scope="session")
 def docker_services_lock(
-    shared_temp_dir: str, short_testrun_uid: str
+    shared_temp_dir: str,
+    short_testrun_uid: str,
 ) -> InterProcessReaderWriterLock:
     """
     Gets a pytest session lock for xdist workers to mark when they're using the docker

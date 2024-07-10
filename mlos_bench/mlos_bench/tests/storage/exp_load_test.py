@@ -118,7 +118,9 @@ def test_exp_trial_update_twice(
 
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_exp_trial_pending_3(
-    exp_storage: Storage.Experiment, tunable_groups: TunableGroups, zone_info: Optional[tzinfo]
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+    zone_info: Optional[tzinfo],
 ) -> None:
     """
     Start THREE trials, let one succeed, another one fail and keep one not updated.

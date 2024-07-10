@@ -31,7 +31,9 @@ def test_exp_data_root_env_config(
 
 
 def test_exp_trial_data_objectives(
-    storage: Storage, exp_storage: Storage.Experiment, tunable_groups: TunableGroups
+    storage: Storage,
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
 ) -> None:
     """Start a new trial and check the storage for the trial data."""
 

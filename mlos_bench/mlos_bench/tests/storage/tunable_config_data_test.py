@@ -41,7 +41,8 @@ def test_trial_data_no_tunables_config_data(exp_no_tunables_data: ExperimentData
 
 
 def test_mixed_numerics_exp_trial_data(
-    mixed_numerics_exp_data: ExperimentData, mixed_numerics_tunable_groups: TunableGroups
+    mixed_numerics_exp_data: ExperimentData,
+    mixed_numerics_tunable_groups: TunableGroups,
 ) -> None:
     """Tests that data type conversions are retained when loading experiment data with
     mixed numeric tunable types.

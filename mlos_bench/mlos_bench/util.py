@@ -373,7 +373,9 @@ _MIN_TS = datetime(2024, 1, 1, 0, 0, 0, tzinfo=pytz.UTC)
 
 
 def datetime_parser(
-    datetime_col: pandas.Series, *, origin: Literal["utc", "local"]
+    datetime_col: pandas.Series,
+    *,
+    origin: Literal["utc", "local"],
 ) -> pandas.Series:
     """
     Attempt to convert a pandas column to a datetime format.

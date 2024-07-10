@@ -150,7 +150,8 @@ def test_ssh_fileshare_recursive(
 
 @requires_docker
 def test_ssh_fileshare_download_file_dne(
-    ssh_test_server: SshTestServerInfo, ssh_fileshare_service: SshFileShareService
+    ssh_test_server: SshTestServerInfo,
+    ssh_fileshare_service: SshFileShareService,
 ) -> None:
     """Test the SshFileShareService single file download that doesn't exist."""
     with ssh_fileshare_service:

@@ -50,7 +50,10 @@ def test_mock_env_no_noise(mock_env_no_noise: MockEnv, tunable_groups: TunableGr
     ],
 )
 def test_mock_env_assign(
-    mock_env: MockEnv, tunable_groups: TunableGroups, tunable_values: dict, expected_score: float
+    mock_env: MockEnv,
+    tunable_groups: TunableGroups,
+    tunable_values: dict,
+    expected_score: float,
 ) -> None:
     """Check the benchmark values of the mock environment after the assignment."""
     with mock_env as env_context:
