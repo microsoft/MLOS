@@ -24,7 +24,16 @@ _GROUPS = {
 
 def test_expand_groups() -> None:
     """Check the dollar variable expansion for tunable groups."""
-    assert Environment._expand_groups(["begin", "$list", "$empty", "$str", "end"], _GROUPS) == [
+    assert Environment._expand_groups(
+        [
+            "begin",
+            "$list",
+            "$empty",
+            "$str",
+            "end",
+        ],
+        _GROUPS,
+    ) == [
         "begin",
         "c",
         "d",

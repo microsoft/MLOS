@@ -65,9 +65,12 @@ def test_composite_env(tunable_groups: TunableGroups, zone_info: Optional[tzinfo
                 },
                 "required_args": ["errors", "reads"],
                 "shell_env_params": [
-                    "latency",  # const_args overridden by the composite env
-                    "errors",  # Comes from the parent const_args
-                    "reads",  # const_args overridden by the global config
+                    # const_args overridden by the composite env
+                    "latency",
+                    # Comes from the parent const_args
+                    "errors",
+                    # const_args overridden by the global config
+                    "reads",
                 ],
                 "run": [
                     "echo 'metric,value' > output.csv",
@@ -89,9 +92,12 @@ def test_composite_env(tunable_groups: TunableGroups, zone_info: Optional[tzinfo
                 },
                 "required_args": ["writes"],
                 "shell_env_params": [
-                    "throughput",  # const_args overridden by the composite env
-                    "score",  # Comes from the local const_args
-                    "writes",  # Comes straight from the global config
+                    # const_args overridden by the composite env
+                    "throughput",
+                    # Comes from the local const_args
+                    "score",
+                    # Comes straight from the global config
+                    "writes",
                 ],
                 "run": [
                     "echo 'metric,value' > output.csv",
