@@ -72,9 +72,8 @@ extra_requires: Dict[str, List[str]] = {  # pylint: disable=consider-using-named
     "storage-sql-duckdb": ["sqlalchemy", "duckdb_engine"],
     "storage-sql-mysql": ["sqlalchemy", "mysql-connector-python"],
     "storage-sql-postgres": ["sqlalchemy", "psycopg2"],
-    "storage-sql-sqlite": [
-        "sqlalchemy"
-    ],  # sqlite3 comes with python, so we don't need to install it.
+    # sqlite3 comes with python, so we don't need to install it.
+    "storage-sql-sqlite": ["sqlalchemy"],
     # Transitive extra_requires from mlos-core.
     "flaml": ["flaml[blendsearch]"],
     "smac": ["smac"],
