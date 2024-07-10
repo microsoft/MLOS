@@ -17,6 +17,7 @@ _LOG = logging.getLogger(__name__)
 class OneShotOptimizer(MockOptimizer):
     """
     No-op optimizer that proposes a single configuration and returns.
+
     Explicit configs (partial or full) are possible using configuration files.
     """
 

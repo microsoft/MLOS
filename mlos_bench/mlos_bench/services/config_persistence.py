@@ -333,9 +333,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         (class_name, class_config) = self.prepare_class_load(config, global_config)
         # pylint: disable=import-outside-toplevel
-        from mlos_bench.storage.base_storage import (
-            Storage,
-        )
+        from mlos_bench.storage.base_storage import Storage
 
         inst = instantiate_from_config(
             Storage,  # type: ignore[type-abstract]
