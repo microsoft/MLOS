@@ -64,7 +64,7 @@ class AzureAuthService(Service, SupportsAuth):
         self._access_token = "RENEW *NOW*"
         self._token_expiration_ts = datetime.now(UTC)  # Typically, some future timestamp.
 
-        # Login as ourselves
+        # Login as the first identity available, usually ourselves or a managed identity
         self._cred: Union[azure_id.DefaultAzureCredential, azure_id.CertificateCredential]
         self._cred = azure_id.DefaultAzureCredential()
 
