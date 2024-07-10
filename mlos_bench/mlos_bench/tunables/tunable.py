@@ -327,19 +327,31 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
                 coerced_value = self.dtype(value)
         except Exception:
             _LOG.error(
-                "Impossible conversion: %s %s <- %s %s", self._type, self._name, type(value), value
+                "Impossible conversion: %s %s <- %s %s",
+                self._type,
+                self._name,
+                type(value),
+                value,
             )
             raise
 
         if self._type == "int" and isinstance(value, float) and value != coerced_value:
             _LOG.error(
-                "Loss of precision: %s %s <- %s %s", self._type, self._name, type(value), value
+                "Loss of precision: %s %s <- %s %s",
+                self._type,
+                self._name,
+                type(value),
+                value,
             )
             raise ValueError(f"Loss of precision: {self._name}={value}")
 
         if not self.is_valid(coerced_value):
             _LOG.error(
-                "Invalid assignment: %s %s <- %s %s", self._type, self._name, type(value), value
+                "Invalid assignment: %s %s <- %s %s",
+                self._type,
+                self._name,
+                type(value),
+                value,
             )
             raise ValueError(f"Invalid value for the tunable: {self._name}={value}")
 

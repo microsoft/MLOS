@@ -26,9 +26,8 @@ class TunableGroups:
         if config is None:
             config = {}
         ConfigSchema.TUNABLE_PARAMS.validate(config)
-        self._index: Dict[str, CovariantTunableGroup] = (
-            {}
-        )  # Index (Tunable id -> CovariantTunableGroup)
+        # Index (Tunable id -> CovariantTunableGroup)
+        self._index: Dict[str, CovariantTunableGroup] = {}
         self._tunable_groups: Dict[str, CovariantTunableGroup] = {}
         for name, group_config in config.items():
             self._add_group(CovariantTunableGroup(name, group_config))
@@ -123,7 +122,7 @@ class TunableGroups:
                 if not self._tunable_groups[group.name].equals_defaults(group):
                     raise ValueError(
                         f"Overlapping covariant tunable group name {group.name} "
-                        + "in {self._tunable_groups[group.name]} and {tunables}"
+                        "in {self._tunable_groups[group.name]} and {tunables}"
                     )
         return self
 
