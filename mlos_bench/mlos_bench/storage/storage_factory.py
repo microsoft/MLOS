@@ -12,7 +12,9 @@ from mlos_bench.storage.base_storage import Storage
 
 
 def from_config(
-    config_file: str, global_configs: Optional[List[str]] = None, **kwargs: Any
+    config_file: str,
+    global_configs: Optional[List[str]] = None,
+    **kwargs: Any,
 ) -> Storage:
     """
     Create a new storage object from JSON5 config file.
