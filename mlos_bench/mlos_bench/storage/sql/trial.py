@@ -75,8 +75,8 @@ class Trial(Storage.Trial):
                     if cur_status.rowcount not in {1, -1}:
                         _LOG.warning("Trial %s :: update failed: %s", self, status)
                         raise RuntimeError(
-                            f"Failed to update the status of the trial {self} to {status}."
-                            + f" ({cur_status.rowcount} rows)"
+                            f"Failed to update the status of the trial {self} to {status}. "
+                            f"({cur_status.rowcount} rows)"
                         )
                     if metrics:
                         conn.execute(
@@ -119,7 +119,10 @@ class Trial(Storage.Trial):
         return metrics
 
     def update_telemetry(
-        self, status: Status, timestamp: datetime, metrics: List[Tuple[datetime, str, Any]]
+        self,
+        status: Status,
+        timestamp: datetime,
+        metrics: List[Tuple[datetime, str, Any]],
     ) -> None:
         super().update_telemetry(status, timestamp, metrics)
         # Make sure to convert the timestamp to UTC before storing it in the database.
@@ -165,5 +168,8 @@ class Trial(Storage.Trial):
             )
         except IntegrityError as ex:
             _LOG.warning(
-                "Status with that timestamp already exists: %s %s :: %s", self, timestamp, ex
+                "Status with that timestamp already exists: %s %s :: %s",
+                self,
+                timestamp,
+                ex,
             )

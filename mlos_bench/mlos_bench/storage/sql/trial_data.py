@@ -56,7 +56,9 @@ class TrialSqlData(TrialData):
         Note: this corresponds to the Trial object's "tunables" property.
         """
         return TunableConfigSqlData(
-            engine=self._engine, schema=self._schema, tunable_config_id=self._tunable_config_id
+            engine=self._engine,
+            schema=self._schema,
+            tunable_config_id=self._tunable_config_id,
         )
 
     @property

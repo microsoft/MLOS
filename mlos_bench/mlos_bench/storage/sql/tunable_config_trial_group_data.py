@@ -69,9 +69,8 @@ class TunableConfigTrialGroupSqlData(TunableConfigTrialGroupData):
             )
             row = tunable_config_trial_group.fetchone()
             assert row is not None
-            return row._tuple()[
-                0
-            ]  # pylint: disable=protected-access  # following DeprecationWarning in sqlalchemy
+            # pylint: disable=protected-access  # following DeprecationWarning in sqlalchemy
+            return row._tuple()[0]
 
     @property
     def tunable_config(self) -> TunableConfigData:
@@ -93,11 +92,17 @@ class TunableConfigTrialGroupSqlData(TunableConfigTrialGroupData):
             A dictionary of the trials' data, keyed by trial id.
         """
         return common.get_trials(
-            self._engine, self._schema, self._experiment_id, self._tunable_config_id
+            self._engine,
+            self._schema,
+            self._experiment_id,
+            self._tunable_config_id,
         )
 
     @property
     def results_df(self) -> pandas.DataFrame:
         return common.get_results_df(
-            self._engine, self._schema, self._experiment_id, self._tunable_config_id
+            self._engine,
+            self._schema,
+            self._experiment_id,
+            self._tunable_config_id,
         )
