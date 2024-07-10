@@ -418,12 +418,14 @@ def test_hierarchical_input_space(optimizer_type: Optional[OptimizerType], kwarg
         kwargs = {}
 
     def objective(point: pd.DataFrame) -> pd.DataFrame:
-        # mix of hyperparameters, optimal is to select the highest possible
+        # Two different functions based on the switch
+        if point["switch"].iloc[0] == "a":
+            return pd.DataFrame({"score": point["a"] + point["c"]})
+        else:
+            return pd.DataFrame({"score": 2 * point["b"] + point["c"]})
 
-        return pd.DataFrame({"score": point["a"] + point["c"] if point["switch"].iloc[0] == "a" else 2 * point["b"] + point["c"]})
-
+    # Initialize a hierarchical configuration space
     input_space = CS.ConfigurationSpace(seed=SEED)
-    # add a mix of numeric datatypes
     input_space.add_hyperparameter(CS.CategoricalHyperparameter(name="switch", choices=["a", "b"]))
     input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="a", lower=0.0, upper=5.0))
     input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="b", lower=0.0, upper=5.0))
