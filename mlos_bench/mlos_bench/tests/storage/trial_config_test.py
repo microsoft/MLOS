@@ -83,6 +83,7 @@ def test_exp_trial_no_config(exp_no_tunables_storage: Storage.Experiment) -> Non
         "trial_id": trial.trial_id,
     }
 
+
 @pytest.mark.parametrize("bad_config", [
     {
         "obj": object(),
