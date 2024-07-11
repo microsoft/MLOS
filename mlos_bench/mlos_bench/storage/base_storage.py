@@ -308,6 +308,7 @@ class Storage(metaclass=ABCMeta):
                 An object that allows to update the storage with
                 the results of the experiment trial run.
             """
+            # TODO: Check that `config` is json serializable (e.g., no callables)
 
     class Trial(metaclass=ABCMeta):
         # pylint: disable=too-many-instance-attributes
