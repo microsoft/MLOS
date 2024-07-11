@@ -28,6 +28,10 @@ def mlos_core_optimizer(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         'optimizer_type': 'FLAML',
         'max_suggestions': 10,
         'seed': SEED,
+        'optimization_targets': {
+            'latency': 'min',
+            'throughput': 'max',
+        },
     }
     return MlosCoreOptimizer(tunable_groups, test_opt_config)
 
@@ -81,3 +85,38 @@ def test_df(mlos_core_optimizer: MlosCoreOptimizer, mock_configs: List[dict]) ->
             'vmSize': 'Standard_B2s',
         },
     ]
+
+
+def test_df_str(mlos_core_optimizer: MlosCoreOptimizer, mock_configs: List[dict]) -> None:
+    """
+    Test `MlosCoreOptimizer._to_df()` type coercion on tunables with string values.
+    """
+    df_config_orig = mlos_core_optimizer._to_df(mock_configs)
+    df_config_str = mlos_core_optimizer._to_df([
+        {key: str(val) for (key, val) in config.items()}
+        for config in mock_configs
+    ])
+    assert df_config_orig.equals(df_config_str)
+
+
+def test_adjust_signs_df(mlos_core_optimizer: MlosCoreOptimizer) -> None:
+    """
+    Test `MlosCoreOptimizer._adjust_signs_df()` on different types of inputs.
+    """
+    df_scores_input = pandas.DataFrame({
+        'latency': [88.88, 66.66, 99.99, None],
+        'throughput': [111, 222, 333, None],
+    })
+
+    df_scores_output = pandas.DataFrame({
+        'latency': [88.88, 66.66, 99.99, float("NaN")],
+        'throughput': [-111, -222, -333, float("NaN")],
+    })
+
+    # Make sure we adjust the signs for minimization.
+    df_scores = mlos_core_optimizer._adjust_signs_df(df_scores_input)
+    assert df_scores.equals(df_scores_output)
+
+    # Check that the same operation works for string inputs.
+    df_scores = mlos_core_optimizer._adjust_signs_df(df_scores_input.astype(str))
+    assert df_scores.equals(df_scores_output)
