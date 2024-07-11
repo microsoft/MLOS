@@ -18,6 +18,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.dict_templater import DictTemplater
 from mlos_bench.util import get_git_info
 
 _LOG = logging.getLogger(__name__)
@@ -287,7 +288,6 @@ class Storage(metaclass=ABCMeta):
                 An iterator over the scheduled (and maybe running) trials.
             """
 
-        @abstractmethod
         def new_trial(self, tunables: TunableGroups, ts_start: Optional[datetime] = None,
                       config: Optional[Dict[str, Any]] = None) -> 'Storage.Trial':
             """
@@ -308,7 +308,36 @@ class Storage(metaclass=ABCMeta):
                 An object that allows to update the storage with
                 the results of the experiment trial run.
             """
-            # TODO: Check that `config` is json serializable (e.g., no callables)
+            # Check that `config` is json serializable (e.g., no callables)
+            if config:
+                try:
+                    _config = DictTemplater(config).expand_vars()
+                except ValueError:
+                    _LOG.warning("Non-serializable config: %s", config)
+                    raise
+            return self._new_trial(tunables, ts_start, config)
+
+        @abstractmethod
+        def _new_trial(self, tunables: TunableGroups, ts_start: Optional[datetime] = None,
+                      config: Optional[Dict[str, Any]] = None) -> 'Storage.Trial':
+            """
+            Create a new experiment run in the storage.
+
+            Parameters
+            ----------
+            tunables : TunableGroups
+                Tunable parameters to use for the trial.
+            ts_start : Optional[datetime]
+                Timestamp of the trial start (can be in the future).
+            config : dict
+                Key/value pairs of additional non-tunable parameters of the trial.
+
+            Returns
+            -------
+            trial : Storage.Trial
+                An object that allows to update the storage with
+                the results of the experiment trial run.
+            """
 
     class Trial(metaclass=ABCMeta):
         # pylint: disable=too-many-instance-attributes
