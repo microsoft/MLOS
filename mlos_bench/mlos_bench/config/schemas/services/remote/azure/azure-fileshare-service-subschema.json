@@ -28,8 +28,12 @@
                             "description": "Azure storage file share name.",
                             "type": "string"
                         },
-                        "storageAccountKey": {
-                            "description": "Azure storage account key (typically provided in the global config in order to omit from source control).",
+                        "managedIdentityClientId": {
+                            "description": "Azure Managed Identity Client Id (typically provided in the global config in order to omit from source control).",
+                            "type": "string"
+                        },
+                        "tenantId": {
+                            "description": "Azure Tenant Id (typically provided in the global config in order to omit from source control).",
                             "type": "string"
                         }
                     },

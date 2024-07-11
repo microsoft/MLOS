@@ -12,6 +12,7 @@ import logging
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from azure.storage.fileshare import ShareClient
+from azure.identity import DefaultAzureCredential
 from azure.core.exceptions import ResourceNotFoundError
 
 from mlos_bench.services.base_service import Service
@@ -58,16 +59,32 @@ class AzureFileShareService(FileShareService):
             self.config, {
                 "storageAccountName",
                 "storageFileShareName",
-                "storageAccountKey",
+                "managedIdentityClientId",
+                "tenantId"
             }
         )
+
+        os.environ["AZURE_CLIENT_ID"] = self.config["managedIdentityClientId"]
+        os.environ["AZURE_TENANT_ID"] = self.config["tenantId"]
+
+        args = {
+            "exclude_workload_identity_credential": True,
+            "exclude_developer_cli_credential": True,
+            "exclude_cli_credential": True,
+            "exclude_powershell_credential": True,
+            "exclude_shared_token_cache_credential": True,
+            "exclude_interactive_browser_credential": True,
+            "exclude_visual_studio_code_credential": True,
+            "exclude_environment_credential": True,
+        }
 
         self._share_client = ShareClient.from_share_url(
             AzureFileShareService._SHARE_URL.format(
                 account_name=self.config["storageAccountName"],
                 fs_name=self.config["storageFileShareName"],
             ),
-            credential=self.config["storageAccountKey"],
+            credential=DefaultAzureCredential(**args),
+            token_intent="backup",
         )
 
     def download(self, params: dict, remote_path: str, local_path: str, recursive: bool = True) -> None:

@@ -164,7 +164,7 @@ class AzureVMService(AzureDeploymentService, SupportsHostProvisioning, SupportsH
 
     def _set_default_params(self, params: dict) -> dict:    # pylint: disable=no-self-use
         # Try and provide a semi sane default for the deploymentName if not provided
-        # since this is a common way to set the deploymentName and can same some
+        # since this is a common way to set the deploymentName and can save some
         # config work for the caller.
         if "vmName" in params and "deploymentName" not in params:
             params["deploymentName"] = f"{params['vmName']}-deployment"

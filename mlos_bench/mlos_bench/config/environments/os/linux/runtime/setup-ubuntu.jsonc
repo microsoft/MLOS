@@ -56,7 +56,6 @@
                         "vmName",
                         "storageAccountName",
                         "storageFileShareName",
-                        "storageAccountKey",
                         "mountPoint",
                         "experiment_id",
                         "trial_id"
@@ -65,15 +64,15 @@
                     "shell_env_params": [
                         "storageAccountName",
                         "storageFileShareName",
-                        "storageAccountKey",
                         "mountPoint",
                         "experiment_id",
                         "trial_id"
                     ],
                     "setup": [
                         "sudo mkdir -p $mountPoint",
-                        "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=\"$storageAccountKey\",serverino,nosharesock,actimeo=30",
-                        "sudo $mountPoint/$experiment_id/$trial_id/input/config-kernel.sh"
+                        "sudo /usr/local/bin/azure_file_share_service --function 'download' --local_path $mountPoint/$experiment_id/$trial_id/input/ --remote_path $experiment_id/$trial_id/input",
+                        "sudo bash $mountPoint/$experiment_id/$trial_id/input/config-kernel.sh"
+                        // "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=\"$storageAccountKey\",serverino,nosharesock,actimeo=30",
                     ]
                 }
             }

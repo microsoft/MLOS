@@ -14,9 +14,9 @@
     "environment": "environments/root/root-azure-redis.jsonc",
     "storage": "storage/sqlite.jsonc",
 
-    "globals": [
-        "global_config_azure.jsonc"
-    ],
+    // "globals": [
+    //     "global_config_azure.jsonc"
+    // ],
 
     "teardown": false,
 
