@@ -93,7 +93,7 @@ setup(
         "joblib>=1.1.1",
         "scipy>=1.3.2",
         "numpy>=1.24",
-        "numpy<2.0.0",  # FIXME: https://github.com/numpy/numpy/issues/26710
+        "numpy<3.0.0",  # FIXME: https://github.com/numpy/numpy/issues/26710
         'pandas >= 2.2.0;python_version>="3.9"',
         'Bottleneck > 1.3.5;python_version>="3.9"',
         'pandas >= 1.0.3;python_version<"3.9"',
