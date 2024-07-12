@@ -28,10 +28,10 @@ dependencies:
   # This also requires a more recent vs2015_runtime from conda-forge.
   - pyrfr>=0.9.0
   - pip:
-    - autopep8>=1.7.0
     - bump2version
     - check-jsonschema
     - isort
+    - docformatter
     - licenseheaders
     - mypy
     - pandas-stubs
@@ -42,6 +42,9 @@ dependencies:
     - types-requests
     - types-setuptools
     - pyarrow
-    - "--editable ../mlos_core[full-tests]"
-    - "--editable ../mlos_bench[full-tests]"
-    - "--editable ../mlos_viz[full-tests]"
+    # Workaround a pylance issue in vscode that prevents it finding the latest
+    # method of pip installing editable modules.
+    # https://github.com/microsoft/pylance-release/issues/3473
+    - "--config-settings editable_mode=compat --editable ../mlos_core[full-tests]"
+    - "--config-settings editable_mode=compat --editable ../mlos_bench[full-tests]"
+    - "--config-settings editable_mode=compat --editable ../mlos_viz[full-tests]"

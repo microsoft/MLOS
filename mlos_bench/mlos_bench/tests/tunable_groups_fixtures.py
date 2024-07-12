@@ -2,15 +2,12 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Common fixtures for mock TunableGroups.
-"""
+"""Common fixtures for mock TunableGroups."""
 
 from typing import Any, Dict
 
-import pytest
-
 import json5 as json
+import pytest
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
@@ -73,9 +70,7 @@ TUNABLE_GROUPS_JSON = """
 
 @pytest.fixture
 def tunable_groups_config() -> Dict[str, Any]:
-    """
-    Fixture to get the JSON string for the tunable groups.
-    """
+    """Fixture to get the JSON string for the tunable groups."""
     conf = json.loads(TUNABLE_GROUPS_JSON)
     assert isinstance(conf, dict)
     ConfigSchema.TUNABLE_PARAMS.validate(conf)
@@ -120,24 +115,26 @@ def mixed_numerics_tunable_groups() -> TunableGroups:
     tunable_groups : TunableGroups
         A new TunableGroups object for testing.
     """
-    tunables = TunableGroups({
-        "mix-numerics": {
-            "cost": 1,
-            "params": {
-                "int": {
-                    "description": "An integer",
-                    "type": "int",
-                    "default": 0,
-                    "range": [0, 100],
+    tunables = TunableGroups(
+        {
+            "mix-numerics": {
+                "cost": 1,
+                "params": {
+                    "int": {
+                        "description": "An integer",
+                        "type": "int",
+                        "default": 0,
+                        "range": [0, 100],
+                    },
+                    "float": {
+                        "description": "A float",
+                        "type": "float",
+                        "default": 0,
+                        "range": [0, 1],
+                    },
                 },
-                "float": {
-                    "description": "A float",
-                    "type": "float",
-                    "default": 0,
-                    "range": [0, 1],
-                },
-            }
-        },
-    })
+            },
+        }
+    )
     tunables.reset()
     return tunables

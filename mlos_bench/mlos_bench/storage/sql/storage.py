@@ -2,35 +2,33 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Saving and restoring the benchmark data in SQL database.
-"""
+"""Saving and restoring the benchmark data in SQL database."""
 
 import logging
 from typing import Dict, Literal, Optional
 
 from sqlalchemy import URL, create_engine
 
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.services.base_service import Service
-from mlos_bench.storage.base_storage import Storage
-from mlos_bench.storage.sql.schema import DbSchema
-from mlos_bench.storage.sql.experiment import Experiment
 from mlos_bench.storage.base_experiment_data import ExperimentData
+from mlos_bench.storage.base_storage import Storage
+from mlos_bench.storage.sql.experiment import Experiment
 from mlos_bench.storage.sql.experiment_data import ExperimentSqlData
+from mlos_bench.storage.sql.schema import DbSchema
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
 
 
 class SqlStorage(Storage):
-    """
-    An implementation of the Storage interface using SQLAlchemy backend.
-    """
+    """An implementation of the Storage interface using SQLAlchemy backend."""
 
-    def __init__(self,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        config: dict,
+        global_config: Optional[dict] = None,
+        service: Optional[Service] = None,
+    ):
         super().__init__(config, global_config, service)
         lazy_schema_create = self._config.pop("lazy_schema_create", False)
         self._log_sql = self._config.pop("log_sql", False)
@@ -47,7 +45,7 @@ class SqlStorage(Storage):
     @property
     def _schema(self) -> DbSchema:
         """Lazily create schema upon first access."""
-        if not hasattr(self, '_db_schema'):
+        if not hasattr(self, "_db_schema"):
             self._db_schema = DbSchema(self._engine).create()
             if _LOG.isEnabledFor(logging.DEBUG):
                 _LOG.debug("DDL statements:\n%s", self._schema)
@@ -56,13 +54,16 @@ class SqlStorage(Storage):
     def __repr__(self) -> str:
         return self._repr
 
-    def experiment(self, *,
-                   experiment_id: str,
-                   trial_id: int,
-                   root_env_config: str,
-                   description: str,
-                   tunables: TunableGroups,
-                   opt_targets: Dict[str, Literal['min', 'max']]) -> Storage.Experiment:
+    def experiment(
+        self,
+        *,
+        experiment_id: str,
+        trial_id: int,
+        root_env_config: str,
+        description: str,
+        tunables: TunableGroups,
+        opt_targets: Dict[str, Literal["min", "max"]],
+    ) -> Storage.Experiment:
         return Experiment(
             engine=self._engine,
             schema=self._schema,
