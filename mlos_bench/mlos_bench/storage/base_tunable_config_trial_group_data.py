@@ -2,12 +2,10 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Base interface for accessing the stored benchmark config trial group data.
-"""
+"""Base interface for accessing the stored benchmark config trial group data."""
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import pandas
 
@@ -19,18 +17,21 @@ if TYPE_CHECKING:
 
 class TunableConfigTrialGroupData(metaclass=ABCMeta):
     """
-    Base interface for accessing the stored experiment benchmark tunable config
-    trial group data.
+    Base interface for accessing the stored experiment benchmark tunable config trial
+    group data.
 
     A (tunable) config is used to define an instance of values for a set of tunable
     parameters for a given experiment and can be used by one or more trial instances
     (e.g., for repeats), which we call a (tunable) config trial group.
     """
 
-    def __init__(self, *,
-                 experiment_id: str,
-                 tunable_config_id: int,
-                 tunable_config_trial_group_id: Optional[int] = None):
+    def __init__(
+        self,
+        *,
+        experiment_id: str,
+        tunable_config_id: int,
+        tunable_config_trial_group_id: Optional[int] = None,
+    ):
         self._experiment_id = experiment_id
         self._tunable_config_id = tunable_config_id
         # can be lazily initialized as necessary:
@@ -38,23 +39,17 @@ class TunableConfigTrialGroupData(metaclass=ABCMeta):
 
     @property
     def experiment_id(self) -> str:
-        """
-        ID of the experiment.
-        """
+        """ID of the experiment."""
         return self._experiment_id
 
     @property
     def tunable_config_id(self) -> int:
-        """
-        ID of the config.
-        """
+        """ID of the config."""
         return self._tunable_config_id
 
     @abstractmethod
     def _get_tunable_config_trial_group_id(self) -> int:
-        """
-        Retrieve the trial's config_trial_group_id from the storage.
-        """
+        """Retrieve the trial's config_trial_group_id from the storage."""
         raise NotImplementedError("subclass must implement")
 
     @property
@@ -77,13 +72,17 @@ class TunableConfigTrialGroupData(metaclass=ABCMeta):
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, self.__class__):
             return False
-        return self._tunable_config_id == other._tunable_config_id and self._experiment_id == other._experiment_id
+        return (
+            self._tunable_config_id == other._tunable_config_id
+            and self._experiment_id == other._experiment_id
+        )
 
     @property
     @abstractmethod
     def tunable_config(self) -> TunableConfigData:
         """
-        Retrieve the (tunable) config data for this (tunable) config trial group from the storage.
+        Retrieve the (tunable) config data for this (tunable) config trial group from
+        the storage.
 
         Returns
         -------
@@ -94,7 +93,8 @@ class TunableConfigTrialGroupData(metaclass=ABCMeta):
     @abstractmethod
     def trials(self) -> Dict[int, "TrialData"]:
         """
-        Retrieve the trials' data for this (tunable) config trial group from the storage.
+        Retrieve the trials' data for this (tunable) config trial group from the
+        storage.
 
         Returns
         -------
@@ -106,7 +106,8 @@ class TunableConfigTrialGroupData(metaclass=ABCMeta):
     @abstractmethod
     def results_df(self) -> pandas.DataFrame:
         """
-        Retrieve all results for this (tunable) config trial group as a single DataFrame.
+        Retrieve all results for this (tunable) config trial group as a single
+        DataFrame.
 
         Returns
         -------

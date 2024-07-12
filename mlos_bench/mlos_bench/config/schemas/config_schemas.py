@@ -2,18 +2,17 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A simple class for describing where to find different config schemas and validating configs against them.
+"""A simple class for describing where to find different config schemas and validating
+configs against them.
 """
 
+import json  # schema files are pure json - no comments
 import logging
 from enum import Enum
-from os import path, walk, environ
+from os import environ, path, walk
 from typing import Dict, Iterator, Mapping
 
-import json         # schema files are pure json - no comments
 import jsonschema
-
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 
@@ -28,16 +27,21 @@ CONFIG_SCHEMA_DIR = path_join(path.dirname(__file__), abs_path=True)
 # It is used in `ConfigSchema.validate()` method below.
 # NOTE: this may cause pytest to fail if it's expecting exceptions
 # to be raised for invalid configs.
-_VALIDATION_ENV_FLAG = 'MLOS_BENCH_SKIP_SCHEMA_VALIDATION'
-_SKIP_VALIDATION = (environ.get(_VALIDATION_ENV_FLAG, 'false').lower()
-                    in {'true', 'y', 'yes', 'on', '1'})
+_VALIDATION_ENV_FLAG = "MLOS_BENCH_SKIP_SCHEMA_VALIDATION"
+_SKIP_VALIDATION = environ.get(_VALIDATION_ENV_FLAG, "false").lower() in {
+    "true",
+    "y",
+    "yes",
+    "on",
+    "1",
+}
 
 
 # Note: we separate out the SchemaStore from a class method on ConfigSchema
 # because of issues with mypy/pylint and non-Enum-member class members.
 class SchemaStore(Mapping):
-    """
-    A simple class for storing schemas and subschemas for the validator to reference.
+    """A simple class for storing schemas and subschemas for the validator to
+    reference.
     """
 
     # A class member mapping of schema id to schema object.
@@ -58,7 +62,9 @@ class SchemaStore(Mapping):
 
     @classmethod
     def _load_schemas(cls) -> None:
-        """Loads all schemas and subschemas into the schema store for the validator to reference."""
+        """Loads all schemas and subschemas into the schema store for the validator to
+        reference.
+        """
         if cls._SCHEMA_STORE:
             return
         for root, _, files in walk(CONFIG_SCHEMA_DIR):
@@ -78,13 +84,17 @@ class SchemaStore(Mapping):
 
     @classmethod
     def _load_registry(cls) -> None:
-        """Also store them in a Registry object for referencing by recent versions of jsonschema."""
+        """Also store them in a Registry object for referencing by recent versions of
+        jsonschema.
+        """
         if not cls._SCHEMA_STORE:
             cls._load_schemas()
-        cls._REGISTRY = Registry().with_resources([
-            (url, Resource.from_contents(schema, default_specification=DRAFT202012))
-            for url, schema in cls._SCHEMA_STORE.items()
-        ])
+        cls._REGISTRY = Registry().with_resources(
+            [
+                (url, Resource.from_contents(schema, default_specification=DRAFT202012))
+                for url, schema in cls._SCHEMA_STORE.items()
+            ]
+        )
 
     @property
     def registry(self) -> Registry:
@@ -98,9 +108,7 @@ SCHEMA_STORE = SchemaStore()
 
 
 class ConfigSchema(Enum):
-    """
-    An enum to help describe schema types and help validate configs against them.
-    """
+    """An enum to help describe schema types and help validate configs against them."""
 
     CLI = path_join(CONFIG_SCHEMA_DIR, "cli/cli-schema.json")
     GLOBALS = path_join(CONFIG_SCHEMA_DIR, "cli/globals-schema.json")

@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Base interface for accessing the stored benchmark (tunable) config data.
-"""
+"""Base interface for accessing the stored benchmark (tunable) config data."""
 from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, Optional
 
@@ -21,8 +19,7 @@ class TunableConfigData(metaclass=ABCMeta):
     A configuration in this context is the set of tunable parameter values.
     """
 
-    def __init__(self, *,
-                 tunable_config_id: int):
+    def __init__(self, *, tunable_config_id: int):
         self._tunable_config_id = tunable_config_id
 
     def __repr__(self) -> str:
@@ -35,9 +32,7 @@ class TunableConfigData(metaclass=ABCMeta):
 
     @property
     def tunable_config_id(self) -> int:
-        """
-        Unique ID of the (tunable) configuration.
-        """
+        """Unique ID of the (tunable) configuration."""
         return self._tunable_config_id
 
     @property

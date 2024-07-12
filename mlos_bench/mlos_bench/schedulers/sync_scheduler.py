@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A simple single-threaded synchronous optimization loop implementation.
-"""
+"""A simple single-threaded synchronous optimization loop implementation."""
 
 import logging
 from datetime import datetime
@@ -19,14 +17,10 @@ _LOG = logging.getLogger(__name__)
 
 
 class SyncScheduler(Scheduler):
-    """
-    A simple single-threaded synchronous optimization loop implementation.
-    """
+    """A simple single-threaded synchronous optimization loop implementation."""
 
     def start(self) -> None:
-        """
-        Start the optimization loop.
-        """
+        """Start the optimization loop."""
         super().start()
 
         is_warm_up = self.optimizer.supports_preload
@@ -42,7 +36,9 @@ class SyncScheduler(Scheduler):
 
     def run_trial(self, trial: Storage.Trial) -> None:
         """
-        Set up and run a single trial. Save the results in the storage.
+        Set up and run a single trial.
+
+        Save the results in the storage.
         """
         super().run_trial(trial)
 
@@ -53,7 +49,8 @@ class SyncScheduler(Scheduler):
             trial.update(Status.FAILED, datetime.now(UTC))
             return
 
-        (status, timestamp, results) = self.environment.run()  # Block and wait for the final result.
+        # Block and wait for the final result.
+        (status, timestamp, results) = self.environment.run()
         _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
 
         # In async mode (TODO), poll the environment for status and telemetry

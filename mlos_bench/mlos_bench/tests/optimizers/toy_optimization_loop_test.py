@@ -2,27 +2,22 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Toy optimization loop to test the optimizers on mock benchmark environment.
-"""
-
-from typing import Tuple
+"""Toy optimization loop to test the optimizers on mock benchmark environment."""
 
 import logging
+from typing import Tuple
 
 import pytest
 
-from mlos_core.util import config_to_dataframe
-from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
-from mlos_bench.optimizers.convert_configspace import tunable_values_to_configuration
-
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.mock_env import MockEnv
-from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.base_optimizer import Optimizer
-from mlos_bench.optimizers.mock_optimizer import MockOptimizer
+from mlos_bench.optimizers.convert_configspace import tunable_values_to_configuration
 from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
-
+from mlos_bench.optimizers.mock_optimizer import MockOptimizer
+from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
+from mlos_core.util import config_to_dataframe
 
 # For debugging purposes output some warnings which are captured with failed tests.
 DEBUG = True
@@ -32,9 +27,7 @@ if DEBUG:
 
 
 def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
-    """
-    Toy optimization loop.
-    """
+    """Toy optimization loop."""
     assert opt.not_converged()
 
     while opt.not_converged():
@@ -59,7 +52,7 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
             (status, _ts, output) = env_context.run()
             assert status.is_succeeded()
             assert output is not None
-            score = output['score']
+            score = output["score"]
             assert isinstance(score, float)
             assert 60 <= score <= 120
             logger("score: %s", str(score))
@@ -72,11 +65,8 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
     return (best_score["score"], best_tunables)
 
 
-def test_mock_optimization_loop(mock_env_no_noise: MockEnv,
-                                mock_opt: MockOptimizer) -> None:
-    """
-    Toy optimization loop with mock environment and optimizer.
-    """
+def test_mock_optimization_loop(mock_env_no_noise: MockEnv, mock_opt: MockOptimizer) -> None:
+    """Toy optimization loop with mock environment and optimizer."""
     (score, tunables) = _optimize(mock_env_no_noise, mock_opt)
     assert score == pytest.approx(64.9, 0.01)
     assert tunables.get_param_values() == {
@@ -87,11 +77,11 @@ def test_mock_optimization_loop(mock_env_no_noise: MockEnv,
     }
 
 
-def test_mock_optimization_loop_no_defaults(mock_env_no_noise: MockEnv,
-                                            mock_opt_no_defaults: MockOptimizer) -> None:
-    """
-    Toy optimization loop with mock environment and optimizer.
-    """
+def test_mock_optimization_loop_no_defaults(
+    mock_env_no_noise: MockEnv,
+    mock_opt_no_defaults: MockOptimizer,
+) -> None:
+    """Toy optimization loop with mock environment and optimizer."""
     (score, tunables) = _optimize(mock_env_no_noise, mock_opt_no_defaults)
     assert score == pytest.approx(60.97, 0.01)
     assert tunables.get_param_values() == {
@@ -102,11 +92,8 @@ def test_mock_optimization_loop_no_defaults(mock_env_no_noise: MockEnv,
     }
 
 
-def test_flaml_optimization_loop(mock_env_no_noise: MockEnv,
-                                 flaml_opt: MlosCoreOptimizer) -> None:
-    """
-    Toy optimization loop with mock environment and FLAML optimizer.
-    """
+def test_flaml_optimization_loop(mock_env_no_noise: MockEnv, flaml_opt: MlosCoreOptimizer) -> None:
+    """Toy optimization loop with mock environment and FLAML optimizer."""
     (score, tunables) = _optimize(mock_env_no_noise, flaml_opt)
     assert score == pytest.approx(60.15, 0.01)
     assert tunables.get_param_values() == {
@@ -118,11 +105,8 @@ def test_flaml_optimization_loop(mock_env_no_noise: MockEnv,
 
 
 # @pytest.mark.skip(reason="SMAC is not deterministic")
-def test_smac_optimization_loop(mock_env_no_noise: MockEnv,
-                                smac_opt: MlosCoreOptimizer) -> None:
-    """
-    Toy optimization loop with mock environment and SMAC optimizer.
-    """
+def test_smac_optimization_loop(mock_env_no_noise: MockEnv, smac_opt: MlosCoreOptimizer) -> None:
+    """Toy optimization loop with mock environment and SMAC optimizer."""
     (score, tunables) = _optimize(mock_env_no_noise, smac_opt)
     expected_score = 70.33
     expected_tunable_values = {

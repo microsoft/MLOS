@@ -2,15 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Base interface for saving and restoring the benchmark data.
-"""
+"""Base interface for saving and restoring the benchmark data."""
 
 import logging
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 from types import TracebackType
-from typing import Optional, List, Tuple, Dict, Iterator, Type, Any
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Type
+
 from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
@@ -24,15 +23,16 @@ _LOG = logging.getLogger(__name__)
 
 
 class Storage(metaclass=ABCMeta):
-    """
-    An abstract interface between the benchmarking framework
-    and storage systems (e.g., SQLite or MLFLow).
+    """An abstract interface between the benchmarking framework and storage systems
+    (e.g., SQLite or MLFLow).
     """
 
-    def __init__(self,
-                 config: Dict[str, Any],
-                 global_config: Optional[dict] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        config: Dict[str, Any],
+        global_config: Optional[dict] = None,
+        service: Optional[Service] = None,
+    ):
         """
         Create a new storage object.
 
@@ -48,10 +48,9 @@ class Storage(metaclass=ABCMeta):
         self._global_config = global_config or {}
 
     def _validate_json_config(self, config: dict) -> None:
-        """
-        Reconstructs a basic json config that this class might have been
-        instantiated from in order to validate configs provided outside the
-        file loading mechanism.
+        """Reconstructs a basic json config that this class might have been instantiated
+        from in order to validate configs provided outside the file loading
+        mechanism.
         """
         json_config: dict = {
             "class": self.__class__.__module__ + "." + self.__class__.__name__,
@@ -73,13 +72,16 @@ class Storage(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def experiment(self, *,
-                   experiment_id: str,
-                   trial_id: int,
-                   root_env_config: str,
-                   description: str,
-                   tunables: TunableGroups,
-                   opt_targets: Dict[str, Literal['min', 'max']]) -> 'Storage.Experiment':
+    def experiment(
+        self,
+        *,
+        experiment_id: str,
+        trial_id: int,
+        root_env_config: str,
+        description: str,
+        tunables: TunableGroups,
+        opt_targets: Dict[str, Literal["min", "max"]],
+    ) -> "Storage.Experiment":
         """
         Create a new experiment in the storage.
 
@@ -112,26 +114,31 @@ class Storage(metaclass=ABCMeta):
         # pylint: disable=too-many-instance-attributes
         """
         Base interface for storing the results of the experiment.
+
         This class is instantiated in the `Storage.experiment()` method.
         """
 
-        def __init__(self,
-                     *,
-                     tunables: TunableGroups,
-                     experiment_id: str,
-                     trial_id: int,
-                     root_env_config: str,
-                     description: str,
-                     opt_targets: Dict[str, Literal['min', 'max']]):
+        def __init__(
+            self,
+            *,
+            tunables: TunableGroups,
+            experiment_id: str,
+            trial_id: int,
+            root_env_config: str,
+            description: str,
+            opt_targets: Dict[str, Literal["min", "max"]],
+        ):
             self._tunables = tunables.copy()
             self._trial_id = trial_id
             self._experiment_id = experiment_id
-            (self._git_repo, self._git_commit, self._root_env_config) = get_git_info(root_env_config)
+            (self._git_repo, self._git_commit, self._root_env_config) = get_git_info(
+                root_env_config
+            )
             self._description = description
             self._opt_targets = opt_targets
             self._in_context = False
 
-        def __enter__(self) -> 'Storage.Experiment':
+        def __enter__(self) -> "Storage.Experiment":
             """
             Enter the context of the experiment.
 
@@ -143,9 +150,12 @@ class Storage(metaclass=ABCMeta):
             self._in_context = True
             return self
 
-        def __exit__(self, exc_type: Optional[Type[BaseException]],
-                     exc_val: Optional[BaseException],
-                     exc_tb: Optional[TracebackType]) -> Literal[False]:
+        def __exit__(
+            self,
+            exc_type: Optional[Type[BaseException]],
+            exc_val: Optional[BaseException],
+            exc_tb: Optional[TracebackType],
+        ) -> Literal[False]:
             """
             End the context of the experiment.
 
@@ -156,8 +166,11 @@ class Storage(metaclass=ABCMeta):
                 _LOG.debug("Finishing experiment: %s", self)
             else:
                 assert exc_type and exc_val
-                _LOG.warning("Finishing experiment: %s", self,
-                             exc_info=(exc_type, exc_val, exc_tb))
+                _LOG.warning(
+                    "Finishing experiment: %s",
+                    self,
+                    exc_info=(exc_type, exc_val, exc_tb),
+                )
             assert self._in_context
             self._teardown(is_ok)
             self._in_context = False
@@ -168,7 +181,8 @@ class Storage(metaclass=ABCMeta):
 
         def _setup(self) -> None:
             """
-            Create a record of the new experiment or find an existing one in the storage.
+            Create a record of the new experiment or find an existing one in the
+            storage.
 
             This method is called by `Storage.Experiment.__enter__()`.
             """
@@ -187,36 +201,34 @@ class Storage(metaclass=ABCMeta):
 
         @property
         def experiment_id(self) -> str:
-            """Get the Experiment's ID"""
+            """Get the Experiment's ID."""
             return self._experiment_id
 
         @property
         def trial_id(self) -> int:
-            """Get the current Trial ID"""
+            """Get the current Trial ID."""
             return self._trial_id
 
         @property
         def description(self) -> str:
-            """Get the Experiment's description"""
+            """Get the Experiment's description."""
             return self._description
 
         @property
         def tunables(self) -> TunableGroups:
-            """Get the Experiment's tunables"""
+            """Get the Experiment's tunables."""
             return self._tunables
 
         @property
         def opt_targets(self) -> Dict[str, Literal["min", "max"]]:
-            """
-            Get the Experiment's optimization targets and directions
-            """
+            """Get the Experiment's optimization targets and directions."""
             return self._opt_targets
 
         @abstractmethod
         def merge(self, experiment_ids: List[str]) -> None:
             """
-            Merge in the results of other (compatible) experiments trials.
-            Used to help warm up the optimizer for this experiment.
+            Merge in the results of other (compatible) experiments trials. Used to help
+            warm up the optimizer for this experiment.
 
             Parameters
             ----------
@@ -226,9 +238,7 @@ class Storage(metaclass=ABCMeta):
 
         @abstractmethod
         def load_tunable_config(self, config_id: int) -> Dict[str, Any]:
-            """
-            Load tunable values for a given config ID.
-            """
+            """Load tunable values for a given config ID."""
 
         @abstractmethod
         def load_telemetry(self, trial_id: int) -> List[Tuple[datetime, str, Any]]:
@@ -247,8 +257,10 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def load(self, last_trial_id: int = -1,
-                 ) -> Tuple[List[int], List[dict], List[Optional[Dict[str, Any]]], List[Status]]:
+        def load(
+            self,
+            last_trial_id: int = -1,
+        ) -> Tuple[List[int], List[dict], List[Optional[Dict[str, Any]]], List[Status]]:
             """
             Load (tunable values, benchmark scores, status) to warm-up the optimizer.
 
@@ -268,10 +280,15 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator['Storage.Trial']:
+        def pending_trials(
+            self,
+            timestamp: datetime,
+            *,
+            running: bool,
+        ) -> Iterator["Storage.Trial"]:
             """
-            Return an iterator over the pending trials that are scheduled to run
-            on or before the specified timestamp.
+            Return an iterator over the pending trials that are scheduled to run on or
+            before the specified timestamp.
 
             Parameters
             ----------
@@ -288,8 +305,12 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def new_trial(self, tunables: TunableGroups, ts_start: Optional[datetime] = None,
-                      config: Optional[Dict[str, Any]] = None) -> 'Storage.Trial':
+        def new_trial(
+            self,
+            tunables: TunableGroups,
+            ts_start: Optional[datetime] = None,
+            config: Optional[Dict[str, Any]] = None,
+        ) -> "Storage.Trial":
             """
             Create a new experiment run in the storage.
 
@@ -313,13 +334,20 @@ class Storage(metaclass=ABCMeta):
         # pylint: disable=too-many-instance-attributes
         """
         Base interface for storing the results of a single run of the experiment.
+
         This class is instantiated in the `Storage.Experiment.trial()` method.
         """
 
-        def __init__(self, *,
-                     tunables: TunableGroups, experiment_id: str, trial_id: int,
-                     tunable_config_id: int, opt_targets: Dict[str, Literal['min', 'max']],
-                     config: Optional[Dict[str, Any]] = None):
+        def __init__(
+            self,
+            *,
+            tunables: TunableGroups,
+            experiment_id: str,
+            trial_id: int,
+            tunable_config_id: int,
+            opt_targets: Dict[str, Literal["min", "max"]],
+            config: Optional[Dict[str, Any]] = None,
+        ):
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
@@ -332,29 +360,23 @@ class Storage(metaclass=ABCMeta):
 
         @property
         def trial_id(self) -> int:
-            """
-            ID of the current trial.
-            """
+            """ID of the current trial."""
             return self._trial_id
 
         @property
         def tunable_config_id(self) -> int:
-            """
-            ID of the current trial (tunable) configuration.
-            """
+            """ID of the current trial (tunable) configuration."""
             return self._tunable_config_id
 
         @property
         def opt_targets(self) -> Dict[str, Literal["min", "max"]]:
-            """
-            Get the Trial's optimization targets and directions.
-            """
+            """Get the Trial's optimization targets and directions."""
             return self._opt_targets
 
         @property
         def tunables(self) -> TunableGroups:
             """
-            Tunable parameters of the current trial
+            Tunable parameters of the current trial.
 
             (e.g., application Environment's "config")
             """
@@ -362,8 +384,8 @@ class Storage(metaclass=ABCMeta):
 
         def config(self, global_config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
             """
-            Produce a copy of the global configuration updated
-            with the parameters of the current trial.
+            Produce a copy of the global configuration updated with the parameters of
+            the current trial.
 
             Note: this is not the target Environment's "config" (i.e., tunable
             params), but rather the internal "config" which consists of a
@@ -377,9 +399,12 @@ class Storage(metaclass=ABCMeta):
             return config
 
         @abstractmethod
-        def update(self, status: Status, timestamp: datetime,
-                   metrics: Optional[Dict[str, Any]] = None
-                   ) -> Optional[Dict[str, Any]]:
+        def update(
+            self,
+            status: Status,
+            timestamp: datetime,
+            metrics: Optional[Dict[str, Any]] = None,
+        ) -> Optional[Dict[str, Any]]:
             """
             Update the storage with the results of the experiment.
 
@@ -403,14 +428,21 @@ class Storage(metaclass=ABCMeta):
                 assert metrics is not None
                 opt_targets = set(self._opt_targets.keys())
                 if not opt_targets.issubset(metrics.keys()):
-                    _LOG.warning("Trial %s :: opt.targets missing: %s",
-                                 self, opt_targets.difference(metrics.keys()))
+                    _LOG.warning(
+                        "Trial %s :: opt.targets missing: %s",
+                        self,
+                        opt_targets.difference(metrics.keys()),
+                    )
                     # raise ValueError()
             return metrics
 
         @abstractmethod
-        def update_telemetry(self, status: Status, timestamp: datetime,
-                             metrics: List[Tuple[datetime, str, Any]]) -> None:
+        def update_telemetry(
+            self,
+            status: Status,
+            timestamp: datetime,
+            metrics: List[Tuple[datetime, str, Any]],
+        ) -> None:
             """
             Save the experiment's telemetry data and intermediate status.
 
