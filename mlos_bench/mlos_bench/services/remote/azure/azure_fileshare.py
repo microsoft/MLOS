@@ -58,7 +58,7 @@ class AzureFileShareService(FileShareService):
             {
                 "storageAccountName",
                 "storageFileShareName",
-            }
+            },
         )
         self._share_client: Optional[ShareClient] = None
 
@@ -67,8 +67,9 @@ class AzureFileShareService(FileShareService):
         Get the Azure file share client object.
         """
         if self._share_client is None:
-            assert self._parent is not None and isinstance(self._parent, SupportsAuth), \
-                "Authorization service not provided. Include service-auth.jsonc?"
+            assert self._parent is not None and isinstance(
+                self._parent, SupportsAuth
+            ), "Authorization service not provided. Include service-auth.jsonc?"
             self._share_client = ShareClient.from_share_url(
                 AzureFileShareService._SHARE_URL.format(
                     account_name=self.config["storageAccountName"],
