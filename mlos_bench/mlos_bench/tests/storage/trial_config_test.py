@@ -93,11 +93,14 @@ def test_exp_trial_no_config(exp_no_tunables_storage: Storage.Experiment) -> Non
     },
     {
         "nested": {
-                "callable": lambda x: x,
+            "callable": lambda x: x,
         },
     },
 ])
-def test_exp_trial_non_serializable_config(exp_no_tunables_storage: Storage.Experiment, bad_config: Dict[str, Any]) -> None:
+def test_exp_trial_non_serializable_config(
+    exp_no_tunables_storage: Storage.Experiment,
+    bad_config: Dict[str, Any],
+) -> None:
     """
     Tests that a trial with a non-serializable config is rejected.
     """
