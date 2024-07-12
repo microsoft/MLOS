@@ -135,8 +135,8 @@ class Trial(Storage.Trial):
         # and we need to keep `.update_telemetry()` idempotent; hence a loop instead of
         # a bulk upsert.
         # See Also: comments in <https://github.com/microsoft/MLOS/pull/466>
-        with self._engine.begin() as conn:
-            self._update_status(conn, status, timestamp)
+        # with self._engine.begin() as conn:
+            # self._update_status(conn, status, timestamp)
         for metric_ts, key, val in metrics:
             with self._engine.begin() as conn:
                 try:
