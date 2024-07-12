@@ -120,3 +120,35 @@ def test_adjust_signs_df(mlos_core_optimizer: MlosCoreOptimizer) -> None:
     # Check that the same operation works for string inputs.
     df_scores = mlos_core_optimizer._adjust_signs_df(df_scores_input.astype(str))
     assert df_scores.equals(df_scores_output)
+
+
+def test_adjust_signs_df_nan(mlos_core_optimizer: MlosCoreOptimizer) -> None:
+    """
+    Test `MlosCoreOptimizer._adjust_signs_df()` handling None, NaN, and Inf values.
+    """
+    df_scores = mlos_core_optimizer._adjust_signs_df(pandas.DataFrame({
+        'latency': ["88.88", "NaN", "Inf", "-Inf", None],
+        'throughput': ["111", "NaN", "Inf", "-Inf", None],
+    }))
+
+    assert df_scores.equals(pandas.DataFrame({
+        'latency': [88.88, float("NaN"), float("Inf"), float("-Inf"), float("NaN")],
+        'throughput': [-111, float("NaN"), float("-Inf"), float("Inf"), float("NaN")],
+    }))
+
+
+def test_adjust_signs_df_invalid(mlos_core_optimizer: MlosCoreOptimizer) -> None:
+    """
+    Test `MlosCoreOptimizer._adjust_signs_df()` on invalid inputs.
+    """
+    with pytest.raises(ValueError):
+        mlos_core_optimizer._adjust_signs_df(pandas.DataFrame({
+            'latency': ["INVALID"],
+            'throughput': ["no input"],
+        }))
+
+    with pytest.raises(ValueError):
+        mlos_core_optimizer._adjust_signs_df(pandas.DataFrame({
+            'latency': ["88.88", ""],
+            'throughput': ["111", ""],
+        }))
