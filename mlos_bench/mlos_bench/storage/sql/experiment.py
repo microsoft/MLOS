@@ -252,7 +252,7 @@ class Experiment(Storage.Experiment):
         return config_id
 
     def _new_trial(self, tunables: TunableGroups, ts_start: Optional[datetime] = None,
-                  config: Optional[Dict[str, Any]] = None) -> Storage.Trial:
+                   config: Optional[Dict[str, Any]] = None) -> Storage.Trial:
         # MySQL can round microseconds into the future causing scheduler to skip trials.
         # Truncate microseconds to avoid this issue.
         ts_start = utcify_timestamp(ts_start or datetime.now(UTC), origin="local").replace(microsecond=0)

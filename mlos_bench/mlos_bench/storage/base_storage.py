@@ -319,7 +319,7 @@ class Storage(metaclass=ABCMeta):
 
         @abstractmethod
         def _new_trial(self, tunables: TunableGroups, ts_start: Optional[datetime] = None,
-                      config: Optional[Dict[str, Any]] = None) -> 'Storage.Trial':
+                       config: Optional[Dict[str, Any]] = None) -> 'Storage.Trial':
             """
             Create a new experiment run in the storage.
 
