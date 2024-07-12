@@ -20,12 +20,12 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 def mlos_core_optimizer(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
     """An instance of a mlos_core optimizer (FLAML-based)."""
     test_opt_config = {
-        'optimizer_type': 'FLAML',
-        'max_suggestions': 10,
-        'seed': SEED,
-        'optimization_targets': {
-            'latency': 'min',
-            'throughput': 'max',
+        "optimizer_type": "FLAML",
+        "max_suggestions": 10,
+        "seed": SEED,
+        "optimization_targets": {
+            "latency": "min",
+            "throughput": "max",
         },
     }
     return MlosCoreOptimizer(tunable_groups, test_opt_config)
@@ -85,10 +85,9 @@ def test_df_str(mlos_core_optimizer: MlosCoreOptimizer, mock_configs: List[dict]
     Test `MlosCoreOptimizer._to_df()` type coercion on tunables with string values.
     """
     df_config_orig = mlos_core_optimizer._to_df(mock_configs)
-    df_config_str = mlos_core_optimizer._to_df([
-        {key: str(val) for (key, val) in config.items()}
-        for config in mock_configs
-    ])
+    df_config_str = mlos_core_optimizer._to_df(
+        [{key: str(val) for (key, val) in config.items()} for config in mock_configs]
+    )
     assert df_config_orig.equals(df_config_str)
 
 
@@ -96,15 +95,19 @@ def test_adjust_signs_df(mlos_core_optimizer: MlosCoreOptimizer) -> None:
     """
     Test `MlosCoreOptimizer._adjust_signs_df()` on different types of inputs.
     """
-    df_scores_input = pandas.DataFrame({
-        'latency': [88.88, 66.66, 99.99, None],
-        'throughput': [111, 222, 333, None],
-    })
+    df_scores_input = pandas.DataFrame(
+        {
+            "latency": [88.88, 66.66, 99.99, None],
+            "throughput": [111, 222, 333, None],
+        }
+    )
 
-    df_scores_output = pandas.DataFrame({
-        'latency': [88.88, 66.66, 99.99, float("NaN")],
-        'throughput': [-111, -222, -333, float("NaN")],
-    })
+    df_scores_output = pandas.DataFrame(
+        {
+            "latency": [88.88, 66.66, 99.99, float("NaN")],
+            "throughput": [-111, -222, -333, float("NaN")],
+        }
+    )
 
     # Make sure we adjust the signs for minimization.
     df_scores = mlos_core_optimizer._adjust_signs_df(df_scores_input)
@@ -119,15 +122,23 @@ def test_adjust_signs_df_nan(mlos_core_optimizer: MlosCoreOptimizer) -> None:
     """
     Test `MlosCoreOptimizer._adjust_signs_df()` handling None, NaN, and Inf values.
     """
-    df_scores = mlos_core_optimizer._adjust_signs_df(pandas.DataFrame({
-        'latency': ["88.88", "NaN", "Inf", "-Inf", None],
-        'throughput': ["111", "NaN", "Inf", "-Inf", None],
-    }))
+    df_scores = mlos_core_optimizer._adjust_signs_df(
+        pandas.DataFrame(
+            {
+                "latency": ["88.88", "NaN", "Inf", "-Inf", None],
+                "throughput": ["111", "NaN", "Inf", "-Inf", None],
+            }
+        )
+    )
 
-    assert df_scores.equals(pandas.DataFrame({
-        'latency': [88.88, float("NaN"), float("Inf"), float("-Inf"), float("NaN")],
-        'throughput': [-111, float("NaN"), float("-Inf"), float("Inf"), float("NaN")],
-    }))
+    assert df_scores.equals(
+        pandas.DataFrame(
+            {
+                "latency": [88.88, float("NaN"), float("Inf"), float("-Inf"), float("NaN")],
+                "throughput": [-111, float("NaN"), float("-Inf"), float("Inf"), float("NaN")],
+            }
+        )
+    )
 
 
 def test_adjust_signs_df_invalid(mlos_core_optimizer: MlosCoreOptimizer) -> None:
@@ -135,13 +146,21 @@ def test_adjust_signs_df_invalid(mlos_core_optimizer: MlosCoreOptimizer) -> None
     Test `MlosCoreOptimizer._adjust_signs_df()` on invalid inputs.
     """
     with pytest.raises(ValueError):
-        mlos_core_optimizer._adjust_signs_df(pandas.DataFrame({
-            'latency': ["INVALID"],
-            'throughput': ["no input"],
-        }))
+        mlos_core_optimizer._adjust_signs_df(
+            pandas.DataFrame(
+                {
+                    "latency": ["INVALID"],
+                    "throughput": ["no input"],
+                }
+            )
+        )
 
     with pytest.raises(ValueError):
-        mlos_core_optimizer._adjust_signs_df(pandas.DataFrame({
-            'latency': ["88.88", ""],
-            'throughput': ["111", ""],
-        }))
+        mlos_core_optimizer._adjust_signs_df(
+            pandas.DataFrame(
+                {
+                    "latency": ["88.88", ""],
+                    "throughput": ["111", ""],
+                }
+            )
+        )
