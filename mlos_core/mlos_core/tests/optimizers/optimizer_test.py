@@ -106,20 +106,22 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
         assert isinstance(observation, pd.DataFrame)
         optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
 
-    (best_config, best_score, best_context) = optimizer.get_best_observations()
+    (best_config, best_score, best_context, best_metadata) = optimizer.get_best_observations()
     assert isinstance(best_config, pd.DataFrame)
     assert isinstance(best_score, pd.DataFrame)
     assert best_context is None
+    assert best_metadata is None or isinstance(best_metadata, pd.DataFrame)
     assert set(best_config.columns) == {'x', 'y', 'z'}
     assert set(best_score.columns) == {'score'}
     assert best_config.shape == (1, 3)
     assert best_score.shape == (1, 1)
     assert best_score.score.iloc[0] < -5
 
-    (all_configs, all_scores, all_contexts) = optimizer.get_observations()
+    (all_configs, all_scores, all_contexts, all_metadata) = optimizer.get_observations()
     assert isinstance(all_configs, pd.DataFrame)
     assert isinstance(all_scores, pd.DataFrame)
     assert all_contexts is None
+    assert all_metadata is None or isinstance(all_metadata, pd.DataFrame)
     assert set(all_configs.columns) == {'x', 'y', 'z'}
     assert set(all_scores.columns) == {'score'}
     assert all_configs.shape == (20, 3)
@@ -284,26 +286,28 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     best_observation = optimizer.get_best_observations()
     llamatune_best_observation = llamatune_optimizer.get_best_observations()
 
-    for (best_config, best_score, best_context) in (best_observation, llamatune_best_observation):
+    for (best_config, best_score, best_context, best_metadata) in (best_observation, llamatune_best_observation):
         assert isinstance(best_config, pd.DataFrame)
         assert isinstance(best_score, pd.DataFrame)
         assert best_context is None
+        assert best_metadata is None or isinstance(best_metadata, pd.DataFrame)
         assert set(best_config.columns) == {'x', 'y'}
         assert set(best_score.columns) == {'score'}
 
-    (best_config, best_score, _context) = best_observation
-    (llamatune_best_config, llamatune_best_score, _context) = llamatune_best_observation
+    (best_config, best_score, _context, _metadata) = best_observation
+    (llamatune_best_config, llamatune_best_score, _context, _metadata) = llamatune_best_observation
 
     # LlamaTune's optimizer score should better (i.e., lower) than plain optimizer's one, or close to that
     assert best_score.score.iloc[0] > llamatune_best_score.score.iloc[0] or \
         best_score.score.iloc[0] + 1e-3 > llamatune_best_score.score.iloc[0]
 
     # Retrieve and check all observations
-    for (all_configs, all_scores, all_contexts) in (
+    for (all_configs, all_scores, all_contexts, all_metadata) in (
             optimizer.get_observations(), llamatune_optimizer.get_observations()):
         assert isinstance(all_configs, pd.DataFrame)
         assert isinstance(all_scores, pd.DataFrame)
         assert all_contexts is None
+        assert all_metadata is None or isinstance(all_metadata, pd.DataFrame)
         assert set(all_configs.columns) == {'x', 'y'}
         assert set(all_scores.columns) == {'score'}
         assert len(all_configs) == num_iters
@@ -391,12 +395,14 @@ def test_mixed_numerics_type_input_space_types(optimizer_type: Optional[Optimize
         assert isinstance(observation, pd.DataFrame)
         optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
 
-    (best_config, best_score, best_context) = optimizer.get_best_observations()
+    (best_config, best_score, best_context, best_metadata) = optimizer.get_best_observations()
     assert isinstance(best_config, pd.DataFrame)
     assert isinstance(best_score, pd.DataFrame)
     assert best_context is None
+    assert best_metadata is None or isinstance(best_metadata, pd.DataFrame)
 
-    (all_configs, all_scores, all_contexts) = optimizer.get_observations()
+    (all_configs, all_scores, all_contexts, all_metadata) = optimizer.get_observations()
     assert isinstance(all_configs, pd.DataFrame)
     assert isinstance(all_scores, pd.DataFrame)
     assert all_contexts is None
+    assert all_metadata is None or isinstance(all_metadata, pd.DataFrame)

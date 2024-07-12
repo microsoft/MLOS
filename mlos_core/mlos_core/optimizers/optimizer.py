@@ -56,9 +56,9 @@ class BaseOptimizer(metaclass=ABCMeta):
             raise ValueError("Number of weights must match the number of optimization targets")
 
         self._space_adapter: Optional[BaseSpaceAdapter] = space_adapter
-        self._observations: List[Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]] = []
+        self._observations: List[Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame]]] = []
         self._has_context: Optional[bool] = None
-        self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame]]] = []
+        self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame]]] = []
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(space_adapter={self.space_adapter})"
@@ -98,7 +98,7 @@ class BaseOptimizer(metaclass=ABCMeta):
                 "Mismatched number of configs and context."
         assert configs.shape[1] == len(self.parameter_space.values()), \
             "Mismatched configuration shape."
-        self._observations.append((configs, scores, context))
+        self._observations.append((configs, scores, context, metadata))
         self._has_context = context is not None
 
         if self._space_adapter:
@@ -197,26 +197,48 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
-    def get_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]:
+    def _get_observations(self, observations:
+                          List[Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame]]]
+                          ) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame]]:
         """
-        Returns the observations as a triplet of DataFrames (config, score, context).
+        Returns the observations as a quad of DataFrames(config, score, context, metadata)
+        for a specific set of observations.
+
+        Parameters
+        ----------
+        observations: List[Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame]]]
+            Observations to run the transformation on
 
         Returns
         -------
-        observations : Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]
-            A triplet of (config, score, context) DataFrames of observations.
+        observations: Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]], Optional[pd.DataFrame]]
+            A quad of(config, score, context, metadata) DataFrames of observations.
         """
-        if len(self._observations) == 0:
+        if len(observations) == 0:
             raise ValueError("No observations registered yet.")
-        configs = pd.concat([config for config, _, _ in self._observations]).reset_index(drop=True)
-        scores = pd.concat([score for _, score, _ in self._observations]).reset_index(drop=True)
+        configs = pd.concat([config for config, _, _, _ in observations]).reset_index(drop=True)
+        scores = pd.concat([score for _, score, _, _ in observations]).reset_index(drop=True)
         contexts = pd.concat([pd.DataFrame() if context is None else context
-                              for _, _, context in self._observations]).reset_index(drop=True)
-        return (configs, scores, contexts if len(contexts.columns) > 0 else None)
+                              for _, _, context, _ in observations]).reset_index(drop=True)
+        metadatum = pd.concat([pd.DataFrame() if metadata is None else metadata
+                              for _, _, _, metadata in observations]).reset_index(drop=True)
+        return (configs, scores, contexts if len(contexts.columns) > 0 else None, metadatum if len(metadatum.columns) > 0 else None)
 
-    def get_best_observations(self, *, n_max: int = 1) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]:
+    def get_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame]]:
         """
-        Get the N best observations so far as a triplet of DataFrames (config, score, context).
+        Returns the observations as a quad of DataFrames(config, score, context, metadata).
+
+        Returns
+        -------
+        observations: Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]], Optional[pd.DataFrame]]
+            A quad of(config, score, context, metadata) DataFrames of observations.
+        """
+        return self._get_observations(self._observations)
+
+    def get_best_observations(self, *, n_max: int = 1) -> Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame],
+                                                                Optional[pd.DataFrame]]:
+        """
+        Get the N best observations so far as a quad of DataFrames (config, score, context, metadata).
         Default is N=1. The columns are ordered in ASCENDING order of the optimization targets.
         The function uses `pandas.DataFrame.nsmallest(..., keep="first")` method under the hood.
 
@@ -227,15 +249,16 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Returns
         -------
-        observations : Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]
-            A triplet of best (config, score, context) DataFrames of best observations.
+        observations : Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]], Optional[pd.DataFrame]]
+            A quad of best (config, score, context, metadata) DataFrames of best observations.
         """
         if len(self._observations) == 0:
             raise ValueError("No observations registered yet.")
-        (configs, scores, contexts) = self.get_observations()
+        (configs, scores, contexts, metadatum) = self.get_observations()
         idx = scores.nsmallest(n_max, columns=self._optimization_targets, keep="first").index
         return (configs.loc[idx], scores.loc[idx],
-                None if contexts is None else contexts.loc[idx])
+                None if contexts is None else contexts.loc[idx],
+                None if metadatum is None else metadatum.loc[idx])
 
     def cleanup(self) -> None:
         """
