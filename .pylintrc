@@ -35,7 +35,7 @@ load-plugins=
 
 [FORMAT]
 # Maximum number of characters on a single line.
-max-line-length=132
+max-line-length=99
 
 [MESSAGE CONTROL]
 disable=
@@ -48,5 +48,5 @@ disable=
     missing-raises-doc
 
 [STRING]
-#check-quote-consistency=yes
+check-quote-consistency=yes
 check-str-concat-over-line-jumps=yes

@@ -24,10 +24,10 @@ dependencies:
   # FIXME: https://github.com/microsoft/MLOS/issues/727
   - python<3.12
   - pip:
-    - autopep8>=1.7.0
     - bump2version
     - check-jsonschema
     - isort
+    - docformatter
     - licenseheaders
     - mypy
     - pandas-stubs

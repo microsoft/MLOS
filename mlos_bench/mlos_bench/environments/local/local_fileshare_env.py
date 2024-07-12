@@ -2,22 +2,20 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Scheduler-side Environment to run scripts locally
-and upload/download data to the shared storage.
+"""Scheduler-side Environment to run scripts locally and upload/download data to the
+shared storage.
 """
 
 import logging
-
 from datetime import datetime
 from string import Template
-from typing import Any, Dict, List, Generator, Iterable, Mapping, Optional, Tuple
+from typing import Any, Dict, Generator, Iterable, List, Mapping, Optional, Tuple
 
-from mlos_bench.services.base_service import Service
-from mlos_bench.services.types.local_exec_type import SupportsLocalExec
-from mlos_bench.services.types.fileshare_type import SupportsFileShareOps
-from mlos_bench.environments.status import Status
 from mlos_bench.environments.local.local_env import LocalEnv
+from mlos_bench.environments.status import Status
+from mlos_bench.services.base_service import Service
+from mlos_bench.services.types.fileshare_type import SupportsFileShareOps
+from mlos_bench.services.types.local_exec_type import SupportsLocalExec
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -25,18 +23,19 @@ _LOG = logging.getLogger(__name__)
 
 
 class LocalFileShareEnv(LocalEnv):
-    """
-    Scheduler-side Environment that runs scripts locally
-    and uploads/downloads data to the shared file storage.
+    """Scheduler-side Environment that runs scripts locally and uploads/downloads data
+    to the shared file storage.
     """
 
-    def __init__(self,
-                 *,
-                 name: str,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 tunables: Optional[TunableGroups] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        *,
+        name: str,
+        config: dict,
+        global_config: Optional[dict] = None,
+        tunables: Optional[TunableGroups] = None,
+        service: Optional[Service] = None,
+    ):
         """
         Create a new application environment with a given config.
 
@@ -60,34 +59,41 @@ class LocalFileShareEnv(LocalEnv):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
+        super().__init__(
+            name=name,
+            config=config,
+            global_config=global_config,
+            tunables=tunables,
+            service=service,
+        )
 
-        assert self._service is not None and isinstance(self._service, SupportsLocalExec), \
-            "LocalEnv requires a service that supports local execution"
+        assert self._service is not None and isinstance(
+            self._service, SupportsLocalExec
+        ), "LocalEnv requires a service that supports local execution"
         self._local_exec_service: SupportsLocalExec = self._service
 
-        assert self._service is not None and isinstance(self._service, SupportsFileShareOps), \
-            "LocalEnv requires a service that supports file upload/download operations"
+        assert self._service is not None and isinstance(
+            self._service, SupportsFileShareOps
+        ), "LocalEnv requires a service that supports file upload/download operations"
         self._file_share_service: SupportsFileShareOps = self._service
 
         self._upload = self._template_from_to("upload")
         self._download = self._template_from_to("download")
 
     def _template_from_to(self, config_key: str) -> List[Tuple[Template, Template]]:
+        """Convert a list of {"from": "...", "to": "..."} to a list of pairs of
+        string.Template objects so that we can plug in self._params into it later.
         """
-        Convert a list of {"from": "...", "to": "..."} to a list of pairs
-        of string.Template objects so that we can plug in self._params into it later.
-        """
-        return [
-            (Template(d['from']), Template(d['to']))
-            for d in self.config.get(config_key, [])
-        ]
+        return [(Template(d["from"]), Template(d["to"])) for d in self.config.get(config_key, [])]
 
     @staticmethod
-    def _expand(from_to: Iterable[Tuple[Template, Template]],
-                params: Mapping[str, TunableValue]) -> Generator[Tuple[str, str], None, None]:
+    def _expand(
+        from_to: Iterable[Tuple[Template, Template]],
+        params: Mapping[str, TunableValue],
+    ) -> Generator[Tuple[str, str], None, None]:
         """
         Substitute $var parameters in from/to path templates.
+
         Return a generator of (str, str) pairs of paths.
         """
         return (
@@ -120,9 +126,15 @@ class LocalFileShareEnv(LocalEnv):
             assert self._temp_dir is not None
             params = self._get_env_params(restrict=False)
             params["PWD"] = self._temp_dir
-            for (path_from, path_to) in self._expand(self._upload, params):
-                self._file_share_service.upload(self._params, self._config_loader_service.resolve_path(
-                    path_from, extra_paths=[self._temp_dir]), path_to)
+            for path_from, path_to in self._expand(self._upload, params):
+                self._file_share_service.upload(
+                    self._params,
+                    self._config_loader_service.resolve_path(
+                        path_from,
+                        extra_paths=[self._temp_dir],
+                    ),
+                    path_to,
+                )
         return self._is_ready
 
     def _download_files(self, ignore_missing: bool = False) -> None:
@@ -138,11 +150,16 @@ class LocalFileShareEnv(LocalEnv):
         assert self._temp_dir is not None
         params = self._get_env_params(restrict=False)
         params["PWD"] = self._temp_dir
-        for (path_from, path_to) in self._expand(self._download, params):
+        for path_from, path_to in self._expand(self._download, params):
             try:
-                self._file_share_service.download(self._params,
-                                                  path_from, self._config_loader_service.resolve_path(
-                                                      path_to, extra_paths=[self._temp_dir]))
+                self._file_share_service.download(
+                    self._params,
+                    path_from,
+                    self._config_loader_service.resolve_path(
+                        path_to,
+                        extra_paths=[self._temp_dir],
+                    ),
+                )
             except FileNotFoundError as ex:
                 _LOG.warning("Cannot download: %s", path_from)
                 if not ignore_missing:
@@ -153,8 +170,8 @@ class LocalFileShareEnv(LocalEnv):
 
     def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
         """
-        Download benchmark results from the shared storage
-        and run post-processing scripts locally.
+        Download benchmark results from the shared storage and run post-processing
+        scripts locally.
 
         Returns
         -------

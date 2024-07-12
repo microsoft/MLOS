@@ -125,14 +125,10 @@
     ],
     "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source",
     "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/",
-    "autopep8.args": [
-        "--experimental"
-    ],
     "[python]": {
-        // TODO: Enable black formatter
-        //"editor.defaultFormatter": "ms-python.black-formatter",
-        //"editor.formatOnSave": true,
-        //"editor.formatOnSaveMode": "modifications"
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.formatOnSaveMode": "modifications"
     },
     // See Also .vscode/launch.json for environment variable args to pytest during debug sessions.
     // For the rest, see setup.cfg

@@ -1,5 +1,5 @@
 [tool.black]
-line-length = 88
+line-length = 99
 target-version = ["py38", "py39", "py310", "py311", "py312"]
 include = '\.pyi?$'
 
@@ -7,3 +7,12 @@ include = '\.pyi?$'
 profile = "black"
 py_version = 311
 src_paths = ["mlos_core", "mlos_bench", "mlos_viz"]
+
+[tool.docformatter]
+recursive = true
+black = true
+style = "numpy"
+pre-summary-newline = true
+close-quotes-on-newline = true
+
+# TODO: move pylintrc and some setup.cfg configs here

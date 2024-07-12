@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Mock remote services for testing purposes.
-"""
+"""Mock remote services for testing purposes."""
 
 from typing import Any, Tuple
 

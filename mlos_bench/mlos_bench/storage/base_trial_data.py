@@ -2,40 +2,43 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Base interface for accessing the stored benchmark trial data.
-"""
+"""Base interface for accessing the stored benchmark trial data."""
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
-from typing import Any, Dict, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import pandas
 from pytz import UTC
 
 from mlos_bench.environments.status import Status
-from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.storage.base_tunable_config_data import TunableConfigData
 from mlos_bench.storage.util import kv_df_to_dict
+from mlos_bench.tunables.tunable import TunableValue
 
 if TYPE_CHECKING:
-    from mlos_bench.storage.base_tunable_config_trial_group_data import TunableConfigTrialGroupData
+    from mlos_bench.storage.base_tunable_config_trial_group_data import (
+        TunableConfigTrialGroupData,
+    )
 
 
 class TrialData(metaclass=ABCMeta):
     """
     Base interface for accessing the stored experiment benchmark trial data.
 
-    A trial is a single run of an experiment with a given configuration (e.g., set
-    of tunable parameters).
+    A trial is a single run of an experiment with a given configuration (e.g., set of
+    tunable parameters).
     """
 
-    def __init__(self, *,
-                 experiment_id: str,
-                 trial_id: int,
-                 tunable_config_id: int,
-                 ts_start: datetime,
-                 ts_end: Optional[datetime],
-                 status: Status):
+    def __init__(
+        self,
+        *,
+        experiment_id: str,
+        trial_id: int,
+        tunable_config_id: int,
+        ts_start: datetime,
+        ts_end: Optional[datetime],
+        status: Status,
+    ):
         self._experiment_id = experiment_id
         self._trial_id = trial_id
         self._tunable_config_id = tunable_config_id
@@ -46,7 +49,10 @@ class TrialData(metaclass=ABCMeta):
         self._status = status
 
     def __repr__(self) -> str:
-        return f"Trial :: {self._experiment_id}:{self._trial_id} cid:{self._tunable_config_id} {self._status.name}"
+        return (
+            f"Trial :: {self._experiment_id}:{self._trial_id} "
+            f"cid:{self._tunable_config_id} {self._status.name}"
+        )
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, self.__class__):
@@ -55,44 +61,32 @@ class TrialData(metaclass=ABCMeta):
 
     @property
     def experiment_id(self) -> str:
-        """
-        ID of the experiment this trial belongs to.
-        """
+        """ID of the experiment this trial belongs to."""
         return self._experiment_id
 
     @property
     def trial_id(self) -> int:
-        """
-        ID of the trial.
-        """
+        """ID of the trial."""
         return self._trial_id
 
     @property
     def ts_start(self) -> datetime:
-        """
-        Start timestamp of the trial (UTC).
-        """
+        """Start timestamp of the trial (UTC)."""
         return self._ts_start
 
     @property
     def ts_end(self) -> Optional[datetime]:
-        """
-        End timestamp of the trial (UTC).
-        """
+        """End timestamp of the trial (UTC)."""
         return self._ts_end
 
     @property
     def status(self) -> Status:
-        """
-        Status of the trial.
-        """
+        """Status of the trial."""
         return self._status
 
     @property
     def tunable_config_id(self) -> int:
-        """
-        ID of the (tunable) configuration of the trial.
-        """
+        """ID of the (tunable) configuration of the trial."""
         return self._tunable_config_id
 
     @property
@@ -112,9 +106,7 @@ class TrialData(metaclass=ABCMeta):
     @property
     @abstractmethod
     def tunable_config_trial_group(self) -> "TunableConfigTrialGroupData":
-        """
-        Retrieve the trial's (tunable) config trial group data from the storage.
-        """
+        """Retrieve the trial's (tunable) config trial group data from the storage."""
 
     @property
     @abstractmethod
