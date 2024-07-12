@@ -8,4 +8,4 @@ A good example are "boot time" kernel parameters vs. "runtime" kernel parameters
 
 ## TODOs
 
-- Evaluate replacing these entirely with [`ConfigSpace`](https://automl.github.io/ConfigSpace/main/), since that is currently what we use to configure the ([`mlos_core`](../../../mlos_core/)) [`Optimizer`](../optimizers/).
+- Evaluate replacing these entirely with [`ConfigSpace`](https://automl.github.io/ConfigSpace/), since that is currently what we use to configure the ([`mlos_core`](../../../mlos_core/)) [`Optimizer`](../optimizers/).
