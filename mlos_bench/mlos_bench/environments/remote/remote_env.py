@@ -14,11 +14,11 @@ from typing import Dict, Iterable, Optional, Tuple
 
 from pytz import UTC
 
-from mlos_bench.environments.status import Status
 from mlos_bench.environments.script_env import ScriptEnv
+from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 from mlos_bench.services.types.host_ops_type import SupportsHostOps
+from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -32,13 +32,15 @@ class RemoteEnv(ScriptEnv):
     e.g. Application Environment
     """
 
-    def __init__(self,
-                 *,
-                 name: str,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 tunables: Optional[TunableGroups] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        *,
+        name: str,
+        config: dict,
+        global_config: Optional[dict] = None,
+        tunables: Optional[TunableGroups] = None,
+        service: Optional[Service] = None,
+    ):
         """
         Create a new environment for remote execution.
 
@@ -61,24 +63,31 @@ class RemoteEnv(ScriptEnv):
             An optional service object (e.g., providing methods to
             deploy or reboot a Host, VM, OS, etc.).
         """
-        super().__init__(name=name, config=config, global_config=global_config,
-                         tunables=tunables, service=service)
+        super().__init__(
+            name=name,
+            config=config,
+            global_config=global_config,
+            tunables=tunables,
+            service=service,
+        )
 
         self._wait_boot = self.config.get("wait_boot", False)
 
-        assert self._service is not None and isinstance(self._service, SupportsRemoteExec), \
-            "RemoteEnv requires a service that supports remote execution operations"
+        assert self._service is not None and isinstance(
+            self._service, SupportsRemoteExec
+        ), "RemoteEnv requires a service that supports remote execution operations"
         self._remote_exec_service: SupportsRemoteExec = self._service
 
         if self._wait_boot:
-            assert self._service is not None and isinstance(self._service, SupportsHostOps), \
-                "RemoteEnv requires a service that supports host operations"
+            assert self._service is not None and isinstance(
+                self._service, SupportsHostOps
+            ), "RemoteEnv requires a service that supports host operations"
             self._host_service: SupportsHostOps = self._service
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
-        Check if the environment is ready and set up the application
-        and benchmarks on a remote host.
+        Check if the environment is ready and set up the application and benchmarks on a
+        remote host.
 
         Parameters
         ----------
@@ -143,9 +152,7 @@ class RemoteEnv(ScriptEnv):
         return (status, timestamp, output)
 
     def teardown(self) -> None:
-        """
-        Clean up and shut down the remote environment.
-        """
+        """Clean up and shut down the remote environment."""
         if self._script_teardown:
             _LOG.info("Remote teardown: %s", self)
             (status, _timestamp, _output) = self._remote_exec(self._script_teardown)
@@ -170,7 +177,10 @@ class RemoteEnv(ScriptEnv):
         env_params = self._get_env_params()
         _LOG.debug("Submit script: %s with %s", self, env_params)
         (status, output) = self._remote_exec_service.remote_exec(
-            script, config=self._params, env_params=env_params)
+            script,
+            config=self._params,
+            env_params=env_params,
+        )
         _LOG.debug("Script submitted: %s %s :: %s", self, status, output)
         if status in {Status.PENDING, Status.SUCCEEDED}:
             (status, output) = self._remote_exec_service.get_remote_exec_results(output)

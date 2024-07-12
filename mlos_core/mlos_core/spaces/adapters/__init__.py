@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Basic initializer module for the mlos_core space adapters.
-"""
+"""Basic initializer module for the mlos_core space adapters."""
 
 from enum import Enum
 from typing import Optional, TypeVar
@@ -15,8 +13,8 @@ from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 from mlos_core.spaces.adapters.llamatune import LlamaTuneAdapter
 
 __all__ = [
-    'IdentityAdapter',
-    'LlamaTuneAdapter',
+    "IdentityAdapter",
+    "LlamaTuneAdapter",
 ]
 
 
@@ -24,33 +22,38 @@ class SpaceAdapterType(Enum):
     """Enumerate supported MlosCore space adapters."""
 
     IDENTITY = IdentityAdapter
-    """A no-op adapter will be used"""
+    """A no-op adapter will be used."""
 
     LLAMATUNE = LlamaTuneAdapter
-    """An instance of LlamaTuneAdapter class will be used"""
+    """An instance of LlamaTuneAdapter class will be used."""
 
 
 # To make mypy happy, we need to define a type variable for each optimizer type.
 # https://github.com/python/mypy/issues/12952
-# ConcreteSpaceAdapter = TypeVar('ConcreteSpaceAdapter', *[member.value for member in SpaceAdapterType])
+# ConcreteSpaceAdapter = TypeVar(
+#    "ConcreteSpaceAdapter",
+#    *[member.value for member in SpaceAdapterType],
+# )
 # To address this, we add a test for complete coverage of the enum.
 ConcreteSpaceAdapter = TypeVar(
-    'ConcreteSpaceAdapter',
+    "ConcreteSpaceAdapter",
     IdentityAdapter,
     LlamaTuneAdapter,
 )
 
 
 class SpaceAdapterFactory:
-    """Simple factory class for creating BaseSpaceAdapter-derived objects"""
+    """Simple factory class for creating BaseSpaceAdapter-derived objects."""
 
     # pylint: disable=too-few-public-methods
 
     @staticmethod
-    def create(*,
-               parameter_space: ConfigSpace.ConfigurationSpace,
-               space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
-               space_adapter_kwargs: Optional[dict] = None) -> ConcreteSpaceAdapter:    # type: ignore[type-var]
+    def create(
+        *,
+        parameter_space: ConfigSpace.ConfigurationSpace,
+        space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
+        space_adapter_kwargs: Optional[dict] = None,
+    ) -> ConcreteSpaceAdapter:  # type: ignore[type-var]
         """
         Create a new space adapter instance, given the parameter space and potential
         space adapter options.
@@ -76,7 +79,7 @@ class SpaceAdapterFactory:
 
         space_adapter: ConcreteSpaceAdapter = space_adapter_type.value(
             orig_parameter_space=parameter_space,
-            **space_adapter_kwargs
+            **space_adapter_kwargs,
         )
 
         return space_adapter

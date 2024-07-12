@@ -4,6 +4,7 @@
 #
 """
 Tests for mlos_bench.environments.local.
+
 Used to make mypy happy about multiple conftest.py modules.
 """
 
@@ -32,14 +33,20 @@ def create_local_env(tunable_groups: TunableGroups, config: Dict[str, Any]) -> L
     env : LocalEnv
         A new instance of the local environment.
     """
-    return LocalEnv(name="TestLocalEnv", config=config, tunables=tunable_groups,
-                    service=LocalExecService(parent=ConfigPersistenceService()))
+    return LocalEnv(
+        name="TestLocalEnv",
+        config=config,
+        tunables=tunable_groups,
+        service=LocalExecService(parent=ConfigPersistenceService()),
+    )
 
 
-def create_composite_local_env(tunable_groups: TunableGroups,
-                               global_config: Dict[str, Any],
-                               params: Dict[str, Any],
-                               local_configs: List[Dict[str, Any]]) -> CompositeEnv:
+def create_composite_local_env(
+    tunable_groups: TunableGroups,
+    global_config: Dict[str, Any],
+    params: Dict[str, Any],
+    local_configs: List[Dict[str, Any]],
+) -> CompositeEnv:
     """
     Create a CompositeEnv with several LocalEnv instances.
 
@@ -70,7 +77,7 @@ def create_composite_local_env(tunable_groups: TunableGroups,
                     "config": config,
                 }
                 for (i, config) in enumerate(local_configs)
-            ]
+            ],
         },
         tunables=tunable_groups,
         global_config=global_config,

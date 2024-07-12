@@ -2,28 +2,26 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Basic initializer module for the mlos_core optimizers.
-"""
+"""Basic initializer module for the mlos_core optimizers."""
 
 from enum import Enum
 from typing import List, Optional, TypeVar
 
 import ConfigSpace
 
-from mlos_core.optimizers.optimizer import BaseOptimizer
-from mlos_core.optimizers.random_optimizer import RandomOptimizer
 from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
 from mlos_core.optimizers.flaml_optimizer import FlamlOptimizer
-from mlos_core.spaces.adapters import SpaceAdapterType, SpaceAdapterFactory
+from mlos_core.optimizers.optimizer import BaseOptimizer
+from mlos_core.optimizers.random_optimizer import RandomOptimizer
+from mlos_core.spaces.adapters import SpaceAdapterFactory, SpaceAdapterType
 
 __all__ = [
-    'SpaceAdapterType',
-    'OptimizerFactory',
-    'BaseOptimizer',
-    'RandomOptimizer',
-    'FlamlOptimizer',
-    'SmacOptimizer',
+    "SpaceAdapterType",
+    "OptimizerFactory",
+    "BaseOptimizer",
+    "RandomOptimizer",
+    "FlamlOptimizer",
+    "SmacOptimizer",
 ]
 
 
@@ -31,13 +29,13 @@ class OptimizerType(Enum):
     """Enumerate supported MlosCore optimizers."""
 
     RANDOM = RandomOptimizer
-    """An instance of RandomOptimizer class will be used"""
+    """An instance of RandomOptimizer class will be used."""
 
     FLAML = FlamlOptimizer
-    """An instance of FlamlOptimizer class will be used"""
+    """An instance of FlamlOptimizer class will be used."""
 
     SMAC = SmacOptimizer
-    """An instance of SmacOptimizer class will be used"""
+    """An instance of SmacOptimizer class will be used."""
 
 
 # To make mypy happy, we need to define a type variable for each optimizer type.
@@ -45,7 +43,7 @@ class OptimizerType(Enum):
 # ConcreteOptimizer = TypeVar('ConcreteOptimizer', *[member.value for member in OptimizerType])
 # To address this, we add a test for complete coverage of the enum.
 ConcreteOptimizer = TypeVar(
-    'ConcreteOptimizer',
+    "ConcreteOptimizer",
     RandomOptimizer,
     FlamlOptimizer,
     SmacOptimizer,
@@ -55,21 +53,23 @@ DEFAULT_OPTIMIZER_TYPE = OptimizerType.FLAML
 
 
 class OptimizerFactory:
-    """Simple factory class for creating BaseOptimizer-derived objects"""
+    """Simple factory class for creating BaseOptimizer-derived objects."""
 
     # pylint: disable=too-few-public-methods
 
     @staticmethod
-    def create(*,
-               parameter_space: ConfigSpace.ConfigurationSpace,
-               optimization_targets: List[str],
-               optimizer_type: OptimizerType = DEFAULT_OPTIMIZER_TYPE,
-               optimizer_kwargs: Optional[dict] = None,
-               space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
-               space_adapter_kwargs: Optional[dict] = None) -> ConcreteOptimizer:   # type: ignore[type-var]
+    def create(
+        *,
+        parameter_space: ConfigSpace.ConfigurationSpace,
+        optimization_targets: List[str],
+        optimizer_type: OptimizerType = DEFAULT_OPTIMIZER_TYPE,
+        optimizer_kwargs: Optional[dict] = None,
+        space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
+        space_adapter_kwargs: Optional[dict] = None,
+    ) -> ConcreteOptimizer:  # type: ignore[type-var]
         """
-        Create a new optimizer instance, given the parameter space, optimizer type,
-        and potential optimizer options.
+        Create a new optimizer instance, given the parameter space, optimizer type, and
+        potential optimizer options.
 
         Parameters
         ----------
@@ -107,7 +107,7 @@ class OptimizerFactory:
             parameter_space=parameter_space,
             optimization_targets=optimization_targets,
             space_adapter=space_adapter,
-            **optimizer_kwargs
+            **optimizer_kwargs,
         )
 
         return optimizer

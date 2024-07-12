@@ -14,9 +14,8 @@
         "lextudio.restructuredtext",
         "matangover.mypy",
         "ms-azuretools.vscode-docker",
-	// TODO: Enable additional formatter extensions:
-        //"ms-python.black-formatter",
-        //"ms-python.isort",
+        "ms-python.black-formatter",
+        "ms-python.isort",
         "ms-python.pylint",
         "ms-python.python",
         "ms-python.vscode-pylance",

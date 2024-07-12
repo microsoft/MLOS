@@ -2,21 +2,20 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for Service method registering.
-"""
+"""Unit tests for Service method registering."""
 
 import pytest
 
 from mlos_bench.services.base_service import Service
-
-from mlos_bench.tests.services.mock_service import SupportsSomeMethod, MockServiceBase, MockServiceChild
+from mlos_bench.tests.services.mock_service import (
+    MockServiceBase,
+    MockServiceChild,
+    SupportsSomeMethod,
+)
 
 
 def test_service_method_register_without_constructor() -> None:
-    """
-    Test registering a method without a constructor.
-    """
+    """Test registering a method without a constructor."""
     # pylint: disable=protected-access
     some_base_service = MockServiceBase()
     some_child_service = MockServiceChild()

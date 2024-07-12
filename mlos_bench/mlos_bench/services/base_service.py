@@ -2,15 +2,13 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Base class for the service mix-ins.
-"""
+"""Base class for the service mix-ins."""
 
 import json
 import logging
-
 from types import TracebackType
 from typing import Any, Callable, Dict, List, Optional, Set, Type, Union
+
 from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
@@ -21,16 +19,16 @@ _LOG = logging.getLogger(__name__)
 
 
 class Service:
-    """
-    An abstract base of all Environment Services and used to build up mix-ins.
-    """
+    """An abstract base of all Environment Services and used to build up mix-ins."""
 
     @classmethod
-    def new(cls,
-            class_name: str,
-            config: Optional[Dict[str, Any]] = None,
-            global_config: Optional[Dict[str, Any]] = None,
-            parent: Optional["Service"] = None) -> "Service":
+    def new(
+        cls,
+        class_name: str,
+        config: Optional[Dict[str, Any]] = None,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional["Service"] = None,
+    ) -> "Service":
         """
         Factory method for a new service with a given config.
 
@@ -57,11 +55,13 @@ class Service:
         assert issubclass(cls, Service)
         return instantiate_from_config(cls, class_name, config, global_config, parent)
 
-    def __init__(self,
-                 config: Optional[Dict[str, Any]] = None,
-                 global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional["Service"] = None,
-                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional["Service"] = None,
+        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+    ):
         """
         Create a new service with a given config.
 
@@ -101,12 +101,15 @@ class Service:
             _LOG.debug("Service: %s Parent: %s", self, parent.pprint() if parent else None)
 
     @staticmethod
-    def merge_methods(ext_methods: Union[Dict[str, Callable], List[Callable], None],
-                      local_methods: Union[Dict[str, Callable], List[Callable]]) -> Dict[str, Callable]:
+    def merge_methods(
+        ext_methods: Union[Dict[str, Callable], List[Callable], None],
+        local_methods: Union[Dict[str, Callable], List[Callable]],
+    ) -> Dict[str, Callable]:
         """
         Merge methods from the external caller with the local ones.
-        This function is usually called by the derived class constructor
-        just before invoking the constructor of the base class.
+
+        This function is usually called by the derived class constructor just before
+        invoking the constructor of the base class.
         """
         if isinstance(local_methods, dict):
             local_methods = local_methods.copy()
@@ -138,9 +141,12 @@ class Service:
         self._in_context = True
         return self
 
-    def __exit__(self, ex_type: Optional[Type[BaseException]],
-                 ex_val: Optional[BaseException],
-                 ex_tb: Optional[TracebackType]) -> Literal[False]:
+    def __exit__(
+        self,
+        ex_type: Optional[Type[BaseException]],
+        ex_val: Optional[BaseException],
+        ex_tb: Optional[TracebackType],
+    ) -> Literal[False]:
         """
         Exit the Service mix-in context.
 
@@ -170,21 +176,24 @@ class Service:
         """
         Enters the context for this particular Service instance.
 
-        Called by the base __enter__ method of the Service class so it can be
-        used with mix-ins and overridden by subclasses.
+        Called by the base __enter__ method of the Service class so it can be used with
+        mix-ins and overridden by subclasses.
         """
         assert not self._in_context
         self._in_context = True
         return self
 
-    def _exit_context(self, ex_type: Optional[Type[BaseException]],
-                      ex_val: Optional[BaseException],
-                      ex_tb: Optional[TracebackType]) -> Literal[False]:
+    def _exit_context(
+        self,
+        ex_type: Optional[Type[BaseException]],
+        ex_val: Optional[BaseException],
+        ex_tb: Optional[TracebackType],
+    ) -> Literal[False]:
         """
         Exits the context for this particular Service instance.
 
-        Called by the base __enter__ method of the Service class so it can be
-        used with mix-ins and overridden by subclasses.
+        Called by the base __enter__ method of the Service class so it can be used with
+        mix-ins and overridden by subclasses.
         """
         # pylint: disable=unused-argument
         assert self._in_context
@@ -192,13 +201,13 @@ class Service:
         return False
 
     def _validate_json_config(self, config: dict) -> None:
-        """
-        Reconstructs a basic json config that this class might have been
-        instantiated from in order to validate configs provided outside the
-        file loading mechanism.
+        """Reconstructs a basic json config that this class might have been instantiated
+        from in order to validate configs provided outside the file loading
+        mechanism.
         """
         if self.__class__ == Service:
-            # Skip over the case where instantiate a bare base Service class in order to build up a mix-in.
+            # Skip over the case where instantiate a bare base Service class in
+            # order to build up a mix-in.
             assert config == {}
             return
         json_config: dict = {
@@ -212,9 +221,7 @@ class Service:
         return f"{self.__class__.__name__}@{hex(id(self))}"
 
     def pprint(self) -> str:
-        """
-        Produce a human-readable string listing all public methods of the service.
-        """
+        """Produce a human-readable string listing all public methods of the service."""
         return f"{self} ::\n" + "\n".join(
             f'  "{key}": {getattr(val, "__self__", "stand-alone")}'
             for (key, val) in self._service_methods.items()
@@ -265,10 +272,11 @@ class Service:
             # Unfortunately, by creating a set, we may destroy the ability to
             # preserve the context enter/exit order, but hopefully it doesn't
             # matter.
-            svc_method.__self__ for _, svc_method in self._service_methods.items()
+            svc_method.__self__
+            for _, svc_method in self._service_methods.items()
             # Note: some methods are actually stand alone functions, so we need
             # to filter them out.
-            if hasattr(svc_method, '__self__') and isinstance(svc_method.__self__, Service)
+            if hasattr(svc_method, "__self__") and isinstance(svc_method.__self__, Service)
         }
 
     def export(self) -> Dict[str, Callable]:
