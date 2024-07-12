@@ -400,3 +400,75 @@ def test_mixed_numerics_type_input_space_types(optimizer_type: Optional[Optimize
     assert isinstance(all_configs, pd.DataFrame)
     assert isinstance(all_scores, pd.DataFrame)
     assert all_contexts is None
+
+
+@pytest.mark.parametrize(("optimizer_type", "kwargs"), [
+    # Default optimizer
+    (None, {}),
+    # Enumerate all supported Optimizers
+    *[(member, {}) for member in OptimizerType],
+    # Optimizer with non-empty kwargs argument
+])
+def test_hierarchical_input_space(optimizer_type: Optional[OptimizerType], kwargs: Optional[dict]) -> None:
+    """
+    Toy problem to test the optimizers with hierarchical types to ensure that the returned types are properly handled
+    """
+    max_iterations = 10
+    if kwargs is None:
+        kwargs = {}
+
+    def objective(point: pd.DataFrame) -> pd.DataFrame:
+        # Two different functions based on the switch
+        if point["switch"].iloc[0] == "a":
+            return pd.DataFrame({"score": point["a"] + point["c"]})
+        else:
+            return pd.DataFrame({"score": 2 * point["b"] + point["c"]})
+
+    # Initialize a hierarchical configuration space
+    input_space = CS.ConfigurationSpace(seed=SEED)
+    input_space.add_hyperparameter(CS.CategoricalHyperparameter(name="switch", choices=["a", "b"]))
+    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="a", lower=0.0, upper=5.0))
+    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="b", lower=0.0, upper=5.0))
+    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="c", lower=0.0, upper=5.0))
+    input_space.add_condition(CS.EqualsCondition(input_space["a"], input_space["switch"], "a"))
+    input_space.add_condition(CS.EqualsCondition(input_space["b"], input_space["switch"], "b"))
+
+    if optimizer_type is None:
+        optimizer = OptimizerFactory.create(
+            parameter_space=input_space,
+            optimization_targets=['score'],
+            optimizer_kwargs=kwargs,
+        )
+    else:
+        optimizer = OptimizerFactory.create(
+            parameter_space=input_space,
+            optimization_targets=['score'],
+            optimizer_type=optimizer_type,
+            optimizer_kwargs=kwargs,
+        )
+
+    for _ in range(max_iterations):
+        suggestion, metadata = optimizer.suggest()
+
+        # Check that suggestion is returning valid column combinations
+        assert isinstance(suggestion, pd.DataFrame)
+        assert {'switch', 'c'}.issubset(suggestion.columns)
+        assert {'a'}.issubset(suggestion.columns) ^ {'b'}.issubset(suggestion.columns)
+
+        # Check suggestion values are the expected dtype
+        assert suggestion["switch"].iloc[0] == "a" or suggestion["switch"].iloc[0] == "b"
+        if suggestion["switch"].iloc[0] == "a":
+            assert isinstance(suggestion['a'].iloc[0], np.floating)
+        else:
+            assert isinstance(suggestion['b'].iloc[0], np.floating)
+        assert isinstance(suggestion['c'].iloc[0], np.floating)
+
+        # Check that suggestion is in the space
+        test_configuration = CS.Configuration(optimizer.parameter_space, suggestion.astype('O').iloc[0].to_dict())
+        # Raises an error if outside of configuration space
+        test_configuration.is_valid_configuration()
+
+        # Test registering the suggested configuration with a score.
+        observation = objective(suggestion)
+        assert isinstance(observation, pd.DataFrame)
+        optimizer.register(configs=suggestion, scores=observation, metadata=metadata)

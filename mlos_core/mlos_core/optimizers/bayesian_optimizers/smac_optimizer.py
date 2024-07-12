@@ -302,7 +302,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         self.optimizer_parameter_space.check_configuration(trial.config)
         assert trial.config.config_space == self.optimizer_parameter_space
         self.trial_info_map[trial.config] = trial
-        config_df = pd.DataFrame([trial.config], columns=list(self.optimizer_parameter_space.keys()))
+        config_df = pd.DataFrame([trial.config], columns=list(self.optimizer_parameter_space.keys())).dropna(axis=1)
         return config_df, None
 
     def register_pending(self, *, configs: pd.DataFrame,

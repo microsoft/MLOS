@@ -96,14 +96,14 @@ class BaseOptimizer(metaclass=ABCMeta):
         if context is not None:
             assert len(configs) == len(context), \
                 "Mismatched number of configs and context."
-        assert configs.shape[1] == len(self.parameter_space.values()), \
+        assert configs.shape[1] <= len(self.parameter_space.values()), \
             "Mismatched configuration shape."
         self._observations.append((configs, scores, context))
         self._has_context = context is not None
 
         if self._space_adapter:
             configs = self._space_adapter.inverse_transform(configs)
-            assert configs.shape[1] == len(self.optimizer_parameter_space.values()), \
+            assert configs.shape[1] <= len(self.optimizer_parameter_space.values()), \
                 "Mismatched configuration shape after inverse transform."
         return self._register(configs=configs, scores=scores, context=context)
 
