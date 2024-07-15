@@ -8,6 +8,7 @@ profile = "black"
 py_version = 311
 src_paths = ["mlos_core", "mlos_bench", "mlos_viz"]
 
+# TODO: Consider switching to pydocstringformatter
 [tool.docformatter]
 recursive = true
 black = true
