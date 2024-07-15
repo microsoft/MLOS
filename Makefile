@@ -503,7 +503,8 @@ mlos_viz/dist/tmp/mlos_viz-latest.tar.gz: PACKAGE_NAME := mlos_viz
 	cd $(MODULE_NAME)/ && conda run -n ${CONDA_ENV_NAME} python3 -m build --sdist
 	# Do some sanity checks on the sdist tarball output.
 	BASE_VERS=`conda run -n ${CONDA_ENV_NAME} python3 $(MODULE_NAME)/$(MODULE_NAME)/version.py | cut -d. -f-2 | egrep -x '[0-9.]+' || echo err-unknown-base-version` \
-		&& ls $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar.gz | grep -F $$BASE_VERS
+		&& TAG_VERS=`git tag -l --sort=-version:refname | egrep -x '^v[0-9.]+' | head -n1 | sed 's/^v//' | cut -d. -f-2 | egrep -x '[0-9.]+' || echo err-unknown-tag-version` \
+		&& ls $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar.gz | grep -F -e $$BASE_VERS -e $$TAG_VERS
 	# Make sure tests were excluded.
 	! ( tar tzf $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar.gz | grep -m1 tests/ )
 	# Make sure the py.typed marker file exists.
@@ -521,7 +522,8 @@ mlos_viz/dist/tmp/mlos_viz-latest.tar.gz: PACKAGE_NAME := mlos_viz
 	cd $(MODULE_NAME)/ && conda run -n ${CONDA_ENV_NAME} python3 -m build --wheel
 	# Do some sanity checks on the wheel output.
 	BASE_VERS=`conda run -n ${CONDA_ENV_NAME} python3 $(MODULE_NAME)/$(MODULE_NAME)/version.py | cut -d. -f-2 | egrep -o '^[0-9.]+' || echo err-unknown-base-version` \
-		&& ls $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl | grep -F $$BASE_VERS
+		&& TAG_VERS=`git tag -l --sort=-version:refname | egrep -x '^v[0-9.]+' | head -n1 | sed 's/^v//' | cut -d. -f-2 | egrep -x '[0-9.]+' || echo err-unknown-tag-version` \
+		&& ls $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl | grep -F -e $$BASE_VERS -e $$TAG_VERS
 	# Check to make sure the tests were excluded from the wheel.
 	! ( unzip -t $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl | grep -m1 tests/ )
 	# Make sure the py.typed marker file exists.
@@ -606,15 +608,27 @@ PUBLISH_DEPS += build/pytest.${CONDA_ENV_NAME}.build-stamp
 PUBLISH_DEPS += mlos_core/dist/tmp/mlos_core-latest.tar.gz
 PUBLISH_DEPS += mlos_bench/dist/tmp/mlos_bench-latest.tar.gz
 PUBLISH_DEPS += mlos_viz/dist/tmp/mlos_viz-latest.tar.gz
+PUBLISH_DEPS += mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl
+PUBLISH_DEPS += mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl
+PUBLISH_DEPS += mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl
 PUBLISH_DEPS += build/dist-test.$(PYTHON_VERSION).build-stamp
 PUBLISH_DEPS += build/check-doc.build-stamp
 PUBLISH_DEPS += build/linklint-doc.build-stamp
 
 build/publish.${CONDA_ENV_NAME}.%.py.build-stamp: $(PUBLISH_DEPS)
+	# Basic sanity checks on files about to be published.
+	# Run "make clean-dist && make dist" if these fail.
+	# Check the tar count.
 	test `ls -1 mlos_core/dist/*.tar.gz | wc -l` -eq 1
 	test `ls -1 mlos_bench/dist/*.tar.gz | wc -l` -eq 1
 	test `ls -1 mlos_viz/dist/*.tar.gz | wc -l` -eq 1
 	test `ls -1 mlos_*/dist/*.tar.gz | wc -l` -eq 3
+	# Check the whl count.
+	test `ls -1 mlos_core/dist/*.whl | wc -l` -eq 1
+	test `ls -1 mlos_bench/dist/*.whl | wc -l` -eq 1
+	test `ls -1 mlos_viz/dist/*.whl | wc -l` -eq 1
+	test `ls -1 mlos_*/dist/*.whl | wc -l` -eq 3
+	# Publish the files to the specified repository.
 	repo_name=`echo "$@" | sed -r -e 's|build/publish\.[^.]+\.||' -e 's|\.py\.build-stamp||'` \
 		&& conda run -n ${CONDA_ENV_NAME} python3 -m twine upload --repository $$repo_name \
 			mlos_*/dist/mlos*-*.tar.gz mlos_*/dist/mlos*-*.whl
