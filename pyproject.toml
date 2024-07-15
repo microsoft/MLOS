@@ -25,7 +25,10 @@ fail-under = 9.9
 # Make sure public methods are documented.
 # See Also: https://github.com/PyCQA/pydocstyle/issues/309#issuecomment-1426642147
 # Also fail on unused imports.
-fail-on = ["missing-function-docstring", "unused-import"]
+fail-on = [
+    "missing-function-docstring",
+    "unused-import",
+]
 
 # Ignore pylint complaints about an upstream dependency.
 ignored-modules = ["ConfigSpace.hyperparameters"]
