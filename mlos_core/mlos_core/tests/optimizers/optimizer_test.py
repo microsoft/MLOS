@@ -376,6 +376,7 @@ def test_mixed_numerics_type_input_space_types(
     """Toy problem to test the optimizers with mixed numeric types to ensure that
     original dtypes are retained.
     """
+    # pylint: disable=too-many-locals
     max_iterations = 10
     if kwargs is None:
         kwargs = {}

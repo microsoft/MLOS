@@ -23,7 +23,7 @@ _LOG = logging.getLogger(__name__)
 class Trial(Storage.Trial):
     """Store the results of a single run of the experiment in SQL database."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         engine: Engine,

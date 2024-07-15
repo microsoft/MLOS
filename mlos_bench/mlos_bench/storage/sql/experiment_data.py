@@ -33,7 +33,7 @@ class ExperimentSqlData(ExperimentData):
     scripts and mlos_bench configuration files.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         engine: Engine,
