@@ -2,11 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tunable parameter definition.
-"""
+"""Tunable parameter definition."""
 import copy
-
 from typing import Dict, Iterable, Union
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
@@ -15,6 +12,7 @@ from mlos_bench.tunables.tunable import Tunable, TunableValue
 class CovariantTunableGroup:
     """
     A collection of tunable parameters.
+
     Changing any of the parameters in the group incurs the same cost of the experiment.
     """
 
@@ -53,9 +51,9 @@ class CovariantTunableGroup:
     @property
     def cost(self) -> int:
         """
-        Get the cost of changing the values in the covariant group.
-        This value is a constant. Use `get_current_cost()` to get
-        the cost given the group update status.
+        Get the cost of changing the values in the covariant group. This value is a
+        constant. Use `get_current_cost()` to get the cost given the group update
+        status.
 
         Returns
         -------
@@ -94,15 +92,17 @@ class CovariantTunableGroup:
             return False
         # TODO: May need to provide logic to relax the equality check on the
         # tunables (e.g. "compatible" vs. "equal").
-        return (self._name == other._name and
-                self._cost == other._cost and
-                self._is_updated == other._is_updated and
-                self._tunables == other._tunables)
+        return (
+            self._name == other._name
+            and self._cost == other._cost
+            and self._is_updated == other._is_updated
+            and self._tunables == other._tunables
+        )
 
     def equals_defaults(self, other: "CovariantTunableGroup") -> bool:
         """
-        Checks to see if the other CovariantTunableGroup is the same, ignoring
-        the current values of the two groups' Tunables.
+        Checks to see if the other CovariantTunableGroup is the same, ignoring the
+        current values of the two groups' Tunables.
 
         Parameters
         ----------
@@ -127,7 +127,8 @@ class CovariantTunableGroup:
 
     def is_defaults(self) -> bool:
         """
-        Checks whether the currently assigned values of all tunables are at their defaults.
+        Checks whether the currently assigned values of all tunables are at their
+        defaults.
 
         Returns
         -------
@@ -136,9 +137,7 @@ class CovariantTunableGroup:
         return all(tunable.is_default() for tunable in self._tunables.values())
 
     def restore_defaults(self) -> None:
-        """
-        Restore all tunable parameters to their default values.
-        """
+        """Restore all tunable parameters to their default values."""
         for tunable in self._tunables.values():
             if tunable.value != tunable.default:
                 self._is_updated = True
@@ -146,8 +145,10 @@ class CovariantTunableGroup:
 
     def reset_is_updated(self) -> None:
         """
-        Clear the update flag. That is, state that running an experiment with the
-        current values of the tunables in this group has no extra cost.
+        Clear the update flag.
+
+        That is, state that running an experiment with the current values of the
+        tunables in this group has no extra cost.
         """
         self._is_updated = False
 
@@ -174,9 +175,7 @@ class CovariantTunableGroup:
         return self._cost if self._is_updated else 0
 
     def get_names(self) -> Iterable[str]:
-        """
-        Get the names of all tunables in the group.
-        """
+        """Get the names of all tunables in the group."""
         return self._tunables.keys()
 
     def get_tunable_values_dict(self) -> Dict[str, TunableValue]:
@@ -191,8 +190,8 @@ class CovariantTunableGroup:
 
     def __repr__(self) -> str:
         """
-        Produce a human-readable version of the CovariantTunableGroup
-        (mostly for logging).
+        Produce a human-readable version of the CovariantTunableGroup (mostly for
+        logging).
 
         Returns
         -------
@@ -203,8 +202,8 @@ class CovariantTunableGroup:
 
     def get_tunable(self, tunable: Union[str, Tunable]) -> Tunable:
         """
-        Access the entire Tunable in a group (not just its value).
-        Throw KeyError if the tunable is not in the group.
+        Access the entire Tunable in a group (not just its value). Throw KeyError if the
+        tunable is not in the group.
 
         Parameters
         ----------
@@ -220,7 +219,8 @@ class CovariantTunableGroup:
         return self._tunables[name]
 
     def get_tunables(self) -> Iterable[Tunable]:
-        """Gets the set of tunables for this CovariantTunableGroup.
+        """
+        Gets the set of tunables for this CovariantTunableGroup.
 
         Returns
         -------
@@ -235,7 +235,13 @@ class CovariantTunableGroup:
     def __getitem__(self, tunable: Union[str, Tunable]) -> TunableValue:
         return self.get_tunable(tunable).value
 
-    def __setitem__(self, tunable: Union[str, Tunable], tunable_value: Union[TunableValue, Tunable]) -> TunableValue:
-        value: TunableValue = tunable_value.value if isinstance(tunable_value, Tunable) else tunable_value
+    def __setitem__(
+        self,
+        tunable: Union[str, Tunable],
+        tunable_value: Union[TunableValue, Tunable],
+    ) -> TunableValue:
+        value: TunableValue = (
+            tunable_value.value if isinstance(tunable_value, Tunable) else tunable_value
+        )
         self._is_updated |= self.get_tunable(tunable).update(value)
         return value

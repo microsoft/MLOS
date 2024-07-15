@@ -2,20 +2,18 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Composite benchmark environment.
-"""
+"""Composite benchmark environment."""
 
 import logging
 from datetime import datetime
-
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Tuple, Type
+
 from typing_extensions import Literal
 
-from mlos_bench.services.base_service import Service
-from mlos_bench.environments.status import Status
 from mlos_bench.environments.base_environment import Environment
+from mlos_bench.environments.status import Status
+from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -23,17 +21,17 @@ _LOG = logging.getLogger(__name__)
 
 
 class CompositeEnv(Environment):
-    """
-    Composite benchmark environment.
-    """
+    """Composite benchmark environment."""
 
-    def __init__(self,
-                 *,
-                 name: str,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 tunables: Optional[TunableGroups] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        *,
+        name: str,
+        config: dict,
+        global_config: Optional[dict] = None,
+        tunables: Optional[TunableGroups] = None,
+        service: Optional[Service] = None,
+    ):
         """
         Create a new environment with a given config.
 
@@ -53,8 +51,13 @@ class CompositeEnv(Environment):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name=name, config=config, global_config=global_config,
-                         tunables=tunables, service=service)
+        super().__init__(
+            name=name,
+            config=config,
+            global_config=global_config,
+            tunables=tunables,
+            service=service,
+        )
 
         # By default, the Environment includes only the tunables explicitly specified
         # in the "tunable_params" section of the config. `CompositeEnv`, however, must
@@ -70,17 +73,27 @@ class CompositeEnv(Environment):
         # each CompositeEnv gets a copy of the original global config and adjusts it with
         # the `const_args` specific to it.
         global_config = (global_config or {}).copy()
-        for (key, val) in self._const_args.items():
+        for key, val in self._const_args.items():
             global_config.setdefault(key, val)
 
         for child_config_file in config.get("include_children", []):
             for env in self._config_loader_service.load_environment_list(
-                    child_config_file, tunables, global_config, self._const_args, self._service):
+                child_config_file,
+                tunables,
+                global_config,
+                self._const_args,
+                self._service,
+            ):
                 self._add_child(env, tunables)
 
         for child_config in config.get("children", []):
             env = self._config_loader_service.build_environment(
-                child_config, tunables, global_config, self._const_args, self._service)
+                child_config,
+                tunables,
+                global_config,
+                self._const_args,
+                self._service,
+            )
             self._add_child(env, tunables)
 
         _LOG.debug("Build composite environment '%s' END: %s", self, self._tunable_params)
@@ -92,9 +105,12 @@ class CompositeEnv(Environment):
         self._child_contexts = [env.__enter__() for env in self._children]
         return super().__enter__()
 
-    def __exit__(self, ex_type: Optional[Type[BaseException]],
-                 ex_val: Optional[BaseException],
-                 ex_tb: Optional[TracebackType]) -> Literal[False]:
+    def __exit__(
+        self,
+        ex_type: Optional[Type[BaseException]],
+        ex_val: Optional[BaseException],
+        ex_tb: Optional[TracebackType],
+    ) -> Literal[False]:
         ex_throw = None
         for env in reversed(self._children):
             try:
@@ -111,9 +127,7 @@ class CompositeEnv(Environment):
 
     @property
     def children(self) -> List[Environment]:
-        """
-        Return the list of child environments.
-        """
+        """Return the list of child environments."""
         return self._children
 
     def pprint(self, indent: int = 4, level: int = 0) -> str:
@@ -132,12 +146,16 @@ class CompositeEnv(Environment):
         pretty : str
             Pretty-printed environment configuration.
         """
-        return super().pprint(indent, level) + '\n' + '\n'.join(
-            child.pprint(indent, level + 1) for child in self._children)
+        return (
+            super().pprint(indent, level)
+            + "\n"
+            + "\n".join(child.pprint(indent, level + 1) for child in self._children)
+        )
 
     def _add_child(self, env: Environment, tunables: TunableGroups) -> None:
         """
         Add a new child environment to the composite environment.
+
         This method is called from the constructor only.
         """
         _LOG.debug("Merge tunables: '%s' <- '%s' :: %s", self, env, env.tunable_params)
@@ -165,14 +183,16 @@ class CompositeEnv(Environment):
         """
         assert self._in_context
         self._is_ready = super().setup(tunables, global_config) and all(
-            env_context.setup(tunables, global_config) for env_context in self._child_contexts)
+            env_context.setup(tunables, global_config) for env_context in self._child_contexts
+        )
         return self._is_ready
 
     def teardown(self) -> None:
         """
-        Tear down the children environments. This method is idempotent,
-        i.e., calling it several times is equivalent to a single call.
-        The environments are being torn down in the reverse order.
+        Tear down the children environments.
+
+        This method is idempotent, i.e., calling it several times is equivalent to a
+        single call. The environments are being torn down in the reverse order.
         """
         assert self._in_context
         for env_context in reversed(self._child_contexts):
@@ -181,9 +201,9 @@ class CompositeEnv(Environment):
 
     def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
         """
-        Submit a new experiment to the environment.
-        Return the result of the *last* child environment if successful,
-        or the status of the last failed environment otherwise.
+        Submit a new experiment to the environment. Return the result of the *last*
+        child environment if successful, or the status of the last failed environment
+        otherwise.
 
         Returns
         -------
@@ -238,5 +258,6 @@ class CompositeEnv(Environment):
 
         final_status = final_status or status
         _LOG.info("Final status: %s :: %s", self, final_status)
-        # Return the status and the timestamp of the last child environment or the first failed child environment.
+        # Return the status and the timestamp of the last child environment or the
+        # first failed child environment.
         return (final_status, timestamp, joint_telemetry)

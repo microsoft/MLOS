@@ -2,11 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Protocol interface for Host/VM provisioning operations.
-"""
+"""Protocol interface for Host/VM provisioning operations."""
 
-from typing import Tuple, Protocol, runtime_checkable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, Tuple, runtime_checkable
 
 if TYPE_CHECKING:
     from mlos_bench.environments.status import Status
@@ -14,9 +12,7 @@ if TYPE_CHECKING:
 
 @runtime_checkable
 class SupportsHostProvisioning(Protocol):
-    """
-    Protocol interface for Host/VM provisioning operations.
-    """
+    """Protocol interface for Host/VM provisioning operations."""
 
     def provision_host(self, params: dict) -> Tuple["Status", dict]:
         """
@@ -46,7 +42,8 @@ class SupportsHostProvisioning(Protocol):
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
         is_setup : bool
-            If True, wait for Host/VM being deployed; otherwise, wait for successful deprovisioning.
+            If True, wait for Host/VM being deployed; otherwise, wait for successful
+            deprovisioning.
 
         Returns
         -------
@@ -74,7 +71,8 @@ class SupportsHostProvisioning(Protocol):
 
     def deallocate_host(self, params: dict) -> Tuple["Status", dict]:
         """
-        Deallocates the Host/VM by shutting it down then releasing the compute resources.
+        Deallocates the Host/VM by shutting it down then releasing the compute
+        resources.
 
         Note: This can cause the VM to arrive on a new host node when its
         restarted, which may have different performance characteristics.

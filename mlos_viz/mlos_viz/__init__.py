@@ -2,8 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-mlos_viz is a framework to help visualizing, explain, and gain insights from results
+"""mlos_viz is a framework to help visualizing, explain, and gain insights from results
 from the mlos_bench framework for benchmarking and optimization automation.
 """
 
@@ -18,12 +17,10 @@ from mlos_viz.util import expand_results_data_args
 
 
 class MlosVizMethod(Enum):
-    """
-    What method to use for visualizing the experiment results.
-    """
+    """What method to use for visualizing the experiment results."""
 
     DABL = "dabl"
-    AUTO = DABL     # use dabl as the current default
+    AUTO = DABL  # use dabl as the current default
 
 
 def ignore_plotter_warnings(plotter_method: MlosVizMethod = MlosVizMethod.AUTO) -> None:
@@ -38,18 +35,22 @@ def ignore_plotter_warnings(plotter_method: MlosVizMethod = MlosVizMethod.AUTO) 
     """
     base.ignore_plotter_warnings()
     if plotter_method == MlosVizMethod.DABL:
-        import mlos_viz.dabl    # pylint: disable=import-outside-toplevel
+        import mlos_viz.dabl  # pylint: disable=import-outside-toplevel
+
         mlos_viz.dabl.ignore_plotter_warnings()
     else:
         raise NotImplementedError(f"Unhandled method: {plotter_method}")
 
 
-def plot(exp_data: Optional[ExperimentData] = None, *,
-         results_df: Optional[pandas.DataFrame] = None,
-         objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
-         plotter_method: MlosVizMethod = MlosVizMethod.AUTO,
-         filter_warnings: bool = True,
-         **kwargs: Any) -> None:
+def plot(
+    exp_data: Optional[ExperimentData] = None,
+    *,
+    results_df: Optional[pandas.DataFrame] = None,
+    objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
+    plotter_method: MlosVizMethod = MlosVizMethod.AUTO,
+    filter_warnings: bool = True,
+    **kwargs: Any,
+) -> None:
     """
     Plots the results of the experiment.
 
@@ -80,7 +81,8 @@ def plot(exp_data: Optional[ExperimentData] = None, *,
     base.plot_top_n_configs(exp_data, results_df=results_df, objectives=objectives, **kwargs)
 
     if MlosVizMethod.DABL:
-        import mlos_viz.dabl    # pylint: disable=import-outside-toplevel
+        import mlos_viz.dabl  # pylint: disable=import-outside-toplevel
+
         mlos_viz.dabl.plot(exp_data, results_df=results_df, objectives=objectives)
     else:
         raise NotImplementedError(f"Unhandled method: {plotter_method}")

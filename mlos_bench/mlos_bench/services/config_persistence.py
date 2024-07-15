@@ -2,22 +2,28 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Helper functions to load, instantiate, and serialize Python objects
-that encapsulate benchmark environments, tunable parameters, and
-service functions.
+"""Helper functions to load, instantiate, and serialize Python objects that encapsulate
+benchmark environments, tunable parameters, and service functions.
 """
 
+import json  # For logging only
+import logging
 import os
 import sys
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
-import json    # For logging only
-import logging
-
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, TYPE_CHECKING
-
-import json5    # To read configs with comments and other JSON5 syntax features
-from jsonschema import ValidationError, SchemaError
+import json5  # To read configs with comments and other JSON5 syntax features
+from jsonschema import SchemaError, ValidationError
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
@@ -26,7 +32,12 @@ from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import instantiate_from_config, merge_parameters, path_join, preprocess_dynamic_configs
+from mlos_bench.util import (
+    instantiate_from_config,
+    merge_parameters,
+    path_join,
+    preprocess_dynamic_configs,
+)
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -34,25 +45,27 @@ else:
     from importlib.resources import files
 
 if TYPE_CHECKING:
-    from mlos_bench.storage.base_storage import Storage
     from mlos_bench.schedulers.base_scheduler import Scheduler
+    from mlos_bench.storage.base_storage import Storage
 
 
 _LOG = logging.getLogger(__name__)
 
 
 class ConfigPersistenceService(Service, SupportsConfigLoading):
-    """
-    Collection of methods to deserialize the Environment, Service, and TunableGroups objects.
+    """Collection of methods to deserialize the Environment, Service, and TunableGroups
+    objects.
     """
 
     BUILTIN_CONFIG_PATH = str(files("mlos_bench.config").joinpath("")).replace("\\", "/")
 
-    def __init__(self,
-                 config: Optional[Dict[str, Any]] = None,
-                 global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None,
-                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional[Service] = None,
+        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+    ):
         """
         Create a new instance of config persistence service.
 
@@ -69,17 +82,22 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             New methods to register with the service.
         """
         super().__init__(
-            config, global_config, parent,
-            self.merge_methods(methods, [
-                self.resolve_path,
-                self.load_config,
-                self.prepare_class_load,
-                self.build_service,
-                self.build_environment,
-                self.load_services,
-                self.load_environment,
-                self.load_environment_list,
-            ])
+            config,
+            global_config,
+            parent,
+            self.merge_methods(
+                methods,
+                [
+                    self.resolve_path,
+                    self.load_config,
+                    self.prepare_class_load,
+                    self.build_service,
+                    self.build_environment,
+                    self.load_services,
+                    self.load_environment,
+                    self.load_environment_list,
+                ],
+            ),
         )
         self._config_loader_service = self
 
@@ -107,11 +125,10 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         return list(self._config_path)  # make a copy to avoid modifications
 
-    def resolve_path(self, file_path: str,
-                     extra_paths: Optional[Iterable[str]] = None) -> str:
+    def resolve_path(self, file_path: str, extra_paths: Optional[Iterable[str]] = None) -> str:
         """
-        Prepend the suitable `_config_path` to `path` if the latter is not absolute.
-        If `_config_path` is `None` or `path` is absolute, return `path` as is.
+        Prepend the suitable `_config_path` to `path` if the latter is not absolute. If
+        `_config_path` is `None` or `path` is absolute, return `path` as is.
 
         Parameters
         ----------
@@ -138,14 +155,14 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         _LOG.debug("Path not resolved: %s", file_path)
         return file_path
 
-    def load_config(self,
-                    json_file_name: str,
-                    schema_type: Optional[ConfigSchema],
-                    ) -> Dict[str, Any]:
+    def load_config(
+        self,
+        json_file_name: str,
+        schema_type: Optional[ConfigSchema],
+    ) -> Dict[str, Any]:
         """
-        Load JSON config file. Search for a file relative to `_config_path`
-        if the input path is not absolute.
-        This method is exported to be used as a service.
+        Load JSON config file. Search for a file relative to `_config_path` if the input
+        path is not absolute. This method is exported to be used as a service.
 
         Parameters
         ----------
@@ -161,16 +178,22 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         json_file_name = self.resolve_path(json_file_name)
         _LOG.info("Load config: %s", json_file_name)
-        with open(json_file_name, mode='r', encoding='utf-8') as fh_json:
+        with open(json_file_name, mode="r", encoding="utf-8") as fh_json:
             config = json5.load(fh_json)
         if schema_type is not None:
             try:
                 schema_type.validate(config)
             except (ValidationError, SchemaError) as ex:
-                _LOG.error("Failed to validate config %s against schema type %s at %s",
-                           json_file_name, schema_type.name, schema_type.value)
-                raise ValueError(f"Failed to validate config {json_file_name} against " +
-                                 f"schema type {schema_type.name} at {schema_type.value}") from ex
+                _LOG.error(
+                    "Failed to validate config %s against schema type %s at %s",
+                    json_file_name,
+                    schema_type.name,
+                    schema_type.value,
+                )
+                raise ValueError(
+                    f"Failed to validate config {json_file_name} against "
+                    f"schema type {schema_type.name} at {schema_type.value}"
+                ) from ex
             if isinstance(config, dict) and config.get("$schema"):
                 # Remove $schema attributes from the config after we've validated
                 # them to avoid passing them on to other objects
@@ -181,15 +204,17 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                 del config["$schema"]
         else:
             _LOG.warning("Config %s is not validated against a schema.", json_file_name)
-        return config   # type: ignore[no-any-return]
+        return config  # type: ignore[no-any-return]
 
-    def prepare_class_load(self, config: Dict[str, Any],
-                           global_config: Optional[Dict[str, Any]] = None,
-                           parent_args: Optional[Dict[str, TunableValue]] = None) -> Tuple[str, Dict[str, Any]]:
+    def prepare_class_load(
+        self,
+        config: Dict[str, Any],
+        global_config: Optional[Dict[str, Any]] = None,
+        parent_args: Optional[Dict[str, TunableValue]] = None,
+    ) -> Tuple[str, Dict[str, Any]]:
         """
-        Extract the class instantiation parameters from the configuration.
-        Mix-in the global parameters and resolve the local file system paths,
-        where it is required.
+        Extract the class instantiation parameters from the configuration. Mix-in the
+        global parameters and resolve the local file system paths, where it is required.
 
         Parameters
         ----------
@@ -228,19 +253,24 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                 raise ValueError(f"Parameter {key} must be a string or a list")
 
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Instantiating: %s with config:\n%s",
-                       class_name, json.dumps(class_config, indent=2))
+            _LOG.debug(
+                "Instantiating: %s with config:\n%s",
+                class_name,
+                json.dumps(class_config, indent=2),
+            )
 
         return (class_name, class_config)
 
-    def build_optimizer(self, *,
-                        tunables: TunableGroups,
-                        service: Service,
-                        config: Dict[str, Any],
-                        global_config: Optional[Dict[str, Any]] = None) -> Optimizer:
+    def build_optimizer(
+        self,
+        *,
+        tunables: TunableGroups,
+        service: Service,
+        config: Dict[str, Any],
+        global_config: Optional[Dict[str, Any]] = None,
+    ) -> Optimizer:
         """
-        Instantiation of mlos_bench Optimizer
-        that depend on Service and TunableGroups.
+        Instantiation of mlos_bench Optimizer that depend on Service and TunableGroups.
 
         A class *MUST* have a constructor that takes four named arguments:
         (tunables, config, global_config, service)
@@ -266,18 +296,24 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         if tunables_path is not None:
             tunables = self._load_tunables(tunables_path, tunables)
         (class_name, class_config) = self.prepare_class_load(config, global_config)
-        inst = instantiate_from_config(Optimizer, class_name,   # type: ignore[type-abstract]
-                                       tunables=tunables,
-                                       config=class_config,
-                                       global_config=global_config,
-                                       service=service)
+        inst = instantiate_from_config(
+            Optimizer,  # type: ignore[type-abstract]
+            class_name,
+            tunables=tunables,
+            config=class_config,
+            global_config=global_config,
+            service=service,
+        )
         _LOG.info("Created: Optimizer %s", inst)
         return inst
 
-    def build_storage(self, *,
-                      service: Service,
-                      config: Dict[str, Any],
-                      global_config: Optional[Dict[str, Any]] = None) -> "Storage":
+    def build_storage(
+        self,
+        *,
+        service: Service,
+        config: Dict[str, Any],
+        global_config: Optional[Dict[str, Any]] = None,
+    ) -> "Storage":
         """
         Instantiation of mlos_bench Storage objects.
 
@@ -296,21 +332,29 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             A new instance of the Storage class.
         """
         (class_name, class_config) = self.prepare_class_load(config, global_config)
-        from mlos_bench.storage.base_storage import Storage     # pylint: disable=import-outside-toplevel
-        inst = instantiate_from_config(Storage, class_name,     # type: ignore[type-abstract]
-                                       config=class_config,
-                                       global_config=global_config,
-                                       service=service)
+        # pylint: disable=import-outside-toplevel
+        from mlos_bench.storage.base_storage import Storage
+
+        inst = instantiate_from_config(
+            Storage,  # type: ignore[type-abstract]
+            class_name,
+            config=class_config,
+            global_config=global_config,
+            service=service,
+        )
         _LOG.info("Created: Storage %s", inst)
         return inst
 
-    def build_scheduler(self, *,
-                        config: Dict[str, Any],
-                        global_config: Dict[str, Any],
-                        environment: Environment,
-                        optimizer: Optimizer,
-                        storage: "Storage",
-                        root_env_config: str) -> "Scheduler":
+    def build_scheduler(
+        self,
+        *,
+        config: Dict[str, Any],
+        global_config: Dict[str, Any],
+        environment: Environment,
+        optimizer: Optimizer,
+        storage: "Storage",
+        root_env_config: str,
+    ) -> "Scheduler":
         """
         Instantiation of mlos_bench Scheduler.
 
@@ -335,23 +379,30 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             A new instance of the Scheduler.
         """
         (class_name, class_config) = self.prepare_class_load(config, global_config)
-        from mlos_bench.schedulers.base_scheduler import Scheduler  # pylint: disable=import-outside-toplevel
-        inst = instantiate_from_config(Scheduler, class_name,  # type: ignore[type-abstract]
-                                       config=class_config,
-                                       global_config=global_config,
-                                       environment=environment,
-                                       optimizer=optimizer,
-                                       storage=storage,
-                                       root_env_config=root_env_config)
+        # pylint: disable=import-outside-toplevel
+        from mlos_bench.schedulers.base_scheduler import Scheduler
+
+        inst = instantiate_from_config(
+            Scheduler,  # type: ignore[type-abstract]
+            class_name,
+            config=class_config,
+            global_config=global_config,
+            environment=environment,
+            optimizer=optimizer,
+            storage=storage,
+            root_env_config=root_env_config,
+        )
         _LOG.info("Created: Scheduler %s", inst)
         return inst
 
-    def build_environment(self,     # pylint: disable=too-many-arguments
-                          config: Dict[str, Any],
-                          tunables: TunableGroups,
-                          global_config: Optional[Dict[str, Any]] = None,
-                          parent_args: Optional[Dict[str, TunableValue]] = None,
-                          service: Optional[Service] = None) -> Environment:
+    def build_environment(
+        self,  # pylint: disable=too-many-arguments
+        config: Dict[str, Any],
+        tunables: TunableGroups,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent_args: Optional[Dict[str, TunableValue]] = None,
+        service: Optional[Service] = None,
+    ) -> Environment:
         """
         Factory method for a new environment with a given config.
 
@@ -391,16 +442,24 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             tunables = self._load_tunables(env_tunables_path, tunables)
 
         _LOG.debug("Creating env: %s :: %s", env_name, env_class)
-        env = Environment.new(env_name=env_name, class_name=env_class,
-                              config=env_config, global_config=global_config,
-                              tunables=tunables, service=service)
+        env = Environment.new(
+            env_name=env_name,
+            class_name=env_class,
+            config=env_config,
+            global_config=global_config,
+            tunables=tunables,
+            service=service,
+        )
 
         _LOG.info("Created env: %s :: %s", env_name, env)
         return env
 
-    def _build_standalone_service(self, config: Dict[str, Any],
-                                  global_config: Optional[Dict[str, Any]] = None,
-                                  parent: Optional[Service] = None) -> Service:
+    def _build_standalone_service(
+        self,
+        config: Dict[str, Any],
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional[Service] = None,
+    ) -> Service:
         """
         Factory method for a new service with a given config.
 
@@ -425,9 +484,12 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         _LOG.info("Created service: %s", service)
         return service
 
-    def _build_composite_service(self, config_list: Iterable[Dict[str, Any]],
-                                 global_config: Optional[Dict[str, Any]] = None,
-                                 parent: Optional[Service] = None) -> Service:
+    def _build_composite_service(
+        self,
+        config_list: Iterable[Dict[str, Any]],
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional[Service] = None,
+    ) -> Service:
         """
         Factory method for a new service with a given config.
 
@@ -453,18 +515,21 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             service.register(parent.export())
 
         for config in config_list:
-            service.register(self._build_standalone_service(
-                config, global_config, service).export())
+            service.register(
+                self._build_standalone_service(config, global_config, service).export()
+            )
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Created mix-in service: %s", service)
 
         return service
 
-    def build_service(self,
-                      config: Dict[str, Any],
-                      global_config: Optional[Dict[str, Any]] = None,
-                      parent: Optional[Service] = None) -> Service:
+    def build_service(
+        self,
+        config: Dict[str, Any],
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional[Service] = None,
+    ) -> Service:
         """
         Factory method for a new service with a given config.
 
@@ -486,8 +551,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             services from the list plus the parent mix-in.
         """
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Build service from config:\n%s",
-                       json.dumps(config, indent=2))
+            _LOG.debug("Build service from config:\n%s", json.dumps(config, indent=2))
 
         assert isinstance(config, dict)
         config_list: List[Dict[str, Any]]
@@ -502,12 +566,14 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         return self._build_composite_service(config_list, global_config, parent)
 
-    def load_environment(self,  # pylint: disable=too-many-arguments
-                         json_file_name: str,
-                         tunables: TunableGroups,
-                         global_config: Optional[Dict[str, Any]] = None,
-                         parent_args: Optional[Dict[str, TunableValue]] = None,
-                         service: Optional[Service] = None) -> Environment:
+    def load_environment(
+        self,  # pylint: disable=too-many-arguments
+        json_file_name: str,
+        tunables: TunableGroups,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent_args: Optional[Dict[str, TunableValue]] = None,
+        service: Optional[Service] = None,
+    ) -> Environment:
         """
         Load and build new environment from the config file.
 
@@ -534,12 +600,14 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         assert isinstance(config, dict)
         return self.build_environment(config, tunables, global_config, parent_args, service)
 
-    def load_environment_list(self,     # pylint: disable=too-many-arguments
-                              json_file_name: str,
-                              tunables: TunableGroups,
-                              global_config: Optional[Dict[str, Any]] = None,
-                              parent_args: Optional[Dict[str, TunableValue]] = None,
-                              service: Optional[Service] = None) -> List[Environment]:
+    def load_environment_list(
+        self,  # pylint: disable=too-many-arguments
+        json_file_name: str,
+        tunables: TunableGroups,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent_args: Optional[Dict[str, TunableValue]] = None,
+        service: Optional[Service] = None,
+    ) -> List[Environment]:
         """
         Load and build a list of environments from the config file.
 
@@ -564,16 +632,17 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             A list of new benchmarking environments.
         """
         config = self.load_config(json_file_name, ConfigSchema.ENVIRONMENT)
-        return [
-            self.build_environment(config, tunables, global_config, parent_args, service)
-        ]
+        return [self.build_environment(config, tunables, global_config, parent_args, service)]
 
-    def load_services(self, json_file_names: Iterable[str],
-                      global_config: Optional[Dict[str, Any]] = None,
-                      parent: Optional[Service] = None) -> Service:
+    def load_services(
+        self,
+        json_file_names: Iterable[str],
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional[Service] = None,
+    ) -> Service:
         """
-        Read the configuration files and bundle all service methods
-        from those configs into a single Service object.
+        Read the configuration files and bundle all service methods from those configs
+        into a single Service object.
 
         Parameters
         ----------
@@ -589,16 +658,18 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         service : Service
             A collection of service methods.
         """
-        _LOG.info("Load services: %s parent: %s",
-                  json_file_names, parent.__class__.__name__)
+        _LOG.info("Load services: %s parent: %s", json_file_names, parent.__class__.__name__)
         service = Service({}, global_config, parent)
         for fname in json_file_names:
             config = self.load_config(fname, ConfigSchema.SERVICE)
             service.register(self.build_service(config, global_config, service).export())
         return service
 
-    def _load_tunables(self, json_file_names: Iterable[str],
-                       parent: TunableGroups) -> TunableGroups:
+    def _load_tunables(
+        self,
+        json_file_names: Iterable[str],
+        parent: TunableGroups,
+    ) -> TunableGroups:
         """
         Load a collection of tunable parameters from JSON files into the parent
         TunableGroup.

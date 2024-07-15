@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Test the selection of tunables / tunable groups for the environment.
-"""
+"""Test the selection of tunables / tunable groups for the environment."""
 
 from mlos_bench.environments.mock_env import MockEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
@@ -12,13 +10,11 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def test_one_group(tunable_groups: TunableGroups) -> None:
-    """
-    Make sure only one tunable group is available to the environment.
-    """
+    """Make sure only one tunable group is available to the environment."""
     env = MockEnv(
         name="Test Env",
         config={"tunable_params": ["provision"]},
-        tunables=tunable_groups
+        tunables=tunable_groups,
     )
     assert env.tunable_params.get_param_values() == {
         "vmSize": "Standard_B4ms",
@@ -26,13 +22,11 @@ def test_one_group(tunable_groups: TunableGroups) -> None:
 
 
 def test_two_groups(tunable_groups: TunableGroups) -> None:
-    """
-    Make sure only the selected tunable groups are available to the environment.
-    """
+    """Make sure only the selected tunable groups are available to the environment."""
     env = MockEnv(
         name="Test Env",
         config={"tunable_params": ["provision", "kernel"]},
-        tunables=tunable_groups
+        tunables=tunable_groups,
     )
     assert env.tunable_params.get_param_values() == {
         "vmSize": "Standard_B4ms",
@@ -42,9 +36,8 @@ def test_two_groups(tunable_groups: TunableGroups) -> None:
 
 
 def test_two_groups_setup(tunable_groups: TunableGroups) -> None:
-    """
-    Make sure only the selected tunable groups are available to the environment,
-    the set is not changed after calling the `.setup()` method.
+    """Make sure only the selected tunable groups are available to the environment, the
+    set is not changed after calling the `.setup()` method.
     """
     env = MockEnv(
         name="Test Env",
@@ -55,7 +48,7 @@ def test_two_groups_setup(tunable_groups: TunableGroups) -> None:
                 "const_param2": "foo",
             },
         },
-        tunables=tunable_groups
+        tunables=tunable_groups,
     )
     expected_params = {
         "vmSize": "Standard_B4ms",
@@ -77,34 +70,22 @@ def test_two_groups_setup(tunable_groups: TunableGroups) -> None:
 
 
 def test_zero_groups_implicit(tunable_groups: TunableGroups) -> None:
-    """
-    Make sure that no tunable groups are available to the environment by default.
-    """
-    env = MockEnv(
-        name="Test Env",
-        config={},
-        tunables=tunable_groups
-    )
+    """Make sure that no tunable groups are available to the environment by default."""
+    env = MockEnv(name="Test Env", config={}, tunables=tunable_groups)
     assert env.tunable_params.get_param_values() == {}
 
 
 def test_zero_groups_explicit(tunable_groups: TunableGroups) -> None:
+    """Make sure that no tunable groups are available to the environment when explicitly
+    specifying an empty list of tunable_params.
     """
-    Make sure that no tunable groups are available to the environment
-    when explicitly specifying an empty list of tunable_params.
-    """
-    env = MockEnv(
-        name="Test Env",
-        config={"tunable_params": []},
-        tunables=tunable_groups
-    )
+    env = MockEnv(name="Test Env", config={"tunable_params": []}, tunables=tunable_groups)
     assert env.tunable_params.get_param_values() == {}
 
 
 def test_zero_groups_implicit_setup(tunable_groups: TunableGroups) -> None:
-    """
-    Make sure that no tunable groups are available to the environment by default
-    and it does not change after the setup.
+    """Make sure that no tunable groups are available to the environment by default and
+    it does not change after the setup.
     """
     env = MockEnv(
         name="Test Env",
@@ -114,7 +95,7 @@ def test_zero_groups_implicit_setup(tunable_groups: TunableGroups) -> None:
                 "const_param2": "foo",
             },
         },
-        tunables=tunable_groups
+        tunables=tunable_groups,
     )
     assert env.tunable_params.get_param_values() == {}
 
@@ -130,16 +111,13 @@ def test_zero_groups_implicit_setup(tunable_groups: TunableGroups) -> None:
 
 
 def test_loader_level_include() -> None:
-    """
-    Make sure only the selected tunable groups are available to the environment,
-    the set is not changed after calling the `.setup()` method.
+    """Make sure only the selected tunable groups are available to the environment, the
+    set is not changed after calling the `.setup()` method.
     """
     env_json = {
         "class": "mlos_bench.environments.mock_env.MockEnv",
         "name": "Test Env",
-        "include_tunables": [
-            "environments/os/linux/boot/linux-boot-tunables.jsonc"
-        ],
+        "include_tunables": ["environments/os/linux/boot/linux-boot-tunables.jsonc"],
         "config": {
             "tunable_params": ["linux-kernel-boot"],
             "const_args": {
@@ -148,12 +126,14 @@ def test_loader_level_include() -> None:
             },
         },
     }
-    loader = ConfigPersistenceService({
-        "config_path": [
-            "mlos_bench/config",
-            "mlos_bench/examples",
-        ]
-    })
+    loader = ConfigPersistenceService(
+        {
+            "config_path": [
+                "mlos_bench/config",
+                "mlos_bench/examples",
+            ]
+        }
+    )
     env = loader.build_environment(config=env_json, tunables=TunableGroups())
     expected_params = {
         "align_va_addr": "on",

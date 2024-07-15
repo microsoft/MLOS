@@ -2,19 +2,16 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A collection Service functions for managing VMs on Azure.
-"""
+"""A collection Service functions for managing VMs on Azure."""
 
 import logging
 from base64 import b64decode
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from pytz import UTC
-
 import azure.identity as azure_id
 from azure.keyvault.secrets import SecretClient
+from pytz import UTC
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.authenticator_type import SupportsAuth
@@ -24,17 +21,17 @@ _LOG = logging.getLogger(__name__)
 
 
 class AzureAuthService(Service, SupportsAuth):
-    """
-    Helper methods to get access to Azure services.
-    """
+    """Helper methods to get access to Azure services."""
 
-    _REQ_INTERVAL = 300   # = 5 min
+    _REQ_INTERVAL = 300  # = 5 min
 
-    def __init__(self,
-                 config: Optional[Dict[str, Any]] = None,
-                 global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None,
-                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional[Service] = None,
+        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+    ):
         """
         Create a new instance of Azure authentication services proxy.
 
@@ -51,11 +48,16 @@ class AzureAuthService(Service, SupportsAuth):
             New methods to register with the service.
         """
         super().__init__(
-            config, global_config, parent,
-            self.merge_methods(methods, [
-                self.get_access_token,
-                self.get_auth_headers,
-            ])
+            config,
+            global_config,
+            parent,
+            self.merge_methods(
+                methods,
+                [
+                    self.get_access_token,
+                    self.get_auth_headers,
+                ],
+            ),
         )
 
         # This parameter can come from command line as strings, so conversion is needed.
@@ -71,12 +73,13 @@ class AzureAuthService(Service, SupportsAuth):
         # Verify info required for SP auth early
         if "spClientId" in self.config:
             check_required_params(
-                self.config, {
+                self.config,
+                {
                     "spClientId",
                     "keyVaultName",
                     "certName",
                     "tenant",
-                }
+                },
             )
 
     def _init_sp(self) -> None:
@@ -105,12 +108,14 @@ class AzureAuthService(Service, SupportsAuth):
         cert_bytes = b64decode(secret.value)
 
         # Reauthenticate as the service principal.
-        self._cred = azure_id.CertificateCredential(tenant_id=tenant_id, client_id=sp_client_id, certificate_data=cert_bytes)
+        self._cred = azure_id.CertificateCredential(
+            tenant_id=tenant_id,
+            client_id=sp_client_id,
+            certificate_data=cert_bytes,
+        )
 
     def get_access_token(self) -> str:
-        """
-        Get the access token from Azure CLI, if expired.
-        """
+        """Get the access token from Azure CLI, if expired."""
         # Ensure we are logged as the Service Principal, if provided
         if "spClientId" in self.config:
             self._init_sp()
@@ -126,7 +131,5 @@ class AzureAuthService(Service, SupportsAuth):
         return self._access_token
 
     def get_auth_headers(self) -> dict:
-        """
-        Get the authorization part of HTTP headers for REST API calls.
-        """
+        """Get the authorization part of HTTP headers for REST API calls."""
         return {"Authorization": "Bearer " + self.get_access_token()}

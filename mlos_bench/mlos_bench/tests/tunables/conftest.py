@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Test fixtures for individual Tunable objects.
-"""
+"""Test fixtures for individual Tunable objects."""
 
 import pytest
 
@@ -25,12 +23,15 @@ def tunable_categorical() -> Tunable:
     tunable : Tunable
         An instance of a categorical Tunable.
     """
-    return Tunable("vmSize", {
-        "description": "Azure VM size",
-        "type": "categorical",
-        "default": "Standard_B4ms",
-        "values": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"]
-    })
+    return Tunable(
+        "vmSize",
+        {
+            "description": "Azure VM size",
+            "type": "categorical",
+            "default": "Standard_B4ms",
+            "values": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"],
+        },
+    )
 
 
 @pytest.fixture
@@ -43,13 +44,16 @@ def tunable_int() -> Tunable:
     tunable : Tunable
         An instance of an integer Tunable.
     """
-    return Tunable("kernel_sched_migration_cost_ns", {
-        "description": "Cost of migrating the thread to another core",
-        "type": "int",
-        "default": 40000,
-        "range": [0, 500000],
-        "special": [-1]  # Special value outside of the range
-    })
+    return Tunable(
+        "kernel_sched_migration_cost_ns",
+        {
+            "description": "Cost of migrating the thread to another core",
+            "type": "int",
+            "default": 40000,
+            "range": [0, 500000],
+            "special": [-1],  # Special value outside of the range
+        },
+    )
 
 
 @pytest.fixture
@@ -62,9 +66,12 @@ def tunable_float() -> Tunable:
     tunable : Tunable
         An instance of a float Tunable.
     """
-    return Tunable("chaos_monkey_prob", {
-        "description": "Probability of spontaneous VM shutdown",
-        "type": "float",
-        "default": 0.01,
-        "range": [0, 1]
-    })
+    return Tunable(
+        "chaos_monkey_prob",
+        {
+            "description": "Probability of spontaneous VM shutdown",
+            "type": "float",
+            "default": 0.01,
+            "range": [0, 1],
+        },
+    )

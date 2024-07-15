@@ -2,18 +2,17 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for checking the indexing rules for tunable groups.
-"""
+"""Tests for checking the indexing rules for tunable groups."""
 
 from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
-def test_tunable_group_indexing(tunable_groups: TunableGroups, tunable_categorical: Tunable) -> None:
-    """
-    Check that various types of indexing work for the tunable group.
-    """
+def test_tunable_group_indexing(
+    tunable_groups: TunableGroups,
+    tunable_categorical: Tunable,
+) -> None:
+    """Check that various types of indexing work for the tunable group."""
     # Check that the "in" operator works.
     assert tunable_categorical in tunable_groups
     assert tunable_categorical.name in tunable_groups

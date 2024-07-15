@@ -20,8 +20,9 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 _LOG = logging.getLogger(__name__)
 
 
-def _main(argv: Optional[List[str]] = None
-          ) -> Tuple[Optional[Dict[str, float]], Optional[TunableGroups]]:
+def _main(
+    argv: Optional[List[str]] = None,
+) -> Tuple[Optional[Dict[str, float]], Optional[TunableGroups]]:
 
     launcher = Launcher("mlos_bench", "Systems autotuning and benchmarking tool", argv=argv)
 

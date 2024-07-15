@@ -2,25 +2,23 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-EventLoopContext class definition.
-"""
-
-from asyncio import AbstractEventLoop
-from concurrent.futures import Future
-from typing import Any, Coroutine, Optional, TypeVar
-from threading import Lock as ThreadLock, Thread
+"""EventLoopContext class definition."""
 
 import asyncio
 import logging
 import sys
+from asyncio import AbstractEventLoop
+from concurrent.futures import Future
+from threading import Lock as ThreadLock
+from threading import Thread
+from typing import Any, Coroutine, Optional, TypeVar
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
 else:
     from typing_extensions import TypeAlias
 
-CoroReturnType = TypeVar('CoroReturnType')  # pylint: disable=invalid-name
+CoroReturnType = TypeVar("CoroReturnType")  # pylint: disable=invalid-name
 if sys.version_info >= (3, 9):
     FutureReturnType: TypeAlias = Future[CoroReturnType]
 else:
@@ -31,15 +29,15 @@ _LOG = logging.getLogger(__name__)
 
 class EventLoopContext:
     """
-    EventLoopContext encapsulates a background thread for asyncio event
-    loop processing as an aid for context managers.
+    EventLoopContext encapsulates a background thread for asyncio event loop processing
+    as an aid for context managers.
 
-    There is generally only expected to be one of these, either as a base
-    class instance if it's specific to that functionality or for the full
-    mlos_bench process to support parallel trial runners, for instance.
+    There is generally only expected to be one of these, either as a base class instance
+    if it's specific to that functionality or for the full mlos_bench process to support
+    parallel trial runners, for instance.
 
-    It's enter() and exit() routines are expected to be called from the
-    caller's context manager routines (e.g., __enter__ and __exit__).
+    It's enter() and exit() routines are expected to be called from the caller's context
+    manager routines (e.g., __enter__ and __exit__).
     """
 
     def __init__(self) -> None:
@@ -49,17 +47,13 @@ class EventLoopContext:
         self._event_loop_thread_refcnt: int = 0
 
     def _run_event_loop(self) -> None:
-        """
-        Runs the asyncio event loop in a background thread.
-        """
+        """Runs the asyncio event loop in a background thread."""
         assert self._event_loop is not None
         asyncio.set_event_loop(self._event_loop)
         self._event_loop.run_forever()
 
     def enter(self) -> None:
-        """
-        Manages starting the background thread for event loop processing.
-        """
+        """Manages starting the background thread for event loop processing."""
         # Start the background thread if it's not already running.
         with self._event_loop_thread_lock:
             if not self._event_loop_thread:
@@ -74,9 +68,7 @@ class EventLoopContext:
             self._event_loop_thread_refcnt += 1
 
     def exit(self) -> None:
-        """
-        Manages cleaning up the background thread for event loop processing.
-        """
+        """Manages cleaning up the background thread for event loop processing."""
         with self._event_loop_thread_lock:
             self._event_loop_thread_refcnt -= 1
             assert self._event_loop_thread_refcnt >= 0
@@ -92,8 +84,8 @@ class EventLoopContext:
 
     def run_coroutine(self, coro: Coroutine[Any, Any, CoroReturnType]) -> FutureReturnType:
         """
-        Runs the given coroutine in the background event loop thread and
-        returns a Future that can be used to wait for the result.
+        Runs the given coroutine in the background event loop thread and returns a
+        Future that can be used to wait for the result.
 
         Parameters
         ----------

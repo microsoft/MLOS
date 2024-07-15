@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Fixtures for the SSH service tests.
-"""
+"""Fixtures for the SSH service tests."""
 
 import mlos_bench.tests.services.remote.ssh.fixtures as ssh_fixtures
 
