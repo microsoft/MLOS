@@ -16,7 +16,7 @@ style = "numpy"
 pre-summary-newline = true
 close-quotes-on-newline = true
 
-# TODO: move pylintrc and some setup.cfg configs here
+# TODO: move some other setup.cfg configs here
 
 [tool.pylint.main]
 # Specify a score threshold to be exceeded before program exits with error.
