@@ -345,7 +345,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         _LOG.info("Created: Storage %s", inst)
         return inst
 
-    def build_scheduler(
+    def build_scheduler(  # pylint: disable=too-many-arguments
         self,
         *,
         config: Dict[str, Any],
