@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Base scriptable benchmark environment.
-"""
+"""Base scriptable benchmark environment."""
 
 import abc
 import logging
@@ -15,26 +13,25 @@ from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
-
 from mlos_bench.util import try_parse_val
 
 _LOG = logging.getLogger(__name__)
 
 
 class ScriptEnv(Environment, metaclass=abc.ABCMeta):
-    """
-    Base Environment that runs scripts for setup/run/teardown.
-    """
+    """Base Environment that runs scripts for setup/run/teardown."""
 
     _RE_INVALID = re.compile(r"[^a-zA-Z0-9_]")
 
-    def __init__(self,
-                 *,
-                 name: str,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 tunables: Optional[TunableGroups] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        *,
+        name: str,
+        config: dict,
+        global_config: Optional[dict] = None,
+        tunables: Optional[TunableGroups] = None,
+        service: Optional[Service] = None,
+    ):
         """
         Create a new environment for script execution.
 
@@ -64,19 +61,29 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name=name, config=config, global_config=global_config,
-                         tunables=tunables, service=service)
+        super().__init__(
+            name=name,
+            config=config,
+            global_config=global_config,
+            tunables=tunables,
+            service=service,
+        )
 
         self._script_setup = self.config.get("setup")
         self._script_run = self.config.get("run")
         self._script_teardown = self.config.get("teardown")
 
         self._shell_env_params: Iterable[str] = self.config.get("shell_env_params", [])
-        self._shell_env_params_rename: Dict[str, str] = self.config.get("shell_env_params_rename", {})
+        self._shell_env_params_rename: Dict[str, str] = self.config.get(
+            "shell_env_params_rename", {}
+        )
 
         results_stdout_pattern = self.config.get("results_stdout_pattern")
-        self._results_stdout_pattern: Optional[re.Pattern[str]] = \
-            re.compile(results_stdout_pattern, flags=re.MULTILINE) if results_stdout_pattern else None
+        self._results_stdout_pattern: Optional[re.Pattern[str]] = (
+            re.compile(results_stdout_pattern, flags=re.MULTILINE)
+            if results_stdout_pattern
+            else None
+        )
 
     def _get_env_params(self, restrict: bool = True) -> Dict[str, str]:
         """
@@ -117,4 +124,6 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
         if not self._results_stdout_pattern:
             return {}
         _LOG.debug("Extract regex: '%s' from: '%s'", self._results_stdout_pattern, stdout)
-        return {key: try_parse_val(val) for (key, val) in self._results_stdout_pattern.findall(stdout)}
+        return {
+            key: try_parse_val(val) for (key, val) in self._results_stdout_pattern.findall(stdout)
+        }

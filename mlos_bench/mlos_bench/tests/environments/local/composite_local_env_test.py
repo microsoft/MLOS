@@ -2,20 +2,18 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for the composition of several LocalEnv benchmark environments.
-"""
+"""Unit tests for the composition of several LocalEnv benchmark environments."""
 import sys
 from datetime import datetime, timedelta, tzinfo
 from typing import Optional
 
-from pytz import UTC
 import pytest
+from pytz import UTC
 
-from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tests import ZONE_INFO
 from mlos_bench.tests.environments import check_env_success
 from mlos_bench.tests.environments.local import create_composite_local_env
-from mlos_bench.tests import ZONE_INFO
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def _format_str(zone_info: Optional[tzinfo]) -> str:
@@ -28,8 +26,9 @@ def _format_str(zone_info: Optional[tzinfo]) -> str:
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_composite_env(tunable_groups: TunableGroups, zone_info: Optional[tzinfo]) -> None:
     """
-    Produce benchmark and telemetry data in TWO local environments
-    and combine the results.
+    Produce benchmark and telemetry data in TWO local environments and combine the
+    results.
+
     Also checks that global configs flow down at least one level of CompositeEnv
     to its children without being explicitly specified in the CompositeEnv so they
     can be used in the shell_envs by its children.
@@ -43,7 +42,7 @@ def test_composite_env(tunable_groups: TunableGroups, zone_info: Optional[tzinfo
     time_str1 = ts1.strftime(format_str)
     time_str2 = ts2.strftime(format_str)
 
-    (var_prefix, var_suffix) = ("%", "%") if sys.platform == 'win32' else ("$", "")
+    (var_prefix, var_suffix) = ("%", "%") if sys.platform == "win32" else ("$", "")
 
     env = create_composite_local_env(
         tunable_groups=tunable_groups,
@@ -66,9 +65,12 @@ def test_composite_env(tunable_groups: TunableGroups, zone_info: Optional[tzinfo
                 },
                 "required_args": ["errors", "reads"],
                 "shell_env_params": [
-                    "latency",  # const_args overridden by the composite env
-                    "errors",   # Comes from the parent const_args
-                    "reads"     # const_args overridden by the global config
+                    # const_args overridden by the composite env
+                    "latency",
+                    # Comes from the parent const_args
+                    "errors",
+                    # const_args overridden by the global config
+                    "reads",
                 ],
                 "run": [
                     "echo 'metric,value' > output.csv",
@@ -90,9 +92,12 @@ def test_composite_env(tunable_groups: TunableGroups, zone_info: Optional[tzinfo
                 },
                 "required_args": ["writes"],
                 "shell_env_params": [
-                    "throughput",   # const_args overridden by the composite env
-                    "score",        # Comes from the local const_args
-                    "writes"        # Comes straight from the global config
+                    # const_args overridden by the composite env
+                    "throughput",
+                    # Comes from the local const_args
+                    "score",
+                    # Comes straight from the global config
+                    "writes",
                 ],
                 "run": [
                     "echo 'metric,value' > output.csv",
@@ -106,12 +111,13 @@ def test_composite_env(tunable_groups: TunableGroups, zone_info: Optional[tzinfo
                 ],
                 "read_results_file": "output.csv",
                 "read_telemetry_file": "telemetry.csv",
-            }
-        ]
+            },
+        ],
     )
 
     check_env_success(
-        env, tunable_groups,
+        env,
+        tunable_groups,
         expected_results={
             "latency": 4.2,
             "throughput": 768.0,

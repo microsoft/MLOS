@@ -2,19 +2,16 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for LocalExecService to run Python scripts locally.
-"""
-
-from typing import Any, Dict
+"""Unit tests for LocalExecService to run Python scripts locally."""
 
 import json
+from typing import Any, Dict
 
 import pytest
 
-from mlos_bench.tunables.tunable import TunableValue
-from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+from mlos_bench.services.local.local_exec import LocalExecService
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.util import path_join
 
 # pylint: disable=redefined-outer-name
@@ -22,16 +19,12 @@ from mlos_bench.util import path_join
 
 @pytest.fixture
 def local_exec_service() -> LocalExecService:
-    """
-    Test fixture for LocalExecService.
-    """
+    """Test fixture for LocalExecService."""
     return LocalExecService(parent=ConfigPersistenceService())
 
 
 def test_run_python_script(local_exec_service: LocalExecService) -> None:
-    """
-    Run a Python script using a local_exec service.
-    """
+    """Run a Python script using a local_exec service."""
     input_file = "./input-params.json"
     meta_file = "./input-params-meta.json"
     output_file = "./config-kernel.sh"
@@ -57,11 +50,14 @@ def test_run_python_script(local_exec_service: LocalExecService) -> None:
             json.dump(params_meta, fh_meta)
 
         script_path = local_exec_service.config_loader_service.resolve_path(
-            "environments/os/linux/runtime/scripts/local/generate_kernel_config_script.py")
+            "environments/os/linux/runtime/scripts/local/generate_kernel_config_script.py"
+        )
 
-        (return_code, _stdout, stderr) = local_exec_service.local_exec([
-            f"{script_path} {input_file} {meta_file} {output_file}"
-        ], cwd=temp_dir, env=params)
+        (return_code, _stdout, stderr) = local_exec_service.local_exec(
+            [f"{script_path} {input_file} {meta_file} {output_file}"],
+            cwd=temp_dir,
+            env=params,
+        )
 
         assert stderr.strip() == ""
         assert return_code == 0

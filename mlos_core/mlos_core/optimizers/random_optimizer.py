@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Contains the RandomOptimizer class.
-"""
+"""Contains the RandomOptimizer class."""
 
 from typing import Optional, Tuple
 from warnings import warn
@@ -15,8 +13,9 @@ from mlos_core.optimizers.optimizer import BaseOptimizer
 
 
 class RandomOptimizer(BaseOptimizer):
-    """Optimizer class that produces random suggestions.
-    Useful for baseline comparison against Bayesian optimizers.
+    """
+    Optimizer class that produces random suggestions. Useful for baseline comparison
+    against Bayesian optimizers.
 
     Parameters
     ----------
@@ -24,16 +23,24 @@ class RandomOptimizer(BaseOptimizer):
         The parameter space to optimize.
     """
 
-    def _register(self, *, configs: pd.DataFrame, scores: pd.DataFrame,
-                  context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
-        """Registers the given configs and scores.
+    def _register(
+        self,
+        *,
+        configs: pd.DataFrame,
+        scores: pd.DataFrame,
+        context: Optional[pd.DataFrame] = None,
+        metadata: Optional[pd.DataFrame] = None,
+    ) -> None:
+        """
+        Registers the given configs and scores.
 
         Doesn't do anything on the RandomOptimizer except storing configs for logging.
 
         Parameters
         ----------
         configs : pd.DataFrame
-            Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
+            Dataframe of configs / parameters. The columns are parameter names and
+            the rows are the configs.
 
         scores : pd.DataFrame
             Scores from running the configs. The index is the same as the index of the configs.
@@ -50,8 +57,13 @@ class RandomOptimizer(BaseOptimizer):
             warn(f"Not Implemented: Ignoring context {list(metadata.columns)}", UserWarning)
         # should we pop them from self.pending_observations?
 
-    def _suggest(self, *, context: Optional[pd.DataFrame] = None) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
-        """Suggests a new configuration.
+    def _suggest(
+        self,
+        *,
+        context: Optional[pd.DataFrame] = None,
+    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
+        """
+        Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
 
@@ -71,9 +83,17 @@ class RandomOptimizer(BaseOptimizer):
         if context is not None:
             # not sure how that works here?
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
-        return pd.DataFrame(dict(self.optimizer_parameter_space.sample_configuration()), index=[0]), None
+        return (
+            pd.DataFrame(dict(self.optimizer_parameter_space.sample_configuration()), index=[0]),
+            None,
+        )
 
-    def register_pending(self, *, configs: pd.DataFrame,
-                         context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
+    def register_pending(
+        self,
+        *,
+        configs: pd.DataFrame,
+        context: Optional[pd.DataFrame] = None,
+        metadata: Optional[pd.DataFrame] = None,
+    ) -> None:
         raise NotImplementedError()
         # self._pending_observations.append((configs, context))

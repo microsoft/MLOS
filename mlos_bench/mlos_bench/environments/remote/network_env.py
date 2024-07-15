@@ -2,17 +2,16 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Network Environment.
-"""
-
-from typing import Optional
+"""Network Environment."""
 
 import logging
+from typing import Optional
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.types.network_provisioner_type import SupportsNetworkProvisioning
+from mlos_bench.services.types.network_provisioner_type import (
+    SupportsNetworkProvisioning,
+)
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -26,13 +25,15 @@ class NetworkEnv(Environment):
     but no real tuning is expected for it ... yet.
     """
 
-    def __init__(self,
-                 *,
-                 name: str,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 tunables: Optional[TunableGroups] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        *,
+        name: str,
+        config: dict,
+        global_config: Optional[dict] = None,
+        tunables: Optional[TunableGroups] = None,
+        service: Optional[Service] = None,
+    ):
         """
         Create a new environment for network operations.
 
@@ -53,14 +54,21 @@ class NetworkEnv(Environment):
             An optional service object (e.g., providing methods to
             deploy a network, etc.).
         """
-        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
+        super().__init__(
+            name=name,
+            config=config,
+            global_config=global_config,
+            tunables=tunables,
+            service=service,
+        )
 
         # Virtual networks can be used for more than one experiment, so by default
         # we don't attempt to deprovision them.
         self._deprovision_on_teardown = config.get("deprovision_on_teardown", False)
 
-        assert self._service is not None and isinstance(self._service, SupportsNetworkProvisioning), \
-            "NetworkEnv requires a service that supports network provisioning"
+        assert self._service is not None and isinstance(
+            self._service, SupportsNetworkProvisioning
+        ), "NetworkEnv requires a service that supports network provisioning"
         self._network_service: SupportsNetworkProvisioning = self._service
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
@@ -96,15 +104,16 @@ class NetworkEnv(Environment):
         return self._is_ready
 
     def teardown(self) -> None:
-        """
-        Shut down the Network and releases it.
-        """
+        """Shut down the Network and releases it."""
         if not self._deprovision_on_teardown:
             _LOG.info("Skipping Network deprovision: %s", self)
             return
         # Else
         _LOG.info("Network tear down: %s", self)
-        (status, params) = self._network_service.deprovision_network(self._params, ignore_errors=True)
+        (status, params) = self._network_service.deprovision_network(
+            self._params,
+            ignore_errors=True,
+        )
         if status.is_pending():
             (status, _) = self._network_service.wait_network_deployment(params, is_setup=False)
 

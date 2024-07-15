@@ -2,11 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Protocol interface for VM provisioning operations.
-"""
+"""Protocol interface for VM provisioning operations."""
 
-from typing import Tuple, Protocol, runtime_checkable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, Tuple, runtime_checkable
 
 if TYPE_CHECKING:
     from mlos_bench.environments.status import Status
@@ -14,9 +12,7 @@ if TYPE_CHECKING:
 
 @runtime_checkable
 class SupportsVMOps(Protocol):
-    """
-    Protocol interface for VM provisioning operations.
-    """
+    """Protocol interface for VM provisioning operations."""
 
     def vm_provision(self, params: dict) -> Tuple["Status", dict]:
         """
@@ -122,8 +118,8 @@ class SupportsVMOps(Protocol):
 
     def wait_vm_operation(self, params: dict) -> Tuple["Status", dict]:
         """
-        Waits for a pending operation on a VM to resolve to SUCCEEDED or FAILED.
-        Return TIMED_OUT when timing out.
+        Waits for a pending operation on a VM to resolve to SUCCEEDED or FAILED. Return
+        TIMED_OUT when timing out.
 
         Parameters
         ----------

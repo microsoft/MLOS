@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Export test fixtures for mlos_bench storage.
-"""
+"""Export test fixtures for mlos_bench storage."""
 
 import mlos_bench.tests.storage.sql.fixtures as sql_storage_fixtures
 
@@ -19,7 +17,9 @@ exp_no_tunables_storage = sql_storage_fixtures.exp_no_tunables_storage
 mixed_numerics_exp_storage = sql_storage_fixtures.mixed_numerics_exp_storage
 exp_storage_with_trials = sql_storage_fixtures.exp_storage_with_trials
 exp_no_tunables_storage_with_trials = sql_storage_fixtures.exp_no_tunables_storage_with_trials
-mixed_numerics_exp_storage_with_trials = sql_storage_fixtures.mixed_numerics_exp_storage_with_trials
+mixed_numerics_exp_storage_with_trials = (
+    sql_storage_fixtures.mixed_numerics_exp_storage_with_trials
+)
 exp_data = sql_storage_fixtures.exp_data
 exp_no_tunables_data = sql_storage_fixtures.exp_no_tunables_data
 mixed_numerics_exp_data = sql_storage_fixtures.mixed_numerics_exp_data
