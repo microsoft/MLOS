@@ -50,7 +50,7 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
                 config_df = config_to_dataframe(config)
                 logger("config: %s", str(config))
                 try:
-                    logger("prediction: %s", opt._opt.surrogate_predict(config_df))
+                    logger("prediction: %s", opt._opt.surrogate_predict(configs=config_df))
                 except RuntimeError:
                     pass
 
@@ -64,11 +64,12 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
             assert 60 <= score <= 120
             logger("score: %s", str(score))
 
-            opt.register(tunables, status, score)
+            opt.register(tunables, status, output)
 
     (best_score, best_tunables) = opt.get_best_observation()
-    assert isinstance(best_score, float) and isinstance(best_tunables, TunableGroups)
-    return (best_score, best_tunables)
+    assert best_score is not None and len(best_score) == 1
+    assert isinstance(best_tunables, TunableGroups)
+    return (best_score["score"], best_tunables)
 
 
 def test_mock_optimization_loop(mock_env_no_noise: MockEnv,

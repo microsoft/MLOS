@@ -12,7 +12,7 @@ See `--help` output for details.
 """
 
 import logging
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from mlos_bench.launcher import Launcher
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -20,7 +20,8 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 _LOG = logging.getLogger(__name__)
 
 
-def _main(argv: Optional[List[str]] = None) -> Tuple[Optional[float], Optional[TunableGroups]]:
+def _main(argv: Optional[List[str]] = None
+          ) -> Tuple[Optional[Dict[str, float]], Optional[TunableGroups]]:
 
     launcher = Launcher("mlos_bench", "Systems autotuning and benchmarking tool", argv=argv)
 

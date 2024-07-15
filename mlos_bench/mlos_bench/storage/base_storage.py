@@ -10,7 +10,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 from types import TracebackType
-from typing import Optional, Union, List, Tuple, Dict, Iterator, Type, Any
+from typing import Optional, List, Tuple, Dict, Iterator, Type, Any
 from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
@@ -79,8 +79,7 @@ class Storage(metaclass=ABCMeta):
                    root_env_config: str,
                    description: str,
                    tunables: TunableGroups,
-                   opt_target: str,
-                   opt_direction: Optional[str]) -> 'Storage.Experiment':
+                   opt_targets: Dict[str, Literal['min', 'max']]) -> 'Storage.Experiment':
         """
         Create a new experiment in the storage.
 
@@ -99,10 +98,8 @@ class Storage(metaclass=ABCMeta):
         description : str
             Human-readable description of the experiment.
         tunables : TunableGroups
-        opt_target : str
-            Name of metric we're optimizing for.
-        opt_direction: Optional[str]
-            Direction to optimize the metric (e.g., min or max)
+        opt_targets : Dict[str, Literal["min", "max"]]
+            Names of metrics we're optimizing for and the optimization direction {min, max}.
 
         Returns
         -------
@@ -125,16 +122,13 @@ class Storage(metaclass=ABCMeta):
                      trial_id: int,
                      root_env_config: str,
                      description: str,
-                     opt_target: str,
-                     opt_direction: Optional[str]):
+                     opt_targets: Dict[str, Literal['min', 'max']]):
             self._tunables = tunables.copy()
             self._trial_id = trial_id
             self._experiment_id = experiment_id
             (self._git_repo, self._git_commit, self._root_env_config) = get_git_info(root_env_config)
             self._description = description
-            self._opt_target = opt_target
-            assert opt_direction in {None, "min", "max"}
-            self._opt_direction = opt_direction
+            self._opt_targets = opt_targets
             self._in_context = False
 
         def __enter__(self) -> 'Storage.Experiment':
@@ -212,14 +206,11 @@ class Storage(metaclass=ABCMeta):
             return self._tunables
 
         @property
-        def opt_target(self) -> str:
-            """Get the Experiment's optimization target"""
-            return self._opt_target
-
-        @property
-        def opt_direction(self) -> Optional[str]:
-            """Get the Experiment's optimization target"""
-            return self._opt_direction
+        def opt_targets(self) -> Dict[str, Literal["min", "max"]]:
+            """
+            Get the Experiment's optimization targets and directions
+            """
+            return self._opt_targets
 
         @abstractmethod
         def merge(self, experiment_ids: List[str]) -> None:
@@ -256,10 +247,8 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def load(self,
-                 last_trial_id: int = -1,
-                 opt_target: Optional[str] = None
-                 ) -> Tuple[List[int], List[dict], List[Optional[float]], List[Status]]:
+        def load(self, last_trial_id: int = -1,
+                 ) -> Tuple[List[int], List[dict], List[Optional[Dict[str, Any]]], List[Status]]:
             """
             Load (tunable values, benchmark scores, status) to warm-up the optimizer.
 
@@ -271,12 +260,10 @@ class Storage(metaclass=ABCMeta):
             ----------
             last_trial_id : int
                 (Optional) Trial ID to start from.
-            opt_target : Optional[str]
-                Name of the optimization target.
 
             Returns
             -------
-            (trial_ids, configs, scores, status) : ([dict], [Optional[float]], [Status])
+            (trial_ids, configs, scores, status) : ([int], [dict], [Optional[dict]], [Status])
                 Trial ids, Tunable values, benchmark scores, and status of the trials.
             """
 
@@ -331,15 +318,13 @@ class Storage(metaclass=ABCMeta):
 
         def __init__(self, *,
                      tunables: TunableGroups, experiment_id: str, trial_id: int,
-                     tunable_config_id: int, opt_target: str, opt_direction: Optional[str],
+                     tunable_config_id: int, opt_targets: Dict[str, Literal['min', 'max']],
                      config: Optional[Dict[str, Any]] = None):
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
             self._tunable_config_id = tunable_config_id
-            self._opt_target = opt_target
-            assert opt_direction in {None, "min", "max"}
-            self._opt_direction = opt_direction
+            self._opt_targets = opt_targets
             self._config = config or {}
 
         def __repr__(self) -> str:
@@ -367,18 +352,11 @@ class Storage(metaclass=ABCMeta):
             return self._config.get("trial_runner_id")
 
         @property
-        def opt_target(self) -> str:
+        def opt_targets(self) -> Dict[str, Literal["min", "max"]]:
             """
-            Get the Trial's optimization target.
+            Get the Trial's optimization targets and directions.
             """
-            return self._opt_target
-
-        @property
-        def opt_direction(self) -> Optional[str]:
-            """
-            Get the Trial's optimization direction (e.g., min or max)
-            """
-            return self._opt_direction
+            return self._opt_targets
 
         @property
         def tunables(self) -> TunableGroups:
@@ -410,7 +388,7 @@ class Storage(metaclass=ABCMeta):
 
         @abstractmethod
         def update(self, status: Status, timestamp: datetime,
-                   metrics: Optional[Union[Dict[str, Any], float]] = None
+                   metrics: Optional[Dict[str, Any]] = None
                    ) -> Optional[Dict[str, Any]]:
             """
             Update the storage with the results of the experiment.
@@ -421,7 +399,7 @@ class Storage(metaclass=ABCMeta):
                 Status of the experiment run.
             timestamp: datetime
                 Timestamp of the status and metrics.
-            metrics : Optional[Union[Dict[str, Any], float]]
+            metrics : Optional[Dict[str, Any]]
                 One or several metrics of the experiment run.
                 Must contain the (float) optimization target if the status is SUCCEEDED.
 
@@ -431,11 +409,14 @@ class Storage(metaclass=ABCMeta):
                 Same as `metrics`, but always in the dict format.
             """
             _LOG.info("Store trial: %s :: %s %s", self, status, metrics)
-            if isinstance(metrics, dict) and self._opt_target not in metrics:
-                _LOG.warning("Trial %s :: opt.target missing: %s", self, self._opt_target)
-                # raise ValueError(
-                #     f"Optimization target '{self._opt_target}' is missing from {metrics}")
-            return {self._opt_target: metrics} if isinstance(metrics, (float, int)) else metrics
+            if status.is_succeeded():
+                assert metrics is not None
+                opt_targets = set(self._opt_targets.keys())
+                if not opt_targets.issubset(metrics.keys()):
+                    _LOG.warning("Trial %s :: opt.targets missing: %s",
+                                 self, opt_targets.difference(metrics.keys()))
+                    # raise ValueError()
+            return metrics
 
         @abstractmethod
         def update_telemetry(self, status: Status, timestamp: datetime,

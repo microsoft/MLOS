@@ -178,10 +178,9 @@ class Scheduler(metaclass=ABCMeta):
             experiment_id=self._experiment_id,
             trial_id=self._trial_id,
             root_env_config=self._root_env_config,
-            description=self.root_environment.name,
-            tunables=self.root_environment.tunable_params,
-            opt_target=self._optimizer.target,
-            opt_direction=self._optimizer.direction,
+            description=self.environment.name,
+            tunables=self.environment.tunable_params,
+            opt_targets=self.optimizer.targets,
         ).__enter__()
         return self
 
@@ -229,7 +228,7 @@ class Scheduler(metaclass=ABCMeta):
                 assert not trial_runner.is_running
                 trial_runner.teardown()
 
-    def get_best_observation(self) -> Tuple[Optional[float], Optional[TunableGroups]]:
+    def get_best_observation(self) -> Tuple[Optional[Dict[str, float]], Optional[TunableGroups]]:
         """
         Get the best observation from the optimizer.
         """
@@ -287,14 +286,15 @@ class Scheduler(metaclass=ABCMeta):
                 # It is possible that the experiment configs were changed
                 # between resuming the experiment (since that is not currently
                 # prevented).
-                # TODO: Improve for supporting multi-objective
-                # (e.g., opt_target_1, opt_target_2, ... and opt_direction_1, opt_direction_2, ...)
                 "optimizer": self.optimizer.name,
-                "opt_target": self.optimizer.target,
-                "opt_direction": self.optimizer.direction,
                 "repeat_i": repeat_i,
-                "is_defaults": tunables.is_defaults,
                 "trial_runner_id": self._trial_runners[self._current_trial_runner_idx].trial_runner_id,
+                "is_defaults": tunables.is_defaults(),
+                **{
+                    f"opt_{key}_{i}": val
+                    for (i, opt_target) in enumerate(self.optimizer.targets.items())
+                    for (key, val) in zip(["target", "direction"], opt_target)
+                }
             })
             # Rotate which TrialRunner the Trial is assigned to.
             self._current_trial_runner_idx = (self._current_trial_runner_idx + 1) % len(self._trial_runners)

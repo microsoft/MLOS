@@ -25,6 +25,19 @@ def test_trial_data_tunable_config_data(exp_data: ExperimentData,
     assert trial.tunable_config_trial_group.tunable_config == tunable_config
 
 
+def test_trial_metadata(exp_data: ExperimentData) -> None:
+    """
+    Check expected return values for TunableConfigData metadata.
+    """
+    assert exp_data.objectives == {'score': 'min'}
+    for (trial_id, trial) in exp_data.trials.items():
+        assert trial.metadata_dict == {
+            'opt_target_0': 'score',
+            'opt_direction_0': 'min',
+            'trial_number': trial_id,
+        }
+
+
 def test_trial_data_no_tunables_config_data(exp_no_tunables_data: ExperimentData) -> None:
     """
     Check expected return values for TunableConfigData.

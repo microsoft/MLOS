@@ -8,7 +8,7 @@ Grid search optimizer for mlos_bench.
 
 import logging
 
-from typing import Dict, Iterable, Set, Optional, Sequence, Tuple, Union
+from typing import Dict, Iterable, Set, Optional, Sequence, Tuple
 
 import numpy as np
 import ConfigSpace
@@ -20,7 +20,6 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.track_best_optimizer import TrackBestOptimizer
 from mlos_bench.optimizers.convert_configspace import configspace_data_to_tunable_values
 from mlos_bench.services.base_service import Service
-from mlos_bench.util import nullable
 
 _LOG = logging.getLogger(__name__)
 
@@ -36,9 +35,6 @@ class GridSearchOptimizer(TrackBestOptimizer):
                  global_config: Optional[dict] = None,
                  service: Optional[Service] = None):
         super().__init__(tunables, config, global_config, service)
-
-        self._best_config: Optional[TunableGroups] = None
-        self._best_score: Optional[float] = None
 
         # Track the grid as a set of tuples of tunable values and reconstruct the
         # dicts as necessary.
@@ -108,7 +104,9 @@ class GridSearchOptimizer(TrackBestOptimizer):
         # See NOTEs above.
         return (dict(zip(self._config_keys, config)) for config in self._suggested_configs)
 
-    def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
+    def bulk_register(self,
+                      configs: Sequence[dict],
+                      scores: Sequence[Optional[Dict[str, TunableValue]]],
                       status: Optional[Sequence[Status]] = None) -> bool:
         if not super().bulk_register(configs, scores, status):
             return False
@@ -116,10 +114,10 @@ class GridSearchOptimizer(TrackBestOptimizer):
             status = [Status.SUCCEEDED] * len(configs)
         for (params, score, trial_status) in zip(configs, scores, status):
             tunables = self._tunables.copy().assign(params)
-            self.register(tunables, trial_status, nullable(float, score))
+            self.register(tunables, trial_status, score)
         if _LOG.isEnabledFor(logging.DEBUG):
-            (score, _) = self.get_best_observation()
-            _LOG.debug("Update end: %s = %s", self.target, score)
+            (best_score, _) = self.get_best_observation()
+            _LOG.debug("Update END: %s = %s", self, best_score)
         return True
 
     def suggest(self) -> TunableGroups:
@@ -156,7 +154,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
         return tunables
 
     def register(self, tunables: TunableGroups, status: Status,
-                 score: Optional[Union[float, dict]] = None) -> Optional[float]:
+                 score: Optional[Dict[str, TunableValue]] = None) -> Optional[Dict[str, float]]:
         registered_score = super().register(tunables, status, score)
         try:
             config = dict(ConfigSpace.Configuration(self.config_space, values=tunables.get_param_values()))

@@ -6,7 +6,7 @@
 Contains the FlamlOptimizer class.
 """
 
-from typing import Dict, NamedTuple, Optional, Union
+from typing import Dict, List, NamedTuple, Optional, Tuple, Union
 from warnings import warn
 
 import ConfigSpace
@@ -26,32 +26,48 @@ class EvaluatedSample(NamedTuple):
 
 
 class FlamlOptimizer(BaseOptimizer):
-    """Wrapper class for FLAML Optimizer: A fast library for AutoML and tuning.
-
-    Parameters
-    ----------
-    parameter_space : ConfigSpace.ConfigurationSpace
-        The parameter space to optimize.
-
-    space_adapter : BaseSpaceAdapter
-        The space adapter class to employ for parameter space transformations.
-
-    low_cost_partial_config : dict
-        A dictionary from a subset of controlled dimensions to the initial low-cost values.
-        More info: https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
-
-    seed : Optional[int]
-        If provided, calls np.random.seed() with the provided value to set the seed globally at init.
+    """
+    Wrapper class for FLAML Optimizer: A fast library for AutoML and tuning.
     """
 
-    def __init__(self, *,
+    # The name of an internal objective attribute that is calculated as a weighted average of the user provided objective metrics.
+    _METRIC_NAME = "FLAML_score"
+
+    def __init__(self, *,   # pylint: disable=too-many-arguments
                  parameter_space: ConfigSpace.ConfigurationSpace,
+                 optimization_targets: List[str],
+                 objective_weights: Optional[List[float]] = None,
                  space_adapter: Optional[BaseSpaceAdapter] = None,
                  low_cost_partial_config: Optional[dict] = None,
                  seed: Optional[int] = None):
+        """
+        Create an MLOS wrapper for FLAML.
 
+        Parameters
+        ----------
+        parameter_space : ConfigSpace.ConfigurationSpace
+            The parameter space to optimize.
+
+        optimization_targets : List[str]
+            The names of the optimization targets to minimize.
+
+        objective_weights : Optional[List[float]]
+            Optional list of weights of optimization targets.
+
+        space_adapter : BaseSpaceAdapter
+            The space adapter class to employ for parameter space transformations.
+
+        low_cost_partial_config : dict
+            A dictionary from a subset of controlled dimensions to the initial low-cost values.
+            More info: https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
+
+        seed : Optional[int]
+            If provided, calls np.random.seed() with the provided value to set the seed globally at init.
+        """
         super().__init__(
             parameter_space=parameter_space,
+            optimization_targets=optimization_targets,
+            objective_weights=objective_weights,
             space_adapter=space_adapter,
         )
 
@@ -69,32 +85,40 @@ class FlamlOptimizer(BaseOptimizer):
         self.evaluated_samples: Dict[ConfigSpace.Configuration, EvaluatedSample] = {}
         self._suggested_config: Optional[dict]
 
-    def _register(self, configurations: pd.DataFrame, scores: pd.Series,
-                  context: Optional[pd.DataFrame] = None) -> None:
-        """Registers the given configurations and scores.
+    def _register(self, *, configs: pd.DataFrame, scores: pd.DataFrame,
+                  context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
+        """Registers the given configs and scores.
 
         Parameters
         ----------
-        configurations : pd.DataFrame
-            Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
+        configs : pd.DataFrame
+            Dataframe of configs / parameters. The columns are parameter names and the rows are the configs.
 
-        scores : pd.Series
-            Scores from running the configurations. The index is the same as the index of the configurations.
+        scores : pd.DataFrame
+            Scores from running the configs. The index is the same as the index of the configs.
 
         context : None
             Not Yet Implemented.
+
+        metadata : None
+            Not Yet Implemented.
         """
         if context is not None:
-            raise NotImplementedError()
-        for (_, config), score in zip(configurations.astype('O').iterrows(), scores):
+            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+        if metadata is not None:
+            warn(f"Not Implemented: Ignoring metadata {list(metadata.columns)}", UserWarning)
+
+        for (_, config), (_, score) in zip(configs.astype('O').iterrows(), scores.iterrows()):
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
                 self.optimizer_parameter_space, values=config.to_dict())
             if cs_config in self.evaluated_samples:
                 warn(f"Configuration {config} was already registered", UserWarning)
+            self.evaluated_samples[cs_config] = EvaluatedSample(
+                config=config.to_dict(),
+                score=float(np.average(score.astype(float), weights=self._objective_weights)),
+            )
 
-            self.evaluated_samples[cs_config] = EvaluatedSample(config=config.to_dict(), score=score)
-
-    def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def _suggest(self, *, context: Optional[pd.DataFrame] = None) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
         """Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
@@ -108,14 +132,17 @@ class FlamlOptimizer(BaseOptimizer):
         -------
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
+
+        metadata : None
+            Not implemented.
         """
         if context is not None:
-            raise NotImplementedError()
+            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         config: dict = self._get_next_config()
-        return pd.DataFrame(config, index=[0])
+        return pd.DataFrame(config, index=[0]), None
 
-    def register_pending(self, configurations: pd.DataFrame,
-                         context: Optional[pd.DataFrame] = None) -> None:
+    def register_pending(self, *, configs: pd.DataFrame,
+                         context: Optional[pd.DataFrame] = None, metadata: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
 
     def _target_function(self, config: dict) -> Union[dict, None]:
@@ -133,11 +160,11 @@ class FlamlOptimizer(BaseOptimizer):
         Returns
         -------
         result: Union[dict, None]
-            Dictionary with a single key, `score`, if config already evaluated; `None` otherwise.
+            Dictionary with a single key, `FLAML_score`, if config already evaluated; `None` otherwise.
         """
         cs_config = normalize_config(self.optimizer_parameter_space, config)
         if cs_config in self.evaluated_samples:
-            return {'score': self.evaluated_samples[cs_config].score}
+            return {self._METRIC_NAME: self.evaluated_samples[cs_config].score}
 
         self._suggested_config = dict(cs_config)  # Cleaned-up version of the config
         return None  # Returning None stops the process
@@ -147,13 +174,14 @@ class FlamlOptimizer(BaseOptimizer):
 
         Since FLAML does not provide an ask-and-tell interface, we need to create a new instance of FLAML
         each time we get asked for a new suggestion. This is suboptimal performance-wise, but works.
-        To do so, we use any previously evaluated configurations to bootstrap FLAML (i.e., warm-start).
+        To do so, we use any previously evaluated configs to bootstrap FLAML (i.e., warm-start).
         For more info: https://microsoft.github.io/FLAML/docs/Use-Cases/Tune-User-Defined-Function#warm-start
 
         Returns
         -------
         result: dict
-            Dictionary with a single key, `score`, if config already evaluated; `None` otherwise.
+            A dictionary with a single key that is equal to the name of the optimization target,
+            if config already evaluated; `None` otherwise.
 
         Raises
         ------
@@ -179,7 +207,7 @@ class FlamlOptimizer(BaseOptimizer):
             self._target_function,
             config=self.flaml_parameter_space,
             mode='min',
-            metric='score',
+            metric=self._METRIC_NAME,
             points_to_evaluate=points_to_evaluate,
             evaluated_rewards=evaluated_rewards,
             num_samples=len(points_to_evaluate) + 1,

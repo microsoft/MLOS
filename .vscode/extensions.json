@@ -1,7 +1,6 @@
 {
     "recommendations": [
         "davidanson.vscode-markdownlint",
-        "donjayamanne.githistory",
         "donjayamanne.python-environment-manager",
         "eamodio.gitlens",
         "editorconfig.editorconfig",
@@ -10,14 +9,14 @@
         "github.vscode-github-actions",
         "github.vscode-pull-request-github",
         "gruntfuggly.todo-tree",
-        "hashicorp.terraform",
         "huntertran.auto-markdown-toc",
         "ibm.output-colorizer",
         "lextudio.restructuredtext",
         "matangover.mypy",
         "ms-azuretools.vscode-docker",
-        "ms-python.autopep8",
-        "ms-python.flake8",
+	// TODO: Enable additional formatter extensions:
+        //"ms-python.black-formatter",
+        //"ms-python.isort",
         "ms-python.pylint",
         "ms-python.python",
         "ms-python.vscode-pylance",
@@ -26,8 +25,8 @@
         "redhat.vscode-yaml",
         "stkb.rewrap",
         "streetsidesoftware.code-spell-checker",
+        "tamasfe.even-better-toml",
         "trond-snekvik.simple-rst",
-        "tyriar.sort-lines",
-        "waderyan.gitblame"
+        "tyriar.sort-lines"
     ]
 }

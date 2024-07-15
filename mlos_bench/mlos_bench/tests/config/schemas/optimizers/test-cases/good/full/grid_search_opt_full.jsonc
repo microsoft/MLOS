@@ -6,8 +6,7 @@
     ],
     "config": {
         "max_suggestions": 100,
-        "optimization_direction": "max",
-        "optimization_target": "score",
+        "optimization_targets": {"score": "max"},
         "seed": 12345,
         "start_with_defaults": true
     }

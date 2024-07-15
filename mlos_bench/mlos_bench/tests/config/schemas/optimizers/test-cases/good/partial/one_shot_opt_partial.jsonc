@@ -3,6 +3,6 @@
 
     "class": "mlos_bench.optimizers.OneShotOptimizer",
     "config": {
-        "optimization_target": "score"
+        "optimization_targets": {"score": "min"}
     }
 }
