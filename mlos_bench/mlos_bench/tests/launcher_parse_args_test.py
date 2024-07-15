@@ -14,11 +14,10 @@ from typing import List
 
 import pytest
 
-from mlos_bench.launcher import Launcher
-from mlos_bench.optimizers import OneShotOptimizer, MlosCoreOptimizer
-from mlos_bench.os_environ import environ
 from mlos_bench.config.schemas import ConfigSchema
-from mlos_bench.util import path_join
+from mlos_bench.launcher import Launcher
+from mlos_bench.optimizers import MlosCoreOptimizer, OneShotOptimizer
+from mlos_bench.os_environ import environ
 from mlos_bench.schedulers import SyncScheduler
 from mlos_bench.services.types import (
     SupportsAuth,
@@ -28,6 +27,7 @@ from mlos_bench.services.types import (
     SupportsRemoteExec,
 )
 from mlos_bench.tests import check_class_name
+from mlos_bench.util import path_join
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -48,13 +48,13 @@ def config_paths() -> List[str]:
     """
     return [
         path_join(os.getcwd(), abs_path=True),
-        str(files('mlos_bench.config')),
-        str(files('mlos_bench.tests.config')),
+        str(files("mlos_bench.config")),
+        str(files("mlos_bench.tests.config")),
     ]
 
 
 # This is part of the minimal required args by the Launcher.
-ENV_CONF_PATH = 'environments/mock/mock_env.jsonc'
+ENV_CONF_PATH = "environments/mock/mock_env.jsonc"
 
 
 def _get_launcher(desc: str, cli_args: str) -> Launcher:
@@ -63,167 +63,200 @@ def _get_launcher(desc: str, cli_args: str) -> Launcher:
     # variable so we use a separate variable.
     # See global_test_config.jsonc for more details.
     environ["CUSTOM_PATH_FROM_ENV"] = os.getcwd()
-    if sys.platform == 'win32':
+    if sys.platform == "win32":
         # Some env tweaks for platform compatibility.
-        environ['USER'] = environ['USERNAME']
+        environ["USER"] = environ["USERNAME"]
     launcher = Launcher(description=desc, argv=cli_args.split())
     # Check the basic parent service
     assert isinstance(launcher.service, SupportsConfigLoading)  # built-in
-    assert isinstance(launcher.service, SupportsLocalExec)      # built-in
+    assert isinstance(launcher.service, SupportsLocalExec)  # built-in
     # All trial runners should have the same Environment class.
-    assert len(set(trial_runner.environment.__class__ for trial_runner in launcher.trial_runners)) == 1
+    assert (
+        len(set(trial_runner.environment.__class__ for trial_runner in launcher.trial_runners))
+        == 1
+    )
     # Make sure that each trial runner has a unique ID.
-    assert set(trial_runner.environment.const_args["trial_runner_id"] for trial_runner in launcher.trial_runners) \
-        == set(range(0, len(launcher.trial_runners)))
+    assert set(
+        trial_runner.environment.const_args["trial_runner_id"]
+        for trial_runner in launcher.trial_runners
+    ) == set(range(0, len(launcher.trial_runners)))
     return launcher
 
 
 def test_launcher_args_parse_defaults(config_paths: List[str]) -> None:
+    """Test that we get the defaults we expect when using minimal config arg
+    examples.
     """
-    Test that we get the defaults we expect when using minimal config arg examples.
-    """
-    cli_args = '--config-paths ' + ' '.join(config_paths) + \
-        f' --environment {ENV_CONF_PATH}' + \
-        ' --globals globals/global_test_config.jsonc'
+    cli_args = (
+        "--config-paths "
+        + " ".join(config_paths)
+        + f" --environment {ENV_CONF_PATH}"
+        + " --globals globals/global_test_config.jsonc"
+    )
     launcher = _get_launcher(__name__, cli_args)
     # Check that the first --globals file is loaded and $var expansion is handled.
-    assert launcher.global_config['experiment_id'] == 'MockExperiment'
-    assert launcher.global_config['testVmName'] == 'MockExperiment-vm'
+    assert launcher.global_config["experiment_id"] == "MockExperiment"
+    assert launcher.global_config["testVmName"] == "MockExperiment-vm"
     # Check that secondary expansion also works.
-    assert launcher.global_config['testVnetName'] == 'MockExperiment-vm-vnet'
+    assert launcher.global_config["testVnetName"] == "MockExperiment-vm-vnet"
     # Check that we can expand a $var in a config file that references an environment variable.
-    assert path_join(launcher.global_config["pathVarWithEnvVarRef"], abs_path=True) \
-        == path_join(os.getcwd(), "foo", abs_path=True)
-    assert launcher.global_config["varWithEnvVarRef"] == f'user:{getuser()}'
-    assert launcher.teardown    # defaults
+    assert path_join(launcher.global_config["pathVarWithEnvVarRef"], abs_path=True) == path_join(
+        os.getcwd(), "foo", abs_path=True
+    )
+    assert launcher.global_config["varWithEnvVarRef"] == f"user:{getuser()}"
+    assert launcher.teardown  # defaults
     # Make sure we have the right number of trial runners.
-    assert len(launcher.trial_runners) == 1     # defaults
+    assert len(launcher.trial_runners) == 1  # defaults
     # Check that the environment that got loaded looks to be of the right type.
     env_config = launcher.config_loader.load_config(ENV_CONF_PATH, ConfigSchema.ENVIRONMENT)
     assert env_config["class"] == "mlos_bench.environments.mock_env.MockEnv"
     # All TrialRunners should get the same Environment.
-    assert all(check_class_name(trial_runner.environment, env_config['class']) for trial_runner in launcher.trial_runners)
+    assert all(
+        check_class_name(trial_runner.environment, env_config["class"])
+        for trial_runner in launcher.trial_runners
+    )
     # Check that the optimizer looks right.
     assert isinstance(launcher.optimizer, OneShotOptimizer)
     # Check that the optimizer got initialized with defaults.
     assert launcher.optimizer.tunable_params.is_defaults()
-    assert launcher.optimizer.max_iterations == 1   # value for OneShotOptimizer
+    assert launcher.optimizer.max_iterations == 1  # value for OneShotOptimizer
     # Check that we pick up the right scheduler config:
     assert isinstance(launcher.scheduler, SyncScheduler)
-    assert launcher.scheduler.trial_config_repeat_count == 1    # default
-    assert launcher.scheduler.max_trials == -1     # default
+    assert launcher.scheduler.trial_config_repeat_count == 1  # default
+    assert launcher.scheduler.max_trials == -1  # default
 
 
 def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     """
-    Test that using multiple --globals arguments works and that multiple space
-    separated options to --config-paths works.
+    Test that using multiple --globals arguments works and that multiple space separated
+    options to --config-paths works.
+
     Check $var expansion and Environment loading.
     """
     # Here we have multiple paths following --config-paths and --service.
-    cli_args = '--config-paths ' + ' '.join(config_paths) + \
-        ' --num-trial-runners 5' + \
-        ' --service services/remote/mock/mock_auth_service.jsonc' + \
-        ' services/remote/mock/mock_remote_exec_service.jsonc' + \
-        ' --scheduler schedulers/sync_scheduler.jsonc' + \
-        f' --environment {ENV_CONF_PATH}' + \
-        ' --globals globals/global_test_config.jsonc' + \
-        ' --globals globals/global_test_extra_config.jsonc' \
-        ' --test_global_value_2 from-args'
+    cli_args = (
+        "--config-paths "
+        + " ".join(config_paths)
+        + " --num-trial-runners 5"
+        + " --service services/remote/mock/mock_auth_service.jsonc"
+        + " services/remote/mock/mock_remote_exec_service.jsonc"
+        + " --scheduler schedulers/sync_scheduler.jsonc"
+        + f" --environment {ENV_CONF_PATH}"
+        + " --globals globals/global_test_config.jsonc"
+        + " --globals globals/global_test_extra_config.jsonc"
+        " --test_global_value_2 from-args"
+    )
     launcher = _get_launcher(__name__, cli_args)
     # Check some additional features of the the parent service
-    assert isinstance(launcher.service, SupportsAuth)           # from --service
-    assert isinstance(launcher.service, SupportsRemoteExec)     # from --service
+    assert isinstance(launcher.service, SupportsAuth)  # from --service
+    assert isinstance(launcher.service, SupportsRemoteExec)  # from --service
     # Check that the first --globals file is loaded and $var expansion is handled.
-    assert launcher.global_config['experiment_id'] == 'MockExperiment'
-    assert launcher.global_config['testVmName'] == 'MockExperiment-vm'
+    assert launcher.global_config["experiment_id"] == "MockExperiment"
+    assert launcher.global_config["testVmName"] == "MockExperiment-vm"
     # Check that secondary expansion also works.
-    assert launcher.global_config['testVnetName'] == 'MockExperiment-vm-vnet'
+    assert launcher.global_config["testVnetName"] == "MockExperiment-vm-vnet"
     # Check that the second --globals file is loaded.
-    assert launcher.global_config['test_global_value'] == 'from-file'
+    assert launcher.global_config["test_global_value"] == "from-file"
     # Check overriding values in a file from the command line.
-    assert launcher.global_config['test_global_value_2'] == 'from-args'
+    assert launcher.global_config["test_global_value_2"] == "from-args"
     # Check that we can expand a $var in a config file that references an environment variable.
-    assert path_join(launcher.global_config["pathVarWithEnvVarRef"], abs_path=True) \
-        == path_join(os.getcwd(), "foo", abs_path=True)
-    assert launcher.global_config["varWithEnvVarRef"] == f'user:{getuser()}'
+    assert path_join(launcher.global_config["pathVarWithEnvVarRef"], abs_path=True) == path_join(
+        os.getcwd(), "foo", abs_path=True
+    )
+    assert launcher.global_config["varWithEnvVarRef"] == f"user:{getuser()}"
     assert launcher.teardown
     # Make sure we have the right number of trial runners.
-    assert len(launcher.trial_runners) == 5     # from cli args
+    assert len(launcher.trial_runners) == 5  # from cli args
     # Check that the environment that got loaded looks to be of the right type.
     env_config = launcher.config_loader.load_config(ENV_CONF_PATH, ConfigSchema.ENVIRONMENT)
     assert env_config["class"] == "mlos_bench.environments.mock_env.MockEnv"
     # All TrialRunners should get the same Environment.
-    assert all(check_class_name(trial_runner.environment, env_config['class']) for trial_runner in launcher.trial_runners)
+    assert all(
+        check_class_name(trial_runner.environment, env_config["class"])
+        for trial_runner in launcher.trial_runners
+    )
     # Check that the optimizer looks right.
     assert isinstance(launcher.optimizer, OneShotOptimizer)
     # Check that the optimizer got initialized with defaults.
     assert launcher.optimizer.tunable_params.is_defaults()
-    assert launcher.optimizer.max_iterations == 1   # value for OneShotOptimizer
+    assert launcher.optimizer.max_iterations == 1  # value for OneShotOptimizer
     # Check that we pick up the right scheduler config:
     assert isinstance(launcher.scheduler, SyncScheduler)
-    assert launcher.scheduler.trial_config_repeat_count == 3    # from the custom sync_scheduler.jsonc config
+    assert (
+        launcher.scheduler.trial_config_repeat_count == 3
+    )  # from the custom sync_scheduler.jsonc config
     assert launcher.scheduler.max_trials == -1
 
 
 def test_launcher_args_parse_2(config_paths: List[str]) -> None:
-    """
-    Test multiple --config-path instances, --config file vs --arg, --var=val
+    """Test multiple --config-path instances, --config file vs --arg, --var=val
     overrides, $var templates, option args, --random-init, etc.
     """
-    config_file = 'cli/test-cli-config.jsonc'
-    globals_file = 'globals/global_test_config.jsonc'
+    config_file = "cli/test-cli-config.jsonc"
+    globals_file = "globals/global_test_config.jsonc"
     # Here we have multiple --config-path and --service args, each with their own path.
-    cli_args = ' '.join([f"--config-path {config_path}" for config_path in config_paths]) + \
-        f' --config {config_file}' + \
-        ' --service services/remote/mock/mock_auth_service.jsonc' + \
-        ' --service services/remote/mock/mock_remote_exec_service.jsonc' + \
-        f' --globals {globals_file}' + \
-        ' --experiment_id MockeryExperiment' + \
-        ' --no-teardown' + \
-        ' --random-init' + \
-        ' --random-seed 1234' + \
-        ' --trial-config-repeat-count 5' + \
-        ' --max_trials 200'
+    cli_args = (
+        " ".join([f"--config-path {config_path}" for config_path in config_paths])
+        + f" --config {config_file}"
+        + " --service services/remote/mock/mock_auth_service.jsonc"
+        + " --service services/remote/mock/mock_remote_exec_service.jsonc"
+        + f" --globals {globals_file}"
+        + " --experiment_id MockeryExperiment"
+        + " --no-teardown"
+        + " --random-init"
+        + " --random-seed 1234"
+        + " --trial-config-repeat-count 5"
+        + " --max_trials 200"
+    )
     launcher = _get_launcher(__name__, cli_args)
     # Check some additional features of the the parent service
-    assert isinstance(launcher.service, SupportsAuth)           # from --service
-    assert isinstance(launcher.service, SupportsFileShareOps)   # from --config
-    assert isinstance(launcher.service, SupportsRemoteExec)     # from --service
+    assert isinstance(launcher.service, SupportsAuth)  # from --service
+    assert isinstance(launcher.service, SupportsFileShareOps)  # from --config
+    assert isinstance(launcher.service, SupportsRemoteExec)  # from --service
     # Check that the --globals file is loaded and $var expansion is handled
     # using the value provided on the CLI.
-    assert launcher.global_config['experiment_id'] == 'MockeryExperiment'
-    assert launcher.global_config['testVmName'] == 'MockeryExperiment-vm'
+    assert launcher.global_config["experiment_id"] == "MockeryExperiment"
+    assert launcher.global_config["testVmName"] == "MockeryExperiment-vm"
     # Check that secondary expansion also works.
-    assert launcher.global_config['testVnetName'] == 'MockeryExperiment-vm-vnet'
+    assert launcher.global_config["testVnetName"] == "MockeryExperiment-vm-vnet"
     # Check that we can expand a $var in a config file that references an environment variable.
-    assert path_join(launcher.global_config["pathVarWithEnvVarRef"], abs_path=True) \
-        == path_join(os.getcwd(), "foo", abs_path=True)
-    assert launcher.global_config["varWithEnvVarRef"] == f'user:{getuser()}'
+    assert path_join(launcher.global_config["pathVarWithEnvVarRef"], abs_path=True) == path_join(
+        os.getcwd(), "foo", abs_path=True
+    )
+    assert launcher.global_config["varWithEnvVarRef"] == f"user:{getuser()}"
     assert not launcher.teardown
 
     config = launcher.config_loader.load_config(config_file, ConfigSchema.CLI)
-    assert launcher.config_loader.config_paths == [path_join(path, abs_path=True) for path in config_paths + config['config_path']]
+    assert launcher.config_loader.config_paths == [
+        path_join(path, abs_path=True) for path in config_paths + config["config_path"]
+    ]
 
     # Make sure we have the right number of trial runners.
-    assert len(launcher.trial_runners) == 3     # from test-cli-config.jsonc
+    assert len(launcher.trial_runners) == 3  # from test-cli-config.jsonc
     # Check that the environment that got loaded looks to be of the right type.
-    env_config_file = config['environment']
+    env_config_file = config["environment"]
     env_config = launcher.config_loader.load_config(env_config_file, ConfigSchema.ENVIRONMENT)
     # All TrialRunners should get the same Environment.
-    assert all(check_class_name(trial_runner.environment, env_config['class']) for trial_runner in launcher.trial_runners)
+    assert all(
+        check_class_name(trial_runner.environment, env_config["class"])
+        for trial_runner in launcher.trial_runners
+    )
 
     # Check that the optimizer looks right.
     assert isinstance(launcher.optimizer, MlosCoreOptimizer)
-    opt_config_file = config['optimizer']
+    opt_config_file = config["optimizer"]
     opt_config = launcher.config_loader.load_config(opt_config_file, ConfigSchema.OPTIMIZER)
     globals_file_config = launcher.config_loader.load_config(globals_file, ConfigSchema.GLOBALS)
     # The actual global_config gets overwritten as a part of processing, so to test
     # this we read the original value out of the source files.
-    orig_max_iters = globals_file_config.get('max_suggestions', opt_config.get('config', {}).get('max_suggestions', 100))
-    assert launcher.optimizer.max_iterations \
-        == orig_max_iters \
-        == launcher.global_config['max_suggestions']
+    orig_max_iters = globals_file_config.get(
+        "max_suggestions", opt_config.get("config", {}).get("max_suggestions", 100)
+    )
+    assert (
+        launcher.optimizer.max_iterations
+        == orig_max_iters
+        == launcher.global_config["max_suggestions"]
+    )
 
     # Check that the optimizer got initialized with random values instead of the defaults.
     # Note: the environment doesn't get updated until suggest() is called to
@@ -240,12 +273,12 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     assert launcher.scheduler.max_trials == 200
 
     # Check that the value from the file is overridden by the CLI arg.
-    assert config['random_seed'] == 42
+    assert config["random_seed"] == 42
     # TODO: This isn't actually respected yet because the `--random-init` only
     # applies to a temporary Optimizer used to populate the initial values via
     # random sampling.
     # assert launcher.optimizer.seed == 1234
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main([__file__, "-n1"])

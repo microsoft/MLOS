@@ -2,19 +2,28 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A hierarchy of benchmark environments.
-"""
+"""A hierarchy of benchmark environments."""
 
 import abc
 import json
 import logging
 from datetime import datetime
 from types import TracebackType
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Type, TYPE_CHECKING, Union
-from typing_extensions import Literal
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    Union,
+)
 
 from pytz import UTC
+from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.dict_templater import DictTemplater
@@ -32,9 +41,7 @@ _LOG = logging.getLogger(__name__)
 
 class Environment(metaclass=abc.ABCMeta):
     # pylint: disable=too-many-instance-attributes
-    """
-    An abstract base of all benchmark environments.
-    """
+    """An abstract base of all benchmark environments."""
     # Should be provided by the runtime.
     _COMMON_CONST_ARGS = {
         "trial_runner_id",
@@ -45,15 +52,16 @@ class Environment(metaclass=abc.ABCMeta):
     }
 
     @classmethod
-    def new(cls,
-            *,
-            env_name: str,
-            class_name: str,
-            config: dict,
-            global_config: Optional[dict] = None,
-            tunables: Optional[TunableGroups] = None,
-            service: Optional[Service] = None,
-            ) -> "Environment":
+    def new(
+        cls,
+        *,
+        env_name: str,
+        class_name: str,
+        config: dict,
+        global_config: Optional[dict] = None,
+        tunables: Optional[TunableGroups] = None,
+        service: Optional[Service] = None,
+    ) -> "Environment":
         """
         Factory method for a new environment with a given config.
 
@@ -91,16 +99,18 @@ class Environment(metaclass=abc.ABCMeta):
             config=config,
             global_config=global_config,
             tunables=tunables,
-            service=service
+            service=service,
         )
 
-    def __init__(self,
-                 *,
-                 name: str,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 tunables: Optional[TunableGroups] = None,
-                 service: Optional[Service] = None):
+    def __init__(
+        self,
+        *,
+        name: str,
+        config: dict,
+        global_config: Optional[dict] = None,
+        tunables: Optional[TunableGroups] = None,
+        service: Optional[Service] = None,
+    ):
         """
         Create a new environment with a given config.
 
@@ -137,24 +147,29 @@ class Environment(metaclass=abc.ABCMeta):
         self._const_args: Dict[str, TunableValue] = config.get("const_args", {})
 
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Environment: '%s' Service: %s", name,
-                       self._service.pprint() if self._service else None)
+            _LOG.debug(
+                "Environment: '%s' Service: %s",
+                name,
+                self._service.pprint() if self._service else None,
+            )
 
         if tunables is None:
-            _LOG.warning("No tunables provided for %s. Tunable inheritance across composite environments may be broken.", name)
+            _LOG.warning(
+                "No tunables provided for %s. Tunable inheritance across composite environments may be broken.",
+                name,
+            )
             tunables = TunableGroups()
 
         groups = self._expand_groups(
-            config.get("tunable_params", []),
-            global_config.get("tunable_params_map", {}))
+            config.get("tunable_params", []), global_config.get("tunable_params_map", {})
+        )
         _LOG.debug("Tunable groups for: '%s' :: %s", name, groups)
 
         self._tunable_params = tunables.subgroup(groups)
 
         # If a parameter comes from the tunables, do not require it in the const_args or globals
-        req_args = (
-            set(config.get("required_args", [])) -
-            set(self._tunable_params.get_param_values().keys())
+        req_args = set(config.get("required_args", [])) - set(
+            self._tunable_params.get_param_values().keys()
         )
         req_args.update(self._COMMON_CONST_ARGS)
         merge_parameters(dest=self._const_args, source=global_config, required_keys=req_args)
@@ -164,14 +179,12 @@ class Environment(metaclass=abc.ABCMeta):
         _LOG.debug("Parameters for '%s' :: %s", name, self._params)
 
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Config for: '%s'\n%s",
-                       name, json.dumps(self.config, indent=2))
+            _LOG.debug("Config for: '%s'\n%s", name, json.dumps(self.config, indent=2))
 
     def _validate_json_config(self, config: dict, name: str) -> None:
-        """
-        Reconstructs a basic json config that this class might have been
-        instantiated from in order to validate configs provided outside the
-        file loading mechanism.
+        """Reconstructs a basic json config that this class might have been instantiated
+        from in order to validate configs provided outside the file loading
+        mechanism.
         """
         json_config: dict = {
             "class": self.__class__.__module__ + "." + self.__class__.__name__,
@@ -183,8 +196,9 @@ class Environment(metaclass=abc.ABCMeta):
         ConfigSchema.ENVIRONMENT.validate(json_config)
 
     @staticmethod
-    def _expand_groups(groups: Iterable[str],
-                       groups_exp: Dict[str, Union[str, Sequence[str]]]) -> List[str]:
+    def _expand_groups(
+        groups: Iterable[str], groups_exp: Dict[str, Union[str, Sequence[str]]]
+    ) -> List[str]:
         """
         Expand `$tunable_group` into actual names of the tunable groups.
 
@@ -206,7 +220,9 @@ class Environment(metaclass=abc.ABCMeta):
             if grp[:1] == "$":
                 tunable_group_name = grp[1:]
                 if tunable_group_name not in groups_exp:
-                    raise KeyError(f"Expected tunable group name ${tunable_group_name} undefined in {groups_exp}")
+                    raise KeyError(
+                        f"Expected tunable group name ${tunable_group_name} undefined in {groups_exp}"
+                    )
                 add_groups = groups_exp[tunable_group_name]
                 res += [add_groups] if isinstance(add_groups, str) else add_groups
             else:
@@ -214,10 +230,10 @@ class Environment(metaclass=abc.ABCMeta):
         return res
 
     @staticmethod
-    def _expand_vars(params: Dict[str, TunableValue], global_config: Dict[str, TunableValue]) -> dict:
-        """
-        Expand `$var` into actual values of the variables.
-        """
+    def _expand_vars(
+        params: Dict[str, TunableValue], global_config: Dict[str, TunableValue]
+    ) -> dict:
+        """Expand `$var` into actual values of the variables."""
         return DictTemplater(params).expand_vars(extra_source_dict=global_config)
 
     @property
@@ -225,10 +241,8 @@ class Environment(metaclass=abc.ABCMeta):
         assert self._service is not None
         return self._service.config_loader_service
 
-    def __enter__(self) -> 'Environment':
-        """
-        Enter the environment's benchmarking context.
-        """
+    def __enter__(self) -> "Environment":
+        """Enter the environment's benchmarking context."""
         _LOG.debug("Environment START :: %s", self)
         assert not self._in_context
         if self._service:
@@ -236,12 +250,13 @@ class Environment(metaclass=abc.ABCMeta):
         self._in_context = True
         return self
 
-    def __exit__(self, ex_type: Optional[Type[BaseException]],
-                 ex_val: Optional[BaseException],
-                 ex_tb: Optional[TracebackType]) -> Literal[False]:
-        """
-        Exit the context of the benchmarking environment.
-        """
+    def __exit__(
+        self,
+        ex_type: Optional[Type[BaseException]],
+        ex_val: Optional[BaseException],
+        ex_tb: Optional[TracebackType],
+    ) -> Literal[False]:
+        """Exit the context of the benchmarking environment."""
         ex_throw = None
         if ex_val is None:
             _LOG.debug("Environment END :: %s", self)
@@ -271,8 +286,8 @@ class Environment(metaclass=abc.ABCMeta):
 
     def pprint(self, indent: int = 4, level: int = 0) -> str:
         """
-        Pretty-print the environment configuration.
-        For composite environments, print all children environments as well.
+        Pretty-print the environment configuration. For composite environments, print
+        all children environments as well.
 
         Parameters
         ----------
@@ -292,8 +307,8 @@ class Environment(metaclass=abc.ABCMeta):
     def _combine_tunables(self, tunables: TunableGroups) -> Dict[str, TunableValue]:
         """
         Plug tunable values into the base config. If the tunable group is unknown,
-        ignore it (it might belong to another environment). This method should
-        never mutate the original config or the tunables.
+        ignore it (it might belong to another environment). This method should never
+        mutate the original config or the tunables.
 
         Parameters
         ----------
@@ -308,7 +323,8 @@ class Environment(metaclass=abc.ABCMeta):
         """
         return tunables.get_param_values(
             group_names=list(self._tunable_params.get_covariant_group_names()),
-            into_params=self._const_args.copy())
+            into_params=self._const_args.copy(),
+        )
 
     @property
     def tunable_params(self) -> TunableGroups:
@@ -337,8 +353,9 @@ class Environment(metaclass=abc.ABCMeta):
     @property
     def parameters(self) -> Dict[str, TunableValue]:
         """
-        Key/value pairs of all environment parameters (i.e., `const_args` and `tunable_params`).
-        Note that before `.setup()` is called, all tunables will be set to None.
+        Key/value pairs of all environment parameters (i.e., `const_args` and
+        `tunable_params`). Note that before `.setup()` is called, all tunables will be
+        set to None.
 
         Returns
         -------
@@ -350,8 +367,8 @@ class Environment(metaclass=abc.ABCMeta):
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
         Set up a new benchmark environment, if necessary. This method must be
-        idempotent, i.e., calling it several times in a row should be
-        equivalent to a single call.
+        idempotent, i.e., calling it several times in a row should be equivalent to a
+        single call.
 
         Parameters
         ----------
@@ -380,10 +397,15 @@ class Environment(metaclass=abc.ABCMeta):
         # (Derived classes still have to check `self._tunable_params.is_updated()`).
         is_updated = self._tunable_params.is_updated()
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Env '%s': Tunable groups reset = %s :: %s", self, is_updated, {
-                name: self._tunable_params.is_updated([name])
-                for name in self._tunable_params.get_covariant_group_names()
-            })
+            _LOG.debug(
+                "Env '%s': Tunable groups reset = %s :: %s",
+                self,
+                is_updated,
+                {
+                    name: self._tunable_params.is_updated([name])
+                    for name in self._tunable_params.get_covariant_group_names()
+                },
+            )
         else:
             _LOG.info("Env '%s': Tunable groups reset = %s", self, is_updated)
 
@@ -398,9 +420,10 @@ class Environment(metaclass=abc.ABCMeta):
 
     def teardown(self) -> None:
         """
-        Tear down the benchmark environment. This method must be idempotent,
-        i.e., calling it several times in a row should be equivalent to a
-        single call.
+        Tear down the benchmark environment.
+
+        This method must be idempotent, i.e., calling it several times in a row should
+        be equivalent to a single call.
         """
         _LOG.info("Teardown %s", self)
         # Make sure we create a context before invoking setup/run/status/teardown

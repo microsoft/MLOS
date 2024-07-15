@@ -2,23 +2,19 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Simple class to run an individual Trial on a given Environment.
-"""
+"""Simple class to run an individual Trial on a given Environment."""
 
+import logging
+from datetime import datetime
 from types import TracebackType
 from typing import Any, Dict, Literal, Optional, Type
-
-from datetime import datetime
-import logging
 
 from pytz import UTC
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.status import Status
-from mlos_bench.storage.base_storage import Storage
 from mlos_bench.event_loop_context import EventLoopContext
-
+from mlos_bench.storage.base_storage import Storage
 
 _LOG = logging.getLogger(__name__)
 
@@ -44,16 +40,12 @@ class TrialRunner:
 
     @property
     def trial_runner_id(self) -> int:
-        """
-        Get the TrialRunner's id.
-        """
+        """Get the TrialRunner's id."""
         return self._trial_runner_id
 
     @property
     def environment(self) -> Environment:
-        """
-        Get the Environment.
-        """
+        """Get the Environment."""
         return self._env
 
     def __enter__(self) -> "TrialRunner":
@@ -64,10 +56,12 @@ class TrialRunner:
         self._in_context = True
         return self
 
-    def __exit__(self,
-                 ex_type: Optional[Type[BaseException]],
-                 ex_val: Optional[BaseException],
-                 ex_tb: Optional[TracebackType]) -> Literal[False]:
+    def __exit__(
+        self,
+        ex_type: Optional[Type[BaseException]],
+        ex_val: Optional[BaseException],
+        ex_tb: Optional[TracebackType],
+    ) -> Literal[False]:
         assert self._in_context
         _LOG.debug("TrialRunner END :: %s", self)
         self._env.__exit__(ex_type, ex_val, ex_tb)
@@ -80,12 +74,12 @@ class TrialRunner:
         """Get the running state of the current TrialRunner."""
         return self._is_running
 
-    def run_trial(self,
-                  trial: Storage.Trial,
-                  global_config: Optional[Dict[str, Any]] = None) -> None:
+    def run_trial(
+        self, trial: Storage.Trial, global_config: Optional[Dict[str, Any]] = None
+    ) -> None:
         """
-        Run a single trial on this TrialRunner's Environment and stores the results
-        in the backend Trial Storage.
+        Run a single trial on this TrialRunner's Environment and stores the results in
+        the backend Trial Storage.
 
         Parameters
         ----------
@@ -104,8 +98,9 @@ class TrialRunner:
         assert not self._is_running
         self._is_running = True
 
-        assert trial.trial_runner_id == self.trial_runner_id, \
-            f"TrialRunner {self} should not run trial {trial} with different trial_runner_id {trial.trial_runner_id}."
+        assert (
+            trial.trial_runner_id == self.trial_runner_id
+        ), f"TrialRunner {self} should not run trial {trial} with different trial_runner_id {trial.trial_runner_id}."
 
         if not self.environment.setup(trial.tunables, trial.config(global_config)):
             _LOG.warning("Setup failed: %s :: %s", self.environment, trial.tunables)
@@ -116,7 +111,9 @@ class TrialRunner:
 
         # TODO: start background status polling of the environments in the event loop.
 
-        (status, timestamp, results) = self.environment.run()  # Block and wait for the final result.
+        (status, timestamp, results) = (
+            self.environment.run()
+        )  # Block and wait for the final result.
         _LOG.info("TrialRunner Results: %s :: %s\n%s", trial.tunables, status, results)
 
         # In async mode (TODO), poll the environment for status and telemetry
@@ -135,7 +132,9 @@ class TrialRunner:
     def teardown(self) -> None:
         """
         Tear down the Environment.
-        Call it after the completion of one (or more) `.run()` in the TrialRunner context.
+
+        Call it after the completion of one (or more) `.run()` in the TrialRunner
+        context.
         """
         assert self._in_context
         self._env.teardown()

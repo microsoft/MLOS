@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A simple single-threaded synchronous optimization loop implementation.
-"""
+"""A simple single-threaded synchronous optimization loop implementation."""
 
 import logging
 
@@ -15,14 +13,10 @@ _LOG = logging.getLogger(__name__)
 
 
 class SyncScheduler(Scheduler):
-    """
-    A simple single-threaded synchronous optimization loop implementation.
-    """
+    """A simple single-threaded synchronous optimization loop implementation."""
 
     def start(self) -> None:
-        """
-        Start the optimization loop.
-        """
+        """Start the optimization loop."""
         super().start()
 
         is_warm_up = self.optimizer.supports_preload
@@ -38,7 +32,9 @@ class SyncScheduler(Scheduler):
 
     def run_trial(self, trial: Storage.Trial) -> None:
         """
-        Set up and run a single trial. Save the results in the storage.
+        Set up and run a single trial.
+
+        Save the results in the storage.
         """
         super().run_trial(trial)
         # In the sync scheduler we run each trial on its own TrialRunner in sequence.
