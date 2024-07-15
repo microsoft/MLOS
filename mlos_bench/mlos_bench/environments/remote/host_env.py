@@ -18,7 +18,7 @@ _LOG = logging.getLogger(__name__)
 class HostEnv(Environment):
     """Remote host environment."""
 
-    def __init__(  # pylint: disable-too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         name: str,

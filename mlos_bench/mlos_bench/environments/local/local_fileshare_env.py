@@ -27,7 +27,7 @@ class LocalFileShareEnv(LocalEnv):
     to the shared file storage.
     """
 
-    def __init__(  # pylint: disable-too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         name: str,
