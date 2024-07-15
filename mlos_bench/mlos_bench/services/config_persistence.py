@@ -395,8 +395,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         _LOG.info("Created: Scheduler %s", inst)
         return inst
 
-    def build_environment(
-        self,  # pylint: disable=too-many-arguments
+    def build_environment(  # pylint: disable=too-many-arguments
+        self,
         config: Dict[str, Any],
         tunables: TunableGroups,
         global_config: Optional[Dict[str, Any]] = None,
@@ -566,8 +566,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         return self._build_composite_service(config_list, global_config, parent)
 
-    def load_environment(
-        self,  # pylint: disable=too-many-arguments
+    def load_environment(  # pylint: disable=too-many-arguments
+        self,
         json_file_name: str,
         tunables: TunableGroups,
         global_config: Optional[Dict[str, Any]] = None,
@@ -600,8 +600,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         assert isinstance(config, dict)
         return self.build_environment(config, tunables, global_config, parent_args, service)
 
-    def load_environment_list(
-        self,  # pylint: disable=too-many-arguments
+    def load_environment_list(  # pylint: disable=too-many-arguments
+        self,
         json_file_name: str,
         tunables: TunableGroups,
         global_config: Optional[Dict[str, Any]] = None,

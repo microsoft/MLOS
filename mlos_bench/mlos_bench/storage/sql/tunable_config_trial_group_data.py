@@ -31,7 +31,7 @@ class TunableConfigTrialGroupSqlData(TunableConfigTrialGroupData):
     (e.g., for repeats), which we call a (tunable) config trial group.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         engine: Engine,

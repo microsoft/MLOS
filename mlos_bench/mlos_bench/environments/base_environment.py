@@ -44,7 +44,7 @@ class Environment(metaclass=abc.ABCMeta):
     """An abstract base of all benchmark environments."""
 
     @classmethod
-    def new(
+    def new(  # pylint: disable=too-many-arguments
         cls,
         *,
         env_name: str,
