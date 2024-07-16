@@ -59,9 +59,7 @@ def configuration_space() -> ConfigurationSpace:
     spaces["idle"].default_value = "halt"
     spaces["kernel_sched_migration_cost_ns"].default_value = 250000
     spaces[kernel_sched_migration_cost_ns_special].default_value = -1
-    spaces[kernel_sched_migration_cost_ns_special].probabilities = (0.5, 0.5)
     spaces[kernel_sched_migration_cost_ns_type].default_value = TunableValueKind.SPECIAL
-    spaces[kernel_sched_migration_cost_ns_type].probabilities = (0.5, 0.5)
     spaces["kernel_sched_latency_ns"].default_value = 2000000
 
     spaces.add(
