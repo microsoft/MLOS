@@ -35,7 +35,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
     discretization is used.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         orig_parameter_space: ConfigSpace.ConfigurationSpace,

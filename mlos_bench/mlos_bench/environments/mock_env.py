@@ -25,7 +25,7 @@ class MockEnv(Environment):
     _NOISE_VAR = 0.2
     """Variance of the Gaussian noise added to the benchmark value."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         name: str,

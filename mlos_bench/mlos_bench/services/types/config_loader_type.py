@@ -70,8 +70,8 @@ class SupportsConfigLoading(Protocol):
             Free-format dictionary that contains the configuration.
         """
 
-    def build_environment(
-        self,  # pylint: disable=too-many-arguments
+    def build_environment(  # pylint: disable=too-many-arguments
+        self,
         config: dict,
         tunables: "TunableGroups",
         global_config: Optional[dict] = None,
