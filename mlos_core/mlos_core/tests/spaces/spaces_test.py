@@ -115,7 +115,7 @@ class BaseConversion(metaclass=ABCMeta):
 
     def test_unsupported_hyperparameter(self) -> None:
         input_space = CS.ConfigurationSpace()
-        input_space.add(NormalIntegerHyperparameter("a", 2, 1))
+        input_space.add(NormalIntegerHyperparameter("a", mu=50, sigma=5, lower=0, upper=99))
         with pytest.raises(ValueError, match="NormalIntegerHyperparameter"):
             self.conversion_function(input_space)
 
