@@ -20,6 +20,8 @@ from mlos_core.util import config_to_dataframe
 class BaseOptimizer(metaclass=ABCMeta):
     """Optimizer abstract base class defining the basic interface."""
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(
         self,
         *,

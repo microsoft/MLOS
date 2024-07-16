@@ -32,7 +32,7 @@ class RemoteEnv(ScriptEnv):
     e.g. Application Environment
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         name: str,
