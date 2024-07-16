@@ -25,15 +25,15 @@ def construct_parameter_space(
     input_space = CS.ConfigurationSpace(seed=seed)
 
     for idx in range(n_continuous_params):
-        input_space.add_hyperparameter(
+        input_space.add(
             CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64)
         )
     for idx in range(n_integer_params):
-        input_space.add_hyperparameter(
+        input_space.add(
             CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=-1, upper=256)
         )
     for idx in range(n_categorical_params):
-        input_space.add_hyperparameter(
+        input_space.add(
             CS.CategoricalHyperparameter(
                 name=f"str_{idx}", choices=[f"option_{idx}" for idx in range(5)]
             )
@@ -130,11 +130,11 @@ def test_special_parameter_values_validation() -> None:
     dictionary.
     """
     input_space = CS.ConfigurationSpace(seed=1234)
-    input_space.add_hyperparameter(
+    input_space.add(
         CS.CategoricalHyperparameter(name="str", choices=[f"choice_{idx}" for idx in range(5)])
     )
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="cont", lower=-1, upper=100))
-    input_space.add_hyperparameter(CS.UniformIntegerHyperparameter(name="int", lower=0, upper=100))
+    input_space.add(CS.UniformFloatHyperparameter(name="cont", lower=-1, upper=100))
+    input_space.add(CS.UniformIntegerHyperparameter(name="int", lower=0, upper=100))
 
     # Only UniformIntegerHyperparameters are currently supported
     with pytest.raises(NotImplementedError):
@@ -224,10 +224,10 @@ def gen_random_configs(adapter: LlamaTuneAdapter, num_configs: int) -> Iterator[
 def test_special_parameter_values_biasing() -> None:  # pylint: disable=too-complex
     """Tests LlamaTune's special parameter values biasing methodology."""
     input_space = CS.ConfigurationSpace(seed=1234)
-    input_space.add_hyperparameter(
+    input_space.add(
         CS.UniformIntegerHyperparameter(name="int_1", lower=0, upper=100)
     )
-    input_space.add_hyperparameter(
+    input_space.add(
         CS.UniformIntegerHyperparameter(name="int_2", lower=0, upper=100)
     )
 
@@ -323,22 +323,22 @@ def test_max_unique_values_per_param() -> None:
     """Tests LlamaTune's parameter values discretization implementation."""
     # Define config space with a mix of different parameter types
     input_space = CS.ConfigurationSpace(seed=1234)
-    input_space.add_hyperparameter(
+    input_space.add(
         CS.UniformFloatHyperparameter(name="cont_1", lower=0, upper=5),
     )
-    input_space.add_hyperparameter(
+    input_space.add(
         CS.UniformFloatHyperparameter(name="cont_2", lower=1, upper=100)
     )
-    input_space.add_hyperparameter(
+    input_space.add(
         CS.UniformIntegerHyperparameter(name="int_1", lower=1, upper=10)
     )
-    input_space.add_hyperparameter(
+    input_space.add(
         CS.UniformIntegerHyperparameter(name="int_2", lower=0, upper=2048)
     )
-    input_space.add_hyperparameter(
+    input_space.add(
         CS.CategoricalHyperparameter(name="str_1", choices=["on", "off"])
     )
-    input_space.add_hyperparameter(
+    input_space.add(
         CS.CategoricalHyperparameter(name="str_2", choices=[f"choice_{idx}" for idx in range(10)])
     )
 

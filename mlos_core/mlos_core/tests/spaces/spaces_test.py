@@ -115,14 +115,14 @@ class BaseConversion(metaclass=ABCMeta):
 
     def test_unsupported_hyperparameter(self) -> None:
         input_space = CS.ConfigurationSpace()
-        input_space.add_hyperparameter(NormalIntegerHyperparameter("a", 2, 1))
+        input_space.add(NormalIntegerHyperparameter("a", 2, 1))
         with pytest.raises(ValueError, match="NormalIntegerHyperparameter"):
             self.conversion_function(input_space)
 
     def test_continuous_bounds(self) -> None:
         input_space = CS.ConfigurationSpace()
-        input_space.add_hyperparameter(CS.UniformFloatHyperparameter("a", lower=100, upper=200))
-        input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("b", lower=-10, upper=-5))
+        input_space.add(CS.UniformFloatHyperparameter("a", lower=100, upper=200))
+        input_space.add(CS.UniformIntegerHyperparameter("b", lower=-10, upper=-5))
 
         converted_space = self.conversion_function(input_space)
         assert self.get_parameter_names(converted_space) == ["a", "b"]
@@ -132,8 +132,8 @@ class BaseConversion(metaclass=ABCMeta):
 
     def test_uniform_samples(self) -> None:
         input_space = CS.ConfigurationSpace()
-        input_space.add_hyperparameter(CS.UniformFloatHyperparameter("a", lower=1, upper=5))
-        input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("c", lower=1, upper=20))
+        input_space.add(CS.UniformFloatHyperparameter("a", lower=1, upper=5))
+        input_space.add(CS.UniformIntegerHyperparameter("c", lower=1, upper=20))
         converted_space = self.conversion_function(input_space)
 
         np.random.seed(42)
@@ -150,7 +150,7 @@ class BaseConversion(metaclass=ABCMeta):
 
     def test_uniform_categorical(self) -> None:
         input_space = CS.ConfigurationSpace()
-        input_space.add_hyperparameter(CS.CategoricalHyperparameter("c", choices=["foo", "bar"]))
+        input_space.add(CS.CategoricalHyperparameter("c", choices=["foo", "bar"]))
         converted_space = self.conversion_function(input_space)
         points = self.sample(converted_space, n_samples=100)
         counts = self.categorical_counts(points)
@@ -196,16 +196,16 @@ class TestFlamlConversion(BaseConversion):
 
     def test_dimensionality(self) -> None:
         input_space = CS.ConfigurationSpace()
-        input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("a", lower=1, upper=10))
-        input_space.add_hyperparameter(CS.CategoricalHyperparameter("b", choices=["bof", "bum"]))
-        input_space.add_hyperparameter(CS.CategoricalHyperparameter("c", choices=["foo", "bar"]))
+        input_space.add(CS.UniformIntegerHyperparameter("a", lower=1, upper=10))
+        input_space.add(CS.CategoricalHyperparameter("b", choices=["bof", "bum"]))
+        input_space.add(CS.CategoricalHyperparameter("c", choices=["foo", "bar"]))
         output_space = configspace_to_flaml_space(input_space)
         assert len(output_space) == 3
 
     def test_weighted_categorical(self) -> None:
         np.random.seed(42)
         input_space = CS.ConfigurationSpace()
-        input_space.add_hyperparameter(
+        input_space.add(
             CS.CategoricalHyperparameter("c", choices=["foo", "bar"], weights=[0.9, 0.1])
         )
         with pytest.raises(ValueError, match="non-uniform"):
@@ -216,7 +216,7 @@ class TestFlamlConversion(BaseConversion):
         np.random.seed(42)
         # integer is supported
         input_space = CS.ConfigurationSpace()
-        input_space.add_hyperparameter(
+        input_space.add(
             CS.UniformIntegerHyperparameter("d", lower=1, upper=20, log=True)
         )
         converted_space = configspace_to_flaml_space(input_space)
@@ -236,7 +236,7 @@ class TestFlamlConversion(BaseConversion):
 
         # continuous is supported
         input_space = CS.ConfigurationSpace()
-        input_space.add_hyperparameter(
+        input_space.add(
             CS.UniformFloatHyperparameter("b", lower=1, upper=5, log=True)
         )
         converted_space = configspace_to_flaml_space(input_space)

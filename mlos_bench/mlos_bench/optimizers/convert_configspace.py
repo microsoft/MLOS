@@ -23,7 +23,8 @@ from ConfigSpace import (
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import nullable, try_parse_val
+# from mlos_bench.util import nullable
+from mlos_bench.util import try_parse_val
 
 _LOG = logging.getLogger(__name__)
 
@@ -106,7 +107,7 @@ def _tunable_to_configspace(
             name=tunable.name,
             bounds=(int(tunable.range[0]), int(tunable.range[1])),
             log=bool(tunable.is_log),
-            q=nullable(int, tunable.quantization),
+            # q=nullable(int, tunable.quantization),
             distribution=distribution,
             default=(
                 int(tunable.default)
@@ -120,7 +121,7 @@ def _tunable_to_configspace(
             name=tunable.name,
             bounds=tunable.range,
             log=bool(tunable.is_log),
-            q=tunable.quantization,  # type: ignore[arg-type]
+            # q=tunable.quantization,  # type: ignore[arg-type]
             distribution=distribution,  # type: ignore[arg-type]
             default=(
                 float(tunable.default)
@@ -163,10 +164,10 @@ def _tunable_to_configspace(
             ),
         }
     )
-    conf_space.add_condition(
+    conf_space.add(
         EqualsCondition(conf_space[special_name], conf_space[type_name], TunableValueKind.SPECIAL)
     )
-    conf_space.add_condition(
+    conf_space.add(
         EqualsCondition(conf_space[tunable.name], conf_space[type_name], TunableValueKind.RANGE)
     )
 
