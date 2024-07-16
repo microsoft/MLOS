@@ -206,7 +206,18 @@ class MlosCoreOptimizer(Optimizer):
         (df_config, df_score, _df_context) = self._opt.get_best_observations()
         if len(df_config) == 0:
             return (None, None)
+
         params = configspace_data_to_tunable_values(df_config.iloc[0].to_dict())
         scores = self._adjust_signs_df(df_score).iloc[0].to_dict()
+
+        # Check for NaN values in all optimization targets and replace with 0
+        for target in self._opt_targets:
+            if target in scores:
+                if pd.isna(scores[target]):
+                    _LOG.warning(f"'{target}' is NaN in the best observation. Setting it to 0.")
+                    scores[target] = 0
+            else:
+                _LOG.warning(f"'{target}' not found in the scores.")
+
         _LOG.debug("Best observation: %s score: %s", params, scores)
         return (scores, self._tunables.copy().assign(params))

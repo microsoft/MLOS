@@ -76,7 +76,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         # if True (default), use the already initialized values for the first iteration.
         self._start_with_defaults: bool = bool(
             strtobool(str(self._config.pop('start_with_defaults', True))))
-        self._max_iter = int(self._config.pop('max_suggestions', 100))
+        self._max_iter = int(self._config.pop('max_suggestions', 5000))
 
         opt_targets: Dict[str, str] = self._config.pop('optimization_targets', {'score': 'min'})
         self._opt_targets: Dict[str, Literal[1, -1]] = {}
@@ -242,16 +242,24 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         is_not_empty : bool
             True if there is data to register, false otherwise.
         """
-        _LOG.info("Update the optimizer with: %d configs, %d scores, %d status values",
-                  len(configs or []), len(scores or []), len(status or []))
+        _LOG.info(
+            "Update the optimizer with: %d configs, %d scores, %d status values",
+            len(configs or []), len(scores or []), len(status or [])
+        )
+
         if len(configs or []) != len(scores or []):
             raise ValueError("Numbers of configs and scores do not match.")
         if status is not None and len(configs or []) != len(status or []):
             raise ValueError("Numbers of configs and status values do not match.")
+
         has_data = bool(configs and scores)
-        if has_data and self._start_with_defaults:
+        if len(configs or []) == 1:
+            _LOG.info("Only one configuration provided, using defaults.")
+            self._start_with_defaults = True
+        elif has_data and self._start_with_defaults:
             _LOG.info("Prior data exists - do *NOT* use the default initialization.")
             self._start_with_defaults = False
+
         return has_data
 
     def suggest(self) -> TunableGroups:
