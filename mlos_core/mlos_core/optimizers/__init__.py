@@ -58,7 +58,7 @@ class OptimizerFactory:
     # pylint: disable=too-few-public-methods
 
     @staticmethod
-    def create(
+    def create(  # pylint: disable=too-many-arguments
         *,
         parameter_space: ConfigSpace.ConfigurationSpace,
         optimization_targets: List[str],

@@ -125,7 +125,10 @@ class BaseConversion(metaclass=ABCMeta):
         input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("b", lower=-10, upper=-5))
 
         converted_space = self.conversion_function(input_space)
-        assert self.get_parameter_names(converted_space) == ["a", "b"]
+        assert self.get_parameter_names(converted_space) == [  # pylint: disable=unreachable
+            "a",
+            "b",
+        ]
         point = self.sample(converted_space)
         assert 100 <= point[0] <= 200
         assert -10 <= point[1] <= -5
@@ -136,7 +139,7 @@ class BaseConversion(metaclass=ABCMeta):
         input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("c", lower=1, upper=20))
         converted_space = self.conversion_function(input_space)
 
-        np.random.seed(42)
+        np.random.seed(42)  # pylint: disable=unreachable
         uniform, integer_uniform = self.sample(converted_space, n_samples=1000).T
 
         # uniform float
@@ -152,7 +155,7 @@ class BaseConversion(metaclass=ABCMeta):
         input_space = CS.ConfigurationSpace()
         input_space.add_hyperparameter(CS.CategoricalHyperparameter("c", choices=["foo", "bar"]))
         converted_space = self.conversion_function(input_space)
-        points = self.sample(converted_space, n_samples=100)
+        points = self.sample(converted_space, n_samples=100)  # pylint: disable=unreachable
         counts = self.categorical_counts(points)
         assert 35 < counts[0] < 65
         assert 35 < counts[1] < 65

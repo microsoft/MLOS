@@ -25,7 +25,7 @@ _LOG = logging.getLogger(__name__)
 class Experiment(Storage.Experiment):
     """Logic for retrieving and storing the results of a single experiment."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         engine: Engine,

@@ -32,7 +32,7 @@ class LocalEnv(ScriptEnv):
     # pylint: disable=too-many-instance-attributes
     """Scheduler-side Environment that runs scripts locally."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         name: str,
