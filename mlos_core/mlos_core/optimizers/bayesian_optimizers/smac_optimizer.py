@@ -354,7 +354,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
         ConfigSpace.Configuration(
             self.optimizer_parameter_space, values=trial.config
         ).check_valid_configuration()
-        # self.optimizer_parameter_space.check_configuration(trial.config)
         assert trial.config.config_space == self.optimizer_parameter_space
         self.trial_info_map[trial.config] = trial
         config_df = pd.DataFrame(

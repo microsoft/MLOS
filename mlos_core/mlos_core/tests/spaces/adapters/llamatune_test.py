@@ -90,7 +90,7 @@ def test_num_low_dims(
 
         # High-dim (i.e., original) config should be valid
         orig_config = CS.Configuration(input_space, values=orig_config_df.iloc[0].to_dict())
-        input_space.check_configuration(orig_config)
+        orig_config.check_valid_configuration()
 
         # Transform high-dim config back to low-dim
         target_config_df = adapter.inverse_transform(orig_config_df)
@@ -414,7 +414,7 @@ def test_approx_inverse_mapping(
             adapter.target_parameter_space,
             values=target_config_df.iloc[0].to_dict(),
         )
-        adapter.target_parameter_space.check_configuration(target_config)
+        target_config.check_valid_configuration()
 
     # Test inverse transform with 100 random configs
     for _ in range(100):
@@ -428,7 +428,7 @@ def test_approx_inverse_mapping(
             adapter.target_parameter_space,
             values=target_config_df.iloc[0].to_dict(),
         )
-        adapter.target_parameter_space.check_configuration(target_config)
+        target_config.check_valid_configuration()
 
 
 @pytest.mark.parametrize(
@@ -487,7 +487,7 @@ def test_llamatune_pipeline(
         orig_config_df = adapter.transform(sampled_config_df)
         # High-dim (i.e., original) config should be valid
         orig_config = CS.Configuration(input_space, values=orig_config_df.iloc[0].to_dict())
-        input_space.check_configuration(orig_config)
+        orig_config.check_valid_configuration()
 
         # Transform high-dim config back to low-dim
         target_config_df = adapter.inverse_transform(orig_config_df)
