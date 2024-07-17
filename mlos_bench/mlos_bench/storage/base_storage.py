@@ -167,7 +167,9 @@ class Storage(metaclass=ABCMeta):
             else:
                 assert exc_type and exc_val
                 _LOG.warning(
-                    "Finishing experiment: %s", self, exc_info=(exc_type, exc_val, exc_tb)
+                    "Finishing experiment: %s",
+                    self,
+                    exc_info=(exc_type, exc_val, exc_tb),
                 )
             assert self._in_context
             self._teardown(is_ok)
@@ -279,7 +281,10 @@ class Storage(metaclass=ABCMeta):
 
         @abstractmethod
         def pending_trials(
-            self, timestamp: datetime, *, running: bool
+            self,
+            timestamp: datetime,
+            *,
+            running: bool,
         ) -> Iterator["Storage.Trial"]:
             """
             Return an iterator over the pending trials that are scheduled to run on or
@@ -403,7 +408,10 @@ class Storage(metaclass=ABCMeta):
 
         @abstractmethod
         def update(
-            self, status: Status, timestamp: datetime, metrics: Optional[Dict[str, Any]] = None
+            self,
+            status: Status,
+            timestamp: datetime,
+            metrics: Optional[Dict[str, Any]] = None,
         ) -> Optional[Dict[str, Any]]:
             """
             Update the storage with the results of the experiment.
@@ -438,7 +446,10 @@ class Storage(metaclass=ABCMeta):
 
         @abstractmethod
         def update_telemetry(
-            self, status: Status, timestamp: datetime, metrics: List[Tuple[datetime, str, Any]]
+            self,
+            status: Status,
+            timestamp: datetime,
+            metrics: List[Tuple[datetime, str, Any]],
         ) -> None:
             """
             Save the experiment's telemetry data and intermediate status.

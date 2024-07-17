@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Simple class to help with nested dictionary $var templating.
-"""
+"""Simple class to help with nested dictionary $var templating."""
 
 from copy import deepcopy
 from string import Template
@@ -13,10 +11,8 @@ from typing import Any, Dict, Optional
 from mlos_bench.os_environ import environ
 
 
-class DictTemplater:    # pylint: disable=too-few-public-methods
-    """
-    Simple class to help with nested dictionary $var templating.
-    """
+class DictTemplater:  # pylint: disable=too-few-public-methods
+    """Simple class to help with nested dictionary $var templating."""
 
     def __init__(self, source_dict: Dict[str, Any]):
         """
@@ -32,9 +28,12 @@ class DictTemplater:    # pylint: disable=too-few-public-methods
         # The source/target dictionary to expand.
         self._dict: Dict[str, Any] = {}
 
-    def expand_vars(self, *,
-                    extra_source_dict: Optional[Dict[str, Any]] = None,
-                    use_os_env: bool = False) -> Dict[str, Any]:
+    def expand_vars(
+        self,
+        *,
+        extra_source_dict: Optional[Dict[str, Any]] = None,
+        use_os_env: bool = False,
+    ) -> Dict[str, Any]:
         """
         Expand the template variables in the destination dictionary.
 
@@ -55,10 +54,13 @@ class DictTemplater:    # pylint: disable=too-few-public-methods
         assert isinstance(self._dict, dict)
         return self._dict
 
-    def _expand_vars(self, value: Any, extra_source_dict: Optional[Dict[str, Any]], use_os_env: bool) -> Any:
-        """
-        Recursively expand $var strings in the currently operating dictionary.
-        """
+    def _expand_vars(
+        self,
+        value: Any,
+        extra_source_dict: Optional[Dict[str, Any]],
+        use_os_env: bool,
+    ) -> Any:
+        """Recursively expand $var strings in the currently operating dictionary."""
         if isinstance(value, str):
             # First try to expand all $vars internally.
             value = Template(value).safe_substitute(self._dict)
@@ -71,7 +73,7 @@ class DictTemplater:    # pylint: disable=too-few-public-methods
         elif isinstance(value, dict):
             # Note: we use a loop instead of dict comprehension in order to
             # allow secondary expansion of subsequent values immediately.
-            for (key, val) in value.items():
+            for key, val in value.items():
                 value[key] = self._expand_vars(val, extra_source_dict, use_os_env)
         elif isinstance(value, list):
             value = [self._expand_vars(val, extra_source_dict, use_os_env) for val in value]

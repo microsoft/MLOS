@@ -2,11 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Protocol interface for configuring cloud services.
-"""
+"""Protocol interface for configuring cloud services."""
 
-from typing import Any, Dict, Protocol, Tuple, TYPE_CHECKING, runtime_checkable
+from typing import TYPE_CHECKING, Any, Dict, Protocol, Tuple, runtime_checkable
 
 if TYPE_CHECKING:
     from mlos_bench.environments.status import Status
@@ -14,12 +12,9 @@ if TYPE_CHECKING:
 
 @runtime_checkable
 class SupportsRemoteConfig(Protocol):
-    """
-    Protocol interface for configuring cloud services.
-    """
+    """Protocol interface for configuring cloud services."""
 
-    def configure(self, config: Dict[str, Any],
-                  params: Dict[str, Any]) -> Tuple["Status", dict]:
+    def configure(self, config: Dict[str, Any], params: Dict[str, Any]) -> Tuple["Status", dict]:
         """
         Update the parameters of a SaaS service in the cloud.
 

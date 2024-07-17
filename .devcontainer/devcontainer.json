@@ -45,7 +45,6 @@
                 // Adjust the python interpreter path to point to the conda environment
                 "python.defaultInterpreterPath": "/opt/conda/envs/mlos/bin/python",
                 "python.testing.pytestPath": "/opt/conda/envs/mlos/bin/pytest",
-                "python.formatting.autopep8Path": "/opt/conda/envs/mlos/bin/autopep8",
                 "python.linting.pylintPath": "/opt/conda/envs/mlos/bin/pylint",
                 "pylint.path": [
                     "/opt/conda/envs/mlos/bin/pylint"
@@ -71,9 +70,8 @@
                 "lextudio.restructuredtext",
                 "matangover.mypy",
                 "ms-azuretools.vscode-docker",
-                // TODO: Enable additional formatter extensions:
-                //"ms-python.black-formatter",
-                //"ms-python.isort",
+                "ms-python.black-formatter",
+                "ms-python.isort",
                 "ms-python.pylint",
                 "ms-python.python",
                 "ms-python.vscode-pylance",

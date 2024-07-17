@@ -52,8 +52,8 @@ class TrialData(metaclass=ABCMeta):
 
     def __repr__(self) -> str:
         return (
-            f"Trial :: {self._experiment_id}:{self._trial_id} cid:{self._tunable_config_id} "
-            + f"rid:{self._trial_runner_id} {self._status.name}"
+            f"Trial :: {self._experiment_id}:{self._trial_id} "
+            f"cid:{self._tunable_config_id} rid:{self._trial_runner_id} {self._status.name}"
         )
 
     def __eq__(self, other: Any) -> bool:

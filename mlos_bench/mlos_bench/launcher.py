@@ -49,10 +49,13 @@ class Launcher:
         # pylint: disable=too-many-locals
         _LOG.info("Launch: %s", description)
         epilog = """
-            Additional --key=value pairs can be specified to augment or override values listed in --globals.
-            Other required_args values can also be pulled from shell environment variables.
+            Additional --key=value pairs can be specified to augment or override
+            values listed in --globals.
+            Other required_args values can also be pulled from shell environment
+            variables.
 
-            For additional details, please see the website or the README.md files in the source tree:
+            For additional details, please see the website or the README.md files in
+            the source tree:
             <https://github.com/microsoft/MLOS/tree/main/mlos_bench/>
             """
         parser = argparse.ArgumentParser(description=f"{description} : {long_text}", epilog=epilog)
@@ -99,11 +102,13 @@ class Launcher:
                 if key not in args_dict or args_dict[key] is None
             },
         )
-        # experiment_id is generally taken from --globals files, but we also allow overriding it on the CLI.
+        # experiment_id is generally taken from --globals files, but we also allow
+        # overriding it on the CLI.
         # It's useful to keep it there explicitly mostly for the --help output.
         if args.experiment_id:
             self.global_config["experiment_id"] = args.experiment_id
-        # trial_config_repeat_count is a scheduler property but it's convenient to set it via command line
+        # trial_config_repeat_count is a scheduler property but it's convenient to
+        # set it via command line
         if args.trial_config_repeat_count:
             self.global_config["trial_config_repeat_count"] = args.trial_config_repeat_count
         self.global_config.setdefault("num_trial_runners", 1)
@@ -124,7 +129,9 @@ class Launcher:
         service_files: List[str] = config.get("services", []) + (args.service or [])
         assert isinstance(self._parent_service, SupportsConfigLoading)
         self._parent_service = self._parent_service.load_services(
-            service_files, self.global_config, self._parent_service
+            service_files,
+            self.global_config,
+            self._parent_service,
         )
 
         env_path = args.environment or config.get("environment")
@@ -190,7 +197,8 @@ class Launcher:
 
     @staticmethod
     def _parse_args(
-        parser: argparse.ArgumentParser, argv: Optional[List[str]]
+        parser: argparse.ArgumentParser,
+        argv: Optional[List[str]],
     ) -> Tuple[argparse.Namespace, List[str]]:
         """Parse the command line arguments."""
         parser.add_argument(
@@ -236,7 +244,10 @@ class Launcher:
             nargs="+",
             action="extend",
             required=False,
-            help="Path to JSON file with the configuration of the service(s) for environment(s) to use.",
+            help=(
+                "Path to JSON file with the configuration "
+                "of the service(s) for environment(s) to use."
+            ),
         )
 
         parser.add_argument(
@@ -257,7 +268,8 @@ class Launcher:
             "--trial-config-repeat-count",
             required=False,
             type=int,
-            help="Number of times to repeat each config. Default is 1 trial per config, though more may be advised.",
+            help="Number of times to repeat each config. "
+                + "Default is 1 trial per config, though more may be advised."
         )
 
         parser.add_argument(
@@ -485,7 +497,9 @@ class Launcher:
         class_config = self._config_loader.load_config(args_storage, ConfigSchema.STORAGE)
         assert isinstance(class_config, Dict)
         storage = self._config_loader.build_storage(
-            service=self._parent_service, config=class_config, global_config=self.global_config
+            service=self._parent_service,
+            config=class_config,
+            global_config=self.global_config,
         )
         return storage
 

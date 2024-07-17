@@ -2,13 +2,11 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Base interface for accessing the stored benchmark experiment data.
-"""
+"""Base interface for accessing the stored benchmark experiment data."""
 
 from abc import ABCMeta, abstractmethod
-from distutils.util import strtobool    # pylint: disable=deprecated-module
-from typing import Dict, Literal, Optional, Tuple, TYPE_CHECKING
+from distutils.util import strtobool  # pylint: disable=deprecated-module
+from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple
 
 import pandas
 
@@ -16,7 +14,9 @@ from mlos_bench.storage.base_tunable_config_data import TunableConfigData
 
 if TYPE_CHECKING:
     from mlos_bench.storage.base_trial_data import TrialData
-    from mlos_bench.storage.base_tunable_config_trial_group_data import TunableConfigTrialGroupData
+    from mlos_bench.storage.base_tunable_config_trial_group_data import (
+        TunableConfigTrialGroupData,
+    )
 
 
 class ExperimentData(metaclass=ABCMeta):
@@ -30,12 +30,15 @@ class ExperimentData(metaclass=ABCMeta):
     RESULT_COLUMN_PREFIX = "result."
     CONFIG_COLUMN_PREFIX = "config."
 
-    def __init__(self, *,
-                 experiment_id: str,
-                 description: str,
-                 root_env_config: str,
-                 git_repo: str,
-                 git_commit: str):
+    def __init__(
+        self,
+        *,
+        experiment_id: str,
+        description: str,
+        root_env_config: str,
+        git_repo: str,
+        git_commit: str,
+    ):
         self._experiment_id = experiment_id
         self._description = description
         self._root_env_config = root_env_config
@@ -44,16 +47,12 @@ class ExperimentData(metaclass=ABCMeta):
 
     @property
     def experiment_id(self) -> str:
-        """
-        ID of the experiment.
-        """
+        """ID of the experiment."""
         return self._experiment_id
 
     @property
     def description(self) -> str:
-        """
-        Description of the experiment.
-        """
+        """Description of the experiment."""
         return self._description
 
     @property
@@ -123,7 +122,8 @@ class ExperimentData(metaclass=ABCMeta):
     @property
     def default_tunable_config_id(self) -> Optional[int]:
         """
-        Retrieves the (tunable) config id for the default tunable values for this experiment.
+        Retrieves the (tunable) config id for the default tunable values for this
+        experiment.
 
         Note: this is by *default* the first trial executed for this experiment.
         However, it is currently possible that the user changed the tunables config
@@ -140,9 +140,9 @@ class ExperimentData(metaclass=ABCMeta):
         trials_items = sorted(self.trials.items())
         if not trials_items:
             return None
-        for (_trial_id, trial) in trials_items:
+        for _trial_id, trial in trials_items:
             # Take the first config id marked as "defaults" when it was instantiated.
-            if strtobool(str(trial.metadata_dict.get('is_defaults', False))):
+            if strtobool(str(trial.metadata_dict.get("is_defaults", False))):
                 return trial.tunable_config_id
         # Fallback (min trial_id)
         return trials_items[0][1].tunable_config_id
@@ -157,7 +157,8 @@ class ExperimentData(metaclass=ABCMeta):
         -------
         results : pandas.DataFrame
             A DataFrame with configurations and results from all trials of the experiment.
-            Has columns [trial_id, tunable_config_id, tunable_config_trial_group_id, ts_start, ts_end, status]
+            Has columns
+            [trial_id, tunable_config_id, tunable_config_trial_group_id, ts_start, ts_end, status]
             followed by tunable config parameters (prefixed with "config.") and
             trial results (prefixed with "result."). The latter can be NULLs if the
             trial was not successful.

@@ -75,7 +75,9 @@ class TrialRunner:
         return self._is_running
 
     def run_trial(
-        self, trial: Storage.Trial, global_config: Optional[Dict[str, Any]] = None
+        self,
+        trial: Storage.Trial,
+        global_config: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         Run a single trial on this TrialRunner's Environment and stores the results in
@@ -98,9 +100,10 @@ class TrialRunner:
         assert not self._is_running
         self._is_running = True
 
-        assert (
-            trial.trial_runner_id == self.trial_runner_id
-        ), f"TrialRunner {self} should not run trial {trial} with different trial_runner_id {trial.trial_runner_id}."
+        assert trial.trial_runner_id == self.trial_runner_id, (
+            f"TrialRunner {self} should not run trial {trial} "
+            f"with different trial_runner_id {trial.trial_runner_id}."
+        )
 
         if not self.environment.setup(trial.tunables, trial.config(global_config)):
             _LOG.warning("Setup failed: %s :: %s", self.environment, trial.tunables)

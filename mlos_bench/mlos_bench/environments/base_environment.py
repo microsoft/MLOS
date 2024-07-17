@@ -42,6 +42,7 @@ _LOG = logging.getLogger(__name__)
 class Environment(metaclass=abc.ABCMeta):
     # pylint: disable=too-many-instance-attributes
     """An abstract base of all benchmark environments."""
+
     # Should be provided by the runtime.
     _COMMON_CONST_ARGS = {
         "trial_runner_id",
@@ -155,13 +156,17 @@ class Environment(metaclass=abc.ABCMeta):
 
         if tunables is None:
             _LOG.warning(
-                "No tunables provided for %s. Tunable inheritance across composite environments may be broken.",
+                (
+                    "No tunables provided for %s. "
+                    "Tunable inheritance across composite environments may be broken."
+                ),
                 name,
             )
             tunables = TunableGroups()
 
         groups = self._expand_groups(
-            config.get("tunable_params", []), global_config.get("tunable_params_map", {})
+            config.get("tunable_params", []),
+            (global_config or {}).get("tunable_params_map", {}),
         )
         _LOG.debug("Tunable groups for: '%s' :: %s", name, groups)
 
@@ -197,7 +202,8 @@ class Environment(metaclass=abc.ABCMeta):
 
     @staticmethod
     def _expand_groups(
-        groups: Iterable[str], groups_exp: Dict[str, Union[str, Sequence[str]]]
+        groups: Iterable[str],
+        groups_exp: Dict[str, Union[str, Sequence[str]]],
     ) -> List[str]:
         """
         Expand `$tunable_group` into actual names of the tunable groups.
@@ -221,7 +227,10 @@ class Environment(metaclass=abc.ABCMeta):
                 tunable_group_name = grp[1:]
                 if tunable_group_name not in groups_exp:
                     raise KeyError(
-                        f"Expected tunable group name ${tunable_group_name} undefined in {groups_exp}"
+                        (
+                            f"Expected tunable group name ${tunable_group_name} "
+                            "undefined in {groups_exp}"
+                        )
                     )
                 add_groups = groups_exp[tunable_group_name]
                 res += [add_groups] if isinstance(add_groups, str) else add_groups
@@ -231,7 +240,8 @@ class Environment(metaclass=abc.ABCMeta):
 
     @staticmethod
     def _expand_vars(
-        params: Dict[str, TunableValue], global_config: Dict[str, TunableValue]
+        params: Dict[str, TunableValue],
+        global_config: Dict[str, TunableValue],
     ) -> dict:
         """Expand `$var` into actual values of the variables."""
         return DictTemplater(params).expand_vars(extra_source_dict=global_config)
@@ -360,7 +370,8 @@ class Environment(metaclass=abc.ABCMeta):
         Returns
         -------
         parameters : Dict[str, TunableValue]
-            Key/value pairs of all environment parameters (i.e., `const_args` and `tunable_params`).
+            Key/value pairs of all environment parameters
+            (i.e., `const_args` and `tunable_params`).
         """
         return self._params.copy()
 

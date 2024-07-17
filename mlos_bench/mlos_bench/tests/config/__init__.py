@@ -2,14 +2,11 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Helper functions for config example loading tests.
-"""
-
-from typing import Callable, List, Optional
+"""Helper functions for config example loading tests."""
 
 import os
 import sys
+from typing import Callable, List, Optional
 
 from mlos_bench.util import path_join
 
@@ -22,10 +19,13 @@ else:
 BUILTIN_TEST_CONFIG_PATH = str(files("mlos_bench.tests.config").joinpath("")).replace("\\", "/")
 
 
-def locate_config_examples(root_dir: str,
-                           config_examples_dir: str,
-                           examples_filter: Optional[Callable[[List[str]], List[str]]] = None) -> List[str]:
-    """Locates all config examples in the given directory.
+def locate_config_examples(
+    root_dir: str,
+    config_examples_dir: str,
+    examples_filter: Optional[Callable[[List[str]], List[str]]] = None,
+) -> List[str]:
+    """
+    Locates all config examples in the given directory.
 
     Parameters
     ----------

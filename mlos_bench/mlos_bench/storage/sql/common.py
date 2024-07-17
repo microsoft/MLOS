@@ -16,7 +16,10 @@ from mlos_bench.util import utcify_nullable_timestamp, utcify_timestamp
 
 
 def get_trials(
-    engine: Engine, schema: DbSchema, experiment_id: str, tunable_config_id: Optional[int] = None
+    engine: Engine,
+    schema: DbSchema,
+    experiment_id: str,
+    tunable_config_id: Optional[int] = None,
 ) -> Dict[int, TrialData]:
     """
     Gets TrialData for the given experiment_data and optionally additionally restricted
@@ -24,9 +27,8 @@ def get_trials(
 
     Used by both TunableConfigTrialGroupSqlData and ExperimentSqlData.
     """
-    from mlos_bench.storage.sql.trial_data import (
-        TrialSqlData,  # pylint: disable=import-outside-toplevel,cyclic-import
-    )
+    # pylint: disable=import-outside-toplevel,cyclic-import
+    from mlos_bench.storage.sql.trial_data import TrialSqlData
 
     with engine.connect() as conn:
         # Build up sql a statement for fetching trials.
@@ -70,7 +72,10 @@ def get_trials(
 
 
 def get_results_df(
-    engine: Engine, schema: DbSchema, experiment_id: str, tunable_config_id: Optional[int] = None
+    engine: Engine,
+    schema: DbSchema,
+    experiment_id: str,
+    tunable_config_id: Optional[int] = None,
 ) -> pandas.DataFrame:
     """
     Gets TrialData for the given experiment_data and optionally additionally restricted
@@ -203,7 +208,10 @@ def get_results_df(
             columns="param",
             values="value",
         )
-        configs_df = configs_df.apply(pandas.to_numeric, errors="coerce").fillna(configs_df)  # type: ignore[assignment]  # (fp)
+        configs_df = configs_df.apply(  # type: ignore[assignment]  # (fp)
+            pandas.to_numeric,
+            errors="coerce",
+        ).fillna(configs_df)
 
         # Get each trial's results in wide format.
         results_stmt = (
@@ -246,9 +254,14 @@ def get_results_df(
             columns="metric",
             values="value",
         )
-        results_df = results_df.apply(pandas.to_numeric, errors="coerce").fillna(results_df)  # type: ignore[assignment]  # (fp)
+        results_df = results_df.apply(  # type: ignore[assignment]  # (fp)
+            pandas.to_numeric,
+            errors="coerce",
+        ).fillna(results_df)
 
         # Concat the trials, configs, and results.
         return trials_df.merge(configs_df, on=["trial_id", "tunable_config_id"], how="left").merge(
-            results_df, on="trial_id", how="left"
+            results_df,
+            on="trial_id",
+            how="left",
         )

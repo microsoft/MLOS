@@ -2,20 +2,20 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Factory method to create a new Storage instance from configs.
-"""
+"""Factory method to create a new Storage instance from configs."""
 
-from typing import Any, Optional, List, Dict
+from typing import Any, Dict, List, Optional
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_storage import Storage
 
 
-def from_config(config_file: str,
-                global_configs: Optional[List[str]] = None,
-                **kwargs: Any) -> Storage:
+def from_config(
+    config_file: str,
+    global_configs: Optional[List[str]] = None,
+    **kwargs: Any,
+) -> Storage:
     """
     Create a new storage object from JSON5 config file.
 
@@ -36,7 +36,7 @@ def from_config(config_file: str,
     config_path: List[str] = kwargs.get("config_path", [])
     config_loader = ConfigPersistenceService({"config_path": config_path})
     global_config = {}
-    for fname in (global_configs or []):
+    for fname in global_configs or []:
         config = config_loader.load_config(fname, ConfigSchema.GLOBALS)
         global_config.update(config)
         config_path += config.get("config_path", [])

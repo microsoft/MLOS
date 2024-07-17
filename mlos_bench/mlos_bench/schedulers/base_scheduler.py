@@ -61,7 +61,9 @@ class Scheduler(metaclass=ABCMeta):
         """
         self.global_config = global_config
         config = merge_parameters(
-            dest=config.copy(), source=global_config, required_keys=["experiment_id", "trial_id"]
+            dest=config.copy(),
+            source=global_config,
+            required_keys=["experiment_id", "trial_id"],
         )
 
         self._experiment_id = config["experiment_id"].strip()
@@ -178,8 +180,8 @@ class Scheduler(metaclass=ABCMeta):
             experiment_id=self._experiment_id,
             trial_id=self._trial_id,
             root_env_config=self._root_env_config,
-            description=self.environment.name,
-            tunables=self.environment.tunable_params,
+            description=self.root_environment.name,
+            tunables=self.root_environment.tunable_params,
             opt_targets=self.optimizer.targets,
         ).__enter__()
         return self
@@ -301,6 +303,7 @@ class Scheduler(metaclass=ABCMeta):
                 },
             )
             # Rotate which TrialRunner the Trial is assigned to.
+            # TODO: This could be a more sophisticated policy.
             self._current_trial_runner_idx = (self._current_trial_runner_idx + 1) % len(
                 self._trial_runners
             )

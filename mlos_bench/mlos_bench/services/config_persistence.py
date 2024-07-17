@@ -193,7 +193,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                 )
                 raise ValueError(
                     f"Failed to validate config {json_file_name} against "
-                    + f"schema type {schema_type.name} at {schema_type.value}"
+                    f"schema type {schema_type.name} at {schema_type.value}"
                 ) from ex
             if isinstance(config, dict) and config.get("$schema"):
                 # Remove $schema attributes from the config after we've validated
@@ -298,8 +298,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             tunables = self._load_tunables(tunables_path, tunables)
         (class_name, class_config) = self.prepare_class_load(config, global_config)
         inst = instantiate_from_config(
-            Optimizer,
-            class_name,  # type: ignore[type-abstract]
+            Optimizer,  # type: ignore[type-abstract]
+            class_name,
             tunables=tunables,
             config=class_config,
             global_config=global_config,
@@ -333,13 +333,12 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             A new instance of the Storage class.
         """
         (class_name, class_config) = self.prepare_class_load(config, global_config)
-        from mlos_bench.storage.base_storage import (
-            Storage,  # pylint: disable=import-outside-toplevel
-        )
+        # pylint: disable=import-outside-toplevel
+        from mlos_bench.storage.base_storage import Storage
 
         inst = instantiate_from_config(
-            Storage,
-            class_name,  # type: ignore[type-abstract]
+            Storage,  # type: ignore[type-abstract]
+            class_name,
             config=class_config,
             global_config=global_config,
             service=service,
@@ -381,13 +380,12 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             A new instance of the Scheduler.
         """
         (class_name, class_config) = self.prepare_class_load(config, global_config)
-        from mlos_bench.schedulers.base_scheduler import (
-            Scheduler,  # pylint: disable=import-outside-toplevel
-        )
+        # pylint: disable=import-outside-toplevel
+        from mlos_bench.schedulers.base_scheduler import Scheduler
 
         inst = instantiate_from_config(
-            Scheduler,
-            class_name,  # type: ignore[type-abstract]
+            Scheduler,  # type: ignore[type-abstract]
+            class_name,
             config=class_config,
             global_config=global_config,
             trial_runners=trial_runners,
@@ -669,7 +667,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         return service
 
     def _load_tunables(
-        self, json_file_names: Iterable[str], parent: TunableGroups
+        self,
+        json_file_names: Iterable[str],
+        parent: TunableGroups,
     ) -> TunableGroups:
         """
         Load a collection of tunable parameters from JSON files into the parent

@@ -105,7 +105,11 @@ class DbSchema:
             )
         else:
             col_config_id = Column(
-                "config_id", Integer, nullable=False, primary_key=True, autoincrement=True
+                "config_id",
+                Integer,
+                nullable=False,
+                primary_key=True,
+                autoincrement=True,
             )
 
         self.config = Table(
@@ -154,7 +158,8 @@ class DbSchema:
             Column("param_value", String(self._PARAM_VALUE_LEN)),
             PrimaryKeyConstraint("exp_id", "trial_id", "param_id"),
             ForeignKeyConstraint(
-                ["exp_id", "trial_id"], [self.trial.c.exp_id, self.trial.c.trial_id]
+                ["exp_id", "trial_id"],
+                [self.trial.c.exp_id, self.trial.c.trial_id],
             ),
         )
 
@@ -167,7 +172,8 @@ class DbSchema:
             Column("status", String(self._STATUS_LEN), nullable=False),
             UniqueConstraint("exp_id", "trial_id", "ts"),
             ForeignKeyConstraint(
-                ["exp_id", "trial_id"], [self.trial.c.exp_id, self.trial.c.trial_id]
+                ["exp_id", "trial_id"],
+                [self.trial.c.exp_id, self.trial.c.trial_id],
             ),
         )
 
@@ -180,7 +186,8 @@ class DbSchema:
             Column("metric_value", String(self._METRIC_VALUE_LEN)),
             PrimaryKeyConstraint("exp_id", "trial_id", "metric_id"),
             ForeignKeyConstraint(
-                ["exp_id", "trial_id"], [self.trial.c.exp_id, self.trial.c.trial_id]
+                ["exp_id", "trial_id"],
+                [self.trial.c.exp_id, self.trial.c.trial_id],
             ),
         )
 
@@ -194,7 +201,8 @@ class DbSchema:
             Column("metric_value", String(self._METRIC_VALUE_LEN)),
             UniqueConstraint("exp_id", "trial_id", "ts", "metric_id"),
             ForeignKeyConstraint(
-                ["exp_id", "trial_id"], [self.trial.c.exp_id, self.trial.c.trial_id]
+                ["exp_id", "trial_id"],
+                [self.trial.c.exp_id, self.trial.c.trial_id],
             ),
         )
 
