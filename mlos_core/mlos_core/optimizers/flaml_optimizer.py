@@ -124,11 +124,10 @@ class FlamlOptimizer(BaseOptimizer):
             warn(f"Not Implemented: Ignoring metadata {list(metadata.columns)}", UserWarning)
 
         for (_, config), (_, score) in zip(configs.astype("O").iterrows(), scores.iterrows()):
-            # Remove None values for inactive parameters
+            # Remove None values for inactive config parameters
             config_dict = {key: val for key, val in config.to_dict().items() if val is not None}
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
-                self.optimizer_parameter_space,
-                values=config_dict,
+                self.optimizer_parameter_space, values=config_dict
             )
             if cs_config in self.evaluated_samples:
                 warn(f"Configuration {config} was already registered", UserWarning)
