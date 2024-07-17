@@ -62,6 +62,7 @@ def test_multi_target_opt(
     """Toy multi-target optimization problem to test the optimizers with mixed numeric
     types to ensure that original dtypes are retained.
     """
+    # pylint: disable=too-many-locals
     max_iterations = 10
 
     def objective(point: pd.DataFrame) -> pd.DataFrame:

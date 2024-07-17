@@ -343,7 +343,7 @@ build/pylint.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
 
 PYLINT_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
 PYLINT_COMMON_PREREQS += $(FORMAT_PREREQS)
-PYLINT_COMMON_PREREQS += .pylintrc
+PYLINT_COMMON_PREREQS += pyproject.toml
 
 build/pylint.%.${CONDA_ENV_NAME}.build-stamp: $(PYLINT_COMMON_PREREQS)
 	conda run -n ${CONDA_ENV_NAME} pylint -j0 $(filter %.py,$+)

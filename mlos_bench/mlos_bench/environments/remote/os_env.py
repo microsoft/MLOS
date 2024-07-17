@@ -20,7 +20,7 @@ _LOG = logging.getLogger(__name__)
 class OSEnv(Environment):
     """OS Level Environment for a host."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         name: str,
