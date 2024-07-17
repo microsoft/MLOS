@@ -444,6 +444,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
             List of ConfigSpace configs.
         """
         return [
-            ConfigSpace.Configuration(self.optimizer_parameter_space, values=config.to_dict())
+            ConfigSpace.Configuration(
+                self.optimizer_parameter_space,
+                # Remove None values for inactive parameters
+                values={key: val for key, val in config.to_dict().items() if val is not None},
+                allow_inactive_with_values=False,
+            )
             for (_, config) in configs.astype("O").iterrows()
         ]
