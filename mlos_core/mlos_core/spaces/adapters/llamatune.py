@@ -139,6 +139,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
                     self.target_parameter_space,
                     vector=target_config_vector,
                 )
+                self.target_parameter_space.check_configuration(target_config)
+                # target_config.check_valid_configuration()  # for ConfigSpace 1.0
 
             target_configurations.append(target_config)
 
