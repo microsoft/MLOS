@@ -125,10 +125,21 @@
     ],
     "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source",
     "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/",
+    "editor.rulers": [
+        // editorconfig default
+        132
+    ],
+    "isort.check": true,
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true,
-        "editor.formatOnSaveMode": "modifications"
+        "editor.formatOnSaveMode": "modifications",
+        "editor.rulers": [
+            // docstring formatting limit
+            80,
+            // python code formatting limit
+            99
+        ]
     },
     // See Also .vscode/launch.json for environment variable args to pytest during debug sessions.
     // For the rest, see setup.cfg
