@@ -137,9 +137,8 @@ class MlosCoreOptimizer(Optimizer):
         return True
 
     def _adjust_signs_df(self, df_scores: pd.DataFrame) -> pd.DataFrame:
-        """
-        Coerce optimization target scores to floats
-        and adjust the signs for MINIMIZATION problem.
+        """Coerce optimization target scores to floats and adjust the signs for
+        MINIMIZATION problem.
         """
         # NOTE: We use `.astype()` instead of `.apply(pd.to_numeric)`
         # to catch incorrect values early.

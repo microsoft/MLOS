@@ -81,8 +81,8 @@ def test_df(mlos_core_optimizer: MlosCoreOptimizer, mock_configs: List[dict]) ->
 
 
 def test_df_str(mlos_core_optimizer: MlosCoreOptimizer, mock_configs: List[dict]) -> None:
-    """
-    Test `MlosCoreOptimizer._to_df()` type coercion on tunables with string values.
+    """Test `MlosCoreOptimizer._to_df()` type coercion on tunables with string
+    values.
     """
     df_config_orig = mlos_core_optimizer._to_df(mock_configs)
     df_config_str = mlos_core_optimizer._to_df(
@@ -92,9 +92,7 @@ def test_df_str(mlos_core_optimizer: MlosCoreOptimizer, mock_configs: List[dict]
 
 
 def test_adjust_signs_df(mlos_core_optimizer: MlosCoreOptimizer) -> None:
-    """
-    Test `MlosCoreOptimizer._adjust_signs_df()` on different types of inputs.
-    """
+    """Test `MlosCoreOptimizer._adjust_signs_df()` on different types of inputs."""
     df_scores_input = pandas.DataFrame(
         {
             "latency": [88.88, 66.66, 99.99, None],
@@ -119,8 +117,8 @@ def test_adjust_signs_df(mlos_core_optimizer: MlosCoreOptimizer) -> None:
 
 
 def test_adjust_signs_df_nan(mlos_core_optimizer: MlosCoreOptimizer) -> None:
-    """
-    Test `MlosCoreOptimizer._adjust_signs_df()` handling None, NaN, and Inf values.
+    """Test `MlosCoreOptimizer._adjust_signs_df()` handling None, NaN, and Inf
+    values.
     """
     df_scores = mlos_core_optimizer._adjust_signs_df(
         pandas.DataFrame(
@@ -142,9 +140,7 @@ def test_adjust_signs_df_nan(mlos_core_optimizer: MlosCoreOptimizer) -> None:
 
 
 def test_adjust_signs_df_invalid(mlos_core_optimizer: MlosCoreOptimizer) -> None:
-    """
-    Test `MlosCoreOptimizer._adjust_signs_df()` on invalid inputs.
-    """
+    """Test `MlosCoreOptimizer._adjust_signs_df()` on invalid inputs."""
     with pytest.raises(ValueError):
         mlos_core_optimizer._adjust_signs_df(
             pandas.DataFrame(
