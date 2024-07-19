@@ -103,9 +103,7 @@ def azure_vm_service_remote_exec_only(azure_auth_service: AzureAuthService) -> A
 
 @pytest.fixture
 def azure_fileshare(azure_auth_service: AzureAuthService) -> AzureFileShareService:
-    """
-    Creates a dummy AzureFileShareService for tests that require it.
-    """
+    """Creates a dummy AzureFileShareService for tests that require it."""
     with patch("mlos_bench.services.remote.azure.azure_fileshare.ShareClient"):
         return AzureFileShareService(
             config={

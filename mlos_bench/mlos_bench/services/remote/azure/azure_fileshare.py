@@ -63,9 +63,7 @@ class AzureFileShareService(FileShareService):
         self._share_client: Optional[ShareClient] = None
 
     def _get_share_client(self) -> ShareClient:
-        """
-        Get the Azure file share client object.
-        """
+        """Get the Azure file share client object."""
         if self._share_client is None:
             assert self._parent is not None and isinstance(
                 self._parent, SupportsAuth
