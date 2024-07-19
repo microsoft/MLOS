@@ -30,7 +30,7 @@ class ExperimentData(metaclass=ABCMeta):
     RESULT_COLUMN_PREFIX = "result."
     CONFIG_COLUMN_PREFIX = "config."
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         experiment_id: str,

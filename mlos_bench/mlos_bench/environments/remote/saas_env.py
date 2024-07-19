@@ -19,7 +19,7 @@ _LOG = logging.getLogger(__name__)
 class SaaSEnv(Environment):
     """Cloud-based (configurable) SaaS environment."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         name: str,

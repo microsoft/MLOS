@@ -27,7 +27,7 @@ class Scheduler(metaclass=ABCMeta):
     # pylint: disable=too-many-instance-attributes
     """Base class for the optimization loop scheduling policies."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         config: Dict[str, Any],
