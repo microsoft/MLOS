@@ -97,7 +97,7 @@ setup(
         'pandas >= 2.2.0;python_version>="3.9"',
         'Bottleneck > 1.3.5;python_version>="3.9"',
         'pandas >= 1.0.3;python_version<"3.9"',
-        "ConfigSpace==0.7.1",  # Temporarily restrict ConfigSpace version.
+        "ConfigSpace==1.1.1",  # Temporarily restrict ConfigSpace version.
     ],
     extras_require=extra_requires,
     **_get_long_desc_from_readme("https://github.com/microsoft/MLOS/tree/main/mlos_core"),
