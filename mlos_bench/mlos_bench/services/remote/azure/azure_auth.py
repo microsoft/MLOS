@@ -66,9 +66,9 @@ class AzureAuthService(Service, SupportsAuth):
         self._access_token = "RENEW *NOW*"
         self._token_expiration_ts = datetime.now(UTC)  # Typically, some future timestamp.
 
-        # Login as ourselves
-        self._cred: Union[azure_id.AzureCliCredential, azure_id.CertificateCredential]
-        self._cred = azure_id.AzureCliCredential()
+        # Login as the first identity available, usually ourselves or a managed identity
+        self._cred: Union[azure_id.DefaultAzureCredential, azure_id.CertificateCredential]
+        self._cred = azure_id.DefaultAzureCredential()
 
         # Verify info required for SP auth early
         if "spClientId" in self.config:
