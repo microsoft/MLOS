@@ -98,7 +98,7 @@ class Launcher:
         cli_config_args = {
             key: val
             for (key, val) in config.items()
-            if (key not in args_dict or args_dict[key] is None) and key not in excluded_cli_args
+            if (args_dict.get(key) is None) and key not in excluded_cli_args
         }
 
         self.global_config = self._load_config(

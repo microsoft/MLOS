@@ -91,9 +91,9 @@ class Scheduler(metaclass=ABCMeta):
         _LOG.debug("Scheduler instantiated: %s :: %s", self, config)
 
     def _validate_json_config(self, config: dict) -> None:
-        """Reconstructs a basic json config that this class might have been
-        instantiated from in order to validate configs provided outside the
-        file loading mechanism.
+        """Reconstructs a basic json config that this class might have been instantiated
+        from in order to validate configs provided outside the file loading
+        mechanism.
         """
         json_config: dict = {
             "class": self.__class__.__module__ + "." + self.__class__.__name__,
