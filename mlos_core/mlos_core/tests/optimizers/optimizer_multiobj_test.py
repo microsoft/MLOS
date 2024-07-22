@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from mlos_core.optimizers.observations import Suggestion
 from mlos_core.optimizers import BaseOptimizer, OptimizerType
 from mlos_core.tests import SEED
 
@@ -93,35 +94,41 @@ def test_multi_target_opt(
         optimizer.get_observations()
 
     for _ in range(max_iterations):
-        suggestion, metadata = optimizer.suggest()
-        assert isinstance(suggestion, pd.DataFrame)
-        assert metadata is None or isinstance(metadata, pd.DataFrame)
-        assert set(suggestion.columns) == {"x", "y"}
+        suggestion = optimizer.suggest()
+        assert isinstance(suggestion, Suggestion)
+        assert isinstance(suggestion.config, pd.DataFrame)
+        assert suggestion.metadata is None or isinstance(suggestion.metadata, pd.DataFrame)
+        assert set(suggestion.config.columns) == {"x", "y"}
         # Check suggestion values are the expected dtype
-        assert isinstance(suggestion.x.iloc[0], np.integer)
-        assert isinstance(suggestion.y.iloc[0], np.floating)
+        assert isinstance(suggestion.config.x.iloc[0], np.integer)
+        assert isinstance(suggestion.config.y.iloc[0], np.floating)
         # Check that suggestion is in the space
         test_configuration = CS.Configuration(
-            optimizer.parameter_space, suggestion.astype("O").iloc[0].to_dict()
+            optimizer.parameter_space, suggestion.config.astype("O").iloc[0].to_dict()
         )
         # Raises an error if outside of configuration space
         test_configuration.is_valid_configuration()
         # Test registering the suggested configuration with a score.
-        observation = objective(suggestion)
+        observation = objective(suggestion.config)
         assert isinstance(observation, pd.DataFrame)
         assert set(observation.columns) == {"main_score", "other_score"}
-        optimizer.register(configs=suggestion, scores=observation)
+        optimizer.register(observation=suggestion.evaluate(observation))
 
-    (best_config, best_score, best_context) = optimizer.get_best_observations()
+    (best_config, best_score, best_context, _best_metadata) = (
+        optimizer.get_best_observations().to_legacy()
+    )
     assert isinstance(best_config, pd.DataFrame)
     assert isinstance(best_score, pd.DataFrame)
     assert best_context is None
-    assert set(best_config.columns) == {"x", "y"}
+    t = set(best_config.columns)
+    assert t == {"x", "y"}
     assert set(best_score.columns) == {"main_score", "other_score"}
     assert best_config.shape == (1, 2)
     assert best_score.shape == (1, 2)
 
-    (all_configs, all_scores, all_contexts) = optimizer.get_observations()
+    (all_configs, all_scores, all_contexts, _all_metadata) = (
+        optimizer.get_observations().to_legacy()
+    )
     assert isinstance(all_configs, pd.DataFrame)
     assert isinstance(all_scores, pd.DataFrame)
     assert all_contexts is None

@@ -18,6 +18,7 @@ import ConfigSpace
 import numpy.typing as npt
 import pandas as pd
 
+from mlos_core.optimizers.observations import Observation, Suggestion
 from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import (
     BaseBayesianOptimizer,
 )
@@ -272,29 +273,15 @@ class SmacOptimizer(BaseBayesianOptimizer):
     def _register(
         self,
         *,
-        configs: pd.DataFrame,
-        scores: pd.DataFrame,
-        context: Optional[pd.DataFrame] = None,
-        metadata: Optional[pd.DataFrame] = None,
+        observation: Observation,
     ) -> None:
         """
         Registers the given configs and scores.
 
         Parameters
         ----------
-        configs : pd.DataFrame
-            Dataframe of configs / parameters. The columns are parameter names and
-            the rows are the configs.
-
-        scores : pd.DataFrame
-            Scores from running the configs. The index is the same as the index of
-            the configs.
-
-        context : pd.DataFrame
-            Not Yet Implemented.
-
-        metadata: pd.DataFrame
-            Not Yet Implemented.
+        observation: Observation
+            The observation to register.
         """
         from smac.runhistory import (  # pylint: disable=import-outside-toplevel
             StatusType,
@@ -302,12 +289,16 @@ class SmacOptimizer(BaseBayesianOptimizer):
             TrialValue,
         )
 
-        if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+        if observation.context is not None:
+            warn(
+                f"Not Implemented: Ignoring context {list(observation.context.columns)}",
+                UserWarning,
+            )
 
         # Register each trial (one-by-one)
         for config, (_i, score) in zip(
-            self._to_configspace_configs(configs=configs), scores.iterrows()
+            self._to_configspace_configs(configs=observation.config),
+            observation.performance.iterrows(),
         ):
             # Retrieve previously generated TrialInfo (returned by .ask()) or create
             # new TrialInfo instance
@@ -325,7 +316,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         self,
         *,
         context: Optional[pd.DataFrame] = None,
-    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
+    ) -> Suggestion:
         """
         Suggests a new configuration.
 
@@ -357,15 +348,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         config_df = pd.DataFrame(
             [trial.config], columns=list(self.optimizer_parameter_space.keys())
         )
-        return config_df, None
+        return Suggestion(config=config_df, context=context, metadata=None)
 
-    def register_pending(
-        self,
-        *,
-        configs: pd.DataFrame,
-        context: Optional[pd.DataFrame] = None,
-        metadata: Optional[pd.DataFrame] = None,
-    ) -> None:
+    def register_pending(self, *, suggestion: Suggestion) -> None:
         raise NotImplementedError()
 
     def surrogate_predict(
@@ -383,7 +368,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
             raise NotImplementedError("Space adapter not supported for surrogate_predict.")
 
         # pylint: disable=protected-access
-        if len(self._observations) <= self.base_optimizer._initial_design._n_configs:
+        if (
+            sum(len(o.config.index) for o in self._observations)
+            <= self.base_optimizer._initial_design._n_configs
+        ):
             raise RuntimeError(
                 "Surrogate model can make predictions *only* after "
                 "all initial points have been evaluated "

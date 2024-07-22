@@ -10,6 +10,7 @@ import ConfigSpace as CS
 import pandas as pd
 import pytest
 
+from mlos_core.mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
 from mlos_core.optimizers import BaseOptimizer, OptimizerType
 from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
 
@@ -36,16 +37,19 @@ def test_context_not_implemented_warning(
         optimization_targets=["score"],
         **kwargs,
     )
-    suggestion, _metadata = optimizer.suggest()
-    scores = pd.DataFrame({"score": [1]})
-    context = pd.DataFrame([["something"]])
+    suggestion = optimizer.suggest()
+    observation = suggestion.evaluate(performance=pd.DataFrame({"score": [1]}))
+    observation.context = pd.DataFrame([["something"]])
 
     with pytest.raises(UserWarning):
-        optimizer.register(configs=suggestion, scores=scores, context=context)
+        optimizer.register(observation=observation)
 
     with pytest.raises(UserWarning):
-        optimizer.suggest(context=context)
+        optimizer.suggest(context=pd.DataFrame([["something"]]))
 
-    if isinstance(optimizer, BaseBayesianOptimizer):
+    if isinstance(optimizer, SmacOptimizer):
+        with pytest.raises(RuntimeError):
+            optimizer.surrogate_predict(configs=suggestion.config, context=suggestion.context)
+    elif isinstance(optimizer, BaseBayesianOptimizer):
         with pytest.raises(UserWarning):
-            optimizer.surrogate_predict(configs=suggestion, context=context)
+            optimizer.surrogate_predict(configs=suggestion.config, context=suggestion.context)
