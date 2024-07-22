@@ -118,6 +118,7 @@ def test_download_folder_recursive(
     remote_folder = "a/remote/folder"
     local_folder = "some/local/folder"
     dir_client_returns = make_dir_client_returns(remote_folder)
+
     config: dict = {}
     with patch.object(azure_fileshare, "_share_client") as mock_share_client, patch.object(
         mock_share_client, "get_directory_client"
@@ -232,7 +233,6 @@ def test_upload_directory_non_recursive(
     mock_scandir.side_effect = lambda x: scandir_returns[process_paths(x)]
     mock_isdir.side_effect = lambda x: isdir_returns[process_paths(x)]
     mock_share_client = azure_fileshare._share_client  # pylint: disable=protected-access
-    config: dict = {}
 
     config: dict = {}
     with patch.object(azure_fileshare, "_share_client") as mock_share_client, patch.object(
