@@ -139,6 +139,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
                 # Perform approximate reverse mapping
                 # NOTE: applying special value biasing is not possible
                 vector = self._config_scaler.inverse_transform([config_vector])[0]
+                # FIXME: value 3 is outside the range?
                 target_config_vector = self._pinv_matrix.dot(vector)
                 target_config = ConfigSpace.Configuration(
                     self.target_parameter_space,
