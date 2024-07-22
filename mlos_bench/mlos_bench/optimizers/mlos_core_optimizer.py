@@ -140,9 +140,16 @@ class MlosCoreOptimizer(Optimizer):
         """Coerce optimization target scores to floats and adjust the signs for
         MINIMIZATION problem.
         """
-        # NOTE: We use `.astype()` instead of `.apply(pd.to_numeric)`
-        # to catch incorrect values early.
-        return df_scores[list(self._opt_targets)].astype(float) * self._opt_targets.values()
+        df_targets = df_scores[list(self._opt_targets)]
+        try:
+            return df_targets.astype(float) * self._opt_targets.values()
+        except ValueError as ex:
+            _LOG.error(
+                "Some score values cannot be converted to float - check the data ::\n%s",
+                df_targets,
+                exc_info=True,
+            )
+            raise ValueError("Some score values cannot be converted to float") from ex
 
     def _to_df(self, configs: Sequence[Dict[str, TunableValue]]) -> pd.DataFrame:
         """
