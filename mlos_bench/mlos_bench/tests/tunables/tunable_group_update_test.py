@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests for checking the is_updated flag for tunable groups.
-"""
+"""Tests for checking the is_updated flag for tunable groups."""
 
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -15,16 +13,14 @@ _TUNABLE_VALUES = {
 
 
 def test_tunable_group_update(tunable_groups: TunableGroups) -> None:
-    """
-    Test that updating a tunable group raises the is_updated flag.
-    """
+    """Test that updating a tunable group raises the is_updated flag."""
     tunable_groups.assign(_TUNABLE_VALUES)
     assert tunable_groups.is_updated()
 
 
 def test_tunable_group_update_twice(tunable_groups: TunableGroups) -> None:
-    """
-    Test that updating a tunable group with the same values do *NOT* raises the is_updated flag.
+    """Test that updating a tunable group with the same values do *NOT* raises the
+    is_updated flag.
     """
     tunable_groups.assign(_TUNABLE_VALUES)
     assert tunable_groups.is_updated()
@@ -37,9 +33,7 @@ def test_tunable_group_update_twice(tunable_groups: TunableGroups) -> None:
 
 
 def test_tunable_group_update_kernel(tunable_groups: TunableGroups) -> None:
-    """
-    Test that the is_updated flag is set only for the affected covariant group.
-    """
+    """Test that the is_updated flag is set only for the affected covariant group."""
     tunable_groups.assign(_TUNABLE_VALUES)
     assert tunable_groups.is_updated()
     assert tunable_groups.is_updated(["kernel"])
@@ -47,9 +41,7 @@ def test_tunable_group_update_kernel(tunable_groups: TunableGroups) -> None:
 
 
 def test_tunable_group_update_boot(tunable_groups: TunableGroups) -> None:
-    """
-    Test that the is_updated flag is set only for the affected covariant group.
-    """
+    """Test that the is_updated flag is set only for the affected covariant group."""
     tunable_groups.assign(_TUNABLE_VALUES)
     assert tunable_groups.is_updated()
     assert not tunable_groups.is_updated(["boot"])

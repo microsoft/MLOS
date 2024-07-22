@@ -124,7 +124,7 @@
             "uniqueItems": true
         },
         "quantization": {
-            "description": "The number of buckets to quantize the range into.\nSee Also:\nhttps://automl.github.io/ConfigSpace/main/api/hyperparameters.html#module-ConfigSpace.api.types.float,\nhttps://automl.github.io/ConfigSpace/main/api/hyperparameters.html#module-ConfigSpace.api.types.integer",
+            "description": "The number of buckets to quantize the range into.",
             "$comment": "type left unspecified here"
         },
         "log_scale": {
