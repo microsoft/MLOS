@@ -12,8 +12,8 @@ from azure.core.exceptions import ResourceNotFoundError
 from azure.storage.fileshare import ShareClient
 
 from mlos_bench.services.base_fileshare import FileShareService
-from mlos_bench.services.types.authenticator_type import SupportsAuth
 from mlos_bench.services.base_service import Service
+from mlos_bench.services.types.authenticator_type import SupportsAuth
 from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)
