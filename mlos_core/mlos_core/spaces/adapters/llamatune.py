@@ -129,6 +129,11 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
                 if getattr(self, "_pinv_matrix", None) is None:
                     self._try_generate_approx_inverse_mapping()
 
+                # FIXME: Give some variables names for debugging.
+                config_scaler = self._config_scaler
+                q_scaler = self._q_scaler
+                pinv_matrix = self._pinv_matrix
+
                 # Replace NaNs with zeros for inactive hyperparameters
                 config_vector = np.nan_to_num(configuration.get_array(), nan=0.0)
                 # Perform approximate reverse mapping
