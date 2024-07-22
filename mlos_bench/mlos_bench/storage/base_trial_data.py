@@ -29,7 +29,7 @@ class TrialData(metaclass=ABCMeta):
     tunable parameters).
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         experiment_id: str,

@@ -59,7 +59,7 @@ class Launcher:
             <https://github.com/microsoft/MLOS/tree/main/mlos_bench/>
             """
         parser = argparse.ArgumentParser(description=f"{description} : {long_text}", epilog=epilog)
-        (args, args_rest) = self._parse_args(parser, argv)
+        (args, path_args, args_rest) = self._parse_args(parser, argv)
 
         # Bootstrap config loader: command line takes priority.
         config_path = args.config_path or []
@@ -90,18 +90,27 @@ class Launcher:
 
         self._parent_service: Service = LocalExecService(parent=self._config_loader)
 
+        # Prepare global_config from a combination of global config files, cli
+        # configs, and cli args.
         args_dict = vars(args)
+        # teardown (bool) conflicts with Environment configs that use it for shell
+        # commands (list), so we exclude it from copying over
+        excluded_cli_args = path_args + ["teardown"]
+        # Include (almost) any item from the cli config file that either isn't in
+        # the cli args at all or whose cli arg is missing.
+        cli_config_args = {
+            key: val
+            for (key, val) in config.items()
+            if (args_dict.get(key) is None) and key not in excluded_cli_args
+        }
+
         self.global_config = self._load_config(
-            config.get("globals", []) + (args.globals or []),
-            (args.config_path or []) + config.get("config_path", []),
-            args_rest,
-            # Prime the global config with the command line args and the config file.
-            {
-                key: val
-                for (key, val) in config.items()
-                if key not in args_dict or args_dict[key] is None
-            },
+            args_globals=config.get("globals", []) + (args.globals or []),
+            config_path=(args.config_path or []) + config.get("config_path", []),
+            args_rest=args_rest,
+            global_config=cli_config_args,
         )
+        # TODO: Can we generalize these two rules using excluded_cli_args?
         # experiment_id is generally taken from --globals files, but we also allow
         # overriding it on the CLI.
         # It's useful to keep it there explicitly mostly for the --help output.
@@ -199,17 +208,22 @@ class Launcher:
     def _parse_args(
         parser: argparse.ArgumentParser,
         argv: Optional[List[str]],
-    ) -> Tuple[argparse.Namespace, List[str]]:
+    ) -> Tuple[argparse.Namespace, List[str], List[str]]:
         """Parse the command line arguments."""
+        path_args = []
+
         parser.add_argument(
             "--config",
             required=False,
-            help="Main JSON5 configuration file. Its keys are the same as the"
-            + " command line options and can be overridden by the latter.\n"
-            + "\n"
-            + " See the `mlos_bench/config/` tree at https://github.com/microsoft/MLOS/ "
-            + " for additional config examples for this and other arguments.",
+            help=(
+                "Main JSON5 configuration file. Its keys are the same as the "
+                "command line options and can be overridden by the latter.\n"
+                "\n"
+                "See the `mlos_bench/config/` tree at https://github.com/microsoft/MLOS/ "
+                "for additional config examples for this and other arguments."
+            ),
         )
+        path_args.append("config")
 
         parser.add_argument(
             "--log_file",
@@ -217,14 +231,17 @@ class Launcher:
             required=False,
             help="Path to the log file. Use stdout if omitted.",
         )
+        path_args.append("log_file")
 
         parser.add_argument(
             "--log_level",
             "--log-level",
             required=False,
             type=str,
-            help=f"Logging level. Default is {logging.getLevelName(_LOG_LEVEL)}."
-            + " Set to DEBUG for debug, WARNING for warnings only.",
+            help=(
+                f"Logging level. Default is {logging.getLevelName(_LOG_LEVEL)}. "
+                "Set to DEBUG for debug, WARNING for warnings only."
+            ),
         )
 
         parser.add_argument(
@@ -237,6 +254,8 @@ class Launcher:
             required=False,
             help="One or more locations of JSON config files.",
         )
+        path_args.append("config_path")
+        path_args.append("config_paths")
 
         parser.add_argument(
             "--service",
@@ -249,27 +268,35 @@ class Launcher:
                 "of the service(s) for environment(s) to use."
             ),
         )
+        path_args.append("service")
+        path_args.append("services")
 
         parser.add_argument(
             "--environment",
             required=False,
             help="Path to JSON file with the configuration of the benchmarking environment(s).",
         )
+        path_args.append("environment")
 
         parser.add_argument(
             "--optimizer",
             required=False,
-            help="Path to the optimizer configuration file. If omitted, run"
-            + " a single trial with default (or specified in --tunable_values).",
+            help=(
+                "Path to the optimizer configuration file. If omitted, run "
+                "a single trial with default (or specified in --tunable_values)."
+            ),
         )
+        path_args.append("optimizer")
 
         parser.add_argument(
             "--trial_config_repeat_count",
             "--trial-config-repeat-count",
             required=False,
             type=int,
-            help="Number of times to repeat each config. "
-                + "Default is 1 trial per config, though more may be advised."
+            help=(
+                "Number of times to repeat each config. "
+                "Default is 1 trial per config, though more may be advised."
+            ),
         )
 
         parser.add_argument(
@@ -277,23 +304,32 @@ class Launcher:
             "--num-trial-runners",
             required=False,
             type=int,
-            help="Number of TrialRunners to use for executing benchmark Environments. "
-            + "Individual TrialRunners can be identified in configs with $trial_runner_id and optionally run in parallel.",
+            help=(
+                "Number of TrialRunners to use for executing benchmark Environments. "
+                "Individual TrialRunners can be identified in configs with $trial_runner_id "
+                "and optionally run in parallel."
+            ),
         )
 
         parser.add_argument(
             "--scheduler",
             required=False,
-            help="Path to the scheduler configuration file. By default, use"
-            + " a single worker synchronous scheduler.",
+            help=(
+                "Path to the scheduler configuration file. By default, use "
+                "a single worker synchronous scheduler."
+            ),
         )
+        path_args.append("scheduler")
 
         parser.add_argument(
             "--storage",
             required=False,
-            help="Path to the storage configuration file."
-            + " If omitted, use the ephemeral in-memory SQL storage.",
+            help=(
+                "Path to the storage configuration file. "
+                "If omitted, use the ephemeral in-memory SQL storage."
+            ),
         )
+        path_args.append("storage")
 
         parser.add_argument(
             "--random_init",
@@ -319,19 +355,25 @@ class Launcher:
             nargs="+",
             action="extend",
             required=False,
-            help="Path to one or more JSON files that contain values of the tunable"
-            + " parameters. This can be used for a single trial (when no --optimizer"
-            + " is specified) or as default values for the first run in optimization.",
+            help=(
+                "Path to one or more JSON files that contain values of the tunable "
+                "parameters. This can be used for a single trial (when no --optimizer "
+                "is specified) or as default values for the first run in optimization."
+            ),
         )
+        path_args.append("tunable_values")
 
         parser.add_argument(
             "--globals",
             nargs="+",
             action="extend",
             required=False,
-            help="Path to one or more JSON files that contain additional"
-            + " [private] parameters of the benchmarking environment.",
+            help=(
+                "Path to one or more JSON files that contain additional "
+                "[private] parameters of the benchmarking environment."
+            ),
         )
+        path_args.append("globals")
 
         parser.add_argument(
             "--no_teardown",
@@ -366,7 +408,7 @@ class Launcher:
             argv = sys.argv[1:].copy()
         (args, args_rest) = parser.parse_known_args(argv)
 
-        return (args, args_rest)
+        return (args, path_args, args_rest)
 
     @staticmethod
     def _try_parse_extra_args(cmdline: Iterable[str]) -> Dict[str, TunableValue]:
@@ -399,6 +441,7 @@ class Launcher:
 
     def _load_config(
         self,
+        *,
         args_globals: Iterable[str],
         config_path: Iterable[str],
         args_rest: Iterable[str],
@@ -522,7 +565,6 @@ class Launcher:
                 config={
                     "experiment_id": "UNDEFINED - override from global config",
                     "trial_id": 0,
-                    "config_id": -1,
                     "trial_config_repeat_count": 1,
                     "teardown": self.teardown,
                 },

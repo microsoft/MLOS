@@ -23,7 +23,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
 
     _RE_INVALID = re.compile(r"[^a-zA-Z0-9_]")
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         name: str,

@@ -23,7 +23,7 @@ _LOG = logging.getLogger(__name__)
 class CompositeEnv(Environment):
     """Composite benchmark environment."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         name: str,

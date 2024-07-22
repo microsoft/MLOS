@@ -14,6 +14,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 from pytz import UTC
 from typing_extensions import Literal
 
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.schedulers.trial_runner import TrialRunner
@@ -28,7 +29,7 @@ class Scheduler(metaclass=ABCMeta):
     # pylint: disable=too-many-instance-attributes
     """Base class for the optimization loop scheduling policies."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         config: Dict[str, Any],
@@ -65,6 +66,7 @@ class Scheduler(metaclass=ABCMeta):
             source=global_config,
             required_keys=["experiment_id", "trial_id"],
         )
+        self._validate_json_config(config)
 
         self._experiment_id = config["experiment_id"].strip()
         self._trial_id = int(config["trial_id"])
@@ -91,6 +93,18 @@ class Scheduler(metaclass=ABCMeta):
 
         _LOG.debug("Scheduler instantiated: %s :: %s", self, config)
 
+    def _validate_json_config(self, config: dict) -> None:
+        """Reconstructs a basic json config that this class might have been instantiated
+        from in order to validate configs provided outside the file loading
+        mechanism.
+        """
+        json_config: dict = {
+            "class": self.__class__.__module__ + "." + self.__class__.__name__,
+        }
+        if config:
+            json_config["config"] = config
+        ConfigSchema.SCHEDULER.validate(json_config)
+
     @property
     def trial_config_repeat_count(self) -> int:
         """Gets the number of trials to run for a given config."""
@@ -98,7 +112,7 @@ class Scheduler(metaclass=ABCMeta):
 
     @property
     def max_trials(self) -> int:
-        """Gets the maximum number of trials to run for a given config, or -1 for no
+        """Gets the maximum number of trials to run for a given experiment, or -1 for no
         limit.
         """
         return self._max_trials

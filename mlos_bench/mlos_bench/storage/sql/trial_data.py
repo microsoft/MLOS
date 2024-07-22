@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 class TrialSqlData(TrialData):
     """An interface to access the trial data stored in the SQL DB."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         engine: Engine,

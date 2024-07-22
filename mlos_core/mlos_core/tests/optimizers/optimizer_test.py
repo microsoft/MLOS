@@ -157,7 +157,7 @@ def test_basic_interface_toy_problem(
 def test_concrete_optimizer_type(optimizer_type: OptimizerType) -> None:
     """Test that all optimizer types are listed in the ConcreteOptimizer constraints."""
     # pylint: disable=no-member
-    assert optimizer_type.value in ConcreteOptimizer.__constraints__  # type: ignore[attr-defined]
+    assert optimizer_type.value in ConcreteOptimizer.__constraints__
 
 
 @pytest.mark.parametrize(
@@ -376,6 +376,7 @@ def test_mixed_numerics_type_input_space_types(
     """Toy problem to test the optimizers with mixed numeric types to ensure that
     original dtypes are retained.
     """
+    # pylint: disable=too-many-locals
     max_iterations = 10
     if kwargs is None:
         kwargs = {}
