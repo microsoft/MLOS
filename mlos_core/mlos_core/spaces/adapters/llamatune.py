@@ -141,14 +141,43 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
                 vector = self._config_scaler.inverse_transform([config_vector])[0]
                 # FIXME: value 3 is outside the range?
                 target_config_vector = self._pinv_matrix.dot(vector)
+                # Clip values to [-1, 1] range
+                for idx, value in enumerate(target_config_vector):
+                    target_config_vector[idx] = max(-1, min(1, value))
                 if self._q_scaler is not None:
                     target_config_vector = self._q_scaler.inverse_transform(
                         [target_config_vector]
                     )[0]
+                    # Clip values to [1, max_value] range (floating point errors may occur)
+                    for idx, value in enumerate(target_config_vector):
+                        target_config_vector[idx] = int(
+                            max(1, min(value, self._q_scaler.data_max_[idx]))
+                        )
                 target_config = ConfigSpace.Configuration(
                     self.target_parameter_space,
                     vector=target_config_vector,
                 )
+
+                # Check to see if the approximate reverse mapping looks OK.
+                # Note: we know this isn't 100% accurate, so this is just a warning.
+                configuration_dict = dict(configuration)
+                double_checked_config = self._transform(dict(target_config))
+                double_checked_config = {
+                    # Skip the special values that aren't in the original space.
+                    k: v
+                    for k, v in double_checked_config.items()
+                    if k in configuration_dict
+                }
+                if double_checked_config != configuration_dict:
+                    warn(
+                        (
+                            f"Configuration {configuration_dict} was transformed to "
+                            f"{dict(target_config)} and then back to {double_checked_config}."
+                        ),
+                        UserWarning,
+                    )
+
+                # But the inverse mapping should at least be valid in the target space.
                 self.target_parameter_space.check_configuration(target_config)
                 # target_config.check_valid_configuration()  # for ConfigSpace 1.0
 
