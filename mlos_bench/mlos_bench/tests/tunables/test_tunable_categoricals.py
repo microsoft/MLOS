@@ -2,17 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for deep copy of tunable objects and groups.
-"""
+"""Unit tests for deep copy of tunable objects and groups."""
 
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def test_tunable_categorical_types() -> None:
-    """
-    Check if we accept tunable categoricals as ints as well as strings and
-    convert both to strings.
+    """Check if we accept tunable categoricals as ints as well as strings and convert
+    both to strings.
     """
     tunable_params = {
         "test-group": {
@@ -38,7 +35,7 @@ def test_tunable_categorical_types() -> None:
                     "values": ["a", "b", "c"],
                     "default": "a",
                 },
-            }
+            },
         }
     }
     tunable_groups = TunableGroups(tunable_params)

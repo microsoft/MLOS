@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-"Remote" VM (Host) Environment.
-"""
+"""Remote VM (Host) Environment."""
 
 import logging
 

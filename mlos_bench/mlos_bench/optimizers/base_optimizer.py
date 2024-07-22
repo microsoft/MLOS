@@ -306,14 +306,20 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
             from the dataframe that's being MINIMIZED.
         """
         _LOG.info(
-            "Iteration %d :: Register: %s = %s score: %s", self._iter, tunables, status, score
+            "Iteration %d :: Register: %s = %s score: %s",
+            self._iter,
+            tunables,
+            status,
+            score,
         )
         if status.is_succeeded() == (score is None):  # XOR
             raise ValueError("Status and score must be consistent.")
         return self._get_scores(status, score)
 
     def _get_scores(
-        self, status: Status, scores: Optional[Union[Dict[str, TunableValue], Dict[str, float]]]
+        self,
+        status: Status,
+        scores: Optional[Union[Dict[str, TunableValue], Dict[str, float]]],
     ) -> Optional[Dict[str, float]]:
         """
         Extract a scalar benchmark score from the dataframe. Change the sign if we are
@@ -337,6 +343,8 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
 
         if not status.is_succeeded():
             assert scores is None
+            # TODO: Be more flexible with values used for failed trials (not just +inf).
+            # Issue: https://github.com/microsoft/MLOS/issues/523
             return {opt_target: float("inf") for opt_target in self._opt_targets}
 
         assert scores is not None

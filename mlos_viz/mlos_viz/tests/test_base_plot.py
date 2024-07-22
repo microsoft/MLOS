@@ -2,18 +2,17 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for mlos_viz.
-"""
+"""Unit tests for mlos_viz."""
 
 import warnings
-
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
-
-from mlos_viz.base import ignore_plotter_warnings, plot_optimizer_trends, plot_top_n_configs
-
+from mlos_viz.base import (
+    ignore_plotter_warnings,
+    plot_optimizer_trends,
+    plot_top_n_configs,
+)
 from mlos_viz.tests import BASE_MATPLOTLIB_SHOW_PATCH
 
 

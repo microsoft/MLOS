@@ -21,6 +21,10 @@ on:
   schedule:
     - cron: "1 0 * * *"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
 jobs:
   DevContainer:
     runs-on: ubuntu-latest

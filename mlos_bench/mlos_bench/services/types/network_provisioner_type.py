@@ -2,11 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Protocol interface for Network provisioning operations.
-"""
+"""Protocol interface for Network provisioning operations."""
 
-from typing import Tuple, Protocol, runtime_checkable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, Tuple, runtime_checkable
 
 if TYPE_CHECKING:
     from mlos_bench.environments.status import Status
@@ -14,9 +12,7 @@ if TYPE_CHECKING:
 
 @runtime_checkable
 class SupportsNetworkProvisioning(Protocol):
-    """
-    Protocol interface for Network provisioning operations.
-    """
+    """Protocol interface for Network provisioning operations."""
 
     def provision_network(self, params: dict) -> Tuple["Status", dict]:
         """
@@ -46,7 +42,8 @@ class SupportsNetworkProvisioning(Protocol):
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
         is_setup : bool
-            If True, wait for Network being deployed; otherwise, wait for successful deprovisioning.
+            If True, wait for Network being deployed; otherwise, wait for successful
+            deprovisioning.
 
         Returns
         -------
@@ -56,7 +53,11 @@ class SupportsNetworkProvisioning(Protocol):
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
 
-    def deprovision_network(self, params: dict, ignore_errors: bool = True) -> Tuple["Status", dict]:
+    def deprovision_network(
+        self,
+        params: dict,
+        ignore_errors: bool = True,
+    ) -> Tuple["Status", dict]:
         """
         Deprovisions the Network by deleting it.
 

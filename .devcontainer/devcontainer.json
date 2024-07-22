@@ -45,7 +45,6 @@
                 // Adjust the python interpreter path to point to the conda environment
                 "python.defaultInterpreterPath": "/opt/conda/envs/mlos/bin/python",
                 "python.testing.pytestPath": "/opt/conda/envs/mlos/bin/pytest",
-                "python.formatting.autopep8Path": "/opt/conda/envs/mlos/bin/autopep8",
                 "python.linting.pylintPath": "/opt/conda/envs/mlos/bin/pylint",
                 "pylint.path": [
                     "/opt/conda/envs/mlos/bin/pylint"
@@ -58,7 +57,6 @@
             // Add the IDs of extensions you want installed when the container is created.
             "extensions": [
                 "davidanson.vscode-markdownlint",
-                "donjayamanne.githistory",
                 "donjayamanne.python-environment-manager",
                 "eamodio.gitlens",
                 "editorconfig.editorconfig",
@@ -67,14 +65,13 @@
                 "github.vscode-github-actions",
                 "github.vscode-pull-request-github",
                 "gruntfuggly.todo-tree",
-                "hashicorp.terraform",
                 "huntertran.auto-markdown-toc",
                 "ibm.output-colorizer",
                 "lextudio.restructuredtext",
                 "matangover.mypy",
                 "ms-azuretools.vscode-docker",
-                "ms-python.autopep8",
-                "ms-python.flake8",
+                "ms-python.black-formatter",
+                "ms-python.isort",
                 "ms-python.pylint",
                 "ms-python.python",
                 "ms-python.vscode-pylance",
@@ -83,9 +80,9 @@
                 "redhat.vscode-yaml",
                 "stkb.rewrap",
                 "streetsidesoftware.code-spell-checker",
+                "tamasfe.even-better-toml",
                 "trond-snekvik.simple-rst",
-                "tyriar.sort-lines",
-                "waderyan.gitblame"
+                "tyriar.sort-lines"
             ]
         }
     }

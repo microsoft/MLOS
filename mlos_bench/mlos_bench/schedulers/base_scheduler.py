@@ -28,7 +28,7 @@ class Scheduler(metaclass=ABCMeta):
     # pylint: disable=too-many-instance-attributes
     """Base class for the optimization loop scheduling policies."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         config: Dict[str, Any],
@@ -61,7 +61,9 @@ class Scheduler(metaclass=ABCMeta):
         """
         self.global_config = global_config
         config = merge_parameters(
-            dest=config.copy(), source=global_config, required_keys=["experiment_id", "trial_id"]
+            dest=config.copy(),
+            source=global_config,
+            required_keys=["experiment_id", "trial_id"],
         )
         self._validate_json_config(config)
 
@@ -89,9 +91,9 @@ class Scheduler(metaclass=ABCMeta):
         _LOG.debug("Scheduler instantiated: %s :: %s", self, config)
 
     def _validate_json_config(self, config: dict) -> None:
-        """Reconstructs a basic json config that this class might have been instantiated
-        from in order to validate configs provided outside the file loading
-        mechanism.
+        """Reconstructs a basic json config that this class might have been
+        instantiated from in order to validate configs provided outside the
+        file loading mechanism.
         """
         json_config: dict = {
             "class": self.__class__.__module__ + "." + self.__class__.__name__,
@@ -241,7 +243,7 @@ class Scheduler(metaclass=ABCMeta):
                     # prevented).
                     "optimizer": self.optimizer.name,
                     "repeat_i": repeat_i,
-                    "is_defaults": tunables.is_defaults,
+                    "is_defaults": tunables.is_defaults(),
                     **{
                         f"opt_{key}_{i}": val
                         for (i, opt_target) in enumerate(self.optimizer.targets.items())

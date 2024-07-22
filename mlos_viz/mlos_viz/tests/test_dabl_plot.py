@@ -2,18 +2,13 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for mlos_viz.dabl.plot.
-"""
+"""Unit tests for mlos_viz.dabl.plot."""
 
 import warnings
-
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
-
 from mlos_viz import dabl
-
 from mlos_viz.tests import SEABORN_BOXPLOT_PATCH
 
 

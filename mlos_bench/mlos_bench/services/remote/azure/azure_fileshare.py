@@ -2,37 +2,34 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A collection FileShare functions for interacting with Azure File Shares.
-"""
+"""A collection FileShare functions for interacting with Azure File Shares."""
 
-import os
 import logging
-
+import os
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
-from azure.storage.fileshare import ShareClient
 from azure.core.exceptions import ResourceNotFoundError
+from azure.storage.fileshare import ShareClient
 
-from mlos_bench.services.base_service import Service
 from mlos_bench.services.base_fileshare import FileShareService
+from mlos_bench.services.base_service import Service
 from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)
 
 
 class AzureFileShareService(FileShareService):
-    """
-    Helper methods for interacting with Azure File Share
-    """
+    """Helper methods for interacting with Azure File Share."""
 
     _SHARE_URL = "https://{account_name}.file.core.windows.net/{fs_name}"
 
-    def __init__(self,
-                 config: Optional[Dict[str, Any]] = None,
-                 global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None,
-                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
+    def __init__(
+        self,
+        config: Optional[Dict[str, Any]] = None,
+        global_config: Optional[Dict[str, Any]] = None,
+        parent: Optional[Service] = None,
+        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+    ):
         """
         Create a new file share Service for Azure environments with a given config.
 
@@ -50,16 +47,19 @@ class AzureFileShareService(FileShareService):
             New methods to register with the service.
         """
         super().__init__(
-            config, global_config, parent,
-            self.merge_methods(methods, [self.upload, self.download])
+            config,
+            global_config,
+            parent,
+            self.merge_methods(methods, [self.upload, self.download]),
         )
 
         check_required_params(
-            self.config, {
+            self.config,
+            {
                 "storageAccountName",
                 "storageFileShareName",
                 "storageAccountKey",
-            }
+            },
         )
 
         self._share_client = ShareClient.from_share_url(
@@ -70,7 +70,13 @@ class AzureFileShareService(FileShareService):
             credential=self.config["storageAccountKey"],
         )
 
-    def download(self, params: dict, remote_path: str, local_path: str, recursive: bool = True) -> None:
+    def download(
+        self,
+        params: dict,
+        remote_path: str,
+        local_path: str,
+        recursive: bool = True,
+    ) -> None:
         super().download(params, remote_path, local_path, recursive)
         dir_client = self._share_client.get_directory_client(remote_path)
         if dir_client.exists():
@@ -95,16 +101,21 @@ class AzureFileShareService(FileShareService):
                 # Translate into non-Azure exception:
                 raise FileNotFoundError(f"Cannot download: {remote_path}") from ex
 
-    def upload(self, params: dict, local_path: str, remote_path: str, recursive: bool = True) -> None:
+    def upload(
+        self,
+        params: dict,
+        local_path: str,
+        remote_path: str,
+        recursive: bool = True,
+    ) -> None:
         super().upload(params, local_path, remote_path, recursive)
         self._upload(local_path, remote_path, recursive, set())
 
     def _upload(self, local_path: str, remote_path: str, recursive: bool, seen: Set[str]) -> None:
         """
-        Upload contents from a local path to an Azure file share.
-        This method is called from `.upload()` above. We need it to avoid exposing
-        the `seen` parameter and to make `.upload()` match the base class' virtual
-        method.
+        Upload contents from a local path to an Azure file share. This method is called
+        from `.upload()` above. We need it to avoid exposing the `seen` parameter and to
+        make `.upload()` match the base class' virtual method.
 
         Parameters
         ----------
@@ -143,8 +154,8 @@ class AzureFileShareService(FileShareService):
 
     def _remote_makedirs(self, remote_path: str) -> None:
         """
-        Create remote directories for the entire path.
-        Succeeds even some or all directories along the path already exist.
+        Create remote directories for the entire path. Succeeds even some or all
+        directories along the path already exist.
 
         Parameters
         ----------

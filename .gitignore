@@ -1,3 +1,6 @@
+# Ignore git directory (ripgrep)
+.git/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -150,7 +153,9 @@ build/*.build-stamp
 .vscode/
 !.vscode/settings.json
 !.vscode/extensions.json
+!.vscode/launch.json
 !.devcontainer/build/
+!.devcontainer/scripts/
 
 # Test configs. May contain sensitive information
 # like Azure credentials, DB password, etc.

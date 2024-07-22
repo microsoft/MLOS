@@ -46,10 +46,13 @@ class Launcher:
         # pylint: disable=too-many-statements
         _LOG.info("Launch: %s", description)
         epilog = """
-            Additional --key=value pairs can be specified to augment or override values listed in --globals.
-            Other required_args values can also be pulled from shell environment variables.
+            Additional --key=value pairs can be specified to augment or override
+            values listed in --globals.
+            Other required_args values can also be pulled from shell environment
+            variables.
 
-            For additional details, please see the website or the README.md files in the source tree:
+            For additional details, please see the website or the README.md files in
+            the source tree:
             <https://github.com/microsoft/MLOS/tree/main/mlos_bench/>
             """
         parser = argparse.ArgumentParser(description=f"{description} : {long_text}", epilog=epilog)
@@ -84,13 +87,14 @@ class Launcher:
 
         self._parent_service: Service = LocalExecService(parent=self._config_loader)
 
-        # Prepare global_config from a combination of global config files, cli configs, and cli args.
+        # Prepare global_config from a combination of global config files, cli
+        # configs, and cli args.
         args_dict = vars(args)
         # teardown (bool) conflicts with Environment configs that use it for shell
         # commands (list), so we exclude it from copying over
         excluded_cli_args = path_args + ["teardown"]
-        # Include (almost) any item from the cli config file that either isn't in the cli
-        # args at all or whose cli arg is missing.
+        # Include (almost) any item from the cli config file that either isn't in
+        # the cli args at all or whose cli arg is missing.
         cli_config_args = {
             key: val
             for (key, val) in config.items()
@@ -104,11 +108,13 @@ class Launcher:
             global_config=cli_config_args,
         )
         # TODO: Can we generalize these two rules using excluded_cli_args?
-        # experiment_id is generally taken from --globals files, but we also allow overriding it on the CLI.
+        # experiment_id is generally taken from --globals files, but we also allow
+        # overriding it on the CLI.
         # It's useful to keep it there explicitly mostly for the --help output.
         if args.experiment_id:
             self.global_config["experiment_id"] = args.experiment_id
-        # trial_config_repeat_count is a scheduler property but it's convenient to set it via command line
+        # trial_config_repeat_count is a scheduler property but it's convenient to
+        # set it via command line
         if args.trial_config_repeat_count:
             self.global_config["trial_config_repeat_count"] = args.trial_config_repeat_count
         # Ensure that the trial_id is present since it gets used by some other
@@ -122,7 +128,9 @@ class Launcher:
         service_files: List[str] = config.get("services", []) + (args.service or [])
         assert isinstance(self._parent_service, SupportsConfigLoading)
         self._parent_service = self._parent_service.load_services(
-            service_files, self.global_config, self._parent_service
+            service_files,
+            self.global_config,
+            self._parent_service,
         )
 
         env_path = args.environment or config.get("environment")
@@ -173,18 +181,22 @@ class Launcher:
 
     @staticmethod
     def _parse_args(
-        parser: argparse.ArgumentParser, argv: Optional[List[str]]
+        parser: argparse.ArgumentParser,
+        argv: Optional[List[str]],
     ) -> Tuple[argparse.Namespace, List[str], List[str]]:
         """Parse the command line arguments."""
         path_args = []
+
         parser.add_argument(
             "--config",
             required=False,
-            help="Main JSON5 configuration file. Its keys are the same as the"
-            + " command line options and can be overridden by the latter.\n"
-            + "\n"
-            + " See the `mlos_bench/config/` tree at https://github.com/microsoft/MLOS/ "
-            + " for additional config examples for this and other arguments.",
+            help=(
+                "Main JSON5 configuration file. Its keys are the same as the "
+                "command line options and can be overridden by the latter.\n"
+                "\n"
+                "See the `mlos_bench/config/` tree at https://github.com/microsoft/MLOS/ "
+                "for additional config examples for this and other arguments."
+            ),
         )
         path_args.append("config")
 
@@ -201,8 +213,10 @@ class Launcher:
             "--log-level",
             required=False,
             type=str,
-            help=f"Logging level. Default is {logging.getLevelName(_LOG_LEVEL)}."
-            + " Set to DEBUG for debug, WARNING for warnings only.",
+            help=(
+                f"Logging level. Default is {logging.getLevelName(_LOG_LEVEL)}. "
+                "Set to DEBUG for debug, WARNING for warnings only."
+            ),
         )
 
         parser.add_argument(
@@ -224,7 +238,10 @@ class Launcher:
             nargs="+",
             action="extend",
             required=False,
-            help="Path to JSON file with the configuration of the service(s) for environment(s) to use.",
+            help=(
+                "Path to JSON file with the configuration "
+                "of the service(s) for environment(s) to use."
+            ),
         )
         path_args.append("service")
         path_args.append("services")
@@ -239,8 +256,10 @@ class Launcher:
         parser.add_argument(
             "--optimizer",
             required=False,
-            help="Path to the optimizer configuration file. If omitted, run"
-            + " a single trial with default (or specified in --tunable_values).",
+            help=(
+                "Path to the optimizer configuration file. If omitted, run "
+                "a single trial with default (or specified in --tunable_values)."
+            ),
         )
         path_args.append("optimizer")
 
@@ -249,22 +268,29 @@ class Launcher:
             "--trial-config-repeat-count",
             required=False,
             type=int,
-            help="Number of times to repeat each config. Default is 1 trial per config, though more may be advised.",
+            help=(
+                "Number of times to repeat each config. "
+                "Default is 1 trial per config, though more may be advised."
+            ),
         )
 
         parser.add_argument(
             "--scheduler",
             required=False,
-            help="Path to the scheduler configuration file. By default, use"
-            + " a single worker synchronous scheduler.",
+            help=(
+                "Path to the scheduler configuration file. By default, use "
+                "a single worker synchronous scheduler."
+            ),
         )
         path_args.append("scheduler")
 
         parser.add_argument(
             "--storage",
             required=False,
-            help="Path to the storage configuration file."
-            + " If omitted, use the ephemeral in-memory SQL storage.",
+            help=(
+                "Path to the storage configuration file. "
+                "If omitted, use the ephemeral in-memory SQL storage."
+            ),
         )
         path_args.append("storage")
 
@@ -292,9 +318,11 @@ class Launcher:
             nargs="+",
             action="extend",
             required=False,
-            help="Path to one or more JSON files that contain values of the tunable"
-            + " parameters. This can be used for a single trial (when no --optimizer"
-            + " is specified) or as default values for the first run in optimization.",
+            help=(
+                "Path to one or more JSON files that contain values of the tunable "
+                "parameters. This can be used for a single trial (when no --optimizer "
+                "is specified) or as default values for the first run in optimization."
+            ),
         )
         path_args.append("tunable_values")
 
@@ -303,8 +331,10 @@ class Launcher:
             nargs="+",
             action="extend",
             required=False,
-            help="Path to one or more JSON files that contain additional"
-            + " [private] parameters of the benchmarking environment.",
+            help=(
+                "Path to one or more JSON files that contain additional "
+                "[private] parameters of the benchmarking environment."
+            ),
         )
         path_args.append("globals")
 
@@ -393,7 +423,10 @@ class Launcher:
         return global_config
 
     def _init_tunable_values(
-        self, random_init: bool, seed: Optional[int], args_tunables: Optional[str]
+        self,
+        random_init: bool,
+        seed: Optional[int],
+        args_tunables: Optional[str],
     ) -> TunableGroups:
         """Initialize the tunables and load key/value pairs of the tunable values from
         given JSON files, if specified.
@@ -467,7 +500,9 @@ class Launcher:
         class_config = self._config_loader.load_config(args_storage, ConfigSchema.STORAGE)
         assert isinstance(class_config, Dict)
         storage = self._config_loader.build_storage(
-            service=self._parent_service, config=class_config, global_config=self.global_config
+            service=self._parent_service,
+            config=class_config,
+            global_config=self.global_config,
         )
         return storage
 

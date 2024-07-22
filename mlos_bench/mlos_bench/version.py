@@ -2,9 +2,10 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Version number for the mlos_viz package.
-"""
+"""Version number for the mlos_bench package."""
 
 # NOTE: This should be managed by bumpversion.
-_VERSION = '0.1.0'
+VERSION = "0.6.0"
+
+if __name__ == "__main__":
+    print(VERSION)

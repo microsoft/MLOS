@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Contains the Identity (no-op) Space Adapter class.
-"""
+"""Contains the Identity (no-op) Space Adapter class."""
 
 import ConfigSpace
 import pandas as pd
@@ -13,7 +11,8 @@ from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
 
 class IdentityAdapter(BaseSpaceAdapter):
-    """Identity (no-op) SpaceAdapter class.
+    """
+    Identity (no-op) SpaceAdapter class.
 
     Parameters
     ----------

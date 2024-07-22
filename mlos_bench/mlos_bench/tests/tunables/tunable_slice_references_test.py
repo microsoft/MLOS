@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for unique references to tunables when they're loaded multiple times.
-"""
+"""Unit tests for unique references to tunables when they're loaded multiple times."""
 
 import json5 as json
 import pytest
@@ -13,9 +11,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def test_duplicate_merging_tunable_groups(tunable_groups_config: dict) -> None:
-    """
-    Check that the merging logic of tunable groups works as expected.
-    """
+    """Check that the merging logic of tunable groups works as expected."""
     parent_tunables = TunableGroups(tunable_groups_config)
 
     # Pretend we loaded this one from disk another time.
@@ -63,9 +59,7 @@ def test_duplicate_merging_tunable_groups(tunable_groups_config: dict) -> None:
 
 
 def test_overlapping_group_merge_tunable_groups(tunable_groups_config: dict) -> None:
-    """
-    Check that the merging logic of tunable groups works as expected.
-    """
+    """Check that the merging logic of tunable groups works as expected."""
     parent_tunables = TunableGroups(tunable_groups_config)
 
     # This config should overlap with the parent config.
@@ -94,9 +88,7 @@ def test_overlapping_group_merge_tunable_groups(tunable_groups_config: dict) -> 
 
 
 def test_bad_extended_merge_tunable_group(tunable_groups_config: dict) -> None:
-    """
-    Check that the merging logic of tunable groups works as expected.
-    """
+    """Check that the merging logic of tunable groups works as expected."""
     parent_tunables = TunableGroups(tunable_groups_config)
 
     # This config should overlap with the parent config.
@@ -125,9 +117,7 @@ def test_bad_extended_merge_tunable_group(tunable_groups_config: dict) -> None:
 
 
 def test_good_extended_merge_tunable_group(tunable_groups_config: dict) -> None:
-    """
-    Check that the merging logic of tunable groups works as expected.
-    """
+    """Check that the merging logic of tunable groups works as expected."""
     parent_tunables = TunableGroups(tunable_groups_config)
 
     # This config should overlap with the parent config.

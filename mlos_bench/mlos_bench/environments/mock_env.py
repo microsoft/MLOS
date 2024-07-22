@@ -2,41 +2,38 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Scheduler-side environment to mock the benchmark results.
-"""
+"""Scheduler-side environment to mock the benchmark results."""
 
-import random
 import logging
+import random
 from datetime import datetime
 from typing import Dict, Optional, Tuple
 
 import numpy
 
-from mlos_bench.services.base_service import Service
-from mlos_bench.environments.status import Status
 from mlos_bench.environments.base_environment import Environment
+from mlos_bench.environments.status import Status
+from mlos_bench.services.base_service import Service
 from mlos_bench.tunables import Tunable, TunableGroups, TunableValue
-from mlos_bench.util import nullable
 
 _LOG = logging.getLogger(__name__)
 
 
 class MockEnv(Environment):
-    """
-    Scheduler-side environment to mock the benchmark results.
-    """
+    """Scheduler-side environment to mock the benchmark results."""
 
     _NOISE_VAR = 0.2
     """Variance of the Gaussian noise added to the benchmark value."""
 
-    def __init__(self,
-                 *,
-                 name: str,
-                 config: dict,
-                 global_config: Optional[dict] = None,
-                 tunables: Optional[TunableGroups] = None,
-                 service: Optional[Service] = None):
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        *,
+        name: str,
+        config: dict,
+        global_config: Optional[dict] = None,
+        tunables: Optional[TunableGroups] = None,
+        service: Optional[Service] = None,
+    ):
         """
         Create a new environment that produces mock benchmark data.
 
@@ -49,18 +46,24 @@ class MockEnv(Environment):
         global_config : dict
             Free-format dictionary of global parameters (e.g., security credentials)
             to be mixed in into the "const_args" section of the local config.
-            Optional arguments are `seed`, `range`, and `metrics`.
+            Optional arguments are `mock_env_seed`, `mock_env_range`, and `mock_env_metrics`.
+            Set `mock_env_seed` to -1 for deterministic behavior, 0 for default randomness.
         tunables : TunableGroups
             A collection of tunable parameters for *all* environments.
         service: Service
             An optional service object. Not used by this class.
         """
-        super().__init__(name=name, config=config, global_config=global_config,
-                         tunables=tunables, service=service)
-        seed = self.config.get("seed")
-        self._random = nullable(random.Random, seed)
-        self._range = self.config.get("range")
-        self._metrics = self.config.get("metrics", ["score"])
+        super().__init__(
+            name=name,
+            config=config,
+            global_config=global_config,
+            tunables=tunables,
+            service=service,
+        )
+        seed = int(self.config.get("mock_env_seed", -1))
+        self._random = random.Random(seed or None) if seed >= 0 else None
+        self._range = self.config.get("mock_env_range")
+        self._metrics = self.config.get("mock_env_metrics", ["score"])
         self._is_ready = True
 
     def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
@@ -81,9 +84,9 @@ class MockEnv(Environment):
             return result
 
         # Simple convex function of all tunable parameters.
-        score = numpy.mean(numpy.square([
-            self._normalized(tunable) for (tunable, _group) in self._tunable_params
-        ]))
+        score = numpy.mean(
+            numpy.square([self._normalized(tunable) for (tunable, _group) in self._tunable_params])
+        )
 
         # Add noise and shift the benchmark value from [0, 1] to a given range.
         noise = self._random.gauss(0, self._NOISE_VAR) if self._random else 0
@@ -97,15 +100,16 @@ class MockEnv(Environment):
     def _normalized(tunable: Tunable) -> float:
         """
         Get the NORMALIZED value of a tunable.
+
         That is, map current value to the [0, 1] range.
         """
         val = None
         if tunable.is_categorical:
-            val = (tunable.categories.index(tunable.category) /
-                   float(len(tunable.categories) - 1))
+            val = tunable.categories.index(tunable.category) / float(len(tunable.categories) - 1)
         elif tunable.is_numerical:
-            val = ((tunable.numerical_value - tunable.range[0]) /
-                   float(tunable.range[1] - tunable.range[0]))
+            val = (tunable.numerical_value - tunable.range[0]) / float(
+                tunable.range[1] - tunable.range[0]
+            )
         else:
             raise ValueError("Invalid parameter type: " + tunable.type)
         # Explicitly clip the value in case of numerical errors.

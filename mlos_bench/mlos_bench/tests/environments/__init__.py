@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Tests helpers for mlos_bench.environments.
-"""
+"""Tests helpers for mlos_bench.environments."""
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
@@ -12,16 +10,17 @@ from typing import Any, Dict, List, Optional, Tuple
 import pytest
 
 from mlos_bench.environments.base_environment import Environment
-
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
-def check_env_success(env: Environment,
-                      tunable_groups: TunableGroups,
-                      expected_results: Dict[str, TunableValue],
-                      expected_telemetry: List[Tuple[datetime, str, Any]],
-                      global_config: Optional[dict] = None) -> None:
+def check_env_success(
+    env: Environment,
+    tunable_groups: TunableGroups,
+    expected_results: Dict[str, TunableValue],
+    expected_telemetry: List[Tuple[datetime, str, Any]],
+    global_config: Optional[dict] = None,
+) -> None:
     """
     Set up an environment and run a test experiment there.
 
@@ -51,13 +50,13 @@ def check_env_success(env: Environment,
         assert telemetry == pytest.approx(expected_telemetry, nan_ok=True)
 
         env_context.teardown()
-        assert not env_context._is_ready    # pylint: disable=protected-access
+        assert not env_context._is_ready  # pylint: disable=protected-access
 
 
 def check_env_fail_telemetry(env: Environment, tunable_groups: TunableGroups) -> None:
     """
-    Set up a local environment and run a test experiment there;
-    Make sure the environment `.status()` call fails.
+    Set up a local environment and run a test experiment there; Make sure the
+    environment `.status()` call fails.
 
     Parameters
     ----------
