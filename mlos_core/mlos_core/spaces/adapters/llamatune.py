@@ -138,9 +138,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
                 config_vector = np.nan_to_num(configuration.get_array(), nan=0.0)
                 # Perform approximate reverse mapping
                 # NOTE: applying special value biasing is not possible
-                vector = self._config_scaler.inverse_transform([config_vector])[0]
-                # FIXME: value 3 is outside the range?
-                target_config_vector = self._pinv_matrix.dot(vector)
+                vector: npt.NDArray = self._config_scaler.inverse_transform([config_vector])[0]
+                target_config_vector: npt.NDArray = self._pinv_matrix.dot(vector)
                 # Clip values to [-1, 1] range
                 for idx, value in enumerate(target_config_vector):
                     target_config_vector[idx] = max(-1, min(1, value))
@@ -148,14 +147,26 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
                     target_config_vector = self._q_scaler.inverse_transform(
                         [target_config_vector]
                     )[0]
+                    assert isinstance(target_config_vector, np.ndarray)
                     # Clip values to [1, max_value] range (floating point errors may occur)
                     for idx, value in enumerate(target_config_vector):
                         target_config_vector[idx] = int(
                             max(1, min(value, self._q_scaler.data_max_[idx]))
                         )
+                    target_config_vector = target_config_vector.astype(int)
+                target_config_dict = {
+                    param: value
+                    for param, value in zip(
+                        self.target_parameter_space.keys(),
+                        target_config_vector,
+                    )
+                }
                 target_config = ConfigSpace.Configuration(
                     self.target_parameter_space,
-                    vector=target_config_vector,
+                    values=target_config_dict,
+                    # This method results in hyperparameter type conversion issues
+                    # (e.g., float instead of int).
+                    # vector=target_config_vector,
                 )
 
                 # Check to see if the approximate reverse mapping looks OK.
@@ -302,7 +313,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
             # Clip value to force it to fall in [0, 1]
             # NOTE: HeSBO projection ensures that theoretically but due to
             #       floating point ops nuances this is not always guaranteed
-            value = max(0.0, min(1.0, norm_value))  # pylint: disable=redefined-loop-name
+            value = max(0.0, min(1.0, norm_value))
 
             if isinstance(param, ConfigSpace.CategoricalHyperparameter):
                 index = int(value * len(param.choices))  # truncate integer part
