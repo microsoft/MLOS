@@ -32,10 +32,7 @@ from mlos_core.tests import get_all_concrete_subclasses
 def test_concrete_optimizer_type(space_adapter_type: SpaceAdapterType) -> None:
     """Test that all optimizer types are listed in the ConcreteOptimizer constraints."""
     # pylint: disable=no-member
-    assert (
-        space_adapter_type.value
-        in ConcreteSpaceAdapter.__constraints__  # type: ignore[attr-defined]
-    )
+    assert space_adapter_type.value in ConcreteSpaceAdapter.__constraints__
 
 
 @pytest.mark.parametrize(
