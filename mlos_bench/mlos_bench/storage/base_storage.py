@@ -73,7 +73,7 @@ class Storage(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def experiment(
+    def experiment(  # pylint: disable=too-many-arguments
         self,
         *,
         experiment_id: str,
@@ -119,7 +119,7 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.experiment()` method.
         """
 
-        def __init__(
+        def __init__(  # pylint: disable=too-many-arguments
             self,
             *,
             tunables: TunableGroups,
@@ -375,7 +375,7 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.Experiment.trial()` method.
         """
 
-        def __init__(
+        def __init__(  # pylint: disable=too-many-arguments
             self,
             *,
             tunables: TunableGroups,

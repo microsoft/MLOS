@@ -54,7 +54,7 @@ class SqlStorage(Storage):
     def __repr__(self) -> str:
         return self._repr
 
-    def experiment(
+    def experiment(  # pylint: disable=too-many-arguments
         self,
         *,
         experiment_id: str,
