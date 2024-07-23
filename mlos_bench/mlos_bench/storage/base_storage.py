@@ -8,7 +8,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 from types import TracebackType
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Type
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Type, Union
 
 from typing_extensions import Literal
 
@@ -408,6 +408,45 @@ class Storage(metaclass=ABCMeta):
             if trial_runner_id is not None:
                 config.setdefault("trial_runner_id", trial_runner_id)
             return config
+
+        def add_new_config_data(
+            self,
+            new_config_data: Dict[str, Union[int, float, str]],
+        ) -> None:
+            """Add new config data to the trial.
+
+            Parameters
+            ----------
+            new_config_data : Dict[str, Union[int, float, str]]
+                New data to add (must not already exist for the trial).
+
+            Raises
+            ------
+            ValueError
+                If any of the data already exists.
+            """
+
+            for key, value in new_config_data.items():
+                if key in self._config:
+                    raise ValueError(
+                        f"New config data {key}={value} already exists for trial {self}: "
+                        f"{self._config[key]}"
+                    )
+                self._config[key] = value
+            self._save_new_config_data(new_config_data)
+
+        @abstractmethod
+        def _save_new_config_data(
+            self,
+            new_config_data: Dict[str, Union[int, float, str]],
+        ) -> None:
+            """Save the new config data to the storage.
+
+            Parameters
+            ----------
+            new_config_data : Dict[str, Union[int, float, str]]
+                New data to add.
+            """
 
         @abstractmethod
         def update(

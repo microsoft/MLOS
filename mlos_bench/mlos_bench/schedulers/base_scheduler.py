@@ -173,7 +173,14 @@ class Scheduler(metaclass=ABCMeta):
         TrialRunner
         """
         if trial.trial_runner_id is None:
-            raise ValueError(f"Trial {trial} has no trial_runner_id")
+            new_trial_runner_id = self._atomic_get_and_increment_current_trial_runner_index()
+            _LOG.warning(
+                "Trial %s missing trial_runner_id.  Assigning %d",
+                trial,
+                new_trial_runner_id,
+            )
+            trial.add_new_config_data({"trial_runner_id": new_trial_runner_id})
+        assert trial.trial_runner_id is not None
         return self._trial_runners[trial.trial_runner_id]
 
     def __repr__(self) -> str:
@@ -293,6 +300,14 @@ class Scheduler(metaclass=ABCMeta):
 
         return not_done
 
+    def _atomic_get_and_increment_current_trial_runner_index(self) -> int:
+        current_trial_runner_index = self._current_trial_runner_idx
+        # Rotate which TrialRunner the Trial is assigned to.
+        # TODO: This could be a more sophisticated policy.
+        self._current_trial_runner_idx += 1
+        self._current_trial_runner_idx %= len(self._trial_runners)
+        return current_trial_runner_index
+
     def schedule_trial(self, tunables: TunableGroups) -> None:
         """Add a configuration to the queue of trials."""
         # TODO: Alternative scheduling policies may prefer to expand repeats over
@@ -312,7 +327,7 @@ class Scheduler(metaclass=ABCMeta):
                     "optimizer": self.optimizer.name,
                     "repeat_i": repeat_i,
                     "trial_runner_id": self._trial_runners[
-                        self._current_trial_runner_idx
+                        self._atomic_get_and_increment_current_trial_runner_index()
                     ].trial_runner_id,
                     "is_defaults": tunables.is_defaults(),
                     **{
@@ -321,11 +336,6 @@ class Scheduler(metaclass=ABCMeta):
                         for (key, val) in zip(["target", "direction"], opt_target)
                     },
                 },
-            )
-            # Rotate which TrialRunner the Trial is assigned to.
-            # TODO: This could be a more sophisticated policy.
-            self._current_trial_runner_idx = (self._current_trial_runner_idx + 1) % len(
-                self._trial_runners
             )
 
     def _add_trial_to_queue(
