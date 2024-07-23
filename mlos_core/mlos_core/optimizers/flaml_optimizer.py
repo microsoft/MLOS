@@ -11,7 +11,7 @@ import ConfigSpace
 import numpy as np
 import pandas as pd
 
-from mlos_core.optimizers.observations import Observation
+from mlos_core.optimizers.observations import Observation, Suggestion
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.util import normalize_config
@@ -124,9 +124,9 @@ class FlamlOptimizer(BaseOptimizer):
             )
 
         assert isinstance(observation.config, pd.DataFrame)
-        assert isinstance(observation.performance, pd.DataFrame)
+        assert isinstance(observation.score, pd.DataFrame)
         for (_, config), (_, score) in zip(
-            observation.config.iterrows(), observation.performance.iterrows()
+            observation.config.astype("O").iterrows(), observation.score.iterrows()
         ):
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
                 self.optimizer_parameter_space, values=config.to_dict()
@@ -142,7 +142,7 @@ class FlamlOptimizer(BaseOptimizer):
         self,
         *,
         context: Optional[pd.DataFrame] = None,
-    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
+    ) -> Suggestion:
         """
         Suggests a new configuration.
 
@@ -164,15 +164,9 @@ class FlamlOptimizer(BaseOptimizer):
         if context is not None:
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
         config: dict = self._get_next_config()
-        return pd.DataFrame(config, index=[0]), None
+        return Suggestion(config=pd.DataFrame(config, index=[0]), context=context, metadata=None)
 
-    def register_pending(
-        self,
-        *,
-        configs: pd.DataFrame,
-        context: Optional[pd.DataFrame] = None,
-        metadata: Optional[pd.DataFrame] = None,
-    ) -> None:
+    def register_pending(self, *, pending: Suggestion) -> None:
         raise NotImplementedError()
 
     def _target_function(self, config: dict) -> Union[dict, None]:

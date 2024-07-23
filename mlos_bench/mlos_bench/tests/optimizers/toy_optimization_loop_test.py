@@ -7,6 +7,7 @@
 import logging
 from typing import Tuple
 
+from mlos_core.optimizers.observations import Suggestion
 import pytest
 
 from mlos_bench.environments.base_environment import Environment
@@ -43,7 +44,10 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
                 config_df = config_to_dataframe(config)
                 logger("config: %s", str(config))
                 try:
-                    logger("prediction: %s", opt._opt.surrogate_predict(configs=config_df))
+                    logger(
+                        "prediction: %s",
+                        opt._opt.surrogate_predict(suggestion=Suggestion(config=config_df)),
+                    )
                 except RuntimeError:
                     pass
 

@@ -129,7 +129,7 @@ class MlosCoreOptimizer(Optimizer):
 
         # TODO: Specify (in the config) which metrics to pass to the optimizer.
         # Issue: https://github.com/microsoft/MLOS/issues/745
-        self._opt.register(observation=Observation(config=df_configs, performance=df_scores))
+        self._opt.register(observation=Observation(config=df_configs, score=df_scores))
 
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
@@ -199,10 +199,12 @@ class MlosCoreOptimizer(Optimizer):
         tunables = super().suggest()
         if self._start_with_defaults:
             _LOG.info("Use default values for the first trial")
-        df_config, _metadata = self._opt.suggest(defaults=self._start_with_defaults)
+        suggestion = self._opt.suggest(defaults=self._start_with_defaults)
         self._start_with_defaults = False
-        _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, df_config)
-        return tunables.assign(configspace_data_to_tunable_values(df_config.loc[0].to_dict()))
+        _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, suggestion.config)
+        return tunables.assign(
+            configspace_data_to_tunable_values(suggestion.config.loc[0].to_dict())
+        )
 
     def register(
         self,
@@ -224,7 +226,7 @@ class MlosCoreOptimizer(Optimizer):
             self._opt.register(
                 observation=Observation(
                     config=df_config,
-                    performance=pd.DataFrame([registered_score], dtype=float),
+                    score=pd.DataFrame([registered_score], dtype=float),
                 )
             )
         return registered_score
@@ -232,10 +234,10 @@ class MlosCoreOptimizer(Optimizer):
     def get_best_observation(
         self,
     ) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
-        (df_config, df_score, _df_context) = self._opt.get_best_observations()
-        if len(df_config) == 0:
+        best_observations = self._opt.get_best_observations()
+        if len(best_observations.config.index) == 0:
             return (None, None)
-        params = configspace_data_to_tunable_values(df_config.iloc[0].to_dict())
-        scores = self._adjust_signs_df(df_score).iloc[0].to_dict()
+        params = configspace_data_to_tunable_values(best_observations.config.iloc[0].to_dict())
+        scores = self._adjust_signs_df(best_observations.score).iloc[0].to_dict()
         _LOG.debug("Best observation: %s score: %s", params, scores)
         return (scores, self._tunables.copy().assign(params))

@@ -37,18 +37,17 @@ def test_context_not_implemented_warning(
         optimization_targets=["score"],
         **kwargs,
     )
-    suggestion, _metadata = optimizer.suggest()
+    suggestion = optimizer.suggest()
     scores = pd.DataFrame({"score": [1]})
     context = pd.DataFrame([["something"]])
+    suggestion.context = context
 
     with pytest.raises(UserWarning):
-        optimizer.register(
-            observation=Observation(config=suggestion, performance=scores, context=context)
-        )
+        optimizer.register(observation=suggestion.complete(scores))
 
     with pytest.raises(UserWarning):
         optimizer.suggest(context=context)
 
     if isinstance(optimizer, BaseBayesianOptimizer):
         with pytest.raises(UserWarning):
-            optimizer.surrogate_predict(configs=suggestion, context=context)
+            optimizer.surrogate_predict(suggestion=suggestion)

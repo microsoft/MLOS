@@ -9,7 +9,7 @@ from warnings import warn
 
 import pandas as pd
 
-from mlos_core.optimizers.observations import Observation
+from mlos_core.optimizers.observations import Observation, Suggestion
 from mlos_core.optimizers.optimizer import BaseOptimizer
 
 
@@ -61,7 +61,7 @@ class RandomOptimizer(BaseOptimizer):
         self,
         *,
         context: Optional[pd.DataFrame] = None,
-    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
+    ) -> Suggestion:
         """
         Suggests a new configuration.
 
@@ -74,26 +74,20 @@ class RandomOptimizer(BaseOptimizer):
 
         Returns
         -------
-        configuration : pd.DataFrame
-            Pandas dataframe with a single row. Column names are the parameter names.
-
-        metadata : None
-            Not implemented.
+        suggestion: Suggestion
+            The suggestion to evaluate.
         """
         if context is not None:
             # not sure how that works here?
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
-        return (
-            pd.DataFrame(dict(self.optimizer_parameter_space.sample_configuration()), index=[0]),
-            None,
+        return Suggestion(
+            config=pd.DataFrame(
+                dict(self.optimizer_parameter_space.sample_configuration()), index=[0]
+            ),
+            context=context,
+            metadata=None,
         )
 
-    def register_pending(
-        self,
-        *,
-        configs: pd.DataFrame,
-        context: Optional[pd.DataFrame] = None,
-        metadata: Optional[pd.DataFrame] = None,
-    ) -> None:
+    def register_pending(self, *, pending: Suggestion) -> None:
         raise NotImplementedError()
         # self._pending_observations.append((configs, context))
