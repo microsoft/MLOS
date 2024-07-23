@@ -332,10 +332,13 @@ class Storage(metaclass=ABCMeta):
             # Check that `config` is json serializable (e.g., no callables)
             if config:
                 try:
+                    # Relies on the fact that DictTemplater only accepts primitive
+                    # types in it's nested dict structure walk.
                     _config = DictTemplater(config).expand_vars()
-                except ValueError:
-                    _LOG.warning("Non-serializable config: %s", config)
-                    raise
+                    assert isinstance(_config, dict)
+                except ValueError as e:
+                    _LOG.error("Non-serializable config: %s\n%s", config, e)
+                    raise e
             return self._new_trial(tunables, ts_start, config)
 
         @abstractmethod
