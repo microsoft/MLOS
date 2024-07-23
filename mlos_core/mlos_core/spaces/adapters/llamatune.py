@@ -138,8 +138,9 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         self,
         config: ConfigSpace.Configuration,
     ) -> ConfigSpace.Configuration:
-        """Attempts to generate an inverse mapping of the given configuration that
-        wasn't previously registered.
+        """
+        Attempts to generate an inverse mapping of the given configuration that wasn't
+        previously registered.
 
         Parameters
         ----------
