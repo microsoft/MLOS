@@ -15,16 +15,9 @@ import pytest
 from mlos_core.spaces.adapters import LlamaTuneAdapter
 
 
-# Explicitly test quantized values with llamatune space adapter.
-# TODO: Add log scale sampling tests as well.
-
-
-def construct_parameter_space(  # pylint: disable=too-many-arguments
-    *,
+def construct_parameter_space(
     n_continuous_params: int = 0,
-    n_quantized_continuous_params: int = 0,
     n_integer_params: int = 0,
-    n_quantized_integer_params: int = 0,
     n_categorical_params: int = 0,
     seed: int = 1234,
 ) -> CS.ConfigurationSpace:
@@ -35,17 +28,9 @@ def construct_parameter_space(  # pylint: disable=too-many-arguments
         input_space.add_hyperparameter(
             CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64)
         )
-    for idx in range(n_quantized_continuous_params):
-        input_space.add_hyperparameter(
-            CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64, q=12.8)
-        )
     for idx in range(n_integer_params):
         input_space.add_hyperparameter(
             CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=-1, upper=256)
-        )
-    for idx in range(n_quantized_integer_params):
-        input_space.add_hyperparameter(
-            CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=0, upper=256, q=16)
         )
     for idx in range(n_categorical_params):
         input_space.add_hyperparameter(
@@ -68,13 +53,6 @@ def construct_parameter_space(  # pylint: disable=too-many-arguments
                 {"n_continuous_params": int(num_target_space_dims * num_orig_space_factor)},
                 {"n_integer_params": int(num_target_space_dims * num_orig_space_factor)},
                 {"n_categorical_params": int(num_target_space_dims * num_orig_space_factor)},
-                {"n_categorical_params": int(num_target_space_dims * num_orig_space_factor)},
-                {"n_quantized_integer_params": int(num_target_space_dims * num_orig_space_factor)},
-                {
-                    "n_quantized_continuous_params": int(
-                        num_target_space_dims * num_orig_space_factor
-                    )
-                },
                 # Mix of all three types
                 {
                     "n_continuous_params": int(num_target_space_dims * num_orig_space_factor / 3),
@@ -396,12 +374,6 @@ def test_max_unique_values_per_param() -> None:
                 {"n_continuous_params": int(num_target_space_dims * num_orig_space_factor)},
                 {"n_integer_params": int(num_target_space_dims * num_orig_space_factor)},
                 {"n_categorical_params": int(num_target_space_dims * num_orig_space_factor)},
-                {"n_quantized_integer_params": int(num_target_space_dims * num_orig_space_factor)},
-                {
-                    "n_quantized_continuous_params": int(
-                        num_target_space_dims * num_orig_space_factor
-                    )
-                },
                 # Mix of all three types
                 {
                     "n_continuous_params": int(num_target_space_dims * num_orig_space_factor / 3),
