@@ -108,7 +108,6 @@ class Launcher:
             args_rest=args_rest,
             global_config=cli_config_args,
         )
-        # TODO: Can we generalize these two rules using excluded_cli_args?
         # experiment_id is generally taken from --globals files, but we also allow
         # overriding it on the CLI.
         # It's useful to keep it there explicitly mostly for the --help output.
