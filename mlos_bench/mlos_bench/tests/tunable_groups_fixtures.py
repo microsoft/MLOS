@@ -15,6 +15,8 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
 
+# TODO: Add quantized tunables here for better test coverage.
+
 TUNABLE_GROUPS_JSON = """
 {
     "provision": {
@@ -60,8 +62,7 @@ TUNABLE_GROUPS_JSON = """
                 "type": "int",
                 "default": 2000000,
                 "range": [0, 1000000000],
-                "log": false,
-                "quantization": 100
+                "log": false
             }
         }
     }

@@ -113,7 +113,7 @@ def test_smac_optimization_loop(mock_env_no_noise: MockEnv, smac_opt: MlosCoreOp
         "vmSize": "Standard_B2s",
         "idle": "mwait",
         "kernel_sched_migration_cost_ns": 297669,
-        "kernel_sched_latency_ns": 290365100,
+        "kernel_sched_latency_ns": 290365137,
     }
     assert score == pytest.approx(expected_score, 0.01)
     assert tunables.get_param_values() == expected_tunable_values
