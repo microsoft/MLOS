@@ -99,7 +99,13 @@ class Scheduler(metaclass=ABCMeta):
             "class": self.__class__.__module__ + "." + self.__class__.__name__,
         }
         if config:
-            json_config["config"] = config
+            json_config["config"] = config.copy()
+            # The json schema does not allow for -1 as a valid value for config_id.
+            # As it is just a default placeholder value, and not required, we can
+            # remove it from the config copy prior to validation safely.
+            config_id = json_config["config"].get("config_id")
+            if config_id is not None and isinstance(config_id, int) and config_id < 0:
+                json_config["config"].pop("config_id")
         ConfigSchema.SCHEDULER.validate(json_config)
 
     @property
