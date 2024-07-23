@@ -525,8 +525,8 @@ class Launcher:
                 # All config values can be overridden from global config
                 config={
                     "experiment_id": "UNDEFINED - override from global config",
-                    "config_id": -1,
                     "trial_id": 0,
+                    "config_id": -1,
                     "trial_config_repeat_count": 1,
                     "teardown": self.teardown,
                 },
