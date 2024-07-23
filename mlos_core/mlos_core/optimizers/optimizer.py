@@ -217,7 +217,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         observations : Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]
             A triplet of (config, score, context) DataFrames of observations.
         """
-        if len(self._observations) == 0:
+        if sum(len(o.config.index) for o in self._observations) == 0:
             raise ValueError("No observations registered yet.")
 
         return self._observations
@@ -243,7 +243,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         observations : Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]
             A triplet of best (config, score, context) DataFrames of best observations.
         """
-        if len(self._observations) == 0:
+        if sum(len(o.config.index) for o in self._observations) == 0:
             raise ValueError("No observations registered yet.")
 
         configs, scores, contexts, metadata = self._observations.to_legacy()

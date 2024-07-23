@@ -375,7 +375,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             raise RuntimeError(
                 "Surrogate model can make predictions *only* after "
                 "all initial points have been evaluated "
-                f"{len(self._observations)} <= {self.base_optimizer._initial_design._n_configs}"
+                f"{sum(len(o.config.index) for o in self._observations)} <= {self.base_optimizer._initial_design._n_configs}"
             )
         if self.base_optimizer._config_selector._model is None:
             raise RuntimeError("Surrogate model is not yet trained")
@@ -428,7 +428,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         configs : list
             List of ConfigSpace configs.
         """
+        values = [config.to_dict() for (_, config) in configs.astype("O").iterrows()]
         return [
-            ConfigSpace.Configuration(self.optimizer_parameter_space, values=config.to_dict())
-            for (_, config) in configs.astype("O").iterrows()
+            ConfigSpace.Configuration(self.optimizer_parameter_space, values=value)
+            for value in values
         ]

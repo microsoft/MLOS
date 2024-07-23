@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from mlos_core.optimizers.observations import Suggestion
+from mlos_core.optimizers.observations import Observations, Suggestion
 from mlos_core.optimizers import (
     BaseOptimizer,
     ConcreteOptimizer,
@@ -337,17 +337,16 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     )
 
     # Retrieve and check all observations
-    for all_configs, all_scores, all_contexts, _metadata in (
-        optimizer.get_observations().to_legacy(),
-        llamatune_optimizer.get_observations().to_legacy(),
-    ):
+    for obs in [optimizer.get_observations(), llamatune_optimizer.get_observations()]:
+        assert isinstance(obs, Observations)
+        all_configs, all_scores, all_contexts, _metadata = obs.to_legacy()
         assert isinstance(all_configs, pd.DataFrame)
         assert isinstance(all_scores, pd.DataFrame)
         assert all_contexts is None
         assert set(all_configs.columns) == {"x", "y"}
         assert set(all_scores.columns) == {"score"}
-        assert len(all_configs) == num_iters
-        assert len(all_scores) == num_iters
+        assert len(all_configs.index) == num_iters
+        assert len(all_scores.index) == num_iters
 
     # .surrogate_predict method not currently implemented if space adapter is employed
     if isinstance(llamatune_optimizer, BaseBayesianOptimizer):
@@ -425,19 +424,19 @@ def test_mixed_numerics_type_input_space_types(
     for _ in range(max_iterations):
         suggestion = optimizer.suggest()
         assert isinstance(suggestion, Suggestion)
-        assert isinstance(suggestion.context, pd.DataFrame)
-        assert (suggestion.context.columns == ["x", "y"]).all()
+        assert isinstance(suggestion.config, pd.DataFrame)
+        assert (suggestion.config.columns == ["x", "y"]).all()
         # Check suggestion values are the expected dtype
-        assert isinstance(suggestion.context["x"].iloc[0], np.integer)
-        assert isinstance(suggestion.context["y"].iloc[0], np.floating)
+        assert isinstance(suggestion.config["x"].iloc[0], np.integer)
+        assert isinstance(suggestion.config["y"].iloc[0], np.floating)
         # Check that suggestion is in the space
         test_configuration = CS.Configuration(
-            optimizer.parameter_space, suggestion.context.astype("O").iloc[0].to_dict()
+            optimizer.parameter_space, suggestion.config.astype("O").iloc[0].to_dict()
         )
         # Raises an error if outside of configuration space
         test_configuration.is_valid_configuration()
         # Test registering the suggested configuration with a score.
-        observation = objective(suggestion.context)
+        observation = objective(suggestion.config)
         assert isinstance(observation, pd.DataFrame)
         optimizer.register(observation=suggestion.evaluate(observation))
 

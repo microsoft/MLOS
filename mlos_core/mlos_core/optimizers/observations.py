@@ -166,9 +166,6 @@ class Observations:
     def __init__(self, observations: List[Observation] = []):
         self.observations = observations
 
-    def __len__(self) -> int:
-        return len(self.observations)
-
     def append(self, observation: Observation) -> None:
         """
         Appends an observation to the collection.
