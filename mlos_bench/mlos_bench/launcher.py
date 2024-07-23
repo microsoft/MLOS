@@ -210,9 +210,21 @@ class Launcher:
         argv: Optional[List[str]],
     ) -> Tuple[argparse.Namespace, List[str], List[str]]:
         """Parse the command line arguments."""
-        path_args = []
 
-        parser.add_argument(
+        class PathArgsTracker:
+            """Simple class to help track which arguments are paths."""
+
+            def __init__(self, parser: argparse.ArgumentParser):
+                self._parser = parser
+                self.path_args: List[str] = []
+
+            def add_argument(self, *args: Any, **kwargs: Any) -> None:
+                """Add an argument to the parser and track its destination."""
+                self.path_args.append(self._parser.add_argument(*args, **kwargs).dest)
+
+        path_args_tracker = PathArgsTracker(parser)
+
+        path_args_tracker.add_argument(
             "--config",
             required=False,
             help=(
@@ -223,15 +235,13 @@ class Launcher:
                 "for additional config examples for this and other arguments."
             ),
         )
-        path_args.append("config")
 
-        parser.add_argument(
+        path_args_tracker.add_argument(
             "--log_file",
             "--log-file",
             required=False,
             help="Path to the log file. Use stdout if omitted.",
         )
-        path_args.append("log_file")
 
         parser.add_argument(
             "--log_level",
@@ -244,7 +254,7 @@ class Launcher:
             ),
         )
 
-        parser.add_argument(
+        path_args_tracker.add_argument(
             "--config_path",
             "--config-path",
             "--config-paths",
@@ -254,10 +264,8 @@ class Launcher:
             required=False,
             help="One or more locations of JSON config files.",
         )
-        path_args.append("config_path")
-        path_args.append("config_paths")
 
-        parser.add_argument(
+        path_args_tracker.add_argument(
             "--service",
             "--services",
             nargs="+",
@@ -268,17 +276,14 @@ class Launcher:
                 "of the service(s) for environment(s) to use."
             ),
         )
-        path_args.append("service")
-        path_args.append("services")
 
-        parser.add_argument(
+        path_args_tracker.add_argument(
             "--environment",
             required=False,
             help="Path to JSON file with the configuration of the benchmarking environment(s).",
         )
-        path_args.append("environment")
 
-        parser.add_argument(
+        path_args_tracker.add_argument(
             "--optimizer",
             required=False,
             help=(
@@ -286,7 +291,6 @@ class Launcher:
                 "a single trial with default (or specified in --tunable_values)."
             ),
         )
-        path_args.append("optimizer")
 
         parser.add_argument(
             "--trial_config_repeat_count",
@@ -311,7 +315,7 @@ class Launcher:
             ),
         )
 
-        parser.add_argument(
+        path_args_tracker.add_argument(
             "--scheduler",
             required=False,
             help=(
@@ -319,9 +323,8 @@ class Launcher:
                 "a single worker synchronous scheduler."
             ),
         )
-        path_args.append("scheduler")
 
-        parser.add_argument(
+        path_args_tracker.add_argument(
             "--storage",
             required=False,
             help=(
@@ -329,7 +332,6 @@ class Launcher:
                 "If omitted, use the ephemeral in-memory SQL storage."
             ),
         )
-        path_args.append("storage")
 
         parser.add_argument(
             "--random_init",
@@ -349,7 +351,7 @@ class Launcher:
             help="Seed to use with --random_init",
         )
 
-        parser.add_argument(
+        path_args_tracker.add_argument(
             "--tunable_values",
             "--tunable-values",
             nargs="+",
@@ -361,9 +363,8 @@ class Launcher:
                 "is specified) or as default values for the first run in optimization."
             ),
         )
-        path_args.append("tunable_values")
 
-        parser.add_argument(
+        path_args_tracker.add_argument(
             "--globals",
             nargs="+",
             action="extend",
@@ -373,7 +374,6 @@ class Launcher:
                 "[private] parameters of the benchmarking environment."
             ),
         )
-        path_args.append("globals")
 
         parser.add_argument(
             "--no_teardown",
@@ -408,7 +408,7 @@ class Launcher:
             argv = sys.argv[1:].copy()
         (args, args_rest) = parser.parse_known_args(argv)
 
-        return (args, path_args, args_rest)
+        return (args, path_args_tracker.path_args, args_rest)
 
     @staticmethod
     def _try_parse_extra_args(cmdline: Iterable[str]) -> Dict[str, TunableValue]:
@@ -565,6 +565,7 @@ class Launcher:
                 config={
                     "experiment_id": "UNDEFINED - override from global config",
                     "trial_id": 0,
+                    "config_id": -1,
                     "trial_config_repeat_count": 1,
                     "teardown": self.teardown,
                 },
