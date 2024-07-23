@@ -4,7 +4,7 @@
 #
 """Contains the FlamlOptimizer class."""
 
-from typing import Dict, List, NamedTuple, Optional, Tuple, Union
+from typing import Dict, List, NamedTuple, Optional, Union
 from warnings import warn
 
 import ConfigSpace

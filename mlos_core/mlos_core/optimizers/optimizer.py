@@ -17,7 +17,6 @@ import pandas as pd
 from mlos_core.optimizers.observations import Observation, Suggestion
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.util import config_to_dataframe
-from traitlets import Int
 
 
 class BaseOptimizer(metaclass=ABCMeta):

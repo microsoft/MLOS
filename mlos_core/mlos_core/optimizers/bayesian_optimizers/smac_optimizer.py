@@ -11,17 +11,17 @@ See Also: <https://automl.github.io/SMAC3/main/index.html>
 from logging import warning
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 from warnings import warn
 
 import ConfigSpace
 import numpy.typing as npt
 import pandas as pd
 
-from mlos_core.optimizers.observations import Observation, Suggestion
 from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import (
     BaseBayesianOptimizer,
 )
+from mlos_core.optimizers.observations import Observation, Suggestion
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 

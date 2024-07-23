@@ -12,8 +12,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from mlos_core.optimizers.observations import Observation, Suggestion
 from mlos_core.optimizers import BaseOptimizer, OptimizerType
+from mlos_core.optimizers.observations import Observation, Suggestion
 from mlos_core.tests import SEED
 
 _LOG = logging.getLogger(__name__)

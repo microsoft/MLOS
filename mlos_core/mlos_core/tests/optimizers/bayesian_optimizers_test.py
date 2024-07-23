@@ -10,7 +10,6 @@ import ConfigSpace as CS
 import pandas as pd
 import pytest
 
-from mlos_core.optimizers.observations import Observation
 from mlos_core.optimizers import BaseOptimizer, OptimizerType
 from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
 

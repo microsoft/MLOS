@@ -2,25 +2,32 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+"""Contains classes for observations and suggestions."""
+
 from __future__ import annotations
-from typing import Any, Iterator, List, Optional, Tuple
+
+from typing import Any, Iterator, Optional
+
 import pandas as pd
-
-
-def compare_optional_series(left: Optional[pd.Series], right: Optional[pd.Series]) -> bool:
-    if left is None and right is not None:
-        return False
-    if left is not None and right is None:
-        return False
-    elif left is not None and right is not None:
-        if not left.equals(right):
-            return False
-    return True
 
 
 def compare_optional_dataframe(
     left: Optional[pd.DataFrame], right: Optional[pd.DataFrame]
 ) -> bool:
+    """Compare DataFrames that may also be None
+
+    Parameters
+    ----------
+    left : Optional[pd.DataFrame]
+        The left DataFrame to compare
+    right : Optional[pd.DataFrame]
+        The right DataFrame to compare
+
+    Returns
+    -------
+    bool
+        Compare the equality of two Optional[pd.DataFrame] objects
+    """
     if left is None and right is not None:
         return False
     if left is not None and right is None:
@@ -34,6 +41,7 @@ def compare_optional_dataframe(
 class Observation:
     """
     A set of observations of a configuration's score.
+
     Attributes
     ----------
     config : pd.DataFrame
@@ -66,16 +74,17 @@ class Observation:
     def filter_by_index(self, index: pd.Index) -> Observation:
         """
         Filters the observation by the given indices.
+
         Parameters
         ----------
         index : pd.Index
             The indices to filter by.
+
         Returns
         -------
         Observation
             The filtered observation.
         """
-
         return Observation(
             config=self.config.loc[index],
             score=self.score.loc[index],
@@ -86,12 +95,12 @@ class Observation:
     def append(self, other: Observation) -> None:
         """
         Appends the given observation to this observation.
+
         Parameters
         ----------
         other : Observation
             The observation to append.
         """
-
         if len(self.config.index) == 0:
             self.config = other.config
             self.score = other.score
@@ -102,33 +111,37 @@ class Observation:
         self.config = pd.concat([self.config, other.config]).reset_index(drop=True)
         self.score = pd.concat([self.score, other.score]).reset_index(drop=True)
         if self.context is not None:
-            assert (
-                other.context is not None
-            ), "context of appending observation must not be null if context of prior observation is not null"
+            assert other.context is not None, (
+                "context of appending observation must not be null"
+                + " if context of prior observation is not null"
+            )
             self.context = pd.concat([self.context, other.context]).reset_index(drop=True)
         else:
-            assert (
-                other.context is None
-            ), "context of appending observation must be null if context of prior observation is null"
+            assert other.context is None, (
+                "context of appending observation must be null"
+                + " if context of prior observation is null"
+            )
         if self.metadata is not None:
-            assert (
-                other.metadata is not None
-            ), "context of appending observation must not be null if metadata of prior observation is not null"
+            assert other.metadata is not None, (
+                "context of appending observation must not be null"
+                + " if metadata of prior observation is not null"
+            )
             self.metadata = pd.concat([self.metadata, other.metadata]).reset_index(drop=True)
         else:
-            assert (
-                other.metadata is None
-            ), "context of appending observation must be null if metadata of prior observation is null"
+            assert other.metadata is None, (
+                "context of appending observation must be null"
+                + " if metadata of prior observation is null"
+            )
 
     def to_suggestion(self) -> Suggestion:
         """
         Converts the observation to a suggestion.
+
         Returns
         -------
         Suggestion
             The suggestion.
         """
-
         return Suggestion(
             config=self.config,
             context=self.context,
@@ -148,7 +161,10 @@ class Observation:
             )
 
     def __repr__(self) -> str:
-        return f"Observation(config={self.config}, score={self.score}, context={self.context}, metadata={self.metadata})"
+        return (
+            f"Observation(config={self.config}, score={self.score},"
+            + " context={self.context}, metadata={self.metadata})"
+        )
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Observation):
@@ -172,6 +188,7 @@ class Observation:
 class Suggestion:
     """
     A single suggestion for a configuration.
+
     Attributes
     ----------
     config : pd.DataFrame
@@ -192,16 +209,17 @@ class Suggestion:
     def complete(self, score: pd.DataFrame) -> Observation:
         """
         Completes the suggestion.
+
         Parameters
         ----------
         score : pd.Series
             The score metrics observed.
+
         Returns
         -------
         Observation
             The observation of the suggestion.
         """
-
         assert len(score) == len(self.config), "score must have the same length as the config"
 
         return Observation(

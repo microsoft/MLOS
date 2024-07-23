@@ -7,7 +7,6 @@
 import logging
 from typing import Tuple
 
-from mlos_core.optimizers.observations import Suggestion
 import pytest
 
 from mlos_bench.environments.base_environment import Environment
@@ -18,6 +17,7 @@ from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
+from mlos_core.optimizers.observations import Suggestion
 from mlos_core.util import config_to_dataframe
 
 # For debugging purposes output some warnings which are captured with failed tests.

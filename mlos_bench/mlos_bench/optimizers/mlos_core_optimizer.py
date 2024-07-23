@@ -22,7 +22,6 @@ from mlos_bench.optimizers.convert_configspace import (
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_core.optimizers.observations import Observation
 from mlos_core.optimizers import (
     DEFAULT_OPTIMIZER_TYPE,
     BaseOptimizer,
@@ -30,6 +29,7 @@ from mlos_core.optimizers import (
     OptimizerType,
     SpaceAdapterType,
 )
+from mlos_core.optimizers.observations import Observation
 
 _LOG = logging.getLogger(__name__)
 
