@@ -186,6 +186,7 @@ class Launcher:
         argv: Optional[List[str]],
     ) -> Tuple[argparse.Namespace, List[str], List[str]]:
         """Parse the command line arguments."""
+
         class PathArgsTracker:
             """Simple class to help track which arguments are paths."""
 
