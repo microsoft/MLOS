@@ -153,7 +153,7 @@ class Launcher:
         self.root_env_config = self._config_loader.resolve_path(env_path)
 
         self.trial_runners: List[TrialRunner] = []
-        for trial_runner_id in range(0, self.global_config["num_trial_runners"]):
+        for trial_runner_id in range(self.global_config["num_trial_runners"]):
             # Create a new global config for each Environment with a unique trial_runner_id for it.
             env_global_config = self.global_config.copy()
             env_global_config["trial_runner_id"] = trial_runner_id
