@@ -63,6 +63,7 @@ def configuration_space() -> ConfigurationSpace:
     spaces[kernel_sched_migration_cost_ns_type].default_value = TunableValueKind.SPECIAL
     spaces[kernel_sched_migration_cost_ns_type].probabilities = (0.5, 0.5)
     spaces["kernel_sched_latency_ns"].default_value = 2000000
+    spaces["kernel_sched_latency_ns"].q = 100
 
     spaces.add_condition(
         EqualsCondition(
