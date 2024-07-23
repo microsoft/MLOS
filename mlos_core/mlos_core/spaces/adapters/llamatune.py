@@ -7,6 +7,7 @@ from typing import Dict, Optional
 from warnings import warn
 
 import ConfigSpace
+import ConfigSpace.exceptions
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -123,80 +124,108 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
                         "thus *only* configurations suggested "
                         "previously by the optimizer can be registered."
                     )
-
-                # ...yet, we try to support that by implementing an approximate
-                # reverse mapping using pseudo-inverse matrix.
-                if getattr(self, "_pinv_matrix", None) is None:
-                    self._try_generate_approx_inverse_mapping()
-
-                # FIXME: Give some variables names for debugging.
-                config_scaler = self._config_scaler
-                q_scaler = self._q_scaler
-                pinv_matrix = self._pinv_matrix
-
-                # Replace NaNs with zeros for inactive hyperparameters
-                config_vector = np.nan_to_num(configuration.get_array(), nan=0.0)
-                # Perform approximate reverse mapping
-                # NOTE: applying special value biasing is not possible
-                vector: npt.NDArray = self._config_scaler.inverse_transform([config_vector])[0]
-                target_config_vector: npt.NDArray = self._pinv_matrix.dot(vector)
-                # Clip values to [-1, 1] range
-                for idx, value in enumerate(target_config_vector):
-                    target_config_vector[idx] = max(-1, min(1, value))
-                if self._q_scaler is not None:
-                    target_config_vector = self._q_scaler.inverse_transform(
-                        [target_config_vector]
-                    )[0]
-                    assert isinstance(target_config_vector, np.ndarray)
-                    # Clip values to [1, max_value] range (floating point errors may occur)
-                    for idx, value in enumerate(target_config_vector):
-                        target_config_vector[idx] = int(
-                            max(1, min(value, self._q_scaler.data_max_[idx]))
-                        )
-                    target_config_vector = target_config_vector.astype(int)
-                target_config_dict = {
-                    param: value
-                    for param, value in zip(
-                        self.target_parameter_space.keys(),
-                        target_config_vector,
-                    )
-                }
-                target_config = ConfigSpace.Configuration(
-                    self.target_parameter_space,
-                    values=target_config_dict,
-                    # This method results in hyperparameter type conversion issues
-                    # (e.g., float instead of int).
-                    # vector=target_config_vector,
-                )
-
-                # Check to see if the approximate reverse mapping looks OK.
-                # Note: we know this isn't 100% accurate, so this is just a warning.
-                configuration_dict = dict(configuration)
-                double_checked_config = self._transform(dict(target_config))
-                double_checked_config = {
-                    # Skip the special values that aren't in the original space.
-                    k: v
-                    for k, v in double_checked_config.items()
-                    if k in configuration_dict
-                }
-                if double_checked_config != configuration_dict:
-                    warn(
-                        (
-                            f"Configuration {configuration_dict} was transformed to "
-                            f"{dict(target_config)} and then back to {double_checked_config}."
-                        ),
-                        UserWarning,
-                    )
-
-                # But the inverse mapping should at least be valid in the target space.
-                self.target_parameter_space.check_configuration(target_config)
-                # target_config.check_valid_configuration()  # for ConfigSpace 1.0
+                # else ...
+                target_config = self._try_inverse_transform_config(configuration)
 
             target_configurations.append(target_config)
 
         return pd.DataFrame(
-            target_configurations, columns=list(self.target_parameter_space.keys())
+            target_configurations,
+            columns=list(self.target_parameter_space.keys()),
         )
+
+    def _try_inverse_transform_config(
+        self,
+        config: ConfigSpace.Configuration,
+    ) -> ConfigSpace.Configuration:
+        """Attempts to generate an inverse mapping of the given configuration that
+        wasn't previously registered.
+
+        Parameters
+        ----------
+        configuration : ConfigSpace.Configuration
+            Configuration in the original high-dimensional space.
+
+        Returns
+        -------
+        ConfigSpace.Configuration
+            Configuration in the low-dimensional space.
+
+        Raises
+        ------
+        ValueError
+            On conversion errors.
+        """
+        # ...yet, we try to support that by implementing an approximate
+        # reverse mapping using pseudo-inverse matrix.
+        if getattr(self, "_pinv_matrix", None) is None:
+            self._try_generate_approx_inverse_mapping()
+
+        # Replace NaNs with zeros for inactive hyperparameters
+        config_vector = np.nan_to_num(config.get_array(), nan=0.0)
+        # Perform approximate reverse mapping
+        # NOTE: applying special value biasing is not possible
+        vector: npt.NDArray = self._config_scaler.inverse_transform([config_vector])[0]
+        target_config_vector: npt.NDArray = self._pinv_matrix.dot(vector)
+        # Clip values to to [-1, 1] range of the low dimensional space.
+        for idx, value in enumerate(target_config_vector):
+            target_config_vector[idx] = max(-1, min(1, value))
+        if self._q_scaler is not None:
+            # If the max_unique_values_per_param is set, we need to scale
+            # the low dimension space back to the discretized space as well.
+            target_config_vector = self._q_scaler.inverse_transform([target_config_vector])[0]
+            assert isinstance(target_config_vector, np.ndarray)
+            # Clip values to [1, max_value] range (floating point errors may occur).
+            for idx, value in enumerate(target_config_vector):
+                target_config_vector[idx] = int(max(1, min(value, self._q_scaler.data_max_[idx])))
+            target_config_vector = target_config_vector.astype(int)
+        # Convert the vector to a dictionary.
+        target_config_dict = dict(
+            zip(
+                self.target_parameter_space.keys(),
+                target_config_vector,
+            )
+        )
+        target_config = ConfigSpace.Configuration(
+            self.target_parameter_space,
+            values=target_config_dict,
+            # This method results in hyperparameter type conversion issues
+            # (e.g., float instead of int), so we use the values dict instead.
+            # vector=target_config_vector,
+        )
+
+        # Check to see if the approximate reverse mapping looks OK.
+        # Note: we know this isn't 100% accurate, so this is just a warning and
+        # mostly meant for internal debugging.
+        configuration_dict = dict(config)
+        double_checked_config = self._transform(dict(target_config))
+        double_checked_config = {
+            # Skip the special values that aren't in the original space.
+            k: v
+            for k, v in double_checked_config.items()
+            if k in configuration_dict
+        }
+        if double_checked_config != configuration_dict:
+            warn(
+                (
+                    f"Note: Configuration {configuration_dict} was inverse transformed to "
+                    f"{dict(target_config)} and then back to {double_checked_config}. "
+                    "This is an approximate reverse mapping for previously unregistered "
+                    "configurations, so this is just a warning."
+                ),
+                UserWarning,
+            )
+
+        # But the inverse mapping should at least be valid in the target space.
+        try:
+            self.target_parameter_space.check_configuration(target_config)
+        except ConfigSpace.exceptions.IllegalValueError as e:
+            raise ValueError(
+                f"Invalid configuration {target_config} generated by "
+                f"inverse mapping of {config}:\n{e}"
+            ) from e
+
+        return target_config
 
     def transform(self, configuration: pd.DataFrame) -> pd.DataFrame:
         if len(configuration) != 1:
