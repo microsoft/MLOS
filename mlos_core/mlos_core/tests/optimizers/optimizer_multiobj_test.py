@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from mlos_core.optimizers.observations import Observation
 from mlos_core.optimizers import BaseOptimizer, OptimizerType
 from mlos_core.tests import SEED
 
@@ -110,7 +111,7 @@ def test_multi_target_opt(
         observation = objective(suggestion)
         assert isinstance(observation, pd.DataFrame)
         assert set(observation.columns) == {"main_score", "other_score"}
-        optimizer.register(configs=suggestion, scores=observation)
+        optimizer.register(observation=Observation(config=suggestion, performance=observation))
 
     (best_config, best_score, best_context) = optimizer.get_best_observations()
     assert isinstance(best_config, pd.DataFrame)

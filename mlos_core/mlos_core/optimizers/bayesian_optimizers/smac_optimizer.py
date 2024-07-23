@@ -18,6 +18,7 @@ import ConfigSpace
 import numpy.typing as npt
 import pandas as pd
 
+from mlos_core.optimizers.observations import Observation
 from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import (
     BaseBayesianOptimizer,
 )
@@ -269,32 +270,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # release: https://github.com/automl/SMAC3/issues/946
         raise RuntimeError("This function should never be called.")
 
-    def _register(
-        self,
-        *,
-        configs: pd.DataFrame,
-        scores: pd.DataFrame,
-        context: Optional[pd.DataFrame] = None,
-        metadata: Optional[pd.DataFrame] = None,
-    ) -> None:
+    def _register(self, *, observation: Observation) -> None:
         """
         Registers the given configs and scores.
 
         Parameters
         ----------
-        configs : pd.DataFrame
-            Dataframe of configs / parameters. The columns are parameter names and
-            the rows are the configs.
-
-        scores : pd.DataFrame
-            Scores from running the configs. The index is the same as the index of
-            the configs.
-
-        context : pd.DataFrame
-            Not Yet Implemented.
-
-        metadata: pd.DataFrame
-            Not Yet Implemented.
+        observation: Observation
+            The observation to register.
         """
         from smac.runhistory import (  # pylint: disable=import-outside-toplevel
             StatusType,
@@ -302,12 +285,16 @@ class SmacOptimizer(BaseBayesianOptimizer):
             TrialValue,
         )
 
-        if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+        if observation.context is not None:
+            warn(
+                f"Not Implemented: Ignoring context {list(observation.context.columns)}",
+                UserWarning,
+            )
 
         # Register each trial (one-by-one)
         for config, (_i, score) in zip(
-            self._to_configspace_configs(configs=configs), scores.iterrows()
+            self._to_configspace_configs(configs=observation.config),
+            observation.performance.iterrows(),
         ):
             # Retrieve previously generated TrialInfo (returned by .ask()) or create
             # new TrialInfo instance
@@ -440,7 +427,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         configs : list
             List of ConfigSpace configs.
         """
+        assert isinstance(configs, pd.DataFrame)
         return [
             ConfigSpace.Configuration(self.optimizer_parameter_space, values=config.to_dict())
-            for (_, config) in configs.astype("O").iterrows()
+            for (_, config) in configs.iterrows()
         ]

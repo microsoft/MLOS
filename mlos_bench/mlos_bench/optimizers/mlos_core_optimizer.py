@@ -22,6 +22,7 @@ from mlos_bench.optimizers.convert_configspace import (
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_core.optimizers.observations import Observation
 from mlos_core.optimizers import (
     DEFAULT_OPTIMIZER_TYPE,
     BaseOptimizer,
@@ -128,7 +129,7 @@ class MlosCoreOptimizer(Optimizer):
 
         # TODO: Specify (in the config) which metrics to pass to the optimizer.
         # Issue: https://github.com/microsoft/MLOS/issues/745
-        self._opt.register(configs=df_configs, scores=df_scores)
+        self._opt.register(observation=Observation(config=df_configs, performance=df_scores))
 
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
@@ -221,8 +222,10 @@ class MlosCoreOptimizer(Optimizer):
             # TODO: Specify (in the config) which metrics to pass to the optimizer.
             # Issue: https://github.com/microsoft/MLOS/issues/745
             self._opt.register(
-                configs=df_config,
-                scores=pd.DataFrame([registered_score], dtype=float),
+                observation=Observation(
+                    config=df_config,
+                    performance=pd.DataFrame([registered_score], dtype=float),
+                )
             )
         return registered_score
 

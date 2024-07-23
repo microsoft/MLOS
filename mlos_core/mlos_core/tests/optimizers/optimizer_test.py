@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from mlos_core.optimizers.observations import Observation
 from mlos_core.optimizers import (
     BaseOptimizer,
     ConcreteOptimizer,
@@ -115,7 +116,9 @@ def test_basic_interface_toy_problem(
         configuration.is_valid_configuration()
         observation = objective(suggestion["x"])
         assert isinstance(observation, pd.DataFrame)
-        optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
+        optimizer.register(
+            observation=Observation(config=suggestion, performance=observation, metadata=metadata)
+        )
 
     (best_config, best_score, best_context) = optimizer.get_best_observations()
     assert isinstance(best_config, pd.DataFrame)
@@ -293,7 +296,9 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
         # loop for optimizer
         suggestion, metadata = optimizer.suggest()
         observation = objective(suggestion)
-        optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
+        optimizer.register(
+            observation=Observation(config=suggestion, performance=observation, metadata=metadata)
+        )
 
         # loop for llamatune-optimizer
         suggestion, metadata = llamatune_optimizer.suggest()
@@ -301,7 +306,9 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
         # optimizer explores 1-dimensional space
         assert _x == pytest.approx(_y, rel=1e-3) or _x + _y == pytest.approx(3.0, rel=1e-3)
         observation = objective(suggestion)
-        llamatune_optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
+        llamatune_optimizer.register(
+            observation=Observation(config=suggestion, performance=observation, metadata=metadata)
+        )
 
     # Retrieve best observations
     best_observation = optimizer.get_best_observations()
@@ -426,7 +433,9 @@ def test_mixed_numerics_type_input_space_types(
         # Test registering the suggested configuration with a score.
         observation = objective(suggestion)
         assert isinstance(observation, pd.DataFrame)
-        optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
+        optimizer.register(
+            observation=Observation(config=suggestion, performance=observation, metadata=metadata)
+        )
 
     (best_config, best_score, best_context) = optimizer.get_best_observations()
     assert isinstance(best_config, pd.DataFrame)

@@ -13,6 +13,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
+from mlos_core.optimizers.observations import Observation
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.util import config_to_dataframe
 
@@ -58,7 +59,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             raise ValueError("Number of weights must match the number of optimization targets")
 
         self._space_adapter: Optional[BaseSpaceAdapter] = space_adapter
-        self._observations: List[Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]] = []
+        self._observations: List[Observation] = []
         self._has_context: Optional[bool] = None
         self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame]]] = []
 
@@ -70,78 +71,57 @@ class BaseOptimizer(metaclass=ABCMeta):
         """Get the space adapter instance (if any)."""
         return self._space_adapter
 
-    def register(
-        self,
-        *,
-        configs: pd.DataFrame,
-        scores: pd.DataFrame,
-        context: Optional[pd.DataFrame] = None,
-        metadata: Optional[pd.DataFrame] = None,
-    ) -> None:
+    def register(self, *, observation: Observation) -> None:
         """
         Wrapper method, which employs the space adapter (if any), before registering the
         configs and scores.
 
         Parameters
         ----------
-        configs : pd.DataFrame
-            Dataframe of configs / parameters. The columns are parameter names and
-            the rows are the configs.
-        scores : pd.DataFrame
-            Scores from running the configs. The index is the same as the index of the configs.
-
-        context : pd.DataFrame
-            Not Yet Implemented.
-
-        metadata : Optional[pd.DataFrame]
-            Not Yet Implemented.
+        observation: Observation
+            The observation to register.
         """
         # Do some input validation.
-        assert metadata is None or isinstance(metadata, pd.DataFrame)
-        assert set(scores.columns) == set(
+        assert observation.metadata is None or isinstance(observation.metadata, pd.DataFrame)
+        assert set(observation.performance.columns) == set(
             self._optimization_targets
         ), "Mismatched optimization targets."
         assert self._has_context is None or self._has_context ^ (
-            context is None
+            observation.context is None
         ), "Context must always be added or never be added."
-        assert len(configs) == len(scores), "Mismatched number of configs and scores."
-        if context is not None:
-            assert len(configs) == len(context), "Mismatched number of configs and context."
-        assert configs.shape[1] == len(
+        assert len(observation.config) == len(
+            observation.performance
+        ), "Mismatched number of configs and scores."
+        if observation.context is not None:
+            assert len(observation.config) == len(
+                observation.context
+            ), "Mismatched number of configs and context."
+        assert observation.config.shape[1] == len(
             self.parameter_space.values()
         ), "Mismatched configuration shape."
-        self._observations.append((configs, scores, context))
-        self._has_context = context is not None
+        self._observations.append(observation)
+        self._has_context = observation.context is not None
 
         if self._space_adapter:
-            configs = self._space_adapter.inverse_transform(configs)
+            configs = self._space_adapter.inverse_transform(observation.config)
             assert configs.shape[1] == len(
                 self.optimizer_parameter_space.values()
             ), "Mismatched configuration shape after inverse transform."
-        return self._register(configs=configs, scores=scores, context=context)
+        return self._register(observation=observation)
 
     @abstractmethod
     def _register(
         self,
         *,
-        configs: pd.DataFrame,
-        scores: pd.DataFrame,
-        context: Optional[pd.DataFrame] = None,
-        metadata: Optional[pd.DataFrame] = None,
+        observation: Observation,
     ) -> None:
         """
         Registers the given configs and scores.
 
         Parameters
         ----------
-        configs : pd.DataFrame
-            Dataframe of configs / parameters. The columns are parameter names and
-            the rows are the configs.
-        scores : pd.DataFrame
-            Scores from running the configs. The index is the same as the index of the configs.
-
-        context : pd.DataFrame
-            Not Yet Implemented.
+        observation: Observation
+            The observation to register.
         """
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
@@ -248,13 +228,10 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         if len(self._observations) == 0:
             raise ValueError("No observations registered yet.")
-        configs = pd.concat([config for config, _, _ in self._observations]).reset_index(drop=True)
-        scores = pd.concat([score for _, score, _ in self._observations]).reset_index(drop=True)
+        configs = pd.concat([o.config for o in self._observations]).reset_index(drop=True)
+        scores = pd.concat([o.performance for o in self._observations]).reset_index(drop=True)
         contexts = pd.concat(
-            [
-                pd.DataFrame() if context is None else context
-                for _, _, context in self._observations
-            ]
+            [pd.DataFrame() if o.context is None else o.context for o in self._observations]
         ).reset_index(drop=True)
         return (configs, scores, contexts if len(contexts.columns) > 0 else None)
 

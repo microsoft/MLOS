@@ -10,6 +10,7 @@ import ConfigSpace as CS
 import pandas as pd
 import pytest
 
+from mlos_core.optimizers.observations import Observation
 from mlos_core.optimizers import BaseOptimizer, OptimizerType
 from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
 
@@ -41,7 +42,9 @@ def test_context_not_implemented_warning(
     context = pd.DataFrame([["something"]])
 
     with pytest.raises(UserWarning):
-        optimizer.register(configs=suggestion, scores=scores, context=context)
+        optimizer.register(
+            observation=Observation(config=suggestion, performance=scores, context=context)
+        )
 
     with pytest.raises(UserWarning):
         optimizer.suggest(context=context)
