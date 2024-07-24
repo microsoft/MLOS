@@ -13,7 +13,7 @@ from azure.storage.fileshare import ShareClient
 
 from mlos_bench.services.base_fileshare import FileShareService
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.types.authenticator_type import SupportsAuth
+from mlos_bench.services.types.azure_authenticator_type import SupportsAzureAuth
 from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)
@@ -66,14 +66,14 @@ class AzureFileShareService(FileShareService):
         """Get the Azure file share client object."""
         if self._share_client is None:
             assert self._parent is not None and isinstance(
-                self._parent, SupportsAuth
+                self._parent, SupportsAzureAuth
             ), "Authorization service not provided. Include service-auth.jsonc?"
             self._share_client = ShareClient.from_share_url(
                 self._SHARE_URL.format(
                     account_name=self.config["storageAccountName"],
                     fs_name=self.config["storageFileShareName"],
                 ),
-                credential=self._parent.get_access_token(),
+                credential=self._parent.get_credential(),
                 token_intent="backup",
             )
         return self._share_client

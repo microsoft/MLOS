@@ -7,6 +7,7 @@ mlos_bench.
 """
 
 from mlos_bench.services.types.authenticator_type import SupportsAuth
+from mlos_bench.services.types.azure_authenticator_type import SupportsAzureAuth
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.services.types.fileshare_type import SupportsFileShareOps
 from mlos_bench.services.types.host_provisioner_type import SupportsHostProvisioning
@@ -19,6 +20,7 @@ from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 
 __all__ = [
     "SupportsAuth",
+    "SupportsAzureAuth",
     "SupportsConfigLoading",
     "SupportsFileShareOps",
     "SupportsHostProvisioning",

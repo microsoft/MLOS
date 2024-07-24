@@ -10,17 +10,18 @@ from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Union
 
 import azure.identity as azure_id
+import azure.core.credentials as azure_cred
 from azure.keyvault.secrets import SecretClient
 from pytz import UTC
 
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.types.authenticator_type import SupportsAuth
+from mlos_bench.services.types.azure_authenticator_type import SupportsAzureAuth
 from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)
 
 
-class AzureAuthService(Service, SupportsAuth):
+class AzureAuthService(Service, SupportsAzureAuth):
     """Helper methods to get access to Azure services."""
 
     _REQ_INTERVAL = 300  # = 5 min
@@ -56,6 +57,7 @@ class AzureAuthService(Service, SupportsAuth):
                 [
                     self.get_access_token,
                     self.get_auth_headers,
+                    self.get_credential,
                 ],
             ),
         )
@@ -133,3 +135,7 @@ class AzureAuthService(Service, SupportsAuth):
     def get_auth_headers(self) -> dict:
         """Get the authorization part of HTTP headers for REST API calls."""
         return {"Authorization": "Bearer " + self.get_access_token()}
+
+    def get_credential(self) -> azure_cred.TokenCredential:
+        """Return the Azure SDK credential object."""
+        return self._cred
