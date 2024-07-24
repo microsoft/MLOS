@@ -171,7 +171,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         target_config_vector: npt.NDArray = self._pinv_matrix.dot(vector)
         # Clip values to to [-1, 1] range of the low dimensional space.
         for idx, value in enumerate(target_config_vector):
-            target_config_vector[idx] = max(-1, min(1, value))
+            target_config_vector[idx] = np.clip(value, -1, 1)
         if self._q_scaler is not None:
             # If the max_unique_values_per_param is set, we need to scale
             # the low dimension space back to the discretized space as well.
@@ -179,7 +179,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
             assert isinstance(target_config_vector, np.ndarray)
             # Clip values to [1, max_value] range (floating point errors may occur).
             for idx, value in enumerate(target_config_vector):
-                target_config_vector[idx] = int(max(1, min(value, self._q_scaler.data_max_[idx])))
+                target_config_vector[idx] = int(np.clip(value, 1, self._q_scaler.data_max_[idx]))
             target_config_vector = target_config_vector.astype(int)
         # Convert the vector to a dictionary.
         target_config_dict = dict(
@@ -355,7 +355,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
             # Clip value to force it to fall in [0, 1]
             # NOTE: HeSBO projection ensures that theoretically but due to
             #       floating point ops nuances this is not always guaranteed
-            value = max(0.0, min(1.0, norm_value))
+            value = np.clip(norm_value, 0, 1)
 
             if isinstance(param, ConfigSpace.CategoricalHyperparameter):
                 index = int(value * len(param.choices))  # truncate integer part
@@ -367,7 +367,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
                     value = self._special_param_value_scaler(param, value)
 
                 orig_value = param._transform(value)  # pylint: disable=protected-access
-                orig_value = max(param.lower, min(param.upper, orig_value))
+                orig_value = np.clip(orig_value, param.lower, param.upper)
             else:
                 raise NotImplementedError(
                     "Only Categorical, Integer, and Float hyperparameters are currently supported."
