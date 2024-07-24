@@ -337,7 +337,7 @@ class Storage(metaclass=ABCMeta):
                     _config = DictTemplater(config).expand_vars()
                     assert isinstance(_config, dict)
                 except ValueError as e:
-                    _LOG.error("Non-serializable config: %s\n%s", config, e)
+                    _LOG.error("Non-serializable config: %s", config, exc_info=e)
                     raise e
             return self._new_trial(tunables, ts_start, config)
 
