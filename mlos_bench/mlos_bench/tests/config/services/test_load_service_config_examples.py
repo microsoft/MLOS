@@ -53,7 +53,7 @@ def test_load_service_config_examples(
     if config.get("class", "").split(".")[-1] == "AzureFileShareService":
         # AzureFileShareService requires an auth service to be loaded as well.
         auth_service_config = config_loader_service.load_config(
-            "services/remote/azure/service-auth.jsonc",
+            "services/remote/mock/mock_auth_service.jsonc",
             ConfigSchema.SERVICE,
         )
         auth_service = config_loader_service.build_service(
