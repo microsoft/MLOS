@@ -5,6 +5,7 @@
 """Implementation of LlamaTune space adapter."""
 from typing import Dict, Optional
 from warnings import warn
+import os
 
 import ConfigSpace
 import ConfigSpace.exceptions
@@ -206,7 +207,9 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
             for k, v in double_checked_config.items()
             if k in configuration_dict
         }
-        if double_checked_config != configuration_dict:
+        if double_checked_config != configuration_dict and (
+            os.environ.get("MLOS_DEBUG") in {"1", "true", "y", "yes"}
+        ):
             warn(
                 (
                     f"Note: Configuration {configuration_dict} was inverse transformed to "
