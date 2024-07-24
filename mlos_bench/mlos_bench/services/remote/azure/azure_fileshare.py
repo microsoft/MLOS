@@ -60,20 +60,27 @@ class AzureFileShareService(FileShareService):
                 "storageFileShareName",
             },
         )
+        assert self._parent is not None and isinstance(
+            self._parent, SupportsAuth
+        ), "Authorization service not provided. Include service-auth.jsonc?"
+        self._auth_service: SupportsAuth = self._parent
         self._share_client: Optional[ShareClient] = None
+        # Cache of the last access token we used to access the file share.
+        self._access_token: Optional[str] = None
 
     def _get_share_client(self) -> ShareClient:
         """Get the Azure file share client object."""
-        if self._share_client is None:
-            assert self._parent is not None and isinstance(
-                self._parent, SupportsAuth
-            ), "Authorization service not provided. Include service-auth.jsonc?"
+        # If the auth service needed to refresh the access token, then we should
+        # refresh the ShareClient as well.
+        current_access_token = self._auth_service.get_access_token()
+        if current_access_token != self._access_token or self._share_client is None:
+            self._access_token = current_access_token
             self._share_client = ShareClient.from_share_url(
                 self._SHARE_URL.format(
                     account_name=self.config["storageAccountName"],
                     fs_name=self.config["storageFileShareName"],
                 ),
-                credential=self._parent.get_access_token(),
+                credential=self._access_token,
                 token_intent="backup",
             )
         return self._share_client
