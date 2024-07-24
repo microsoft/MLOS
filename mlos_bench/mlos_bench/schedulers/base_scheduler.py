@@ -14,6 +14,7 @@ from typing import Any, Dict, Optional, Tuple, Type
 from pytz import UTC
 from typing_extensions import Literal
 
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.storage.base_storage import Storage
@@ -64,6 +65,7 @@ class Scheduler(metaclass=ABCMeta):
             source=global_config,
             required_keys=["experiment_id", "trial_id"],
         )
+        self._validate_json_config(config)
 
         self._experiment_id = config["experiment_id"].strip()
         self._trial_id = int(config["trial_id"])
@@ -87,6 +89,36 @@ class Scheduler(metaclass=ABCMeta):
         self._last_trial_id = -1
 
         _LOG.debug("Scheduler instantiated: %s :: %s", self, config)
+
+    def _validate_json_config(self, config: dict) -> None:
+        """Reconstructs a basic json config that this class might have been instantiated
+        from in order to validate configs provided outside the file loading
+        mechanism.
+        """
+        json_config: dict = {
+            "class": self.__class__.__module__ + "." + self.__class__.__name__,
+        }
+        if config:
+            json_config["config"] = config.copy()
+            # The json schema does not allow for -1 as a valid value for config_id.
+            # As it is just a default placeholder value, and not required, we can
+            # remove it from the config copy prior to validation safely.
+            config_id = json_config["config"].get("config_id")
+            if config_id is not None and isinstance(config_id, int) and config_id < 0:
+                json_config["config"].pop("config_id")
+        ConfigSchema.SCHEDULER.validate(json_config)
+
+    @property
+    def trial_config_repeat_count(self) -> int:
+        """Gets the number of trials to run for a given config."""
+        return self._trial_config_repeat_count
+
+    @property
+    def max_trials(self) -> int:
+        """Gets the maximum number of trials to run for a given experiment, or -1 for no
+        limit.
+        """
+        return self._max_trials
 
     def __repr__(self) -> str:
         """
