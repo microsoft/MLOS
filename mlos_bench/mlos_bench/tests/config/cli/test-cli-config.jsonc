@@ -17,7 +17,7 @@
         "services/remote/mock/mock_fileshare_service.jsonc"
     ],
 
-    "trial_config_repeat_count": 1,
+    "trial_config_repeat_count": 2,
 
     "random_seed": 42,
     "random_init": true
