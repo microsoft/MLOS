@@ -199,9 +199,10 @@ class BaseOptimizer(metaclass=ABCMeta):
     @abstractmethod
     def register_pending(self, *, pending: Suggestion) -> None:
         """
-        Registers the given suggestion as "pending". That is it say, it has been suggested
-        by the optimizer, and an experiment trial has been started. This can be useful
-        for executing multiple trials in parallel, retry logic, etc.
+        Registers the given suggestion as "pending". That is it say, it has
+        been suggested by the optimizer, and an experiment trial has been started.
+        This can be useful for executing multiple trials in parallel,
+        retry logic, etc.
 
         Parameters
         ----------

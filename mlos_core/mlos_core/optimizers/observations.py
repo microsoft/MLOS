@@ -14,7 +14,8 @@ import pandas as pd
 def compare_optional_dataframe(
     left: Optional[pd.DataFrame], right: Optional[pd.DataFrame]
 ) -> bool:
-    """Compare DataFrames that may also be None
+    """
+    Compare DataFrames that may also be None
 
     Parameters
     ----------
