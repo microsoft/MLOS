@@ -62,7 +62,7 @@ class AzureFileShareService(FileShareService):
         )
         assert self._parent is not None and isinstance(
             self._parent, SupportsAuth
-        ), "Authorization service not provided. Include service-auth.jsonc?"
+        ), "Authorization service not provided. Include services/remote/azure/service-auth.jsonc?"
         self._auth_service: SupportsAuth = self._parent
         self._share_client: Optional[ShareClient] = None
         # Cache of the last access token we used to access the file share.
