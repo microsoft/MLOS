@@ -7,10 +7,12 @@ optimizers.
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Hashable, List, Optional, Tuple, Union
 
 from ConfigSpace import (
     Beta,
+    BetaIntegerHyperparameter,
+    BetaFloatHyperparameter,
     CategoricalHyperparameter,
     Configuration,
     ConfigurationSpace,
@@ -18,7 +20,11 @@ from ConfigSpace import (
     Float,
     Integer,
     Normal,
+    NormalIntegerHyperparameter,
+    NormalFloatHyperparameter,
     Uniform,
+    UniformIntegerHyperparameter,
+    UniformFloatHyperparameter,
 )
 from ConfigSpace.types import NotSet
 
@@ -71,7 +77,9 @@ def _tunable_to_configspace(
     cs : ConfigurationSpace
         A ConfigurationSpace object that corresponds to the Tunable.
     """
-    meta = {"group": group_name, "cost": cost}  # {"scaling": ""}
+    meta: Dict[Hashable, TunableValue] = {"cost": cost}
+    if group_name is not None:
+        meta["group"] = group_name
 
     if tunable.type == "categorical":
         return ConfigurationSpace(
@@ -102,6 +110,14 @@ def _tunable_to_configspace(
     elif tunable.distribution is not None:
         raise TypeError(f"Invalid Distribution Type: {tunable.distribution}")
 
+    range_hp: Union[
+        UniformFloatHyperparameter,
+        NormalFloatHyperparameter,
+        BetaFloatHyperparameter,
+        UniformIntegerHyperparameter,
+        NormalIntegerHyperparameter,
+        BetaIntegerHyperparameter
+    ]
     if tunable.type == "int":
         range_hp = Integer(
             name=tunable.name,
@@ -120,7 +136,7 @@ def _tunable_to_configspace(
             name=tunable.name,
             bounds=tunable.range,
             log=bool(tunable.is_log),
-            distribution=distribution,  # type: ignore[arg-type]
+            distribution=distribution,
             default=(
                 float(tunable.default)
                 if tunable.in_range(tunable.default) and tunable.default is not None
