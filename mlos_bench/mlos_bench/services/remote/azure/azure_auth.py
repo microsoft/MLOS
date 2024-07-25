@@ -108,6 +108,7 @@ class AzureAuthService(Service, SupportsAuth):
         cert_bytes = b64decode(secret.value)
 
         # Reauthenticate as the service principal.
+        # TODO: Add managed identity support as well.
         self._cred = azure_id.CertificateCredential(
             tenant_id=tenant_id,
             client_id=sp_client_id,
