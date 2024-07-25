@@ -69,7 +69,7 @@ def _get_long_desc_from_readme(base_url: str) -> dict:
 
 extra_requires: Dict[str, List[str]] = {  # pylint: disable=consider-using-namedtuple-or-dataclass
     "flaml": ["flaml[blendsearch]"],
-    "smac": ["smac>=2.0.0"],  # NOTE: Major refactoring on SMAC starting from v2.0.0
+    "smac": ["smac>=2.2.0"],  # NOTE: Major refactoring on SMAC starting from v2.0.0
 }
 
 # construct special 'full' extra that adds requirements for all built-in
