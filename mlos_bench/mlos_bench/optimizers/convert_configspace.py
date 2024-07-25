@@ -20,6 +20,7 @@ from ConfigSpace import (
     Normal,
     Uniform,
 )
+from ConfigSpace.types import NotSet
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -150,7 +151,7 @@ def _tunable_to_configspace(
                 name=special_name,
                 choices=tunable.special,
                 weights=special_weights,
-                default_value=tunable.default if tunable.default in tunable.special else None,
+                default_value=tunable.default if tunable.default in tunable.special else NotSet,
                 meta=meta,
             ),
             type_name: CategoricalHyperparameter(
