@@ -102,7 +102,7 @@ def azure_vm_service_remote_exec_only(azure_auth_service: AzureAuthService) -> A
 
 
 @pytest.fixture
-def azure_fileshare(config_persistence_service: ConfigPersistenceService) -> AzureFileShareService:
+def azure_fileshare(azure_auth_service: AzureAuthService) -> AzureFileShareService:
     """Creates a dummy AzureFileShareService for tests that require it."""
     with patch("mlos_bench.services.remote.azure.azure_fileshare.ShareClient"):
         return AzureFileShareService(
@@ -112,5 +112,5 @@ def azure_fileshare(config_persistence_service: ConfigPersistenceService) -> Azu
                 "storageAccountKey": "TEST_ACCOUNT_KEY",
             },
             global_config={},
-            parent=config_persistence_service,
+            parent=azure_auth_service,
         )
