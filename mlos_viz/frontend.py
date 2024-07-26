@@ -1,10 +1,13 @@
-
+import asyncio
+import websockets
 import plotly.express as px
+from mpl_toolkits.mplot3d import Axes3D
 import streamlit as st
 import requests
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import dabl
 import mlos_viz
 from mlos_bench.storage import from_config
 import re
@@ -12,20 +15,49 @@ import warnings
 from pathlib import Path
 import json5 as json
 import os
+import mpld3
+import streamlit.components.v1 as components
+import toml
+import plotly.figure_factory as ff
+import pandas_gpt
 
-# Load the storage config and connect to the storage
-storage_config_path = "config/storage/mlos-mysql-db-front.jsonc"
-try:
-    storage = from_config(config_file=storage_config_path)
-except Exception as e:
-    st.error(f"Error loading storage configuration: {e}")
-    storage = None
-
-# Set page configuration
+# # Set page configuration
 st.set_page_config(
-    page_title="Autotuning Control Panel",
-    page_icon="https://user-images.githubusercontent.com/122168162/255422898-763cb56c-9b54-409a-a177-87f376d9f925.png?width=64&height=64"
+    page_title="MySQL Autotuning Control Panel",
+    page_icon="https://azure.microsoft.com/svghandler/mysql/?width=64&height=64"
 )
+
+# import hashlib
+
+# # Define a password (hashed for security)
+# PASSWORD_HASH = hashlib.sha256("your_secure_password".encode()).hexdigest()
+
+# if check_password():
+
+# # Function to check password
+# def check_password():
+#     def password_entered():
+#         if hashlib.sha256(st.session_state["password"].encode()).hexdigest() == PASSWORD_HASH:
+#             st.session_state["password_correct"] = True
+#             del st.session_state["password"]  # don't store password
+#         else:
+#             st.session_state["password_correct"] = False
+
+#     if "password_correct" not in st.session_state:
+#         # First run, show input for password
+#         st.text_input("Password", type="password", on_change=password_entered, key="password")
+#         return False
+#     elif not st.session_state["password_correct"]:
+#         # Password not correct, show input + error
+#         st.text_input("Password", type="password", on_change=password_entered, key="password")
+#         st.error("😕 Password incorrect")
+#         return False
+#     else:
+#         # Password correct
+#         return True
+
+if st.button("Refresh Tabs"):
+        st.experimental_rerun()
 
 # Suppress specific FutureWarning from seaborn
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -35,6 +67,23 @@ backend_url = "http://localhost:8000"
 
 # Base directory for the project
 base_dir = Path(__file__).resolve().parent
+
+# Load MySQL tunable parameters configuration
+mysql_tunables_path = base_dir / \
+    'config/environments/apps/mysql/mysql-tunables.jsonc'
+with mysql_tunables_path.open() as f:
+    mysql_tunables = json.load(f)
+
+# st.title("Experiment Control Panel")
+
+@st.cache_data
+def get_vm_skus():
+    response = requests.get(f"{backend_url}/vm_skus")
+    if response.status_code == 200:
+        return response.json()
+    else:
+        st.error("Failed to fetch VM SKUs")
+        return []
 
 @st.cache_data
 def get_experiments():
@@ -54,6 +103,37 @@ def get_experiment_results(experiment_id):
         st.error(f"Failed to fetch results for experiment {experiment_id}")
         return pd.DataFrame()
 
+
+def run_experiments(selected_skus, selected_tunables, selected_config_path, selected_benchbase_config_file, cleaned_user_input_experiment_name, selected_purpose, trial_repeat_count, max_iterations, exp_id="",terminals=0,scalefactor=0):
+    response = requests.post(
+        f"{backend_url}/run_experiments",
+        json={
+            "selected_skus": selected_skus,
+            "selected_tunables": selected_tunables,
+            "selected_config_path": selected_config_path,
+            "selected_benchbase_config_file": selected_benchbase_config_file,
+            "selected_experiment_name": cleaned_user_input_experiment_name,
+            "selected_purpose": selected_purpose,
+            "trial_repeat_count": trial_repeat_count,
+            "max_iterations": max_iterations,
+            "exp_id": exp_id,
+            "terminals": terminals,
+            "scalefactor": scalefactor
+        }
+    )
+    if response.status_code == 200:
+        st.success("Experiments are running")
+    else:
+        st.error(f"Failed to run experiments: {response.text}")
+
+def kill_all_sessions():
+    response = requests.post(f"{backend_url}/kill_all_sessions")
+    if response.status_code == 200:
+        st.success("All tmux sessions killed")
+    else:
+        st.error("Failed to kill tmux sessions")
+
+
 def get_experiment_explanation(experiment_id):
     response = requests.post(
         f"{backend_url}/get_experiment_explanation",
@@ -65,7 +145,203 @@ def get_experiment_explanation(experiment_id):
         st.error(f"Failed to get explanation: {response.text}")
         return ""
 
+
+def run_control_data(selected_skus, selected_purpose, selected_benchbase_config_file, num_nodes, num_times_per_day, experiment_name, exp_id, terminals=0, scalefactor=0):
+    response = requests.post(
+        f"{backend_url}/run_control_data",
+        json={
+            "selected_skus": selected_skus,
+            "selected_purpose": selected_purpose,
+            "selected_benchbase_config_file": selected_benchbase_config_file,
+            "num_nodes": num_nodes,
+            "num_times_per_day": num_times_per_day,
+            "experiment_name": experiment_name,
+            "exp_id": exp_id,
+            "terminals": terminals,
+            "scalefactor": scalefactor
+        }
+    )
+    if response.status_code == 200:
+        st.success("Control data experiments are scheduled")
+    else:
+        st.error(f"Failed to run control data: {response.text}")
+
+# Fetch VM SKUs and experiments
+vm_skus = get_vm_skus()
 experiment_ids = get_experiments()
+
+# Load the storage config and connect to the storage
+storage_config_path = "config/storage/mlos-mysql-db-front.jsonc"
+try:
+    storage = from_config(config_file=storage_config_path)
+except Exception as e:
+    st.error(f"Error loading storage configuration: {e}")
+    storage = None
+
+st.sidebar.title("Experiment Settings")
+user_input_experiment_name = st.sidebar.text_input(
+    "Enter resources name (SKU automatically included):", key="experiment_name")
+cleaned_user_input_experiment_name = re.sub(
+    r'[^0-9a-zA-Z-]', '', user_input_experiment_name)
+
+user_exp_id = st.sidebar.text_input(
+    "Enter a experiment_id/deployment_name (if left blank will use resources name):", key="experiment_id")
+cleaned_exp_id = re.sub(
+    r'[^0-9a-zA-Z-]', '', user_exp_id)
+
+selected_skus = st.sidebar.multiselect(
+    "Select VM SKUs", vm_skus, key="vm_skus")
+if mysql_tunables:
+    tunable_groups = list(mysql_tunables.keys())
+    selected_tunables = st.sidebar.multiselect(
+        "Select MySQL Tunable Groups", tunable_groups, key="mysql_tunables")
+else:
+    selected_tunables = []
+
+selected_purpose = st.sidebar.selectbox(
+    "Select Server Edition", options=["Burstable","GeneralPurpose","MemoryOptimized"], index=0, key="selected_purpose"
+)
+
+config_paths_directory = 'config/cli'
+config_paths = os.listdir(config_paths_directory)
+selected_config_path = st.sidebar.selectbox(
+    "Select Config Path", config_paths, index=0, key="config_path")
+os.environ['CONFIG_PATH_CLI_GUI'] = str(selected_config_path)
+
+benchbase_terminals = 0
+benchbase_scalefactor = 0
+
+selected_benchbase_config_file = ""
+if "benchbase" in selected_config_path:
+    config_files_directory = '/workspaces/MySQL-Autotuning/config/environments/apps/mysql/scripts/remote/benchbase/configs/'
+    config_files = [f.name for f in Path(
+        config_files_directory).glob('**/*') if f.is_file()]
+    selected_benchbase_config_file = st.sidebar.selectbox(
+        "Select BenchBase Config File", config_files, index=0, key="benchbase_config_file")
+    benchbase_terminals = st.sidebar.number_input(
+        "Terminals", min_value=1, max_value=100000, value=1, key="terminals")
+    benchbase_scalefactor = st.sidebar.number_input(
+        "Scale Factor", min_value=1, max_value=100000, value=1, key="scalefactor")
+
+# Input fields for trial_repeat_count and max_iterations
+if "opt" in selected_config_path:
+    trial_repeat_count = st.sidebar.number_input(
+        "Trial Repeat Count", min_value=1, max_value=100, value=1, key="trial_repeat_count")
+    max_iterations = st.sidebar.number_input(
+        "Max Iterations", min_value=1, max_value=5000, value=100, key="max_iterations")
+else:
+    trial_repeat_count = 0
+    max_iterations = 0
+
+st.sidebar.write(f"Config Path: {selected_config_path}")
+
+if st.sidebar.button("Run Experiments"):
+    if selected_skus and selected_tunables:
+        run_experiments(selected_skus, selected_tunables, config_paths_directory +
+                        '/' + str(selected_config_path), selected_benchbase_config_file, cleaned_user_input_experiment_name, selected_purpose, trial_repeat_count, max_iterations, exp_id=cleaned_exp_id, terminals=benchbase_terminals, scalefactor=benchbase_scalefactor)
+    else:
+        st.sidebar.error(
+            "Please select at least one VM SKU and one MySQL tunable group.")
+
+# Kill all sessions button
+if st.sidebar.button("Kill All Sessions"):
+    st.write("Killing all tmux sessions...")
+    kill_all_sessions()
+
+selected_num_nodes = st.sidebar.number_input(
+    "Num of Nodes to Collect Control Data on", min_value=1, max_value=10, value=1, key="num_nodes")
+
+selected_times_a_day = st.sidebar.number_input(
+    "Times per 24h to Collect Control Data", min_value=1, max_value=45, value=45, key="times_per_day")
+
+# Button to run control data
+if st.sidebar.button("Run Control Data"):
+    if selected_skus:
+        run_control_data(selected_skus, selected_purpose, selected_benchbase_config_file,
+                         selected_num_nodes, selected_times_a_day, cleaned_user_input_experiment_name, cleaned_exp_id, terminals=benchbase_terminals, scalefactor=benchbase_scalefactor)
+    else:
+        st.sidebar.error(
+            "Please select at least one VM SKU to run control data.")
+
+# Function to fetch log errors from the backend
+
+
+def fetch_log_errors():
+    response = requests.get(f"{backend_url}/log_errors")
+    if response.status_code == 200:
+        return response.json()
+    else:
+        st.error("Failed to fetch log errors")
+        return {}
+
+# Function to display log errors in the Streamlit app
+
+
+def display_log_errors(log_errors):
+    st.subheader("Log Errors")
+    if log_errors:
+        for log_file, errors in log_errors.items():
+            st.write(f"**{log_file}**")
+            for line_number, error in errors:
+                st.write(f"Line {line_number}: {error}")
+    else:
+        st.write("No errors found in the log files.")
+
+st.title("Experiment Control Panel")
+st.write("Welcome to the MySQL Autotuning Control Panel. Use the sidebar to run experiments and control data collection. You can also view log errors and manage tmux sessions bellow.")
+error_tab,tmux_tab,= st.tabs(["Errors","Tmux Control"])
+with error_tab:
+    st.header("Error Checker")
+    # Button to fetch and display log errors
+
+    if st.button("Fetch Log Errors"):
+        log_errors = fetch_log_errors()
+        display_log_errors(log_errors)
+
+# Function to list tmux sessions
+
+
+def list_tmux_sessions():
+    response = requests.get(f"{backend_url}/list_tmux_sessions")
+    if response.status_code == 200:
+        return response.json().get("sessions", [])
+    else:
+        st.error("Failed to fetch tmux sessions")
+        return []
+
+
+
+def kill_tmux_session(session_name):
+    response = requests.post(f"{backend_url}/kill_tmux_session", json={"session_name": session_name})
+    if response.status_code == 200:
+        try:
+            data = response.json()
+            if data.get("status") == "success":
+                st.success(data.get("message", "Tmux session killed successfully"))
+            else:
+                st.error(data.get("message", "Failed to kill tmux session"))
+        except requests.exceptions.JSONDecodeError:
+            st.error(f"Failed to kill tmux session '{session_name}': Invalid JSON response")
+    else:
+        st.error(f"Failed to kill tmux session '{session_name}': {response.text}")
+
+with tmux_tab:
+    # List tmux sessions
+    st.header("Tmux Session Manager")
+    sessions = list_tmux_sessions()
+
+    if sessions:
+        for session in sessions:
+            session_name = session.split(":")[0]  # Extract session name
+            if session_name:
+                st.write(f"Session: {session}")
+                if st.button(f"Kill {session_name}"):
+                    kill_tmux_session(session_name)
+            else:
+                st.write("No tmux sessions found.")
+    else:
+        st.write("No tmux sessions found.")
+
 
 # Function to plot the average metrics for each configuration
 def plot_average_metrics(experiment_id, storage, metric):
@@ -983,8 +1259,7 @@ def compare_multiple_experiments(experiment_ids, storage, target_col):
 if storage:
     st.title("Analytics Panel")
 
-    st.write(
-        "Welcome to the Panel. View and analyze the results of your experiments here.")
+    st.write("Welcome to the MySQL Autotuning Control Panel. View and analyze the results of your experiments here.")
     st.header("Select and View Experiment Details To Start Analyzing & Monitoring")
     selected_experiment_id = st.selectbox(
             "Select Experiment ID",  list(storage.experiments.keys()))
