@@ -3,9 +3,9 @@
 # Licensed under the MIT License.
 #
 """Implementation of LlamaTune space adapter."""
+import os
 from typing import Dict, Optional
 from warnings import warn
-import os
 
 import ConfigSpace
 import ConfigSpace.exceptions
