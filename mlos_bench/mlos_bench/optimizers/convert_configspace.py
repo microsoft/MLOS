@@ -111,12 +111,12 @@ def _tunable_to_configspace(
         raise TypeError(f"Invalid Distribution Type: {tunable.distribution}")
 
     range_hp: Union[
-        UniformFloatHyperparameter,
-        NormalFloatHyperparameter,
         BetaFloatHyperparameter,
-        UniformIntegerHyperparameter,
+        BetaIntegerHyperparameter,
+        NormalFloatHyperparameter,
         NormalIntegerHyperparameter,
-        BetaIntegerHyperparameter
+        UniformFloatHyperparameter,
+        UniformIntegerHyperparameter,
     ]
     if tunable.type == "int":
         range_hp = Integer(
