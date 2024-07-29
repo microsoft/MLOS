@@ -3,10 +3,12 @@
 # Licensed under the MIT License.
 #
 """Implementation of LlamaTune space adapter."""
+import os
 from typing import Dict, Optional
 from warnings import warn
 
 import ConfigSpace
+import ConfigSpace.exceptions
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -123,28 +125,111 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
                         "thus *only* configurations suggested "
                         "previously by the optimizer can be registered."
                     )
-
-                # ...yet, we try to support that by implementing an approximate
-                # reverse mapping using pseudo-inverse matrix.
-                if getattr(self, "_pinv_matrix", None) is None:
-                    self._try_generate_approx_inverse_mapping()
-
-                # Replace NaNs with zeros for inactive hyperparameters
-                config_vector = np.nan_to_num(configuration.get_array(), nan=0.0)
-                # Perform approximate reverse mapping
-                # NOTE: applying special value biasing is not possible
-                vector = self._config_scaler.inverse_transform([config_vector])[0]
-                target_config_vector = self._pinv_matrix.dot(vector)
-                target_config = ConfigSpace.Configuration(
-                    self.target_parameter_space,
-                    vector=target_config_vector,
-                )
+                # else ...
+                target_config = self._try_inverse_transform_config(configuration)
 
             target_configurations.append(target_config)
 
         return pd.DataFrame(
-            target_configurations, columns=list(self.target_parameter_space.keys())
+            target_configurations,
+            columns=list(self.target_parameter_space.keys()),
         )
+
+    def _try_inverse_transform_config(
+        self,
+        config: ConfigSpace.Configuration,
+    ) -> ConfigSpace.Configuration:
+        """
+        Attempts to generate an inverse mapping of the given configuration that wasn't
+        previously registered.
+
+        Parameters
+        ----------
+        configuration : ConfigSpace.Configuration
+            Configuration in the original high-dimensional space.
+
+        Returns
+        -------
+        ConfigSpace.Configuration
+            Configuration in the low-dimensional space.
+
+        Raises
+        ------
+        ValueError
+            On conversion errors.
+        """
+        # ...yet, we try to support that by implementing an approximate
+        # reverse mapping using pseudo-inverse matrix.
+        if getattr(self, "_pinv_matrix", None) is None:
+            self._try_generate_approx_inverse_mapping()
+
+        # Replace NaNs with zeros for inactive hyperparameters
+        config_vector = np.nan_to_num(config.get_array(), nan=0.0)
+        # Perform approximate reverse mapping
+        # NOTE: applying special value biasing is not possible
+        vector: npt.NDArray = self._config_scaler.inverse_transform([config_vector])[0]
+        target_config_vector: npt.NDArray = self._pinv_matrix.dot(vector)
+        # Clip values to to [-1, 1] range of the low dimensional space.
+        for idx, value in enumerate(target_config_vector):
+            target_config_vector[idx] = np.clip(value, -1, 1)
+        if self._q_scaler is not None:
+            # If the max_unique_values_per_param is set, we need to scale
+            # the low dimension space back to the discretized space as well.
+            target_config_vector = self._q_scaler.inverse_transform([target_config_vector])[0]
+            assert isinstance(target_config_vector, np.ndarray)
+            # Clip values to [1, max_value] range (floating point errors may occur).
+            for idx, value in enumerate(target_config_vector):
+                target_config_vector[idx] = int(np.clip(value, 1, self._q_scaler.data_max_[idx]))
+            target_config_vector = target_config_vector.astype(int)
+        # Convert the vector to a dictionary.
+        target_config_dict = dict(
+            zip(
+                self.target_parameter_space.keys(),
+                target_config_vector,
+            )
+        )
+        target_config = ConfigSpace.Configuration(
+            self.target_parameter_space,
+            values=target_config_dict,
+            # This method results in hyperparameter type conversion issues
+            # (e.g., float instead of int), so we use the values dict instead.
+            # vector=target_config_vector,
+        )
+
+        # Check to see if the approximate reverse mapping looks OK.
+        # Note: we know this isn't 100% accurate, so this is just a warning and
+        # mostly meant for internal debugging.
+        configuration_dict = dict(config)
+        double_checked_config = self._transform(dict(target_config))
+        double_checked_config = {
+            # Skip the special values that aren't in the original space.
+            k: v
+            for k, v in double_checked_config.items()
+            if k in configuration_dict
+        }
+        if double_checked_config != configuration_dict and (
+            os.environ.get("MLOS_DEBUG", "false").lower() in {"1", "true", "y", "yes"}
+        ):
+            warn(
+                (
+                    f"Note: Configuration {configuration_dict} was inverse transformed to "
+                    f"{dict(target_config)} and then back to {double_checked_config}. "
+                    "This is an approximate reverse mapping for previously unregistered "
+                    "configurations, so this is just a warning."
+                ),
+                UserWarning,
+            )
+
+        # But the inverse mapping should at least be valid in the target space.
+        try:
+            self.target_parameter_space.check_configuration(target_config)
+        except ConfigSpace.exceptions.IllegalValueError as e:
+            raise ValueError(
+                f"Invalid configuration {target_config} generated by "
+                f"inverse mapping of {config}:\n{e}"
+            ) from e
+
+        return target_config
 
     def transform(self, configuration: pd.DataFrame) -> pd.DataFrame:
         if len(configuration) != 1:
@@ -161,6 +246,15 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
 
         orig_values_dict = self._transform(target_values_dict)
         orig_configuration = normalize_config(self.orig_parameter_space, orig_values_dict)
+
+        # Validate that the configuration is in the original space.
+        try:
+            self.orig_parameter_space.check_configuration(orig_configuration)
+        except ConfigSpace.exceptions.IllegalValueError as e:
+            raise ValueError(
+                f"Invalid configuration {orig_configuration} generated by "
+                f"transformation of {target_configuration}:\n{e}"
+            ) from e
 
         # Add to inverse dictionary -- needed for registering the performance later
         self._suggested_configs[orig_configuration] = target_configuration
@@ -261,7 +355,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
             # Clip value to force it to fall in [0, 1]
             # NOTE: HeSBO projection ensures that theoretically but due to
             #       floating point ops nuances this is not always guaranteed
-            value = max(0.0, min(1.0, norm_value))  # pylint: disable=redefined-loop-name
+            value = np.clip(norm_value, 0, 1)
 
             if isinstance(param, ConfigSpace.CategoricalHyperparameter):
                 index = int(value * len(param.choices))  # truncate integer part
@@ -273,7 +367,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
                     value = self._special_param_value_scaler(param, value)
 
                 orig_value = param._transform(value)  # pylint: disable=protected-access
-                orig_value = max(param.lower, min(param.upper, orig_value))
+                orig_value = np.clip(orig_value, param.lower, param.upper)
             else:
                 raise NotImplementedError(
                     "Only Categorical, Integer, and Float hyperparameters are currently supported."
