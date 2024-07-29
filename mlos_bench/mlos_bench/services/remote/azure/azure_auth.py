@@ -15,13 +15,13 @@ from azure.keyvault.secrets import SecretClient
 from pytz import UTC
 
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.types.azure_authenticator_type import SupportsAzureAuth
+from mlos_bench.services.types.authenticator_type import SupportsAuth
 from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)
 
 
-class AzureAuthService(Service, SupportsAzureAuth):
+class AzureAuthService(Service, SupportsAuth[azure_cred.TokenCredential]):
     """Helper methods to get access to Azure services."""
 
     _REQ_INTERVAL = 300  # = 5 min
