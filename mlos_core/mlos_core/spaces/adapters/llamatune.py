@@ -208,7 +208,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
             if k in configuration_dict
         }
         if double_checked_config != configuration_dict and (
-            os.environ.get("MLOS_DEBUG") in {"1", "true", "y", "yes"}
+            os.environ.get("MLOS_DEBUG", "false").lower() in {"1", "true", "y", "yes"}
         ):
             warn(
                 (
