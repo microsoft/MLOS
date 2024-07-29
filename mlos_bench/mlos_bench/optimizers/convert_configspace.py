@@ -11,8 +11,8 @@ from typing import Dict, Hashable, List, Optional, Tuple, Union
 
 from ConfigSpace import (
     Beta,
-    BetaIntegerHyperparameter,
     BetaFloatHyperparameter,
+    BetaIntegerHyperparameter,
     CategoricalHyperparameter,
     Configuration,
     ConfigurationSpace,
@@ -20,11 +20,11 @@ from ConfigSpace import (
     Float,
     Integer,
     Normal,
-    NormalIntegerHyperparameter,
     NormalFloatHyperparameter,
+    NormalIntegerHyperparameter,
     Uniform,
-    UniformIntegerHyperparameter,
     UniformFloatHyperparameter,
+    UniformIntegerHyperparameter,
 )
 from ConfigSpace.types import NotSet
 

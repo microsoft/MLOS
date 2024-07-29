@@ -13,7 +13,7 @@ import pandas as pd
 
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
-from mlos_core.util import normalize_config, drop_nulls
+from mlos_core.util import drop_nulls, normalize_config
 
 
 class EvaluatedSample(NamedTuple):
