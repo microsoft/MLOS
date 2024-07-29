@@ -23,6 +23,7 @@ from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import (
 )
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
+from mlos_core.util import drop_nulls
 
 
 class SmacOptimizer(BaseBayesianOptimizer):
@@ -446,7 +447,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             ConfigSpace.Configuration(
                 self.optimizer_parameter_space,
                 # Remove None values for inactive parameters
-                values={key: val for key, val in config.to_dict().items() if val is not None},
+                values=drop_nulls(config.to_dict()),
                 allow_inactive_with_values=False,
             )
             for (_, config) in configs.astype("O").iterrows()

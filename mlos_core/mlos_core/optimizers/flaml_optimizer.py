@@ -13,7 +13,7 @@ import pandas as pd
 
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
-from mlos_core.util import normalize_config
+from mlos_core.util import normalize_config, drop_nulls
 
 
 class EvaluatedSample(NamedTuple):
@@ -125,7 +125,7 @@ class FlamlOptimizer(BaseOptimizer):
 
         for (_, config), (_, score) in zip(configs.astype("O").iterrows(), scores.iterrows()):
             # Remove None values for inactive config parameters
-            config_dict = {key: val for key, val in config.to_dict().items() if val is not None}
+            config_dict = drop_nulls(config.to_dict())
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
                 self.optimizer_parameter_space, values=config_dict
             )

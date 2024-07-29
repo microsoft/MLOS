@@ -16,7 +16,7 @@ from ConfigSpace.hyperparameters import NumericalHyperparameter
 from sklearn.preprocessing import MinMaxScaler
 
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
-from mlos_core.util import normalize_config
+from mlos_core.util import normalize_config, drop_nulls
 
 
 class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-attributes
@@ -102,7 +102,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         for _, config in configurations.astype("O").iterrows():
             configuration = ConfigSpace.Configuration(
                 self.orig_parameter_space,
-                values=config.to_dict(),
+                values=drop_nulls(config.to_dict()),
             )
 
             target_config = self._suggested_configs.get(configuration, None)
