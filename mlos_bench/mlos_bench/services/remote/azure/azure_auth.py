@@ -9,8 +9,8 @@ from base64 import b64decode
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Union
 
-import azure.identity as azure_id
 import azure.core.credentials as azure_cred
+import azure.identity as azure_id
 from azure.keyvault.secrets import SecretClient
 from pytz import UTC
 
