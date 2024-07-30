@@ -134,9 +134,8 @@ class BaseConversion(metaclass=ABCMeta):
         assert -10 <= point[1] <= -5
 
     def test_uniform_samples(self) -> None:
-        input_space = CS.ConfigurationSpace()
-        input_space.add(CS.UniformFloatHyperparameter("a", lower=1, upper=5))
-        input_space.add(CS.UniformIntegerHyperparameter("c", lower=1, upper=20))
+        c = CS.UniformIntegerHyperparameter("c", lower=1, upper=20)
+        input_space = CS.ConfigurationSpace({"a": (1.0, 5.0), "c": c})
         converted_space = self.conversion_function(input_space)
 
         np.random.seed(42)  # pylint: disable=unreachable
@@ -146,8 +145,8 @@ class BaseConversion(metaclass=ABCMeta):
         assert_is_uniform(uniform)
 
         # Check that we get both ends of the sampled range returned to us.
-        assert input_space["c"].lower in integer_uniform
-        assert input_space["c"].upper in integer_uniform
+        assert c.upper in integer_uniform
+        assert c.lower in integer_uniform
         # integer uniform
         assert_is_uniform(integer_uniform)
 
