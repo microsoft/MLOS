@@ -75,7 +75,7 @@ class BaseConversion(metaclass=ABCMeta):
     conversion_function: Callable[..., OptimizerSpace] = invalid_conversion_function
 
     @abstractmethod
-    def sample(self, config_space: OptimizerSpace, n_samples: int = 1) -> OptimizerParam:
+    def sample(self, config_space: OptimizerSpace, n_samples: int = 1) -> npt.NDArray:
         """
         Sample from the given configuration space.
 
