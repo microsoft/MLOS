@@ -30,9 +30,6 @@ fail-on = [
     "unused-import",
 ]
 
-# Ignore pylint complaints about an upstream dependency.
-ignored-modules = ["ConfigSpace.hyperparameters"]
-
 # Help inform pylint where to find the project's source code without needing to relyon PYTHONPATH.
 #init-hook="from pylint.config import find_pylintrc; import os, sys; sys.path.append(os.path.dirname(find_pylintrc())); from logging import warning; warning(sys.path)"
 init-hook = "from logging import warning; warning(sys.path)"
