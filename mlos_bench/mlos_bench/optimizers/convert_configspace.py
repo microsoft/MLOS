@@ -123,6 +123,7 @@ def _tunable_to_configspace(
             name=tunable.name,
             bounds=(int(tunable.range[0]), int(tunable.range[1])),
             log=bool(tunable.is_log),
+            # TODO: Restore quantization support (#803).
             distribution=distribution,
             default=(
                 int(tunable.default)
@@ -136,6 +137,7 @@ def _tunable_to_configspace(
             name=tunable.name,
             bounds=tunable.range,
             log=bool(tunable.is_log),
+            # TODO: Restore quantization support (#803).
             distribution=distribution,
             default=(
                 float(tunable.default)

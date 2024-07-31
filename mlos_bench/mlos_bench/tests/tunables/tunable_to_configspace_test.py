@@ -41,6 +41,8 @@ def configuration_space() -> ConfigurationSpace:
         special_param_names("kernel_sched_migration_cost_ns")
     )
 
+    # TODO: Add quantization support tests (#803).
+
     # NOTE: FLAML requires distribution to be uniform
     spaces = ConfigurationSpace(
         {
