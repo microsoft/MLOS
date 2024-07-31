@@ -4,7 +4,9 @@
 #
 """Unit tests for saving and retrieving additional parameters of pending trials."""
 from datetime import datetime
+from typing import Any, Dict
 
+import pytest
 from pytz import UTC
 
 from mlos_bench.storage.base_storage import Storage
@@ -71,3 +73,30 @@ def test_exp_trial_no_config(exp_no_tunables_storage: Storage.Experiment) -> Non
         "experiment_id": "Test-003",
         "trial_id": trial.trial_id,
     }
+
+
+@pytest.mark.parametrize(
+    "bad_config",
+    [
+        {
+            "obj": object(),
+        },
+        {
+            "callable": lambda x: x,
+        },
+        {
+            "nested": {
+                "callable": lambda x: x,
+            },
+        },
+    ],
+)
+def test_exp_trial_non_serializable_config(
+    exp_no_tunables_storage: Storage.Experiment,
+    bad_config: Dict[str, Any],
+) -> None:
+    """Tests that a trial with a non-serializable config is rejected."""
+    empty_config: dict = {}
+    tunable_groups = TunableGroups(config=empty_config)
+    with pytest.raises(ValueError):
+        exp_no_tunables_storage.new_trial(tunable_groups, config=bad_config)
