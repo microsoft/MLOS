@@ -418,7 +418,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
                 return float(param.to_vector(special_value))
 
         # Scale input value uniformly to non-special values
-        return float(param.to_vector(param.to_vector((input_value - perc_sum) / (1 - perc_sum))))
+        return float(param.to_vector((input_value - perc_sum) / (1 - perc_sum)))
 
     # pylint: disable=too-complex,too-many-branches
     def _validate_special_param_values(self, special_param_values_dict: dict) -> None:
