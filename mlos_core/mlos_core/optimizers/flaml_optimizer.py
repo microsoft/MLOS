@@ -127,7 +127,8 @@ class FlamlOptimizer(BaseOptimizer):
             # Remove None values for inactive config parameters
             config_dict = drop_nulls(config.to_dict())
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
-                self.optimizer_parameter_space, values=config_dict
+                self.optimizer_parameter_space,
+                values=config_dict,
             )
             if cs_config in self.evaluated_samples:
                 warn(f"Configuration {config} was already registered", UserWarning)

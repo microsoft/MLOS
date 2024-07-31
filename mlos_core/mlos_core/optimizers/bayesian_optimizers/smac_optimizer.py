@@ -353,7 +353,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         trial: TrialInfo = self.base_optimizer.ask()
         trial.config.check_valid_configuration()
         ConfigSpace.Configuration(
-            self.optimizer_parameter_space, values=trial.config
+            self.optimizer_parameter_space,
+            values=trial.config,
         ).check_valid_configuration()
         assert trial.config.config_space == self.optimizer_parameter_space
         self.trial_info_map[trial.config] = trial

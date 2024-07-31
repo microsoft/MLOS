@@ -223,7 +223,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         # But the inverse mapping should at least be valid in the target space.
         try:
             ConfigSpace.Configuration(
-                self.target_parameter_space, values=target_config
+                self.target_parameter_space,
+                values=target_config,
             ).check_valid_configuration()
         except ConfigSpace.exceptions.IllegalValueError as e:
             raise ValueError(
@@ -252,7 +253,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         # Validate that the configuration is in the original space.
         try:
             ConfigSpace.Configuration(
-                self.orig_parameter_space, values=orig_configuration
+                self.orig_parameter_space,
+                values=orig_configuration,
             ).check_valid_configuration()
         except ConfigSpace.exceptions.IllegalValueError as e:
             raise ValueError(
