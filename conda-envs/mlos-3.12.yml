@@ -1,4 +1,4 @@
-name: mlos
+name: mlos-3.12
 channels:
   - defaults
   - conda-forge
@@ -21,7 +21,9 @@ dependencies:
   - pyarrow
   - swig
   - libpq
-  - python
+  - python=3.12
+  # See comments in mlos.yml.
+  #- gcc_linux-64
   - pip:
     - bump2version
     - check-jsonschema
