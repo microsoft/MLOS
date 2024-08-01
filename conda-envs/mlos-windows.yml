@@ -16,7 +16,6 @@ dependencies:
   - jupyter
   - ipykernel
   - nb_conda_kernels
-  - matplotlib<3.9
   - matplotlib-base<3.9
   - seaborn
   - pandas
