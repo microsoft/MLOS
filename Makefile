@@ -760,8 +760,9 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 			-e "failed to import function 'create' from module '(SpaceAdapter|Optimizer)Factory'" \
 			-e "No module named '(SpaceAdapter|Optimizer)Factory'" \
 			-e '^make.*resetting jobserver mode' \
+			-e 'from cryptography.hazmat.primitives.ciphers.algorithms import' \
 		| grep -v '^\s*$$' \
-		| if grep .; then echo "Errors found in doc build. Check doc/build/log.txt for details."; exit 1; else exit 0; fi
+		| if grep .; then echo "Errors found in doc build. Check doc/build/log.txt for details."; cat doc/build/log.txt; exit 1; else exit 0; fi
 	touch $@
 
 .PHONY: linklint-doc
