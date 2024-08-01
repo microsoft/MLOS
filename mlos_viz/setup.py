@@ -85,6 +85,7 @@ setup(
         "mlos-bench==" + VERSION,
         "dabl>=0.2.6",
         "matplotlib<3.9",  # FIXME: https://github.com/dabl/dabl/pull/341
+        "seaborn>=0.12.2",
     ],
     extras_require=extra_requires,
     **_get_long_desc_from_readme("https://github.com/microsoft/MLOS/tree/main/mlos_viz"),
