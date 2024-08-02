@@ -14,6 +14,9 @@ import pandas
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_viz import base
 from mlos_viz.util import expand_results_data_args
+from mlos_viz.version import VERSION
+
+__version__ = VERSION
 
 
 class MlosVizMethod(Enum):
