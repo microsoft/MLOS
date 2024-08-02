@@ -27,6 +27,23 @@ def config_to_dataframe(config: Configuration) -> pd.DataFrame:
     return pd.DataFrame([dict(config)])
 
 
+def drop_nulls(d: dict) -> dict:
+    """
+    Remove all key-value pairs where the value is None.
+
+    Parameters
+    ----------
+    d : dict
+        The dictionary to clean.
+
+    Returns
+    -------
+    dict
+        The cleaned dictionary.
+    """
+    return {k: v for k, v in d.items() if v is not None}
+
+
 def normalize_config(
     config_space: ConfigurationSpace,
     config: Union[Configuration, dict],

@@ -52,9 +52,9 @@ def test_create_space_adapter_with_factory_method(
     input_space = CS.ConfigurationSpace(seed=1234)
 
     # Add a single continuous input dimension between 0 and 1.
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="x", lower=0, upper=1))
+    input_space.add(CS.UniformFloatHyperparameter(name="x", lower=0, upper=1))
     # Add a single continuous input dimension between 0 and 1.
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="y", lower=0, upper=1))
+    input_space.add(CS.UniformFloatHyperparameter(name="y", lower=0, upper=1))
 
     # Adjust some kwargs for specific space adapters
     if space_adapter_type is SpaceAdapterType.LLAMATUNE:
