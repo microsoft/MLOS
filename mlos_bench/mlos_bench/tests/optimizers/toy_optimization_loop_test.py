@@ -17,6 +17,7 @@ from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
+from mlos_core.optimizers.observations import Suggestion
 from mlos_core.util import config_to_dataframe
 
 # For debugging purposes output some warnings which are captured with failed tests.
@@ -43,7 +44,10 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
                 config_df = config_to_dataframe(config)
                 logger("config: %s", str(config))
                 try:
-                    logger("prediction: %s", opt._opt.surrogate_predict(configs=config_df))
+                    logger(
+                        "prediction: %s",
+                        opt._opt.surrogate_predict(suggestion=Suggestion(config=config_df)),
+                    )
                 except RuntimeError:
                     pass
 
