@@ -69,7 +69,8 @@ def _get_long_desc_from_readme(base_url: str) -> dict:
 
 extra_requires: Dict[str, List[str]] = {  # pylint: disable=consider-using-namedtuple-or-dataclass
     "flaml": ["flaml[blendsearch]"],
-    "smac": ["smac>=2.0.0"],  # NOTE: Major refactoring on SMAC starting from v2.0.0
+    # NOTE: Major refactoring on SMAC and ConfigSpace v1.0 starting from v2.2
+    "smac": ["smac>=2.2.0"],
 }
 
 # construct special 'full' extra that adds requirements for all built-in
@@ -97,7 +98,7 @@ setup(
         'pandas >= 2.2.0;python_version>="3.9"',
         'Bottleneck > 1.3.5;python_version>="3.9"',
         'pandas >= 1.0.3;python_version<"3.9"',
-        "ConfigSpace==0.7.1",  # Temporarily restrict ConfigSpace version.
+        "ConfigSpace>=1.0",
     ],
     extras_require=extra_requires,
     **_get_long_desc_from_readme("https://github.com/microsoft/MLOS/tree/main/mlos_core"),

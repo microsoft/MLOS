@@ -76,8 +76,8 @@ def test_multi_target_opt(
 
     input_space = CS.ConfigurationSpace(seed=SEED)
     # add a mix of numeric datatypes
-    input_space.add_hyperparameter(CS.UniformIntegerHyperparameter(name="x", lower=0, upper=5))
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="y", lower=0.0, upper=5.0))
+    input_space.add(CS.UniformIntegerHyperparameter(name="x", lower=0, upper=5))
+    input_space.add(CS.UniformFloatHyperparameter(name="y", lower=0.0, upper=5.0))
 
     optimizer = optimizer_class(
         parameter_space=input_space,
@@ -105,7 +105,7 @@ def test_multi_target_opt(
             optimizer.parameter_space, suggestion.astype("O").iloc[0].to_dict()
         )
         # Raises an error if outside of configuration space
-        test_configuration.is_valid_configuration()
+        test_configuration.check_valid_configuration()
         # Test registering the suggested configuration with a score.
         observation = objective(suggestion)
         assert isinstance(observation, pd.DataFrame)
