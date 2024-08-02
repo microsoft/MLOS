@@ -67,9 +67,7 @@ class AzureAuthService(Service, SupportsAuth[TokenCredential]):
 
         self._access_token = "RENEW *NOW*"
         self._token_expiration_ts = datetime.now(UTC)  # Typically, some future timestamp.
-
-        # Login as the first identity available, usually ourselves or a managed identity
-        self._cred: Union[DefaultAzureCredential, CertificateCredential] = DefaultAzureCredential()
+        self._cred: Optional[TokenCredential] = None
 
         # Verify info required for SP auth early
         if "spClientId" in self.config:
@@ -87,15 +85,18 @@ class AzureAuthService(Service, SupportsAuth[TokenCredential]):
         """Return the Azure SDK credential object."""
         # Perform this initialization outside of __init__ so that environment loading tests
         # don't need to specifically mock keyvault interactions out
+        if self._cred is not None:
+            return self._cred
 
-        # Already logged in as SP
-        if isinstance(self._cred, CertificateCredential):
+        self._cred = DefaultAzureCredential()
+        if "spClientId" not in self.config:
             return self._cred
 
         sp_client_id = self.config["spClientId"]
         keyvault_name = self.config["keyVaultName"]
         cert_name = self.config["certName"]
         tenant_id = self.config["tenant"]
+        _LOG.debug("Log in with Azure Service Principal %s", sp_client_id)
 
         # Get a client for fetching cert info
         keyvault_secrets_client = SecretClient(
@@ -119,15 +120,11 @@ class AzureAuthService(Service, SupportsAuth[TokenCredential]):
 
     def get_access_token(self) -> str:
         """Get the access token from Azure CLI, if expired."""
-        # Ensure we are logged as the Service Principal, if provided
-        if "spClientId" in self.config:
-            self.get_credential()
-
         ts_diff = (self._token_expiration_ts - datetime.now(UTC)).total_seconds()
         _LOG.debug("Time to renew the token: %.2f sec.", ts_diff)
         if ts_diff < self._req_interval:
             _LOG.debug("Request new accessToken")
-            res = self._cred.get_token("https://management.azure.com/.default")
+            res = self.get_credential().get_token("https://management.azure.com/.default")
             self._token_expiration_ts = datetime.fromtimestamp(res.expires_on, tz=UTC)
             self._access_token = res.token
             _LOG.info("Got new accessToken. Expiration time: %s", self._token_expiration_ts)
