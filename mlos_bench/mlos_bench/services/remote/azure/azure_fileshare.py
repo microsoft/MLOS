@@ -8,7 +8,7 @@ import logging
 import os
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
-import azure.core.credentials as azure_cred
+from azure.core.credentials import TokenCredential
 from azure.core.exceptions import ResourceNotFoundError
 from azure.storage.fileshare import ShareClient
 
@@ -64,7 +64,7 @@ class AzureFileShareService(FileShareService):
         assert self._parent is not None and isinstance(
             self._parent, SupportsAuth
         ), "Authorization service not provided. Include service-auth.jsonc?"
-        self._auth_service: SupportsAuth[azure_cred.TokenCredential] = self._parent
+        self._auth_service: SupportsAuth[TokenCredential] = self._parent
         self._share_client: Optional[ShareClient] = None
 
     def _get_share_client(self) -> ShareClient:
@@ -72,7 +72,7 @@ class AzureFileShareService(FileShareService):
         if self._share_client is None:
             credential = self._auth_service.get_credential()
             assert isinstance(
-                credential, azure_cred.TokenCredential
+                credential, TokenCredential
             ), f"Expected a TokenCredential, but got {type(credential)} instead."
             self._share_client = ShareClient.from_share_url(
                 self._SHARE_URL.format(
