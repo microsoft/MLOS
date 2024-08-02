@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from azure.core.credentials import TokenCredential
-from azure.identity import DefaultAzureCredential, CertificateCredential
+from azure.identity import CertificateCredential, DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from pytz import UTC
 
