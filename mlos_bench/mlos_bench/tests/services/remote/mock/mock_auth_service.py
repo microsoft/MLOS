@@ -13,7 +13,7 @@ from mlos_bench.services.types.authenticator_type import SupportsAuth
 _LOG = logging.getLogger(__name__)
 
 
-class MockAuthService(Service, SupportsAuth):
+class MockAuthService(Service, SupportsAuth[str]):
     """A collection Service functions for mocking authentication ops."""
 
     def __init__(
@@ -32,6 +32,7 @@ class MockAuthService(Service, SupportsAuth):
                 [
                     self.get_access_token,
                     self.get_auth_headers,
+                    self.get_credential,
                 ],
             ),
         )
@@ -41,3 +42,6 @@ class MockAuthService(Service, SupportsAuth):
 
     def get_auth_headers(self) -> dict:
         return {"Authorization": "Bearer " + self.get_access_token()}
+
+    def get_credential(self) -> str:
+        return "MOCK CREDENTIAL"
