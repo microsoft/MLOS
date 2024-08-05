@@ -26,6 +26,7 @@ from ConfigSpace import (
     UniformFloatHyperparameter,
     UniformIntegerHyperparameter,
 )
+from ConfigSpace.functional import quantize
 from ConfigSpace.types import NotSet
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
@@ -123,7 +124,6 @@ def _tunable_to_configspace(
             name=tunable.name,
             bounds=(int(tunable.range[0]), int(tunable.range[1])),
             log=bool(tunable.is_log),
-            # TODO: Restore quantization support (#803).
             distribution=distribution,
             default=(
                 int(tunable.default)
@@ -137,7 +137,6 @@ def _tunable_to_configspace(
             name=tunable.name,
             bounds=tunable.range,
             log=bool(tunable.is_log),
-            # TODO: Restore quantization support (#803).
             distribution=distribution,
             default=(
                 float(tunable.default)
@@ -148,6 +147,19 @@ def _tunable_to_configspace(
         )
     else:
         raise TypeError(f"Invalid Parameter Type: {tunable.type}")
+
+    if tunable.quantization:
+        setattr(range_hp, "sample_value_mlos_orig", range_hp.sample_value)
+        assert hasattr(range_hp, "sample_value_mlos_orig")
+        setattr(
+            range_hp,
+            "sample_value",
+            lambda size, **kwarg: quantize(
+                range_hp.sample_value_mlos_orig(size, **kwarg),
+                bounds=tunable.range,
+                bins=int((tunable.range[1] - tunable.range[0]) / tunable.quantization),
+            ).astype(tunable.dtype),
+        )
 
     if not tunable.special:
         return ConfigurationSpace({tunable.name: range_hp})
