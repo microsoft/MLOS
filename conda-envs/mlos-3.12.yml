@@ -1,5 +1,7 @@
 name: mlos-3.12
 channels:
+  # Use conda-forge to allow other packages to install with python 3.12.
+  # See Also: https://github.com/microsoft/MLOS/issues/832
   - conda-forge
   - defaults
 dependencies:
