@@ -40,7 +40,7 @@ def grid_search_tunables_config() -> dict:
                     "type": "float",
                     "range": [0, 1],
                     "default": 0.5,
-                    "quantization": 0.25,
+                    "quantization": 4,
                 },
             },
         },

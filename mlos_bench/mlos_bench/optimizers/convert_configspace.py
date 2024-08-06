@@ -157,7 +157,7 @@ def _tunable_to_configspace(
             lambda size, **kwarg: quantize(
                 range_hp.sample_value_mlos_orig(size, **kwarg),
                 bounds=tunable.range,
-                bins=int((tunable.range[1] - tunable.range[0]) / tunable.quantization),
+                bins=tunable.quantization,
             ).astype(tunable.dtype),
         )
 
