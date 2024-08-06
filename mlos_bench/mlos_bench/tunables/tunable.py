@@ -594,19 +594,19 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._quantization
 
     @property
-    def quantized_values(self) -> Union[Iterable[int], Iterable[float], None]:
+    def quantized_values(self) -> Optional[Union[Iterable[int], Iterable[float]]]:
         """
         Get a sequence of quanitized values for this tunable.
 
         Returns
         -------
-        Union[Iterable[int], Iterable[float], None]
+        Optional[Union[Iterable[int], Iterable[float]]]
             If the Tunable is quantizable, returns a sequence of those elements,
             else None (e.g., for unquantized float type tunables).
         """
         num_range = self.range
         if self.type == "float":
-            if not self._quantization:
+            if not self.quantization:
                 return None
             # Be sure to return python types instead of numpy types.
             return (
@@ -614,7 +614,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
                 for x in np.linspace(
                     start=num_range[0],
                     stop=num_range[1],
-                    num=self.cardinality,
+                    num=self.quantization,
                     endpoint=True,
                 )
             )
