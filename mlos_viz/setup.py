@@ -83,8 +83,8 @@ setup(
     version=VERSION,
     install_requires=[
         "mlos-bench==" + VERSION,
-        "dabl>=0.3.1",
-        "matplotlib",
+        "dabl>=0.2.6",
+        "matplotlib<3.9",  # FIXME: https://github.com/dabl/dabl/pull/341
         "seaborn>=0.12.2",
     ],
     extras_require=extra_requires,
