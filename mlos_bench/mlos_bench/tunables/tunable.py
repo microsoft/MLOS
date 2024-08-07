@@ -606,7 +606,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         """
         num_range = self.range
         if self.type == "float":
-            if not self.quantization:
+            if not self.cardinality:
                 return None
             # Be sure to return python types instead of numpy types.
             return (
@@ -614,12 +614,16 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
                 for x in np.linspace(
                     start=num_range[0],
                     stop=num_range[1],
-                    num=self.quantization,
+                    num=self.cardinality,
                     endpoint=True,
                 )
             )
         assert self.type == "int", f"Unhandled tunable type: {self}"
-        return range(int(num_range[0]), int(num_range[1]) + 1, self.quantization or 1)
+        return range(
+            int(num_range[0]),
+            int(num_range[1]) + 1,
+            int(self.span / self.quantization) if self.quantization else 1,
+        )
 
     @property
     def cardinality(self) -> Optional[int]:
@@ -637,9 +641,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         if self.is_categorical:
             return len(self.categories)
         if self.quantization:
-            return self.quantization
+            return self.quantization + 1
         if self.type == "int":
-            return int(self.span)
+            return int(self.span) + 1
         return None
 
     @property
