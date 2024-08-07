@@ -628,8 +628,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @property
     def cardinality(self) -> Optional[int]:
         """
-        Gets the cardinality of elements in this tunable, or else None.
-        (i.e., when the tunable is continuous float and not quantized).
+        Gets the cardinality of elements in this tunable, or else None. (i.e., when the
+        tunable is continuous float and not quantized).
 
         If the tunable has quantization set, this
 
