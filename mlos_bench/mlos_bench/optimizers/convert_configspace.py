@@ -78,6 +78,7 @@ def _tunable_to_configspace(
     cs : ConfigurationSpace
         A ConfigurationSpace object that corresponds to the Tunable.
     """
+    # pylint: disable=too-complex
     meta: Dict[Hashable, TunableValue] = {"cost": cost}
     if group_name is not None:
         meta["group"] = group_name
