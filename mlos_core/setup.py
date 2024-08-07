@@ -88,10 +88,11 @@ extra_requires["full-tests"] = extra_requires["full"] + [
 setup(
     version=VERSION,
     install_requires=[
-        "scikit-learn>=1.2",
+        "scikit-learn>=1.3",
         "scipy>=1.3.2",
         "numpy>=1.24",
-        "pandas>=2.2.0",
+        'pandas >= 2.2.0;python_version>="3.9"',
+        'pandas >= 1.0.3;python_version<"3.9"',
         "ConfigSpace>=1.0",
     ],
     extras_require=extra_requires,
