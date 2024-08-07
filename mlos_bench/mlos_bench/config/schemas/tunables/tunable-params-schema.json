@@ -217,6 +217,9 @@
                 "distribution": {
                     "$ref": "#/$defs/tunable_param_distribution"
                 },
+                "quantization": {
+                    "$ref": "#/$defs/quantization"
+                },
                 "log": {
                     "$ref": "#/$defs/log_scale"
                 },
@@ -261,6 +264,9 @@
                 },
                 "distribution": {
                     "$ref": "#/$defs/tunable_param_distribution"
+                },
+                "quantization": {
+                    "$ref": "#/$defs/quantization"
                 },
                 "log": {
                     "$ref": "#/$defs/log_scale"
