@@ -390,7 +390,7 @@ build/mypy.%.${CONDA_ENV_NAME}.build-stamp: $(MYPY_COMMON_PREREQS)
 
 
 .PHONY: test
-test: pytest
+test: pytest notebook-exec-test
 
 PYTEST_CONF_FILES := $(MLOS_GLOBAL_CONF_FILES) conftest.py
 
@@ -641,7 +641,7 @@ publish-test-pypi: build/publish.${CONDA_ENV_NAME}.testpypi.py.build-stamp
 notebook-exec-test: build/notebook-exec-test.${CONDA_ENV_NAME}.build-stamp
 
 build/notebook-exec-test.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp $(NOTEBOOK_FILES)
-	conda run -n ${CONDA_ENV_NAME} python -m jupyter execute $(NOTEBOOK_FILES)
+	find . -name '*.ipynb' -not -path '*/build/*' -print0 | xargs -0 -n1 -P0 conda run -n ${CONDA_ENV_NAME} python -m jupyter execute
 	touch $@
 
 build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
