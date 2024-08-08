@@ -55,8 +55,8 @@ def _monkey_patch_quantization(hp: NumericalHyperparameter, quantization_bins: i
 
     Parameters
     ----------
-    hp : Hyperparameter
-        Numeric ConfigSpace hyperparameter to patch.
+    hp : NumericalHyperparameter
+        ConfigSpace hyperparameter to patch.
     quantization_bins : int
         Number of bins to quantize the hyperparameter into.
     """
