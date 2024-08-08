@@ -6,7 +6,7 @@
 
 import logging
 import os
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Union, get_type_hints
 
 from azure.core.credentials import TokenCredential
 from azure.core.exceptions import ResourceNotFoundError
@@ -62,22 +62,25 @@ class AzureFileShareService(FileShareService):
             },
         )
         # TODO: Ensure that the parent service is an authentication service that provides a TokenCredential.
-        assert self._parent is not None and isinstance(
-            self._parent, SupportsAuth
-        ), "Authorization service not provided. Include services/remote/azure/service-auth.jsonc?"
+        assert (
+            self._parent is not None
+            and isinstance(self._parent, SupportsAuth)
+            and get_type_hints(self._parent.get_credential).get("return") == TokenCredential
+        ), (
+            "Azure Authorization service not provided. "
+            "Include services/remote/azure/service-auth.jsonc?"
+        )
         self._auth_service: SupportsAuth[TokenCredential] = self._parent
         self._share_client: Optional[ShareClient] = None
-        # Cache of the last access token we used to access the file share.
-        self._access_token: Optional[str] = None
 
     def _get_share_client(self) -> ShareClient:
         """Get the Azure file share client object."""
         if self._share_client is None:
             credential = self._auth_service.get_credential()
-            assert isinstance(
-                credential, TokenCredential
-            ), (f"Expected a TokenCredential, but got {type(credential)} instead. "
-                "Include services/remote/azure/service-auth.jsonc?")
+            assert isinstance(credential, TokenCredential), (
+                f"Expected a TokenCredential, but got {type(credential)} instead. "
+                "Include services/remote/azure/service-auth.jsonc?"
+            )
             self._share_client = ShareClient.from_share_url(
                 self._SHARE_URL.format(
                     account_name=self.config["storageAccountName"],
