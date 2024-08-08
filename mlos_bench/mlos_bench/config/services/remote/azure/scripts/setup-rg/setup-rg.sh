@@ -42,6 +42,10 @@ case $1 in
         resultsDbArmParamsFile="$2"
         shift 2
         ;;
+    --resourceGroupName)
+        resourceGroupName="$2"
+        shift 2
+        ;;
     # Managed Identity params
     --managedIdentityName)
         managedIdentityName="$2"
@@ -50,10 +54,6 @@ case $1 in
     # Service Principal params
     --servicePrincipalName)
         servicePrincipalName="$2"
-        shift 2
-        ;;
-    --resourceGroupName)
-        resourceGroupName="$2"
         shift 2
         ;;
     --certName)
@@ -217,7 +217,7 @@ elif [ -n "${managedIdentityName:-}" ]; then
 
     # Assign the identity access to the storage accounts
     for storageAccountName in $storageAccountNames; do
-        echo "Assigning the identity role to ${storageAccountName}..."
+        echo "Assigning the identity the role for ${storageAccountName}..."
         storageAccountResourceId=$(az storage account show --name "${storageAccountName}" --resource-group "${resourceGroupName}" --query "id" --output tsv)
         az role assignment create \
             --assignee "${miId}" \
