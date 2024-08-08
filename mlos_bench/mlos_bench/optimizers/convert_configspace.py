@@ -11,8 +11,6 @@ from typing import Dict, Hashable, List, Optional, Tuple, Union
 
 from ConfigSpace import (
     Beta,
-    BetaFloatHyperparameter,
-    BetaIntegerHyperparameter,
     CategoricalHyperparameter,
     Configuration,
     ConfigurationSpace,
@@ -20,13 +18,10 @@ from ConfigSpace import (
     Float,
     Integer,
     Normal,
-    NormalFloatHyperparameter,
-    NormalIntegerHyperparameter,
     Uniform,
-    UniformFloatHyperparameter,
-    UniformIntegerHyperparameter,
 )
 from ConfigSpace.functional import quantize
+from ConfigSpace.hyperparameters import NumericalHyperparameter
 from ConfigSpace.types import NotSet
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
@@ -55,14 +50,7 @@ def _normalize_weights(weights: List[float]) -> List[float]:
 
 
 def _monkey_patch_quantization(
-    range_hp: Union[
-        BetaFloatHyperparameter,
-        BetaIntegerHyperparameter,
-        NormalFloatHyperparameter,
-        NormalIntegerHyperparameter,
-        UniformFloatHyperparameter,
-        UniformIntegerHyperparameter,
-    ],
+    range_hp: NumericalHyperparameter,
     quantization_bins: int,
 ) -> None:
     """Monkey-patch quantization into the Hyperparameter.
@@ -147,14 +135,7 @@ def _tunable_to_configspace(
     elif tunable.distribution is not None:
         raise TypeError(f"Invalid Distribution Type: {tunable.distribution}")
 
-    range_hp: Union[
-        BetaFloatHyperparameter,
-        BetaIntegerHyperparameter,
-        NormalFloatHyperparameter,
-        NormalIntegerHyperparameter,
-        UniformFloatHyperparameter,
-        UniformIntegerHyperparameter,
-    ]
+    range_hp: NumericalHyperparameter
     if tunable.type == "int":
         range_hp = Integer(
             name=tunable.name,
