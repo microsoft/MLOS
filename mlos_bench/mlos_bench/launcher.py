@@ -22,6 +22,7 @@ from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.optimizers.one_shot_optimizer import OneShotOptimizer
 from mlos_bench.schedulers.base_scheduler import Scheduler
+from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService
@@ -44,6 +45,7 @@ class Launcher:
 
     def __init__(self, description: str, long_text: str = "", argv: Optional[List[str]] = None):
         # pylint: disable=too-many-statements
+        # pylint: disable=too-complex
         # pylint: disable=too-many-locals
         _LOG.info("Launch: %s", description)
         epilog = """
@@ -108,6 +110,7 @@ class Launcher:
             args_rest=args_rest,
             global_config=cli_config_args,
         )
+        # TODO: Can we generalize these two rules using excluded_cli_args?
         # experiment_id is generally taken from --globals files, but we also allow
         # overriding it on the CLI.
         # It's useful to keep it there explicitly mostly for the --help output.
@@ -117,6 +120,13 @@ class Launcher:
         # set it via command line
         if args.trial_config_repeat_count:
             self.global_config["trial_config_repeat_count"] = args.trial_config_repeat_count
+        self.global_config.setdefault("num_trial_runners", 1)
+        if args.num_trial_runners:
+            self.global_config["num_trial_runners"] = args.num_trial_runners
+        if self.global_config["num_trial_runners"] <= 0:
+            raise ValueError(
+                f"Invalid num_trial_runners: {self.global_config['num_trial_runners']}"
+            )
         # Ensure that the trial_id is present since it gets used by some other
         # configs but is typically controlled by the run optimize loop.
         self.global_config.setdefault("trial_id", 1)
@@ -142,13 +152,28 @@ class Launcher:
             )
         self.root_env_config = self._config_loader.resolve_path(env_path)
 
-        self.environment: Environment = self._config_loader.load_environment(
-            self.root_env_config, TunableGroups(), self.global_config, service=self._parent_service
+        self.trial_runners: List[TrialRunner] = []
+        for trial_runner_id in range(self.global_config["num_trial_runners"]):
+            # Create a new global config for each Environment with a unique trial_runner_id for it.
+            env_global_config = self.global_config.copy()
+            env_global_config["trial_runner_id"] = trial_runner_id
+            env = self._config_loader.load_environment(
+                self.root_env_config,
+                TunableGroups(),
+                env_global_config,
+                service=self._parent_service,
+            )
+            self.trial_runners.append(TrialRunner(trial_runner_id, env))
+        _LOG.info(
+            "Init %d trial runners for environments: %s",
+            len(self.trial_runners),
+            list(trial_runner.environment for trial_runner in self.trial_runners),
         )
-        _LOG.info("Init environment: %s", self.environment)
 
-        # NOTE: Init tunable values *after* the Environment, but *before* the Optimizer
+        # NOTE: Init tunable values *after* the Environment(s), but *before* the Optimizer
+        # TODO: should we assign the same or different tunables for all TrialRunner Environments?
         self.tunables = self._init_tunable_values(
+            self.trial_runners[0].environment,
             args.random_init or config.get("random_init", False),
             config.get("random_seed") if args.random_seed is None else args.random_seed,
             config.get("tunable_values", []) + (args.tunable_values or []),
@@ -275,6 +300,18 @@ class Launcher:
             help=(
                 "Number of times to repeat each config. "
                 "Default is 1 trial per config, though more may be advised."
+            ),
+        )
+
+        parser.add_argument(
+            "--num_trial_runners",
+            "--num-trial-runners",
+            required=False,
+            type=int,
+            help=(
+                "Number of TrialRunners to use for executing benchmark Environments. "
+                "Individual TrialRunners can be identified in configs with $trial_runner_id "
+                "and optionally run in parallel."
             ),
         )
 
@@ -424,6 +461,7 @@ class Launcher:
 
     def _init_tunable_values(
         self,
+        env: Environment,
         random_init: bool,
         seed: Optional[int],
         args_tunables: Optional[str],
@@ -431,7 +469,7 @@ class Launcher:
         """Initialize the tunables and load key/value pairs of the tunable values from
         given JSON files, if specified.
         """
-        tunables = self.environment.tunable_params
+        tunables = env.tunable_params
         _LOG.debug("Init tunables: default = %s", tunables)
 
         if random_init:
@@ -441,6 +479,8 @@ class Launcher:
                 config={"start_with_defaults": False, "seed": seed},
             ).suggest()
             _LOG.debug("Init tunables: random = %s", tunables)
+
+        # TODO: should we assign the same or different tunables for all TrialRunner Environments?
 
         if args_tunables is not None:
             for data_file in args_tunables:
@@ -530,7 +570,7 @@ class Launcher:
                     "teardown": self.teardown,
                 },
                 global_config=self.global_config,
-                environment=self.environment,
+                trial_runners=self.trial_runners,
                 optimizer=self.optimizer,
                 storage=self.storage,
                 root_env_config=self.root_env_config,
@@ -540,7 +580,7 @@ class Launcher:
         return self._config_loader.build_scheduler(
             config=class_config,
             global_config=self.global_config,
-            environment=self.environment,
+            trial_runners=self.trial_runners,
             optimizer=self.optimizer,
             storage=self.storage,
             root_env_config=self.root_env_config,

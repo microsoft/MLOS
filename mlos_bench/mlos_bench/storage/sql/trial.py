@@ -6,7 +6,7 @@
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional, Tuple
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 from sqlalchemy import Connection, Engine
 from sqlalchemy.exc import IntegrityError
@@ -45,6 +45,16 @@ class Trial(Storage.Trial):
         )
         self._engine = engine
         self._schema = schema
+
+    def _save_new_config_data(self, new_config_data: Dict[str, Union[int, float, str]]) -> None:
+        with self._engine.begin() as conn:
+            self._experiment._save_params(
+                conn,
+                self._schema.trial_param,
+                new_config_data,
+                exp_id=self._experiment_id,
+                trial_id=self._trial_id,
+            )
 
     def update(
         self,
