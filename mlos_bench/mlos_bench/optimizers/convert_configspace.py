@@ -54,6 +54,41 @@ def _normalize_weights(weights: List[float]) -> List[float]:
     return [w / total for w in weights]
 
 
+def _monkey_patch_quantization(
+    range_hp: Union[
+        BetaFloatHyperparameter,
+        BetaIntegerHyperparameter,
+        NormalFloatHyperparameter,
+        NormalIntegerHyperparameter,
+        UniformFloatHyperparameter,
+        UniformIntegerHyperparameter,
+    ],
+    quantization_bins: int,
+) -> None:
+    """Monkey-patch quantization into the Hyperparameter.
+
+    Parameters
+    ----------
+    range_hp : Hyperparameter
+        Numeric ConfigSpace hyperparameter to patch.
+    quantization_bins : int
+        Number of bins to quantize the hyperparameter into.
+    """
+    if not hasattr(range_hp, "sample_value_mlos_orig"):
+        setattr(range_hp, "sample_value_mlos_orig", range_hp.sample_value)
+
+    assert hasattr(range_hp, "sample_value_mlos_orig")
+    setattr(
+        range_hp,
+        "sample_value",
+        lambda size, **kwarg: quantize(
+            range_hp.sample_value_mlos_orig(size, **kwarg),
+            bounds=(range_hp.lower, range_hp.upper),
+            bins=quantization_bins,
+        ).astype(type(range_hp.default_value)),
+    )
+
+
 def _tunable_to_configspace(
     tunable: Tunable,
     group_name: Optional[str] = None,
@@ -150,17 +185,7 @@ def _tunable_to_configspace(
         raise TypeError(f"Invalid Parameter Type: {tunable.type}")
 
     if tunable.quantization:
-        setattr(range_hp, "sample_value_mlos_orig", range_hp.sample_value)
-        assert hasattr(range_hp, "sample_value_mlos_orig")
-        setattr(
-            range_hp,
-            "sample_value",
-            lambda size, **kwarg: quantize(
-                range_hp.sample_value_mlos_orig(size, **kwarg),
-                bounds=tunable.range,
-                bins=tunable.quantization,
-            ).astype(tunable.dtype),
-        )
+        _monkey_patch_quantization(range_hp, tunable.quantization)
 
     if not tunable.special:
         return ConfigurationSpace({tunable.name: range_hp})
