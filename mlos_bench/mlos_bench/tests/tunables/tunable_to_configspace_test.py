@@ -9,6 +9,7 @@ from ConfigSpace import (
     CategoricalHyperparameter,
     ConfigurationSpace,
     EqualsCondition,
+    Integer,
     UniformFloatHyperparameter,
     UniformIntegerHyperparameter,
 )
@@ -40,46 +41,66 @@ def configuration_space() -> ConfigurationSpace:
         special_param_names("kernel_sched_migration_cost_ns")
     )
 
-    spaces = ConfigurationSpace(
-        space={
-            "vmSize": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"],
-            "idle": ["halt", "mwait", "noidle"],
-            "kernel_sched_migration_cost_ns": (0, 500000),
-            kernel_sched_migration_cost_ns_special: [-1, 0],
-            kernel_sched_migration_cost_ns_type: [
-                TunableValueKind.SPECIAL,
-                TunableValueKind.RANGE,
-            ],
-            "kernel_sched_latency_ns": (0, 1000000000),
-        }
-    )
+    # TODO: Add quantization support tests (#803).
 
     # NOTE: FLAML requires distribution to be uniform
-    spaces["vmSize"].default_value = "Standard_B4ms"
-    spaces["idle"].default_value = "halt"
-    spaces["kernel_sched_migration_cost_ns"].default_value = 250000
-    spaces[kernel_sched_migration_cost_ns_special].default_value = -1
-    spaces[kernel_sched_migration_cost_ns_special].probabilities = (0.5, 0.5)
-    spaces[kernel_sched_migration_cost_ns_type].default_value = TunableValueKind.SPECIAL
-    spaces[kernel_sched_migration_cost_ns_type].probabilities = (0.5, 0.5)
-    spaces["kernel_sched_latency_ns"].default_value = 2000000
-    spaces["kernel_sched_latency_ns"].q = 100
-
-    spaces.add_condition(
+    spaces = ConfigurationSpace(
+        {
+            "vmSize": CategoricalHyperparameter(
+                name="vmSize",
+                choices=["Standard_B2s", "Standard_B2ms", "Standard_B4ms"],
+                default_value="Standard_B4ms",
+                meta={"group": "provision", "cost": 0},
+            ),
+            "idle": CategoricalHyperparameter(
+                name="idle",
+                choices=["halt", "mwait", "noidle"],
+                default_value="halt",
+                meta={"group": "boot", "cost": 0},
+            ),
+            "kernel_sched_latency_ns": Integer(
+                name="kernel_sched_latency_ns",
+                bounds=(0, 1000000000),
+                log=False,
+                default=2000000,
+                meta={"group": "kernel", "cost": 0},
+            ),
+            "kernel_sched_migration_cost_ns": Integer(
+                name="kernel_sched_migration_cost_ns",
+                bounds=(0, 500000),
+                log=False,
+                default=250000,
+                meta={"group": "kernel", "cost": 0},
+            ),
+            kernel_sched_migration_cost_ns_special: CategoricalHyperparameter(
+                name=kernel_sched_migration_cost_ns_special,
+                choices=[-1, 0],
+                weights=[0.5, 0.5],
+                default_value=-1,
+                meta={"group": "kernel", "cost": 0},
+            ),
+            kernel_sched_migration_cost_ns_type: CategoricalHyperparameter(
+                name=kernel_sched_migration_cost_ns_type,
+                choices=[TunableValueKind.SPECIAL, TunableValueKind.RANGE],
+                weights=[0.5, 0.5],
+                default_value=TunableValueKind.SPECIAL,
+            ),
+        }
+    )
+    spaces.add(
         EqualsCondition(
             spaces[kernel_sched_migration_cost_ns_special],
             spaces[kernel_sched_migration_cost_ns_type],
             TunableValueKind.SPECIAL,
         )
     )
-    spaces.add_condition(
+    spaces.add(
         EqualsCondition(
             spaces["kernel_sched_migration_cost_ns"],
             spaces[kernel_sched_migration_cost_ns_type],
             TunableValueKind.RANGE,
         )
     )
-
     return spaces
 
 

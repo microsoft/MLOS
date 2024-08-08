@@ -32,23 +32,15 @@ def construct_parameter_space(  # pylint: disable=too-many-arguments
     input_space = CS.ConfigurationSpace(seed=seed)
 
     for idx in range(n_continuous_params):
-        input_space.add_hyperparameter(
-            CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64)
-        )
+        input_space.add(CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64))
     for idx in range(n_quantized_continuous_params):
-        input_space.add_hyperparameter(
-            CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64, q=12.8)
-        )
+        input_space.add(CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64, q=12.8))
     for idx in range(n_integer_params):
-        input_space.add_hyperparameter(
-            CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=-1, upper=256)
-        )
+        input_space.add(CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=-1, upper=256))
     for idx in range(n_quantized_integer_params):
-        input_space.add_hyperparameter(
-            CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=0, upper=256, q=16)
-        )
+        input_space.add(CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=0, upper=256, q=16))
     for idx in range(n_categorical_params):
-        input_space.add_hyperparameter(
+        input_space.add(
             CS.CategoricalHyperparameter(
                 name=f"str_{idx}", choices=[f"option_{idx}" for idx in range(5)]
             )
@@ -116,7 +108,7 @@ def test_num_low_dims(
 
         # High-dim (i.e., original) config should be valid
         orig_config = CS.Configuration(input_space, values=orig_config_df.iloc[0].to_dict())
-        input_space.check_configuration(orig_config)
+        orig_config.check_valid_configuration()
 
         # Transform high-dim config back to low-dim
         target_config_df = adapter.inverse_transform(orig_config_df)
@@ -152,11 +144,11 @@ def test_special_parameter_values_validation() -> None:
     dictionary.
     """
     input_space = CS.ConfigurationSpace(seed=1234)
-    input_space.add_hyperparameter(
+    input_space.add(
         CS.CategoricalHyperparameter(name="str", choices=[f"choice_{idx}" for idx in range(5)])
     )
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="cont", lower=-1, upper=100))
-    input_space.add_hyperparameter(CS.UniformIntegerHyperparameter(name="int", lower=0, upper=100))
+    input_space.add(CS.UniformFloatHyperparameter(name="cont", lower=-1, upper=100))
+    input_space.add(CS.UniformIntegerHyperparameter(name="int", lower=0, upper=100))
 
     # Only UniformIntegerHyperparameters are currently supported
     with pytest.raises(NotImplementedError):
@@ -246,12 +238,8 @@ def gen_random_configs(adapter: LlamaTuneAdapter, num_configs: int) -> Iterator[
 def test_special_parameter_values_biasing() -> None:  # pylint: disable=too-complex
     """Tests LlamaTune's special parameter values biasing methodology."""
     input_space = CS.ConfigurationSpace(seed=1234)
-    input_space.add_hyperparameter(
-        CS.UniformIntegerHyperparameter(name="int_1", lower=0, upper=100)
-    )
-    input_space.add_hyperparameter(
-        CS.UniformIntegerHyperparameter(name="int_2", lower=0, upper=100)
-    )
+    input_space.add(CS.UniformIntegerHyperparameter(name="int_1", lower=0, upper=100))
+    input_space.add(CS.UniformIntegerHyperparameter(name="int_2", lower=0, upper=100))
 
     num_configs = 400
     bias_percentage = LlamaTuneAdapter.DEFAULT_SPECIAL_PARAM_VALUE_BIASING_PERCENTAGE
@@ -345,22 +333,14 @@ def test_max_unique_values_per_param() -> None:
     """Tests LlamaTune's parameter values discretization implementation."""
     # Define config space with a mix of different parameter types
     input_space = CS.ConfigurationSpace(seed=1234)
-    input_space.add_hyperparameter(
+    input_space.add(
         CS.UniformFloatHyperparameter(name="cont_1", lower=0, upper=5),
     )
-    input_space.add_hyperparameter(
-        CS.UniformFloatHyperparameter(name="cont_2", lower=1, upper=100)
-    )
-    input_space.add_hyperparameter(
-        CS.UniformIntegerHyperparameter(name="int_1", lower=1, upper=10)
-    )
-    input_space.add_hyperparameter(
-        CS.UniformIntegerHyperparameter(name="int_2", lower=0, upper=2048)
-    )
-    input_space.add_hyperparameter(
-        CS.CategoricalHyperparameter(name="str_1", choices=["on", "off"])
-    )
-    input_space.add_hyperparameter(
+    input_space.add(CS.UniformFloatHyperparameter(name="cont_2", lower=1, upper=100))
+    input_space.add(CS.UniformIntegerHyperparameter(name="int_1", lower=1, upper=10))
+    input_space.add(CS.UniformIntegerHyperparameter(name="int_2", lower=0, upper=2048))
+    input_space.add(CS.CategoricalHyperparameter(name="str_1", choices=["on", "off"]))
+    input_space.add(
         CS.CategoricalHyperparameter(name="str_2", choices=[f"choice_{idx}" for idx in range(10)])
     )
 
@@ -458,7 +438,7 @@ def test_approx_inverse_mapping(
             adapter.target_parameter_space,
             values=target_config_df.iloc[0].to_dict(),
         )
-        adapter.target_parameter_space.check_configuration(target_config)
+        target_config.check_valid_configuration()
 
     # Test inverse transform with 100 random configs
     for _ in range(100):
@@ -472,7 +452,7 @@ def test_approx_inverse_mapping(
             adapter.target_parameter_space,
             values=target_config_df.iloc[0].to_dict(),
         )
-        adapter.target_parameter_space.check_configuration(target_config)
+        target_config.check_valid_configuration()
 
 
 @pytest.mark.parametrize(
@@ -531,7 +511,7 @@ def test_llamatune_pipeline(
         orig_config_df = adapter.transform(sampled_config_df)
         # High-dim (i.e., original) config should be valid
         orig_config = CS.Configuration(input_space, values=orig_config_df.iloc[0].to_dict())
-        input_space.check_configuration(orig_config)
+        orig_config.check_valid_configuration()
 
         # Transform high-dim config back to low-dim
         target_config_df = adapter.inverse_transform(orig_config_df)

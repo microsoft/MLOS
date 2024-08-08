@@ -94,7 +94,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             Not Yet Implemented.
 
         metadata : Optional[pd.DataFrame]
-            Not Yet Implemented.
+            Metadata returned by the backend optimizer's suggest method.
         """
         # Do some input validation.
         assert metadata is None or isinstance(metadata, pd.DataFrame)
@@ -167,6 +167,10 @@ class BaseOptimizer(metaclass=ABCMeta):
         -------
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
+
+        metadata : Optional[pd.DataFrame]
+            The metadata associated with the given configuration used for evaluations.
+            Backend optimizer specific.
         """
         if defaults:
             configuration = config_to_dataframe(self.parameter_space.get_default_configuration())
@@ -209,6 +213,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         metadata : Optional[pd.DataFrame]
             The metadata associated with the given configuration used for evaluations.
+            Backend optimizer specific.
         """
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
@@ -233,7 +238,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         context : pd.DataFrame
             Not Yet Implemented.
         metadata : Optional[pd.DataFrame]
-            Not Yet Implemented.
+            Metadata returned by the backend optimizer's suggest method.
         """
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
