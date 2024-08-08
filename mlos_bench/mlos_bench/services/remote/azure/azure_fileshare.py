@@ -61,7 +61,8 @@ class AzureFileShareService(FileShareService):
                 "storageFileShareName",
             },
         )
-        # TODO: Ensure that the parent service is an authentication service that provides a TokenCredential.
+        # Ensure that the parent service is an authentication service that provides
+        # a TokenCredential.
         assert (
             self._parent is not None
             and isinstance(self._parent, SupportsAuth)
