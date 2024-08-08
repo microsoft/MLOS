@@ -68,7 +68,7 @@ class AzureFileShareService(FileShareService):
             and isinstance(self._parent, SupportsAuth)
             and get_type_hints(self._parent.get_credential).get("return") == TokenCredential
         ), (
-            "Azure Authorization service not provided. "
+            "Azure Authentication service not provided. "
             "Include services/remote/azure/service-auth.jsonc?"
         )
         self._auth_service: SupportsAuth[TokenCredential] = self._parent
