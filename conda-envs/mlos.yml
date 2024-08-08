@@ -1,7 +1,7 @@
 name: mlos
 channels:
-  - defaults
   - conda-forge
+  - defaults
 dependencies:
   # Basic dev environment packages.
   # All other dependencies for the mlos modules come from pip.
@@ -15,14 +15,13 @@ dependencies:
   - jupyter
   - ipykernel
   - nb_conda_kernels
-  - matplotlib
+  - matplotlib-base
   - seaborn
   - pandas
   - pyarrow
   - swig
   - libpq
-  # FIXME: https://github.com/microsoft/MLOS/issues/727
-  - python<3.12
+  - python
   - pip:
     - bump2version
     - check-jsonschema

@@ -23,6 +23,7 @@ from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import (
 )
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
+from mlos_core.util import drop_nulls
 
 
 class SmacOptimizer(BaseBayesianOptimizer):
@@ -350,8 +351,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
             warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
 
         trial: TrialInfo = self.base_optimizer.ask()
-        trial.config.is_valid_configuration()
-        self.optimizer_parameter_space.check_configuration(trial.config)
+        trial.config.check_valid_configuration()
+        ConfigSpace.Configuration(
+            self.optimizer_parameter_space,
+            values=trial.config,
+        ).check_valid_configuration()
         assert trial.config.config_space == self.optimizer_parameter_space
         self.trial_info_map[trial.config] = trial
         config_df = pd.DataFrame(
@@ -441,6 +445,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
             List of ConfigSpace configs.
         """
         return [
-            ConfigSpace.Configuration(self.optimizer_parameter_space, values=config.to_dict())
+            ConfigSpace.Configuration(
+                self.optimizer_parameter_space,
+                # Remove None values for inactive parameters
+                values=drop_nulls(config.to_dict()),
+                allow_inactive_with_values=False,
+            )
             for (_, config) in configs.astype("O").iterrows()
         ]
