@@ -53,7 +53,8 @@ def _monkey_patch_quantization(
     range_hp: NumericalHyperparameter,
     quantization_bins: int,
 ) -> None:
-    """Monkey-patch quantization into the Hyperparameter.
+    """
+    Monkey-patch quantization into the Hyperparameter.
 
     Parameters
     ----------
