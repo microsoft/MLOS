@@ -67,8 +67,8 @@ def _monkey_patch_quantization(hp: NumericalHyperparameter, quantization_bins: i
     setattr(
         hp,
         "sample_value",
-        lambda size, **kwarg: quantize(
-            hp.sample_value_mlos_orig(size, **kwarg),
+        lambda size=None, **kwargs: quantize(
+            hp.sample_value_mlos_orig(size, **kwargs),
             bounds=(hp.lower, hp.upper),
             bins=quantization_bins,
         ).astype(type(hp.default_value)),
