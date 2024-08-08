@@ -62,7 +62,8 @@ TUNABLE_GROUPS_JSON = """
                 "type": "int",
                 "default": 2000000,
                 "range": [0, 1000000000],
-                "log": false
+                "log": false,
+                "quantization": 100
             }
         }
     }
