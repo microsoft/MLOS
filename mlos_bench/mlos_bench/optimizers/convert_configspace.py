@@ -49,32 +49,29 @@ def _normalize_weights(weights: List[float]) -> List[float]:
     return [w / total for w in weights]
 
 
-def _monkey_patch_quantization(
-    range_hp: NumericalHyperparameter,
-    quantization_bins: int,
-) -> None:
+def _monkey_patch_quantization(hp: NumericalHyperparameter, quantization_bins: int) -> None:
     """
     Monkey-patch quantization into the Hyperparameter.
 
     Parameters
     ----------
-    range_hp : Hyperparameter
+    hp : Hyperparameter
         Numeric ConfigSpace hyperparameter to patch.
     quantization_bins : int
         Number of bins to quantize the hyperparameter into.
     """
-    if not hasattr(range_hp, "sample_value_mlos_orig"):
-        setattr(range_hp, "sample_value_mlos_orig", range_hp.sample_value)
+    if not hasattr(hp, "sample_value_mlos_orig"):
+        setattr(hp, "sample_value_mlos_orig", hp.sample_value)
 
-    assert hasattr(range_hp, "sample_value_mlos_orig")
+    assert hasattr(hp, "sample_value_mlos_orig")
     setattr(
-        range_hp,
+        hp,
         "sample_value",
         lambda size, **kwarg: quantize(
-            range_hp.sample_value_mlos_orig(size, **kwarg),
-            bounds=(range_hp.lower, range_hp.upper),
+            hp.sample_value_mlos_orig(size, **kwarg),
+            bounds=(hp.lower, hp.upper),
             bins=quantization_bins,
-        ).astype(type(range_hp.default_value)),
+        ).astype(type(hp.default_value)),
     )
 
 
