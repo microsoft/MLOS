@@ -98,9 +98,9 @@ def test_flaml_optimization_loop(mock_env_no_noise: MockEnv, flaml_opt: MlosCore
     assert score == pytest.approx(63.78, 0.01)
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B2s",
-        "idle": "halt",
+        "idle": "mwait",
         "kernel_sched_migration_cost_ns": -1,
-        "kernel_sched_latency_ns": 13718105,
+        "kernel_sched_latency_ns": 43097356,
     }
 
 
