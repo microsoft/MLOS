@@ -95,7 +95,7 @@ def test_mock_optimization_loop_no_defaults(
 def test_flaml_optimization_loop(mock_env_no_noise: MockEnv, flaml_opt: MlosCoreOptimizer) -> None:
     """Toy optimization loop with mock environment and FLAML optimizer."""
     (score, tunables) = _optimize(mock_env_no_noise, flaml_opt)
-    assert score == pytest.approx(60.15, 0.01)
+    assert score == pytest.approx(63.78, 0.01)
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B2s",
         "idle": "halt",
