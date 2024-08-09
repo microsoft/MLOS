@@ -211,6 +211,13 @@ elif [ -n "${managedIdentityName:-}" ]; then
         )
     echo "Using managed identity ${managedIdentityName} with principalId $miId"
 
+    # Assign the identity access to the resource group
+    echo "Assigning the identity access to the Resource Group..."
+    az role assignment create \
+        --assignee "${miId}" \
+        --role "Contributor" \
+        --scope "${resourceGroupId}"
+
     # Assign the identity to the VM
     echo "Assigning the identity to the VM..."
     az vm identity assign --name "${vmName}" --resource-group "${resourceGroupName}" --identities "${managedIdentityName}"

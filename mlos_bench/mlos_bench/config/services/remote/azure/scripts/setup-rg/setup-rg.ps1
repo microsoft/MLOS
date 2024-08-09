@@ -139,6 +139,12 @@ switch ($PSCmdlet.ParameterSetName) {
 
         Write-Output "Using managed identity $managedIdentityName with principalId $miId"
 
+        Write-Output "Assigning the identity access to the Resource Group..."
+        az role assignment create `
+            --assignee $miId `
+            --role "Contributor" `
+            --scope $resourceGroupId
+
         # Assign the identity to the VM
         Write-Output "Assigning the identity to the VM..."
         az vm identity assign --name $vmName --resource-group $resourceGroupName --identities $managedIdentityName
