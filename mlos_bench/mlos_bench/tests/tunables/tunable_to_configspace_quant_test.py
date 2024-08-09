@@ -5,8 +5,8 @@
 """Unit tests for ConfigSpace quantization monkey patching."""
 
 import numpy as np
-from numpy.random import RandomState
 from ConfigSpace import UniformFloatHyperparameter, UniformIntegerHyperparameter
+from numpy.random import RandomState
 
 from mlos_bench.optimizers.convert_configspace import _monkey_patch_quantization
 from mlos_bench.tests import SEED
