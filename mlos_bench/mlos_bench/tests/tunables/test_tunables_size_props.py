@@ -4,7 +4,6 @@
 #
 """Unit tests for checking tunable size properties."""
 
-import numpy as np
 import pytest
 
 from mlos_bench.tunables.tunable import Tunable
@@ -41,7 +40,7 @@ def test_tunable_float_size_props() -> None:
         },
     )
     assert tunable.span == 3.5
-    assert tunable.cardinality == np.inf
+    assert tunable.cardinality is None
     assert tunable.quantized_values is None
     assert tunable.values is None
 
@@ -68,7 +67,7 @@ def test_tunable_quantized_int_size_props() -> None:
     """Test quantized tunable int size properties."""
     tunable = Tunable(
         name="test",
-        config={"type": "int", "range": [100, 1000], "default": 100, "quantization": 100},
+        config={"type": "int", "range": [100, 1000], "default": 100, "quantization": 9},
     )
     assert tunable.span == 900
     assert tunable.cardinality == 10
@@ -81,7 +80,7 @@ def test_tunable_quantized_float_size_props() -> None:
     """Test quantized tunable float size properties."""
     tunable = Tunable(
         name="test",
-        config={"type": "float", "range": [0, 1], "default": 0, "quantization": 0.1},
+        config={"type": "float", "range": [0, 1], "default": 0, "quantization": 10},
     )
     assert tunable.span == 1
     assert tunable.cardinality == 11
