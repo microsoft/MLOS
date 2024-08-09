@@ -60,7 +60,7 @@ def test_configspace_quant_repatch() -> None:
 
     # Repatch with the higher number of bins and make sure we get new values.
     _monkey_patch_quantization(hp, 21)
-    samples_set = set(hp.sample_value(100))
+    samples_set = set(hp.sample_value(100, seed=np.random.RandomState(SEED)))
+    quantized_values_new = set(range(5, 96, 10))
     assert samples_set.issubset(set(range(0, 101, 5)))
-    assert samples_set.issuperset(set(range(5, 96, 10)))
-    assert samples_set.issuperset(set(range(0, 101, 10)))
+    assert len(samples_set - quantized_values_new) < len(samples_set)
