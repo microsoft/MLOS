@@ -5,6 +5,7 @@
 """Unit tests for ConfigSpace quantization monkey patching."""
 
 import numpy as np
+from numpy.random import RandomState
 from ConfigSpace import UniformFloatHyperparameter, UniformIntegerHyperparameter
 
 from mlos_bench.optimizers.convert_configspace import _monkey_patch_quantization
@@ -50,17 +51,17 @@ def test_configspace_quant_repatch() -> None:
 
     _monkey_patch_quantization(hp, 11)
     # After patching: *all* values must belong to the set of quantized values.
-    samples = hp.sample_value(100, seed=np.random.RandomState(SEED))
+    samples = hp.sample_value(100, seed=RandomState(SEED))
     assert set(samples).issubset(quantized_values)
 
     # Patch the same hyperparameter again and check that the results are the same.
     _monkey_patch_quantization(hp, 11)
     # After patching: *all* values must belong to the set of quantized values.
-    assert all(samples == hp.sample_value(100, seed=np.random.RandomState(SEED)))
+    assert all(samples == hp.sample_value(100, seed=RandomState(SEED)))
 
     # Repatch with the higher number of bins and make sure we get new values.
     _monkey_patch_quantization(hp, 21)
-    samples_set = set(hp.sample_value(100, seed=np.random.RandomState(SEED)))
+    samples_set = set(hp.sample_value(100, seed=RandomState(SEED)))
     quantized_values_new = set(range(5, 96, 10))
     assert samples_set.issubset(set(range(0, 101, 5)))
     assert len(samples_set - quantized_values_new) < len(samples_set)
