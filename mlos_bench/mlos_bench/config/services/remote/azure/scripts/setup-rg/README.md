@@ -29,23 +29,42 @@ The *control plane RG* is a container for the *persistent* resources of MLOS (re
 
     ```shell
     # With Powershell, recommended to use Powershell 7
+    # If provisioning results DB include '-resultsDbArmsParamsFile', otherwise omit
+
+    # If setting up with a Service Principal
     ./setup-rg.ps1 `
         -controlPlaneArmParamsFile $controlPlaneArmParamsFile `
-        -resultsDbArmParamsFile $resultsDbArmParamsFile  # If provisioning results DB, otherwise omit `
-        -servicePrincipalName $servicePrincipalName `
         -resourceGroupName $resourceGroupName `
+        -resultsDbArmParamsFile $resultsDbArmParamsFile `
+        -servicePrincipalName $servicePrincipalName `
         -certName $certName
+
+    # If setting up with a Managed Identity
+    ./setup-rg.ps1 `
+        -controlPlaneArmParamsFile $controlPlaneArmParamsFile `
+        -resourceGroupName $resourceGroupName `
+        -resultsDbArmParamsFile $resultsDbArmParamsFile `
+        -managedIdentityname $managedIdentityName
     ```
 
     ```sh
     # With bash
     # If provisioning results DB include '--resultsDbArmsParamsFile', otherwise omit
+
+    # If setting up with a Service Principal
     ./setup-rg.sh \
         --controlPlaneArmParamsFile $controlPlaneArmParamsFile \
+        --resourceGroupName $resourceGroupName \
         --resultsDbArmParamsFile $resultsDbArmParamsFile  \
         --servicePrincipalName $servicePrincipalName \
-        --resourceGroupName $resourceGroupName \
         --certName $certName
+
+    # If setting up with a Managed Identity
+    ./setup-rg.sh \
+        --controlPlaneArmParamsFile $controlPlaneArmParamsFile \
+        --resourceGroupName $resourceGroupName \
+        --resultsDbArmParamsFile $resultsDbArmParamsFile  \
+        --managedIdentityname $managedIdentityName
     ```
 
     where `$*ArmParamsFile` can be the corresponding `*.parameters.json` and from before. However, it also follows the same usage as `--parameters` in [az deployment group create](https://learn.microsoft.com/en-us/cli/azure/deployment/group?view=azure-cli-latest#az-deployment-group-create-examples).

@@ -19,6 +19,12 @@ $script_name
     --resultsDbArmParamsFile someResultsDbArmParamsFile.json
     --servicePrincipalName someServicePrincipalName
     --certName someCertName
+OR
+$script_name
+    --resourceGroupName someRgName
+    --controlPlaneArmParamsFile someControlPlaneArmParamsFile.json
+    --resultsDbArmParamsFile someResultsDbArmParamsFile.json
+    --managedIdentityName someManagedIdentityName
 USAGE
     exit 1
 }
@@ -36,13 +42,18 @@ case $1 in
         resultsDbArmParamsFile="$2"
         shift 2
         ;;
-    # Other params
-    --servicePrincipalName)
-        servicePrincipalName="$2"
-        shift 2
-        ;;
     --resourceGroupName)
         resourceGroupName="$2"
+        shift 2
+        ;;
+    # Managed Identity params
+    --managedIdentityName)
+        managedIdentityName="$2"
+        shift 2
+        ;;
+    # Service Principal params
+    --servicePrincipalName)
+        servicePrincipalName="$2"
         shift 2
         ;;
     --certName)
@@ -64,9 +75,9 @@ if [ -z "${resourceGroupName:-}" ]; then
     usage "missing required resourceGroupName"
 elif [ -z "${controlPlaneArmParamsFile:-}" ]; then
     usage "missing required controlPlaneArmParamsFile"
-elif [ -z "${servicePrincipalName:-}" ]; then
-    usage "missing required servicePrincipalName"
-elif [ -z "${certName:-}" ]; then
+elif [ -z "${servicePrincipalName:-}" ] && [ -z "${managedIdentityName:-}" ]; then
+    usage "missing required servicePrincipalName or managedIdentityName"
+elif [ -n "${servicePrincipalName:-}" ] && [ -z "${certName:-}" ]; then
     usage "missing required certName"
 fi
 
@@ -102,6 +113,9 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 
+vmName=$(echo "$deploymentResults" | jq -r ".properties.outputs.vmName.value")
+storageAccountNames=$(echo "$deploymentResults" | jq -r ".properties.outputs.storageAccountNames.value[]")
+
 # Conditional provisioning of results DB
 if [[ "$resultsDbArmParamsFile" ]]; then
     echo "Provisioning results DB..."
@@ -116,7 +130,6 @@ if [[ "$resultsDbArmParamsFile" ]]; then
         echo "Error in provisioning results DB!"
     else
         dbName=$(echo "$dbDeploymentResults" | jq -r ".properties.outputs.dbName.value")
-        vmName=$(echo "$deploymentResults" | jq -r ".properties.outputs.vmName.value")
         vmIpAddress=$(echo "$deploymentResults" | jq -r ".properties.outputs.vmIpAddress.value")
 
         # VM IP access for results DB
@@ -140,51 +153,83 @@ az role assignment create \
     --role "Key Vault Administrator" \
     --scope "$kvId"
 
-# Check if cert of same name exists in keyvault already
-certThumbprint=$(az keyvault certificate show \
-    --name "$certName" \
-    --vault-name "$kvName" \
-    --query "x509ThumbprintHex" --output tsv \
-    2> /dev/null \
-    || echo "NOCERT" \
-    )
-
-if [[ $certThumbprint == "NOCERT" ]]; then
-    # The cert does not exist yet.
-    # Create the service principal if doesn't exist, storing the cert in the keyvault
-    # If it does exist, this also patches the current service principal with the role
-    az ad sp create-for-rbac \
-        --name "$servicePrincipalName" \
-        --role "Contributor" \
-        --scopes "$resourceGroupId" \
-        --create-cert \
-        --cert "$certName" \
-        --keyvault "$kvName" \
-        --years "$certExpirationYears"
-else
-    # The cert already exists in the keyvault.
-
-    # Ensure the SP exists with correct roles, without creating a cert.
-    az ad sp create-for-rbac \
-        --name "$servicePrincipalName" \
-        --role "Contributor" \
-        --scopes "$resourceGroupId"
-
-    # SP's certs, which are stored in the registered application instead
-    servicePrincipalAppId=$(az ad sp list \
-        --display-name "$servicePrincipalName" \
-        --query "[?servicePrincipalType == 'Application'].appId" \
-        --output tsv \
+if [ -n "${servicePrincipalName:-}" ]; then
+    # Check if cert of same name exists in keyvault already
+    certThumbprint=$(az keyvault certificate show \
+        --name "$certName" \
+        --vault-name "$kvName" \
+        --query "x509ThumbprintHex" --output tsv \
+        2> /dev/null \
+        || echo "NOCERT" \
         )
-    spCertThumbprints=$(az ad app credential list \
-        --id "$servicePrincipalAppId" \
-        --cert \
-        --query "[].customKeyIdentifier" \
-        --output tsv \
-        )
-    if [[ $spCertThumbprints == *$certThumbprint* ]]; then
-        echo "Keyvault contains the certificate '$certName' that is linked to the service principal '$servicePrincipalName' already."
+
+    if [[ $certThumbprint == "NOCERT" ]]; then
+        # The cert does not exist yet.
+        # Create the service principal if doesn't exist, storing the cert in the keyvault
+        # If it does exist, this also patches the current service principal with the role
+        az ad sp create-for-rbac \
+            --name "$servicePrincipalName" \
+            --role "Contributor" \
+            --scopes "$resourceGroupId" \
+            --create-cert \
+            --cert "$certName" \
+            --keyvault "$kvName" \
+            --years "$certExpirationYears"
     else
-        echo "Keyvault already contains a certificate called '$certName', but is not linked with the service principal '$servicePrincipalName'! Skipping cert handling"
+        # The cert already exists in the keyvault.
+
+        # Ensure the SP exists with correct roles, without creating a cert.
+        az ad sp create-for-rbac \
+            --name "$servicePrincipalName" \
+            --role "Contributor" \
+            --scopes "$resourceGroupId"
+
+        # SP's certs, which are stored in the registered application instead
+        servicePrincipalAppId=$(az ad sp list \
+            --display-name "$servicePrincipalName" \
+            --query "[?servicePrincipalType == 'Application'].appId" \
+            --output tsv \
+            )
+        spCertThumbprints=$(az ad app credential list \
+            --id "$servicePrincipalAppId" \
+            --cert \
+            --query "[].customKeyIdentifier" \
+            --output tsv \
+            )
+        if [[ $spCertThumbprints == *$certThumbprint* ]]; then
+            echo "Keyvault contains the certificate '$certName' that is linked to the service principal '$servicePrincipalName' already."
+        else
+            echo "Keyvault already contains a certificate called '$certName', but is not linked with the service principal '$servicePrincipalName'! Skipping cert handling"
+        fi
     fi
+elif [ -n "${managedIdentityName:-}" ]; then
+    # Ensure the user managed identity is created
+    miId=$(az identity create \
+        --name "${managedIdentityName}" \
+        --resource-group "${resourceGroupName}" \
+        --query "principalId" --output tsv \
+        )
+    echo "Using managed identity ${managedIdentityName} with principalId $miId"
+
+    # Assign the identity access to the resource group
+    echo "Assigning the identity access to the Resource Group..."
+    az role assignment create \
+        --assignee "${miId}" \
+        --role "Contributor" \
+        --scope "${resourceGroupId}"
+
+    # Assign the identity to the VM
+    echo "Assigning the identity to the VM..."
+    az vm identity assign --name "${vmName}" --resource-group "${resourceGroupName}" --identities "${managedIdentityName}"
+
+    # Assign the identity access to the storage accounts
+    for storageAccountName in $storageAccountNames; do
+        echo "Assigning the identity the role for ${storageAccountName}..."
+        storageAccountResourceId=$(az storage account show --name "${storageAccountName}" --resource-group "${resourceGroupName}" --query "id" --output tsv)
+        az role assignment create \
+            --assignee "${miId}" \
+            --role "Storage File Data Privileged Contributor" \
+            --scope "${storageAccountResourceId}"
+
+    done
 fi
