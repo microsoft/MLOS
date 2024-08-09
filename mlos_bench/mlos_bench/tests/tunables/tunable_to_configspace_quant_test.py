@@ -42,25 +42,25 @@ def test_configspace_quant_float() -> None:
 
 def test_configspace_quant_repatch() -> None:
     """Repatch the same hyperparameter with different number of bins."""
-    quantized_values = set(np.linspace(0, 1, num=5, endpoint=True))
-    hp = UniformFloatHyperparameter("hp", lower=0, upper=1, log=False)
+    quantized_values = set(range(0, 101, 10))
+    hp = UniformIntegerHyperparameter("hp", lower=0, upper=100, log=False)
 
-    seed = np.random.RandomState(SEED)
     # Before patching: expect that at least one value is not quantized.
-    assert not set(hp.sample_value(100, seed=seed)).issubset(quantized_values)
+    assert not set(hp.sample_value(100)).issubset(quantized_values)
 
-    # 5 is a nice number of bins to avoid floating point errors.
-    _monkey_patch_quantization(hp, 5)
+    _monkey_patch_quantization(hp, 11)
     # After patching: *all* values must belong to the set of quantized values.
-    samples = hp.sample_value(100, seed=seed)
+    samples = hp.sample_value(100, seed=np.random.RandomState(SEED))
     assert set(samples).issubset(quantized_values)
 
     # Patch the same hyperparameter again and check that the results are the same.
-    _monkey_patch_quantization(hp, 5)
-    # After patching: *all* values must belong to the set of quantized values.
-    assert all(samples == hp.sample_value(100, seed=seed))
-
-    # Repatch with the higher number of bins that are not aligned with the original ones.
     _monkey_patch_quantization(hp, 11)
-    samples = hp.sample_value(100)
-    assert set(samples).issubset(set(np.linspace(0, 1, num=11, endpoint=True)))
+    # After patching: *all* values must belong to the set of quantized values.
+    assert all(samples == hp.sample_value(100, seed=np.random.RandomState(SEED)))
+
+    # Repatch with the higher number of bins and make sure we get new values.
+    _monkey_patch_quantization(hp, 21)
+    samples_set = set(hp.sample_value(100))
+    assert samples_set.issubset(set(range(0, 101, 5)))
+    assert samples_set.issuperset(set(range(5, 96, 10)))
+    assert samples_set.issuperset(set(range(0, 101, 10)))
