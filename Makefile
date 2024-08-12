@@ -10,6 +10,7 @@ PYTHON_FILES := $(shell find ./ -type f -name '*.py' 2>/dev/null | egrep -v -e '
 MLOS_CORE_PYTHON_FILES := $(shell find ./mlos_core/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_core/build/')
 MLOS_BENCH_PYTHON_FILES := $(shell find ./mlos_bench/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_bench/build/')
 MLOS_VIZ_PYTHON_FILES := $(shell find ./mlos_viz/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_viz/build/')
+NOTEBOOK_FILES := $(shell find ./ -type f -name '*.ipynb' 2>/dev/null | egrep -v -e '/build/')
 SCRIPT_FILES := $(shell find ./ -name '*.sh' -or -name '*.ps1' -or -name '*.cmd')
 SQL_FILES := $(shell find ./ -name '*.sql')
 MD_FILES := $(shell find ./ -name '*.md' | grep -v '^./doc/')
@@ -389,7 +390,7 @@ build/mypy.%.${CONDA_ENV_NAME}.build-stamp: $(MYPY_COMMON_PREREQS)
 
 
 .PHONY: test
-test: pytest
+test: pytest notebook-exec-test
 
 PYTEST_CONF_FILES := $(MLOS_GLOBAL_CONF_FILES) conftest.py
 
@@ -637,6 +638,11 @@ build/publish.${CONDA_ENV_NAME}.%.py.build-stamp: $(PUBLISH_DEPS)
 publish-pypi: build/publish.${CONDA_ENV_NAME}.pypi.py.build-stamp
 publish-test-pypi: build/publish.${CONDA_ENV_NAME}.testpypi.py.build-stamp
 
+notebook-exec-test: build/notebook-exec-test.${CONDA_ENV_NAME}.build-stamp
+
+build/notebook-exec-test.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp $(NOTEBOOK_FILES)
+	find . -name '*.ipynb' -not -path '*/build/*' -print0 | xargs -0 -n1 -P0 conda run -n ${CONDA_ENV_NAME} python -m jupyter execute
+	touch $@
 
 build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp: doc/requirements.txt
@@ -760,8 +766,9 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 			-e "failed to import function 'create' from module '(SpaceAdapter|Optimizer)Factory'" \
 			-e "No module named '(SpaceAdapter|Optimizer)Factory'" \
 			-e '^make.*resetting jobserver mode' \
+			-e 'from cryptography.hazmat.primitives.ciphers.algorithms import' \
 		| grep -v '^\s*$$' \
-		| if grep .; then echo "Errors found in doc build. Check doc/build/log.txt for details."; exit 1; else exit 0; fi
+		| if grep .; then echo "Errors found in doc build. Check doc/build/log.txt for details."; cat doc/build/log.txt; exit 1; else exit 0; fi
 	touch $@
 
 .PHONY: linklint-doc

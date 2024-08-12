@@ -13,7 +13,7 @@ import pandas as pd
 
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
-from mlos_core.util import normalize_config
+from mlos_core.util import drop_nulls, normalize_config
 
 
 class EvaluatedSample(NamedTuple):
@@ -124,13 +124,16 @@ class FlamlOptimizer(BaseOptimizer):
             warn(f"Not Implemented: Ignoring metadata {list(metadata.columns)}", UserWarning)
 
         for (_, config), (_, score) in zip(configs.astype("O").iterrows(), scores.iterrows()):
+            # Remove None values for inactive config parameters
+            config_dict = drop_nulls(config.to_dict())
             cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
-                self.optimizer_parameter_space, values=config.to_dict()
+                self.optimizer_parameter_space,
+                values=config_dict,
             )
             if cs_config in self.evaluated_samples:
                 warn(f"Configuration {config} was already registered", UserWarning)
             self.evaluated_samples[cs_config] = EvaluatedSample(
-                config=config.to_dict(),
+                config=config_dict,
                 score=float(np.average(score.astype(float), weights=self._objective_weights)),
             )
 

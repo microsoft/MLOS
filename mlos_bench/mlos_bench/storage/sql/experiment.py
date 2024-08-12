@@ -310,7 +310,7 @@ class Experiment(Storage.Experiment):
         )
         return config_id
 
-    def new_trial(
+    def _new_trial(
         self,
         tunables: TunableGroups,
         ts_start: Optional[datetime] = None,

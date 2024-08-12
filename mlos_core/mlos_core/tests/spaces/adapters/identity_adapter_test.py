@@ -15,15 +15,9 @@ from mlos_core.spaces.adapters import IdentityAdapter
 def test_identity_adapter() -> None:
     """Tests identity adapter."""
     input_space = CS.ConfigurationSpace(seed=1234)
-    input_space.add_hyperparameter(
-        CS.UniformIntegerHyperparameter(name="int_1", lower=0, upper=100)
-    )
-    input_space.add_hyperparameter(
-        CS.UniformFloatHyperparameter(name="float_1", lower=0, upper=100)
-    )
-    input_space.add_hyperparameter(
-        CS.CategoricalHyperparameter(name="str_1", choices=["on", "off"])
-    )
+    input_space.add(CS.UniformIntegerHyperparameter(name="int_1", lower=0, upper=100))
+    input_space.add(CS.UniformFloatHyperparameter(name="float_1", lower=0, upper=100))
+    input_space.add(CS.CategoricalHyperparameter(name="str_1", choices=["on", "off"]))
 
     adapter = IdentityAdapter(orig_parameter_space=input_space)
 

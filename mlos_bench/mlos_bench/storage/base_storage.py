@@ -13,6 +13,7 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple, Type, Union
 from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
+from mlos_bench.dict_templater import DictTemplater
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.storage.base_experiment_data import ExperimentData
@@ -304,8 +305,44 @@ class Storage(metaclass=ABCMeta):
                 An iterator over the scheduled (and maybe running) trials.
             """
 
-        @abstractmethod
         def new_trial(
+            self,
+            tunables: TunableGroups,
+            ts_start: Optional[datetime] = None,
+            config: Optional[Dict[str, Any]] = None,
+        ) -> "Storage.Trial":
+            """
+            Create a new experiment run in the storage.
+
+            Parameters
+            ----------
+            tunables : TunableGroups
+                Tunable parameters to use for the trial.
+            ts_start : Optional[datetime]
+                Timestamp of the trial start (can be in the future).
+            config : dict
+                Key/value pairs of additional non-tunable parameters of the trial.
+
+            Returns
+            -------
+            trial : Storage.Trial
+                An object that allows to update the storage with
+                the results of the experiment trial run.
+            """
+            # Check that `config` is json serializable (e.g., no callables)
+            if config:
+                try:
+                    # Relies on the fact that DictTemplater only accepts primitive
+                    # types in it's nested dict structure walk.
+                    _config = DictTemplater(config).expand_vars()
+                    assert isinstance(_config, dict)
+                except ValueError as e:
+                    _LOG.error("Non-serializable config: %s", config, exc_info=e)
+                    raise e
+            return self._new_trial(tunables, ts_start, config)
+
+        @abstractmethod
+        def _new_trial(
             self,
             tunables: TunableGroups,
             ts_start: Optional[datetime] = None,
