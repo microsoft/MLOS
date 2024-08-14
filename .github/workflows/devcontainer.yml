@@ -232,10 +232,10 @@ jobs:
       run: |
         set -x
         image_tag=''
-        if [ "${{ github.ref }}" == 'refs/heads/main' ]; then
-          image_tag='latest'
-        elif [ "${{ github.ref_type }}" == 'tag' ]; then
+        if [ "${{ github.ref_type }}" == 'tag' ]; then
           image_tag="${{ github.ref_name }}"
+        elif [ "${{ github.ref }}" == 'refs/heads/main' ]; then
+          image_tag='latest'
         fi
         if [ -z "$image_tag" ]; then
           echo "ERROR: Unhandled event condition or ref: event=${{ github.event}}, ref=${{ github.ref }}, ref_type=${{ github.ref_type }}"
