@@ -75,6 +75,7 @@ def test_tunable_quantized_int_size_props() -> None:
         },
     )
     assert tunable.span == 900
+    assert tunable.quantization == 9
     assert tunable.cardinality == 10
     expected = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
     assert list(tunable.quantized_values or []) == expected
@@ -93,7 +94,9 @@ def test_tunable_quantized_float_size_props() -> None:
         },
     )
     assert tunable.span == 1
-    assert tunable.cardinality == 11
+    # FIXME:
+    assert tunable.quantization == 10  # == tunable.quantization_num_bins == 11 ?
+    assert tunable.cardinality == 11  # == 10 ?
     expected = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     assert pytest.approx(list(tunable.quantized_values or []), 0.0001) == expected
     assert pytest.approx(list(tunable.values or []), 0.0001) == expected
