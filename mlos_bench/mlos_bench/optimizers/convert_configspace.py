@@ -60,6 +60,8 @@ def _monkey_patch_quantization(hp: NumericalHyperparameter, quantization_bins: i
     quantization_bins : int
         Number of bins to quantize the hyperparameter into.
     """
+    # Temporary workaround to dropped quantization support in ConfigSpace 1.0
+    # See Also: https://github.com/automl/ConfigSpace/issues/390
     if not hasattr(hp, "sample_value_mlos_orig"):
         setattr(hp, "sample_value_mlos_orig", hp.sample_value)
 
