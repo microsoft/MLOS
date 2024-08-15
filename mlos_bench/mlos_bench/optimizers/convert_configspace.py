@@ -168,10 +168,10 @@ def _tunable_to_configspace(
     else:
         raise TypeError(f"Invalid Parameter Type: {tunable.type}")
 
-    if tunable.quantization:
+    if tunable.quantization_bins:
         # Temporary workaround to dropped quantization support in ConfigSpace 1.0
         # See Also: https://github.com/automl/ConfigSpace/issues/390
-        _monkey_patch_quantization(range_hp, tunable.quantization)
+        _monkey_patch_quantization(range_hp, tunable.quantization_bins)
 
     if not tunable.special:
         return ConfigurationSpace({tunable.name: range_hp})

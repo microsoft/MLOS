@@ -64,7 +64,7 @@ class TunableDict(TypedDict, total=False):
     default: TunableValue
     values: Optional[List[Optional[str]]]
     range: Optional[Union[Sequence[int], Sequence[float]]]
-    quantization: Optional[int]
+    quantization_bins: Optional[int]
     log: Optional[bool]
     distribution: Optional[DistributionDict]
     special: Optional[Union[List[int], List[float]]]
@@ -109,7 +109,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             self._values = [str(v) if v is not None else v for v in self._values]
         self._meta: Dict[str, Any] = config.get("meta", {})
         self._range: Optional[Union[Tuple[int, int], Tuple[float, float]]] = None
-        self._quantization: Optional[int] = config.get("quantization")
+        self._quantization_bins: Optional[int] = config.get("quantization_bins")
         self._log: Optional[bool] = config.get("log")
         self._distribution: Optional[DistributionName] = None
         self._distribution_params: Dict[str, float] = {}
@@ -162,7 +162,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             raise ValueError(f"Categorical tunable cannot have range_weight: {self}")
         if self._log is not None:
             raise ValueError(f"Categorical tunable cannot have log parameter: {self}")
-        if self._quantization is not None:
+        if self._quantization_bins is not None:
             raise ValueError(f"Categorical tunable cannot have quantization parameter: {self}")
         if self._distribution is not None:
             raise ValueError(f"Categorical parameters do not support `distribution`: {self}")
@@ -182,7 +182,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             raise ValueError(f"Values must be None for the numerical type tunable {self}")
         if not self._range or len(self._range) != 2 or self._range[0] >= self._range[1]:
             raise ValueError(f"Invalid range for tunable {self}: {self._range}")
-        if self._quantization is not None and self._quantization <= 1:
+        if self._quantization_bins is not None and self._quantization_bins <= 1:
             raise ValueError(f"Number of quantization bins is <= 1: {self}")
         if self._distribution is not None and self._distribution not in {
             "uniform",
@@ -580,18 +580,18 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return num_range[1] - num_range[0]
 
     @property
-    def quantization(self) -> Optional[int]:
+    def quantization_bins(self) -> Optional[int]:
         """
         Get the number of quantization bins, if specified.
 
         Returns
         -------
-        quantization : int | None
+        quantization_bins : int | None
             Number of quantization bins, or None.
         """
         if self.is_categorical:
             return None
-        return self._quantization
+        return self._quantization_bins
 
     @property
     def quantized_values(self) -> Optional[Union[Iterable[int], Iterable[float]]]:
@@ -606,7 +606,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         """
         num_range = self.range
         if self.type == "float":
-            if not self.quantization:
+            if not self.quantization_bins:
                 return None
             # Be sure to return python types instead of numpy types.
             return (
@@ -614,7 +614,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
                 for x in np.linspace(
                     start=num_range[0],
                     stop=num_range[1],
-                    num=self.quantization,
+                    num=self.quantization_bins,
                     endpoint=True,
                 )
             )
@@ -622,7 +622,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return range(
             int(num_range[0]),
             int(num_range[1]) + 1,
-            int(self.span / (self.quantization - 1)) if self.quantization else 1,
+            int(self.span / (self.quantization_bins - 1)) if self.quantization_bins else 1,
         )
 
     @property
@@ -640,8 +640,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         """
         if self.is_categorical:
             return len(self.categories)
-        if self.quantization:
-            return self.quantization
+        if self.quantization_bins:
+            return self.quantization_bins
         if self.type == "int":
             return int(self.span) + 1
         return None

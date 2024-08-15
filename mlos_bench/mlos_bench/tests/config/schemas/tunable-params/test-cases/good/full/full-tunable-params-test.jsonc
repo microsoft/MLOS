@@ -12,7 +12,7 @@
                 "special": [-1],
                 "special_weights": [0.1],
                 "range_weight": 0.9,
-                "quantization": 50,
+                "quantization_bins": 50,
                 "distribution": {
                     "type": "beta",
                     "params": {
@@ -31,7 +31,7 @@
                 "special": [-1],
                 "special_weights": [0.1],
                 "range_weight": 0.9,
-                "quantization": 50,
+                "quantization_bins": 50,
                 "distribution": {
                     "type": "normal",
                     "params": {
@@ -48,7 +48,7 @@
                 "meta": {"scale": 1000, "prefix": "/proc/var/random/", "base": 2.71828},
                 "range": [1.1, 111.1],
                 "special": [-1.1],
-                "quantization": 11,
+                "quantization_bins": 11,
                 "distribution": {
                     "type": "uniform"
                 },
