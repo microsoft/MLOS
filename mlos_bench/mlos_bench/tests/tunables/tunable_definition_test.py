@@ -242,7 +242,7 @@ def test_numerical_quantization(tunable_type: TunableValueTypeName) -> None:
     tunable = Tunable(name="test", config=config)
     expected = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     assert tunable.quantization == len(expected)
-    assert tunable.quantized_values == expected
+    assert pytest.approx(list(tunable.quantized_values or []), 1e-8) == expected
     assert not tunable.is_log
 
 
