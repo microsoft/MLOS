@@ -47,7 +47,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
         self._suggested_configs: Set[Tuple[TunableValue, ...]] = set()
 
     def _sanity_check(self) -> None:
-        size = np.prod([tunable.cardinality for (tunable, _group) in self._tunables])
+        size = np.prod([tunable.cardinality or np.inf for (tunable, _group) in self._tunables])
         if size == np.inf:
             raise ValueError(
                 f"Unquantized tunables are not supported for grid search: {self._tunables}"
@@ -79,9 +79,9 @@ class GridSearchOptimizer(TrackBestOptimizer):
             for config in generate_grid(
                 self.config_space,
                 {
-                    tunable.name: int(tunable.cardinality)
+                    tunable.name: tunable.cardinality or 0  # mypy wants an int
                     for (tunable, _group) in self._tunables
-                    if tunable.quantization or tunable.type == "int"
+                    if tunable.is_numerical and tunable.cardinality
                 },
             )
         ]

@@ -11,8 +11,6 @@ from typing import Dict, Hashable, List, Optional, Tuple, Union
 
 from ConfigSpace import (
     Beta,
-    BetaFloatHyperparameter,
-    BetaIntegerHyperparameter,
     CategoricalHyperparameter,
     Configuration,
     ConfigurationSpace,
@@ -20,12 +18,10 @@ from ConfigSpace import (
     Float,
     Integer,
     Normal,
-    NormalFloatHyperparameter,
-    NormalIntegerHyperparameter,
     Uniform,
-    UniformFloatHyperparameter,
-    UniformIntegerHyperparameter,
 )
+from ConfigSpace.functional import quantize
+from ConfigSpace.hyperparameters import NumericalHyperparameter
 from ConfigSpace.types import NotSet
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
@@ -53,6 +49,37 @@ def _normalize_weights(weights: List[float]) -> List[float]:
     return [w / total for w in weights]
 
 
+def _monkey_patch_quantization(hp: NumericalHyperparameter, quantization_bins: int) -> None:
+    """
+    Monkey-patch quantization into the Hyperparameter.
+
+    Parameters
+    ----------
+    hp : NumericalHyperparameter
+        ConfigSpace hyperparameter to patch.
+    quantization_bins : int
+        Number of bins to quantize the hyperparameter into.
+    """
+    if quantization_bins <= 1:
+        raise ValueError(f"{quantization_bins=} :: must be greater than 1.")
+
+    # Temporary workaround to dropped quantization support in ConfigSpace 1.0
+    # See Also: https://github.com/automl/ConfigSpace/issues/390
+    if not hasattr(hp, "sample_value_mlos_orig"):
+        setattr(hp, "sample_value_mlos_orig", hp.sample_value)
+
+    assert hasattr(hp, "sample_value_mlos_orig")
+    setattr(
+        hp,
+        "sample_value",
+        lambda size=None, **kwargs: quantize(
+            hp.sample_value_mlos_orig(size, **kwargs),
+            bounds=(hp.lower, hp.upper),
+            bins=quantization_bins,
+        ).astype(type(hp.default_value)),
+    )
+
+
 def _tunable_to_configspace(
     tunable: Tunable,
     group_name: Optional[str] = None,
@@ -77,6 +104,7 @@ def _tunable_to_configspace(
     cs : ConfigurationSpace
         A ConfigurationSpace object that corresponds to the Tunable.
     """
+    # pylint: disable=too-complex
     meta: Dict[Hashable, TunableValue] = {"cost": cost}
     if group_name is not None:
         meta["group"] = group_name
@@ -110,20 +138,12 @@ def _tunable_to_configspace(
     elif tunable.distribution is not None:
         raise TypeError(f"Invalid Distribution Type: {tunable.distribution}")
 
-    range_hp: Union[
-        BetaFloatHyperparameter,
-        BetaIntegerHyperparameter,
-        NormalFloatHyperparameter,
-        NormalIntegerHyperparameter,
-        UniformFloatHyperparameter,
-        UniformIntegerHyperparameter,
-    ]
+    range_hp: NumericalHyperparameter
     if tunable.type == "int":
         range_hp = Integer(
             name=tunable.name,
             bounds=(int(tunable.range[0]), int(tunable.range[1])),
             log=bool(tunable.is_log),
-            # TODO: Restore quantization support (#803).
             distribution=distribution,
             default=(
                 int(tunable.default)
@@ -137,7 +157,6 @@ def _tunable_to_configspace(
             name=tunable.name,
             bounds=tunable.range,
             log=bool(tunable.is_log),
-            # TODO: Restore quantization support (#803).
             distribution=distribution,
             default=(
                 float(tunable.default)
@@ -148,6 +167,11 @@ def _tunable_to_configspace(
         )
     else:
         raise TypeError(f"Invalid Parameter Type: {tunable.type}")
+
+    if tunable.quantization_bins:
+        # Temporary workaround to dropped quantization support in ConfigSpace 1.0
+        # See Also: https://github.com/automl/ConfigSpace/issues/390
+        _monkey_patch_quantization(range_hp, tunable.quantization_bins)
 
     if not tunable.special:
         return ConfigurationSpace({tunable.name: range_hp})
