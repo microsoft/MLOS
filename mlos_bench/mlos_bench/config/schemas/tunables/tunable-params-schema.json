@@ -125,8 +125,7 @@
         },
         "quantization": {
             "description": "The number of buckets to quantize the range into.",
-            "type": "integer",
-            "exclusiveMinimum": 1
+            "$comment": "type left unspecified here"
         },
         "log_scale": {
             "description": "Whether to use log instead of linear scale for the range search.",
@@ -218,7 +217,9 @@
                     "$ref": "#/$defs/tunable_param_distribution"
                 },
                 "quantization": {
-                    "$ref": "#/$defs/quantization"
+                    "$ref": "#/$defs/quantization",
+                    "type": "integer",
+                    "exclusiveMinimum": 1
                 },
                 "log": {
                     "$ref": "#/$defs/log_scale"
@@ -266,7 +267,9 @@
                     "$ref": "#/$defs/tunable_param_distribution"
                 },
                 "quantization": {
-                    "$ref": "#/$defs/quantization"
+                    "$ref": "#/$defs/quantization",
+                    "type": "number",
+                    "exclusiveMinimum": 0
                 },
                 "log": {
                     "$ref": "#/$defs/log_scale"
