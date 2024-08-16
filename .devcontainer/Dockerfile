@@ -93,5 +93,9 @@ RUN umask 0002 \
 RUN mkdir -p /home/vscode/.conda/envs \
     && ln -s /opt/conda/envs/mlos /home/vscode/.conda/envs/mlos
 
-# Try and prime the devcontainer's known ssh keys with the github one.
-RUN mkdir -p /home/vscode/.ssh && ssh-keyscan github.com | tee -a /home/vscode/.ssh/known_hosts
+# Try and prime the devcontainer's ssh known_hosts keys with the github one for scripted calls.
+RUN mkdir -p /home/vscode/.ssh \
+    && (
+        grep -q ^github.com /home/vscode/.ssh/known_hosts \
+        || ssh-keyscan github.com | tee -a /home/vscode/.ssh/known_hosts \
+    )
