@@ -13,9 +13,11 @@ from ConfigSpace import (
     UniformFloatHyperparameter,
     UniformIntegerHyperparameter,
 )
+from ConfigSpace.hyperparameters import NumericalHyperparameter
 
 from mlos_bench.optimizers.convert_configspace import (
     TunableValueKind,
+    _monkey_patch_quantization,
     _tunable_to_configspace,
     special_param_names,
     tunable_groups_to_configspace,
@@ -40,8 +42,6 @@ def configuration_space() -> ConfigurationSpace:
     (kernel_sched_migration_cost_ns_special, kernel_sched_migration_cost_ns_type) = (
         special_param_names("kernel_sched_migration_cost_ns")
     )
-
-    # TODO: Add quantization support tests (#803).
 
     # NOTE: FLAML requires distribution to be uniform
     spaces = ConfigurationSpace(
@@ -101,6 +101,9 @@ def configuration_space() -> ConfigurationSpace:
             TunableValueKind.RANGE,
         )
     )
+    hp = spaces["kernel_sched_latency_ns"]
+    assert isinstance(hp, NumericalHyperparameter)
+    _monkey_patch_quantization(hp, quantization_bins=10)
     return spaces
 
 

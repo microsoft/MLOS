@@ -7,7 +7,7 @@
                 "description": "Int",
                 "type": "int",
                 "default": 10,
-                "range": [1, 500],
+                "range": [0, 500],
                 "meta": {"suffix": "MB"},
                 "special": [-1],
                 "special_weights": [0.1],
@@ -26,7 +26,7 @@
                 "description": "Int",
                 "type": "int",
                 "default": 10,
-                "range": [1, 500],
+                "range": [0, 500],
                 "meta": {"suffix": "MB"},
                 "special": [-1],
                 "special_weights": [0.1],
@@ -48,7 +48,7 @@
                 "meta": {"scale": 1000, "prefix": "/proc/var/random/", "base": 2.71828},
                 "range": [1.1, 111.1],
                 "special": [-1.1],
-                "quantization": 10,
+                "quantization": 11,
                 "distribution": {
                     "type": "uniform"
                 },

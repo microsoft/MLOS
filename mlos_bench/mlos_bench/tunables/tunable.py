@@ -64,7 +64,7 @@ class TunableDict(TypedDict, total=False):
     default: TunableValue
     values: Optional[List[Optional[str]]]
     range: Optional[Union[Sequence[int], Sequence[float]]]
-    quantization: Optional[Union[int, float]]
+    quantization: Optional[int]
     log: Optional[bool]
     distribution: Optional[DistributionDict]
     special: Optional[Union[List[int], List[float]]]
@@ -109,7 +109,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             self._values = [str(v) if v is not None else v for v in self._values]
         self._meta: Dict[str, Any] = config.get("meta", {})
         self._range: Optional[Union[Tuple[int, int], Tuple[float, float]]] = None
-        self._quantization: Optional[Union[int, float]] = config.get("quantization")
+        self._quantization: Optional[int] = config.get("quantization")
         self._log: Optional[bool] = config.get("log")
         self._distribution: Optional[DistributionName] = None
         self._distribution_params: Dict[str, float] = {}
@@ -182,19 +182,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             raise ValueError(f"Values must be None for the numerical type tunable {self}")
         if not self._range or len(self._range) != 2 or self._range[0] >= self._range[1]:
             raise ValueError(f"Invalid range for tunable {self}: {self._range}")
-        if self._quantization is not None:
-            if self.dtype == int:
-                if not isinstance(self._quantization, int):
-                    raise ValueError(f"Quantization of a int param should be an int: {self}")
-                if self._quantization <= 1:
-                    raise ValueError(f"Number of quantization points is <= 1: {self}")
-            if self.dtype == float:
-                if not isinstance(self._quantization, (float, int)):
-                    raise ValueError(
-                        f"Quantization of a float param should be a float or int: {self}"
-                    )
-                if self._quantization <= 0:
-                    raise ValueError(f"Number of quantization points is <= 0: {self}")
+        if self._quantization is not None and self._quantization <= 1:
+            raise ValueError(f"Number of quantization bins is <= 1: {self}")
         if self._distribution is not None and self._distribution not in {
             "uniform",
             "normal",
@@ -391,7 +380,6 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         is_valid : bool
             True if the value is valid, False otherwise.
         """
-        # FIXME: quantization check?
         if self.is_categorical and self._values:
             return value in self._values
         elif self.is_numerical and self._range:
@@ -592,14 +580,14 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return num_range[1] - num_range[0]
 
     @property
-    def quantization(self) -> Optional[Union[int, float]]:
+    def quantization(self) -> Optional[int]:
         """
-        Get the quantization factor, if specified.
+        Get the number of quantization bins, if specified.
 
         Returns
         -------
-        quantization : int, float, None
-            The quantization factor, or None.
+        quantization : int | None
+            Number of quantization bins, or None.
         """
         if self.is_categorical:
             return None
@@ -618,41 +606,45 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         """
         num_range = self.range
         if self.type == "float":
-            if not self._quantization:
+            if not self.quantization:
                 return None
             # Be sure to return python types instead of numpy types.
-            cardinality = self.cardinality
-            assert isinstance(cardinality, int)
             return (
                 float(x)
                 for x in np.linspace(
                     start=num_range[0],
                     stop=num_range[1],
-                    num=cardinality,
+                    num=self.quantization,
                     endpoint=True,
                 )
             )
         assert self.type == "int", f"Unhandled tunable type: {self}"
-        return range(int(num_range[0]), int(num_range[1]) + 1, int(self._quantization or 1))
+        return range(
+            int(num_range[0]),
+            int(num_range[1]) + 1,
+            int(self.span / (self.quantization - 1)) if self.quantization else 1,
+        )
 
     @property
-    def cardinality(self) -> Union[int, float]:
+    def cardinality(self) -> Optional[int]:
         """
-        Gets the cardinality of elements in this tunable, or else infinity.
+        Gets the cardinality of elements in this tunable, or else None. (i.e., when the
+        tunable is continuous float and not quantized).
 
         If the tunable has quantization set, this
 
         Returns
         -------
-        cardinality : int, float
-            Either the number of points in the tunable or else infinity.
+        cardinality : int
+            Either the number of points in the tunable or else None.
         """
         if self.is_categorical:
             return len(self.categories)
-        if not self.quantization and self.type == "float":
-            return np.inf
-        q_factor = self.quantization or 1
-        return int(self.span / q_factor) + 1
+        if self.quantization:
+            return self.quantization
+        if self.type == "int":
+            return int(self.span) + 1
+        return None
 
     @property
     def is_log(self) -> Optional[bool]:

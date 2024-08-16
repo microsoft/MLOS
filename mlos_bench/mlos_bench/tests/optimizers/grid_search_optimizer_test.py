@@ -9,6 +9,7 @@ import math
 import random
 from typing import Dict, List
 
+import numpy as np
 import pytest
 
 from mlos_bench.environments.status import Status
@@ -40,7 +41,7 @@ def grid_search_tunables_config() -> dict:
                     "type": "float",
                     "range": [0, 1],
                     "default": 0.5,
-                    "quantization": 0.25,
+                    "quantization": 5,
                 },
             },
         },
@@ -99,7 +100,9 @@ def test_grid_search_grid(
 ) -> None:
     """Make sure that grid search optimizer initializes and works correctly."""
     # Check the size.
-    expected_grid_size = math.prod(tunable.cardinality for tunable, _group in grid_search_tunables)
+    expected_grid_size = math.prod(
+        tunable.cardinality or np.inf for tunable, _group in grid_search_tunables
+    )
     assert expected_grid_size > len(grid_search_tunables)
     assert len(grid_search_tunables_grid) == expected_grid_size
     # Check for specific example configs inclusion.
