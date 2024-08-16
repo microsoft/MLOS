@@ -71,13 +71,13 @@ def test_tunable_quantized_int_size_props() -> None:
             "type": "int",
             "range": [100, 1000],
             "default": 100,
-            "quantization": 10,
+            "quantization_bins": 10,
         },
     )
     expected = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
     assert tunable.span == 900
     assert tunable.cardinality == len(expected)
-    assert tunable.quantization == len(expected)
+    assert tunable.quantization_bins == len(expected)
     assert list(tunable.quantized_values or []) == expected
     assert list(tunable.values or []) == expected
 
@@ -90,12 +90,12 @@ def test_tunable_quantized_float_size_props() -> None:
             "type": "float",
             "range": [0, 1],
             "default": 0,
-            "quantization": 11,
+            "quantization_bins": 11,
         },
     )
     expected = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     assert tunable.span == 1
     assert tunable.cardinality == len(expected)
-    assert tunable.quantization == len(expected)
+    assert tunable.quantization_bins == len(expected)
     assert pytest.approx(list(tunable.quantized_values or []), 0.0001) == expected
     assert pytest.approx(list(tunable.values or []), 0.0001) == expected

@@ -6,7 +6,7 @@
                 "type": "float",
                 "default": 10,
                 "range": [1, 500],
-                "quantization": 1   // <-- should be greater than 1
+                "quantization_bins": 1   // <-- should be greater than 1
             }
         }
     }

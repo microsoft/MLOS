@@ -234,14 +234,14 @@ def test_numerical_quantization(tunable_type: TunableValueTypeName) -> None:
     {{
         "type": "{tunable_type}",
         "range": [0, 100],
-        "quantization": 11,
+        "quantization_bins": 11,
         "default": 0
     }}
     """
     config = json.loads(json_config)
     tunable = Tunable(name="test", config=config)
     expected = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-    assert tunable.quantization == len(expected)
+    assert tunable.quantization_bins == len(expected)
     assert pytest.approx(list(tunable.quantized_values or []), 1e-8) == expected
     assert not tunable.is_log
 
@@ -393,7 +393,7 @@ def test_numerical_quantization_wrong(tunable_type: TunableValueTypeName) -> Non
     {{
         "type": "{tunable_type}",
         "range": [0, 100],
-        "quantization": 0,
+        "quantization_bins": 0,
         "default": 0
     }}
     """
