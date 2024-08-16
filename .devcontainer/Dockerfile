@@ -95,7 +95,7 @@ RUN mkdir -p /home/vscode/.conda/envs \
 
 # Try and prime the devcontainer's ssh known_hosts keys with the github one for scripted calls.
 RUN mkdir -p /home/vscode/.ssh \
-    && (
+    && ( \
         grep -q ^github.com /home/vscode/.ssh/known_hosts \
         || ssh-keyscan github.com | tee -a /home/vscode/.ssh/known_hosts \
     )
