@@ -78,7 +78,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
         self._start_with_defaults: bool = bool(
             strtobool(str(self._config.pop("start_with_defaults", True)))
         )
-        self._max_iter = int(self._config.pop("max_suggestions", 100))
+        self._max_suggestions = int(self._config.pop("max_suggestions", 100))
 
         opt_targets: Dict[str, str] = self._config.pop("optimization_targets", {"score": "min"})
         self._opt_targets: Dict[str, Literal[1, -1]] = {}
@@ -142,18 +142,15 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
         """
         return self._iter
 
-    # TODO: finish renaming iterations to suggestions.
-    # See Also: https://github.com/microsoft/MLOS/pull/713
-
     @property
-    def max_iterations(self) -> int:
+    def max_suggestions(self) -> int:
         """
         The maximum number of iterations (suggestions) to run.
 
         Note: this may or may not be the same as the number of configurations.
         See Also: Scheduler.trial_config_repeat_count and Scheduler.max_trials.
         """
-        return self._max_iter
+        return self._max_suggestions
 
     @property
     def seed(self) -> int:
@@ -362,7 +359,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
 
         Base implementation just checks the iteration count.
         """
-        return self._iter < self._max_iter
+        return self._iter < self._max_suggestions
 
     @abstractmethod
     def get_best_observation(
