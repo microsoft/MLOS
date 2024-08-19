@@ -12,9 +12,8 @@ import ConfigSpace as CS
 import pandas as pd
 import pytest
 
-from mlos_core.spaces.converters.util import monkey_patch_quantization
 from mlos_core.spaces.adapters import LlamaTuneAdapter
-
+from mlos_core.spaces.converters.util import monkey_patch_quantization
 
 # Explicitly test quantized values with llamatune space adapter.
 # TODO: Add log scale sampling tests as well.
