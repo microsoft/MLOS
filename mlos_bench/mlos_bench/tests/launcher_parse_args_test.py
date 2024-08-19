@@ -260,8 +260,11 @@ def test_launcher_args_parse_3(config_paths: List[str]) -> None:
         " ".join([f"--config-path {config_path}" for config_path in config_paths])
         + f" --config {config_file}"
         + f" --globals {globals_file}"
+        + " --max-suggestions 10"  # check for - to _ conversion too
     )
     launcher = _get_launcher(__name__, cli_args)
+
+    assert launcher.optimizer.max_suggestions == 10  # from CLI args
 
     # Check that CLI file parameter overrides JSON config:
     assert isinstance(launcher.scheduler, SyncScheduler)
