@@ -31,7 +31,7 @@ from mlos_bench.run import _main
                 "mlos_bench/mlos_bench/tests/config/cli/mock-opt.jsonc",
                 "--trial_config_repeat_count",
                 "3",
-                "--max_suggestions",
+                "--max-suggestions",
                 "3",
                 "--mock_env_seed",
                 "42",  # Noisy Mock Environment.
