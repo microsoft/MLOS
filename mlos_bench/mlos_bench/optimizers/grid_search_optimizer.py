@@ -58,11 +58,11 @@ class GridSearchOptimizer(TrackBestOptimizer):
                 size,
                 self._tunables,
             )
-        if size > self._max_iter:
+        if size > self._max_suggestions:
             _LOG.warning(
                 "Grid search size %d, is greater than max iterations %d",
                 size,
-                self._max_iter,
+                self._max_suggestions,
             )
 
     def _get_grid(self) -> Tuple[Tuple[str, ...], Dict[Tuple[TunableValue, ...], None]]:
@@ -147,7 +147,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
             self._suggested_configs.add(default_config_values)
         else:
             # Select the first item from the pending configs.
-            if not self._pending_configs and self._iter <= self._max_iter:
+            if not self._pending_configs and self._iter <= self._max_suggestions:
                 _LOG.info("No more pending configs to suggest. Restarting grid.")
                 self._config_keys, self._pending_configs = self._get_grid()
             try:
@@ -185,7 +185,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
         return registered_score
 
     def not_converged(self) -> bool:
-        if self._iter > self._max_iter:
+        if self._iter > self._max_suggestions:
             if bool(self._pending_configs):
                 _LOG.warning(
                     "Exceeded max iterations, but still have %d pending configs: %s",
