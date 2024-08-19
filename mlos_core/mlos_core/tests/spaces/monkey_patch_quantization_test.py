@@ -8,8 +8,8 @@ import numpy as np
 from ConfigSpace import UniformFloatHyperparameter, UniformIntegerHyperparameter
 from numpy.random import RandomState
 
-from mlos_bench.optimizers.convert_configspace import _monkey_patch_quantization
-from mlos_bench.tests import SEED
+from mlos_core.spaces.converters.util import monkey_patch_quantization
+from mlos_core.tests import SEED
 
 
 def test_configspace_quant_int() -> None:
@@ -20,7 +20,7 @@ def test_configspace_quant_int() -> None:
     # Before patching: expect that at least one value is not quantized.
     assert not set(hp.sample_value(100)).issubset(quantized_values)
 
-    _monkey_patch_quantization(hp, 11)
+    monkey_patch_quantization(hp, 11)
     # After patching: *all* values must belong to the set of quantized values.
     assert hp.sample_value() in quantized_values  # check scalar type
     assert set(hp.sample_value(100)).issubset(quantized_values)  # batch version
@@ -35,7 +35,7 @@ def test_configspace_quant_float() -> None:
     assert not set(hp.sample_value(100)).issubset(quantized_values)
 
     # 5 is a nice number of bins to avoid floating point errors.
-    _monkey_patch_quantization(hp, 5)
+    monkey_patch_quantization(hp, 5)
     # After patching: *all* values must belong to the set of quantized values.
     assert hp.sample_value() in quantized_values  # check scalar type
     assert set(hp.sample_value(100)).issubset(quantized_values)  # batch version
@@ -49,18 +49,18 @@ def test_configspace_quant_repatch() -> None:
     # Before patching: expect that at least one value is not quantized.
     assert not set(hp.sample_value(100)).issubset(quantized_values)
 
-    _monkey_patch_quantization(hp, 11)
+    monkey_patch_quantization(hp, 11)
     # After patching: *all* values must belong to the set of quantized values.
     samples = hp.sample_value(100, seed=RandomState(SEED))
     assert set(samples).issubset(quantized_values)
 
     # Patch the same hyperparameter again and check that the results are the same.
-    _monkey_patch_quantization(hp, 11)
+    monkey_patch_quantization(hp, 11)
     # After patching: *all* values must belong to the set of quantized values.
     assert all(samples == hp.sample_value(100, seed=RandomState(SEED)))
 
     # Repatch with the higher number of bins and make sure we get new values.
-    _monkey_patch_quantization(hp, 21)
+    monkey_patch_quantization(hp, 21)
     samples_set = set(hp.sample_value(100, seed=RandomState(SEED)))
     quantized_values_new = set(range(5, 96, 10))
     assert samples_set.issubset(set(range(0, 101, 5)))

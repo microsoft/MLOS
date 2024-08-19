@@ -20,13 +20,13 @@ from ConfigSpace import (
     Normal,
     Uniform,
 )
-from ConfigSpace.functional import quantize
 from ConfigSpace.hyperparameters import NumericalHyperparameter
 from ConfigSpace.types import NotSet
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import try_parse_val
+from mlos_core.spaces.converters.util import monkey_patch_quantization
 
 _LOG = logging.getLogger(__name__)
 
@@ -47,37 +47,6 @@ def _normalize_weights(weights: List[float]) -> List[float]:
     """Helper function for normalizing weights to probabilities."""
     total = sum(weights)
     return [w / total for w in weights]
-
-
-def _monkey_patch_quantization(hp: NumericalHyperparameter, quantization_bins: int) -> None:
-    """
-    Monkey-patch quantization into the Hyperparameter.
-
-    Parameters
-    ----------
-    hp : NumericalHyperparameter
-        ConfigSpace hyperparameter to patch.
-    quantization_bins : int
-        Number of bins to quantize the hyperparameter into.
-    """
-    if quantization_bins <= 1:
-        raise ValueError(f"{quantization_bins=} :: must be greater than 1.")
-
-    # Temporary workaround to dropped quantization support in ConfigSpace 1.0
-    # See Also: https://github.com/automl/ConfigSpace/issues/390
-    if not hasattr(hp, "sample_value_mlos_orig"):
-        setattr(hp, "sample_value_mlos_orig", hp.sample_value)
-
-    assert hasattr(hp, "sample_value_mlos_orig")
-    setattr(
-        hp,
-        "sample_value",
-        lambda size=None, **kwargs: quantize(
-            hp.sample_value_mlos_orig(size, **kwargs),
-            bounds=(hp.lower, hp.upper),
-            bins=quantization_bins,
-        ).astype(type(hp.default_value)),
-    )
 
 
 def _tunable_to_configspace(
@@ -171,7 +140,7 @@ def _tunable_to_configspace(
     if tunable.quantization_bins:
         # Temporary workaround to dropped quantization support in ConfigSpace 1.0
         # See Also: https://github.com/automl/ConfigSpace/issues/390
-        _monkey_patch_quantization(range_hp, tunable.quantization_bins)
+        monkey_patch_quantization(range_hp, tunable.quantization_bins)
 
     if not tunable.special:
         return ConfigurationSpace({tunable.name: range_hp})
