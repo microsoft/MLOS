@@ -54,7 +54,7 @@
                         "example": 10
                     },
                     "max_trials": {
-                        "description": "Influence the budget of max number of trials for SMAC. If omitted, will default to max_iterations.",
+                        "description": "Influence the budget of max number of trials for SMAC. If omitted, will default to max_suggestions.",
                         "type": "integer",
                         "minimum": 10,
                         "example": 100

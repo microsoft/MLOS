@@ -13,11 +13,18 @@ import pandas as pd
 import pytest
 
 from mlos_core.spaces.adapters import LlamaTuneAdapter
+from mlos_core.spaces.converters.util import monkey_patch_quantization
+
+# Explicitly test quantized values with llamatune space adapter.
+# TODO: Add log scale sampling tests as well.
 
 
-def construct_parameter_space(
+def construct_parameter_space(  # pylint: disable=too-many-arguments
+    *,
     n_continuous_params: int = 0,
+    n_quantized_continuous_params: int = 0,
     n_integer_params: int = 0,
+    n_quantized_integer_params: int = 0,
     n_categorical_params: int = 0,
     seed: int = 1234,
 ) -> CS.ConfigurationSpace:
@@ -26,8 +33,16 @@ def construct_parameter_space(
 
     for idx in range(n_continuous_params):
         input_space.add(CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64))
+    for idx in range(n_quantized_continuous_params):
+        param_int = CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64)
+        monkey_patch_quantization(param_int, 6)
+        input_space.add(param_int)
     for idx in range(n_integer_params):
         input_space.add(CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=-1, upper=256))
+    for idx in range(n_quantized_integer_params):
+        param_float = CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=0, upper=256)
+        monkey_patch_quantization(param_float, 17)
+        input_space.add(param_float)
     for idx in range(n_categorical_params):
         input_space.add(
             CS.CategoricalHyperparameter(
@@ -49,6 +64,13 @@ def construct_parameter_space(
                 {"n_continuous_params": int(num_target_space_dims * num_orig_space_factor)},
                 {"n_integer_params": int(num_target_space_dims * num_orig_space_factor)},
                 {"n_categorical_params": int(num_target_space_dims * num_orig_space_factor)},
+                {"n_categorical_params": int(num_target_space_dims * num_orig_space_factor)},
+                {"n_quantized_integer_params": int(num_target_space_dims * num_orig_space_factor)},
+                {
+                    "n_quantized_continuous_params": int(
+                        num_target_space_dims * num_orig_space_factor
+                    )
+                },
                 # Mix of all three types
                 {
                     "n_continuous_params": int(num_target_space_dims * num_orig_space_factor / 3),
@@ -358,6 +380,12 @@ def test_max_unique_values_per_param() -> None:
                 {"n_continuous_params": int(num_target_space_dims * num_orig_space_factor)},
                 {"n_integer_params": int(num_target_space_dims * num_orig_space_factor)},
                 {"n_categorical_params": int(num_target_space_dims * num_orig_space_factor)},
+                {"n_quantized_integer_params": int(num_target_space_dims * num_orig_space_factor)},
+                {
+                    "n_quantized_continuous_params": int(
+                        num_target_space_dims * num_orig_space_factor
+                    )
+                },
                 # Mix of all three types
                 {
                     "n_continuous_params": int(num_target_space_dims * num_orig_space_factor / 3),
