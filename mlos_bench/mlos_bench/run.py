@@ -18,7 +18,6 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 
 from mlos_bench.launcher import Launcher
-from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -59,7 +58,6 @@ def _sanity_check_results(launcher: Launcher) -> None:
 def _main(
     argv: Optional[List[str]] = None,
 ) -> Tuple[Optional[Dict[str, float]], Optional[TunableGroups]]:
-
     launcher = Launcher("mlos_bench", "Systems autotuning and benchmarking tool", argv=argv)
 
     with launcher.scheduler as scheduler_context:
@@ -74,16 +72,21 @@ def _main(
     return result
 
 
-if __name__ == "__main__":
-    (best_score, best_config) = _main()
-
+def _shell_main(
+    argv: Optional[List[str]] = None,
+) -> int:
+    (best_score, best_config) = _main(argv)
     # Exit zero if it looks like the overall operation was successful.
     # TODO: Improve this sanity check to be more robust.
     if (
         best_score
         and best_config
-        and all(isinstance(best_score[key], float) for key in best_score)
+        and all(isinstance(score_value, float) for score_value in best_score.values())
     ):
-        sys.exit(0)
+        return 0
     else:
         raise ValueError(f"Unexpected result: {best_score=}, {best_config=}")
+
+
+if __name__ == "__main__":
+    sys.exit(_shell_main())
