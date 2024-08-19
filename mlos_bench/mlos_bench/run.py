@@ -24,8 +24,7 @@ _LOG = logging.getLogger(__name__)
 
 
 def _sanity_check_results(launcher: Launcher) -> None:
-    """
-    Do some sanity checking on the results and throw an exception if it looks like
+    """Do some sanity checking on the results and throw an exception if it looks like
     something went wrong.
     """
     basic_err_msg = "Check configuration, scripts, and logs for details."
