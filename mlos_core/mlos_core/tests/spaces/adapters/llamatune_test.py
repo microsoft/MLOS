@@ -12,6 +12,7 @@ import ConfigSpace as CS
 import pandas as pd
 import pytest
 
+from mlos_core.spaces.converters.util import monkey_patch_quantization
 from mlos_core.spaces.adapters import LlamaTuneAdapter
 
 
@@ -34,11 +35,15 @@ def construct_parameter_space(  # pylint: disable=too-many-arguments
     for idx in range(n_continuous_params):
         input_space.add(CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64))
     for idx in range(n_quantized_continuous_params):
-        input_space.add(CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64, q=12.8))
+        param_int = CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64)
+        monkey_patch_quantization(param_int, 6)
+        input_space.add(param_int)
     for idx in range(n_integer_params):
         input_space.add(CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=-1, upper=256))
     for idx in range(n_quantized_integer_params):
-        input_space.add(CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=0, upper=256, q=16))
+        param_float = CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=0, upper=256)
+        monkey_patch_quantization(param_float, 17)
+        input_space.add(param_float)
     for idx in range(n_categorical_params):
         input_space.add(
             CS.CategoricalHyperparameter(
