@@ -8,7 +8,6 @@ from ConfigSpace import ConfigurationSpace
 from ConfigSpace.functional import quantize
 from ConfigSpace.hyperparameters import Hyperparameter, NumericalHyperparameter
 
-
 QUANTIZATION_BINS_META_KEY = "quantization_bins"
 
 

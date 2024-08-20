@@ -13,8 +13,8 @@ from ConfigSpace import (
 from numpy.random import RandomState
 
 from mlos_core.spaces.converters.util import (
-    monkey_patch_cs_quantization,
     QUANTIZATION_BINS_META_KEY,
+    monkey_patch_cs_quantization,
 )
 from mlos_core.tests import SEED
 

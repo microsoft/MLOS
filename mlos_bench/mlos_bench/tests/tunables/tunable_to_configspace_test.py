@@ -24,8 +24,8 @@ from mlos_bench.optimizers.convert_configspace import (
 from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_core.spaces.converters.util import (
-    monkey_patch_cs_quantization,
     QUANTIZATION_BINS_META_KEY,
+    monkey_patch_cs_quantization,
 )
 
 # pylint: disable=redefined-outer-name

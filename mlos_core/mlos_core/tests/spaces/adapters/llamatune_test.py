@@ -14,8 +14,8 @@ import pytest
 
 from mlos_core.spaces.adapters import LlamaTuneAdapter
 from mlos_core.spaces.converters.util import (
-    monkey_patch_cs_quantization,
     QUANTIZATION_BINS_META_KEY,
+    monkey_patch_cs_quantization,
 )
 
 # Explicitly test quantized values with llamatune space adapter.
