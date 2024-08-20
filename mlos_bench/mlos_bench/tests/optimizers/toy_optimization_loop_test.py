@@ -73,7 +73,7 @@ def test_mock_optimization_loop(mock_env_no_noise: MockEnv, mock_opt: MockOptimi
         "vmSize": "Standard_B2ms",
         "idle": "halt",
         "kernel_sched_migration_cost_ns": 117026,
-        "kernel_sched_latency_ns": 149827706,
+        "kernel_sched_latency_ns": 149827700,
     }
 
 
@@ -88,7 +88,7 @@ def test_mock_optimization_loop_no_defaults(
         "vmSize": "Standard_B2s",
         "idle": "halt",
         "kernel_sched_migration_cost_ns": 49123,
-        "kernel_sched_latency_ns": 234760738,
+        "kernel_sched_latency_ns": 234760700,
     }
 
 
@@ -100,7 +100,7 @@ def test_flaml_optimization_loop(mock_env_no_noise: MockEnv, flaml_opt: MlosCore
         "vmSize": "Standard_B2s",
         "idle": "halt",
         "kernel_sched_migration_cost_ns": -1,
-        "kernel_sched_latency_ns": 13718105,
+        "kernel_sched_latency_ns": 13718100,
     }
 
 
@@ -113,7 +113,7 @@ def test_smac_optimization_loop(mock_env_no_noise: MockEnv, smac_opt: MlosCoreOp
         "vmSize": "Standard_B2s",
         "idle": "mwait",
         "kernel_sched_migration_cost_ns": 297669,
-        "kernel_sched_latency_ns": 290365137,
+        "kernel_sched_latency_ns": 290365100,
     }
     assert score == pytest.approx(expected_score, 0.01)
     assert tunables.get_param_values() == expected_tunable_values
