@@ -102,3 +102,13 @@ def test_configspace_quant_repatch() -> None:
     quantized_values_new = set(range(5, 96, 10))
     assert samples_set.issubset(set(range(0, 101, 5)))
     assert len(samples_set - quantized_values_new) < len(samples_set)
+
+    # Repatch without quantization and make sure we get the original values.
+    new_meta = dict(hp.meta or {})
+    del new_meta[QUANTIZATION_BINS_META_KEY]
+    hp.meta = new_meta
+    assert hp.meta.get(QUANTIZATION_BINS_META_KEY) is None
+    monkey_patch_cs_quantization(cs)
+    samples_set = set(hp.sample_value(100, seed=RandomState(SEED)))
+    assert samples_set.issubset(set(range(0, 101)))
+    assert len(quantized_values_new) < len(quantized_values) < len(samples_set)
