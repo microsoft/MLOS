@@ -16,17 +16,27 @@ def monkey_patch_hp_quantization(hp: Hyperparameter) -> None:
     """
     Monkey-patch quantization into the Hyperparameter.
 
+    Temporary workaround to dropped quantization support in ConfigSpace 1.0
+    See Also: <https://github.com/automl/ConfigSpace/issues/390>
+
     Parameters
     ----------
     hp : NumericalHyperparameter
         ConfigSpace hyperparameter to patch.
     """
+
     if not isinstance(hp, NumericalHyperparameter):
         return
+
     assert isinstance(hp, NumericalHyperparameter)
     quantization_bins = (hp.meta or {}).get(QUANTIZATION_BINS_META_KEY)
     if quantization_bins is None:
-        return  # no quantization requested
+        # No quantization requested.
+        # Remove any previously applied patches.
+        if hasattr(hp, "sample_value_mlos_orig"):
+            setattr(hp, "sample_value", hp.sample_value_mlos_orig)
+            delattr(hp, "sample_value_mlos_orig")
+        return
 
     try:
         quantization_bins = int(quantization_bins)
@@ -36,8 +46,6 @@ def monkey_patch_hp_quantization(hp: Hyperparameter) -> None:
     if quantization_bins <= 1:
         raise ValueError(f"{quantization_bins=} :: must be greater than 1.")
 
-    # Temporary workaround to dropped quantization support in ConfigSpace 1.0
-    # See Also: https://github.com/automl/ConfigSpace/issues/390
     if not hasattr(hp, "sample_value_mlos_orig"):
         setattr(hp, "sample_value_mlos_orig", hp.sample_value)
 
