@@ -13,7 +13,10 @@ import pandas as pd
 import pytest
 
 from mlos_core.spaces.adapters import LlamaTuneAdapter
-from mlos_core.spaces.converters.util import monkey_patch_quantization
+from mlos_core.spaces.converters.util import (
+    monkey_patch_cs_quantization,
+    QUANTIZATION_BINS_META_KEY,
+)
 
 # Explicitly test quantized values with llamatune space adapter.
 # TODO: Add log scale sampling tests as well.
@@ -32,17 +35,39 @@ def construct_parameter_space(  # pylint: disable=too-many-arguments
     input_space = CS.ConfigurationSpace(seed=seed)
 
     for idx in range(n_continuous_params):
-        input_space.add(CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64))
+        input_space.add(
+            CS.UniformFloatHyperparameter(
+                name=f"cont_{idx}",
+                lower=0,
+                upper=64,
+            )
+        )
     for idx in range(n_quantized_continuous_params):
-        param_int = CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64)
-        monkey_patch_quantization(param_int, 6)
-        input_space.add(param_int)
+        input_space.add(
+            CS.UniformFloatHyperparameter(
+                name=f"cont_{idx}",
+                lower=0,
+                upper=64,
+                meta={QUANTIZATION_BINS_META_KEY: 6},
+            )
+        )
     for idx in range(n_integer_params):
-        input_space.add(CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=-1, upper=256))
+        input_space.add(
+            CS.UniformIntegerHyperparameter(
+                name=f"int_{idx}",
+                lower=-1,
+                upper=256,
+            )
+        )
     for idx in range(n_quantized_integer_params):
-        param_float = CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=0, upper=256)
-        monkey_patch_quantization(param_float, 17)
-        input_space.add(param_float)
+        input_space.add(
+            CS.UniformIntegerHyperparameter(
+                name=f"int_{idx}",
+                lower=0,
+                upper=256,
+                meta={QUANTIZATION_BINS_META_KEY: 17},
+            )
+        )
     for idx in range(n_categorical_params):
         input_space.add(
             CS.CategoricalHyperparameter(
@@ -50,6 +75,7 @@ def construct_parameter_space(  # pylint: disable=too-many-arguments
             )
         )
 
+    monkey_patch_cs_quantization(input_space)
     return input_space
 
 
@@ -322,15 +348,15 @@ def test_special_parameter_values_biasing() -> None:  # pylint: disable=too-comp
             special_values_instances["int_2"][100] += 1
 
     assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_instances["int_1"][0]
-    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_instances["int_1"][
-        1
-    ]
-    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_instances["int_2"][
-        2
-    ]
-    assert (1 - eps) * int(num_configs * bias_percentage * 1.5) <= special_values_instances[
-        "int_2"
-    ][100]
+    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= (
+        special_values_instances["int_1"][1]
+    )
+    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= (
+        special_values_instances["int_2"][2]
+    )
+    assert (1 - eps) * int(num_configs * bias_percentage * 1.5) <= (
+        special_values_instances["int_2"][100]
+    )
 
 
 def test_max_unique_values_per_param() -> None:

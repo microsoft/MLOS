@@ -26,7 +26,10 @@ from ConfigSpace.types import NotSet
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import try_parse_val
-from mlos_core.spaces.converters.util import monkey_patch_quantization
+from mlos_core.spaces.converters.util import (
+    monkey_patch_hp_quantization,
+    QUANTIZATION_BINS_META_KEY,
+)
 
 _LOG = logging.getLogger(__name__)
 
@@ -140,7 +143,10 @@ def _tunable_to_configspace(
     if tunable.quantization_bins:
         # Temporary workaround to dropped quantization support in ConfigSpace 1.0
         # See Also: https://github.com/automl/ConfigSpace/issues/390
-        monkey_patch_quantization(range_hp, tunable.quantization_bins)
+        new_meta = dict(range_hp.meta or {})
+        new_meta[QUANTIZATION_BINS_META_KEY] = tunable.quantization_bins
+        range_hp.meta = new_meta
+        monkey_patch_hp_quantization(range_hp)
 
     if not tunable.special:
         return ConfigurationSpace({tunable.name: range_hp})

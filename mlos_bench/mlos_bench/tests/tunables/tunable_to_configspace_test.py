@@ -23,7 +23,10 @@ from mlos_bench.optimizers.convert_configspace import (
 )
 from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_core.spaces.converters.util import monkey_patch_quantization
+from mlos_core.spaces.converters.util import (
+    monkey_patch_cs_quantization,
+    QUANTIZATION_BINS_META_KEY,
+)
 
 # pylint: disable=redefined-outer-name
 
@@ -63,7 +66,11 @@ def configuration_space() -> ConfigurationSpace:
                 bounds=(0, 1000000000),
                 log=False,
                 default=2000000,
-                meta={"group": "kernel", "cost": 0},
+                meta={
+                    "group": "kernel",
+                    "cost": 0,
+                    QUANTIZATION_BINS_META_KEY: 11,
+                },
             ),
             "kernel_sched_migration_cost_ns": Integer(
                 name="kernel_sched_migration_cost_ns",
@@ -101,9 +108,7 @@ def configuration_space() -> ConfigurationSpace:
             TunableValueKind.RANGE,
         )
     )
-    hp = spaces["kernel_sched_latency_ns"]
-    assert isinstance(hp, NumericalHyperparameter)
-    monkey_patch_quantization(hp, quantization_bins=11)
+    monkey_patch_cs_quantization(spaces)
     return spaces
 
 
