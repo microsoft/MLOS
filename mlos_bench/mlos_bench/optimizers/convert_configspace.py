@@ -26,7 +26,10 @@ from ConfigSpace.types import NotSet
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import try_parse_val
-from mlos_core.spaces.converters.util import QUANTIZATION_BINS_META_KEY
+from mlos_core.spaces.converters.util import (
+    QUANTIZATION_BINS_META_KEY,
+    monkey_patch_hp_quantization,
+)
 
 _LOG = logging.getLogger(__name__)
 
@@ -77,10 +80,6 @@ def _tunable_to_configspace(
     meta: Dict[Hashable, TunableValue] = {"cost": cost}
     if group_name is not None:
         meta["group"] = group_name
-    if tunable.is_numerical and tunable.quantization_bins:
-        # Temporary workaround to dropped quantization support in ConfigSpace 1.0
-        # See Also: https://github.com/automl/ConfigSpace/issues/390
-        meta[QUANTIZATION_BINS_META_KEY] = tunable.quantization_bins
 
     if tunable.type == "categorical":
         return ConfigurationSpace(
@@ -140,6 +139,14 @@ def _tunable_to_configspace(
         )
     else:
         raise TypeError(f"Invalid Parameter Type: {tunable.type}")
+
+    if tunable.is_numerical and tunable.quantization_bins:
+        # Temporary workaround to dropped quantization support in ConfigSpace 1.0
+        # See Also: https://github.com/automl/ConfigSpace/issues/390
+        new_meta = dict(range_hp.meta or {})
+        new_meta[QUANTIZATION_BINS_META_KEY] = tunable.quantization_bins
+        range_hp.meta = new_meta
+        monkey_patch_hp_quantization(range_hp)
 
     if not tunable.special:
         return ConfigurationSpace({tunable.name: range_hp})
