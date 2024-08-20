@@ -17,13 +17,13 @@ from ConfigSpace.hyperparameters import NumericalHyperparameter
 
 from mlos_bench.optimizers.convert_configspace import (
     TunableValueKind,
-    _monkey_patch_quantization,
     _tunable_to_configspace,
     special_param_names,
     tunable_groups_to_configspace,
 )
 from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_core.spaces.converters.util import monkey_patch_quantization
 
 # pylint: disable=redefined-outer-name
 
@@ -103,7 +103,7 @@ def configuration_space() -> ConfigurationSpace:
     )
     hp = spaces["kernel_sched_latency_ns"]
     assert isinstance(hp, NumericalHyperparameter)
-    _monkey_patch_quantization(hp, quantization_bins=10)
+    monkey_patch_quantization(hp, quantization_bins=11)
     return spaces
 
 
