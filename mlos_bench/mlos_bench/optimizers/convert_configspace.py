@@ -11,8 +11,6 @@ from typing import Dict, Hashable, List, Optional, Tuple, Union
 
 from ConfigSpace import (
     Beta,
-    BetaFloatHyperparameter,
-    BetaIntegerHyperparameter,
     CategoricalHyperparameter,
     Configuration,
     ConfigurationSpace,
@@ -20,17 +18,15 @@ from ConfigSpace import (
     Float,
     Integer,
     Normal,
-    NormalFloatHyperparameter,
-    NormalIntegerHyperparameter,
     Uniform,
-    UniformFloatHyperparameter,
-    UniformIntegerHyperparameter,
 )
+from ConfigSpace.hyperparameters import NumericalHyperparameter
 from ConfigSpace.types import NotSet
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import try_parse_val
+from mlos_core.spaces.converters.util import monkey_patch_quantization
 
 _LOG = logging.getLogger(__name__)
 
@@ -77,6 +73,7 @@ def _tunable_to_configspace(
     cs : ConfigurationSpace
         A ConfigurationSpace object that corresponds to the Tunable.
     """
+    # pylint: disable=too-complex
     meta: Dict[Hashable, TunableValue] = {"cost": cost}
     if group_name is not None:
         meta["group"] = group_name
@@ -110,20 +107,12 @@ def _tunable_to_configspace(
     elif tunable.distribution is not None:
         raise TypeError(f"Invalid Distribution Type: {tunable.distribution}")
 
-    range_hp: Union[
-        BetaFloatHyperparameter,
-        BetaIntegerHyperparameter,
-        NormalFloatHyperparameter,
-        NormalIntegerHyperparameter,
-        UniformFloatHyperparameter,
-        UniformIntegerHyperparameter,
-    ]
+    range_hp: NumericalHyperparameter
     if tunable.type == "int":
         range_hp = Integer(
             name=tunable.name,
             bounds=(int(tunable.range[0]), int(tunable.range[1])),
             log=bool(tunable.is_log),
-            # TODO: Restore quantization support (#803).
             distribution=distribution,
             default=(
                 int(tunable.default)
@@ -137,7 +126,6 @@ def _tunable_to_configspace(
             name=tunable.name,
             bounds=tunable.range,
             log=bool(tunable.is_log),
-            # TODO: Restore quantization support (#803).
             distribution=distribution,
             default=(
                 float(tunable.default)
@@ -148,6 +136,11 @@ def _tunable_to_configspace(
         )
     else:
         raise TypeError(f"Invalid Parameter Type: {tunable.type}")
+
+    if tunable.quantization_bins:
+        # Temporary workaround to dropped quantization support in ConfigSpace 1.0
+        # See Also: https://github.com/automl/ConfigSpace/issues/390
+        monkey_patch_quantization(range_hp, tunable.quantization_bins)
 
     if not tunable.special:
         return ConfigurationSpace({tunable.name: range_hp})

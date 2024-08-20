@@ -90,6 +90,7 @@ class Scheduler(metaclass=ABCMeta):
         self._root_env_config = root_env_config
         self._current_trial_runner_idx = 0
         self._last_trial_id = -1
+        self._ran_trials: List[Storage.Trial] = []
 
         _LOG.debug("Scheduler instantiated: %s :: %s", self, config)
 
@@ -115,6 +116,11 @@ class Scheduler(metaclass=ABCMeta):
     def trial_config_repeat_count(self) -> int:
         """Gets the number of trials to run for a given config."""
         return self._trial_config_repeat_count
+
+    @property
+    def trial_count(self) -> int:
+        """Gets the current number of trials run for the experiment."""
+        return self._trial_count
 
     @property
     def max_trials(self) -> int:
@@ -382,4 +388,10 @@ class Scheduler(metaclass=ABCMeta):
         """
         assert self.experiment is not None
         self._trial_count += 1
+        self._ran_trials.append(trial)
         _LOG.info("QUEUE: Execute trial # %d/%d :: %s", self._trial_count, self._max_trials, trial)
+
+    @property
+    def ran_trials(self) -> List[Storage.Trial]:
+        """Get the list of trials that were run."""
+        return self._ran_trials

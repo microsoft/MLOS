@@ -62,12 +62,13 @@ class MlosCoreOptimizer(Optimizer):
                     )
                 )
 
-            # Make sure max_trials >= max_iterations.
+            # Make sure max_trials >= max_suggestions.
             if "max_trials" not in self._config:
-                self._config["max_trials"] = self._max_iter
-            assert (
-                int(self._config["max_trials"]) >= self._max_iter
-            ), f"max_trials {self._config.get('max_trials')} <= max_iterations {self._max_iter}"
+                self._config["max_trials"] = self._max_suggestions
+            assert int(self._config["max_trials"]) >= self._max_suggestions, (
+                f"max_trials {self._config.get('max_trials')} "
+                f"<= max_suggestions{self._max_suggestions}"
+            )
 
             if "run_name" not in self._config and self.experiment_id:
                 self._config["run_name"] = self.experiment_id

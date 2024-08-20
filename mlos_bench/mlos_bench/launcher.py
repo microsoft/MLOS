@@ -436,6 +436,10 @@ class Launcher:
             # Handles missing trailing elem from last --key arg.
             raise ValueError("Command line argument has no value: " + key)
 
+        # Convert "max-suggestions" to "max_suggestions" for compatibility with
+        # other CLI options to use as common python/json variable replacements.
+        config = {k.replace("-", "_"): v for k, v in config.items()}
+
         _LOG.debug("Parsed config: %s", config)
         return config
 
