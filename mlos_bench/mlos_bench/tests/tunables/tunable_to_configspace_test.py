@@ -127,6 +127,7 @@ def _cmp_tunable_hyperparameter_numerical(tunable: Tunable, space: Configuration
     assert (param.lower, param.upper) == tuple(tunable.range)
     if tunable.in_range(tunable.value):
         assert param.default_value == tunable.value
+    assert (param.meta or {}).get(QUANTIZATION_BINS_META_KEY) == tunable.quantization_bins
 
 
 def test_tunable_to_configspace_categorical(tunable_categorical: Tunable) -> None:
