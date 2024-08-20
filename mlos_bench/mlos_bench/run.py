@@ -41,7 +41,7 @@ def _sanity_check_results(launcher: Launcher) -> None:
     if launcher.scheduler.trial_count < expected_trial_count:
         raise RuntimeError(
             f"Expected {expected_trial_count} trials, "
-            "but only {launcher.scheduler.trial_count} were run. {basic_err_msg}"
+            f"but only {launcher.scheduler.trial_count} were run. {basic_err_msg}"
         )
 
     # Check to see if "too many" trials seem to have failed (#523).
