@@ -10,9 +10,9 @@ import pandas as pd
 from ConfigSpace import Configuration, ConfigurationSpace
 
 
-def config_to_dataframe(config: Configuration) -> pd.DataFrame:
+def config_to_series(config: Configuration) -> pd.Series:
     """
-    Converts a ConfigSpace config to a DataFrame.
+    Converts a ConfigSpace config to a Series.
 
     Parameters
     ----------
@@ -21,10 +21,11 @@ def config_to_dataframe(config: Configuration) -> pd.DataFrame:
 
     Returns
     -------
-    pd.DataFrame
-        A DataFrame with a single row, containing the config's parameters.
+    pd.Series
+        A Series, containing the config's parameters.
     """
-    return pd.DataFrame([dict(config)])
+    ret: pd.Series = pd.Series(dict(config))
+    return ret
 
 
 def normalize_config(

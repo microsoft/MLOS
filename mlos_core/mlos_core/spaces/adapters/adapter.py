@@ -44,7 +44,7 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
-    def transform(self, configuration: pd.DataFrame) -> pd.DataFrame:
+    def transform(self, configuration: pd.Series) -> pd.Series:
         """
         Translates a configuration, which belongs to the target parameter space, to the
         original parameter space. This method is called by the `suggest` method of the
@@ -52,20 +52,20 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
 
         Parameters
         ----------
-        configuration : pd.DataFrame
-            Pandas dataframe with a single row. Column names are the parameter names
+        configuration : pd.Series
+            Pandas series. Column names are the parameter names
             of the target parameter space.
 
         Returns
         -------
-        configuration : pd.DataFrame
-            Pandas dataframe with a single row, containing the translated configuration.
+        configuration : pd.Series
+            Pandas series, containing the translated configuration.
             Column names are the parameter names of the original parameter space.
         """
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
-    def inverse_transform(self, configurations: pd.DataFrame) -> pd.DataFrame:
+    def inverse_transform(self, configurations: pd.Series) -> pd.Series:
         """
         Translates a configuration, which belongs to the original parameter space, to
         the target parameter space. This method is called by the `register` method of
@@ -74,15 +74,15 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
 
         Parameters
         ----------
-        configurations : pd.DataFrame
-            Dataframe of configurations / parameters, which belong to the original parameter space.
+        configurations : pd.Series
+            Series of configurations / parameters, which belong to the original parameter space.
             The columns are the parameter names the original parameter space and the
             rows are the configurations.
 
         Returns
         -------
-        configurations : pd.DataFrame
-            Dataframe of the translated configurations / parameters.
+        configurations : pd.Series
+            Series of the translated configurations / parameters.
             The columns are the parameter names of the target parameter space and
             the rows are the configurations.
         """

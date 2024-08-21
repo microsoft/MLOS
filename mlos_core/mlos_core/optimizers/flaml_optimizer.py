@@ -11,7 +11,7 @@ import ConfigSpace
 import numpy as np
 import pandas as pd
 
-from mlos_core.optimizers.observations import Observation, Suggestion
+from mlos_core.optimizers.observations import Observation, Observations, Suggestion
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.util import normalize_config
@@ -95,53 +95,40 @@ class FlamlOptimizer(BaseOptimizer):
 
     def _register(self, *, observation: Observation) -> None:
         """
-        Registers the given configs and scores.
+        Registers the given config and scores.
 
         Parameters
         ----------
-        configs : pd.DataFrame
-            Dataframe of configs / parameters. The columns are parameter names and
-            the rows are the configs.
-
-        scores : pd.DataFrame
-            Scores from running the configs. The index is the same as the index of the configs.
-
-        context : None
-            Not Yet Implemented.
-
-        metadata : None
-            Not Yet Implemented.
+        observation : Observation
+            The observation to register.
         """
         if observation.context is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observation.context.columns)}",
+                f"Not Implemented: Ignoring context {list(observation.context.index)}",
                 UserWarning,
             )
         if observation.metadata is not None:
             warn(
-                f"Not Implemented: Ignoring metadata {list(observation.metadata.columns)}",
+                f"Not Implemented: Ignoring metadata {list(observation.metadata.index)}",
                 UserWarning,
             )
 
-        assert isinstance(observation.config, pd.DataFrame)
-        assert isinstance(observation.score, pd.DataFrame)
-        for (_, config), (_, score) in zip(
-            observation.config.astype("O").iterrows(), observation.score.iterrows()
-        ):
-            cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
-                self.optimizer_parameter_space, values=config.to_dict()
-            )
-            if cs_config in self.evaluated_samples:
-                warn(f"Configuration {config} was already registered", UserWarning)
-            self.evaluated_samples[cs_config] = EvaluatedSample(
-                config=config.to_dict(),
-                score=float(np.average(score.astype(float), weights=self._objective_weights)),
-            )
+        cs_config: ConfigSpace.Configuration = observation.to_suggestion().config_to_configspace(
+            self.optimizer_parameter_space
+        )
+        if cs_config in self.evaluated_samples:
+            warn(f"Configuration {cs_config} was already registered", UserWarning)
+        self.evaluated_samples[cs_config] = EvaluatedSample(
+            config=dict(cs_config),
+            score=float(
+                np.average(observation.score.astype(float), weights=self._objective_weights)
+            ),
+        )
 
     def _suggest(
         self,
         *,
-        context: Optional[pd.DataFrame] = None,
+        context: Optional[pd.Series] = None,
     ) -> Suggestion:
         """
         Suggests a new configuration.
@@ -155,16 +142,16 @@ class FlamlOptimizer(BaseOptimizer):
 
         Returns
         -------
-        configuration : pd.DataFrame
+        configuration : pd.Series
             Pandas dataframe with a single row. Column names are the parameter names.
 
         metadata : None
             Not implemented.
         """
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+            warn(f"Not Implemented: Ignoring context {list(context.index)}", UserWarning)
         config: dict = self._get_next_config()
-        return Suggestion(config=pd.DataFrame(config, index=[0]), context=context, metadata=None)
+        return Suggestion(config=pd.Series(config, dtype=object), context=context, metadata=None)
 
     def register_pending(self, *, pending: Suggestion) -> None:
         raise NotImplementedError()

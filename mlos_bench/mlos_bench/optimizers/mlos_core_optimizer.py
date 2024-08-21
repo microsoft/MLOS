@@ -29,7 +29,7 @@ from mlos_core.optimizers import (
     OptimizerType,
     SpaceAdapterType,
 )
-from mlos_core.optimizers.observations import Observation
+from mlos_core.optimizers.observations import Observations
 
 _LOG = logging.getLogger(__name__)
 
@@ -129,7 +129,7 @@ class MlosCoreOptimizer(Optimizer):
 
         # TODO: Specify (in the config) which metrics to pass to the optimizer.
         # Issue: https://github.com/microsoft/MLOS/issues/745
-        self._opt.register(observation=Observation(config=df_configs, score=df_scores))
+        self._opt.register(observations=Observations(config=df_configs, score=df_scores))
 
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
@@ -202,9 +202,7 @@ class MlosCoreOptimizer(Optimizer):
         suggestion = self._opt.suggest(defaults=self._start_with_defaults)
         self._start_with_defaults = False
         _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, suggestion.config)
-        return tunables.assign(
-            configspace_data_to_tunable_values(suggestion.config.loc[0].to_dict())
-        )
+        return tunables.assign(configspace_data_to_tunable_values(suggestion.config.to_dict()))
 
     def register(
         self,
@@ -224,7 +222,7 @@ class MlosCoreOptimizer(Optimizer):
             # TODO: Specify (in the config) which metrics to pass to the optimizer.
             # Issue: https://github.com/microsoft/MLOS/issues/745
             self._opt.register(
-                observation=Observation(
+                observations=Observations(
                     config=df_config,
                     score=pd.DataFrame([registered_score], dtype=float),
                 )

@@ -95,65 +95,53 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         """Get the parameter space, which is explored by the underlying optimizer."""
         return self._target_config_space
 
-    def inverse_transform(self, configurations: pd.DataFrame) -> pd.DataFrame:
-        target_configurations = []
-        for _, config in configurations.astype("O").iterrows():
-            configuration = ConfigSpace.Configuration(
-                self.orig_parameter_space,
-                values=config.to_dict(),
-            )
-
-            target_config = self._suggested_configs.get(configuration, None)
-            # NOTE: HeSBO is a non-linear projection method, and does not inherently
-            # support inverse projection
-            # To (partly) support this operation, we keep track of the suggested
-            # low-dim point(s) along with the respective high-dim point; this way we
-            # can retrieve the low-dim point, from its high-dim counterpart.
-            if target_config is None:
-                # Inherently it is not supported to register points, which were not
-                # suggested by the optimizer.
-                if configuration == self.orig_parameter_space.get_default_configuration():
-                    # Default configuration should always be registerable.
-                    pass
-                elif not self._use_approximate_reverse_mapping:
-                    raise ValueError(
-                        f"{repr(configuration)}\n"
-                        "The above configuration was not suggested by the optimizer. "
-                        "Approximate reverse mapping is currently disabled; "
-                        "thus *only* configurations suggested "
-                        "previously by the optimizer can be registered."
-                    )
-
-                # ...yet, we try to support that by implementing an approximate
-                # reverse mapping using pseudo-inverse matrix.
-                if getattr(self, "_pinv_matrix", None) is None:
-                    self._try_generate_approx_inverse_mapping()
-
-                # Replace NaNs with zeros for inactive hyperparameters
-                config_vector = np.nan_to_num(configuration.get_array(), nan=0.0)
-                # Perform approximate reverse mapping
-                # NOTE: applying special value biasing is not possible
-                vector = self._config_scaler.inverse_transform([config_vector])[0]
-                target_config_vector = self._pinv_matrix.dot(vector)
-                target_config = ConfigSpace.Configuration(
-                    self.target_parameter_space,
-                    vector=target_config_vector,
-                )
-
-            target_configurations.append(target_config)
-
-        return pd.DataFrame(
-            target_configurations, columns=list(self.target_parameter_space.keys())
+    def inverse_transform(self, configuration: pd.Series) -> pd.Series:
+        config = ConfigSpace.Configuration(
+            self.orig_parameter_space,
+            values=configuration.dropna().to_dict(),
         )
 
-    def transform(self, configuration: pd.DataFrame) -> pd.DataFrame:
-        if len(configuration) != 1:
-            raise ValueError(
-                "Configuration dataframe must contain exactly 1 row. "
-                f"Found {len(configuration)} rows."
+        target_config = self._suggested_configs.get(config, None)
+        # NOTE: HeSBO is a non-linear projection method, and does not inherently
+        # support inverse projection
+        # To (partly) support this operation, we keep track of the suggested
+        # low-dim point(s) along with the respective high-dim point; this way we
+        # can retrieve the low-dim point, from its high-dim counterpart.
+        if target_config is None:
+            # Inherently it is not supported to register points, which were not
+            # suggested by the optimizer.
+            if config == self.orig_parameter_space.get_default_configuration():
+                # Default configuration should always be registerable.
+                pass
+            elif not self._use_approximate_reverse_mapping:
+                raise ValueError(
+                    f"{repr(config)}\n"
+                    "The above configuration was not suggested by the optimizer. "
+                    "Approximate reverse mapping is currently disabled; "
+                    "thus *only* configurations suggested "
+                    "previously by the optimizer can be registered."
+                )
+
+            # ...yet, we try to support that by implementing an approximate
+            # reverse mapping using pseudo-inverse matrix.
+            if getattr(self, "_pinv_matrix", None) is None:
+                self._try_generate_approx_inverse_mapping()
+
+            # Replace NaNs with zeros for inactive hyperparameters
+            config_vector = np.nan_to_num(config.get_array(), nan=0.0)
+            # Perform approximate reverse mapping
+            # NOTE: applying special value biasing is not possible
+            vector = self._config_scaler.inverse_transform([config_vector])[0]
+            target_config_vector = self._pinv_matrix.dot(vector)
+            target_config = ConfigSpace.Configuration(
+                self.target_parameter_space,
+                vector=target_config_vector,
             )
 
-        target_values_dict = configuration.iloc[0].to_dict()
+        return pd.Series(target_config, index=list(self.target_parameter_space.keys()))
+
+    def transform(self, configuration: pd.Series) -> pd.Series:
+        target_values_dict = configuration.to_dict()
         target_configuration = ConfigSpace.Configuration(
             self.target_parameter_space,
             values=target_values_dict,
@@ -165,9 +153,10 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         # Add to inverse dictionary -- needed for registering the performance later
         self._suggested_configs[orig_configuration] = target_configuration
 
-        return pd.DataFrame(
-            [list(orig_configuration.values())], columns=list(orig_configuration.keys())
+        ret: pd.Series = pd.Series(
+            list(orig_configuration.values()), index=list(orig_configuration.keys())
         )
+        return ret
 
     def _construct_low_dim_space(
         self,

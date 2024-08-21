@@ -18,7 +18,7 @@ from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
 from mlos_core.optimizers.observations import Suggestion
-from mlos_core.util import config_to_dataframe
+from mlos_core.util import config_to_series
 
 # For debugging purposes output some warnings which are captured with failed tests.
 DEBUG = True
@@ -41,7 +41,7 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
             # pylint: disable=protected-access
             if isinstance(opt, MlosCoreOptimizer) and isinstance(opt._opt, SmacOptimizer):
                 config = tunable_values_to_configuration(tunables)
-                config_df = config_to_dataframe(config)
+                config_df = config_to_series(config)
                 logger("config: %s", str(config))
                 try:
                     logger(

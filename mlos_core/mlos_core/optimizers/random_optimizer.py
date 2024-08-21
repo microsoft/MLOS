@@ -9,7 +9,7 @@ from warnings import warn
 
 import pandas as pd
 
-from mlos_core.optimizers.observations import Observation, Suggestion
+from mlos_core.optimizers.observations import Observation, Observations, Suggestion
 from mlos_core.optimizers.optimizer import BaseOptimizer
 
 
@@ -32,27 +32,17 @@ class RandomOptimizer(BaseOptimizer):
 
         Parameters
         ----------
-        configs : pd.DataFrame
-            Dataframe of configs / parameters. The columns are parameter names and
-            the rows are the configs.
-
-        scores : pd.DataFrame
-            Scores from running the configs. The index is the same as the index of the configs.
-
-        context : None
-            Not Yet Implemented.
-
-        metadata : None
-            Not Yet Implemented.
+        observations : Observations
+            The observations to register.
         """
         if observation.context is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observation.context.columns)}",
+                f"Not Implemented: Ignoring context {list(observation.context.index)}",
                 UserWarning,
             )
         if observation.metadata is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observation.metadata.columns)}",
+                f"Not Implemented: Ignoring context {list(observation.metadata.index)}",
                 UserWarning,
             )
         # should we pop them from self.pending_observations?
@@ -60,7 +50,7 @@ class RandomOptimizer(BaseOptimizer):
     def _suggest(
         self,
         *,
-        context: Optional[pd.DataFrame] = None,
+        context: Optional[pd.Series] = None,
     ) -> Suggestion:
         """
         Suggests a new configuration.
@@ -79,11 +69,9 @@ class RandomOptimizer(BaseOptimizer):
         """
         if context is not None:
             # not sure how that works here?
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+            warn(f"Not Implemented: Ignoring context {list(context.index)}", UserWarning)
         return Suggestion(
-            config=pd.DataFrame(
-                dict(self.optimizer_parameter_space.sample_configuration()), index=[0]
-            ),
+            config=pd.Series(self.optimizer_parameter_space.sample_configuration(), dtype=object),
             context=context,
             metadata=None,
         )

@@ -37,8 +37,8 @@ def test_context_not_implemented_warning(
         **kwargs,
     )
     suggestion = optimizer.suggest()
-    scores = pd.DataFrame({"score": [1]})
-    context = pd.DataFrame([["something"]])
+    scores = pd.Series({"score": [1]})
+    context = pd.Series([["something"]])
     suggestion.context = context
 
     with pytest.raises(UserWarning):
