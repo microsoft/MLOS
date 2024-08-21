@@ -28,7 +28,6 @@ def monkey_patch_hp_quantization(hp: Hyperparameter) -> Hyperparameter:
     hp : Hyperparameter
         Patched hyperparameter.
     """
-
     if not isinstance(hp, NumericalHyperparameter):
         return hp
 
