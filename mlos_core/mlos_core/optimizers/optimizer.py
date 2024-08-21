@@ -14,7 +14,6 @@ import numpy.typing as npt
 import pandas as pd
 
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
-from mlos_core.spaces.converters.util import monkey_patch_cs_quantization
 from mlos_core.util import config_to_dataframe
 
 
@@ -45,9 +44,6 @@ class BaseOptimizer(metaclass=ABCMeta):
         space_adapter : BaseSpaceAdapter
             The space adapter class to employ for parameter space transformations.
         """
-        # Temporary workaround to dropped quantization support in ConfigSpace 1.0
-        # See Also: https://github.com/automl/ConfigSpace/issues/390
-        monkey_patch_cs_quantization(parameter_space)
         self.parameter_space: ConfigSpace.ConfigurationSpace = parameter_space
         self.optimizer_parameter_space: ConfigSpace.ConfigurationSpace = (
             parameter_space if space_adapter is None else space_adapter.target_parameter_space

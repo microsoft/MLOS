@@ -32,51 +32,38 @@ def construct_parameter_space(  # pylint: disable=too-many-arguments
     seed: int = 1234,
 ) -> CS.ConfigurationSpace:
     """Helper function for construct an instance of `ConfigSpace.ConfigurationSpace`."""
-    input_space = CS.ConfigurationSpace(seed=seed)
-
-    for idx in range(n_continuous_params):
-        input_space.add(
-            CS.UniformFloatHyperparameter(
-                name=f"cont_{idx}",
-                lower=0,
-                upper=64,
-            )
-        )
-    for idx in range(n_quantized_continuous_params):
-        input_space.add(
-            CS.UniformFloatHyperparameter(
-                name=f"cont_{idx}",
-                lower=0,
-                upper=64,
-                meta={QUANTIZATION_BINS_META_KEY: 6},
-            )
-        )
-    for idx in range(n_integer_params):
-        input_space.add(
-            CS.UniformIntegerHyperparameter(
-                name=f"int_{idx}",
-                lower=-1,
-                upper=256,
-            )
-        )
-    for idx in range(n_quantized_integer_params):
-        input_space.add(
-            CS.UniformIntegerHyperparameter(
-                name=f"int_{idx}",
-                lower=0,
-                upper=256,
-                meta={QUANTIZATION_BINS_META_KEY: 17},
-            )
-        )
-    for idx in range(n_categorical_params):
-        input_space.add(
-            CS.CategoricalHyperparameter(
-                name=f"str_{idx}", choices=[f"option_{idx}" for idx in range(5)]
-            )
-        )
-
-    monkey_patch_cs_quantization(input_space)
-    return input_space
+    input_space = CS.ConfigurationSpace(
+        seed=seed,
+        space=[
+            *(
+                CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64)
+                for idx in range(n_continuous_params)
+            ),
+            *(
+                CS.UniformFloatHyperparameter(
+                    name=f"cont_{idx}", lower=0, upper=64, meta={QUANTIZATION_BINS_META_KEY: 6}
+                )
+                for idx in range(n_quantized_continuous_params)
+            ),
+            *(
+                CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=-1, upper=256)
+                for idx in range(n_integer_params)
+            ),
+            *(
+                CS.UniformIntegerHyperparameter(
+                    name=f"int_{idx}", lower=0, upper=256, meta={QUANTIZATION_BINS_META_KEY: 17}
+                )
+                for idx in range(n_quantized_integer_params)
+            ),
+            *(
+                CS.CategoricalHyperparameter(
+                    name=f"str_{idx}", choices=[f"option_{idx}" for idx in range(5)]
+                )
+                for idx in range(n_categorical_params)
+            ),
+        ],
+    )
+    return monkey_patch_cs_quantization(input_space)
 
 
 @pytest.mark.parametrize(

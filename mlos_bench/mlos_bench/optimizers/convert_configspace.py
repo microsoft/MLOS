@@ -80,6 +80,10 @@ def _tunable_to_configspace(
     meta: Dict[Hashable, TunableValue] = {"cost": cost}
     if group_name is not None:
         meta["group"] = group_name
+    if tunable.is_numerical and tunable.quantization_bins:
+        # Temporary workaround to dropped quantization support in ConfigSpace 1.0
+        # See Also: https://github.com/automl/ConfigSpace/issues/390
+        meta[QUANTIZATION_BINS_META_KEY] = tunable.quantization_bins
 
     if tunable.type == "categorical":
         return ConfigurationSpace(
@@ -140,16 +144,9 @@ def _tunable_to_configspace(
     else:
         raise TypeError(f"Invalid Parameter Type: {tunable.type}")
 
-    if tunable.is_numerical and tunable.quantization_bins:
-        # Temporary workaround to dropped quantization support in ConfigSpace 1.0
-        # See Also: https://github.com/automl/ConfigSpace/issues/390
-        new_meta = dict(range_hp.meta or {})
-        new_meta[QUANTIZATION_BINS_META_KEY] = tunable.quantization_bins
-        range_hp.meta = new_meta
-        monkey_patch_hp_quantization(range_hp)
-
+    monkey_patch_hp_quantization(range_hp)
     if not tunable.special:
-        return ConfigurationSpace({tunable.name: range_hp})
+        return ConfigurationSpace(space=[range_hp])
 
     # Compute the probabilities of switching between regular and special values.
     special_weights: Optional[List[float]] = None
@@ -162,30 +159,33 @@ def _tunable_to_configspace(
     # one for special values, and one to choose between the two.
     (special_name, type_name) = special_param_names(tunable.name)
     conf_space = ConfigurationSpace(
-        {
-            tunable.name: range_hp,
-            special_name: CategoricalHyperparameter(
+        space=[
+            range_hp,
+            CategoricalHyperparameter(
                 name=special_name,
                 choices=tunable.special,
                 weights=special_weights,
                 default_value=tunable.default if tunable.default in tunable.special else NotSet,
                 meta=meta,
             ),
-            type_name: CategoricalHyperparameter(
+            CategoricalHyperparameter(
                 name=type_name,
                 choices=[TunableValueKind.SPECIAL, TunableValueKind.RANGE],
                 weights=switch_weights,
                 default_value=TunableValueKind.SPECIAL,
             ),
-        }
+        ]
     )
     conf_space.add(
-        EqualsCondition(conf_space[special_name], conf_space[type_name], TunableValueKind.SPECIAL)
+        [
+            EqualsCondition(
+                conf_space[special_name], conf_space[type_name], TunableValueKind.SPECIAL
+            ),
+            EqualsCondition(
+                conf_space[tunable.name], conf_space[type_name], TunableValueKind.RANGE
+            ),
+        ]
     )
-    conf_space.add(
-        EqualsCondition(conf_space[tunable.name], conf_space[type_name], TunableValueKind.RANGE)
-    )
-
     return conf_space
 
 

@@ -47,20 +47,20 @@ def configuration_space() -> ConfigurationSpace:
 
     # NOTE: FLAML requires distribution to be uniform
     spaces = ConfigurationSpace(
-        {
-            "vmSize": CategoricalHyperparameter(
+        space=[
+            CategoricalHyperparameter(
                 name="vmSize",
                 choices=["Standard_B2s", "Standard_B2ms", "Standard_B4ms"],
                 default_value="Standard_B4ms",
                 meta={"group": "provision", "cost": 0},
             ),
-            "idle": CategoricalHyperparameter(
+            CategoricalHyperparameter(
                 name="idle",
                 choices=["halt", "mwait", "noidle"],
                 default_value="halt",
                 meta={"group": "boot", "cost": 0},
             ),
-            "kernel_sched_latency_ns": Integer(
+            Integer(
                 name="kernel_sched_latency_ns",
                 bounds=(0, 1000000000),
                 log=False,
@@ -71,44 +71,43 @@ def configuration_space() -> ConfigurationSpace:
                     QUANTIZATION_BINS_META_KEY: 11,
                 },
             ),
-            "kernel_sched_migration_cost_ns": Integer(
+            Integer(
                 name="kernel_sched_migration_cost_ns",
                 bounds=(0, 500000),
                 log=False,
                 default=250000,
                 meta={"group": "kernel", "cost": 0},
             ),
-            kernel_sched_migration_cost_ns_special: CategoricalHyperparameter(
+            CategoricalHyperparameter(
                 name=kernel_sched_migration_cost_ns_special,
                 choices=[-1, 0],
                 weights=[0.5, 0.5],
                 default_value=-1,
                 meta={"group": "kernel", "cost": 0},
             ),
-            kernel_sched_migration_cost_ns_type: CategoricalHyperparameter(
+            CategoricalHyperparameter(
                 name=kernel_sched_migration_cost_ns_type,
                 choices=[TunableValueKind.SPECIAL, TunableValueKind.RANGE],
                 weights=[0.5, 0.5],
                 default_value=TunableValueKind.SPECIAL,
             ),
-        }
+        ]
     )
     spaces.add(
-        EqualsCondition(
-            spaces[kernel_sched_migration_cost_ns_special],
-            spaces[kernel_sched_migration_cost_ns_type],
-            TunableValueKind.SPECIAL,
-        )
+        [
+            EqualsCondition(
+                spaces[kernel_sched_migration_cost_ns_special],
+                spaces[kernel_sched_migration_cost_ns_type],
+                TunableValueKind.SPECIAL,
+            ),
+            EqualsCondition(
+                spaces["kernel_sched_migration_cost_ns"],
+                spaces[kernel_sched_migration_cost_ns_type],
+                TunableValueKind.RANGE,
+            ),
+        ]
     )
-    spaces.add(
-        EqualsCondition(
-            spaces["kernel_sched_migration_cost_ns"],
-            spaces[kernel_sched_migration_cost_ns_type],
-            TunableValueKind.RANGE,
-        )
-    )
-    monkey_patch_cs_quantization(spaces)
-    return spaces
+    return monkey_patch_cs_quantization(spaces)
 
 
 def _cmp_tunable_hyperparameter_categorical(tunable: Tunable, space: ConfigurationSpace) -> None:
