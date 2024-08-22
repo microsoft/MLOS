@@ -6,6 +6,7 @@
 
 import json
 import logging
+from datetime import datetime
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import requests
@@ -99,15 +100,24 @@ class AzureVMService(
         "?api-version=2022-03-01"
     )
 
-    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/run-command
+    # From: https://learn.microsoft.com/en-us/rest/api/compute/virtual-machine-run-commands/create-or-update
     _URL_REXEC_RUN = (
         "https://management.azure.com"
         "/subscriptions/{subscription}"
         "/resourceGroups/{resource_group}"
         "/providers/Microsoft.Compute"
         "/virtualMachines/{vm_name}"
-        "/runCommand"
-        "?api-version=2022-03-01"
+        "/runcommands/{command_name}"
+        "?api-version=2024-07-01"
+    )
+    _URL_REXEC_RESULT = (
+        "https://management.azure.com"
+        "/subscriptions/{subscription}"
+        "/resourceGroups/{resource_group}"
+        "/providers/Microsoft.Compute"
+        "/virtualMachines/{vm_name}"
+        "/runcommands/{command_name}"
+        "?$expand=instanceView&api-version=2024-07-01"
     )
 
     def __init__(
@@ -481,6 +491,8 @@ class AzureVMService(
                 "subscription",
                 "resourceGroup",
                 "vmName",
+                "commandName",
+                "location",
             ],
         )
 
@@ -488,21 +500,28 @@ class AzureVMService(
             _LOG.info("Run a script on VM: %s\n  %s", config["vmName"], "\n  ".join(script))
 
         json_req = {
-            "commandId": "RunShellScript",
-            "script": list(script),
-            "parameters": [{"name": key, "value": val} for (key, val) in env_params.items()],
+            "location": config["location"],
+            "properties": {
+                "source": {
+                    "script": "; ".join(script)
+                },
+                "parameters": [{"name": key, "value": val} for (key, val) in env_params.items()],
+                "timeoutInSeconds": int(self._poll_timeout),
+                "treatFailureAsDeploymentFailure": True,
+            },
         }
 
         url = self._URL_REXEC_RUN.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
+            command_name=config["commandName"],
         )
 
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Request: POST %s\n%s", url, json.dumps(json_req, indent=2))
+            _LOG.debug("Request: PUT %s\n%s", url, json.dumps(json_req, indent=2))
 
-        response = requests.post(
+        response = requests.put(
             url,
             json=json_req,
             headers=self._get_headers(),
@@ -518,17 +537,13 @@ class AzureVMService(
         else:
             _LOG.info("Response: %s", response)
 
-        if response.status_code == 200:
-            # TODO: extract the results from JSON response
-            return (Status.SUCCEEDED, config)
-        elif response.status_code == 202:
+        if response.status_code in (200, 201):
             return (
                 Status.PENDING,
                 {**config, "asyncResultsUrl": response.headers.get("Azure-AsyncOperation")},
             )
         else:
             _LOG.error("Response: %s :: %s", response, response.text)
-            # _LOG.error("Bad Request:\n%s", response.request.body)
             return (Status.FAILED, {})
 
     def get_remote_exec_results(self, config: dict) -> Tuple[Status, dict]:
@@ -547,7 +562,8 @@ class AzureVMService(
         result : (Status, dict)
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
-            A dict can have an "stdout" key with the remote output.
+            A dict can have an "stdout" key with the remote output
+            and an "stderr" key for errors / warnings.
         """
         _LOG.info("Check the results on VM: %s", config.get("vmName"))
         (status, result) = self.wait_host_operation(config)
@@ -555,5 +571,36 @@ class AzureVMService(
         if not status.is_succeeded():
             # TODO: Extract the telemetry and status from stdout, if available
             return (status, result)
-        val = result.get("properties", {}).get("output", {}).get("value", [])
-        return (status, {"stdout": val[0].get("message", "")} if val else {})
+
+        url = self._URL_REXEC_RESULT.format(
+            subscription=config["subscription"],
+            resource_group=config["resourceGroup"],
+            vm_name=config["vmName"],
+            command_name=config["commandName"],
+        )
+
+        session = self._get_session(config)
+        response = session.get(url, timeout=self._request_timeout)
+
+        if not response.status_code == 200:
+            _LOG.error("Response: %s :: %s", response, response.text)
+            return (Status.FAILED, {})
+
+        result = response.json().get("properties", {}).get("instanceView", {})
+        exit_code = result.get("exitCode")
+        execution_state = result.get("executionState")
+        outputs = result.get("output", "").strip().split("\n")
+        errors = result.get("error", "").strip().split("\n")
+
+        if execution_state == "Succeeded" and exit_code == 0:
+            status = Status.SUCCEEDED
+        else:
+            status = Status.FAILED
+
+        return (status, {
+            "stdout": outputs,
+            "stderr": errors,
+            "exitCode": exit_code,
+            "startTimestamp": datetime.fromisoformat(result["startTime"]),
+            "endTimestamp": datetime.fromisoformat(result["endTime"]),
+        })

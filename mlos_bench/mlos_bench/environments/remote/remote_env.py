@@ -9,6 +9,7 @@ e.g. Application Environment
 """
 
 import logging
+import re
 from datetime import datetime
 from typing import Dict, Iterable, Optional, Tuple
 
@@ -175,10 +176,14 @@ class RemoteEnv(ScriptEnv):
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
         env_params = self._get_env_params()
+        command_name = re.sub(r"\W+", "-", self.name).lower()
         _LOG.debug("Submit script: %s with %s", self, env_params)
         (status, output) = self._remote_exec_service.remote_exec(
             script,
-            config=self._params,
+            config={
+                **self._params,
+                "commandName": command_name,
+            },
             env_params=env_params,
         )
         _LOG.debug("Script submitted: %s %s :: %s", self, status, output)
