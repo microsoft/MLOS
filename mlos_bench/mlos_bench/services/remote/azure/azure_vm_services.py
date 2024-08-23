@@ -100,7 +100,8 @@ class AzureVMService(
         "?api-version=2022-03-01"
     )
 
-    # From: https://learn.microsoft.com/en-us/rest/api/compute/virtual-machine-run-commands/create-or-update
+    # From:
+    # https://learn.microsoft.com/en-us/rest/api/compute/virtual-machine-run-commands/create-or-update
     _URL_REXEC_RUN = (
         "https://management.azure.com"
         "/subscriptions/{subscription}"
@@ -502,9 +503,7 @@ class AzureVMService(
         json_req = {
             "location": config["location"],
             "properties": {
-                "source": {
-                    "script": "; ".join(script)
-                },
+                "source": {"script": "; ".join(script)},
                 "parameters": [{"name": key, "value": val} for (key, val) in env_params.items()],
                 "timeoutInSeconds": int(self._poll_timeout),
                 "treatFailureAsDeploymentFailure": True,
@@ -537,7 +536,7 @@ class AzureVMService(
         else:
             _LOG.info("Response: %s", response)
 
-        if response.status_code in (200, 201):
+        if response.status_code in {200, 201}:
             return (
                 Status.PENDING,
                 {**config, "asyncResultsUrl": response.headers.get("Azure-AsyncOperation")},
@@ -597,10 +596,13 @@ class AzureVMService(
         else:
             status = Status.FAILED
 
-        return (status, {
-            "stdout": outputs,
-            "stderr": errors,
-            "exitCode": exit_code,
-            "startTimestamp": datetime.fromisoformat(result["startTime"]),
-            "endTimestamp": datetime.fromisoformat(result["endTime"]),
-        })
+        return (
+            status,
+            {
+                "stdout": outputs,
+                "stderr": errors,
+                "exitCode": exit_code,
+                "startTimestamp": datetime.fromisoformat(result["startTime"]),
+                "endTimestamp": datetime.fromisoformat(result["endTime"]),
+            },
+        )
