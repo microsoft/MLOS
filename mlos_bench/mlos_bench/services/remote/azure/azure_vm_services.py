@@ -261,7 +261,7 @@ class AzureVMService(
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
-        _LOG.info("Wait for run command % on VM %s", params["commandName"], params["vmName"])
+        _LOG.info("Wait for run command %s on VM %s", params["commandName"], params["vmName"])
         return self._wait_while(self._check_remote_exec_status, Status.RUNNING, params)
 
     def wait_os_operation(self, params: dict) -> Tuple["Status", dict]:
@@ -618,7 +618,7 @@ class AzureVMService(
             execution_state = (
                 output.get("properties", {}).get("instanceView", {}).get("executionState")
             )
-            if execution_state == "Running":
+            if execution_state in {"Running", "Pending"}:
                 return Status.RUNNING, {}
             elif execution_state == "Succeeded":
                 return Status.SUCCEEDED, output
