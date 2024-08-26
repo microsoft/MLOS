@@ -618,7 +618,7 @@ class AzureVMService(
             execution_state = (
                 output.get("properties", {}).get("instanceView", {}).get("executionState")
             )
-            if execution_state in {"Running", "Pending"}:
+            if execution_state in {"Running", "Pending", "Unknown"}:
                 return Status.RUNNING, {}
             elif execution_state == "Succeeded":
                 return Status.SUCCEEDED, output
