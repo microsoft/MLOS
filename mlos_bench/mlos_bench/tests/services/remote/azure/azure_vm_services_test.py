@@ -311,7 +311,7 @@ def test_remote_exec_status(
 
 
 @patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
-def test_remote_exec_headers_output(
+def test_remote_exec_output(
     mock_requests: MagicMock,
     azure_vm_service_remote_exec_only: AzureVMService,
 ) -> None:
@@ -344,7 +344,6 @@ def test_remote_exec_headers_output(
     )
 
     assert async_url_key in cmd_output
-    assert cmd_output[async_url_key] == async_url_value
 
     assert mock_requests.put.call_args[1]["json"] == {
         "location": "TEST_LOCATION",
@@ -352,13 +351,14 @@ def test_remote_exec_headers_output(
             "source": {"script": "; ".join(script)},
             "parameters": [{"name": "param_1", "value": 123}, {"name": "param_2", "value": "abc"}],
             "timeoutInSeconds": 2,
+            "asyncExecution": True,
             "treatFailureAsDeploymentFailure": True,
         },
     }
 
 
 @pytest.mark.parametrize(
-    ("operation_status", "req_get_output", "results_output"),
+    ("operation_status", "wait_output", "results_output"),
     [
         (
             Status.SUCCEEDED,
@@ -389,32 +389,25 @@ def test_remote_exec_headers_output(
 def test_get_remote_exec_results(
     azure_vm_service_remote_exec_only: AzureVMService,
     operation_status: Status,
-    req_get_output: dict,
+    wait_output: dict,
     results_output: dict,
 ) -> None:
     """Test getting the results of the remote execution on Azure."""
     params = {
         "asyncResultsUrl": "DUMMY_ASYNC_URL",
-        "subscription": "TEST_SUB",
-        "resourceGroup": "TEST_RG",
-        "vmName": "TEST_VM",
-        "commandName": "TEST_COMMAND",
     }
 
-    mock_wait_host_operation = MagicMock()
-    mock_wait_host_operation.return_value = (operation_status, {})
-    # azure_vm_service.wait_host_operation = mock_wait_host_operation
-    setattr(azure_vm_service_remote_exec_only, "wait_host_operation", mock_wait_host_operation)
-
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.json = MagicMock(return_value=req_get_output)
-    mock_get_session = MagicMock()
-    mock_get_session.return_value.get.return_value = mock_response
-    setattr(azure_vm_service_remote_exec_only, "_get_session", mock_get_session)
+    mock_wait_remote_exec_operation = MagicMock()
+    mock_wait_remote_exec_operation.return_value = (operation_status, wait_output)
+    # azure_vm_service.wait_remote_exec_operation = mock_wait_remote_exec_operation
+    setattr(
+        azure_vm_service_remote_exec_only,
+        "wait_remote_exec_operation",
+        mock_wait_remote_exec_operation,
+    )
 
     status, cmd_output = azure_vm_service_remote_exec_only.get_remote_exec_results(params)
 
     assert status == operation_status
-    assert mock_wait_host_operation.call_args[0][0] == params
+    assert mock_wait_remote_exec_operation.call_args[0][0] == params
     assert cmd_output == results_output

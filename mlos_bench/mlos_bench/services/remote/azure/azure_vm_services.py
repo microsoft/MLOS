@@ -242,6 +242,28 @@ class AzureVMService(
         params.setdefault(f"{params['vmName']}-deployment")
         return self._wait_while(self._check_operation_status, Status.RUNNING, params)
 
+    def wait_remote_exec_operation(self, params: dict) -> Tuple["Status", dict]:
+        """
+        Waits for a pending remote execution on an Azure VM to resolve to SUCCEEDED or
+        FAILED. Return TIMED_OUT when timing out.
+
+        Parameters
+        ----------
+        params: dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+            Must have the "asyncResultsUrl" key to get the results.
+            If the key is not present, return Status.PENDING.
+
+        Returns
+        -------
+        result : (Status, dict)
+            A pair of Status and result.
+            Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+            Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+        """
+        _LOG.info("Wait for run command % on VM %s", params["commandName"], params["vmName"])
+        return self._wait_while(self._check_remote_exec_status, Status.RUNNING, params)
+
     def wait_os_operation(self, params: dict) -> Tuple["Status", dict]:
         return self.wait_host_operation(params)
 
@@ -506,6 +528,7 @@ class AzureVMService(
                 "source": {"script": "; ".join(script)},
                 "parameters": [{"name": key, "value": val} for (key, val) in env_params.items()],
                 "timeoutInSeconds": int(self._poll_timeout),
+                "asyncExecution": True,
                 "treatFailureAsDeploymentFailure": True,
             },
         }
@@ -537,13 +560,71 @@ class AzureVMService(
             _LOG.info("Response: %s", response)
 
         if response.status_code in {200, 201}:
+            results_url = self._URL_REXEC_RESULT.format(
+                subscription=config["subscription"],
+                resource_group=config["resourceGroup"],
+                vm_name=config["vmName"],
+                command_name=config["commandName"],
+            )
             return (
                 Status.PENDING,
-                {**config, "asyncResultsUrl": response.headers.get("Azure-AsyncOperation")},
+                {**config, "asyncResultsUrl": results_url},
             )
         else:
             _LOG.error("Response: %s :: %s", response, response.text)
             return (Status.FAILED, {})
+
+    def _check_remote_exec_status(self, params: dict) -> Tuple[Status, dict]:
+        """
+        Checks the status of a pending remote execution on an Azure VM.
+
+        Parameters
+        ----------
+        params: dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+            Must have the "asyncResultsUrl" key to get the results.
+            If the key is not present, return Status.PENDING.
+
+        Returns
+        -------
+        result : (Status, dict)
+            A pair of Status and result.
+            Status is one of {PENDING, RUNNING, SUCCEEDED, FAILED}
+            Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+        """
+        url = params.get("asyncResultsUrl")
+        if url is None:
+            return Status.PENDING, {}
+
+        session = self._get_session(params)
+        try:
+            response = session.get(url, timeout=self._request_timeout)
+        except requests.exceptions.ReadTimeout:
+            _LOG.warning("Request timed out after %.2f s: %s", self._request_timeout, url)
+            return Status.RUNNING, {}
+        except requests.exceptions.RequestException as ex:
+            _LOG.exception("Error in request checking operation status", exc_info=ex)
+            return (Status.FAILED, {})
+
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug(
+                "Response: %s\n%s",
+                response,
+                json.dumps(response.json(), indent=2) if response.content else "",
+            )
+
+        if response.status_code == 200:
+            output = response.json()
+            execution_state = (
+                output.get("properties", {}).get("instanceView", {}).get("executionState")
+            )
+            if execution_state == "Running":
+                return Status.RUNNING, {}
+            elif execution_state == "Succeeded":
+                return Status.SUCCEEDED, output
+
+        _LOG.error("Response: %s :: %s", response, response.text)
+        return Status.FAILED, {}
 
     def get_remote_exec_results(self, config: dict) -> Tuple[Status, dict]:
         """
@@ -565,31 +646,17 @@ class AzureVMService(
             and an "stderr" key for errors / warnings.
         """
         _LOG.info("Check the results on VM: %s", config.get("vmName"))
-        (status, result) = self.wait_host_operation(config)
+        (status, result) = self.wait_remote_exec_operation(config)
         _LOG.debug("Result: %s :: %s", status, result)
         if not status.is_succeeded():
             # TODO: Extract the telemetry and status from stdout, if available
             return (status, result)
 
-        url = self._URL_REXEC_RESULT.format(
-            subscription=config["subscription"],
-            resource_group=config["resourceGroup"],
-            vm_name=config["vmName"],
-            command_name=config["commandName"],
-        )
-
-        session = self._get_session(config)
-        response = session.get(url, timeout=self._request_timeout)
-
-        if not response.status_code == 200:
-            _LOG.error("Response: %s :: %s", response, response.text)
-            return (Status.FAILED, {})
-
-        result = response.json().get("properties", {}).get("instanceView", {})
-        exit_code = result.get("exitCode")
-        execution_state = result.get("executionState")
-        outputs = result.get("output", "").strip().split("\n")
-        errors = result.get("error", "").strip().split("\n")
+        output = result.get("properties", {}).get("instanceView", {})
+        exit_code = output.get("exitCode")
+        execution_state = output.get("executionState")
+        outputs = output.get("output", "").strip().split("\n")
+        errors = output.get("error", "").strip().split("\n")
 
         if execution_state == "Succeeded" and exit_code == 0:
             status = Status.SUCCEEDED
@@ -602,7 +669,7 @@ class AzureVMService(
                 "stdout": outputs,
                 "stderr": errors,
                 "exitCode": exit_code,
-                "startTimestamp": datetime.fromisoformat(result["startTime"]),
-                "endTimestamp": datetime.fromisoformat(result["endTime"]),
+                "startTimestamp": datetime.fromisoformat(output["startTime"]),
+                "endTimestamp": datetime.fromisoformat(output["endTime"]),
             },
         )
