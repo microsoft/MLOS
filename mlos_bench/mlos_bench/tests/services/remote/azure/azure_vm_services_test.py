@@ -352,7 +352,6 @@ def test_remote_exec_output(
             "parameters": [{"name": "param_1", "value": 123}, {"name": "param_2", "value": "abc"}],
             "timeoutInSeconds": 2,
             "asyncExecution": True,
-            "treatFailureAsDeploymentFailure": True,
         },
     }
 

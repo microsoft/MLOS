@@ -529,7 +529,6 @@ class AzureVMService(
                 "parameters": [{"name": key, "value": val} for (key, val) in env_params.items()],
                 "timeoutInSeconds": int(self._poll_timeout),
                 "asyncExecution": True,
-                "treatFailureAsDeploymentFailure": True,
             },
         }
 
@@ -618,7 +617,7 @@ class AzureVMService(
             execution_state = (
                 output.get("properties", {}).get("instanceView", {}).get("executionState")
             )
-            if execution_state in {"Running", "Pending", "Unknown"}:
+            if execution_state in {"Running", "Pending"}:
                 return Status.RUNNING, {}
             elif execution_state == "Succeeded":
                 return Status.SUCCEEDED, output
