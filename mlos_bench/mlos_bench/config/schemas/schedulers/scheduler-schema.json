@@ -62,7 +62,9 @@
             "$comment": "required",
             "enum": [
                 "mlos_bench.schedulers.SyncScheduler",
-                "mlos_bench.schedulers.sync_scheduler.SyncScheduler"
+                "mlos_bench.schedulers.sync_scheduler.SyncScheduler",
+                "mlos_bench.schedulers.CyclicScheduler",
+                "mlos_bench.schedulers.cyclic_scheduler.CyclicScheduler"
             ]
         },
 
@@ -83,7 +85,9 @@
                     "class": {
                         "enum": [
                             "mlos_bench.schedulers.SyncScheduler",
-                            "mlos_bench.schedulers.sync_scheduler.SyncScheduler"
+                            "mlos_bench.schedulers.sync_scheduler.SyncScheduler",
+                            "mlos_bench.schedulers.CyclicScheduler",
+                            "mlos_bench.schedulers.cyclic_scheduler.CyclicScheduler"
                         ]
                     }
                 },
