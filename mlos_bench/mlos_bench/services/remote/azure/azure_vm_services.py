@@ -526,7 +526,9 @@ class AzureVMService(
             "location": config["location"],
             "properties": {
                 "source": {"script": "; ".join(script)},
-                "parameters": [{"name": key, "value": val} for (key, val) in env_params.items()],
+                "protectedParameters": [
+                    {"name": key, "value": val} for (key, val) in env_params.items()
+                ],
                 "timeoutInSeconds": int(self._poll_timeout),
                 "asyncExecution": True,
             },

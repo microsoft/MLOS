@@ -349,7 +349,10 @@ def test_remote_exec_output(
         "location": "TEST_LOCATION",
         "properties": {
             "source": {"script": "; ".join(script)},
-            "parameters": [{"name": "param_1", "value": 123}, {"name": "param_2", "value": "abc"}],
+            "protectedParameters": [
+                {"name": "param_1", "value": 123},
+                {"name": "param_2", "value": "abc"},
+            ],
             "timeoutInSeconds": 2,
             "asyncExecution": True,
         },
