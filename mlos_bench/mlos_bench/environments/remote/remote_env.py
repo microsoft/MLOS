@@ -33,6 +33,8 @@ class RemoteEnv(ScriptEnv):
     e.g. Application Environment
     """
 
+    _RE_SPECIAL = re.compile(r"\W+")
+
     def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
@@ -117,7 +119,8 @@ class RemoteEnv(ScriptEnv):
 
         if self._script_setup:
             _LOG.info("Set up the remote environment: %s", self)
-            (status, _timestamp, _output) = self._remote_exec(self._script_setup)
+            command_name = self._sanitized_cmd_name(suffix="setup")
+            (status, _timestamp, _output) = self._remote_exec(command_name, self._script_setup)
             _LOG.info("Remote set up complete: %s :: %s", self, status)
             self._is_ready = status.is_succeeded()
         else:
@@ -146,7 +149,8 @@ class RemoteEnv(ScriptEnv):
         if not (status.is_ready() and self._script_run):
             return result
 
-        (status, timestamp, output) = self._remote_exec(self._script_run)
+        command_name = self._sanitized_cmd_name(suffix="run")
+        (status, timestamp, output) = self._remote_exec(command_name, self._script_run)
         if status.is_succeeded() and output is not None:
             output = self._extract_stdout_results(output.get("stdout", ""))
         _LOG.info("Remote run complete: %s :: %s = %s", self, status, output)
@@ -156,11 +160,17 @@ class RemoteEnv(ScriptEnv):
         """Clean up and shut down the remote environment."""
         if self._script_teardown:
             _LOG.info("Remote teardown: %s", self)
-            (status, _timestamp, _output) = self._remote_exec(self._script_teardown)
+            command_name = self._sanitized_cmd_name(suffix="teardown")
+            (status, _timestamp, _output) = self._remote_exec(command_name, self._script_teardown)
             _LOG.info("Remote teardown complete: %s :: %s", self, status)
         super().teardown()
 
-    def _remote_exec(self, script: Iterable[str]) -> Tuple[Status, datetime, Optional[dict]]:
+    def _sanitized_cmd_name(self, suffix: str = "") -> str:
+        return "-".join([self._RE_SPECIAL.sub("-", self.name).lower(), suffix])
+
+    def _remote_exec(
+        self, command_name: str, script: Iterable[str]
+    ) -> Tuple[Status, datetime, Optional[dict]]:
         """
         Run a script on the remote host.
 
@@ -176,7 +186,6 @@ class RemoteEnv(ScriptEnv):
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
         env_params = self._get_env_params()
-        command_name = re.sub(r"\W+", "-", self.name).lower()
         _LOG.debug("Submit script: %s with %s", self, env_params)
         (status, output) = self._remote_exec_service.remote_exec(
             script,
