@@ -8,7 +8,12 @@ set -x
 
 set -eu
 scriptdir=$(dirname "$(readlink -f "$0")")
+repo_root=$(readlink -f "$scriptdir/../..")
+repo_name=$(basename "$repo_root")
 cd "$scriptdir/"
+
+DEVCONTAINER_IMAGE="devcontainer-cli:latest"
+MLOS_AUTOTUNING_IMAGE="mlos-devcontainer:latest"
 
 # Build the helper container that has the devcontainer CLI for building the devcontainer.
 NO_CACHE=${NO_CACHE:-} ./build-devcontainer-cli.sh
@@ -20,13 +25,13 @@ if [ -w /var/run/docker-host.sock ]; then
 fi
 
 # Build the devcontainer image.
-rootdir=$(readlink -f "$scriptdir/../..")
+rootdir="$repo_root"
 
 # Run the initialize command on the host first.
 # Note: command should already pull the cached image if possible.
 pwd
-devcontainer_json=$(cat "$rootdir/.devcontainer/devcontainer.json" | sed -e 's|//.*||' -e 's|/\*|\n&|g;s|*/|&\n|g' | sed -e '/\/\*/,/*\//d')
-initializeCommand=$(echo "$devcontainer_json" | docker run -i --rm devcontainer-cli jq -e -r '.initializeCommand[]')
+devcontainer_json=$(cat "$rootdir/.devcontainer/devcontainer.json" | sed -e 's|^\s*//.*||' -e 's|/\*|\n&|g;s|*/|&\n|g' | sed -e '/\/\*/,/*\//d')
+initializeCommand=$(echo "$devcontainer_json" | docker run -i --rm $DEVCONTAINER_IMAGE jq -e -r '.initializeCommand[]')
 if [ -z "$initializeCommand" ]; then
     echo "No initializeCommand found in devcontainer.json" >&2
     exit 1
@@ -61,10 +66,10 @@ docker run -i --rm \
     --env http_proxy=${http_proxy:-} \
     --env https_proxy=${https_proxy:-} \
     --env no_proxy=${no_proxy:-} \
-    devcontainer-cli \
+    $DEVCONTAINER_IMAGE \
     devcontainer build --workspace-folder /src \
         $devcontainer_build_args \
-        --image-name mlos-devcontainer:latest
+        --image-name $MLOS_AUTOTUNING_IMAGE
 if [ "${CONTAINER_REGISTRY:-}" != '' ]; then
     docker tag mlos-devcontainer:latest "$CONTAINER_REGISTRY/mlos-devcontainer:latest"
 fi
