@@ -139,7 +139,7 @@ class Scheduler(metaclass=ABCMeta):
         """
         Gets the root (prototypical) Environment from the first TrialRunner.
 
-        Note: This all TrialRunners have the same Environment config and are made
+        Note: All TrialRunners have the same Environment config and are made
         unique by their use of the unique trial_runner_id assigned to each
         TrialRunner's Environment's global_config.
         """
@@ -165,6 +165,70 @@ class Scheduler(metaclass=ABCMeta):
         """Gets the Storage."""
         return self._storage
 
+    def assign_trial_runner(
+        self,
+        trial: Storage.Trial,
+        trial_runner: Optional[TrialRunner] = None,
+    ) -> TrialRunner:
+        """
+        Assigns a TrialRunner to the given Trial.
+
+        The base class implements a simple round-robin scheduling algorithm.
+
+        Subclasses can override this method to implement a more sophisticated policy.
+        For instance:
+
+        ```python
+        def assign_trial_runner(
+            self,
+            trial: Storage.Trial,
+            trial_runner: Optional[TrialRunner] = None,
+        ) -> TrialRunner:
+            if trial_runner is None:
+                # Implement a more sophisticated policy here.
+                # For example, to assign the Trial to the TrialRunner with the least
+                # number of running Trials.
+                # Or assign the Trial to the TrialRunner that hasn't executed this
+                # TunableValues Config yet.
+                trial_runner = ...
+            # Call the base class method to assign the TrialRunner in the Trial's metadata.
+            return super().assign_trial_runner(trial, trial_runner)
+            ...
+        ```
+
+        Parameters
+        ----------
+        trial : Storage.Trial
+            The trial to assign a TrialRunner to.
+        trial_runner : Optional[TrialRunner]
+            The ID of the TrialRunner to assign to the given Trial.
+
+        Returns
+        -------
+        TrialRunner
+            The assigned TrialRunner.
+        """
+        assert (
+            trial.trial_runner_id is None
+        ), f"Trial {trial} already has a TrialRunner assigned: {trial.trial_runner_id}"
+        if trial_runner is None:
+            # Basic round-robin trial runner assignment policy:
+            # fetch and increment the current TrialRunner index.
+            # Override in the subclass for a more sophisticated policy.
+            trial_runner_id = self._current_trial_runner_idx
+            self._current_trial_runner_idx += 1
+            self._current_trial_runner_idx %= len(self._trial_runners)
+
+            trial_runner_id = self._atomic_get_and_increment_current_trial_runner_index()
+            _LOG.info(
+                "Trial %s missing trial_runner_id. Assigning %d via basic round-robin policy.",
+                trial,
+                trial_runner_id,
+            )
+            trial_runner = self._trial_runners[trial_runner_id]
+        trial.add_new_config_data({"trial_runner_id": trial_runner.trial_runner_id})
+        return trial_runner
+
     def get_trial_runner(self, trial: Storage.Trial) -> TrialRunner:
         """
         Gets the TrialRunner associated with the given Trial.
@@ -179,13 +243,7 @@ class Scheduler(metaclass=ABCMeta):
         TrialRunner
         """
         if trial.trial_runner_id is None:
-            new_trial_runner_id = self._atomic_get_and_increment_current_trial_runner_index()
-            _LOG.warning(
-                "Trial %s missing trial_runner_id.  Assigning %d",
-                trial,
-                new_trial_runner_id,
-            )
-            trial.add_new_config_data({"trial_runner_id": new_trial_runner_id})
+            self.assign_trial_runner(trial, trial_runner=None)
         assert trial.trial_runner_id is not None
         return self._trial_runners[trial.trial_runner_id]
 
@@ -306,14 +364,6 @@ class Scheduler(metaclass=ABCMeta):
 
         return not_done
 
-    def _atomic_get_and_increment_current_trial_runner_index(self) -> int:
-        current_trial_runner_index = self._current_trial_runner_idx
-        # Rotate which TrialRunner the Trial is assigned to.
-        # TODO: This could be a more sophisticated policy.
-        self._current_trial_runner_idx += 1
-        self._current_trial_runner_idx %= len(self._trial_runners)
-        return current_trial_runner_index
-
     def schedule_trial(self, tunables: TunableGroups) -> None:
         """Add a configuration to the queue of trials."""
         # TODO: Alternative scheduling policies may prefer to expand repeats over
@@ -332,9 +382,6 @@ class Scheduler(metaclass=ABCMeta):
                     # prevented).
                     "optimizer": self.optimizer.name,
                     "repeat_i": repeat_i,
-                    "trial_runner_id": self._trial_runners[
-                        self._atomic_get_and_increment_current_trial_runner_index()
-                    ].trial_runner_id,
                     "is_defaults": tunables.is_defaults(),
                     **{
                         f"opt_{key}_{i}": val
@@ -357,7 +404,9 @@ class Scheduler(metaclass=ABCMeta):
         """
         assert self.experiment is not None
         trial = self.experiment.new_trial(tunables, ts_start, config)
-        _LOG.info("QUEUE: Add new trial: %s", trial)
+        # Select a TrialRunner based on the trial's metadata.
+        trial_runner = self.assign_trial_runner(trial, trial_runner=None)
+        _LOG.info("QUEUE: Added new trial: %s (assigned to %s)", trial, trial_runner)
 
     def _run_schedule(self, running: bool = False) -> None:
         """

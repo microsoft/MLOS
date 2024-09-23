@@ -148,7 +148,8 @@ class DbSchema:
 
         # Values of additional non-tunable parameters of the trial,
         # e.g., scheduled execution time, VM name / location, number of repeats, etc.
-        # In particular, the trial_runner_id is stored here (in part to avoid updating the trial table schema).
+        # In particular, the trial_runner_id is stored here (in part to avoid
+        # updating the trial table schema).
         self.trial_param = Table(
             "trial_param",
             self._meta,
