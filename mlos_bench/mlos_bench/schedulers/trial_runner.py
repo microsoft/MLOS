@@ -114,9 +114,8 @@ class TrialRunner:
 
         # TODO: start background status polling of the environments in the event loop.
 
-        (status, timestamp, results) = (
-            self.environment.run()
-        )  # Block and wait for the final result.
+        # Block and wait for the final result.
+        (status, timestamp, results) = self.environment.run()
         _LOG.info("TrialRunner Results: %s :: %s\n%s", trial.tunables, status, results)
 
         # In async mode (TODO), poll the environment for status and telemetry
