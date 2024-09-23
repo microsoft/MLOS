@@ -165,7 +165,7 @@ class Scheduler(metaclass=ABCMeta):
         """Gets the Storage."""
         return self._storage
 
-    def assign_trial_runner(
+    def _assign_trial_runner(
         self,
         trial: Storage.Trial,
         trial_runner: Optional[TrialRunner] = None,
@@ -218,14 +218,12 @@ class Scheduler(metaclass=ABCMeta):
             trial_runner_id = self._current_trial_runner_idx
             self._current_trial_runner_idx += 1
             self._current_trial_runner_idx %= len(self._trial_runners)
-
-            trial_runner_id = self._atomic_get_and_increment_current_trial_runner_index()
-            _LOG.info(
-                "Trial %s missing trial_runner_id. Assigning %d via basic round-robin policy.",
-                trial,
-                trial_runner_id,
-            )
             trial_runner = self._trial_runners[trial_runner_id]
+            _LOG.info(
+                "Trial %s missing trial_runner_id. Assigning %s via basic round-robin policy.",
+                trial,
+                trial_runner,
+            )
         trial.add_new_config_data({"trial_runner_id": trial_runner.trial_runner_id})
         return trial_runner
 
@@ -243,7 +241,7 @@ class Scheduler(metaclass=ABCMeta):
         TrialRunner
         """
         if trial.trial_runner_id is None:
-            self.assign_trial_runner(trial, trial_runner=None)
+            self._assign_trial_runner(trial, trial_runner=None)
         assert trial.trial_runner_id is not None
         return self._trial_runners[trial.trial_runner_id]
 
@@ -350,8 +348,6 @@ class Scheduler(metaclass=ABCMeta):
         over, False otherwise.
         """
         assert self.experiment is not None
-        # FIXME: In async mode, trial_ids may be returned out of order, so we may
-        # need to adjust this fetching logic.
         (trial_ids, configs, scores, status) = self.experiment.load(self._last_trial_id)
         _LOG.info("QUEUE: Update the optimizer with trial results: %s", trial_ids)
         self.optimizer.bulk_register(configs, scores, status)
@@ -405,7 +401,9 @@ class Scheduler(metaclass=ABCMeta):
         assert self.experiment is not None
         trial = self.experiment.new_trial(tunables, ts_start, config)
         # Select a TrialRunner based on the trial's metadata.
-        trial_runner = self.assign_trial_runner(trial, trial_runner=None)
+        # TODO: May want to further split this in the future to support scheduling a
+        # batch of new trials.
+        trial_runner = self._assign_trial_runner(trial, trial_runner=None)
         _LOG.info("QUEUE: Added new trial: %s (assigned to %s)", trial, trial_runner)
 
     def _run_schedule(self, running: bool = False) -> None:
