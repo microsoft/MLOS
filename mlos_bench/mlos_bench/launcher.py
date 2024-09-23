@@ -484,8 +484,6 @@ class Launcher:
             ).suggest()
             _LOG.debug("Init tunables: random = %s", tunables)
 
-        # TODO: should we assign the same or different tunables for all TrialRunner Environments?
-
         if args_tunables is not None:
             for data_file in args_tunables:
                 values = self._config_loader.load_config(data_file, ConfigSchema.TUNABLE_VALUES)
