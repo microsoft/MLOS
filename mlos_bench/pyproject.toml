@@ -41,7 +41,7 @@ dynamic = [
 ]
 
 [project.scripts]
-mlos_bench = "mlos_bench.run:_main"
+mlos_bench = "mlos_bench.run:_shell_main"
 
 [project.urls]
 Documentation = "https://microsoft.github.io/MLOS/source_tree_docs/mlos_bench/"
