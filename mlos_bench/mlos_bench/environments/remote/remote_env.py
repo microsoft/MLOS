@@ -169,7 +169,9 @@ class RemoteEnv(ScriptEnv):
         return "-".join([self._RE_SPECIAL.sub("-", self.name).lower(), suffix])
 
     def _remote_exec(
-        self, command_name: str, script: Iterable[str]
+        self,
+        command_name: str,
+        script: Iterable[str],
     ) -> Tuple[Status, datetime, Optional[dict]]:
         """
         Run a script on the remote host.
