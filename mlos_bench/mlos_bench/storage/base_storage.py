@@ -451,7 +451,8 @@ class Storage(metaclass=ABCMeta):
             self,
             new_config_data: Dict[str, Union[int, float, str]],
         ) -> None:
-            """Add new config data to the trial.
+            """
+            Add new config data to the trial.
 
             Parameters
             ----------
@@ -478,7 +479,8 @@ class Storage(metaclass=ABCMeta):
             self,
             new_config_data: Dict[str, Union[int, float, str]],
         ) -> None:
-            """Save the new config data to the storage.
+            """
+            Save the new config data to the storage.
 
             Parameters
             ----------
