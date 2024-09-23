@@ -14,6 +14,7 @@ from pytz import UTC
 
 from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
+from mlos_bench.schedulers.sync_scheduler import SyncScheduler
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.storage import SqlStorage
 from mlos_bench.tests import SEED
@@ -110,9 +111,14 @@ def _dummy_run_exp(
     exp: SqlStorage.Experiment,
     tunable_name: Optional[str],
 ) -> SqlStorage.Experiment:
+    # pylint: disable=too-many-locals
     """Generates data by doing a simulated run of the given experiment."""
     # Add some trials to that experiment.
-    # Note: we're just fabricating some made up function for the ML libraries to try and learn.
+
+    # TODO: Add MockEnv (from conftest fixtures) to simulate the Environment to "run".
+    # TODO: Add MockOptimizer (local fixture?) to suggest tunables.
+    # TODO: Add SyncScheduler (new fixture) to run them?
+
     base_score = 10.0
     if tunable_name:
         tunable = exp.tunables.get_tunable(tunable_name)[0]
@@ -130,6 +136,21 @@ def _dummy_run_exp(
             # "start_with_defaults": True,
         },
     )
+    scheduler = SyncScheduler(
+        # All config values can be overridden from global config
+        config={
+            "experiment_id": "UNDEFINED - override from global config",
+            "trial_id": 0,
+            "config_id": -1,
+            "trial_config_repeat_count": CONFIG_TRIAL_REPEAT_COUNT,
+        },
+        global_config=self.global_config,
+        trial_runners=self.trial_runners,
+        optimizer=self.optimizer,
+        storage=self.storage,
+        root_env_config=self.root_env_config,
+    )
+
     assert opt.start_with_defaults
     for config_i in range(CONFIG_COUNT):
         tunables = opt.suggest()
@@ -145,6 +166,7 @@ def _dummy_run_exp(
                     },
                 },
             )
+            # TODO: scheduler trial on a runner
             if exp.tunables:
                 assert trial.tunable_config_id == config_i + 1
             else:
