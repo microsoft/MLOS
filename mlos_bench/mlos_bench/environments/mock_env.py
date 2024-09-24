@@ -7,7 +7,7 @@
 import logging
 import random
 from datetime import datetime
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy
 
@@ -66,6 +66,20 @@ class MockEnv(Environment):
         self._metrics = self.config.get("mock_env_metrics", ["score"])
         self._is_ready = True
 
+    def _produce_metrics(self) -> Dict[str, TunableValue]:
+        # Simple convex function of all tunable parameters.
+        score = numpy.mean(
+            numpy.square([self._normalized(tunable) for (tunable, _group) in self._tunable_params])
+        )
+
+        # Add noise and shift the benchmark value from [0, 1] to a given range.
+        noise = self._random.gauss(0, self._NOISE_VAR) if self._random else 0
+        score = numpy.clip(score + noise, 0, 1)
+        if self._range:
+            score = self._range[0] + score * (self._range[1] - self._range[0])
+
+        return {metric: score for metric in self._metrics}
+
     def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
         """
         Produce mock benchmark data for one experiment.
@@ -83,18 +97,29 @@ class MockEnv(Environment):
         if not status.is_ready():
             return result
 
-        # Simple convex function of all tunable parameters.
-        score = numpy.mean(
-            numpy.square([self._normalized(tunable) for (tunable, _group) in self._tunable_params])
+        return (Status.SUCCEEDED, timestamp, self._produce_metrics())
+
+    def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
+        """
+        Produce mock benchmark status telemetry for one experiment.
+
+        Returns
+        -------
+        Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]
+            3-tuple of (Status, timestamp, output) values, where `output` is a dict
+            with the results or None if the status is not COMPLETED.
+            The keys of the `output` dict are the names of the metrics
+            specified in the config; by default it's just one metric
+            named "score". All output metrics have the same value.
+        """
+        (status, timestamp, _) = result = super().status()
+        if not status.is_ready():
+            return result
+        return (
+            Status.RUNNING,
+            timestamp,
+            [(timestamp, metric, score) for (metric, score) in self._produce_metrics().items()],
         )
-
-        # Add noise and shift the benchmark value from [0, 1] to a given range.
-        noise = self._random.gauss(0, self._NOISE_VAR) if self._random else 0
-        score = numpy.clip(score + noise, 0, 1)
-        if self._range:
-            score = self._range[0] + score * (self._range[1] - self._range[0])
-
-        return (Status.SUCCEEDED, timestamp, {metric: score for metric in self._metrics})
 
     @staticmethod
     def _normalized(tunable: Tunable) -> float:
