@@ -111,7 +111,7 @@ class AzureAuthService(Service, SupportsAuth[TokenCredential]):
         cert_bytes = b64decode(secret.value)
 
         # Reauthenticate as the service principal.
-        self._cred = CertificateCredential(
+        self._cred = CertificateCredential(  # pylint: disable=redefined-variable-type
             tenant_id=tenant_id,
             client_id=sp_client_id,
             certificate_data=cert_bytes,

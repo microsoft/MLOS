@@ -138,6 +138,13 @@ jobs:
         set -x
         docker exec --user vscode --env USER=vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v conda-env
 
+    - name: Verify expected version of python in conda env
+      timeout-minutes: 2
+      run: |
+        set -x
+        docker exec --user vscode --env USER=vscode mlos-devcontainer conda run -n mlos python -c \
+          'from sys import version_info as vers; assert (vers.major, vers.minor) == (3, 12), f"Unexpected python version: {vers}"'
+
     - name: Check for missing licenseheaders
       timeout-minutes: 3
       run: |

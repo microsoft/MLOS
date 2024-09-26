@@ -11,7 +11,7 @@ dependencies:
   - pycodestyle
   - pydocstyle
   - flake8
-  - build
+  - python-build
   - jupyter
   - ipykernel
   - nb_conda_kernels

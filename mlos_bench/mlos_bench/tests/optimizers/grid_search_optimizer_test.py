@@ -83,11 +83,11 @@ def grid_search_opt(
     assert len(grid_search_tunables) == 3
     # Test the convergence logic by controlling the number of iterations to be not a
     # multiple of the number of elements in the grid.
-    max_iterations = len(grid_search_tunables_grid) * 2 - 3
+    max_suggestions = len(grid_search_tunables_grid) * 2 - 3
     return GridSearchOptimizer(
         tunables=grid_search_tunables,
         config={
-            "max_suggestions": max_iterations,
+            "max_suggestions": max_suggestions,
             "optimization_targets": {"score": "max", "other_score": "min"},
         },
     )
@@ -187,7 +187,7 @@ def test_grid_search(
 
     # But if we still have iterations left, we should be able to suggest again by
     # refilling the grid.
-    assert grid_search_opt.current_iteration < grid_search_opt.max_iterations
+    assert grid_search_opt.current_iteration < grid_search_opt.max_suggestions
     assert grid_search_opt.suggest()
     assert list(grid_search_opt.pending_configs)
     assert list(grid_search_opt.suggested_configs)
@@ -198,7 +198,7 @@ def test_grid_search(
         suggestion = grid_search_opt.suggest()
         grid_search_opt.register(suggestion, status, score)
     assert not grid_search_opt.not_converged()
-    assert grid_search_opt.current_iteration >= grid_search_opt.max_iterations
+    assert grid_search_opt.current_iteration >= grid_search_opt.max_suggestions
     assert list(grid_search_opt.pending_configs)
     assert list(grid_search_opt.suggested_configs)
 

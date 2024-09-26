@@ -20,13 +20,16 @@ from ConfigSpace import (
     Normal,
     Uniform,
 )
-from ConfigSpace.functional import quantize
 from ConfigSpace.hyperparameters import NumericalHyperparameter
 from ConfigSpace.types import NotSet
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import try_parse_val
+from mlos_core.spaces.converters.util import (
+    QUANTIZATION_BINS_META_KEY,
+    monkey_patch_hp_quantization,
+)
 
 _LOG = logging.getLogger(__name__)
 
@@ -47,37 +50,6 @@ def _normalize_weights(weights: List[float]) -> List[float]:
     """Helper function for normalizing weights to probabilities."""
     total = sum(weights)
     return [w / total for w in weights]
-
-
-def _monkey_patch_quantization(hp: NumericalHyperparameter, quantization_bins: int) -> None:
-    """
-    Monkey-patch quantization into the Hyperparameter.
-
-    Parameters
-    ----------
-    hp : NumericalHyperparameter
-        ConfigSpace hyperparameter to patch.
-    quantization_bins : int
-        Number of bins to quantize the hyperparameter into.
-    """
-    if quantization_bins <= 1:
-        raise ValueError(f"{quantization_bins=} :: must be greater than 1.")
-
-    # Temporary workaround to dropped quantization support in ConfigSpace 1.0
-    # See Also: https://github.com/automl/ConfigSpace/issues/390
-    if not hasattr(hp, "sample_value_mlos_orig"):
-        setattr(hp, "sample_value_mlos_orig", hp.sample_value)
-
-    assert hasattr(hp, "sample_value_mlos_orig")
-    setattr(
-        hp,
-        "sample_value",
-        lambda size=None, **kwargs: quantize(
-            hp.sample_value_mlos_orig(size, **kwargs),
-            bounds=(hp.lower, hp.upper),
-            bins=quantization_bins,
-        ).astype(type(hp.default_value)),
-    )
 
 
 def _tunable_to_configspace(
@@ -108,6 +80,10 @@ def _tunable_to_configspace(
     meta: Dict[Hashable, TunableValue] = {"cost": cost}
     if group_name is not None:
         meta["group"] = group_name
+    if tunable.is_numerical and tunable.quantization_bins:
+        # Temporary workaround to dropped quantization support in ConfigSpace 1.0
+        # See Also: https://github.com/automl/ConfigSpace/issues/390
+        meta[QUANTIZATION_BINS_META_KEY] = tunable.quantization_bins
 
     if tunable.type == "categorical":
         return ConfigurationSpace(
@@ -168,13 +144,9 @@ def _tunable_to_configspace(
     else:
         raise TypeError(f"Invalid Parameter Type: {tunable.type}")
 
-    if tunable.quantization_bins:
-        # Temporary workaround to dropped quantization support in ConfigSpace 1.0
-        # See Also: https://github.com/automl/ConfigSpace/issues/390
-        _monkey_patch_quantization(range_hp, tunable.quantization_bins)
-
+    monkey_patch_hp_quantization(range_hp)
     if not tunable.special:
-        return ConfigurationSpace({tunable.name: range_hp})
+        return ConfigurationSpace(space=[range_hp])
 
     # Compute the probabilities of switching between regular and special values.
     special_weights: Optional[List[float]] = None
@@ -187,30 +159,33 @@ def _tunable_to_configspace(
     # one for special values, and one to choose between the two.
     (special_name, type_name) = special_param_names(tunable.name)
     conf_space = ConfigurationSpace(
-        {
-            tunable.name: range_hp,
-            special_name: CategoricalHyperparameter(
+        space=[
+            range_hp,
+            CategoricalHyperparameter(
                 name=special_name,
                 choices=tunable.special,
                 weights=special_weights,
                 default_value=tunable.default if tunable.default in tunable.special else NotSet,
                 meta=meta,
             ),
-            type_name: CategoricalHyperparameter(
+            CategoricalHyperparameter(
                 name=type_name,
                 choices=[TunableValueKind.SPECIAL, TunableValueKind.RANGE],
                 weights=switch_weights,
                 default_value=TunableValueKind.SPECIAL,
             ),
-        }
+        ]
     )
     conf_space.add(
-        EqualsCondition(conf_space[special_name], conf_space[type_name], TunableValueKind.SPECIAL)
+        [
+            EqualsCondition(
+                conf_space[special_name], conf_space[type_name], TunableValueKind.SPECIAL
+            ),
+            EqualsCondition(
+                conf_space[tunable.name], conf_space[type_name], TunableValueKind.RANGE
+            ),
+        ]
     )
-    conf_space.add(
-        EqualsCondition(conf_space[tunable.name], conf_space[type_name], TunableValueKind.RANGE)
-    )
-
     return conf_space
 
 
