@@ -38,7 +38,6 @@ def test_trial_metadata(exp_data: ExperimentData) -> None:
             "opt_target_0": "score",
             "opt_direction_0": "min",
             "optimizer": "MockOptimizer",
-            # FIXME:
             "repeat_i": ((trial_id - 1) % CONFIG_TRIAL_REPEAT_COUNT) + 1,
         }
 
