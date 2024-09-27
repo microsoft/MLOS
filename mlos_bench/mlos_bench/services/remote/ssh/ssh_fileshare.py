@@ -35,7 +35,7 @@ class SshFileShareService(FileShareService, SshService):
         remote_path: str,
         recursive: bool = True,
     ) -> None:
-        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
         Starts a file copy operation.
 

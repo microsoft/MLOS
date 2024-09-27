@@ -125,6 +125,10 @@
     ],
     "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source",
     "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/",
+    "pylint.severity": {
+        // display refactor warnings as information messages
+        "refactor": "Information"
+    },
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true,

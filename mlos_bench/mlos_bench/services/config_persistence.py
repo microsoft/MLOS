@@ -396,7 +396,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         _LOG.info("Created: Scheduler %s", inst)
         return inst
 
-    def build_environment(  # pylint: disable=too-many-arguments
+    def build_environment(
         self,
         config: Dict[str, Any],
         tunables: TunableGroups,
@@ -404,6 +404,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         parent_args: Optional[Dict[str, TunableValue]] = None,
         service: Optional[Service] = None,
     ) -> Environment:
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
         Factory method for a new environment with a given config.
 
@@ -567,7 +568,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         return self._build_composite_service(config_list, global_config, parent)
 
-    def load_environment(  # pylint: disable=too-many-arguments
+    def load_environment(
         self,
         json_file_name: str,
         tunables: TunableGroups,
@@ -575,6 +576,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         parent_args: Optional[Dict[str, TunableValue]] = None,
         service: Optional[Service] = None,
     ) -> Environment:
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
         Load and build new environment from the config file.
 
@@ -601,7 +603,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         assert isinstance(config, dict)
         return self.build_environment(config, tunables, global_config, parent_args, service)
 
-    def load_environment_list(  # pylint: disable=too-many-arguments
+    def load_environment_list(
         self,
         json_file_name: str,
         tunables: TunableGroups,
@@ -609,6 +611,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         parent_args: Optional[Dict[str, TunableValue]] = None,
         service: Optional[Service] = None,
     ) -> List[Environment]:
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
         Load and build a list of environments from the config file.
 

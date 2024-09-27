@@ -216,6 +216,11 @@ class Storage(metaclass=ABCMeta):
             return self._description
 
         @property
+        def root_env_config(self) -> str:
+            """Get the Experiment's root Environment config file path."""
+            return self._root_env_config
+
+        @property
         def tunables(self) -> TunableGroups:
             """Get the Experiment's tunables."""
             return self._tunables

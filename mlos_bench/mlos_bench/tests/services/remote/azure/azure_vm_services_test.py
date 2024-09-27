@@ -139,7 +139,6 @@ def test_azure_vm_service_custom_data(azure_auth_service: AzureAuthService) -> N
     ],
 )
 @patch("mlos_bench.services.remote.azure.azure_deployment_services.requests")
-# pylint: disable=too-many-arguments
 def test_vm_operation_status(
     mock_requests: MagicMock,
     azure_vm_service: AzureVMService,
@@ -149,6 +148,7 @@ def test_vm_operation_status(
     operation_status: Status,
 ) -> None:
     """Test VM operation status."""
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     mock_response = MagicMock()
     mock_response.status_code = http_status_code
     mock_requests.post.return_value = mock_response
