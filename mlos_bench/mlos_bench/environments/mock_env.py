@@ -115,6 +115,7 @@ class MockEnv(Environment):
             return result
         metrics = self._produce_metrics()
         return (
+            # FIXME: this causes issues if we report RUNNING instead of READY
             Status.READY,
             timestamp,
             [(timestamp, metric, score) for (metric, score) in metrics.items()],
