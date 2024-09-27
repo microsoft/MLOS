@@ -96,8 +96,8 @@ class MockEnv(Environment):
         (status, timestamp, _) = result = super().run()
         if not status.is_ready():
             return result
-
-        return (Status.SUCCEEDED, timestamp, self._produce_metrics())
+        metrics = self._produce_metrics()
+        return (Status.SUCCEEDED, timestamp, metrics)
 
     def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
         """
@@ -105,20 +105,19 @@ class MockEnv(Environment):
 
         Returns
         -------
-        Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]
-            3-tuple of (Status, timestamp, output) values, where `output` is a dict
-            with the results or None if the status is not COMPLETED.
-            The keys of the `output` dict are the names of the metrics
-            specified in the config; by default it's just one metric
-            named "score". All output metrics have the same value.
+        (benchmark_status, timestamp, telemetry) : (Status, datetime, list)
+            3-tuple of (benchmark status, timestamp, telemetry) values.
+            `timestamp` is UTC time stamp of the status; it's current time by default.
+            `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
         """
         (status, timestamp, _) = result = super().status()
         if not status.is_ready():
             return result
+        metrics = self._produce_metrics()
         return (
-            Status.RUNNING,
+            Status.READY,
             timestamp,
-            [(timestamp, metric, score) for (metric, score) in self._produce_metrics().items()],
+            [(timestamp, metric, score) for (metric, score) in metrics.items()],
         )
 
     @staticmethod
