@@ -143,7 +143,7 @@ def locked_docker_services(
     """A locked version of the docker_services fixture to implement xdist single
     instance locking.
     """
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     # Mark the services as in use with the reader lock.
     docker_services_lock.acquire_read_lock()
     # Acquire the setup lock to prevent multiple setup operations at once.
