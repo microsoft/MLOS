@@ -7,9 +7,8 @@
 from math import ceil
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
-from mlos_bench.tunables.tunable_groups import TunableGroups
-
 from mlos_bench.tests.storage import CONFIG_TRIAL_REPEAT_COUNT
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def test_trial_data_tunable_config_data(
