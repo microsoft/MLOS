@@ -61,19 +61,20 @@ class MockEnv(Environment):
             service=service,
         )
         seed = int(self.config.get("mock_env_seed", -1))
-        self._random = random.Random(seed or None) if seed >= 0 else None
+        self._run_random = random.Random(seed or None) if seed >= 0 else None
+        self._status_random = random.Random(seed or None) if seed >= 0 else None
         self._range = self.config.get("mock_env_range")
         self._metrics = self.config.get("mock_env_metrics", ["score"])
         self._is_ready = True
 
-    def _produce_metrics(self) -> Dict[str, TunableValue]:
+    def _produce_metrics(self, rand: Optional[random.Random]) -> Dict[str, TunableValue]:
         # Simple convex function of all tunable parameters.
         score = numpy.mean(
             numpy.square([self._normalized(tunable) for (tunable, _group) in self._tunable_params])
         )
 
         # Add noise and shift the benchmark value from [0, 1] to a given range.
-        noise = self._random.gauss(0, self._NOISE_VAR) if self._random else 0
+        noise = rand.gauss(0, self._NOISE_VAR) if rand else 0
         score = numpy.clip(score + noise, 0, 1)
         if self._range:
             score = self._range[0] + score * (self._range[1] - self._range[0])
@@ -96,7 +97,7 @@ class MockEnv(Environment):
         (status, timestamp, _) = result = super().run()
         if not status.is_ready():
             return result
-        metrics = self._produce_metrics()
+        metrics = self._produce_metrics(self._run_random)
         return (Status.SUCCEEDED, timestamp, metrics)
 
     def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
@@ -113,7 +114,7 @@ class MockEnv(Environment):
         (status, timestamp, _) = result = super().status()
         if not status.is_ready():
             return result
-        metrics = self._produce_metrics()
+        metrics = self._produce_metrics(self._status_random)
         return (
             # FIXME: this causes issues if we report RUNNING instead of READY
             Status.READY,
