@@ -69,7 +69,7 @@ def _get_long_desc_from_readme(base_url: str) -> dict:
 
 extra_requires: Dict[str, List[str]] = {  # pylint: disable=consider-using-namedtuple-or-dataclass
     "flaml": [
-        "flaml<2.2.0",  # FIXME: temporarily avoid changes in new FLAML package (#839).
+        "flaml<2.4.0",  # FIXME: temporarily avoid changes in new FLAML package (#839).
         "flaml[blendsearch]",
     ],
     # NOTE: Major refactoring on SMAC and ConfigSpace v1.0 starting from v2.2
