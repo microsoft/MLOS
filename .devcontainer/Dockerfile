@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM mcr.microsoft.com/devcontainers/miniconda:3 AS base
+FROM debian:stable-slim AS base
 
 # Add some additional packages for the devcontainer terminal environment.
 USER root
@@ -11,16 +11,38 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         less colordiff \
         curl jq \
         ripgrep \
-        vim-nox neovim python3-pynvim \
+        vim-nox neovim \
         make \
         rename \
+        sudo \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && echo "C-w: unix-filename-rubout" >> /etc/inputrc
     # Also tweak C-w to stop at slashes as well instead of just spaces
 
+RUN useradd -m -U -G sudo vscode
+
+RUN echo "Setup miniconda" \
+    && curl -Ss https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc > /etc/apt/trusted.gpg.d/conda.asc \
+    && gpg --keyring /etc/apt/trusted.gpg.d/conda.asc --no-default-keyring --fingerprint 34161F5BF5EB1D4BFBBB8F0A8AEB4F8B29D82806 \
+    && echo "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/conda.asc] https://repo.anaconda.com/pkgs/misc/debrepo/conda stable main" | sudo tee /etc/apt/sources.list.d/conda.list \
+    && apt-get update && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get install -y --no-install-recommends conda \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    && adduser vscode conda
+
 # Set some cache dirs to be owned by the vscode user even as we're currently
 # executing as root to build the container image.
 # NOTE: We do *not* mark these as volumes - it doesn't help rebuilding at all.
+
+ARG VSCODE_UID=1000
+ARG VSCODE_GID=1000
+ARG DOCKER_GID=999
+
+RUN groupmod --non-unique --gid $VSCODE_GID vscode \
+    && usermod --non-unique --uid $VSCODE_UID --gid $NODE_GID vscode \
+    && chown -R $NODE_UID:$NODE_GID /home/vscode \
+    && groupadd --non-unique --gid $DOCKER_GID docker \
+    && adduser vscode docker
 
 ARG PIP_CACHE_DIR=/var/cache/pip
 ENV PIP_CACHE_DIR=/var/cache/pip

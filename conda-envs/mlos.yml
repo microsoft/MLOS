@@ -20,7 +20,7 @@ dependencies:
   - pandas
   - pyarrow
   - swig
-  - libpq
+  - libpq<17.0
   - python
   - pip:
     - bump2version
