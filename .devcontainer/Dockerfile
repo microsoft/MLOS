@@ -9,7 +9,8 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends \
         bash bash-completion \
         less colordiff \
-        curl jq \
+        curl gpg \
+        jq \
         ripgrep \
         vim-nox neovim \
         make \
@@ -22,13 +23,26 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 RUN useradd -m -U -G sudo vscode
 
 RUN echo "Setup miniconda" \
-    && curl -Ss https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc > /etc/apt/trusted.gpg.d/conda.asc \
-    && gpg --keyring /etc/apt/trusted.gpg.d/conda.asc --no-default-keyring --fingerprint 34161F5BF5EB1D4BFBBB8F0A8AEB4F8B29D82806 \
-    && echo "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/conda.asc] https://repo.anaconda.com/pkgs/misc/debrepo/conda stable main" | sudo tee /etc/apt/sources.list.d/conda.list \
+    && curl -Ss https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/conda.gpg \
+    && gpg --keyring /etc/apt/trusted.gpg.d/conda.gpg --no-default-keyring --fingerprint 34161F5BF5EB1D4BFBBB8F0A8AEB4F8B29D82806 \
+    && echo "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/conda.gpg] https://repo.anaconda.com/pkgs/misc/debrepo/conda stable main" | sudo tee /etc/apt/sources.list.d/conda.list \
     && apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y --no-install-recommends conda \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
-    && adduser vscode conda
+    && adduser vscode conda \
+    && /opt/conda/bin/conda init --system bash \
+    && echo "# Upgrade conda and use strict priorities" \
+    && echo "# Use the mamba solver (necessary for some quality of life speedups due to required packages to support Windows)" \
+    && umask 0002 \
+    && /opt/conda/bin/conda config --set channel_priority strict \
+    && /opt/conda/bin/conda info \
+    && /opt/conda/bin/conda update -v -y -n base -c defaults --all \
+    && /opt/conda/bin/conda list -n base \
+    && /opt/conda/bin/conda install -v -y -n base conda-libmamba-solver \
+    && /opt/conda/bin/conda config --set solver libmamba \
+    && /opt/conda/bin/conda list -n base \
+    && /opt/conda/bin/conda clean -v -y -a \
+    && /opt/conda/bin/conda run -n base pip cache purge
 
 # Set some cache dirs to be owned by the vscode user even as we're currently
 # executing as root to build the container image.
@@ -58,20 +72,6 @@ RUN mkdir -p ${CONDA_PKGS_DIRS} \
 
 USER vscode:conda
 
-# Upgrade conda and use strict priorities
-# Use the mamba solver (necessary for some quality of life speedups due to
-# required packages to support Windows)
-RUN umask 0002 \
-    && /opt/conda/bin/conda config --set channel_priority strict \
-    && /opt/conda/bin/conda info \
-    && /opt/conda/bin/conda update -v -y -n base -c defaults --all \
-    && /opt/conda/bin/conda list -n base \
-    && /opt/conda/bin/conda install -v -y -n base conda-libmamba-solver \
-    && /opt/conda/bin/conda config --set solver libmamba \
-    && /opt/conda/bin/conda list -n base \
-    && /opt/conda/bin/conda clean -v -y -a \
-    && /opt/conda/bin/conda run -n base pip cache purge
-
 # No longer relevant since we're using conda-forge in the environment files by default now.
 ## Update the base. This helps save space by making sure the same version
 ## python is used for both the base env and mlos env.
@@ -95,7 +95,10 @@ RUN /opt/conda/bin/conda init bash \
     && /opt/conda/bin/conda config --set solver libmamba
 
 # Prepare the mlos_deps.yml file in a cross platform way.
-FROM mcr.microsoft.com/devcontainers/miniconda:3 AS deps-prep
+FROM debian:stable-slim AS deps-prep
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -y install --no-install-recommends \
+        python3-minimal python3-setuptools
 COPY --chown=vscode:conda . /tmp/conda-tmp/
 RUN /tmp/conda-tmp/prep-deps-files.sh \
     && ls -l /tmp/conda-tmp/ # && cat /tmp/conda-tmp/combined.requirements.txt /tmp/conda-tmp/mlos_deps.yml

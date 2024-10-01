@@ -17,11 +17,6 @@ set -x
 scriptdir=$(dirname "$(readlink -f "$0")")
 cd "$scriptdir"
 
-if ! type -p python3; then
-    sudo -n apt-get update
-    sudo -n apt-get -y install --no-install-recommends python3
-fi
-
 cat /tmp/conda-tmp/mlos.yml \
     | sed 's|#.*||' \
     | egrep -v -e '--editable' -e '^\s*$' \
