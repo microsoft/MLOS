@@ -7,7 +7,7 @@
 import logging
 import random
 from datetime import datetime
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy
 
@@ -61,10 +61,25 @@ class MockEnv(Environment):
             service=service,
         )
         seed = int(self.config.get("mock_env_seed", -1))
-        self._random = random.Random(seed or None) if seed >= 0 else None
+        self._run_random = random.Random(seed or None) if seed >= 0 else None
+        self._status_random = random.Random(seed or None) if seed >= 0 else None
         self._range = self.config.get("mock_env_range")
         self._metrics = self.config.get("mock_env_metrics", ["score"])
         self._is_ready = True
+
+    def _produce_metrics(self, rand: Optional[random.Random]) -> Dict[str, TunableValue]:
+        # Simple convex function of all tunable parameters.
+        score = numpy.mean(
+            numpy.square([self._normalized(tunable) for (tunable, _group) in self._tunable_params])
+        )
+
+        # Add noise and shift the benchmark value from [0, 1] to a given range.
+        noise = rand.gauss(0, self._NOISE_VAR) if rand else 0
+        score = numpy.clip(score + noise, 0, 1)
+        if self._range:
+            score = self._range[0] + score * (self._range[1] - self._range[0])
+
+        return {metric: score for metric in self._metrics}
 
     def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
         """
@@ -82,19 +97,30 @@ class MockEnv(Environment):
         (status, timestamp, _) = result = super().run()
         if not status.is_ready():
             return result
+        metrics = self._produce_metrics(self._run_random)
+        return (Status.SUCCEEDED, timestamp, metrics)
 
-        # Simple convex function of all tunable parameters.
-        score = numpy.mean(
-            numpy.square([self._normalized(tunable) for (tunable, _group) in self._tunable_params])
+    def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
+        """
+        Produce mock benchmark status telemetry for one experiment.
+
+        Returns
+        -------
+        (benchmark_status, timestamp, telemetry) : (Status, datetime, list)
+            3-tuple of (benchmark status, timestamp, telemetry) values.
+            `timestamp` is UTC time stamp of the status; it's current time by default.
+            `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
+        """
+        (status, timestamp, _) = result = super().status()
+        if not status.is_ready():
+            return result
+        metrics = self._produce_metrics(self._status_random)
+        return (
+            # FIXME: this causes issues if we report RUNNING instead of READY
+            Status.READY,
+            timestamp,
+            [(timestamp, metric, score) for (metric, score) in metrics.items()],
         )
-
-        # Add noise and shift the benchmark value from [0, 1] to a given range.
-        noise = self._random.gauss(0, self._NOISE_VAR) if self._random else 0
-        score = numpy.clip(score + noise, 0, 1)
-        if self._range:
-            score = self._range[0] + score * (self._range[1] - self._range[0])
-
-        return (Status.SUCCEEDED, timestamp, {metric: score for metric in self._metrics})
 
     @staticmethod
     def _normalized(tunable: Tunable) -> float:
