@@ -5,13 +5,14 @@
 """Test fixtures for mlos_bench storage."""
 
 from random import seed as rand_seed
-from typing import Generator
+from typing import Generator, List
 
 import pytest
 
 from mlos_bench.environments.mock_env import MockEnv
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.schedulers.sync_scheduler import SyncScheduler
+from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.storage import SqlStorage
 from mlos_bench.tests import SEED
@@ -129,16 +130,24 @@ def _dummy_run_exp(
 
     rand_seed(SEED)
 
-    env = MockEnv(
-        name="Test Env",
-        config={
-            "tunable_params": list(exp.tunables.get_covariant_group_names()),
-            "mock_env_seed": SEED,
-            "mock_env_range": [60, 120],
-            "mock_env_metrics": ["score"],
-        },
-        tunables=exp.tunables,
-    )
+    trial_runners: List[TrialRunner] = []
+    global_config: dict = {}
+    for i in range(1, TRIAL_RUNNER_COUNT):
+        # Create a new global config for each Environment with a unique trial_runner_id for it.
+        global_config_copy = global_config.copy()
+        global_config_copy["trial_runner_id"] = i
+        env = MockEnv(
+            name="Test Env",
+            config={
+                "tunable_params": list(exp.tunables.get_covariant_group_names()),
+                "mock_env_seed": SEED,
+                "mock_env_range": [60, 120],
+                "mock_env_metrics": ["score"],
+            },
+            global_config=global_config_copy,
+            tunables=exp.tunables,
+        )
+        trial_runners.append(TrialRunner(trial_runner_id=i, env=env))
 
     opt = MockOptimizer(
         tunables=exp.tunables,
@@ -150,6 +159,7 @@ def _dummy_run_exp(
             # default values for the tunable params)
             # "start_with_defaults": True,
         },
+        global_config=global_config,
     )
 
     scheduler = SyncScheduler(
@@ -161,8 +171,8 @@ def _dummy_run_exp(
             "trial_config_repeat_count": CONFIG_TRIAL_REPEAT_COUNT,
             "max_trials": CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT,
         },
-        global_config={},
-        environment=env,
+        global_config=global_config,
+        trial_runners=trial_runners,
         optimizer=opt,
         storage=storage,
         root_env_config=exp.root_env_config,
