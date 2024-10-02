@@ -1,0 +1,11 @@
+// Mock optimizer to test the benchmarking framework.
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json",
+
+    "class": "mlos_bench.optimizers.ManualOptimizer",
+
+    "config": {
+        "max_suggestions": 30,
+        "cycle_tunable_values": []
+    }
+}

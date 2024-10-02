@@ -201,6 +201,46 @@
                 }
             },
             "else": false
+        },
+
+        {
+            "$comment": "extensions to the 'config' object properties when the manual optimizer is being used",
+            "if": {
+                "properties": {
+                    "class": {
+                        "enum": [
+                            "mlos_bench.optimizers.ManualOptimizer",
+                            "mlos_bench.optimizers.manual_optimizer.ManualOptimizer"
+                        ]
+                    }
+                },
+                "required": ["class"]
+            },
+            "then": {
+                "properties": {
+                    "config": {
+                        "type": "object",
+                        "allOf": [
+                            { "$ref": "#/$defs/config_base_optimizer" },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "cycle_tunable_values": {
+                                        "description": "The tunable values to cycle through.",
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "../tunables/tunable-values-schema.json#/$defs/tunable_values_set"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "$comment": "disallow other properties",
+                        "unevaluatedProperties": false
+                    }
+                }
+            },
+            "else": false
         }
     ],
     "unevaluatedProperties": false
