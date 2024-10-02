@@ -75,7 +75,6 @@ def test_wait_network_deployment_retry(
     ],
 )
 @patch("mlos_bench.services.remote.azure.azure_deployment_services.requests")
-# pylint: disable=too-many-arguments
 def test_network_operation_status(
     mock_requests: MagicMock,
     azure_network_service: AzureNetworkService,
@@ -85,6 +84,7 @@ def test_network_operation_status(
     operation_status: Status,
 ) -> None:
     """Test network operation status."""
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     mock_response = MagicMock()
     mock_response.status_code = http_status_code
     mock_requests.post.return_value = mock_response

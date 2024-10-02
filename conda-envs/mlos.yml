@@ -11,7 +11,7 @@ dependencies:
   - pycodestyle
   - pydocstyle
   - flake8
-  - build
+  - python-build
   - jupyter
   - ipykernel
   - nb_conda_kernels
@@ -20,7 +20,8 @@ dependencies:
   - pandas
   - pyarrow
   - swig
-  - libpq
+  # FIXME: Temporarily avoid broken libpq that's missing client headers.
+  - libpq<17.0
   - python
   - pip:
     - bump2version

@@ -12,7 +12,7 @@ dependencies:
   - pycodestyle
   - pydocstyle
   - flake8
-  - build
+  - python-build
   - jupyter
   - ipykernel
   - nb_conda_kernels
@@ -21,7 +21,8 @@ dependencies:
   - pandas
   - pyarrow
   - swig
-  - libpq
+  # FIXME: Temporarily avoid broken libpq that's missing client headers.
+  - libpq<17.0
   - python
   # Install an SMAC requirement pre-compiled from conda-forge.
   # This also requires a more recent vs2015_runtime from conda-forge.

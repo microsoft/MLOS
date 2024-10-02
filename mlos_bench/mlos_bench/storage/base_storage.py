@@ -216,6 +216,11 @@ class Storage(metaclass=ABCMeta):
             return self._description
 
         @property
+        def root_env_config(self) -> str:
+            """Get the Experiment's root Environment config file path."""
+            return self._root_env_config
+
+        @property
         def tunables(self) -> TunableGroups:
             """Get the Experiment's tunables."""
             return self._tunables
@@ -391,6 +396,7 @@ class Storage(metaclass=ABCMeta):
             self._tunable_config_id = tunable_config_id
             self._opt_targets = opt_targets
             self._config = config or {}
+            self._status = Status.UNKNOWN
 
         def __repr__(self) -> str:
             return f"{self._experiment_id}:{self._trial_id}:{self._tunable_config_id}"
@@ -435,6 +441,11 @@ class Storage(metaclass=ABCMeta):
             config["trial_id"] = self._trial_id
             return config
 
+        @property
+        def status(self) -> Status:
+            """Get the status of the current trial."""
+            return self._status
+
         @abstractmethod
         def update(
             self,
@@ -471,6 +482,7 @@ class Storage(metaclass=ABCMeta):
                         opt_targets.difference(metrics.keys()),
                     )
                     # raise ValueError()
+            self._status = status
             return metrics
 
         @abstractmethod

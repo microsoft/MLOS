@@ -92,3 +92,10 @@ RUN umask 0002 \
     && mkdir -p /opt/conda/pkgs/cache/ && chown -R vscode:conda /opt/conda/pkgs/cache/
 RUN mkdir -p /home/vscode/.conda/envs \
     && ln -s /opt/conda/envs/mlos /home/vscode/.conda/envs/mlos
+
+# Try and prime the devcontainer's ssh known_hosts keys with the github one for scripted calls.
+RUN mkdir -p /home/vscode/.ssh \
+    && ( \
+        grep -q ^github.com /home/vscode/.ssh/known_hosts \
+        || ssh-keyscan github.com | tee -a /home/vscode/.ssh/known_hosts \
+    )

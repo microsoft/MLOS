@@ -123,9 +123,10 @@
             "maxItems": 2,
             "uniqueItems": true
         },
-        "quantization": {
+        "quantization_bins": {
             "description": "The number of buckets to quantize the range into.",
-            "$comment": "type left unspecified here"
+            "type": "integer",
+            "exclusiveMinimum": 1
         },
         "log_scale": {
             "description": "Whether to use log instead of linear scale for the range search.",
@@ -186,7 +187,7 @@
             },
             "required": ["type", "default", "values"],
             "not": {
-                "required": ["range", "special", "special_weights", "range_weight", "log", "quantization", "distribution"]
+                "required": ["range", "special", "special_weights", "range_weight", "log", "quantization_bins", "distribution"]
             },
             "$comment": "TODO: add check that default is in values",
             "unevaluatedProperties": false
@@ -216,10 +217,8 @@
                 "distribution": {
                     "$ref": "#/$defs/tunable_param_distribution"
                 },
-                "quantization": {
-                    "$ref": "#/$defs/quantization",
-                    "type": "integer",
-                    "exclusiveMinimum": 1
+                "quantization_bins": {
+                    "$ref": "#/$defs/quantization_bins"
                 },
                 "log": {
                     "$ref": "#/$defs/log_scale"
@@ -266,10 +265,8 @@
                 "distribution": {
                     "$ref": "#/$defs/tunable_param_distribution"
                 },
-                "quantization": {
-                    "$ref": "#/$defs/quantization",
-                    "type": "number",
-                    "exclusiveMinimum": 0
+                "quantization_bins": {
+                    "$ref": "#/$defs/quantization_bins"
                 },
                 "log": {
                     "$ref": "#/$defs/log_scale"

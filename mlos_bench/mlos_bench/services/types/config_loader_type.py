@@ -78,6 +78,7 @@ class SupportsConfigLoading(Protocol):
         parent_args: Optional[Dict[str, TunableValue]] = None,
         service: Optional["Service"] = None,
     ) -> "Environment":
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
         Factory method for a new environment with a given config.
 
@@ -106,7 +107,7 @@ class SupportsConfigLoading(Protocol):
             An instance of the `Environment` class initialized with `config`.
         """
 
-    def load_environment_list(  # pylint: disable=too-many-arguments
+    def load_environment_list(
         self,
         json_file_name: str,
         tunables: "TunableGroups",
@@ -114,6 +115,7 @@ class SupportsConfigLoading(Protocol):
         parent_args: Optional[Dict[str, TunableValue]] = None,
         service: Optional["Service"] = None,
     ) -> List["Environment"]:
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
         Load and build a list of environments from the config file.
 
