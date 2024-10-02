@@ -20,6 +20,7 @@ dependencies:
   - pandas
   - pyarrow
   - swig
+  # FIXME: Temporarily avoid broken libpq that's missing client headers.
   - libpq<17.0
   - python
   - pip:
