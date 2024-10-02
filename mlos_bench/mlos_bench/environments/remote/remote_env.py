@@ -75,7 +75,7 @@ class RemoteEnv(ScriptEnv):
         )
 
         self._wait_boot = self.config.get("wait_boot", False)
-        self._command_prefix = self._RE_SPECIAL.sub("-", self.name).lower() + "-"
+        self._command_prefix = "mlos-" + self._RE_SPECIAL.sub("-", self.name).lower() + "-"
 
         assert self._service is not None and isinstance(
             self._service, SupportsRemoteExec
