@@ -8,10 +8,13 @@ from typing import List
 
 import pytest
 
+from mlos_bench.optimizers.manual_optimizer import ManualOptimizer
 from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.tests import SEED
 from mlos_bench.tunables.tunable_groups import TunableGroups
+
+# pylint: disable=redefined-outer-name
 
 
 @pytest.fixture
@@ -152,5 +155,18 @@ def smac_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
             # See Above
             "n_random_init": SMAC_ITERATIONS,
             "max_ratio": 1.0,
+        },
+    )
+
+
+@pytest.fixture
+def manual_opt(tunable_groups: TunableGroups, mock_configs: List[dict]) -> ManualOptimizer:
+    """Test fixture for ManualOptimizer."""
+    return ManualOptimizer(
+        tunables=tunable_groups,
+        service=None,
+        config={
+            "max_suggestions": 2 * len(mock_configs),
+            "cycle_tunable_values": mock_configs,
         },
     )

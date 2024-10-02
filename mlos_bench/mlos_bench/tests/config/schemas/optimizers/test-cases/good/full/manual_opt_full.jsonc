@@ -1,0 +1,23 @@
+{
+    "class": "mlos_bench.optimizers.ManualOptimizer",
+
+    "config": {
+        // Here we do our best to list the exhaustive set of full configs available for the base optimizer config.
+        "optimization_targets": {"score": "min"},
+        "max_suggestions": 20,
+        "seed": 12345,
+        "start_with_defaults": false,
+        "cycle_tunable_values": [
+            {
+                "param1": "value1",
+                "param2": 1,
+                "param3": false
+            },
+            {
+                "param1": "value2",
+                "param2": 2,
+                "param3": true
+            },
+        ]
+    }
+}

@@ -55,6 +55,8 @@
             "description": "The name of the optimizer class to use.",
             "$comment": "required",
             "enum": [
+                "mlos_bench.optimizers.ManualOptimizer",
+                "mlos_bench.optimizers.manual_optimizer.ManualOptimizer",
                 "mlos_bench.optimizers.MlosCoreOptimizer",
                 "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
                 "mlos_bench.optimizers.GridSearchOptimizer",

@@ -1,0 +1,7 @@
+{
+
+    "class": "mlos_bench.optimizers.ManualOptimizer",
+    "config": {
+        "cycle_tunable_values": []
+    }
+}

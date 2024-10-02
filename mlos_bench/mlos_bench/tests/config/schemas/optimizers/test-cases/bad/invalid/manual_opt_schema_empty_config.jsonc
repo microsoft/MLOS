@@ -1,0 +1,6 @@
+{
+
+    "class": "mlos_bench.optimizers.ManualOptimizer",
+
+    "config": {}
+}
