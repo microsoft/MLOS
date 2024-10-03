@@ -1,6 +1,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
+export PATH := $(PATH):/opt/conda/bin
+
 CONDA_ENV_NAME ?= mlos
 PYTHON_VERSION := $(shell echo "${CONDA_ENV_NAME}" | sed -r -e 's/^mlos[-]?//')
 ENV_YML := conda-envs/${CONDA_ENV_NAME}.yml
