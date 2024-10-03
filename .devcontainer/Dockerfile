@@ -103,3 +103,6 @@ RUN echo "Setup miniconda" \
     && mkdir -p /opt/conda/pkgs/cache/ && chown -R vscode:conda /opt/conda/pkgs/cache/ \
     && mkdir -p /home/vscode/.conda/envs \
     && ln -s /opt/conda/envs/mlos /home/vscode/.conda/envs/mlos
+
+#ENV PATH=/opt/conda/bin:$PATH
+ENV PATH=/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
