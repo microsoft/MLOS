@@ -59,7 +59,7 @@ def strtobool(val: str) -> bool:
     elif val in {"n", "no", "f", "false", "off", "0"}:
         return False
     else:
-        raise ValueError(f"invalid truth value {val}")
+        raise ValueError(f"Invalid Boolean value: '{val}'")
 
 
 def preprocess_dynamic_configs(*, dest: dict, source: Optional[dict] = None) -> dict:
