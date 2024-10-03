@@ -21,6 +21,19 @@ def save_params(
     params: Dict[str, Any],
     **kwargs: Any,
 ) -> None:
+    """Updates a set of (param_id, param_value) tuples in the given Table.
+
+    Parameters
+    ----------
+    conn : Connection
+        A connection to the backend database.
+    table : Table
+        The table to update.
+    params : Dict[str, Any]
+        The new (param_id, param_value) tuples to upsert to the Table.
+    **kwargs : Dict[str, Any]
+        Primary key info for the given table.
+    """
     if not params:
         return
     conn.execute(
