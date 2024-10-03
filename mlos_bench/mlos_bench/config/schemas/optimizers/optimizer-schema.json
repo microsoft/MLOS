@@ -227,6 +227,11 @@
                             {
                                 "type": "object",
                                 "properties": {
+                                    "max_cycles": {
+                                        "description": "The maximum number of cycles of tunable values to run the optimizer for.",
+                                        "type": "integer",
+                                        "minimum": 1
+                                    },
                                     "cycle_tunable_values": {
                                         "description": "The tunable values to cycle through.",
                                         "type": "array",

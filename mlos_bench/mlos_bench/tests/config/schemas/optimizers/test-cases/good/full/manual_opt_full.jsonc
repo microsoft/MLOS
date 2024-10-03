@@ -7,6 +7,7 @@
         "max_suggestions": 20,
         "seed": 12345,
         "start_with_defaults": false,
+        "max_cycles": 10,
         "cycle_tunable_values": [
             {
                 "param1": "value1",

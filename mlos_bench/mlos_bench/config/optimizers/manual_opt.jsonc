@@ -5,7 +5,7 @@
     "class": "mlos_bench.optimizers.ManualOptimizer",
 
     "config": {
-        "max_suggestions": 30,
+        "max_cycles": 30,
         "cycle_tunable_values": []
     }
 }

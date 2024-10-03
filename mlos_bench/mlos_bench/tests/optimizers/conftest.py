@@ -166,7 +166,7 @@ def manual_opt(tunable_groups: TunableGroups, mock_configs: List[dict]) -> Manua
         tunables=tunable_groups,
         service=None,
         config={
-            "max_suggestions": 2 * len(mock_configs),
+            "max_cycles": 2,
             "cycle_tunable_values": mock_configs,
         },
     )

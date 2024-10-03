@@ -32,6 +32,11 @@ class ManualOptimizer(MockOptimizer):
         if len(self._cycle_tunable_values) == 0:
             _LOG.warning("No cycle_tunable_values provided, using default values.")
             self._cycle_tunable_values = [tunables.get_param_values()]
+        max_cycles = int(config.get("max_cycles", 1))
+        self._max_suggestions = min(
+            self._max_suggestions,
+            max_cycles * len(self._cycle_tunable_values),
+        )
 
     def suggest(self) -> TunableGroups:
         """Always produce the same sequence of explicit suggestions, in a cycle."""
