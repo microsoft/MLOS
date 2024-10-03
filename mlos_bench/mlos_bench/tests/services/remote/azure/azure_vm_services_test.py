@@ -5,6 +5,7 @@
 """Tests for mlos_bench.services.remote.azure.azure_vm_services."""
 
 from copy import deepcopy
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -273,8 +274,8 @@ def test_wait_vm_operation_retry(
 @pytest.mark.parametrize(
     ("http_status_code", "operation_status"),
     [
-        (200, Status.SUCCEEDED),
-        (202, Status.PENDING),
+        (200, Status.PENDING),
+        (201, Status.PENDING),
         (401, Status.FAILED),
         (404, Status.FAILED),
     ],
@@ -291,16 +292,18 @@ def test_remote_exec_status(
 
     mock_response = MagicMock()
     mock_response.status_code = http_status_code
-    mock_response.json = MagicMock(
-        return_value={
-            "fake response": "body as json to dict",
-        }
-    )
-    mock_requests.post.return_value = mock_response
+    mock_response.json.return_value = {
+        "fake response": "body as json to dict",
+    }
+    mock_requests.put.return_value = mock_response
 
     status, _ = azure_vm_service_remote_exec_only.remote_exec(
         script,
-        config={"vmName": "test-vm"},
+        config={
+            "vmName": "test-vm",
+            "commandName": "TEST_COMMAND",
+            "location": "TEST_LOCATION",
+        },
         env_params={},
     )
 
@@ -308,7 +311,7 @@ def test_remote_exec_status(
 
 
 @patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
-def test_remote_exec_headers_output(
+def test_remote_exec_output(
     mock_requests: MagicMock,
     azure_vm_service_remote_exec_only: AzureVMService,
 ) -> None:
@@ -318,18 +321,22 @@ def test_remote_exec_headers_output(
     script = ["command_1", "command_2"]
 
     mock_response = MagicMock()
-    mock_response.status_code = 202
+    mock_response.status_code = 201
     mock_response.headers = {"Azure-AsyncOperation": async_url_value}
     mock_response.json = MagicMock(
         return_value={
             "fake response": "body as json to dict",
         }
     )
-    mock_requests.post.return_value = mock_response
+    mock_requests.put.return_value = mock_response
 
     _, cmd_output = azure_vm_service_remote_exec_only.remote_exec(
         script,
-        config={"vmName": "test-vm"},
+        config={
+            "vmName": "test-vm",
+            "commandName": "TEST_COMMAND",
+            "location": "TEST_LOCATION",
+        },
         env_params={
             "param_1": 123,
             "param_2": "abc",
@@ -337,12 +344,18 @@ def test_remote_exec_headers_output(
     )
 
     assert async_url_key in cmd_output
-    assert cmd_output[async_url_key] == async_url_value
 
-    assert mock_requests.post.call_args[1]["json"] == {
-        "commandId": "RunShellScript",
-        "script": script,
-        "parameters": [{"name": "param_1", "value": 123}, {"name": "param_2", "value": "abc"}],
+    assert mock_requests.put.call_args[1]["json"] == {
+        "location": "TEST_LOCATION",
+        "properties": {
+            "source": {"script": "; ".join(script)},
+            "protectedParameters": [
+                {"name": "param_1", "value": 123},
+                {"name": "param_2", "value": "abc"},
+            ],
+            "timeoutInSeconds": 2,
+            "asyncExecution": True,
+        },
     }
 
 
@@ -353,14 +366,23 @@ def test_remote_exec_headers_output(
             Status.SUCCEEDED,
             {
                 "properties": {
-                    "output": {
-                        "value": [
-                            {"message": "DUMMY_STDOUT_STDERR"},
-                        ]
+                    "instanceView": {
+                        "output": "DUMMY_STDOUT\n",
+                        "error": "DUMMY_STDERR\n",
+                        "executionState": "Succeeded",
+                        "exitCode": 0,
+                        "startTime": "2024-01-01T00:00:00+00:00",
+                        "endTime": "2024-01-01T00:01:00+00:00",
                     }
                 }
             },
-            {"stdout": "DUMMY_STDOUT_STDERR"},
+            {
+                "stdout": ["DUMMY_STDOUT"],
+                "stderr": ["DUMMY_STDERR"],
+                "exitCode": 0,
+                "startTimestamp": datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+                "endTimestamp": datetime(2024, 1, 1, 0, 1, 0, tzinfo=timezone.utc),
+            },
         ),
         (Status.PENDING, {}, {}),
         (Status.FAILED, {}, {}),
@@ -373,15 +395,21 @@ def test_get_remote_exec_results(
     results_output: dict,
 ) -> None:
     """Test getting the results of the remote execution on Azure."""
-    params = {"asyncResultsUrl": "DUMMY_ASYNC_URL"}
+    params = {
+        "asyncResultsUrl": "DUMMY_ASYNC_URL",
+    }
 
-    mock_wait_host_operation = MagicMock()
-    mock_wait_host_operation.return_value = (operation_status, wait_output)
-    # azure_vm_service.wait_host_operation = mock_wait_host_operation
-    setattr(azure_vm_service_remote_exec_only, "wait_host_operation", mock_wait_host_operation)
+    mock_wait_remote_exec_operation = MagicMock()
+    mock_wait_remote_exec_operation.return_value = (operation_status, wait_output)
+    # azure_vm_service.wait_remote_exec_operation = mock_wait_remote_exec_operation
+    setattr(
+        azure_vm_service_remote_exec_only,
+        "wait_remote_exec_operation",
+        mock_wait_remote_exec_operation,
+    )
 
     status, cmd_output = azure_vm_service_remote_exec_only.get_remote_exec_results(params)
 
     assert status == operation_status
-    assert mock_wait_host_operation.call_args[0][0] == params
+    assert mock_wait_remote_exec_operation.call_args[0][0] == params
     assert cmd_output == results_output
