@@ -44,6 +44,24 @@ BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Scheduler", "S
 BaseTypes = Union["Environment", "Optimizer", "Scheduler", "Service", "Storage"]
 
 
+# Adjusted from https://github.com/python/cpython/blob/v3.11.10/Lib/distutils/util.py#L308
+# See Also: https://github.com/microsoft/MLOS/issues/865
+def strtobool(val: str) -> bool:
+    """
+    Convert a string representation of truth to true (1) or false (0).
+
+    True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values are 'n', 'no',
+    'f', 'false', 'off', and '0'.  Raises ValueError if 'val' is anything else.
+    """
+    val = val.lower()
+    if val in {"y", "yes", "t", "true", "on", "1"}:
+        return True
+    elif val in {"n", "no", "f", "false", "off", "0"}:
+        return False
+    else:
+        raise ValueError(f"Invalid Boolean value: '{val}'")
+
+
 def preprocess_dynamic_configs(*, dest: dict, source: Optional[dict] = None) -> dict:
     """
     Replaces all $name values in the destination config with the corresponding value

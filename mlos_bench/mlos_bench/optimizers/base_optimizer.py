@@ -8,7 +8,6 @@ optimizers.
 
 import logging
 from abc import ABCMeta, abstractmethod
-from distutils.util import strtobool  # pylint: disable=deprecated-module
 from types import TracebackType
 from typing import Dict, Optional, Sequence, Tuple, Type, Union
 
@@ -21,6 +20,7 @@ from mlos_bench.optimizers.convert_configspace import tunable_groups_to_configsp
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.util import strtobool
 
 _LOG = logging.getLogger(__name__)
 
