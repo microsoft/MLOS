@@ -14,10 +14,11 @@ from sqlalchemy import Connection, CursorResult, Engine, Table, column, func, se
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_storage import Storage
+from mlos_bench.storage.sql.common import save_params
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.sql.trial import Trial
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import nullable, utcify_timestamp
+from mlos_bench.util import utcify_timestamp
 
 _LOG = logging.getLogger(__name__)
 
@@ -224,23 +225,6 @@ class Experiment(Storage.Experiment):
             row._tuple() for row in cur_result.fetchall()  # pylint: disable=protected-access
         )
 
-    @staticmethod
-    def _save_params(
-        conn: Connection,
-        table: Table,
-        params: Dict[str, Any],
-        **kwargs: Any,
-    ) -> None:
-        if not params:
-            return
-        conn.execute(
-            table.insert(),
-            [
-                {**kwargs, "param_id": key, "param_value": nullable(str, val)}
-                for (key, val) in params.items()
-            ],
-        )
-
     def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator[Storage.Trial]:
         timestamp = utcify_timestamp(timestamp, origin="local")
         _LOG.info("Retrieve pending trials for: %s @ %s", self._experiment_id, timestamp)
@@ -302,7 +286,7 @@ class Experiment(Storage.Experiment):
         config_id: int = conn.execute(
             self._schema.config.insert().values(config_hash=config_hash)
         ).inserted_primary_key[0]
-        self._save_params(
+        save_params(
             conn,
             self._schema.config_param,
             {tunable.name: tunable.value for (tunable, _group) in tunables},
@@ -338,7 +322,7 @@ class Experiment(Storage.Experiment):
                 # Note: config here is the framework config, not the target
                 # environment config (i.e., tunables).
                 if config is not None:
-                    self._save_params(
+                    save_params(
                         conn,
                         self._schema.trial_param,
                         config,

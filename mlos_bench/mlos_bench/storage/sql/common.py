@@ -3,16 +3,33 @@
 # Licensed under the MIT License.
 #
 """Common SQL methods for accessing the stored benchmark data."""
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 import pandas
-from sqlalchemy import Engine, Integer, and_, func, select
+from sqlalchemy import Connection, Engine, Integer, Table, and_, func, select
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.base_trial_data import TrialData
 from mlos_bench.storage.sql.schema import DbSchema
-from mlos_bench.util import utcify_nullable_timestamp, utcify_timestamp
+from mlos_bench.util import nullable, utcify_nullable_timestamp, utcify_timestamp
+
+
+def save_params(
+    conn: Connection,
+    table: Table,
+    params: Dict[str, Any],
+    **kwargs: Any,
+) -> None:
+    if not params:
+        return
+    conn.execute(
+        table.insert(),
+        [
+            {**kwargs, "param_id": key, "param_value": nullable(str, val)}
+            for (key, val) in params.items()
+        ],
+    )
 
 
 def get_trials(
