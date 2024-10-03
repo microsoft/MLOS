@@ -5,11 +5,11 @@
 """Base interface for accessing the stored benchmark experiment data."""
 
 from abc import ABCMeta, abstractmethod
-from distutils.util import strtobool  # pylint: disable=deprecated-module
 from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple
 
 import pandas
 
+from mlos_bench.util import strtobool
 from mlos_bench.storage.base_tunable_config_data import TunableConfigData
 
 if TYPE_CHECKING:
