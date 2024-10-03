@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple
 
 import pandas
 
-from mlos_bench.util import strtobool
 from mlos_bench.storage.base_tunable_config_data import TunableConfigData
+from mlos_bench.util import strtobool
 
 if TYPE_CHECKING:
     from mlos_bench.storage.base_trial_data import TrialData

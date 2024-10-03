@@ -47,11 +47,11 @@ BaseTypes = Union["Environment", "Optimizer", "Scheduler", "Service", "Storage"]
 # Adjusted from https://github.com/python/cpython/blob/v3.11.10/Lib/distutils/util.py#L308
 # See Also: https://github.com/microsoft/MLOS/issues/865
 def strtobool(val: str) -> bool:
-    """Convert a string representation of truth to true (1) or false (0).
+    """
+    Convert a string representation of truth to true (1) or false (0).
 
-    True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values
-    are 'n', 'no', 'f', 'false', 'off', and '0'.  Raises ValueError if
-    'val' is anything else.
+    True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values are 'n', 'no',
+    'f', 'false', 'off', and '0'.  Raises ValueError if 'val' is anything else.
     """
     val = val.lower()
     if val in {"y", "yes", "t", "true", "on", "1"}:
