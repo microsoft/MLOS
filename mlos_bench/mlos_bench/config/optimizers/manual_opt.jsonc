@@ -6,6 +6,6 @@
 
     "config": {
         "max_cycles": 30,
-        "cycle_tunable_values": []
+        "tunable_values_cycle": []
     }
 }

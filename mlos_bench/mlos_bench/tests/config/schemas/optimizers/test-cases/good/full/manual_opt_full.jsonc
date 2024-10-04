@@ -8,7 +8,7 @@
         "seed": 12345,
         "start_with_defaults": false,
         "max_cycles": 10,
-        "cycle_tunable_values": [
+        "tunable_values_cycle": [
             {
                 "param1": "value1",
                 "param2": 1,

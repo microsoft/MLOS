@@ -26,23 +26,23 @@ class ManualOptimizer(MockOptimizer):
         service: Optional[Service] = None,
     ):
         super().__init__(tunables, config, global_config, service)
-        self._cycle_tunable_values: List[Dict[str, TunableValue]] = config.get(
-            "cycle_tunable_values", []
+        self._tunable_values_cycle: List[Dict[str, TunableValue]] = config.get(
+            "tunable_values_cycle", []
         )
-        if len(self._cycle_tunable_values) == 0:
-            _LOG.warning("No cycle_tunable_values provided, using default values.")
-            self._cycle_tunable_values = [tunables.get_param_values()]
+        if len(self._tunable_values_cycle) == 0:
+            _LOG.warning("No tunable_values_cycle provided, using default values.")
+            self._tunable_values_cycle = [tunables.get_param_values()]
         max_cycles = int(config.get("max_cycles", 1))
         self._max_suggestions = min(
             self._max_suggestions,
-            max_cycles * len(self._cycle_tunable_values),
+            max_cycles * len(self._tunable_values_cycle),
         )
 
     def suggest(self) -> TunableGroups:
         """Always produce the same sequence of explicit suggestions, in a cycle."""
         tunables = super().suggest()
-        cycle_index = (self._iter - 1) % len(self._cycle_tunable_values)
-        tunables.assign(self._cycle_tunable_values[cycle_index])
+        cycle_index = (self._iter - 1) % len(self._tunable_values_cycle)
+        tunables.assign(self._tunable_values_cycle[cycle_index])
         _LOG.info("Iteration %d :: Suggest: %s", self._iter, tunables)
         return tunables
 

@@ -5,6 +5,6 @@
     "config": {
         // max_cycles should be at least 1
         "max_cycles": 0,
-        "cycle_tunable_values": []
+        "tunable_values_cycle": []
     }
 }

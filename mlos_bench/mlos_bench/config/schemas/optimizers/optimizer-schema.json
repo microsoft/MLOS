@@ -232,7 +232,7 @@
                                         "type": "integer",
                                         "minimum": 1
                                     },
-                                    "cycle_tunable_values": {
+                                    "tunable_values_cycle": {
                                         "description": "The tunable values to cycle through.",
                                         "type": "array",
                                         "items": {
