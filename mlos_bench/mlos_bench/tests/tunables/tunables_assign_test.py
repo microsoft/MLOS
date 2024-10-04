@@ -28,6 +28,24 @@ def test_tunables_assign_unknown_param(tunable_groups: TunableGroups) -> None:
         )
 
 
+def test_tunables_assign_defaults(tunable_groups: TunableGroups) -> None:
+    """Make sure we can assign the default values using an empty dictionary."""
+    tunable_groups_defaults = tunable_groups.copy()
+    assert tunable_groups.is_defaults()
+    # Assign the default values.
+    # Also reset the _is_updated flag to avoid considering that in the comparison.
+    tunable_groups.assign({}).reset()
+    assert tunable_groups_defaults == tunable_groups
+    assert tunable_groups.is_defaults()
+    tunable_groups.assign({"vmSize": "Standard_B2s"}).reset()
+    assert tunable_groups_defaults != tunable_groups
+    assert not tunable_groups.is_defaults()
+    tunable_groups.assign({}).reset()
+    assert tunable_groups["vmSize"] != "Standard_B2s"
+    assert tunable_groups.is_defaults()
+    assert tunable_groups_defaults == tunable_groups
+
+
 def test_tunables_assign_categorical(tunable_categorical: Tunable) -> None:
     """Regular assignment for categorical tunable."""
     # Must be one of: {"Standard_B2s", "Standard_B2ms", "Standard_B4ms"}

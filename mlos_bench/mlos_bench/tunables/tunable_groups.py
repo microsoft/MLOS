@@ -351,6 +351,8 @@ class TunableGroups:
         self : TunableGroups
             Self-reference for chaining.
         """
+        if not param_values:
+            return self.restore_defaults()
         for key, value in param_values.items():
             self[key] = value
         return self
