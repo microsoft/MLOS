@@ -1,0 +1,6 @@
+[theme]
+primaryColor = '#FF8C00'  # Amber for better visibility of sliders and other interactive elements
+backgroundColor = '#FFFFFF'  # Azure blue background
+secondaryBackgroundColor = '#ADD8F6'  # Darker blue for the sidebar
+textColor = '#0078D4'  # White text
+font = "Segoe UI"  # Microsoft's standard font
