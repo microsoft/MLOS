@@ -363,6 +363,13 @@
         "kvName": {
             "type": "string",
             "value": "[variables('kvName')]"
+        },
+        "storageAccountNames": {
+            "type": "array",
+            "copy": {
+                "count": "[length(parameters('storageAccountLocations'))]",
+                "input": "[concat(variables('storageAccountName'), parameters('storageAccountLocations')[copyIndex()])]"
+            }
         }
     }
 }
