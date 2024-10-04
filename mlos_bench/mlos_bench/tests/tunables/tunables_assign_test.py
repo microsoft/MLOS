@@ -37,11 +37,19 @@ def test_tunables_assign_defaults(tunable_groups: TunableGroups) -> None:
     tunable_groups.assign({}).reset()
     assert tunable_groups_defaults == tunable_groups
     assert tunable_groups.is_defaults()
-    tunable_groups.assign({"vmSize": "Standard_B2s"}).reset()
+    new_vm_size = "Standard_B2s"
+    assert tunable_groups["vmSize"] != new_vm_size
+    # Change one value.
+    tunable_groups.assign({"vmSize": new_vm_size}).reset()
+    assert tunable_groups["vmSize"] == new_vm_size
+    # Check that the other values are still defaults.
+    idle_tunable, _ = tunable_groups.get_tunable("idle")
+    assert idle_tunable.is_default()
     assert tunable_groups_defaults != tunable_groups
     assert not tunable_groups.is_defaults()
+    # Reassign defaults.
     tunable_groups.assign({}).reset()
-    assert tunable_groups["vmSize"] != "Standard_B2s"
+    assert tunable_groups["vmSize"] != new_vm_size
     assert tunable_groups.is_defaults()
     assert tunable_groups_defaults == tunable_groups
 
