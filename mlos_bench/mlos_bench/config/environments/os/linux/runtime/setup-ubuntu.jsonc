@@ -56,7 +56,6 @@
                         "vmName",
                         "storageAccountName",
                         "storageFileShareName",
-                        "storageAccountKey",
                         "mountPoint",
                         "experiment_id",
                         "trial_id"
@@ -65,7 +64,6 @@
                     "shell_env_params": [
                         "storageAccountName",
                         "storageFileShareName",
-                        "storageAccountKey",
                         "mountPoint",
                         "experiment_id",
                         "trial_id"
