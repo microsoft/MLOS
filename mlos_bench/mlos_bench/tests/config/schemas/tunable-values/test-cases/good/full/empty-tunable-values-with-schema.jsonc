@@ -1,0 +1,4 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-values-schema.json"
+    // empty tunable values represents the defaults
+}

@@ -12,7 +12,6 @@
                     "type": ["string", "number", "boolean"]
                 }
             },
-            "minProperties": 1,
             "not": {
                 "required": ["tunable_values"]
             }
