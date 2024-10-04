@@ -4,11 +4,14 @@
 #
 """TunableGroups definition."""
 import copy
+import logging
 from typing import Dict, Generator, Iterable, Mapping, Optional, Tuple, Union
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
 from mlos_bench.tunables.tunable import Tunable, TunableValue
+
+_LOG = logging.getLogger(__name__)
 
 
 class TunableGroups:
@@ -358,6 +361,7 @@ class TunableGroups:
             Self-reference for chaining.
         """
         if not param_values:
+            _LOG.info("Empty tunable values set provided. Resetting all tunables to defaults.")
             return self.restore_defaults()
         for key, value in param_values.items():
             self[key] = value
