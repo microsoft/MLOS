@@ -6,6 +6,11 @@
 
     "config": {
         "max_cycles": 30,
-        "tunable_values_cycle": []
+        "tunable_values_cycle": [
+            // Add one or more set of tunable values here as a dictionary:
+            // {"tunable_param_1": "tunable_value_1", ... },
+            // The empty dictionary {} can be used to represent the default tunable values.
+            {}
+        ]
     }
 }

@@ -2,6 +2,6 @@
 
     "class": "mlos_bench.optimizers.ManualOptimizer",
     "config": {
-        "tunable_values_cycle": []
+        "tunable_values_cycle": [{}]
     }
 }

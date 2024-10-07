@@ -237,7 +237,8 @@
                                         "type": "array",
                                         "items": {
                                             "$ref": "../tunables/tunable-values-schema.json#/$defs/tunable_values_set"
-                                        }
+                                        },
+                                        "minItems": 1
                                     }
                                 }
                             }

@@ -13,7 +13,9 @@ from mlos_bench.optimizers.manual_optimizer import ManualOptimizer
 def test_manual_optimizer(manual_opt: ManualOptimizer, mock_configs: list) -> None:
     """Make sure that manual optimizer produces consistent suggestions."""
 
-    for i in range(2 * len(mock_configs)):
+    i = 0
+    while manual_opt.not_converged():
         tunables = manual_opt.suggest()
         assert tunables.get_param_values() == mock_configs[i % len(mock_configs)]
         manual_opt.register(tunables, Status.SUCCEEDED, {"score": 123.0})
+        i += 1

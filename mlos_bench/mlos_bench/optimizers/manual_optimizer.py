@@ -29,9 +29,7 @@ class ManualOptimizer(MockOptimizer):
         self._tunable_values_cycle: List[Dict[str, TunableValue]] = config.get(
             "tunable_values_cycle", []
         )
-        if len(self._tunable_values_cycle) == 0:
-            _LOG.warning("No tunable_values_cycle provided, using default values.")
-            self._tunable_values_cycle = [tunables.get_param_values()]
+        assert len(self._tunable_values_cycle) > 0, "No tunable values provided."
         max_cycles = int(config.get("max_cycles", 1))
         self._max_suggestions = min(
             self._max_suggestions,
