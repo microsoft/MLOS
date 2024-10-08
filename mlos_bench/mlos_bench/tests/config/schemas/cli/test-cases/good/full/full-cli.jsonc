@@ -16,6 +16,7 @@
     "storage": "storage/sqlite.jsonc",
 
     "trial_config_repeat_count": 3,
+    "num_trial_runners": 3,
 
     "random_init": true,
     "random_seed": 42,
