@@ -1,4 +1,6 @@
 {
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-values-schema.json",
+
     "foo": "bar",
     "int": 1,
     "float": 1.1,
