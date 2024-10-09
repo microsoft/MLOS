@@ -23,6 +23,12 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 _LOG = logging.getLogger(__name__)
 
 
+_NAME = "mlos_bench"
+_DESC = "Systems autotuning and benchmarking tool"
+# Dynamically add the --help text to our docstring.
+__doc__ += "\n" + Launcher.get_help_text(_NAME, _DESC)
+
+
 def _sanity_check_results(launcher: Launcher) -> None:
     """Do some sanity checking on the results and throw an exception if it looks like
     something went wrong.
@@ -57,7 +63,7 @@ def _sanity_check_results(launcher: Launcher) -> None:
 def _main(
     argv: Optional[List[str]] = None,
 ) -> Tuple[Optional[Dict[str, float]], Optional[TunableGroups]]:
-    launcher = Launcher("mlos_bench", "Systems autotuning and benchmarking tool", argv=argv)
+    launcher = Launcher(_NAME, _DESC, argv=argv)
 
     with launcher.scheduler as scheduler_context:
         scheduler_context.start()
