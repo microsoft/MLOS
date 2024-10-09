@@ -63,9 +63,8 @@ release = VERSION
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "autoapi.extension",
     "nbsphinx",
-    "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
     # 'sphinx.ext.intersphinx',
     # 'sphinx.ext.linkcode',
@@ -83,21 +82,6 @@ source_suffix = {
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
-# generate autosummary even if no references
-autosummary_generate = True
-# but don't complain about missing stub files
-# See Also: <https://stackoverflow.com/a/73294408>
-numpydoc_class_members_toctree = False
-
-autodoc_default_options = {
-    "members": True,
-    "inherited-members": True,
-    "undoc-members": True,
-    # Don't generate documentation for some (non-private) functions that are more
-    # for internal implementation use.
-    "exclude-members": "mlos_bench.util.check_required_params",
-}
-
 # Generate the plots for the gallery
 # plot_gallery = True
 
@@ -106,6 +90,38 @@ autodoc_default_options = {
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "_templates"]
 
+autoapi_dirs = [
+    # Don't index setup.py or other utility scripts.
+    "../../mlos_core/mlos_core/",
+    "../../mlos_bench/mlos_bench/",
+    "../../mlos_viz/mlos_viz/",
+]
+autoapi_ignore = [
+    "*/tests/*",
+    # Don't document internal environment scripts that aren't part of a module.
+    "*/mlos_bench/config/environments/*/*.py",
+    "*/mlos_bench/config/services/*/*.py",
+]
+autoapi_options = [
+    "members",
+    # Can't document externally inherited members due to broken references.
+    # "inherited-members",
+    "undoc-members",
+    # Don't document private members.
+    # "private-members",
+    "show-inheritance",
+    # Causes issues when base class is a typing protocol.
+    # "show-inheritance-diagram",
+    "show-module-summary",
+    "special-members",
+    # Causes duplicate reference issues. For instance:
+    # - mlos_bench.environments.LocalEnv
+    # - mlos_bench.environments.local.LocalEnv
+    # - mlos_bench.environments.local.local_env.LocalEnv
+    # "imported-members",
+]
+autoapi_add_toctree_entry = False
+# autoapi_keep_files = True  # for testing
 
 # -- Options for HTML output -------------------------------------------------
 

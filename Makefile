@@ -800,7 +800,7 @@ build/linklint-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov
 
 .PHONY: clean-doc
 clean-doc:
-	rm -rf doc/build/ doc/global/ doc/source/api/ doc/source/generated
+	rm -rf doc/build/ doc/global/ doc/source/api/ doc/source/generated doc/source/autoapi
 	rm -rf doc/source/source_tree_docs/*
 
 .PHONY: clean-format
