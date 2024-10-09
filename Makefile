@@ -699,7 +699,11 @@ doc/build/html/index.html: build/pytest.${CONDA_ENV_NAME}.build-stamp
 doc/build/html/htmlcov/index.html: build/pytest.${CONDA_ENV_NAME}.build-stamp
 endif
 
-doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile doc/copy-source-tree-docs.sh $(MD_FILES)
+# Treat warnings as failures.
+SPHINXOPTS ?= -v
+SPHINXOPTS += -W -w $(PWD)/doc/build/sphinx-build.warn.log -j auto
+
+doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile doc/source/conf.py doc/copy-source-tree-docs.sh $(MD_FILES)
 	@rm -rf doc/build
 	@mkdir -p doc/build
 	@rm -f doc/build/log.txt
@@ -713,7 +717,7 @@ doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile doc/copy-source-
 	./doc/copy-source-tree-docs.sh
 
 	# Build the rst files into html.
-	conda run -n ${CONDA_ENV_NAME} $(MAKE) -C doc/ $(MAKEFLAGS) html \
+	conda run -n ${CONDA_ENV_NAME} $(MAKE) SPHINXOPTS="$(SPHINXOPTS)" -C doc/ $(MAKEFLAGS) html \
 		>> doc/build/log.txt 2>&1 \
 		|| { cat doc/build/log.txt; exit 1; }
 	# DONE: Add some output filtering for this so we can more easily see what went wrong.
