@@ -659,40 +659,7 @@ clean-doc-env:
 
 COMMON_DOC_FILES := build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp doc/source/*.rst doc/source/_templates/*.rst doc/source/conf.py
 
-doc/source/api/mlos_core/modules.rst: $(FORMAT_PREREQS) $(COMMON_DOC_FILES)
-doc/source/api/mlos_core/modules.rst: $(MLOS_CORE_PYTHON_FILES)
-	rm -rf doc/source/api/mlos_core
-	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M \
-		-o source/api/mlos_core/ \
-		../mlos_core/ \
-		../mlos_core/setup.py ../mlos_core/mlos_core/tests/
-
-doc/source/api/mlos_bench/modules.rst: $(FORMAT_PREREQS) $(COMMON_DOC_FILES)
-doc/source/api/mlos_bench/modules.rst: $(MLOS_BENCH_PYTHON_FILES)
-	rm -rf doc/source/api/mlos_bench
-	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M \
-		-o source/api/mlos_bench/ \
-		../mlos_bench/ \
-		../mlos_bench/setup.py ../mlos_bench/mlos_bench/tests/
-	# Save the help output of the mlos_bench scripts to include in the documentation.
-	conda run -n ${CONDA_ENV_NAME} mlos_bench --help > doc/source/api/mlos_bench/mlos_bench.run.usage.txt
-	echo ".. literalinclude:: mlos_bench.run.usage.txt" >> doc/source/api/mlos_bench/mlos_bench.run.rst
-	echo "   :language: none" >> doc/source/api/mlos_bench/mlos_bench.run.rst
-
-doc/source/api/mlos_viz/modules.rst: $(FORMAT_PREREQS) $(COMMON_DOC_FILES)
-doc/source/api/mlos_viz/modules.rst: $(MLOS_VIZ_PYTHON_FILES)
-	rm -rf doc/source/api/mlos_viz
-	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M \
-		-o source/api/mlos_viz/ \
-		../mlos_viz/ \
-		../mlos_viz/setup.py ../mlos_viz/mlos_viz/tests/
-
-SPHINX_API_RST_FILES := doc/source/api/mlos_core/modules.rst
-SPHINX_API_RST_FILES += doc/source/api/mlos_bench/modules.rst
-SPHINX_API_RST_FILES += doc/source/api/mlos_viz/modules.rst
-
-.PHONY: sphinx-apidoc
-sphinx-apidoc: $(SPHINX_API_RST_FILES)
+SPHINX_API_RST_FILES := doc/source/index.rst
 
 ifeq ($(SKIP_COVERAGE),)
 doc/build/html/index.html: build/pytest.${CONDA_ENV_NAME}.build-stamp
@@ -700,7 +667,7 @@ doc/build/html/htmlcov/index.html: build/pytest.${CONDA_ENV_NAME}.build-stamp
 endif
 
 # Treat warnings as failures.
-SPHINXOPTS ?= -v
+SPHINXOPTS ?= # -v # be verbose
 SPHINXOPTS += -W -w $(PWD)/doc/build/sphinx-build.warn.log -j auto
 
 doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile doc/source/conf.py doc/copy-source-tree-docs.sh $(MD_FILES)
