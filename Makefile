@@ -713,13 +713,13 @@ check-doc: build/check-doc.build-stamp
 build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/index.html
 	# Check for a few files to make sure the docs got generated in a way we want.
 	test -s doc/build/html/index.html
-	test -s doc/build/html/generated/mlos_core.optimizers.optimizer.BaseOptimizer.html
-	test -s doc/build/html/generated/mlos_bench.environments.Environment.html
-	test -s doc/build/html/generated/mlos_viz.plot.html
-	test -s doc/build/html/api/mlos_core/mlos_core.html
-	test -s doc/build/html/api/mlos_bench/mlos_bench.html
-	test -s doc/build/html/api/mlos_viz/mlos_viz.html
-	test -s doc/build/html/api/mlos_viz/mlos_viz.dabl.html
+	grep -q BaseOptimizer doc/build/html/autoapi/mlos_core/optimizers/optimizer/index.html
+	grep -q Environment doc/build/html/autoapi/mlos_bench/environments/base_environment/index.html
+	grep -q plot doc/build/html/autoapi/mlos_viz/index.html
+	test -s doc/build/html/autoapi/mlos_core/index.html
+	test -s doc/build/html/autoapi/mlos_bench/index.html
+	test -s doc/build/html/autoapi/mlos_viz/index.html
+	test -s doc/build/html/autoapi/mlos_viz/dabl/index.html
 	grep -q -e '--config CONFIG' doc/build/html/api/mlos_bench/mlos_bench.run.html
 	# Check doc logs for errors (but skip over some known ones) ...
 	@cat doc/build/log.txt \
