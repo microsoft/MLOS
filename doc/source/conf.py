@@ -91,6 +91,7 @@ numpydoc_class_members_toctree = False
 
 autodoc_default_options = {
     "members": True,
+    "inherited-members": True,
     "undoc-members": True,
     # Don't generate documentation for some (non-private) functions that are more
     # for internal implementation use.
