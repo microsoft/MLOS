@@ -757,7 +757,7 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 		| egrep -C1 -e WARNING -e CRITICAL -e ERROR \
 		| egrep -v \
 			-e "warnings.warn\(f'\"{wd.path}\" is shallow and may cause errors'\)" \
-			-e "No such file or directory: '.*.examples'.$$" \
+			-e "No such file or directory: '.*.examples'.( \[docutils\]\s*)?$$" \
 			-e 'Problems with "include" directive path:' \
 			-e 'duplicate object description' \
 			-e "document isn't included in any toctree" \
