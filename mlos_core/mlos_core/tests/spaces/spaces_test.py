@@ -26,6 +26,8 @@ from mlos_core.spaces.converters.flaml import (
 OptimizerSpace = Union[FlamlSpace, CS.ConfigurationSpace]
 OptimizerParam = Union[FlamlDomain, Hyperparameter]
 
+NP_E: float = np.e  # type: ignore[misc]    # false positive (read deleted variable)
+
 
 def assert_is_uniform(arr: npt.NDArray) -> None:
     """Implements a few tests for uniformity."""
@@ -44,7 +46,7 @@ def assert_is_uniform(arr: npt.NDArray) -> None:
     assert f_p_value > 0.5
 
 
-def assert_is_log_uniform(arr: npt.NDArray, base: float = np.e) -> None:
+def assert_is_log_uniform(arr: npt.NDArray, base: float = NP_E) -> None:
     """Checks whether an array is log uniformly distributed."""
     logs = np.log(arr) / np.log(base)
     assert_is_uniform(logs)
