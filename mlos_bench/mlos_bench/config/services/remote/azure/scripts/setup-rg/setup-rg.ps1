@@ -11,14 +11,17 @@ param(
     # Results DB ARM template params
     [Parameter(Mandatory=$False)]
     [string] $resultsDbArmParamsFile,
-    # Other params
-    [Parameter(Mandatory=$True)]
-    [string] $servicePrincipalName,
     [Parameter(Mandatory=$True)]
     [string] $resourceGroupName,
-    [Parameter(Mandatory=$True)]
+    # Managed Identity params
+    [Parameter(Mandatory=$True, ParameterSetName="ByMI")]
+    [string] $managedIdentityName,
+    # Service Principal params
+    [Parameter(Mandatory=$True, ParameterSetName="BySP")]
+    [string] $servicePrincipalName,
+    [Parameter(Mandatory=$True, ParameterSetName="BySP")]
     [string] $certName,
-    [Parameter(Mandatory=$False)]
+    [Parameter(Mandatory=$False, ParameterSetName="BySP")]
     [int] $certExpirationYears = 1
 )
 
@@ -36,6 +39,9 @@ if (!$?) {
     return
 }
 
+$vmName = $deploymentResults.properties.outputs.vmName.value
+$storageAccountNames = $deploymentResults.properties.outputs.storageAccountNames.value
+
 # Conditional provisioning of results DB
 if ($resultsDbArmParamsFile) {
     Write-Output "Provisioning results DB..."
@@ -51,7 +57,6 @@ if ($resultsDbArmParamsFile) {
     }
     else {
         $dbName = $dbDeploymentResults.properties.outputs.dbName.value
-        $vmName = $deploymentResults.properties.outputs.vmName.value
         $vmIpAddress = $deploymentResults.properties.outputs.vmIpAddress.value
 
         # VM IP access for results DB
@@ -83,41 +88,77 @@ $certThumbprint = az keyvault certificate show `
     2>$null `
     || "NOCERT"
 
-if ($certThumbprint == "NOCERT") {
-    # The cert does not exist yet.
-    # Create the service principal if doesn't exist, storing the cert in the keyvault
-    # If it does exist, this also patches the current service principal with the role
-    az ad sp create-for-rbac `
-        --name $servicePrincipalName `
-        --role "Contributor" `
-        --scopes $resourceGroupId `
-        --create-cert `
-        --cert $certName `
-        --keyvault $kvName `
-        --years $certExpirationYears
-} else {
-    # The cert already exists in the keyvault.
+switch ($PSCmdlet.ParameterSetName) {
+    "BySP" {
+        if ($certThumbprint -eq "NOCERT") {
+            # The cert does not exist yet.
+            # Create the service principal if doesn't exist, storing the cert in the keyvault
+            # If it does exist, this also patches the current service principal with the role
+            az ad sp create-for-rbac `
+                --name $servicePrincipalName `
+                --role "Contributor" `
+                --scopes $resourceGroupId `
+                --create-cert `
+                --cert $certName `
+                --keyvault $kvName `
+                --years $certExpirationYears
+        } else {
+            # The cert already exists in the keyvault.
 
-    # Ensure the SP exists with correct roles, without creating a cert.
-    az ad sp create-for-rbac `
-        --name $servicePrincipalName `
-        --role "Contributor" `
-        --scopes $resourceGroupId `
+            # Ensure the SP exists with correct roles, without creating a cert.
+            az ad sp create-for-rbac `
+                --name $servicePrincipalName `
+                --role "Contributor" `
+                --scopes $resourceGroupId `
 
-    # SP's certs, which are stored in the registered application instead
-    $servicePrincipalAppId = az ad sp list `
-        --display-name $servicePrincipalName `
-        --query "[?servicePrincipalType == 'Application'].appId" `
-        --output tsv
-    $spCertThumbprints = az ad app credential list `
-        --id $servicePrincipalAppId `
-        --cert `
-        --query "[].customKeyIdentifier" `
-        --output tsv
+            # SP's certs, which are stored in the registered application instead
+            $servicePrincipalAppId = az ad sp list `
+                --display-name $servicePrincipalName `
+                --query "[?servicePrincipalType == 'Application'].appId" `
+                --output tsv
+            $spCertThumbprints = az ad app credential list `
+                --id $servicePrincipalAppId `
+                --cert `
+                --query "[].customKeyIdentifier" `
+                --output tsv
 
-    if ($spCertThumbprints.Contains($certThumbprint)) {
-        Write-Output "Keyvault contains the certificate '$certName' that is linked to the service principal '$servicePrincipalName' already."
-    } else {
-        Write-Warning "Keyvault already contains a certificate called '$certName', but is not linked with the service principal '$servicePrincipalName'! Skipping cert handling"
+            if ($spCertThumbprints.Contains($certThumbprint)) {
+                Write-Output "Keyvault contains the certificate '$certName' that is linked to the service principal '$servicePrincipalName' already."
+            } else {
+                Write-Warning "Keyvault already contains a certificate called '$certName', but is not linked with the service principal '$servicePrincipalName'! Skipping cert handling"
+            }
+        }
+        break
+    }
+    "ByMI" {
+        # Ensure the user managed identity is created
+        $miId = az identity create `
+            --name $managedIdentityName `
+            --resource-group $resourceGroupName `
+            --query "principalId" --output tsv
+
+        Write-Output "Using managed identity $managedIdentityName with principalId $miId"
+
+        Write-Output "Assigning the identity access to the Resource Group..."
+        az role assignment create `
+            --assignee $miId `
+            --role "Contributor" `
+            --scope $resourceGroupId
+
+        # Assign the identity to the VM
+        Write-Output "Assigning the identity to the VM..."
+        az vm identity assign --name $vmName --resource-group $resourceGroupName --identities $managedIdentityName
+
+        # Assign the identity access to the storage accounts
+        foreach ($storageAccountName in $storageAccountNames) {
+            Write-Output "Assigning the identity the role for $storageAccountName..."
+            $storageAccountResourceId = az storage account show --name $storageAccountName --resource-group $resourceGroupName --query "id" --output tsv
+            az role assignment create `
+                --assignee $miId `
+                --role "Storage File Data Privileged Contributor" `
+                --scope $storageAccountResourceId
+        }
+        break
     }
 }
+
