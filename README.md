@@ -25,6 +25,7 @@ MLOS is a project to enable autotuning for systems.
     - [Installation](#installation)
     - [See Also](#see-also)
         - [Examples](#examples)
+        - [Publications](#publications)
 
 <!-- /TOC -->
 
