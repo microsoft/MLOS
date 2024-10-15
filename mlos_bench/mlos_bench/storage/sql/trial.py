@@ -6,13 +6,14 @@
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional, Tuple
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 from sqlalchemy import Connection, Engine
 from sqlalchemy.exc import IntegrityError
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_storage import Storage
+from mlos_bench.storage.sql.common import save_params
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import nullable, utcify_timestamp
@@ -45,6 +46,16 @@ class Trial(Storage.Trial):
         )
         self._engine = engine
         self._schema = schema
+
+    def _save_new_config_data(self, new_config_data: Dict[str, Union[int, float, str]]) -> None:
+        with self._engine.begin() as conn:
+            save_params(
+                conn,
+                self._schema.trial_param,
+                new_config_data,
+                exp_id=self._experiment_id,
+                trial_id=self._trial_id,
+            )
 
     def update(
         self,
