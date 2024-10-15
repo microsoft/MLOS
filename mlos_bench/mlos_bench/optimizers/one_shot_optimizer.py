@@ -21,8 +21,6 @@ class OneShotOptimizer(MockOptimizer):
     Explicit configs (partial or full) are possible using configuration files.
     """
 
-    # TODO: Add support for multiple explicit configs (i.e., FewShot or Manual Optimizer) - #344
-
     def __init__(
         self,
         tunables: TunableGroups,
