@@ -32,7 +32,7 @@ rootdir="$repo_root"
 # Run the initialize command on the host first.
 # Note: command should already pull the cached image if possible.
 pwd
-devcontainer_json=$(cat "$rootdir/.devcontainer/devcontainer.json" | sed -e 's|^\s*//.*||' -e 's|/\*|\n&|g;s|*/|&\n|g' | sed -e '/\/\*/,/*\//d')
+devcontainer_json=$(cat "$rootdir/.devcontainer/devcontainer.json" | sed -e 's|^[ \t]*//.*||' -e 's|/\*|\n&|g;s|*/|&\n|g' | sed -e '/\/\*/,/*\//d')
 initializeCommand=$(echo "$devcontainer_json" | docker run -i --rm $DEVCONTAINER_IMAGE jq -e -r '.initializeCommand[]')
 if [ -z "$initializeCommand" ]; then
     echo "No initializeCommand found in devcontainer.json" >&2
