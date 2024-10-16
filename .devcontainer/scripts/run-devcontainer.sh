@@ -17,15 +17,17 @@ repo_root=$(readlink -f "$scriptdir/../..")
 repo_name=$(basename "$repo_root")
 cd "$repo_root"
 
-container_name="$repo_name.$(stat -c%i "$repo_root/")"
+source .devcontainer/common.sh
+
+container_name="$repo_name.$(stat $STAT_FORMAT_INODE_ARGS "$repo_root/")"
 
 # Be sure to use the host workspace folder if available.
 workspace_root=${LOCAL_WORKSPACE_FOLDER:-$repo_root}
 
 if [ -e /var/run/docker-host.sock ]; then
-    docker_gid=$(stat -c%g /var/run/docker-host.sock)
+    docker_gid=$(stat $STAT_FORMAT_GID_ARGS /var/run/docker-host.sock)
 else
-    docker_gid=$(stat -c%g /var/run/docker.sock)
+    docker_gid=$(stat $STAT_FORMAT_GID_ARGS /var/run/docker.sock)
 fi
 
 set -x

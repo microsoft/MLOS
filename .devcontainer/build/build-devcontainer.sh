@@ -12,16 +12,18 @@ repo_root=$(readlink -f "$scriptdir/../..")
 repo_name=$(basename "$repo_root")
 cd "$scriptdir/"
 
+source ../common.sh
+
 DEVCONTAINER_IMAGE="devcontainer-cli:latest"
 MLOS_AUTOTUNING_IMAGE="mlos-devcontainer:latest"
 
 # Build the helper container that has the devcontainer CLI for building the devcontainer.
 NO_CACHE=${NO_CACHE:-} ./build-devcontainer-cli.sh
 
-DOCKER_GID=$(stat -c'%g' /var/run/docker.sock)
+DOCKER_GID=$(stat $STAT_FORMAT_GID_ARGS /var/run/docker.sock)
 # Make this work inside a devcontainer as well.
 if [ -w /var/run/docker-host.sock ]; then
-    DOCKER_GID=$(stat -c'%g' /var/run/docker-host.sock)
+    DOCKER_GID=$(stat $STAT_FORMAT_GID_ARGS /var/run/docker-host.sock)
 fi
 
 # Build the devcontainer image.
