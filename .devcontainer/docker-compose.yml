@@ -4,6 +4,7 @@ services:
       context: ./tmp
       dockerfile: ../Dockerfile
       args:
+        DOCKER_BUILKIT: 1
         BUILDKIT_INLINE_CACHE: 1
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
@@ -31,6 +32,7 @@ services:
       context: ./tmp
       dockerfile: ../../doc/Dockerfile
       args:
+        DOCKER_BUILKIT: 1
         BUILDKIT_INLINE_CACHE: 1
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
