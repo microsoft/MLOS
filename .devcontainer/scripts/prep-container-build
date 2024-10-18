@@ -20,6 +20,7 @@ if [ ! -f .env ]; then
 fi
 # Also prep the random NGINX_PORT for the docker-compose command.
 if ! [ -e .devcontainer/.env ] || ! egrep -q "^NGINX_PORT=[0-9]+$" .devcontainer/.env; then
+    RANDOM=$$
     NGINX_PORT=$((($RANDOM % 30000) + 1 + 80))
     echo "NGINX_PORT=$NGINX_PORT" > .devcontainer/.env
 fi
