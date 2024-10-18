@@ -123,7 +123,7 @@ autoapi_options = [
     # "imported-members",
 ]
 autoapi_add_toctree_entry = False
-# autoapi_keep_files = True  # for testing
+autoapi_keep_files = True  # for testing
 
 # -- Options for HTML output -------------------------------------------------
 
