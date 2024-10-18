@@ -44,6 +44,8 @@ else
     eval "pushd "$rootdir/"; $initializeCommand; popd"
 fi
 
+# TODO: Add multi-platform build support?
+#devcontainer_build_args='--platform linux/amd64,linux/arm64'
 devcontainer_build_args=''
 if [ "${NO_CACHE:-}" == 'true' ]; then
     base_image=$(grep '^FROM ' "$rootdir/.devcontainer/Dockerfile" | sed -e 's/^FROM //' -e 's/ AS .*//' | head -n1)
