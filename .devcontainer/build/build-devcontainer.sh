@@ -20,11 +20,14 @@ MLOS_AUTOTUNING_IMAGE="mlos-devcontainer:latest"
 # Build the helper container that has the devcontainer CLI for building the devcontainer.
 NO_CACHE=${NO_CACHE:-} ./build-devcontainer-cli.sh
 
-DOCKER_GID=$(stat $STAT_FORMAT_GID_ARGS /var/run/docker.sock)
-# Make this work inside a devcontainer as well.
-if [ -w /var/run/docker-host.sock ]; then
-    DOCKER_GID=$(stat $STAT_FORMAT_GID_ARGS /var/run/docker-host.sock)
+docker_sock=
+if [ -e /var/run/docker-host.sock ]; then
+    docker_sock=$(readlink -f /var/run/docker-host.sock)
+else
+    docker_sock=$(readlink -f /var/run/docker.sock)
 fi
+DOCKER_GID=$(stat $STAT_FORMAT_GID_ARGS "$docker_sock")
+
 
 # Build the devcontainer image.
 rootdir="$repo_root"

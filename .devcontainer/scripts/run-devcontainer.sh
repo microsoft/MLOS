@@ -24,11 +24,13 @@ container_name="$repo_name.$(stat $STAT_FORMAT_INODE_ARGS "$repo_root/")"
 # Be sure to use the host workspace folder if available.
 workspace_root=${LOCAL_WORKSPACE_FOLDER:-$repo_root}
 
+docker_sock=
 if [ -e /var/run/docker-host.sock ]; then
-    docker_gid=$(stat $STAT_FORMAT_GID_ARGS /var/run/docker-host.sock)
+    docker_sock=$(readlink -f /var/run/docker-host.sock)
 else
-    docker_gid=$(stat $STAT_FORMAT_GID_ARGS /var/run/docker.sock)
+    docker_sock=$(readlink -f /var/run/docker.sock)
 fi
+DOCKER_GID=$(stat $STAT_FORMAT_GID_ARGS "$docker_sock")
 
 set -x
 mkdir -p "/tmp/$container_name/dc/shellhistory"
@@ -36,7 +38,7 @@ docker run -it --rm \
     --name "$container_name" \
     --user vscode \
     --env USER=vscode \
-    --group-add $docker_gid \
+    --group-add $DOCKER_GID \
     -v "$HOME/.azure":/dc/azure \
     -v "/tmp/$container_name/dc/shellhistory:/dc/shellhistory" \
     -v /var/run/docker.sock:/var/run/docker.sock \
