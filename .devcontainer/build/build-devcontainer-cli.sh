@@ -25,7 +25,11 @@ if [ -w /var/run/docker-host.sock ]; then
 fi
 
 export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-1}
+
+# TODO: Add multiplatform build support?
+#devcontainer_cli_build_args='--platform linux/amd64,linux/arm64'
 devcontainer_cli_build_args=''
+
 if docker buildx version 2>/dev/null; then
     devcontainer_cli_build_args+=' --progress=plain'
 else
