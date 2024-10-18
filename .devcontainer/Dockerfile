@@ -66,8 +66,7 @@ COPY --from=deps-prep --chown=vscode:conda /tmp/conda-tmp/mlos_deps.yml /tmp/con
 RUN echo "Setup miniconda" \
     && curl -Ss https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/conda.gpg > /dev/null \
     && gpg --keyring /etc/apt/trusted.gpg.d/conda.gpg --no-default-keyring --fingerprint 34161F5BF5EB1D4BFBBB8F0A8AEB4F8B29D82806 \
-    && mtype=`uname -m` && echo "# uname -m: $mtype" \
-    && echo "deb [arch=$mtype signed-by=/etc/apt/trusted.gpg.d/conda.gpg] https://repo.anaconda.com/pkgs/misc/debrepo/conda stable main" | sudo tee /etc/apt/sources.list.d/conda.list \
+    && echo "deb [arch=amd64,arm64 signed-by=/etc/apt/trusted.gpg.d/conda.gpg] https://repo.anaconda.com/pkgs/misc/debrepo/conda stable main" | sudo tee /etc/apt/sources.list.d/conda.list \
     && sudo apt-get update \
     && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends conda \
     && sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/* \
