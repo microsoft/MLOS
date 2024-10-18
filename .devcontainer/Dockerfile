@@ -65,7 +65,7 @@ COPY --from=deps-prep --chown=vscode:conda /tmp/conda-tmp/mlos_deps.yml /tmp/con
 # This allows the mlos env to reference the base env's packages without duplication across layers.
 RUN echo "Setup miniconda" \
     && curl -Ss --url https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-$(uname -m).sh -o /tmp/miniconda3.sh \
-    && sh /tmp/miniconda3.sh -b -u -p /opt/conda \
+    && sudo sh /tmp/miniconda3.sh -b -u -p /opt/conda \
     && rm -rf /tmp/miniconda3.sh \
     && echo "# Adjust the conda installation to be user/group writable." \
     && sudo /opt/conda/bin/conda init --system \
