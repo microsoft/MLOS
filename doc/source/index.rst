@@ -20,6 +20,12 @@ See below for additional documentation sections.
    source_tree_docs/mlos_viz/index
 
 .. toctree::
+   :caption: Overview
+   :maxdepth: 2
+
+   overview
+
+.. toctree::
    :caption: API Reference
    :maxdepth: 2
 

@@ -16,6 +16,7 @@ from mlos_core.optimizers.random_optimizer import RandomOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterFactory, SpaceAdapterType
 
 __all__ = [
+    "OptimizerType",
     "SpaceAdapterType",
     "OptimizerFactory",
     "BaseOptimizer",

@@ -63,6 +63,7 @@ release = VERSION
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx.ext.autodoc",
     "autoapi.extension",
     "nbsphinx",
     "sphinx.ext.doctest",
@@ -72,6 +73,7 @@ extensions = [
     "matplotlib.sphinxext.plot_directive",
     "myst_parser",
 ]
+autodoc_typehints = "both"
 
 source_suffix = {
     ".rst": "restructuredtext",
