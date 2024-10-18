@@ -42,13 +42,13 @@ if ($null -eq $env:DOCKER_BUILDKIT) {
 $devcontainer_build_args = ''
 if ("$env:NO_CACHE" -eq 'true') {
     $base_image = (Get-Content "$rootdir/.devcontainer/Dockerfile" | Select-String '^FROM' | Select-Object -ExpandProperty Line | ForEach-Object { $_ -replace '^FROM\s+','' } | ForEach-Object { $_ -replace ' AS\s+.*','' } | Select-Object -First 1)
-    docker pull $base_image
+    docker pull --platform linux/amd64 $base_image
     $devcontainer_build_args = '--no-cache'
 }
 else {
     $cacheFrom = 'mloscore.azurecr.io/mlos-devcontainer:latest'
     $devcontainer_build_args = "--cache-from $cacheFrom"
-    docker pull "$cacheFrom"
+    docker pull --platform linux/amd64 "$cacheFrom"
 }
 
 # Make this work inside a devcontainer as well.

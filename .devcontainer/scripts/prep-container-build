@@ -20,7 +20,8 @@ if [ ! -f .env ]; then
 fi
 # Also prep the random NGINX_PORT for the docker-compose command.
 if ! [ -e .devcontainer/.env ] || ! egrep -q "^NGINX_PORT=[0-9]+$" .devcontainer/.env; then
-    NGINX_PORT=$(($(shuf -i 0-30000 -n 1) + 80))
+    RANDOM=$$
+    NGINX_PORT=$((($RANDOM % 30000) + 1 + 80))
     echo "NGINX_PORT=$NGINX_PORT" > .devcontainer/.env
 fi
 
@@ -55,6 +56,6 @@ if [ "${NO_CACHE:-}" != 'true' ]; then
     ## Make sure we use an empty config to avoid auth issues for devs with the
     ## registry, which should allow anonymous pulls
     #tmpdir=$(mktemp -d)
-    #docker --config="$tmpdir" pull -q "$cacheFrom" >/dev/null || true
+    #docker --config="$tmpdir" pull --platform linux/$(uname -m) -q "$cacheFrom" >/dev/null || true
     #rmdir "$tmpdir"
 fi

@@ -35,7 +35,7 @@ if ("$env:NO_CACHE" -eq 'true') {
 else {
     $cacheFrom = 'mloscore.azurecr.io/devcontainer-cli:latest'
     $devcontainer_cli_build_args += " --cache-from $cacheFrom"
-    docker pull $cacheFrom
+    docker pull --platform linux/amd64 $cacheFrom
 }
 
 $cmd = "docker.exe build -t devcontainer-cli:latest -t cspell:latest " +
