@@ -38,7 +38,7 @@ else
     cacheFrom='mloscore.azurecr.io/devcontainer-cli'
     tmpdir=$(mktemp -d)
     devcontainer_cli_build_args+=" --cache-from $cacheFrom"
-    docker --config="$tmpdir" pull "$cacheFrom" || true
+    docker --config="$tmpdir" pull --platform linux/$(uname -m) "$cacheFrom" || true
     rmdir "$tmpdir"
 fi
 

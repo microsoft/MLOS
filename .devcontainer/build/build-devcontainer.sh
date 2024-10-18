@@ -47,13 +47,13 @@ fi
 devcontainer_build_args=''
 if [ "${NO_CACHE:-}" == 'true' ]; then
     base_image=$(grep '^FROM ' "$rootdir/.devcontainer/Dockerfile" | sed -e 's/^FROM //' -e 's/ AS .*//' | head -n1)
-    docker pull "$base_image" || true
+    docker pull --platform linux/$(uname -m) "$base_image" || true
     devcontainer_build_args='--no-cache'
 else
     cache_from='mloscore.azurecr.io/mlos-devcontainer'
     devcontainer_build_args="--cache-from $cache_from --cache-from mlos-devcontainer"
     tmpdir=$(mktemp -d)
-    docker --config="$tmpdir" pull "$cache_from" || true
+    docker --config="$tmpdir" pull --platform linux/$(uname -m) "$cache_from" || true
     rmdir "$tmpdir"
 fi
 

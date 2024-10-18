@@ -56,6 +56,6 @@ if [ "${NO_CACHE:-}" != 'true' ]; then
     ## Make sure we use an empty config to avoid auth issues for devs with the
     ## registry, which should allow anonymous pulls
     #tmpdir=$(mktemp -d)
-    #docker --config="$tmpdir" pull -q "$cacheFrom" >/dev/null || true
+    #docker --config="$tmpdir" pull --platform linux/$(uname -m) -q "$cacheFrom" >/dev/null || true
     #rmdir "$tmpdir"
 fi
