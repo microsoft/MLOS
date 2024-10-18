@@ -659,7 +659,7 @@ clean-doc-env:
 
 COMMON_DOC_FILES := build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp doc/source/*.rst doc/source/_templates/*.rst doc/source/conf.py
 
-SPHINX_API_RST_FILES := doc/source/index.rst
+SPHINX_API_RST_FILES := doc/source/index.rst doc/source/overview.rst
 
 ifeq ($(SKIP_COVERAGE),)
 doc/build/html/index.html: build/pytest.${CONDA_ENV_NAME}.build-stamp
@@ -670,7 +670,9 @@ endif
 SPHINXOPTS ?= # -v # be verbose
 SPHINXOPTS += -W -w $(PWD)/doc/build/sphinx-build.warn.log -j auto
 
-doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile doc/source/conf.py doc/copy-source-tree-docs.sh $(MD_FILES)
+doc/build/html/index.html: build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp
+doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile doc/source/conf.py doc/source/conf.py
+doc/build/html/index.html: doc/copy-source-tree-docs.sh $(MD_FILES)
 	@rm -rf doc/build
 	@mkdir -p doc/build
 	@rm -f doc/build/log.txt
