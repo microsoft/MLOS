@@ -25,6 +25,9 @@ DOCKER_GID=$(stat $STAT_FORMAT_GID_ARGS /var/run/docker.sock)
 if [ -w /var/run/docker-host.sock ]; then
     DOCKER_GID=$(stat $STAT_FORMAT_GID_ARGS /var/run/docker-host.sock)
 fi
+if [[ $OSTYPE =~ darwin* ]]; then
+    DOCKER_GID=0
+fi
 
 # Build the devcontainer image.
 rootdir="$repo_root"
