@@ -18,13 +18,11 @@ if [ ! -w /var/run/docker.sock ]; then
     echo "ERROR: $USER does not have write access to /var/run/docker.sock. Please add $USER to the docker group." >&2
     exit 1
 fi
-docker_sock=
-if [ -e /var/run/docker-host.sock ]; then
-    docker_sock=$(readlink -f /var/run/docker-host.sock)
-else
-    docker_sock=$(readlink -f /var/run/docker.sock)
+DOCKER_GID=$(stat $STAT_FORMAT_GID_ARGS /var/run/docker.sock)
+# Make this work inside a devcontainer as well.
+if [ -w /var/run/docker-host.sock ]; then
+    DOCKER_GID=$(stat $STAT_FORMAT_GID_ARGS /var/run/docker-host.sock)
 fi
-DOCKER_GID=$(stat $STAT_FORMAT_GID_ARGS "$docker_sock")
 
 export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-1}
 devcontainer_cli_build_args=''
