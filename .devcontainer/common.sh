@@ -1,3 +1,7 @@
+##
+## Copyright (c) Microsoft Corporation.
+## Licensed under the MIT License.
+##
 case $OSTYPE in
     linux*)
         STAT_FORMAT_GID_ARGS="-c%g"
