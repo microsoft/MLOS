@@ -23,7 +23,7 @@ MKDIR_BUILD := $(shell test -d build || mkdir build)
 #CONDA_INFO_LEVEL ?= -q
 
 # Run make in parallel by default.
-MAKEFLAGS += -j$(shell nproc)
+MAKEFLAGS += -j$(shell nproc 2>/dev/null || sysctl -n hw.ncpu)
 #MAKEFLAGS += -Oline
 
 .PHONY: all
