@@ -2,8 +2,9 @@
 {
     "experiment_id": "TEST-LOCAL-001",
 
-    // Add your parameters here. remember to declare them in the
-    // experiments' configs in "const_args" and/or "required_args".
+    // Add your parameters here. Remember to declare them in the
+    // experiments' configs in "const_args" and/or "required_args" or
+    // in the Service or Optimizer "config" section.
 
     // This parameter gets propagated into the optimizer config.
     // By default, MLOS expects the benchmark to produce a single
@@ -11,5 +12,12 @@
     "optimization_targets": {
         "total_time": "min",
         "throughput": "max"
-    }
+    },
+
+    // Another parameter that gets propagated into the optimizer config.
+    // Each such parameter can be overridden by the CLI option, e.g.,
+    // `--max_suggestions 20`
+    // Number of configurations to be suggested by the optimizer,
+    // if optimization is enabled.
+    "max_suggestions": 10
 }

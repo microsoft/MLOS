@@ -6,9 +6,9 @@
 //
 // Run:
 // mlos_bench \
-//      --config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env.jsonc \
+//      --config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-opt.jsonc \
 //      --globals experiment_test_local.jsonc \
-//      --tunable_values tunable-values/tunable-values-local.jsonc
+//      --max_suggestions 10
 {
     "config_path": [
         "mlos_bench/mlos_bench/config",
@@ -19,7 +19,7 @@
     "environment": "environments/local/test_local_env.jsonc",
 
     // If optimizer is not specified, run a single benchmark trial.
-    // "optimizer": "optimizers/mlos_core_default_opt.jsonc",
+    "optimizer": "optimizers/mlos_core_default_opt.jsonc",
 
     // If storage is not specified, just print the results to the log.
     // "storage": "storage/sqlite.jsonc",

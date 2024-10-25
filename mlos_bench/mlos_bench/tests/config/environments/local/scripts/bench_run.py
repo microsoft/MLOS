@@ -26,8 +26,10 @@ def _main(output_metrics: str, output_telemetry: str) -> None:
     ])
     df_metrics.to_csv(output_metrics, index=False)
 
-    timestamp = datetime.now()
-    ts_delta = timedelta(seconds=15)
+    # Timestamps are const so we can check them in the tests.
+    timestamp = datetime(2024, 10, 25, 13, 45)
+    ts_delta = timedelta(seconds=30)
+
     df_telemetry = pandas.DataFrame([
         {"timestamp": timestamp, "metric": "cpu_load", "value": 0.1},
         {"timestamp": timestamp, "metric": "mem_usage", "value": 20.0},
