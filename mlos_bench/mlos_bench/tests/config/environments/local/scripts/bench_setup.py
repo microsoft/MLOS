@@ -12,9 +12,13 @@ Run:
 
 import argparse
 import json
-
+import os
 
 def _main(fname_input: str, fname_meta: str, fname_output: str) -> None:
+
+    # In addition to the input JSON files,
+    # MLOS can pass parameters through the OS environment:
+    print(f'RUN: {os.environ["experiment_id"]}:{os.environ["trial_id"]}')
 
     # Key-value pairs of tunable parameters, e.g.,
     # {"shared_buffers": "128", ...}

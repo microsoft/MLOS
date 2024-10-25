@@ -23,15 +23,18 @@
 
         // Other non-tunable parameters to use in this environment:
         "required_args": [
-            "experiment_id",
-            "trial_id"
+            "experiment_id",    // Specified by the user in `experiment_test_local.jsonc`
+            "trial_id",         // Provided by MLOS/storage
+            "script_password"   // Provided by the user externally (e.g., through --globals)
         ],
 
         // Pass these parameters to the shell script as env variables:
         // (can be the names of the tunables, too)
         "shell_env_params": [
             "experiment_id",
-            "trial_id"
+            "trial_id",
+            "script_password",
+            "shared_buffers"    // This tunable parameter will appear as env var (and in JSON)
         ],
 
         // MLOS will dump key-value pairs of tunable parameters
@@ -44,21 +47,22 @@
         // MLOS will create a temp directory, store the parameters and metadata
         // into it, and run the setup script from there:
         "setup": [
+            "echo Set up $experiment_id:$trial_id :: shared_buffers = $shared_buffers",
             "environments/local/scripts/bench_setup.py input-params.json input-params-meta.json 99_bench.conf"
         ],
 
         // Run the benchmark script from the temp directory.
         "run": [
+            "echo Run $experiment_id:$trial_id",
             "environments/local/scripts/bench_run.py output-metrics.csv output-telemetry.csv"
         ],
 
         // [Optionally] MLOS can run the teardown script from the temp directory.
         // We don't need it here, because it will automatically clean up
         // the temp directory after each trial.
-
-        // "teardown": [
-        //     "rm output-metrics.csv"
-        // ],
+        "teardown": [
+            "echo Tear down $experiment_id:$trial_id"
+        ],
 
         // [Optionally] MLOS can read telemetry data produced by the
         // `bench_run.py` script:

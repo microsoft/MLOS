@@ -16,6 +16,12 @@
         "mlos_bench/mlos_bench/tests/config"
     ],
 
+    // Include some sensitive parameters that should not be checked in.
+    // Alternatively, one can specify this file through the --globals CLI option.
+    "globals": [
+        "test_local_private_params.jsonc"
+    ],
+
     "environment": "environments/local/test_local_env.jsonc",
 
     // If optimizer is not specified, run a single benchmark trial.
