@@ -1,0 +1,31 @@
+//
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+//
+// A test config to launch a local shell environment with some tunables.
+//
+// Run:
+// mlos_bench \
+//      --config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env.jsonc \
+//      --globals experiment_test_local.jsonc \
+//      --tunable_values tunable-values/tunable-values-local.jsonc
+{
+    "config_path": [
+        "mlos_bench/mlos_bench/config",
+        "mlos_bench/mlos_bench/tests/config/experiments",
+        "mlos_bench/mlos_bench/tests/config"
+    ],
+
+    "environment": "environments/local/test_local_env.jsonc",
+
+    // If optimizer is not specified, run a single benchmark trial.
+    // "optimizer": "optimizers/mlos_core_default_opt.jsonc",
+
+    // If storage is not specified, just print the results to the log.
+    // "storage": "storage/sqlite.jsonc",
+
+    "teardown": false,
+
+    "log_file": "test-local-bench.log",
+    "log_level": "DEBUG"  // "INFO" for less verbosity
+}

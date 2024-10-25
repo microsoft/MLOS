@@ -1,0 +1,71 @@
+// Test config for test_local_env.py
+{
+    "class": "mlos_bench.environments.local.LocalEnv",
+    "name": "Local Shell Test Environment",
+
+    "include_services": [
+        // from the built in configs
+        "services/local/local_exec_service.jsonc"
+    ],
+
+    // Include the definitions of the tunable parameters to use
+    // in this environment and its children, if there are any:
+    "include_tunables": [
+        "environments/local/test_local-tunables.jsonc"
+    ],
+
+    "config": {
+
+        // GROUPS of tunable parameters to use in this environment:
+        "tunable_params": [
+            "test_local_tunable_group"
+        ],
+
+        // Other non-tunable parameters to use in this environment:
+        "required_args": [
+            "experiment_id",
+            "trial_id"
+        ],
+
+        // Pass these parameters to the shell script as env variables:
+        // (can be the names of the tunables, too)
+        "shell_env_params": [
+            "experiment_id",
+            "trial_id"
+        ],
+
+        // MLOS will dump key-value pairs of tunable parameters
+        // into this file in temp directory:
+        "dump_params_file": "input-params.json",
+
+        // [Optionally] MLOS can dump metadata of tunable parameters here:
+        "dump_meta_file": "input-params-meta.json",
+
+        // MLOS will create a temp directory, store the parameters and metadata
+        // into it, and run the setup script from there:
+        "setup": [
+            "./scripts/bench_setup.py ./input-params.json ./input-params-meta.json ./99_bench.conf"
+        ],
+
+        // Run the benchmark script from the temp directory.
+        "run": [
+            "./scripts/bench_run.py ./output-metrics.csv ./output-telemetry.csv"
+        ],
+
+        // [Optionally] MLOS can run the teardown script from the temp directory.
+        // We don't need it here, because it will automatically clean up
+        // the temp directory after each trial.
+
+        // "teardown": [
+        //     "rm output-metrics.csv"
+        // ],
+
+        // [Optionally] MLOS can read telemetry data produced by the
+        // `bench_run.py` script:
+        "read_telemetry_file": "output-telemetry.csv",
+
+        // MLOS will read the results of the benchmark from this file:
+        // (created by the "run" script)
+        "read_results_file": "output-metrics.csv"
+    }
+}

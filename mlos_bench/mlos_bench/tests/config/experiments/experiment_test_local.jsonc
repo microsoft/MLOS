@@ -1,0 +1,7 @@
+// Global parameters for the experiment.
+{
+    "experiment_id": "TEST-LOCAL-001"
+
+    // Add your parameters here. remember to declare them in the
+    // experiments' configs in "const_args" and/or "required_args".
+}
