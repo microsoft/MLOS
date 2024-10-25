@@ -44,12 +44,12 @@
         // MLOS will create a temp directory, store the parameters and metadata
         // into it, and run the setup script from there:
         "setup": [
-            "./scripts/bench_setup.py ./input-params.json ./input-params-meta.json ./99_bench.conf"
+            "environments/local/scripts/bench_setup.py input-params.json input-params-meta.json 99_bench.conf"
         ],
 
         // Run the benchmark script from the temp directory.
         "run": [
-            "./scripts/bench_run.py ./output-metrics.csv ./output-telemetry.csv"
+            "environments/local/scripts/bench_run.py output-metrics.csv output-telemetry.csv"
         ],
 
         // [Optionally] MLOS can run the teardown script from the temp directory.
