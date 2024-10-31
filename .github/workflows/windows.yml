@@ -124,6 +124,10 @@ jobs:
       run: |
         .github/workflows/build-dist-test.ps1
 
+    - name: Check docker
+      run: |
+        docker info
+
     - name: Build the devcontainer
       run: |
         .devcontainer/build/build-devcontainer.ps1
