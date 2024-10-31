@@ -160,3 +160,11 @@ jobs:
 
     - name: Generate and test binary distribution files
       run: make CONDA_ENV_NAME=$CONDA_ENV_NAME CONDA_INFO_LEVEL=-v dist dist-test
+
+    - name: Build the devcontainer
+      run: |
+        .devcontainer/build/build-devcontainer.sh
+
+    - name: Basic test of the devcontainer
+      run: |
+        .devcontainer/script/run-devcontainer.sh conda run -n mlos python --version | grep "Python 3.13"

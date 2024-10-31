@@ -123,3 +123,11 @@ jobs:
     - name: Generate and test binary distribution files
       run: |
         .github/workflows/build-dist-test.ps1
+
+    - name: Build the devcontainer
+      run: |
+        .devcontainer/build/build-devcontainer.ps1
+
+    - name: Basic test of the devcontainer
+      run: |
+        .devcontainer/script/run-devcontainer.ps1 conda run -n mlos python --version
