@@ -21,11 +21,18 @@
             "test_local_tunable_group"
         ],
 
+        "const_args": {
+            // The actual value should be provided by the user externally
+            // (e.g., through the --globals file).
+            // This is just a placeholder to make unit tests work.
+            "script_password": "PLACEHOLDER"
+        },
+
         // Other non-tunable parameters to use in this environment:
         "required_args": [
             "experiment_id",    // Specified by the user in `experiment_test_local.jsonc`
             "trial_id",         // Provided by MLOS/storage
-            "script_password"   // Provided by the user externally (e.g., through --globals)
+            "script_password"   // Should be provided by the user (e.g., through --globals).
         ],
 
         // Pass these parameters to the shell script as env variables:
