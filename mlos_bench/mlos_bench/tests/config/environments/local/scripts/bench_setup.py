@@ -14,6 +14,7 @@ import argparse
 import json
 import os
 
+
 def _main(fname_input: str, fname_meta: str, fname_output: str) -> None:
 
     # In addition to the input JSON files,
@@ -43,9 +44,7 @@ def _main(fname_input: str, fname_meta: str, fname_output: str) -> None:
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(
-        description="Update the environment parameters from JSON."
-    )
+    parser = argparse.ArgumentParser(description="Update the environment parameters from JSON.")
 
     parser.add_argument("input", help="JSON file with tunable parameters.")
     parser.add_argument("meta", help="JSON file with tunable parameters metadata.")
