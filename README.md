@@ -25,6 +25,7 @@ MLOS is a project to enable autotuning for systems.
     - [Installation](#installation)
     - [See Also](#see-also)
         - [Examples](#examples)
+        - [Publications](#publications)
 
 <!-- /TOC -->
 
@@ -187,3 +188,10 @@ Details on using a local version from git are available in [CONTRIBUTING.md](./C
     Working example of tuning `sqlite` with MLOS.
 
 These can be used as starting points for new autotuning projects.
+
+### Publications
+
+- [MLOS in Action: Bridging the Gap Between Experimentation and Auto-Tuning in the Cloud](https://www.vldb.org/pvldb/vol17/p4269-kroth.pdf) at [VLDB 2024](https://www.vldb.org/2024/?papers-demo)
+- [Towards Building Autonomous Data Services on Azure](https://dl.acm.org/doi/abs/10.1145/3555041.3589674) in [SIGMOD Companion 2023](https://dl.acm.org/doi/proceedings/10.1145/3555041)
+- [LlamaTune: Sample-efficient DBMS configuration tuning](https://www.microsoft.com/en-us/research/publication/llamatune-sample-efficient-dbms-configuration-tuning) at [VLDB 2022](https://vldb.org/pvldb/volumes/15/)
+- [MLOS: An infrastructure for automated software performance engineering](https://arxiv.org/abs/2006.02155) at [DEEM 2020](https://deem-workshop.github.io/2020/index.html)
