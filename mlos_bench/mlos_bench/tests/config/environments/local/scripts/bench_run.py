@@ -20,8 +20,9 @@ def _main(output_metrics: str, output_telemetry: str) -> None:
 
     df_metrics = pandas.DataFrame(
         [
+            {"metric": "score", "value": 123.4},
             {"metric": "total_time", "value": 123.4},
-            {"metric": "latency", "value": 0.1},
+            {"metric": "latency", "value": 9.876},
             {"metric": "throughput", "value": 1234567},
         ]
     )

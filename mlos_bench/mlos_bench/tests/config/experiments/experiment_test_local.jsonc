@@ -10,6 +10,7 @@
     // By default, MLOS expects the benchmark to produce a single
     // scalar, "score".
     "optimization_targets": {
+        "score": "min",         // Same as `total_time`, we need it for unit tests.
         "total_time": "min",
         "throughput": "max"
     },
