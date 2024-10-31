@@ -161,6 +161,10 @@ jobs:
     - name: Generate and test binary distribution files
       run: make CONDA_ENV_NAME=$CONDA_ENV_NAME CONDA_INFO_LEVEL=-v dist dist-test
 
+    - name: Check docker
+      run: |
+        sudo docker info
+
     - name: Build the devcontainer
       run: |
         .devcontainer/build/build-devcontainer.sh
