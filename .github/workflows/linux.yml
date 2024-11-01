@@ -19,7 +19,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Linux:
+  LinuxCondaBuildTest:
+    name: Linux Build/Test with Conda
+
     runs-on: ubuntu-latest
 
     permissions:

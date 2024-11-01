@@ -21,7 +21,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  MacOS:
+  MacOSCondaBuildTest:
+    name: MacOS Build/Test with Conda
+
     runs-on: macos-latest
 
     permissions:
@@ -161,9 +163,34 @@ jobs:
     - name: Generate and test binary distribution files
       run: make CONDA_ENV_NAME=$CONDA_ENV_NAME CONDA_INFO_LEVEL=-v dist dist-test
 
+  MacOSDevContainerBuildTest:
+    name: MacOS DevContainer Build/Test
+    runs-on: macos-latest
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install docker
+      run: |
+        brew install docker
+        brew install docker-machine
+        docker --version
+        docker-machine create default
+        docker-machine start default
+        docker-machine ls
+        docker-machine env default
+        eval "$(docker-machine env default)"
+        docker image ls
+        echo "eval \$(docker-machine env default)" >> ~/.bash_profile
+        echo "export DOCKER_HOST="tcp://0.0.0.0:2375"" >> ~/.bashrc
+        cat ~/.bash_profile
+
     - name: Check docker
       run: |
-        sudo docker info
+        docker info
 
     - name: Build the devcontainer
       run: |

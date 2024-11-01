@@ -20,7 +20,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Windows:
+  WindowsCondaBuildTest:
+    name: Windows Build/Test with Conda
+
     runs-on: windows-latest
 
     permissions:
@@ -123,6 +125,17 @@ jobs:
     - name: Generate and test binary distribution files
       run: |
         .github/workflows/build-dist-test.ps1
+
+  WindowsDevContainerBuildTest:
+    name: Windows DevContainer Build/Test
+
+    runs-on: windows-latest
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
 
     - name: Check docker
       run: |
