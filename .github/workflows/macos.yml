@@ -180,9 +180,12 @@ jobs:
       run: |
         brew install --cask docker
         brew install docker-buildx
+        brew install jq
         mkdir -p ~/.docker
-        cat ~/.docker/config.json || true
-        echo '"cliPluginsExtraDirs": ["/opt/homebrew/lib/docker/cli-plugins"]' | tee -a ~/.docker/config.json
+        (cat ~/.docker/config.json || echo "{}") \
+          | jq '.cliPluginsExtraDirs = ((.cliPluginsExtraDirs // []) + ["/opt/homebrew/lib/docker-cli-plugins"])' \
+          | tee ~/.docker/config.json.new
+        mv ~/.docker/config.json.new ~/.docker/config.json
         cat ~/.docker/config.json
         docker --version
         docker info
