@@ -140,6 +140,7 @@ jobs:
     - name: Check docker
       run: |
         docker info
+        docker system info
         docker builder ls
         docker builder inspect
 
