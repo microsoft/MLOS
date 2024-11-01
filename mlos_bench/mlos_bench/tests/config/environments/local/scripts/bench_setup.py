@@ -6,6 +6,13 @@
 """
 Helper script to update the environment parameters from JSON.
 
+This is a sample script that demonstrates how to read the tunable parameters
+and metadata from JSON and produce some kind of a configuration file for the
+application that is being benchmarked or optimized.
+
+THIS IS A TOY EXAMPLE. The script does not have any actual effect on the system.
+Please copy and extend it to suit your needs.
+
 Run:
     `./bench_setup.py ./input-params.json ./input-params-meta.json`
 """

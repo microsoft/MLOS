@@ -6,6 +6,12 @@
 """
 Helper script to run the benchmark and store the results and telemetry in CSV files.
 
+This is a sample script that demonstrates how to produce the benchmark results
+and telemetry in the format that MLOS expects.
+
+THIS IS A TOY EXAMPLE. The script does not run any actual benchmarks and produces fake
+data for demonstration purposes. Please copy and extend it to suit your needs.
+
 Run:
     ./bench_run.py ./output-metrics.csv ./output-telemetry.csv`
 """
@@ -18,9 +24,11 @@ import pandas
 
 def _main(output_metrics: str, output_telemetry: str) -> None:
 
+    # Some fake const data that we can check in the unit tests.
+    # Our unit tests expect the `score` metric to be present in the output.
     df_metrics = pandas.DataFrame(
         [
-            {"metric": "score", "value": 123.4},
+            {"metric": "score", "value": 123.4},  # A copy of `total_time`
             {"metric": "total_time", "value": 123.4},
             {"metric": "latency", "value": 9.876},
             {"metric": "throughput", "value": 1234567},
