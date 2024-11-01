@@ -177,16 +177,19 @@ jobs:
     # Note: no linux platform build support due to lack of nested virtualization on M series chips.
     # https://github.com/orgs/community/discussions/69211#discussioncomment-7242133
     - name: Install docker
+      timeout-minutes: 15
       run: |
         brew install --cask docker
         brew install docker-buildx
         brew install jq
         mkdir -p ~/.docker
-        (cat ~/.docker/config.json || echo "{}") \
+        (cat ~/.docker/config.json 2>/dev/null || echo "{}") \
           | jq '.cliPluginsExtraDirs = ((.cliPluginsExtraDirs // []) + ["/opt/homebrew/lib/docker-cli-plugins"])' \
           | tee ~/.docker/config.json.new
         mv ~/.docker/config.json.new ~/.docker/config.json
         cat ~/.docker/config.json
+        osascript -e 'quit app "Docker"' || true; open -a Docker; while [ -z "$(docker info 2> /dev/null )" ]; do printf "."; sleep 1; done; echo ""
+        ls -l /var/run/docker.sock || true
         docker --version
         docker info
         docker system info || true
