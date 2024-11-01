@@ -174,14 +174,21 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    # Note: no linux platform build support due to lack of nested virtualization on M series chips.
+    # https://github.com/orgs/community/discussions/69211#discussioncomment-7242133
     - name: Install docker
       run: |
         brew install --cask docker
         brew install docker-buildx
-        export DOCKER_BUILDKIT=1
+        mkdir -p ~/.docker
+        cat ~/.docker/config.json || true
+        echo '"cliPluginsExtraDirs": "cliPluginsExtraDirs": ["/opt/homebrew/lib/docker/cli-plugins"]' | tee -a ~/.docker/config.json
+        cat ~/.docker/config.json
         docker --version
-        docker builder ls
+        docker info
+        docker system info || true
         docker ps
+        DOCKER_BUILDKIT=1 docker builder ls
 
     - name: Check docker
       run: |
