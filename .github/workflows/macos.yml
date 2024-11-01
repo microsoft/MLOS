@@ -175,9 +175,11 @@ jobs:
 
     - name: Install docker
       run: |
-        brew install docker
+        brew install --cask docker
+        brew install --cask virtualbox
         brew install docker-machine
         docker --version
+        docker builder ls
         docker-machine create default
         docker-machine start default
         docker-machine ls
