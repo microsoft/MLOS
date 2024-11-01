@@ -128,8 +128,14 @@ jobs:
 
   WindowsDevContainerBuildTest:
     name: Windows DevContainer Build/Test
+    # Skipped for now since building Linux containers on Windows Github Action Runners is not yet supported.
+    if: false
 
     runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: pwsh
 
     permissions:
       contents: read
@@ -140,8 +146,7 @@ jobs:
     - name: Check docker
       run: |
         docker info
-        docker system info
-        docker builder ls
+        docker builder ls | Select-String linux # current returns '' (not yet supported)
         docker builder inspect
 
     - name: Build the devcontainer
