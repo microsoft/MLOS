@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   MacOSCondaBuildTest:
-    name: MacOS Build/Test with Conda
+    name: Build/Test with Conda
 
     runs-on: macos-latest
 
@@ -165,7 +165,7 @@ jobs:
 
 
   MacOSDevContainerBuildTest:
-    name: MacOS DevContainer Build/Test
+    name: DevContainer Build/Test
     runs-on: macos-latest
 
     # Skip this for now.
