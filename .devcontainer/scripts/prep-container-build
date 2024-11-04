@@ -19,7 +19,7 @@ if [ ! -f .env ]; then
     touch .env
 fi
 # Add some info about the host OS to the .env file.
-egrep -v '^HOST_OSTYPE=' .env > .env.tmp
+egrep -v '^HOST_OSTYPE=' .env > .env.tmp || true
 echo "HOST_OSTYPE=$OSTYPE" >> .env.tmp
 mv .env.tmp .env
 
