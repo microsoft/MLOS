@@ -6,7 +6,6 @@
 
 import os
 from logging import warning
-from subprocess import run
 from time import time_ns
 from typing import Any, Generator, List, Union
 
@@ -186,13 +185,9 @@ def locked_docker_services(
         warning(f"{time_ns()} {worker_id}: Released {docker_setup_teardown_lock.path}")
         # Yield the services so that tests within this worker can use them.
         warning(f"{time_ns()} {worker_id}: Yielding services")
-        out = run("docker ps", shell=True, check=True, capture_output=True)
-        warning(f"{time_ns()} {worker_id}: pre locked yield: " + out.stdout.decode())
         yield docker_services
         # Now tests that use those services get to run on this worker...
         # Once the tests are done, release the read lock that marks the services as in use.
-        out = run("docker ps", shell=True, check=True, capture_output=True)
-        warning(f"{time_ns()} {worker_id}: post locked yield: " + out.stdout.decode())
         warning(f"{time_ns()} {worker_id}: Releasing read lock on {docker_services_lock.path}")
         docker_services_lock.release_read_lock()
         warning(f"{time_ns()} {worker_id}: Released read lock on {docker_services_lock.path}")
