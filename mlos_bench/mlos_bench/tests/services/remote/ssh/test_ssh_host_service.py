@@ -141,7 +141,6 @@ def test_ssh_service_remote_exec(
 
     # Make sure the cache is cleaned up on context exit.
     assert len(SshHostService._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE) == 0
-    assert False, "Testing"
 
 
 def check_ssh_service_reboot(
@@ -250,4 +249,3 @@ def test_ssh_service_reboot(
         ssh_host_service,
         graceful=False,
     )
-    assert False, "Testing"

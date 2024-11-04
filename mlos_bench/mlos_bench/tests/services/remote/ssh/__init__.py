@@ -5,11 +5,8 @@
 """Common data classes for the SSH service tests."""
 
 from dataclasses import dataclass
-from logging import warning
 from subprocess import run
 from typing import Optional
-
-import os
 
 from pytest_docker.plugin import Services as DockerServices
 
@@ -78,8 +75,6 @@ class SshTestServerInfo:
 
 def wait_docker_service_socket(docker_services: DockerServices, hostname: str, port: int) -> None:
     """Wait until a docker service is ready."""
-    worker_id = os.environ.get("PYTEST_XDIST_WORKER")
-    warning(f"{worker_id} Waiting for {hostname}:{port} to be ready.")
     docker_services.wait_until_responsive(
         check=lambda: check_socket(hostname, port),
         timeout=30.0,

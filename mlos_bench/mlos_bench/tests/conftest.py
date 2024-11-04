@@ -5,8 +5,6 @@
 """Common fixtures for mock TunableGroups and Environment objects."""
 
 import os
-from logging import warning
-from time import time_ns
 from typing import Any, Generator, List, Union
 
 import sys
@@ -158,16 +156,11 @@ def locked_docker_services(
     """A locked version of the docker_services fixture to implement xdist single
     instance locking.
     """
-    worker_id = os.environ.get("PYTEST_XDIST_WORKER")
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     # Mark the services as in use with the reader lock.
-    warning(f"{time_ns()} {worker_id}: Acquiring read lock on {docker_services_lock.path}")
     docker_services_lock.acquire_read_lock()
-    warning(f"{time_ns()} {worker_id}: Acquired read lock on {docker_services_lock.path}")
     # Acquire the setup lock to prevent multiple setup operations at once.
-    warning(f"{time_ns()} {worker_id}: Acquiring lock on {docker_setup_teardown_lock.path}")
     docker_setup_teardown_lock.acquire()
-    warning(f"{time_ns()} {worker_id}: Acquired lock on {docker_setup_teardown_lock.path}")
     # This "with get_docker_services(...)"" pattern is in the default fixture.
     # We call it instead of docker_services() to avoid pytest complaints about
     # calling fixtures directly.
@@ -180,35 +173,22 @@ def locked_docker_services(
     ) as docker_services:
         # Release the setup/tear down lock in order to let the setup operation
         # continue for other workers (should be a no-op at this point).
-        warning(f"{time_ns()} {worker_id}: Releasing {docker_setup_teardown_lock.path}")
         docker_setup_teardown_lock.release()
-        warning(f"{time_ns()} {worker_id}: Released {docker_setup_teardown_lock.path}")
         # Yield the services so that tests within this worker can use them.
-        warning(f"{time_ns()} {worker_id}: Yielding services")
         yield docker_services
         # Now tests that use those services get to run on this worker...
         # Once the tests are done, release the read lock that marks the services as in use.
-        warning(f"{time_ns()} {worker_id}: Releasing read lock on {docker_services_lock.path}")
         docker_services_lock.release_read_lock()
-        warning(f"{time_ns()} {worker_id}: Released read lock on {docker_services_lock.path}")
         # Now as we prepare to execute the cleanup code on context exit we need
         # to acquire the setup/teardown lock again.
         # First we attempt to get the write lock so that we wait for other
         # readers to finish and guard against a lock inversion possibility.
-        warning(f"{time_ns()} {worker_id}: Acquiring write lock on {docker_services_lock.path}")
         docker_services_lock.acquire_write_lock()
-        warning(f"{time_ns()} {worker_id}: Acquired write lock on {docker_services_lock.path}")
         # Next, acquire the setup/teardown lock
         # First one here is the one to do actual work, everyone else is basically a no-op.
         # Upon context exit, we should execute the docker_cleanup code.
         # And try to get the setup/tear down lock again.
-        warning(f"{time_ns()} {worker_id}: Acquiring {docker_setup_teardown_lock.path}")
         docker_setup_teardown_lock.acquire()
-        warning(f"{time_ns()} {worker_id}: Acquired {docker_setup_teardown_lock.path}")
     # Finally, after the docker_cleanup code has finished, remove both locks.
-    warning(f"{time_ns()} {worker_id}: Releasing {docker_setup_teardown_lock.path}")
     docker_setup_teardown_lock.release()
-    warning(f"{time_ns()} {worker_id}: Released {docker_setup_teardown_lock.path}")
-    warning(f"{time_ns()} {worker_id}: Releasing write lock on {docker_services_lock.path}")
     docker_services_lock.release_write_lock()
-    warning(f"{time_ns()} {worker_id}: Released write lock on {docker_services_lock.path}")
