@@ -71,7 +71,9 @@ def ssh_test_server(
             id_rsa_path=id_rsa_file.name,
         )
         wait_docker_service_socket(
-            locked_docker_services, ssh_test_server_info.hostname, ssh_test_server_info.get_port()
+            locked_docker_services,
+            ssh_test_server_info.hostname,
+            ssh_test_server_info.get_port(),
         )
         id_rsa_src = f"/{ssh_test_server_info.username}/.ssh/id_rsa"
         docker_cp_cmd = (
@@ -116,7 +118,9 @@ def alt_test_server(
         id_rsa_path=ssh_test_server.id_rsa_path,
     )
     wait_docker_service_socket(
-        locked_docker_services, alt_test_server_info.hostname, alt_test_server_info.get_port()
+        locked_docker_services,
+        alt_test_server_info.hostname,
+        alt_test_server_info.get_port(),
     )
     return alt_test_server_info
 
