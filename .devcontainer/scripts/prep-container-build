@@ -18,6 +18,11 @@ if [ ! -f .env ]; then
     echo "Creating empty .env file for devcontainer."
     touch .env
 fi
+# Add some info about the host OS to the .env file.
+egrep -v '^HOST_OSTYPE=' .env > .env.tmp
+echo "HOST_OSTYPE=$OSTYPE" >> .env.tmp
+mv .env.tmp .env
+
 # Also prep the random NGINX_PORT for the docker-compose command.
 if ! [ -e .devcontainer/.env ] || ! egrep -q "^NGINX_PORT=[0-9]+$" .devcontainer/.env; then
     RANDOM=$$
