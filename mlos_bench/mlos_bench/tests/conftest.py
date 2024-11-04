@@ -5,9 +5,8 @@
 """Common fixtures for mock TunableGroups and Environment objects."""
 
 import os
-from typing import Any, Generator, List, Union
-
 import sys
+from typing import Any, Generator, List, Union
 
 import pytest
 from fasteners import InterProcessLock, InterProcessReaderWriterLock
