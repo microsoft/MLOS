@@ -110,7 +110,7 @@ class AzureFileShareService(FileShareService):
                 data = file_client.download_file()
                 with open(local_path, "wb") as output_file:
                     _LOG.debug("Download file: %s -> %s", remote_path, local_path)
-                    data.readinto(output_file)  # type: ignore[no-untyped-call]
+                    data.readinto(output_file)
             except ResourceNotFoundError as ex:
                 # Translate into non-Azure exception:
                 raise FileNotFoundError(f"Cannot download: {remote_path}") from ex

@@ -191,7 +191,7 @@ def get_results_df(
             columns="param",
             values="value",
         )
-        configs_df = configs_df.apply(  # type: ignore[assignment]  # (fp)
+        configs_df = configs_df.apply(
             pandas.to_numeric,
             errors="coerce",
         ).fillna(configs_df)
@@ -237,7 +237,7 @@ def get_results_df(
             columns="metric",
             values="value",
         )
-        results_df = results_df.apply(  # type: ignore[assignment]  # (fp)
+        results_df = results_df.apply(
             pandas.to_numeric,
             errors="coerce",
         ).fillna(results_df)

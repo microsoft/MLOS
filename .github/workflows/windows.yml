@@ -20,7 +20,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Windows:
+  WindowsCondaBuildTest:
+    name: Windows Build/Test with Conda
+
     runs-on: windows-latest
 
     permissions:
@@ -123,3 +125,35 @@ jobs:
     - name: Generate and test binary distribution files
       run: |
         .github/workflows/build-dist-test.ps1
+
+
+  WindowsDevContainerBuildTest:
+    name: Windows DevContainer Build/Test
+    # Skipped for now since building Linux containers on Windows Github Action Runners is not yet supported.
+    if: false
+
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: pwsh
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Check docker
+      run: |
+        docker info
+        docker builder ls | Select-String linux # current returns '' (not yet supported)
+        docker builder inspect
+
+    - name: Build the devcontainer
+      run: |
+        .devcontainer/build/build-devcontainer.ps1
+
+    - name: Basic test of the devcontainer
+      run: |
+        .devcontainer/script/run-devcontainer.ps1 conda run -n mlos python --version
