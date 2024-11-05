@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   WindowsCondaBuildTest:
-    name: Build/Test with Conda
+    name: Windows Build/Test with Conda
 
     runs-on: windows-latest
 
@@ -128,7 +128,7 @@ jobs:
 
 
   WindowsDevContainerBuildTest:
-    name: DevContainer Build/Test
+    name: Windows DevContainer Build/Test
     # Skipped for now since building Linux containers on Windows Github Action Runners is not yet supported.
     if: false
 

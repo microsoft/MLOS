@@ -19,7 +19,7 @@ concurrency:
 jobs:
   # Check in-repo markdown links
   markdown-link-check:
-    name: Check markdown links
+    name: Check Markdown links
     runs-on: ubuntu-latest
     permissions:
       contents: read

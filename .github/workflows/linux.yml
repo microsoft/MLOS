@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   LinuxCondaBuildTest:
-    name: Build/Test with Conda
+    name: Linux Build/Test with Conda
 
     runs-on: ubuntu-latest
 

@@ -27,7 +27,7 @@ concurrency:
 
 jobs:
   DevContainerLintBuildTestPublish:
-    name: Lint/Build/Test/Publish
+    name: DevContainer Lint/Build/Test/Publish
 
     runs-on: ubuntu-latest
 
