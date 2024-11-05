@@ -5,7 +5,8 @@
 """Common fixtures for mock TunableGroups and Environment objects."""
 
 import os
-from typing import Any, Generator, List
+import sys
+from typing import Any, Generator, List, Union
 
 import pytest
 from fasteners import InterProcessLock, InterProcessReaderWriterLock
@@ -58,6 +59,17 @@ def mock_env_no_noise(tunable_groups: TunableGroups) -> MockEnv:
 
 
 # Fixtures to configure the pytest-docker plugin.
+@pytest.fixture(scope="session")
+def docker_setup() -> Union[List[str], str]:
+    """Setup for docker services."""
+    if sys.platform == "darwin" or os.environ.get("HOST_OSTYPE", "").lower().startswith("darwin"):
+        # Workaround an oddity on macOS where the "docker-compose up"
+        # command always recreates the containers.
+        # That leads to races when multiple workers are trying to
+        # start and use the same services.
+        return ["up --build -d --no-recreate"]
+    else:
+        return ["up --build -d"]
 
 
 @pytest.fixture(scope="session")

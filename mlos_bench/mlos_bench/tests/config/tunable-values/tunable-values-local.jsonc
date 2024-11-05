@@ -1,0 +1,8 @@
+// A simple key-value assignment of an tunables instance.
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-values-schema.json",
+
+    // Values that are different from the defaults
+    // in order to test --tunable-values handling in OneShotOptimizer.
+    "shared_buffers": 256
+}

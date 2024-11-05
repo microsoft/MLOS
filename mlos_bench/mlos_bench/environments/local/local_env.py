@@ -209,7 +209,7 @@ class LocalEnv(ScriptEnv):
             )
             data = pandas.DataFrame([data.value.to_list()], columns=data.metric.to_list())
             # Try to convert string metrics to numbers.
-            data = data.apply(  # type: ignore[assignment]  # (false positive)
+            data = data.apply(
                 pandas.to_numeric,
                 errors="coerce",
             ).fillna(data)
