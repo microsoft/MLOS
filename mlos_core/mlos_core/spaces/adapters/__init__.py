@@ -15,17 +15,19 @@ from mlos_core.spaces.adapters.llamatune import LlamaTuneAdapter
 __all__ = [
     "IdentityAdapter",
     "LlamaTuneAdapter",
+    "SpaceAdapterFactory",
+    "SpaceAdapterType",
 ]
 
 
 class SpaceAdapterType(Enum):
-    """Enumerate supported MlosCore space adapters."""
+    """Enumerate supported mlos_core space adapters."""
 
     IDENTITY = IdentityAdapter
-    """A no-op adapter will be used."""
+    """A no-op adapter (:class:`IdentityAdapter`) will be used."""
 
     LLAMATUNE = LlamaTuneAdapter
-    """An instance of LlamaTuneAdapter class will be used."""
+    """An instance of :class:`LlamaTuneAdapter` class will be used."""
 
 
 # To make mypy happy, we need to define a type variable for each optimizer type.
@@ -40,10 +42,14 @@ ConcreteSpaceAdapter = TypeVar(
     IdentityAdapter,
     LlamaTuneAdapter,
 )
+"""Type variable for concrete SpaceAdapter classes."""
 
 
 class SpaceAdapterFactory:
-    """Simple factory class for creating BaseSpaceAdapter-derived objects."""
+    """
+    Simple factory class for creating
+    :class:`~mlos_core.spaces.adapters.adapter.BaseSpaceAdapter`-derived objects.
+    """
 
     # pylint: disable=too-few-public-methods
 

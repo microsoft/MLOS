@@ -671,6 +671,9 @@ SPHINXOPTS ?= # -v # be verbose
 SPHINXOPTS += -W -w $(PWD)/doc/build/sphinx-build.warn.log -j auto
 
 doc/build/html/index.html: build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp
+doc/build/html/index.html: $(MLOS_CORE_PYTHON_FILES)
+doc/build/html/index.html: $(MLOS_BENCH_PYTHON_FILES)
+doc/build/html/index.html: $(MLOS_VIZ_PYTHON_FILES)
 doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile doc/source/conf.py doc/source/conf.py
 doc/build/html/index.html: doc/copy-source-tree-docs.sh $(MD_FILES)
 	@rm -rf doc/build

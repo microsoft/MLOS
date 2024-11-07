@@ -27,34 +27,50 @@ __all__ = [
 
 
 class OptimizerType(Enum):
-    """Enumerate supported MlosCore optimizers."""
+    """Enumerate supported mlos_core optimizers."""
 
     RANDOM = RandomOptimizer
-    """An instance of RandomOptimizer class will be used."""
+    """
+    An instance of :class:`~mlos_core.optimizers.random_optimizer.RandomOptimizer`
+    class will be used.
+    """
 
     FLAML = FlamlOptimizer
-    """An instance of FlamlOptimizer class will be used."""
+    """
+    An instance of :class:`~mlos_core.optimizers.flaml_optimizer.FlamlOptimizer`
+    class will be used.
+    """
 
     SMAC = SmacOptimizer
-    """An instance of SmacOptimizer class will be used."""
+    """
+    An instance of
+    :class:`~mlos_core.optimizers.bayesian_optimizers.smac_optimizer.SmacOptimizer`
+    class will be used.
+    """
 
 
 # To make mypy happy, we need to define a type variable for each optimizer type.
 # https://github.com/python/mypy/issues/12952
 # ConcreteOptimizer = TypeVar('ConcreteOptimizer', *[member.value for member in OptimizerType])
 # To address this, we add a test for complete coverage of the enum.
+
 ConcreteOptimizer = TypeVar(
     "ConcreteOptimizer",
     RandomOptimizer,
     FlamlOptimizer,
     SmacOptimizer,
 )
+"""Type variable for concrete optimizer classes."""
 
 DEFAULT_OPTIMIZER_TYPE = OptimizerType.FLAML
+"""Default optimizer type to use if none is specified."""
 
 
 class OptimizerFactory:
-    """Simple factory class for creating BaseOptimizer-derived objects."""
+    """
+    Simple factory class for creating
+    :class:`~mlos_core.optimizers.base_optimizer.BaseOptimizer`-derived objects.
+    """
 
     # pylint: disable=too-few-public-methods
 
