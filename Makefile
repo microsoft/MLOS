@@ -668,7 +668,9 @@ endif
 
 # Treat warnings as failures.
 SPHINXOPTS ?= # -v # be verbose
-SPHINXOPTS += -W -w $(PWD)/doc/build/sphinx-build.warn.log -j auto
+SPHINXOPTS += -n -W -w $(PWD)/doc/build/sphinx-build.warn.log -j auto
+
+sphinx-apidoc: doc/build/html/index.html
 
 doc/build/html/index.html: build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp
 doc/build/html/index.html: $(MLOS_CORE_PYTHON_FILES)

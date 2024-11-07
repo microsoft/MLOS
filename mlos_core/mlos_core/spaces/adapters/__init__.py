@@ -24,10 +24,10 @@ class SpaceAdapterType(Enum):
     """Enumerate supported mlos_core space adapters."""
 
     IDENTITY = IdentityAdapter
-    """A no-op adapter (:class:`IdentityAdapter`) will be used."""
+    """A no-op adapter (:class:`.IdentityAdapter`) will be used."""
 
     LLAMATUNE = LlamaTuneAdapter
-    """An instance of :class:`LlamaTuneAdapter` class will be used."""
+    """An instance of :class:`.LlamaTuneAdapter` class will be used."""
 
 
 # To make mypy happy, we need to define a type variable for each optimizer type.
