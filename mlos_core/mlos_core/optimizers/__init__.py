@@ -70,7 +70,7 @@ DEFAULT_OPTIMIZER_TYPE = OptimizerType.FLAML
 class OptimizerFactory:
     """
     Simple factory class for creating
-    :class:`~mlos_core.optimizers.base_optimizer.BaseOptimizer`-derived objects.
+    :class:`~mlos_core.optimizers.optimizer.BaseOptimizer`-derived objects.
     """
 
     # pylint: disable=too-few-public-methods

@@ -84,12 +84,16 @@ intersphinx_mapping = {  # pylint: disable=consider-using-namedtuple-or-dataclas
 
 # Ignore some cross references to external things we can't intersphinx with.
 nitpick_ignore = [
-    # FIXME: sphinx has a hard time finding typealiases instead of classes.
+    # FIXME: sphinx has a hard time finding typealiases and typevars instead of classes.
+    ("py:class", "BaseTypeVar"),
     ("py:class", "ConcreteOptimizer"),
-    ("py:class", "ConcreteSpaceAdapater"),
+    ("py:class", "ConcreteSpaceAdapter"),
+    ("py:class", "FlamlDomain"),
     ("py:class", "mlos_core.spaces.converters.flaml.FlamlDomain"),
+    ("py:class", "mlos_bench.tunables.tunable.TunableValue"),
 ]
 nitpick_ignore_regex = [
+    # Ignore some external references that don't use sphinx for their docs.
     (r"py:.*", r"ConfigSpace\..*"),
     (r"py:.*", r"flaml\..*"),
     (r"py:.*", r"smac\..*"),
