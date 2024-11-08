@@ -67,13 +67,33 @@ extensions = [
     "autoapi.extension",
     "nbsphinx",
     "sphinx.ext.doctest",
-    # 'sphinx.ext.intersphinx',
+    "sphinx.ext.intersphinx",
     # 'sphinx.ext.linkcode',
     "numpydoc",
     "matplotlib.sphinxext.plot_directive",
     "myst_parser",
 ]
 autodoc_typehints = "both"
+
+# Add mappings to link to external documentation.
+intersphinx_mapping = {  # pylint: disable=consider-using-namedtuple-or-dataclass
+    "python": ("https://docs.python.org/3", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
+    "numpy": ("https://numpy.org/doc/stable/reference/", None),
+}
+
+# Ignore some cross references to external things we can't intersphinx with.
+nitpick_ignore = [
+    # FIXME: sphinx has a hard time finding typealiases instead of classes.
+    ("py:class", "ConcreteOptimizer"),
+    ("py:class", "ConcreteSpaceAdapater"),
+    ("py:class", "mlos_core.spaces.converters.flaml.FlamlDomain"),
+]
+nitpick_ignore_regex = [
+    (r"py:.*", r"ConfigSpace\..*"),
+    (r"py:.*", r"flaml\..*"),
+    (r"py:.*", r"smac\..*"),
+]
 
 source_suffix = {
     ".rst": "restructuredtext",

@@ -17,6 +17,7 @@ from mlos_core.spaces.adapters import SpaceAdapterFactory, SpaceAdapterType
 
 __all__ = [
     "OptimizerType",
+    "ConcreteOptimizer",
     "SpaceAdapterType",
     "OptimizerFactory",
     "BaseOptimizer",

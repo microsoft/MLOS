@@ -13,6 +13,7 @@ from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 from mlos_core.spaces.adapters.llamatune import LlamaTuneAdapter
 
 __all__ = [
+    "ConcreteSpaceAdapter",
     "IdentityAdapter",
     "LlamaTuneAdapter",
     "SpaceAdapterFactory",
