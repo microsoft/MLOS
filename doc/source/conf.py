@@ -67,23 +67,37 @@ release = VERSION
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx_autodoc_typehints",
+    # "sphinx_autodoc_typehints",
     "autoapi.extension",
     "nbsphinx",
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx.ext.linkcode",
-    "numpydoc",
+    # "numpydoc",
+    "sphinx.ext.napoleon",
     "matplotlib.sphinxext.plot_directive",
     "myst_parser",
 ]
-autodoc_typehints = "both"
+# autodoc_typehints = "both"
+# autodoc_typehints_description_target = "documented"
 
-typehints_fully_qualified = True
-typehints_defaults = "braces"
-# typehints_use_signature = True
-# typehints_use_signature_return = True
+# typehints_fully_qualified = True
+# typehints_defaults = "braces"
+## typehints_use_signature = True
+## typehints_use_signature_return = True
 
+napoleon_numpy_docstring = True
+napoleon_include_init_with_doc = False
+napoleon_include_private_with_doc = False
+napoleon_include_special_with_doc = False
+napoleon_use_admonition_for_examples = False
+napoleon_use_admonition_for_notes = False
+napoleon_use_admonition_for_references = False
+napoleon_use_ivar = False
+napoleon_use_param = True
+napoleon_use_rtype = True
+napoleon_use_keyword = True
+napoleon_custom_sections = None
 
 _base_path = os.path.abspath(os.path.join(__file__, "../../.."))
 _path_cache: Dict[str, bool] = {}
