@@ -207,7 +207,7 @@ class CompositeEnv(Environment):
 
         Returns
         -------
-        (status, timestamp, output) : (Status, datetime, dict)
+        (status, timestamp, output) : (Status, datetime.datetime, dict)
             3-tuple of (Status, timestamp, output) values, where `output` is a dict
             with the results or None if the status is not COMPLETED.
             If run script is a benchmark, then the score is usually expected to
@@ -238,7 +238,7 @@ class CompositeEnv(Environment):
 
         Returns
         -------
-        (benchmark_status, timestamp, telemetry) : (Status, datetime, list)
+        (benchmark_status, timestamp, telemetry) : (Status, datetime.datetime, list)
             3-tuple of (benchmark status, timestamp, telemetry) values.
             `timestamp` is UTC time stamp of the status; it's current time by default.
             `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.

@@ -77,7 +77,7 @@ class TempDirContextService(Service, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        temp_dir_context : TemporaryDirectory
+        temp_dir_context : tempfile.TemporaryDirectory
             Temporary directory context to use in the `with` clause.
         """
         temp_dir = path or self._temp_dir

@@ -138,7 +138,7 @@ class RemoteEnv(ScriptEnv):
 
         Returns
         -------
-        (status, timestamp, output) : (Status, datetime, dict)
+        (status, timestamp, output) : (Status, datetime.datetime, dict)
             3-tuple of (Status, timestamp, output) values, where `output` is a dict
             with the results or None if the status is not COMPLETED.
             If run script is a benchmark, then the score is usually expected to
@@ -180,7 +180,7 @@ class RemoteEnv(ScriptEnv):
 
         Returns
         -------
-        result : (Status, datetime, dict)
+        result : (Status, datetime.datetime, dict)
             3-tuple of Status, timestamp, and dict with the benchmark/script results.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """

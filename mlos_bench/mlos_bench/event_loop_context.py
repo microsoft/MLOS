@@ -94,7 +94,7 @@ class EventLoopContext:
 
         Returns
         -------
-        Future[CoroReturnType]
+        concurrent.futures.Future[CoroReturnType]
             A future that will be completed when the coroutine completes.
         """
         assert self._event_loop_thread_refcnt > 0

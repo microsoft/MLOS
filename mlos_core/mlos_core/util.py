@@ -63,7 +63,7 @@ def normalize_config(
 
     Returns
     -------
-    cs_config: Configuration
+    cs_config: ConfigSpace.Configuration
         A valid ConfigSpace configuration with inactive parameters removed.
     """
     cs_config = Configuration(config_space, values=config, allow_inactive_with_values=True)

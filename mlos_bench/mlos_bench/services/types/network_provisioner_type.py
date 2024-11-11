@@ -65,7 +65,7 @@ class SupportsNetworkProvisioning(Protocol):
         ----------
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
-        ignore_errors : boolean
+        ignore_errors : bool
             Whether to ignore errors (default) encountered during the operation
             (e.g., due to dependent resources still in use).
 

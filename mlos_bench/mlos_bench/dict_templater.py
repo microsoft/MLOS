@@ -51,7 +51,8 @@ class DictTemplater:  # pylint: disable=too-few-public-methods
 
         Raises
         ------
-        ValueError on unsupported nested types.
+        ValueError
+            On unsupported nested types.
         """
         self._dict = deepcopy(self._template_dict)
         self._dict = self._expand_vars(self._dict, extra_source_dict, use_os_env)

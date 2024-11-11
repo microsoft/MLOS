@@ -186,7 +186,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
 
         Returns
         -------
-        ConfigurationSpace
+        ConfigSpace.ConfigurationSpace
             The ConfigSpace representation of the tunable parameters.
         """
         if self._config_space is None:

@@ -172,13 +172,13 @@ class TunableGroups:
         self._index[name][name] = value
         return self._index[name][name]
 
-    def __iter__(self) -> Generator[Tuple[Tunable, CovariantTunableGroup], None, None]:
+    def __iter__(self) -> Generator[Tuple[Tunable, CovariantTunableGroup]]:
         """
         An iterator over all tunables in the group.
 
         Returns
         -------
-        [(tunable, group), ...] : iter(Tunable, CovariantTunableGroup)
+        [(tunable, group), ...] : Generator[Tuple[Tunable, CovariantTunableGroup]]
             An iterator over all tunables in all groups. Each element is a 2-tuple
             of an instance of the Tunable parameter and covariant group it belongs to.
         """

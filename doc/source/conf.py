@@ -214,6 +214,8 @@ nitpick_ignore = [
     # External classes that refuse to resolve:
     ("py:class", "contextlib.nullcontext"),
     ("py:class", "sqlalchemy.engine.Engine"),
+    ("py:exc", "jsonschema.exceptions.SchemaError"),
+    ("py:exc", "jsonschema.exceptions.ValidationError"),
 ]
 nitpick_ignore_regex = [
     # Ignore some external references that don't use sphinx for their docs.
