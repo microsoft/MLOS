@@ -223,12 +223,12 @@ def limit_top_n_configs(
         The ExperimentData (e.g., obtained from the storage layer) to operate on.
     results_df : Optional[pandas.DataFrame]
         The results dataframe to augment, by default None to use the results_df property.
-    objectives : Iterable[str], optional
+    objectives : Iterable[str]
         Which result column(s) to use for sorting the configs, and in which
         direction ("min" or "max").
         By default None to automatically select the experiment objectives.
-    top_n_configs : int, optional
-        How many configs to return, including the default, by default 20.
+    top_n_configs : int
+        How many configs to return, including the default, by default 10.
     method: Literal["mean", "median", "p50", "p75", "p90", "p95", "p99"] = "mean",
         Which statistical method to use when sorting the config groups before
         determining the cutoff, by default "mean".
