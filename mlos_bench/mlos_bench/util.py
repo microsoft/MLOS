@@ -353,7 +353,7 @@ def utcify_timestamp(timestamp: datetime, *, origin: Literal["utc", "local"]) ->
 
     Parameters
     ----------
-    timestamp : datetime
+    timestamp : datetime.datetime
         A timestamp to convert to UTC.
         Note: The original datetime may or may not have tzinfo associated with it.
 
@@ -367,7 +367,7 @@ def utcify_timestamp(timestamp: datetime, *, origin: Literal["utc", "local"]) ->
 
     Returns
     -------
-    datetime
+    datetime.datetime
         A datetime with zoneinfo in UTC.
     """
     if timestamp.tzinfo is not None or origin == "local":

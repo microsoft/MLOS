@@ -27,7 +27,7 @@ class SupportsNetworkProvisioning(Protocol):
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
@@ -71,7 +71,7 @@ class SupportsNetworkProvisioning(Protocol):
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """

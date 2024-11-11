@@ -20,12 +20,12 @@ def monkey_patch_hp_quantization(hp: Hyperparameter) -> Hyperparameter:
 
     Parameters
     ----------
-    hp : Hyperparameter
+    hp : ConfigSpace.hyperparameters.Hyperparameter
         ConfigSpace hyperparameter to patch.
 
     Returns
     -------
-    hp : Hyperparameter
+    hp : ConfigSpace.hyperparameters.Hyperparameter
         Patched hyperparameter.
     """
     if not isinstance(hp, NumericalHyperparameter):
@@ -72,12 +72,12 @@ def monkey_patch_cs_quantization(cs: ConfigurationSpace) -> ConfigurationSpace:
 
     Parameters
     ----------
-    cs : ConfigurationSpace
+    cs : ConfigSpace.ConfigurationSpace
         ConfigSpace to patch.
 
     Returns
     -------
-    cs : ConfigurationSpace
+    cs : ConfigSpace.ConfigurationSpace
         Patched ConfigSpace.
     """
     for hp in cs.values():

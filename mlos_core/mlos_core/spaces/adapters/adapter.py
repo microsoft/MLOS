@@ -63,13 +63,13 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
 
         Parameters
         ----------
-        configuration : pd.DataFrame
+        configuration : pandas.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names
             of the target parameter space.
 
         Returns
         -------
-        configuration : pd.DataFrame
+        configuration : pandas.DataFrame
             Pandas dataframe with a single row, containing the translated configuration.
             Column names are the parameter names of the original parameter space.
         """
@@ -85,14 +85,14 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
 
         Parameters
         ----------
-        configurations : pd.DataFrame
+        configurations : pandas.DataFrame
             Dataframe of configurations / parameters, which belong to the original parameter space.
             The columns are the parameter names the original parameter space and the
             rows are the configurations.
 
         Returns
         -------
-        configurations : pd.DataFrame
+        configurations : pandas.DataFrame
             Dataframe of the translated configurations / parameters.
             The columns are the parameter names of the target parameter space and
             the rows are the configurations.

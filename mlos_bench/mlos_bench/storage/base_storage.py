@@ -258,7 +258,7 @@ class Storage(metaclass=ABCMeta):
 
             Returns
             -------
-            metrics : List[Tuple[datetime, str, Any]]
+            metrics : List[Tuple[datetime.datetime, str, Any]]
                 Telemetry data.
             """
 
@@ -298,7 +298,7 @@ class Storage(metaclass=ABCMeta):
 
             Parameters
             ----------
-            timestamp : datetime
+            timestamp : datetime.datetime
                 The time in UTC to check for scheduled trials.
             running : bool
                 If True, include the trials that are already running.
@@ -323,7 +323,7 @@ class Storage(metaclass=ABCMeta):
             ----------
             tunables : TunableGroups
                 Tunable parameters to use for the trial.
-            ts_start : Optional[datetime]
+            ts_start : Optional[datetime.datetime]
                 Timestamp of the trial start (can be in the future).
             config : dict
                 Key/value pairs of additional non-tunable parameters of the trial.
@@ -360,7 +360,7 @@ class Storage(metaclass=ABCMeta):
             ----------
             tunables : TunableGroups
                 Tunable parameters to use for the trial.
-            ts_start : Optional[datetime]
+            ts_start : Optional[datetime.datetime]
                 Timestamp of the trial start (can be in the future).
             config : dict
                 Key/value pairs of additional non-tunable parameters of the trial.
@@ -460,7 +460,7 @@ class Storage(metaclass=ABCMeta):
             ----------
             status : Status
                 Status of the experiment run.
-            timestamp: datetime
+            timestamp: datetime.datetime
                 Timestamp of the status and metrics.
             metrics : Optional[Dict[str, Any]]
                 One or several metrics of the experiment run.
@@ -499,9 +499,9 @@ class Storage(metaclass=ABCMeta):
             ----------
             status : Status
                 Current status of the trial.
-            timestamp: datetime
+            timestamp: datetime.datetime
                 Timestamp of the status (but not the metrics).
-            metrics : List[Tuple[datetime, str, Any]]
+            metrics : List[Tuple[datetime.datetime, str, Any]]
                 Telemetry data.
             """
             _LOG.info("Store telemetry: %s :: %s %d records", self, status, len(metrics))

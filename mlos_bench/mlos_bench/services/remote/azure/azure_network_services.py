@@ -125,7 +125,7 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is the input `params` plus the
             parameters extracted from the response JSON, or {} if the status is FAILED.
             Status is one of {PENDING, SUCCEEDED, FAILED}
@@ -146,7 +146,7 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """

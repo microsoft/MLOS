@@ -348,7 +348,7 @@ def plot_optimizer_trends(
     ----------
     exp_data : ExperimentData
         The ExperimentData (e.g., obtained from the storage layer) to plot.
-    results_df : Optional["pandas.DataFrame"]
+    results_df : Optional[pandas.DataFrame]
         Optional results_df to plot.
         If not provided, defaults to exp_data.results_df property.
     objectives : Optional[Dict[str, Literal["min", "max"]]]
@@ -438,7 +438,7 @@ def plot_top_n_configs(
     ----------
     exp_data: ExperimentData
         The experiment data to plot.
-    results_df : Optional["pandas.DataFrame"]
+    results_df : Optional[pandas.DataFrame]
         Optional results_df to plot.
         If not provided, defaults to exp_data.results_df property.
     objectives : Optional[Dict[str, Literal["min", "max"]]]

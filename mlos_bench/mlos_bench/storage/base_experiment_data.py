@@ -78,7 +78,7 @@ class ExperimentData(metaclass=ABCMeta):
 
         Returns
         -------
-        objectives : Dict[str, objective]
+        objectives : Dict[str, Literal["min", "max"]]
             A dictionary of the experiment's objective names (optimization_targets)
             and their directions (e.g., min or max).
         """
