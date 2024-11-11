@@ -2,7 +2,16 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Implementation of LlamaTune space adapter."""
+"""Implementation of LlamaTune space adapter.
+
+LlamaTune is a technique that transforms the original parameter space into a
+lower-dimensional space to try and improve the sample efficiency of the underlying
+optimizer by making use of the inherent parameter sensitivity correlations in most
+systems.
+
+See Also: `LlamaTune: Sample-Efficient DBMS Configuration Tuning
+<https://www.microsoft.com/en-us/research/publication/llamatune-sample-efficient-dbms-configuration-tuning>`_.
+"""
 import os
 from typing import Dict, List, Optional, Union
 from warnings import warn

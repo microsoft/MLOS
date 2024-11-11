@@ -22,7 +22,10 @@ else:
 
 
 FlamlDomain: TypeAlias = flaml.tune.sample.Domain
+"""Flaml domain type alias."""
+
 FlamlSpace: TypeAlias = Dict[str, flaml.tune.sample.Domain]
+"""Flaml space type alias - a `Dict[str, FlamlDomain]`"""
 
 
 def configspace_to_flaml_space(

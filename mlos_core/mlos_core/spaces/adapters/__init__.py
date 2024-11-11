@@ -2,7 +2,26 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Basic initializer module for the mlos_core space adapters."""
+"""Basic initializer module for the mlos_core space adapters.
+
+Space adapters provide a mechanism for automatic transformation of the original
+:py:class:`ConfigSpace.ConfigurationSpace` provided to the optimizer into a new
+space that is more suitable for the optimizer.
+
+By default the :py:class:`.IdentityAdapter` is used, which does not perform any
+transformation.
+But, for instance, the :py:class:`.LlamaTuneAdapter` can be used to automatically
+transform the space to a lower dimensional one.
+
+See the :py:mod:`mlos_bench.optimizers` module for more information on how to do
+this with :py:mod:`mlos_bench`.
+
+This module provides a simple factory class for creating space adapters.
+
+For instance:
+
+TODO: Add example usage here.
+"""
 
 from enum import Enum
 from typing import Optional, TypeVar

@@ -2,7 +2,23 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Basic initializer module for the mlos_core optimizers."""
+"""Basic initializer module for the mlos_core optimizers.
+
+Optimizers are the main component of the :py:mod:`mlos_core` package.
+They act as a wrapper around other OSS tuning libraries to provide a consistent API
+interface to allow experimenting with different autotuning algorithms.
+
+The :class:`~mlos_core.optimizers.optimizer.BaseOptimizer` class is the base class
+for all Optimizers and provides the core
+:py:meth:`~mlos_core.optimizers.optimizer.BaseOptimizer.suggest` and
+:py:meth:`~mlos_core.optimizers.optimizer.BaseOptimizer.register` methods.
+
+This module also provides a simple factory class for creating optimizers.
+
+For instance:
+
+TODO: Add example usage here.
+"""
 
 from enum import Enum
 from typing import List, Optional, TypeVar

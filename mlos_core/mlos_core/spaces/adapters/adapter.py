@@ -2,7 +2,17 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Contains the BaseSpaceAdapter abstract class."""
+"""Contains the BaseSpaceAdapter abstract class.
+
+As mentioned in :py:mod:`mlos_core.spaces.adapters`, the space adapters provide a
+mechanism for automatic transformation of the original
+:py:class:`ConfigSpace.ConfigurationSpace` provided to the Optimizer into a new
+space for the Optimizer to search over.
+
+It's main APIs are the :py:meth:`~.BaseSpaceAdapter.transform` and
+:py:meth:`~.BaseSpaceAdapter.inverse_transform` methods, which are used to translate
+configurations from one space to another.
+"""
 
 from abc import ABCMeta, abstractmethod
 
@@ -47,8 +57,9 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
     def transform(self, configuration: pd.DataFrame) -> pd.DataFrame:
         """
         Translates a configuration, which belongs to the target parameter space, to the
-        original parameter space. This method is called by the `suggest` method of the
-        `BaseOptimizer` class.
+        original parameter space. This method is called by the
+        :py:meth:`~mlos_core.optimizers.optimizer.BaseOptimizer.suggest` method of the
+        :py:class:`~mlos_core.optimizers.optimizer.BaseOptimizer` class.
 
         Parameters
         ----------
@@ -69,8 +80,8 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
         """
         Translates a configuration, which belongs to the original parameter space, to
         the target parameter space. This method is called by the `register` method of
-        the `BaseOptimizer` class, and performs the inverse operation of
-        `BaseSpaceAdapter.transform` method.
+        the :py:class:`~mlos_core.optimizers.optimizer.BaseOptimizer` class, and
+        performs the inverse operation of :py:meth:`~.BaseSpaceAdapter.transform` method.
 
         Parameters
         ----------
