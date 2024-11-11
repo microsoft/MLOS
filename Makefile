@@ -659,7 +659,7 @@ clean-doc-env:
 
 COMMON_DOC_FILES := build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp doc/source/*.rst doc/source/_templates/*.rst doc/source/conf.py
 
-SPHINX_API_RST_FILES := doc/source/index.rst doc/source/overview.rst
+SPHINX_API_RST_FILES := doc/source/index.rst doc/source/mlos_bench.run.usage.rst
 
 ifeq ($(SKIP_COVERAGE),)
 doc/build/html/index.html: build/pytest.${CONDA_ENV_NAME}.build-stamp
@@ -689,6 +689,10 @@ doc/build/html/index.html: doc/copy-source-tree-docs.sh $(MD_FILES)
 
 	# Copy some of the source tree markdown docs into place.
 	./doc/copy-source-tree-docs.sh
+
+	# Generate the help output from mlos_bench CLI for the docs.
+	mkdir -p doc/source/generated/
+	conda run -n ${CONDA_ENV_NAME} mlos_bench --help > doc/source/generated/mlos_bench.run.usage.txt
 
 	# Build the rst files into html.
 	conda run -n ${CONDA_ENV_NAME} $(MAKE) SPHINXOPTS="$(SPHINXOPTS)" -C doc/ $(MAKEFLAGS) html \
@@ -727,7 +731,7 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 	test -s doc/build/html/autoapi/mlos_bench/index.html
 	test -s doc/build/html/autoapi/mlos_viz/index.html
 	test -s doc/build/html/autoapi/mlos_viz/dabl/index.html
-	grep -q -e '--config CONFIG' doc/build/html/api/mlos_bench/mlos_bench.run.html
+	grep -q -e '--config CONFIG' doc/build/html//mlos_bench.run.usage.html
 	# TODO: Add sphinx-build -b linkcheck target?
 	# Check doc logs for errors (but skip over some known ones) ...
 	# TODO: Remove some of these ignores.

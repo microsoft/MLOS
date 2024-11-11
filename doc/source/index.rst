@@ -20,18 +20,18 @@ See below for additional documentation sections.
    source_tree_docs/mlos_viz/index
 
 .. toctree::
-   :caption: Overview
-   :maxdepth: 2
-
-   overview
-
-.. toctree::
    :caption: API Reference
    :maxdepth: 2
 
    autoapi/mlos_core/index
    autoapi/mlos_bench/index
    autoapi/mlos_viz/index
+
+.. toctree::
+   :caption: mlos_bench CLI usage
+   :maxdepth: 1
+
+   mlos_bench.run.usage
 
 .. toctree::
    :maxdepth: 1
