@@ -81,8 +81,8 @@ autodoc_typehints = "both"
 
 typehints_fully_qualified = True
 typehints_defaults = "braces"
-typehints_use_signature = True
-typehints_use_signature_return = True
+# typehints_use_signature = True
+# typehints_use_signature_return = True
 
 
 _base_path = os.path.abspath(os.path.join(__file__, "../../.."))
