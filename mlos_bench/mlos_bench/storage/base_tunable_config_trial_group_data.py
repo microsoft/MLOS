@@ -120,5 +120,5 @@ class TunableConfigTrialGroupData(metaclass=ABCMeta):
 
         See Also
         --------
-        ExperimentData.results
+        :py:attr:`mlos_bench.storage.base_experiment_data.ExperimentData.results_df`
         """

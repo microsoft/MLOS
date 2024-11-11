@@ -16,7 +16,7 @@ from typing import (
     runtime_checkable,
 )
 
-from mlos_bench.config.schemas import ConfigSchema
+from mlos_bench.config.schemas.config_schemas import ConfigSchema
 from mlos_bench.tunables.tunable import TunableValue
 
 # Avoid's circular import issues.

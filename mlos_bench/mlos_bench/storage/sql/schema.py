@@ -11,7 +11,6 @@ from sqlalchemy import (
     Column,
     DateTime,
     Dialect,
-    Engine,
     Float,
     ForeignKeyConstraint,
     Integer,
@@ -23,6 +22,7 @@ from sqlalchemy import (
     UniqueConstraint,
     create_mock_engine,
 )
+from sqlalchemy.engine import Engine
 
 _LOG = logging.getLogger(__name__)
 

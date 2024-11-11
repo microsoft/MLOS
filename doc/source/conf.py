@@ -23,6 +23,7 @@ import sys
 
 from logging import warning
 
+from intersphinx_registry import get_intersphinx_mapping
 import sphinx_rtd_theme  # pylint: disable=unused-import
 
 
@@ -64,86 +65,114 @@ release = VERSION
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx_autodoc_typehints",
     "autoapi.extension",
     "nbsphinx",
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
-    # 'sphinx.ext.linkcode',
+    "sphinx.ext.linkcode",
     "numpydoc",
     "matplotlib.sphinxext.plot_directive",
     "myst_parser",
 ]
 autodoc_typehints = "both"
 
+typehints_fully_qualified = True
+typehints_defaults = "braces"
+typehints_use_signature = True
+typehints_use_signature_return = True
+
+
+def linkcode_resolve(domain: str, info: dict):
+    """linkcode extension override to link to the source code on GitHub."""
+    if domain != "py":
+        return None
+    if not info["module"]:
+        return None
+    if not info["module"].startswith("mlos_"):
+        return None
+    filename = info["module"].replace(".", "/")
+    return f"https://github.com/microsoft/MLOS/tree/main/{filename}.py"
+
+
 # Add mappings to link to external documentation.
-intersphinx_mapping = {  # pylint: disable=consider-using-namedtuple-or-dataclass
-    "asyncssh": (
-        "https://asyncssh.readthedocs.io/en/latest/",
-        None,
-    ),
-    "azure-core": (
-        "https://azuresdkdocs.blob.core.windows.net/$web/python/azure-core/latest/",
-        None,
-    ),
-    "azure-identity": (
-        "https://azuresdkdocs.blob.core.windows.net/$web/python/azure-identity/latest/",
-        None,
-    ),
-    "ConfigSpace": (
-        "https://automl.github.io/ConfigSpace/latest/",
-        None,
-    ),
-    "matplotlib": (
-        "https://matplotlib.org/stable/",
-        None,
-    ),
-    "numpy": (
-        "https://numpy.org/doc/stable/",
-        "https://numpy.org/doc/stable/objects.inv",
-    ),
-    "pandas": (
-        "https://pandas.pydata.org/docs/",
-        None,
-    ),
-    "python": (
-        "https://docs.python.org/3/",
-        None,
-    ),
-    "referencing": (
-        "https://referencing.readthedocs.io/en/stable/",
-        None,
-    ),
-    "scikit-learn": (
-        "https://scikit-learn.org/stable/",
-        None,
-    ),
-    "scipy": (
-        "https://docs.scipy.org/doc/scipy/",
-        None,
-    ),
-    "smac": (
-        "https://automl.github.io/SMAC3/main/",
-        None,
-    ),
-    "sqlalchemy": (
-        "http://docs.sqlalchemy.org/en/stable/",
-        None,
-    ),
-    "typing_extensions": (
-        "https://typing-extensions.readthedocs.io/en/stable/",
-        None,
-    ),
-}
+intersphinx_mapping = get_intersphinx_mapping(
+    packages={
+        "asyncssh",
+        "matplotlib",
+        "numpy",
+        "pandas",
+        "python",
+    }
+)
+
+# TODO: convert these to registry calls once the following PR is merged:
+# https://github.com/Quansight-Labs/intersphinx_registry/pull/41
+intersphinx_mapping.update(
+    {
+        "azure-core": (
+            "https://azuresdkdocs.blob.core.windows.net/$web/python/azure-core/latest/",
+            None,
+        ),
+        "azure-identity": (
+            "https://azuresdkdocs.blob.core.windows.net/$web/python/azure-identity/latest/",
+            None,
+        ),
+        "ConfigSpace": (
+            "https://automl.github.io/ConfigSpace/latest/",
+            None,
+        ),
+        "referencing": (
+            "https://referencing.readthedocs.io/en/stable/",
+            None,
+        ),
+        "smac": (
+            "https://automl.github.io/SMAC3/main/",
+            None,
+        ),
+        "typing_extensions": (
+            "https://typing-extensions.readthedocs.io/en/stable/",
+            None,
+        ),
+    }
+)
+
+# We recommend adding the following config value.
+# Sphinx defaults to automatically resolve *unresolved* labels using all your Intersphinx mappings.
+# This behavior has unintended side-effects, namely that documentations local references can
+# suddenly resolve to an external location.
+# See also:
+# https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#confval-intersphinx_disabled_reftypes
+# intersphinx_disabled_reftypes = ["*"]
 
 # Ignore some cross references to external things we can't intersphinx with.
+# sphinx has a hard time finding typealiases and typevars instead of classes.
+# See Also: https://github.com/sphinx-doc/sphinx/issues/10974
 nitpick_ignore = [
-    # FIXME: sphinx has a hard time finding typealiases and typevars instead of classes.
+    # Internal typevars and aliases:
     ("py:class", "BaseTypeVar"),
     ("py:class", "ConcreteOptimizer"),
     ("py:class", "ConcreteSpaceAdapter"),
+    ("py:class", "DistributionName"),
+    ("py:class", "EnvironType"),
     ("py:class", "FlamlDomain"),
     ("py:class", "mlos_core.spaces.converters.flaml.FlamlDomain"),
+    ("py:class", "TunableValue"),
     ("py:class", "mlos_bench.tunables.tunable.TunableValue"),
+    ("py:class", "TunableValueType"),
+    ("py:class", "TunableValueTypeName"),
+    ("py:class", "T_co"),
+    # Literals in base_storage.py
+    ("py:class", "min"),
+    ("py:class", "max"),
+    # Literal in context handlers signatures.
+    ("py:class", "False"),
+    # External typevars and aliases:
+    ("py:class", "CoroReturnType"),
+    ("py:class", "FutureReturnType"),
+    ("py:class", "typing.Literal"),
+    ("py:class", "typing_extensions.Literal"),
+    ("py:class", "numpy.typing.NDArray"),
 ]
 nitpick_ignore_regex = [
     # Ignore some external references that don't use sphinx for their docs.
