@@ -740,13 +740,7 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 		| egrep -v \
 			-e "warnings.warn\(f'\"{wd.path}\" is shallow and may cause errors'\)" \
 			-e "No such file or directory: '.*.examples'.( \[docutils\]\s*)?$$" \
-			-e 'Problems with "include" directive path:' \
-			-e 'duplicate object description' \
-			-e "document isn't included in any toctree" \
-			-e "more than one target found for cross-reference" \
 			-e "toctree contains reference to nonexisting document 'auto_examples/index'" \
-			-e "failed to import function 'create' from module '(SpaceAdapter|Optimizer)Factory'" \
-			-e "No module named '(SpaceAdapter|Optimizer)Factory'" \
 			-e '^make.*resetting jobserver mode' \
 			-e 'from cryptography.hazmat.primitives.ciphers.algorithms import' \
 		| grep -v '^\s*$$' \
