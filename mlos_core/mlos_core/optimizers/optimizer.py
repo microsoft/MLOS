@@ -84,16 +84,16 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Parameters
         ----------
-        configs : pd.DataFrame
+        configs : pandas.DataFrame
             Dataframe of configs / parameters. The columns are parameter names and
             the rows are the configs.
-        scores : pd.DataFrame
+        scores : pandas.DataFrame
             Scores from running the configs. The index is the same as the index of the configs.
 
-        context : pd.DataFrame
+        context : pandas.DataFrame
             Not Yet Implemented.
 
-        metadata : Optional[pd.DataFrame]
+        metadata : Optional[pandas.DataFrame]
             Metadata returned by the backend optimizer's suggest method.
         """
         # Do some input validation.
@@ -134,13 +134,13 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Parameters
         ----------
-        configs : pd.DataFrame
+        configs : pandas.DataFrame
             Dataframe of configs / parameters. The columns are parameter names and
             the rows are the configs.
-        scores : pd.DataFrame
+        scores : pandas.DataFrame
             Scores from running the configs. The index is the same as the index of the configs.
 
-        context : pd.DataFrame
+        context : pandas.DataFrame
             Not Yet Implemented.
         """
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
@@ -157,7 +157,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Parameters
         ----------
-        context : pd.DataFrame
+        context : pandas.DataFrame
             Not Yet Implemented.
         defaults : bool
             Whether or not to return the default config instead of an optimizer guided one.
@@ -165,10 +165,10 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Returns
         -------
-        configuration : pd.DataFrame
+        configuration : pandas.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
 
-        metadata : Optional[pd.DataFrame]
+        metadata : Optional[pandas.DataFrame]
             The metadata associated with the given configuration used for evaluations.
             Backend optimizer specific.
         """
@@ -203,15 +203,15 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Parameters
         ----------
-        context : pd.DataFrame
+        context : pandas.DataFrame
             Not Yet Implemented.
 
         Returns
         -------
-        configuration : pd.DataFrame
+        configuration : pandas.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
 
-        metadata : Optional[pd.DataFrame]
+        metadata : Optional[pandas.DataFrame]
             The metadata associated with the given configuration used for evaluations.
             Backend optimizer specific.
         """
@@ -232,12 +232,12 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Parameters
         ----------
-        configs : pd.DataFrame
+        configs : pandas.DataFrame
             Dataframe of configs / parameters. The columns are parameter names and
             the rows are the configs.
-        context : pd.DataFrame
+        context : pandas.DataFrame
             Not Yet Implemented.
-        metadata : Optional[pd.DataFrame]
+        metadata : Optional[pandas.DataFrame]
             Metadata returned by the backend optimizer's suggest method.
         """
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
@@ -248,7 +248,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Returns
         -------
-        observations : Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]
+        observations : Tuple[pandas.DataFrame, pandas.DataFrame, Optional[pandas.DataFrame]]
             A triplet of (config, score, context) DataFrames of observations.
         """
         if len(self._observations) == 0:
@@ -281,7 +281,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Returns
         -------
-        observations : Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]
+        observations : Tuple[pandas.DataFrame, pandas.DataFrame, Optional[pandas.DataFrame]]
             A triplet of best (config, score, context) DataFrames of best observations.
         """
         if len(self._observations) == 0:

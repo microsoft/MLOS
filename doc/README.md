@@ -70,7 +70,9 @@ class MyClass:
 make -C .. doc
 ```
 
-> This will also run some checks on the documentation.
+This will also run some checks on the documentation.
+
+> When running this command in a tight loop, it may be useful to run with `SKIP_COVERAGE=true` to avoid re-running the test and coverage checks each time a python file changes.
 
 ## Testing
 
