@@ -5,7 +5,7 @@
 """An interface to access the tunable config data stored in SQL DB."""
 
 import pandas
-from sqlalchemy import Engine
+from sqlalchemy.engine import Engine
 
 from mlos_bench.storage.base_tunable_config_data import TunableConfigData
 from mlos_bench.storage.sql.schema import DbSchema

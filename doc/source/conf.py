@@ -77,9 +77,62 @@ autodoc_typehints = "both"
 
 # Add mappings to link to external documentation.
 intersphinx_mapping = {  # pylint: disable=consider-using-namedtuple-or-dataclass
-    "python": ("https://docs.python.org/3", None),
-    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
-    "numpy": ("https://numpy.org/doc/stable/reference/", None),
+    "asyncssh": (
+        "https://asyncssh.readthedocs.io/en/latest/",
+        None,
+    ),
+    "azure-core": (
+        "https://azuresdkdocs.blob.core.windows.net/$web/python/azure-core/latest/",
+        None,
+    ),
+    "azure-identity": (
+        "https://azuresdkdocs.blob.core.windows.net/$web/python/azure-identity/latest/",
+        None,
+    ),
+    "ConfigSpace": (
+        "https://automl.github.io/ConfigSpace/latest/",
+        None,
+    ),
+    "matplotlib": (
+        "https://matplotlib.org/stable/",
+        None,
+    ),
+    "numpy": (
+        "https://numpy.org/doc/stable/",
+        "https://numpy.org/doc/stable/objects.inv",
+    ),
+    "pandas": (
+        "https://pandas.pydata.org/docs/",
+        None,
+    ),
+    "python": (
+        "https://docs.python.org/3/",
+        None,
+    ),
+    "referencing": (
+        "https://referencing.readthedocs.io/en/stable/",
+        None,
+    ),
+    "scikit-learn": (
+        "https://scikit-learn.org/stable/",
+        None,
+    ),
+    "scipy": (
+        "https://docs.scipy.org/doc/scipy/",
+        None,
+    ),
+    "smac": (
+        "https://automl.github.io/SMAC3/main/",
+        None,
+    ),
+    "sqlalchemy": (
+        "http://docs.sqlalchemy.org/en/stable/",
+        None,
+    ),
+    "typing_extensions": (
+        "https://typing-extensions.readthedocs.io/en/stable/",
+        None,
+    ),
 }
 
 # Ignore some cross references to external things we can't intersphinx with.
@@ -94,9 +147,7 @@ nitpick_ignore = [
 ]
 nitpick_ignore_regex = [
     # Ignore some external references that don't use sphinx for their docs.
-    (r"py:.*", r"ConfigSpace\..*"),
     (r"py:.*", r"flaml\..*"),
-    (r"py:.*", r"smac\..*"),
 ]
 
 source_suffix = {

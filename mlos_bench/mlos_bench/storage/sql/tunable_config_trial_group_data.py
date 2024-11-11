@@ -7,7 +7,8 @@
 from typing import TYPE_CHECKING, Dict, Optional
 
 import pandas
-from sqlalchemy import Engine, Integer, func
+from sqlalchemy import Integer, func
+from sqlalchemy.engine import Engine
 
 from mlos_bench.storage.base_tunable_config_data import TunableConfigData
 from mlos_bench.storage.base_tunable_config_trial_group_data import (

@@ -7,7 +7,8 @@ import logging
 from typing import Dict, Literal, Optional
 
 import pandas
-from sqlalchemy import Engine, Integer, String, func
+from sqlalchemy import Integer, String, func
+from sqlalchemy.engine import Engine
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.base_trial_data import TrialData

@@ -10,7 +10,8 @@ from datetime import datetime
 from typing import Any, Dict, Iterator, List, Literal, Optional, Tuple
 
 from pytz import UTC
-from sqlalchemy import Connection, CursorResult, Engine, Table, column, func, select
+from sqlalchemy import Connection, CursorResult, Table, column, func, select
+from sqlalchemy.engine import Engine
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_storage import Storage

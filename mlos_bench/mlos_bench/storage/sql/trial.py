@@ -8,7 +8,7 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Literal, Optional, Tuple
 
-from sqlalchemy import Connection, Engine
+from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import IntegrityError
 
 from mlos_bench.environments.status import Status
