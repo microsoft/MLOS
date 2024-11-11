@@ -18,8 +18,10 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 
+import json
 import os
 import sys
+from typing import Dict
 
 from logging import warning
 
@@ -83,7 +85,22 @@ typehints_use_signature = True
 typehints_use_signature_return = True
 
 
-def linkcode_resolve(domain: str, info: dict):
+_base_path = os.path.abspath(os.path.join(__file__, "../../.."))
+_path_cache: Dict[str, bool] = {}
+
+
+def _check_path(path: str) -> bool:
+    """Check if a path exists and cache the result."""
+    path = os.path.join(_base_path, path)
+    if path in _path_cache:
+        result = _path_cache[path]
+    else:
+        result = os.path.exists(path)
+        _path_cache[path] = result
+    return result
+
+
+def linkcode_resolve(domain: str, info: Dict[str, str]):
     """linkcode extension override to link to the source code on GitHub."""
     if domain != "py":
         return None
@@ -91,8 +108,15 @@ def linkcode_resolve(domain: str, info: dict):
         return None
     if not info["module"].startswith("mlos_"):
         return None
+    package = info["module"].split(".")[0]
     filename = info["module"].replace(".", "/")
-    return f"https://github.com/microsoft/MLOS/tree/main/{filename}.py"
+    path = f"{package}/{filename}.py"
+    if not _check_path(path):
+        path = f"{package}/{filename}/__init__.py"
+        if not _check_path(path):
+            warning(f"linkcode_resolve failed to find {path}")
+            warning(f"linkcode_resolve info: {json.dumps(info, indent=2)}")
+    return f"https://github.com/microsoft/MLOS/tree/main/{path}"
 
 
 # Add mappings to link to external documentation.
@@ -173,12 +197,16 @@ nitpick_ignore = [
     ("py:class", "typing.Literal"),
     ("py:class", "typing_extensions.Literal"),
     ("py:class", "numpy.typing.NDArray"),
+    # External classes that refuse to resolve:
+    ("py:class", "contextlib.nullcontext"),
+    ("py:class", "sqlalchemy.engine.Engine"),
 ]
 nitpick_ignore_regex = [
     # Ignore some external references that don't use sphinx for their docs.
     (r"py:.*", r"flaml\..*"),
 ]
 
+# Which documents to include in the build.
 source_suffix = {
     ".rst": "restructuredtext",
     # '.txt': 'markdown',
