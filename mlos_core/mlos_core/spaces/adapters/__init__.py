@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Basic initializer module for the mlos_core space adapters.
+"""
+Basic initializer module for the mlos_core space adapters.
 
 Space adapters provide a mechanism for automatic transformation of the original
 :py:class:`ConfigSpace.ConfigurationSpace` provided to the optimizer into a new
@@ -69,14 +70,13 @@ ConcreteSpaceAdapter = TypeVar(
     IdentityAdapter,
     LlamaTuneAdapter,
 )
-"""Type variable for concrete SpaceAdapter classes
-(e.g., :class:`~mlos_core.spaces.adapters.identity_adapter.IdentityAdapter`, etc.)
+"""Type variable for concrete SpaceAdapter classes (e.g.,
+:class:`~mlos_core.spaces.adapters.identity_adapter.IdentityAdapter`, etc.)
 """
 
 
 class SpaceAdapterFactory:
-    """
-    Simple factory class for creating
+    """Simple factory class for creating
     :class:`~mlos_core.spaces.adapters.adapter.BaseSpaceAdapter`-derived objects.
     """
 

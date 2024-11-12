@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Implementation of LlamaTune space adapter.
+"""
+Implementation of LlamaTune space adapter.
 
 LlamaTune is a technique that transforms the original parameter space into a
 lower-dimensional space to try and improve the sample efficiency of the underlying

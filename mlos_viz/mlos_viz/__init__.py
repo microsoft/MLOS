@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""mlos_viz is a framework to help visualizing, explain, and gain insights from results
+"""
+mlos_viz is a framework to help visualizing, explain, and gain insights from results
 from the :py:mod:`mlos_bench` framework for benchmarking and optimization automation.
 
 Its main entrypoint is the :py:func:`plot` function, which can be used to

@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""mlos_core is a wrapper around other OSS tuning libraries to provide a consistent
+"""
+mlos_core is a wrapper around other OSS tuning libraries to provide a consistent
 interface for autotuning experimentation.
 
 :py:mod:`mlos_core` can be installed from `pypi <https://pypi.org/project/mlos-core>`_

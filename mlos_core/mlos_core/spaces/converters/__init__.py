@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Space converters init file.
+"""
+Space converters init file.
 
 Space converters are helper functions that translate a
 :py:class:`ConfigSpace.ConfigurationSpace` that :py:mod:`mlos_core` Optimizers take

@@ -27,8 +27,8 @@ def plot(
     objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
 ) -> None:
     """
-    Plots the :py:class:`~mlos_bench.storage.base_storage.Storage.Experiment`
-    results data using :external:py:func:`dabl.plot`.
+    Plots the :py:class:`~mlos_bench.storage.base_storage.Storage.Experiment` results
+    data using :external:py:func:`dabl.plot`.
 
     Parameters
     ----------

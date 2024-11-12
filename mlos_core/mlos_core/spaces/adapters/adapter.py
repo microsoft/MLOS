@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Contains the BaseSpaceAdapter abstract class.
+"""
+Contains the BaseSpaceAdapter abstract class.
 
 As mentioned in :py:mod:`mlos_core.spaces.adapters`, the space adapters provide a
 mechanism for automatic transformation of the original
@@ -81,7 +82,8 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
         Translates a configuration, which belongs to the original parameter space, to
         the target parameter space. This method is called by the `register` method of
         the :py:class:`~mlos_core.optimizers.optimizer.BaseOptimizer` class, and
-        performs the inverse operation of :py:meth:`~.BaseSpaceAdapter.transform` method.
+        performs the inverse operation of :py:meth:`~.BaseSpaceAdapter.transform`
+        method.
 
         Parameters
         ----------

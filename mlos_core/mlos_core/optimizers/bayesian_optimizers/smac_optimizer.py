@@ -239,8 +239,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
     @property
     def max_ratio(self) -> Optional[float]:
         """
-        Gets the `max_ratio` parameter used in py:meth:`constructor <.__init__>` of
-        this SmacOptimizer.
+        Gets the `max_ratio` parameter used in py:meth:`constructor <.__init__>` of this
+        SmacOptimizer.
 
         Returns
         -------

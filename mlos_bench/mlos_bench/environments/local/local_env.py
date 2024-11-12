@@ -11,7 +11,18 @@ from contextlib import nullcontext
 from datetime import datetime
 from tempfile import TemporaryDirectory
 from types import TracebackType
-from typing import Any, Dict, Iterable, List, Literal, Mapping, Optional, Tuple, Type, Union
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
 import pandas
 

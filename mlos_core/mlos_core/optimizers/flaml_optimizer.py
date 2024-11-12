@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Contains the :py:class:`.FlamlOptimizer` class.
+"""
+Contains the :py:class:`.FlamlOptimizer` class.
 
 See Also
 --------

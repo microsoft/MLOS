@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Initializer module for the mlos_core optimizers.
+"""
+Initializer module for the mlos_core optimizers.
 
 Optimizers are the main component of the :py:mod:`mlos_core` package.
 They act as a wrapper around other OSS tuning libraries to provide a consistent API
@@ -54,20 +55,17 @@ class OptimizerType(Enum):
     """Enumerate supported mlos_core optimizers."""
 
     RANDOM = RandomOptimizer
-    """
-    An instance of :class:`~mlos_core.optimizers.random_optimizer.RandomOptimizer`
+    """An instance of :class:`~mlos_core.optimizers.random_optimizer.RandomOptimizer`
     class will be used.
     """
 
     FLAML = FlamlOptimizer
-    """
-    An instance of :class:`~mlos_core.optimizers.flaml_optimizer.FlamlOptimizer`
+    """An instance of :class:`~mlos_core.optimizers.flaml_optimizer.FlamlOptimizer`
     class will be used.
     """
 
     SMAC = SmacOptimizer
-    """
-    An instance of
+    """An instance of
     :class:`~mlos_core.optimizers.bayesian_optimizers.smac_optimizer.SmacOptimizer`
     class will be used.
     """
@@ -84,7 +82,9 @@ ConcreteOptimizer = TypeVar(
     FlamlOptimizer,
     SmacOptimizer,
 )
-"""Type variable for concrete optimizer classes.
+"""
+Type variable for concrete optimizer classes.
+
 (e.g., :class:`~mlos_core.optimizers.bayesian_optimizers.smac_optimizer.SmacOptimizer`, etc.)
 """
 
@@ -93,8 +93,7 @@ DEFAULT_OPTIMIZER_TYPE = OptimizerType.FLAML
 
 
 class OptimizerFactory:
-    """
-    Simple factory class for creating
+    """Simple factory class for creating
     :class:`~mlos_core.optimizers.optimizer.BaseOptimizer`-derived objects.
     """
 

@@ -40,8 +40,7 @@ if TYPE_CHECKING:
     from mlos_bench.storage.base_storage import Storage
 
 BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Scheduler", "Service", "Storage")
-"""
-BaseTypeVar is a generic with a constraint of the main base classes (e.g.,
+"""BaseTypeVar is a generic with a constraint of the main base classes (e.g.,
 :py:class:`~mlos_bench.environments.base_environment.Environment`,
 :py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer`,
 :py:class:`~mlos_bench.schedulers.base_scheduler.Scheduler`,
