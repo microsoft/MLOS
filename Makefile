@@ -672,11 +672,18 @@ SPHINXOPTS += -n -W -w $(PWD)/doc/build/sphinx-build.warn.log -j auto
 
 sphinx-apidoc: doc/build/html/index.html
 
+doc/source/generated/mlos_bench.run.usage.txt: build/conda-env.${CONDA_ENV_NAME}.build-stamp
+doc/source/generated/mlos_bench.run.usage.txt: $(MLOS_BENCH_PYTHON_FILES)
+	# Generate the help output from mlos_bench CLI for the docs.
+	mkdir -p doc/source/generated/
+	conda run -n ${CONDA_ENV_NAME} mlos_bench --help > doc/source/generated/mlos_bench.run.usage.txt
+
 doc/build/html/index.html: build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp
+doc/build/html/index.html: doc/source/generated/mlos_bench.run.usage.txt
 doc/build/html/index.html: $(MLOS_CORE_PYTHON_FILES)
 doc/build/html/index.html: $(MLOS_BENCH_PYTHON_FILES)
 doc/build/html/index.html: $(MLOS_VIZ_PYTHON_FILES)
-doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile doc/source/conf.py doc/source/conf.py
+doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile doc/source/conf.py
 doc/build/html/index.html: doc/copy-source-tree-docs.sh $(MD_FILES)
 	@rm -rf doc/build
 	@mkdir -p doc/build
@@ -689,10 +696,6 @@ doc/build/html/index.html: doc/copy-source-tree-docs.sh $(MD_FILES)
 
 	# Copy some of the source tree markdown docs into place.
 	./doc/copy-source-tree-docs.sh
-
-	# Generate the help output from mlos_bench CLI for the docs.
-	mkdir -p doc/source/generated/
-	conda run -n ${CONDA_ENV_NAME} mlos_bench --help > doc/source/generated/mlos_bench.run.usage.txt
 
 	# Build the rst files into html.
 	conda run -n ${CONDA_ENV_NAME} $(MAKE) SPHINXOPTS="$(SPHINXOPTS)" -C doc/ $(MAKEFLAGS) html \
