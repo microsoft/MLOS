@@ -735,9 +735,7 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 	test -s doc/build/html/autoapi/mlos_viz/index.html
 	test -s doc/build/html/autoapi/mlos_viz/dabl/index.html
 	grep -q -e '--config CONFIG' doc/build/html//mlos_bench.run.usage.html
-	# TODO: Add sphinx-build -b linkcheck target?
 	# Check doc logs for errors (but skip over some known ones) ...
-	# TODO: Remove some of these ignores.
 	@cat doc/build/log.txt \
 		| egrep -C1 -e WARNING -e CRITICAL -e ERROR \
 		| egrep -v \
