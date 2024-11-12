@@ -45,11 +45,13 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
             and the `const_args` sections. It must also have at least one of
             the following parameters: {`setup`, `run`, `teardown`}.
             Additional parameters:
-                * `shell_env_params` - an array of parameters to pass to the script
-                  as shell environment variables, and
-                * `shell_env_params_rename` - a dictionary of {to: from} mappings
-                  of the script parameters. If not specified, replace all
-                  non-alphanumeric characters with underscores.
+
+            - `shell_env_params` - an array of parameters to pass to the script
+               as shell environment variables, and
+            - `shell_env_params_rename` - a dictionary of {to: from} mappings
+               of the script parameters. If not specified, replace all
+               non-alphanumeric characters with underscores.
+
             If neither `shell_env_params` nor `shell_env_params_rename` are specified,
             *no* additional shell parameters will be passed to the script.
         global_config : dict
