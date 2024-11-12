@@ -66,24 +66,15 @@ release = VERSION
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
-    # "sphinx_autodoc_typehints",
     "autoapi.extension",
     "nbsphinx",
-    "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx.ext.linkcode",
-    # "numpydoc",
     "sphinx.ext.napoleon",
     "matplotlib.sphinxext.plot_directive",
     "myst_parser",
 ]
-# autodoc_typehints = "both"
-# autodoc_typehints_description_target = "documented"
-
-# typehints_fully_qualified = True
-# typehints_defaults = "braces"
-## typehints_use_signature = True
-## typehints_use_signature_return = True
+autodoc_typehints = "both"  # signature and description
 
 napoleon_numpy_docstring = True
 napoleon_include_init_with_doc = False
