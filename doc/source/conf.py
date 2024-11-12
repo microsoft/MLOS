@@ -141,7 +141,7 @@ intersphinx_mapping = get_intersphinx_mapping(
 )
 intersphinx_mapping.update(
     {
-        # "ConfigSpace": ("https://automl.github.io/ConfigSpace/latest/", None),
+        "dabl": ("https://dabl.github.io/stable/", None),
     }
 )
 
@@ -185,15 +185,10 @@ nitpick_ignore = [
     ("py:class", "sqlalchemy.engine.Engine"),
     ("py:exc", "jsonschema.exceptions.SchemaError"),
     ("py:exc", "jsonschema.exceptions.ValidationError"),
-    # ("py:func", "create_connection"),
-    # ("py:class", "SSHClient"),
-    # ("py:class", "SSHKey"),
 ]
 nitpick_ignore_regex = [
     # Ignore some external references that don't use sphinx for their docs.
     (r"py:.*", r"flaml\..*"),
-    # Ignore some external inheritance classes that don't resolve.
-    # (r"py:.*", r"asyncssh\..*"),
 ]
 
 # Which documents to include in the build.
