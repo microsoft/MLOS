@@ -44,7 +44,7 @@ See Also
 --------
 `mlos_core/README.md
 <https://github.com/microsoft/MLOS/tree/main/mlos_core/>`_
-for additional documentation in the source tree.
+for additional documentation and examples in the source tree.
 """
 from mlos_core.version import VERSION
 

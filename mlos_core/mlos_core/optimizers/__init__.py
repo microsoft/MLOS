@@ -24,7 +24,7 @@ See Also
 --------
 `mlos_core/optimizers/README.md
 <https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/optimizers/>`_
-for additional documentation in the source tree.
+for additional documentation and examples in the source tree.
 """
 
 from enum import Enum

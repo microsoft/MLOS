@@ -4,7 +4,9 @@
 #
 """Contains the :py:class:`.FlamlOptimizer` class.
 
-See Also: `Flaml <https://microsoft.github.io/FLAML/>`_
+See Also
+--------
+`Flaml <https://microsoft.github.io/FLAML/>`_
 """
 
 from typing import Dict, List, NamedTuple, Optional, Tuple, Union
