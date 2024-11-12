@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Simple class to help with nested dictionary $var templating."""
+"""Simple class to help with nested dictionary ``$var`` templating in configuration
+file expansions."""
 
 from copy import deepcopy
 from string import Template
@@ -12,7 +13,7 @@ from mlos_bench.os_environ import environ
 
 
 class DictTemplater:  # pylint: disable=too-few-public-methods
-    """Simple class to help with nested dictionary $var templating."""
+    """Simple class to help with nested dictionary ``$var`` templating."""
 
     def __init__(self, source_dict: Dict[str, Any]):
         """
@@ -65,7 +66,7 @@ class DictTemplater:  # pylint: disable=too-few-public-methods
         extra_source_dict: Optional[Dict[str, Any]],
         use_os_env: bool,
     ) -> Any:
-        """Recursively expand $var strings in the currently operating dictionary."""
+        """Recursively expand ``$var`` strings in the currently operating dictionary."""
         if isinstance(value, str):
             # First try to expand all $vars internally.
             value = Template(value).safe_substitute(self._dict)

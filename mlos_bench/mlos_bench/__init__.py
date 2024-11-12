@@ -48,10 +48,12 @@ The other core classes in this package are:
   :py:mod:`~mlos_bench.environments.remote.vm_env.VMEnv`.
 
   Alternatively, one could swap out that service for
-  :py:class:`~mlos_bench.services.remote.ssh.ssh_host_services.SshHostService` in
+  :py:class:`~mlos_bench.services.remote.ssh.ssh_host_service.SshHostService` in
   order to target a different VM without having to change the
   :py:class:`~mlos_bench.environments.base_environment.Environment` configuration at
-  all.
+  all since they both implement the same
+  :py:class:`~mlos_bench.services.types.remote_exec_type.SupportsRemoteExec`
+  :py:mod:`Services type<mlos_bench.services.types>` interfaces.
 
   This is particularly useful when running the same benchmark on different
   ecosystems and makes the configs more modular and composable.

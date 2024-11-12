@@ -4,6 +4,12 @@
 #
 """A simple class for describing where to find different config schemas and validating
 configs against them.
+
+See Also
+--------
+`mlos_bench/config/README.md
+<https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_
+for additional documentation and examples in the source tree.
 """
 
 import json  # schema files are pure json - no comments
