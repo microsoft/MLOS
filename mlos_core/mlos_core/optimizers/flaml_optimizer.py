@@ -6,7 +6,7 @@
 
 See Also
 --------
-`Flaml <https://microsoft.github.io/FLAML/>`_
+`Flaml Documentation <https://microsoft.github.io/FLAML/>`_
 """
 
 from typing import Dict, List, NamedTuple, Optional, Tuple, Union
