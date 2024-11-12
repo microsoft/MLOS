@@ -137,41 +137,21 @@ def linkcode_resolve(domain: str, info: Dict[str, str]):
 intersphinx_mapping = get_intersphinx_mapping(
     packages={
         "asyncssh",
+        "azure-core",
+        "azure-identity",
+        "configspace",
         "matplotlib",
         "numpy",
         "pandas",
         "python",
+        "referencing",
+        "smac",
+        "typing_extensions",
     }
 )
-
-# TODO: convert these to registry calls once the following PR is merged:
-# https://github.com/Quansight-Labs/intersphinx_registry/pull/41
 intersphinx_mapping.update(
     {
-        "azure-core": (
-            "https://azuresdkdocs.blob.core.windows.net/$web/python/azure-core/latest/",
-            None,
-        ),
-        "azure-identity": (
-            "https://azuresdkdocs.blob.core.windows.net/$web/python/azure-identity/latest/",
-            None,
-        ),
-        "ConfigSpace": (
-            "https://automl.github.io/ConfigSpace/latest/",
-            None,
-        ),
-        "referencing": (
-            "https://referencing.readthedocs.io/en/stable/",
-            None,
-        ),
-        "smac": (
-            "https://automl.github.io/SMAC3/main/",
-            None,
-        ),
-        "typing_extensions": (
-            "https://typing-extensions.readthedocs.io/en/stable/",
-            None,
-        ),
+        # "ConfigSpace": ("https://automl.github.io/ConfigSpace/latest/", None),
     }
 )
 
