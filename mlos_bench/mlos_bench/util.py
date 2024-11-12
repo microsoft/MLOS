@@ -39,9 +39,19 @@ if TYPE_CHECKING:
     from mlos_bench.services.base_service import Service
     from mlos_bench.storage.base_storage import Storage
 
-# BaseTypeVar is a generic with a constraint of the three base classes.
 BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Scheduler", "Service", "Storage")
+"""
+BaseTypeVar is a generic with a constraint of the main base classes (e.g.,
+:py:class:`~mlos_bench.environments.base_environment.Environment`,
+:py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer`,
+:py:class:`~mlos_bench.schedulers.base_scheduler.Scheduler`,
+:py:class:`~mlos_bench.services.base_service.Service`,
+:py:class:`~mlos_bench.storage.base_storage.Storage`,
+etc.).
+"""
+
 BaseTypes = Union["Environment", "Optimizer", "Scheduler", "Service", "Storage"]
+"""Similar to :py:data:`.BaseTypeVar`, BaseTypes is a Union of the main base classes."""
 
 
 # Adjusted from https://github.com/python/cpython/blob/v3.11.10/Lib/distutils/util.py#L308
