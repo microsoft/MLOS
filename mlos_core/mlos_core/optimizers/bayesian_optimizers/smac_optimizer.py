@@ -86,8 +86,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Number of points evaluated at start to bootstrap the optimizer.
             Default depends on max_trials and number of parameters and max_ratio.
             Note: it can sometimes be useful to set this to 1 when pre-warming the
-            optimizer from historical data.
-            See Also:
+            optimizer from historical data. See Also:
             :py:meth:`mlos_bench.optimizers.base_optimizer.Optimizer.bulk_register`
 
         max_ratio : Optional[int]

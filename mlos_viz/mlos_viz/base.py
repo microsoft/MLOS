@@ -449,7 +449,8 @@ def plot_top_n_configs(
     with_scatter_plot : bool
         Whether to also add scatter plot to the output figure.
     kwargs : dict
-        Remaining keyword arguments are passed along to the :py:func:`limit_top_n_configs` function.
+        Remaining keyword arguments are passed along to the
+        :py:func:`limit_top_n_configs` function.
     """
     (results_df, _obj_cols) = expand_results_data_args(exp_data, results_df, objectives)
     top_n_config_args = _get_kwarg_defaults(limit_top_n_configs, **kwargs)
