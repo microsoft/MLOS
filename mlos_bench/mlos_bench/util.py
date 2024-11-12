@@ -45,8 +45,7 @@ BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Scheduler", "S
 :py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer`,
 :py:class:`~mlos_bench.schedulers.base_scheduler.Scheduler`,
 :py:class:`~mlos_bench.services.base_service.Service`,
-:py:class:`~mlos_bench.storage.base_storage.Storage`,
-etc.).
+:py:class:`~mlos_bench.storage.base_storage.Storage`, etc.).
 """
 
 BaseTypes = Union["Environment", "Optimizer", "Scheduler", "Service", "Storage"]

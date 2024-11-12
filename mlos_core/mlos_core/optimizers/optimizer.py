@@ -54,8 +54,10 @@ class BaseOptimizer(metaclass=ABCMeta):
         self.optimizer_parameter_space: ConfigSpace.ConfigurationSpace = (
             parameter_space if space_adapter is None else space_adapter.target_parameter_space
         )
-        """The parameter space used by the optimizer (in case a :py:mod:`SpaceAdapter
-        <mlos_core.spaces.adapters>` is used).
+        """
+        The parameter space actually used by the optimizer.
+
+        (in case a :py:mod:`SpaceAdapter <mlos_core.spaces.adapters>` is used)
         """
 
         if space_adapter is not None and space_adapter.orig_parameter_space != parameter_space:
