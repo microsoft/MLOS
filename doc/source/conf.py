@@ -77,7 +77,7 @@ extensions = [
 autodoc_typehints = "both"  # signature and description
 
 napoleon_numpy_docstring = True
-napoleon_include_init_with_doc = True
+napoleon_include_init_with_doc = False
 napoleon_include_private_with_doc = False
 napoleon_include_special_with_doc = True
 napoleon_use_admonition_for_examples = False
@@ -244,8 +244,10 @@ autoapi_options = [
     # - mlos_bench.environments.local.local_env.LocalEnv
     # "imported-members",
 ]
+autoapi_python_class_content = "both"
+autoapi_member_order = "groupwise"
 autoapi_add_toctree_entry = False
-# autoapi_keep_files = True  # for testing
+autoapi_keep_files = True  # for testing
 
 # -- Options for HTML output -------------------------------------------------
 

@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Contains the wrapper class for SMAC Bayesian optimizers.
+Contains the wrapper class for the :py:class:`.SmacOptimizer`.
 
 See Also: <https://automl.github.io/SMAC3/main/index.html>
 """
@@ -93,10 +93,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Useful if you want to explicitly control the number of random
             configs evaluated at start.
 
-        use_default_config: bool
+        use_default_config : bool
             Whether to use the default config for the first trial after random initialization.
 
-        n_random_probability: float
+        n_random_probability : float
             Probability of choosing to evaluate a random configuration during optimization.
             Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
         """

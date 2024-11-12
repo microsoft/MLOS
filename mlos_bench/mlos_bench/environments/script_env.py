@@ -37,7 +37,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        name: str
+        name : str
             Human-readable name of the environment.
         config : dict
             Free-format dictionary that contains the benchmark environment
@@ -57,7 +57,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
             to be mixed in into the "const_args" section of the local config.
         tunables : TunableGroups
             A collection of tunable parameters for *all* environments.
-        service: Service
+        service : Service
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """

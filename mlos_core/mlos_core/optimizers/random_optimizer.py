@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Contains the RandomOptimizer class."""
+"""RandomOptimizer class."""
 
 from typing import Optional, Tuple
 from warnings import warn
@@ -14,13 +14,9 @@ from mlos_core.optimizers.optimizer import BaseOptimizer
 
 class RandomOptimizer(BaseOptimizer):
     """
-    Optimizer class that produces random suggestions. Useful for baseline comparison
-    against Bayesian optimizers.
+    Optimizer class that produces random suggestions.
 
-    Parameters
-    ----------
-    parameter_space : ConfigSpace.ConfigurationSpace
-        The parameter space to optimize.
+    Useful for baseline comparison against Bayesian optimizers.
     """
 
     def _register(
@@ -38,11 +34,11 @@ class RandomOptimizer(BaseOptimizer):
 
         Parameters
         ----------
-        configs : pd.DataFrame
+        configs : pandas.DataFrame
             Dataframe of configs / parameters. The columns are parameter names and
             the rows are the configs.
 
-        scores : pd.DataFrame
+        scores : pandas.DataFrame
             Scores from running the configs. The index is the same as the index of the configs.
 
         context : None

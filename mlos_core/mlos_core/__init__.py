@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Basic initializer module for the mlos_core package.
+"""mlos_core is a wrapper around other OSS tuning libraries to provide a consistent
+interface for autotuning experimentation.
 
 :mod:`~mlos_core` provides the main Optimizer portions of the MLOS project for use with
 autotuning purposes.  Although it is generally intended to be used with
@@ -23,7 +24,7 @@ Specifically:
    - :meth:`~mlos_core.optimizers.optimizer.BaseOptimizer.register` which registers
      a "score" for an evaluated configuration with the Optimizer
 
-- :meth:`~mlos_core.optimizers.OptimizerFactory.create` is a factory function
+- :meth:`mlos_core.optimizers.OptimizerFactory.create` is a factory function
   that creates a new :type:`~mlos_core.optimizers.ConcreteOptimizer` instance
 
   To do this it uses the :class:`~mlos_core.optimizers.OptimizerType` enum to

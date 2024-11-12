@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Contains the BaseOptimizer abstract class."""
+"""Contains the :py:class:`.BaseOptimizer` abstract class.
+"""
 
 import collections
 from abc import ABCMeta, abstractmethod
@@ -18,7 +19,10 @@ from mlos_core.util import config_to_dataframe
 
 
 class BaseOptimizer(metaclass=ABCMeta):
-    """Optimizer abstract base class defining the basic interface."""
+    """Optimizer abstract base class defining the basic interface:
+    :py:meth:`~.BaseOptimizer.suggest`,
+    :py:meth:`~.BaseOptimizer.register`,
+    """
 
     # pylint: disable=too-many-instance-attributes
 
@@ -39,6 +43,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             The parameter space to optimize.
         optimization_targets : List[str]
             The names of the optimization targets to minimize.
+            To maximize a target, use the negative of the target when registering scores.
         objective_weights : Optional[List[float]]
             Optional list of weights of optimization targets.
         space_adapter : BaseSpaceAdapter

@@ -13,10 +13,11 @@ transformation.
 But, for instance, the :py:class:`.LlamaTuneAdapter` can be used to automatically
 transform the space to a lower dimensional one.
 
-See the :py:mod:`mlos_bench.optimizers` module for more information on how to do
-this with :py:mod:`mlos_bench`.
+See the :py:mod:`mlos_bench.optimizers.mlos_core_optimizer` module for more
+information on how to do this with :py:mod:`mlos_bench`.
 
-This module provides a simple factory class for creating space adapters.
+This module provides a simple :py:class:`.SpaceAdapterFactory` class to
+:py:meth:`~.SpaceAdapterFactory.create` space adapters.
 
 For instance:
 

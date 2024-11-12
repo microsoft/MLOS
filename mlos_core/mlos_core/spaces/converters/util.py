@@ -16,7 +16,10 @@ def monkey_patch_hp_quantization(hp: Hyperparameter) -> Hyperparameter:
     Monkey-patch quantization into the Hyperparameter.
 
     Temporary workaround to dropped quantization support in ConfigSpace 1.0
-    See Also: <https://github.com/automl/ConfigSpace/issues/390>
+
+    See Also
+    --------
+    <https://github.com/automl/ConfigSpace/issues/390>
 
     Parameters
     ----------
