@@ -241,8 +241,8 @@ autoapi_options = [
 ]
 autoapi_python_class_content = "both"
 autoapi_member_order = "groupwise"
-autoapi_add_toctree_entry = False
-autoapi_keep_files = True  # for testing
+autoapi_add_toctree_entry = False  # handled manually
+# autoapi_keep_files = True  # for testing
 
 # -- Options for HTML output -------------------------------------------------
 
