@@ -178,7 +178,6 @@ nitpick_ignore = [
     # External typevars and aliases:
     ("py:class", "CoroReturnType"),
     ("py:class", "FutureReturnType"),
-    ("py:class", "typing.Literal"),
     ("py:class", "typing_extensions.Literal"),
     ("py:class", "numpy.typing.NDArray"),
     # External classes that refuse to resolve:
@@ -186,10 +185,15 @@ nitpick_ignore = [
     ("py:class", "sqlalchemy.engine.Engine"),
     ("py:exc", "jsonschema.exceptions.SchemaError"),
     ("py:exc", "jsonschema.exceptions.ValidationError"),
+    # ("py:func", "create_connection"),
+    # ("py:class", "SSHClient"),
+    # ("py:class", "SSHKey"),
 ]
 nitpick_ignore_regex = [
     # Ignore some external references that don't use sphinx for their docs.
     (r"py:.*", r"flaml\..*"),
+    # Ignore some external inheritance classes that don't resolve.
+    # (r"py:.*", r"asyncssh\..*"),
 ]
 
 # Which documents to include in the build.

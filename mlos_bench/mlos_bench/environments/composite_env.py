@@ -7,9 +7,7 @@
 import logging
 from datetime import datetime
 from types import TracebackType
-from typing import Any, Dict, List, Optional, Tuple, Type
-
-from typing_extensions import Literal
+from typing import Any, Dict, List, Literal, Optional, Tuple, Type
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.status import Status

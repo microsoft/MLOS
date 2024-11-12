@@ -15,6 +15,7 @@ from typing import (
     Dict,
     Iterable,
     List,
+    Literal,
     Optional,
     Sequence,
     Tuple,
@@ -23,7 +24,6 @@ from typing import (
 )
 
 from pytz import UTC
-from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.dict_templater import DictTemplater

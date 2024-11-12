@@ -8,9 +8,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 from types import TracebackType
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Type
-
-from typing_extensions import Literal
+from typing import Any, Dict, Iterator, List, Literal, Optional, Tuple, Type
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.dict_templater import DictTemplater
