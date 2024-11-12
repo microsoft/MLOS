@@ -67,7 +67,7 @@ Examples
 >>> config_df.iloc[0]
 x    3
 Name: 0, dtype: int64
->>> # Register the configuration and its corresponding target value.
+>>> # Register the configuration and its corresponding target value
 >>> score = 42 # a made up score
 >>> scores_df = pandas.DataFrame({"y": [score]})
 >>> opt.register(configs=config_df, scores=scores_df)
@@ -77,14 +77,15 @@ Name: 0, dtype: int64
 x    10
 Name: 0, dtype: int64
 >>> score = 7 # a better made up score
->>> # optimizers minimize, so lower is better
->>> # use negative score to maximize
->>> # convert to a DataFrame again
+>>> # Optimizers minimize by convention, so a lower score is better
+>>> # You can use a negative score to maximize values instead
+>>> #
+>>> # Convert it to a DataFrame again
 >>> scores_df = pandas.DataFrame({"y": [score]})
 >>> opt.register(configs=config_df, scores=scores_df)
 >>> # Get the best observations.
 >>> (configs_df, scores_df, _contexts_df) = opt.get_best_observations()
->>> # default is only return one
+>>> # The default is to only return one
 >>> assert len(configs_df) == 1
 >>> assert len(scores_df) == 1
 >>> configs_df.iloc[0]
