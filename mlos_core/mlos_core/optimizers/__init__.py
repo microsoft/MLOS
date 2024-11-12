@@ -16,9 +16,15 @@ for all Optimizers and provides the core
 This module also provides a simple :py:class:`~.OptimizerFactory` class to
 :py:meth:`~.OptimizerFactory.create` an Optimizer.
 
-For instance:
-
+Examples
+--------
 TODO: Add example usage here.
+
+See Also
+--------
+`mlos_core/optimizers/README.md
+<https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/optimizers/>`_
+for additional documentation in the source tree.
 """
 
 from enum import Enum
@@ -78,7 +84,9 @@ ConcreteOptimizer = TypeVar(
     FlamlOptimizer,
     SmacOptimizer,
 )
-"""Type variable for concrete optimizer classes."""
+"""Type variable for concrete optimizer classes.
+(e.g., :class:`~mlos_core.optimizers.bayesian_optimizers.smac_optimizer.SmacOptimizer`, etc.)
+"""
 
 DEFAULT_OPTIMIZER_TYPE = OptimizerType.FLAML
 """Default optimizer type to use if none is specified."""

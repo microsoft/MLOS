@@ -42,8 +42,9 @@ TODO: Add example usage here.
 
 See Also
 --------
-`mlos_core source </source_tree_docs/mlos_core>`_
-For additional documentation and examples in `README.md` and other markdown.
+`mlos_core/README.md
+<https://github.com/microsoft/MLOS/tree/main/mlos_core/>`_
+for additional documentation in the source tree.
 """
 from mlos_core.version import VERSION
 

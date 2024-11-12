@@ -19,9 +19,15 @@ information on how to do this with :py:mod:`mlos_bench`.
 This module provides a simple :py:class:`.SpaceAdapterFactory` class to
 :py:meth:`~.SpaceAdapterFactory.create` space adapters.
 
-For instance:
-
+Examples
+--------
 TODO: Add example usage here.
+
+See Also
+--------
+`mlos_core/spaces/adapters/README.md
+<https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/spaces/adapters>`_
+for additional documentation in the source tree.
 """
 
 from enum import Enum
@@ -63,7 +69,9 @@ ConcreteSpaceAdapter = TypeVar(
     IdentityAdapter,
     LlamaTuneAdapter,
 )
-"""Type variable for concrete SpaceAdapter classes."""
+"""Type variable for concrete SpaceAdapter classes
+(e.g., :class:`~mlos_core.spaces.adapters.identity_adapter.IdentityAdapter`, etc.)
+"""
 
 
 class SpaceAdapterFactory:
