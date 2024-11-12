@@ -39,6 +39,23 @@ The other core classes in this package are:
   configuration parameters that can be optimized or searched over with the
   :py:mod:`~mlos_bench.optimizers`.
 
+- :py:mod:`~mlos_bench.services` provide the necessary abstractions to run interact
+  with the :py:mod:`~mlos_bench.environments` in different settings.
+
+  For instance, the
+  :py:class:`~mlos_bench.services.remote.azure.azure_vm_services.AzureVMService`
+  can be used to run commands on Azure VMs for a remote
+  :py:mod:`~mlos_bench.environments.remote.vm_env.VMEnv`.
+
+  Alternatively, one could swap out that service for
+  :py:class:`~mlos_bench.services.remote.ssh.ssh_host_services.SshHostService` in
+  order to target a different VM without having to change the
+  :py:class:`~mlos_bench.environments.base_environment.Environment` configuration at
+  all.
+
+  This is particularly useful when running the same benchmark on different
+  ecosystems and makes the configs more modular and composable.
+
 - :py:mod:`~mlos_bench.storage` which provides abstractions for storing and
   retrieving data from the experiments.
 

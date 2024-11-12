@@ -2,4 +2,4 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""mlos_bench.config."""
+"""Basic initializer for the mlos_bench config subtree."""

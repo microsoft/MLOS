@@ -22,12 +22,19 @@ _LOG = logging.getLogger(__name__)
 
 # The path to find all config schemas.
 CONFIG_SCHEMA_DIR = path_join(path.dirname(__file__), abs_path=True)
+"""The local directory where all config schemas are stored."""
 
 # Allow skipping schema validation for tight dev cycle changes.
 # It is used in `ConfigSchema.validate()` method below.
 # NOTE: this may cause pytest to fail if it's expecting exceptions
 # to be raised for invalid configs.
 _VALIDATION_ENV_FLAG = "MLOS_BENCH_SKIP_SCHEMA_VALIDATION"
+"""The special environment flag to set to skip schema validation.
+
+Useful for local development when you're making a lot of changes to the config or
+adding new classes that aren't in the main repo yet.
+"""
+
 _SKIP_VALIDATION = environ.get(_VALIDATION_ENV_FLAG, "false").lower() in {
     "true",
     "y",
@@ -105,22 +112,41 @@ class SchemaStore(Mapping):
 
 
 SCHEMA_STORE = SchemaStore()
+"""Static SchemaStore instance used for storing and retrieving schemas for config validation."""
 
 
 class ConfigSchema(Enum):
     """An enum to help describe schema types and help validate configs against them."""
 
     CLI = path_join(CONFIG_SCHEMA_DIR, "cli/cli-schema.json")
+    """Schema for command line arguments."""
+
     GLOBALS = path_join(CONFIG_SCHEMA_DIR, "cli/globals-schema.json")
+    """Schema for global variables."""
+
     ENVIRONMENT = path_join(CONFIG_SCHEMA_DIR, "environments/environment-schema.json")
+    """Schema for :py:mod:`~mlos_bench.environments` configurations."""
+
     OPTIMIZER = path_join(CONFIG_SCHEMA_DIR, "optimizers/optimizer-schema.json")
+    """Schema for :py:mod:`~mlos_bench.optimizers` configurations."""
+
     SCHEDULER = path_join(CONFIG_SCHEMA_DIR, "schedulers/scheduler-schema.json")
+    """Schema for :py:mod:`~mlos_bench.schedulers` configurations."""
+
     SERVICE = path_join(CONFIG_SCHEMA_DIR, "services/service-schema.json")
+    """Schema for :py:mod:`~mlos_bench.services` configurations."""
+
     STORAGE = path_join(CONFIG_SCHEMA_DIR, "storage/storage-schema.json")
+    """Schema for :py:mod:`~mlos_bench.storage` configurations."""
+
     TUNABLE_PARAMS = path_join(CONFIG_SCHEMA_DIR, "tunables/tunable-params-schema.json")
+    """Schema for :py:mod:`~mlos_bench.tunables.tunable_groups` configurations."""
+
     TUNABLE_VALUES = path_join(CONFIG_SCHEMA_DIR, "tunables/tunable-values-schema.json")
+    """Schema for :py:mod:`~mlos_bench.tunables.tunable_groups` values configurations."""
 
     UNIFIED = path_join(CONFIG_SCHEMA_DIR, "mlos-bench-config-schema.json")
+    """Global combined schema file (e.g., for ``*.mlos.json`` files)."""
 
     @property
     def schema(self) -> dict:
