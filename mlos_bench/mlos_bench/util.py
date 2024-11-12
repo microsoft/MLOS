@@ -72,7 +72,7 @@ def strtobool(val: str) -> bool:
 
 def preprocess_dynamic_configs(*, dest: dict, source: Optional[dict] = None) -> dict:
     """
-    Replaces all $name values in the destination config with the corresponding value
+    Replaces all ``$name`` values in the destination config with the corresponding value
     from the source config.
 
     Parameters
