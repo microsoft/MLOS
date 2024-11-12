@@ -6,7 +6,6 @@ nbsphinx
 jupyter_core>=4.11.2    # nbsphix dependency - addresses CVE-2022-39286
 nbconvert
 mistune>=2.0.3          # Address CVE-2022-34749
-numpydoc
 sphinx-rtd-theme
 myst-parser
 

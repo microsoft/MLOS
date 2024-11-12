@@ -26,7 +26,6 @@ from typing import Dict
 from logging import warning
 
 from intersphinx_registry import get_intersphinx_mapping
-import sphinx_rtd_theme  # pylint: disable=unused-import
 
 
 sys.path.insert(0, os.path.abspath("../../mlos_core/mlos_core"))
@@ -210,7 +209,7 @@ source_suffix = {
 }
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+# templates_path = ["_templates"]
 
 # Generate the plots for the gallery
 # plot_gallery = True
@@ -259,7 +258,6 @@ autoapi_keep_files = True  # for testing
 # a list of builtin themes.
 #
 html_theme = "sphinx_rtd_theme"
-# html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
