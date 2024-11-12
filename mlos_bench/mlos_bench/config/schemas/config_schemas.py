@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""A simple class for describing where to find different config schemas and validating
+"""
+A simple class for describing where to find different config schemas and validating
 configs against them.
 
 See Also
@@ -35,10 +36,11 @@ CONFIG_SCHEMA_DIR = path_join(path.dirname(__file__), abs_path=True)
 # NOTE: this may cause pytest to fail if it's expecting exceptions
 # to be raised for invalid configs.
 _VALIDATION_ENV_FLAG = "MLOS_BENCH_SKIP_SCHEMA_VALIDATION"
-"""The special environment flag to set to skip schema validation.
+"""
+The special environment flag to set to skip schema validation.
 
-Useful for local development when you're making a lot of changes to the config or
-adding new classes that aren't in the main repo yet.
+Useful for local development when you're making a lot of changes to the config or adding
+new classes that aren't in the main repo yet.
 """
 
 _SKIP_VALIDATION = environ.get(_VALIDATION_ENV_FLAG, "false").lower() in {
@@ -118,7 +120,9 @@ class SchemaStore(Mapping):
 
 
 SCHEMA_STORE = SchemaStore()
-"""Static SchemaStore instance used for storing and retrieving schemas for config validation."""
+"""Static SchemaStore instance used for storing and retrieving schemas for config
+validation.
+"""
 
 
 class ConfigSchema(Enum):
@@ -149,7 +153,9 @@ class ConfigSchema(Enum):
     """Schema for :py:mod:`~mlos_bench.tunables.tunable_groups` configurations."""
 
     TUNABLE_VALUES = path_join(CONFIG_SCHEMA_DIR, "tunables/tunable-values-schema.json")
-    """Schema for :py:mod:`~mlos_bench.tunables.tunable_groups` values configurations."""
+    """Schema for :py:mod:`~mlos_bench.tunables.tunable_groups` values
+    configurations.
+    """
 
     UNIFIED = path_join(CONFIG_SCHEMA_DIR, "mlos-bench-config-schema.json")
     """Global combined schema file (e.g., for ``*.mlos.json`` files)."""

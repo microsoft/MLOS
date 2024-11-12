@@ -2,8 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""mlos_bench is a framework to help automate benchmarking and OS/application
-parameter autotuning and the data management of the results.
+"""
+mlos_bench is a framework to help automate benchmarking and OS/application parameter
+autotuning and the data management of the results.
 
 It can be installed from `pypi <https://pypi.org/project/mlos-bench>`_ via
 ``pip install mlos-bench`` and executed using the ``mlos_bench``

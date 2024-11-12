@@ -2,8 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Simple class to help with nested dictionary ``$var`` templating in configuration
-file expansions."""
+"""Simple class to help with nested dictionary ``$var`` templating in configuration file
+expansions.
+"""
 
 from copy import deepcopy
 from string import Template
