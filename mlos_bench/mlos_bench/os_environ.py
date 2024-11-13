@@ -9,7 +9,7 @@ replacement for :external:py:data:`os.environ` vs ``nt.environ``.
 Example
 -------
 >>> # Import the environ object.
->>> from mlos_bench.os_env import environ
+>>> from mlos_bench.os_environ import environ
 >>> # Set an environment variable.
 >>> environ["FOO"] = "bar"
 >>> # Get an environment variable.
