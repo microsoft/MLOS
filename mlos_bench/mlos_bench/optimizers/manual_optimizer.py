@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Optimizer for mlos_bench that proposes an explicit sequence of configuration."""
+"""Optimizer for mlos_bench that proposes an explicit sequence of configurations."""
 
 import logging
 from typing import Dict, List, Optional
