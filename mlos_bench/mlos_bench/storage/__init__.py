@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Interfaces to the storage backends for OS Autotune."""
+"""Interfaces to the storage backends for mlos_bench."""
 
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.storage_factory import from_config

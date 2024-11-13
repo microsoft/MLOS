@@ -4,13 +4,16 @@
 #
 """
 Simple platform agnostic abstraction for the OS environment variables. Meant as a
-replacement for os.environ vs nt.environ.
+replacement for :external:py:data:`os.environ` vs ``nt.environ``.
 
 Example
 -------
-from mlos_bench.os_env import environ
-environ['FOO'] = 'bar'
-environ.get('PWD')
+>>> # Import the environ object.
+>>> from mlos_bench.os_env import environ
+>>> # Set an environment variable.
+>>> environ["FOO"] = "bar"
+>>> # Get an environment variable.
+>>> pwd = environ.get("PWD")
 """
 
 import os
@@ -33,7 +36,9 @@ if sys.platform == "win32":
     import nt  # type: ignore[import-not-found]    # pylint: disable=import-error  # (3.8)
 
     environ: EnvironType = nt.environ
+    """A platform agnostic abstraction for the OS environment variables."""
 else:
     environ: EnvironType = os.environ
+    """A platform agnostic abstraction for the OS environment variables."""
 
 __all__ = ["environ"]

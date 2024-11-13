@@ -158,7 +158,12 @@ class ConfigSchema(Enum):
     """
 
     UNIFIED = path_join(CONFIG_SCHEMA_DIR, "mlos-bench-config-schema.json")
-    """Global combined schema file (e.g., for ``*.mlos.json`` files)."""
+    """Global combined schema file (e.g., for ``*.mlos.json`` files).
+
+    See Also
+    --------
+    <https://www.schemastore.org/json/>
+    """
 
     @property
     def schema(self) -> dict:

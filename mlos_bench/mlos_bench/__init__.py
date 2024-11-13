@@ -30,7 +30,7 @@ The other core classes in this package are:
   These are generally the target of the optimization process and are used to
   evaluate the performance of a given configuration, though can also be used to
   simply run a single benchmark.
-  They can be used, for instance, to :py:mod:`provision VMs
+  They can be used, for instance, to provision a :py:mod:`VM
   <mlos_bench.environments.remote.vm_env>`, run benchmarks or execute any other
   arbitrary code on a :py:mod:`remote machine <mlos_bench.environments.remote.remote_env>`,
   and many other things.
@@ -84,9 +84,8 @@ Here is an example that shows how to run a simple benchmark using the command li
 The entry point for these configs can be found `here
 <https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc>`_.
 
-> Note: we show the command wrapped in python here for testing purposes.
-
 >>> from subprocess import run
+>>> # Note: we show the command wrapped in python here for testing purposes.
 >>> # Alternatively replace test-cli-local-env-bench.jsonc with
 >>> # test-cli-local-env-opt.jsonc for one that does an optimization loop.
 >>> cmd = r'''mlos_bench \\

@@ -6,8 +6,8 @@
 A helper class to load the configuration files, parse the command line parameters, and
 instantiate the main components of mlos_bench system.
 
-It is used in `mlos_bench.run` module to run the benchmark/optimizer from the
-command line.
+It is used in the :py:mod:`mlos_bench.run` module to run the benchmark/optimizer
+from the command line.
 """
 
 import argparse

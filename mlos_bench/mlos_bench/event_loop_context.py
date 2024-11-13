@@ -19,8 +19,11 @@ else:
     from typing_extensions import TypeAlias
 
 CoroReturnType = TypeVar("CoroReturnType")  # pylint: disable=invalid-name
+"""Type variable for the return type of an :external:py:mod:`asyncio` coroutine."""
+
 if sys.version_info >= (3, 9):
     FutureReturnType: TypeAlias = Future[CoroReturnType]
+    """Type variable for the return type of a :py:class:`~concurrent.futures.Future`."""
 else:
     FutureReturnType: TypeAlias = Future
 
@@ -29,15 +32,15 @@ _LOG = logging.getLogger(__name__)
 
 class EventLoopContext:
     """
-    EventLoopContext encapsulates a background thread for asyncio event loop processing
-    as an aid for context managers.
+    EventLoopContext encapsulates a background thread for :external:py:mod:`asyncio`
+    event loop processing as an aid for context managers.
 
     There is generally only expected to be one of these, either as a base class instance
     if it's specific to that functionality or for the full mlos_bench process to support
     parallel trial runners, for instance.
 
-    It's enter() and exit() routines are expected to be called from the caller's context
-    manager routines (e.g., __enter__ and __exit__).
+    It's :py:meth:`.enter` and :py:meth:`.exit` routines are expected to be called
+    from the caller's context manager routines (e.g., __enter__ and __exit__).
     """
 
     def __init__(self) -> None:
