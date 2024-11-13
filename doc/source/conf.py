@@ -123,6 +123,13 @@ def linkcode_resolve(domain: str, info: Dict[str, str]):
     return f"https://github.com/microsoft/MLOS/tree/main/{path}"
 
 
+def is_on_github_actions():
+    """Check if the documentation is being built on GitHub Actions."""
+    if "CI" not in os.environ or not os.environ["CI"] or "GITHUB_RUN_ID" not in os.environ:
+        return False
+    return True
+
+
 # Add mappings to link to external documentation.
 intersphinx_mapping = get_intersphinx_mapping(
     packages={
@@ -242,7 +249,7 @@ autoapi_options = [
 autoapi_python_class_content = "both"
 autoapi_member_order = "groupwise"
 autoapi_add_toctree_entry = False  # handled manually
-# autoapi_keep_files = True  # for testing
+autoapi_keep_files = not is_on_github_actions()  # for local testing
 
 # -- Options for HTML output -------------------------------------------------
 

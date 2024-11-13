@@ -668,7 +668,7 @@ endif
 
 # Treat warnings as failures.
 SPHINXOPTS ?= # -v # be verbose
-SPHINXOPTS += -n -W -w $(PWD)/doc/build/sphinx-build.warn.log -j auto
+SPHINXOPTS += -n -W -w $(CURDIR)/doc/build/sphinx-build.warn.log -j auto
 
 sphinx-apidoc: doc/build/html/index.html
 
