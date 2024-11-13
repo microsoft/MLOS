@@ -21,12 +21,15 @@
 import json
 import os
 import sys
-from typing import Dict
+from typing import Dict, Union, Tuple
 
 from logging import warning
 
+from docutils.nodes import Element
 from intersphinx_registry import get_intersphinx_mapping
-
+from sphinx.application import Sphinx as SphinxApp
+from sphinx.environment import BuildEnvironment
+from sphinx.addnodes import pending_xref
 
 sys.path.insert(0, os.path.abspath("../../mlos_core/mlos_core"))
 sys.path.insert(1, os.path.abspath("../../mlos_bench/mlos_bench"))
@@ -152,40 +155,66 @@ intersphinx_mapping.update(
     }
 )
 
-# We recommend adding the following config value.
-# Sphinx defaults to automatically resolve *unresolved* labels using all your Intersphinx mappings.
-# This behavior has unintended side-effects, namely that documentations local references can
-# suddenly resolve to an external location.
-# See also:
-# https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#confval-intersphinx_disabled_reftypes
-# intersphinx_disabled_reftypes = ["*"]
+# Hack to resolve type aliases as attributes instead of classes.
+# See Also: https://github.com/sphinx-doc/sphinx/issues/10785
+
+# Type alias resolution map
+# (original, refname) -> new
+CUSTOM_REF_TYPE_MAP: Dict[Tuple[str, str], str] = {
+    # Internal typevars and aliases:
+    ("BaseTypeVar", "class"): "data",
+    ("ConcreteOptimizer", "class"): "data",
+    ("ConcreteSpaceAdapter", "class"): "data",
+    ("DistributionName", "class"): "data",
+    ("FlamlDomain", "class"): "data",
+    ("mlos_core.spaces.converters.flaml.FlamlDomain", "class"): "data",
+    ("TunableValue", "class"): "data",
+    ("mlos_bench.tunables.tunable.TunableValue", "class"): "data",
+    ("TunableValueType", "class"): "data",
+    ("TunableValueTypeName", "class"): "data",
+    ("T_co", "class"): "data",
+    ("CoroReturnType", "class"): "data",
+    ("FutureReturnType", "class"): "data",
+}
+
+
+def resolve_type_aliases(
+    app: SphinxApp,
+    env: BuildEnvironment,
+    node: pending_xref,
+    contnode: Element,
+) -> Union[Element, None]:
+    """Resolve :class: references to our type aliases as :attr: instead."""
+    if node["refdomain"] != "py":
+        return None
+    (orig_type, reftarget) = (node["reftype"], node["reftarget"])
+    new_type = CUSTOM_REF_TYPE_MAP.get((reftarget, orig_type))
+    if new_type:
+        # warning(f"Resolved {orig_type} {reftarget} to {new_type}")
+        return app.env.get_domain("py").resolve_xref(
+            env,
+            node["refdoc"],
+            app.builder,
+            new_type,
+            reftarget,
+            node,
+            contnode,
+        )
+    return None
+
+
+def setup(app: SphinxApp) -> None:
+    """Connect the missing-reference event to resolve type aliases."""
+    app.connect("missing-reference", resolve_type_aliases)
+
 
 # Ignore some cross references to external things we can't intersphinx with.
 # sphinx has a hard time finding typealiases and typevars instead of classes.
 # See Also: https://github.com/sphinx-doc/sphinx/issues/10974
 nitpick_ignore = [
     # Internal typevars and aliases:
-    ("py:class", "BaseTypeVar"),
-    ("py:class", "ConcreteOptimizer"),
-    ("py:class", "ConcreteSpaceAdapter"),
-    ("py:class", "DistributionName"),
     ("py:class", "EnvironType"),
-    ("py:class", "FlamlDomain"),
-    ("py:class", "mlos_core.spaces.converters.flaml.FlamlDomain"),
-    ("py:class", "TunableValue"),
-    ("py:class", "mlos_bench.tunables.tunable.TunableValue"),
-    ("py:class", "TunableValueType"),
-    ("py:class", "TunableValueTypeName"),
-    ("py:class", "T_co"),
-    # Literals in base_storage.py
-    ("py:class", "min"),
-    ("py:class", "max"),
-    # Literal in context handlers signatures.
-    ("py:class", "False"),
     # External typevars and aliases:
-    ("py:class", "CoroReturnType"),
-    ("py:class", "FutureReturnType"),
-    ("py:class", "typing_extensions.Literal"),
     ("py:class", "numpy.typing.NDArray"),
     # External classes that refuse to resolve:
     ("py:class", "contextlib.nullcontext"),
