@@ -78,13 +78,47 @@ interpretted.
 
 Examples
 --------
-TODO: Add examples
+
+Here is an example that shows how to run a simple benchmark using the command line.
+
+The entry point for these configs can be found `here
+<https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc>`_.
+
+> Note: we show the command wrapped in python here for testing purposes.
+
+>>> from subprocess import run
+>>> # Alternatively replace test-cli-local-env-bench.jsonc with
+>>> # test-cli-local-env-opt.jsonc for one that does an optimization loop.
+>>> cmd = r'''mlos_bench \\
+...     --config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc \\
+...     --globals experiment_test_local.jsonc \\
+...     --tunable_values tunable-values/tunable-values-local.jsonc'''
+>>> print(f"Here's the shell command you'd actually run:\\n# {cmd}")
+Here's the shell command you'd actually run:
+# mlos_bench \\
+    --config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc \\
+    --globals experiment_test_local.jsonc \\
+    --tunable_values tunable-values/tunable-values-local.jsonc
+>>> # Now we run the command and check the output.
+>>> result = run(cmd, shell=True, capture_output=True, text=True, check=True)
+>>> assert result.returncode == 0
+>>> lines = result.stderr.splitlines()
+>>> first_line = lines[0]
+>>> last_line = lines[-1]
+>>> expected = "INFO Launch: mlos_bench"
+>>> assert first_line.endswith(expected)
+>>> expected = "INFO Final score: {'score': 123.4, 'total_time': 123.4, 'throughput': 1234567.0}"
+>>> assert last_line.endswith(expected)
 
 See Also
 --------
 `mlos_bench/README.md
 <https://github.com/microsoft/MLOS/tree/main/mlos_bench/>`_
 for additional documentation and examples in the source tree.
+
+There is also a working example of using ``mlos_bench`` in a separate repo for the
+configs in the `sqlite-autotuning
+<https://github.com/Microsoft-CISL/sqlite-autotuning>`_ repo.
 """
 from mlos_bench.version import VERSION
 
