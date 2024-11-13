@@ -68,3 +68,17 @@ disable = [
 [tool.pylint.string]
 check-quote-consistency = true
 check-str-concat-over-line-jumps = true
+
+[tool.pyright]
+exclude = [
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    "**/node_modules",
+    "**/__pycache__",
+    "**/*.egg-info",
+    "doc/source/autoapi",
+    "doc/build/html",
+    "doc/build/doctrees",
+    "htmlcov",
+]

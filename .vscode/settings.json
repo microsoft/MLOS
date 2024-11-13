@@ -2,8 +2,16 @@
 {
     "makefile.extensionOutputFolder": "./.vscode",
     "files.exclude": {
-	    "**/__pycache__/": true,
-	    "doc/source/autoapi/": true
+        ".git/": true,
+        ".mypy_cache/": true,
+        ".pytest_cache/": true,
+        "**/__pycache__/": true,
+        "**/node_modules/": true,
+        "**/*.egg-info": true,
+        "doc/source/autoapi/": true,
+        "doc/build/doctrees/": true,
+        "doc/build/html/": true,
+        "htmlcov/": true,
     },
     // Note: this only works in WSL/Linux currently.
     "python.defaultInterpreterPath": "${env:HOME}/.conda/envs/mlos/bin/python",
