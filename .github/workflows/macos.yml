@@ -1,10 +1,12 @@
-name: MLOS Linux
+# Note: this file is based on the linux.yml
+
+name: MLOS MacOS
 
 on:
   workflow_dispatch:
     inputs:
       tags:
-        description: Manual MLOS Linux run
+        description: Manual MLOS MacOS run
   push:
     branches: [ main ]
   pull_request:
@@ -19,10 +21,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  LinuxCondaBuildTest:
-    name: Linux Build/Test with Conda
+  MacOSCondaBuildTest:
+    name: MacOS Build/Test with Conda
 
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     permissions:
       contents: read
@@ -35,12 +37,13 @@ jobs:
           # Empty string is the floating most recent version of python
           # (useful to catch new compatibility issues in nightly builds)
           - ""
-          - "3.8"
-          - "3.9"
-          - "3.10"
-          - "3.11"
-          - "3.12"
-          - "3.13"
+          # For now we only test the latest version of python on MacOS.
+          #- "3.8"
+          #- "3.9"
+          #- "3.10"
+          #- "3.11"
+          #- "3.12"
+          #- "3.13"
 
     env:
       cache_cur_date: unset
@@ -159,3 +162,57 @@ jobs:
 
     - name: Generate and test binary distribution files
       run: make CONDA_ENV_NAME=$CONDA_ENV_NAME CONDA_INFO_LEVEL=-v dist dist-test
+
+
+  MacOSDevContainerBuildTest:
+    name: MacOS DevContainer Build/Test
+    runs-on: macos-latest
+
+    # Skip this for now.
+    # Note: no linux platform build support due to lack of nested virtualization on M series chips.
+    # https://github.com/orgs/community/discussions/69211#discussioncomment-7242133
+    if: false
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install docker
+      timeout-minutes: 15
+      run: |
+        # Install the docker desktop app.
+        brew install --cask docker
+        brew install docker-buildx
+        brew install jq
+        # Make sure the cli knows where to find the buildx plugin.
+        mkdir -p ~/.docker
+        (cat ~/.docker/config.json 2>/dev/null || echo "{}") \
+          | jq '.cliPluginsExtraDirs = ((.cliPluginsExtraDirs // []) + ["/opt/homebrew/lib/docker-cli-plugins"])' \
+          | tee ~/.docker/config.json.new
+        mv ~/.docker/config.json.new ~/.docker/config.json
+        cat ~/.docker/config.json
+        # Restart docker service.
+        ps auxwww | grep -i docker || true
+        osascript -e 'quit app "Docker"' || true; open -a Docker; while [ -z "$(docker info 2> /dev/null )" ]; do printf "."; sleep 1; done; echo ""
+
+    - name: Check docker
+      run: |
+        # Check and see if it's running.
+        ps auxwww | grep -i docker || true
+        ls -l /var/run/docker.sock
+        # Dump some debug info.
+        docker --version
+        docker info
+        docker system info || true
+        docker ps
+        DOCKER_BUILDKIT=1 docker builder ls
+
+    - name: Build the devcontainer
+      run: |
+        .devcontainer/build/build-devcontainer.sh
+
+    - name: Basic test of the devcontainer
+      run: |
+        .devcontainer/script/run-devcontainer.sh conda run -n mlos python --version | grep "Python 3.13"
