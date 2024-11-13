@@ -1,6 +1,10 @@
 // vim: set ft=jsonc:
 {
     "makefile.extensionOutputFolder": "./.vscode",
+    "files.exclude": {
+	    "**/__pycache__/": true,
+	    "doc/source/autoapi/": true
+    },
     // Note: this only works in WSL/Linux currently.
     "python.defaultInterpreterPath": "${env:HOME}/.conda/envs/mlos/bin/python",
     // For Windows it should be this instead:
