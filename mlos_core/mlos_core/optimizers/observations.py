@@ -37,7 +37,7 @@ def compare_optional_series(left: Optional[pd.Series], right: Optional[pd.Series
 
 
 def compare_optional_dataframe(
-    left: Optional[pd.DataFrame], right: Optional[pd.DataFrame]
+    left: Optional[pd.DataFrame], right: Optional[pd.DataFrame],
 ) -> bool:
     """
     Compare DataFrames that may also be None.
