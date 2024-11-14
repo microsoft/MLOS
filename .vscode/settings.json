@@ -38,6 +38,8 @@
                 "mlos_bench/mlos_bench/tests/config/environments/**/*.json",
                 "mlos_bench/mlos_bench/config/environments/**/*.jsonc",
                 "mlos_bench/mlos_bench/config/environments/**/*.json",
+                "!mlos_bench/mlos_bench/tests/config/environments/**/*-tunables.jsonc",
+                "!mlos_bench/mlos_bench/tests/config/environments/**/*-tunables.json",
                 "!mlos_bench/mlos_bench/config/environments/**/*-tunables.jsonc",
                 "!mlos_bench/mlos_bench/config/environments/**/*-tunables.json"
             ],
