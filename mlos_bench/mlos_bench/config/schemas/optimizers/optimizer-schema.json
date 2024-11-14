@@ -55,6 +55,8 @@
             "description": "The name of the optimizer class to use.",
             "$comment": "required",
             "enum": [
+                "mlos_bench.optimizers.ManualOptimizer",
+                "mlos_bench.optimizers.manual_optimizer.ManualOptimizer",
                 "mlos_bench.optimizers.MlosCoreOptimizer",
                 "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
                 "mlos_bench.optimizers.GridSearchOptimizer",
@@ -196,6 +198,52 @@
                         "allOf": [
                             { "$ref": "#/$defs/config_base_optimizer" }
                         ],
+                        "unevaluatedProperties": false
+                    }
+                }
+            },
+            "else": false
+        },
+
+        {
+            "$comment": "extensions to the 'config' object properties when the manual optimizer is being used",
+            "if": {
+                "properties": {
+                    "class": {
+                        "enum": [
+                            "mlos_bench.optimizers.ManualOptimizer",
+                            "mlos_bench.optimizers.manual_optimizer.ManualOptimizer"
+                        ]
+                    }
+                },
+                "required": ["class"]
+            },
+            "then": {
+                "properties": {
+                    "config": {
+                        "type": "object",
+                        "allOf": [
+                            { "$ref": "#/$defs/config_base_optimizer" },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "max_cycles": {
+                                        "description": "The maximum number of cycles of tunable values to run the optimizer for.",
+                                        "type": "integer",
+                                        "minimum": 1
+                                    },
+                                    "tunable_values_cycle": {
+                                        "description": "The tunable values to cycle through.",
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "../tunables/tunable-values-schema.json#/$defs/tunable_values_set"
+                                        },
+                                        "minItems": 1
+                                    }
+                                }
+                            }
+                        ],
+                        "$comment": "disallow other properties",
                         "unevaluatedProperties": false
                     }
                 }
