@@ -81,7 +81,7 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
 
         Returns
         -------
-        configurations : pd.Series
+        configuration : pd.Series
             Series of the translated configurations / parameters.
             The columns are the parameter names of the target parameter space and
             the rows are the configurations.
