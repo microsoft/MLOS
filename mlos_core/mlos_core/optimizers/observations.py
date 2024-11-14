@@ -239,7 +239,7 @@ class Observations:
 
     def to_list(self) -> List[Observation]:
         """
-        Converts the observations to a list of observations.
+        Converts the Observations object to a list of Observation objects.
 
         Returns
         -------
