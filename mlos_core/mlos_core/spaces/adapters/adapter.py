@@ -75,7 +75,7 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
         Parameters
         ----------
         configurations : pd.Series
-            Series of configurations / parameters, which belong to the original parameter space.
+            A Series of configuration parameters, which belong to the original parameter space.
             The columns are the parameter names the original parameter space and the
             rows are the configurations.
 
