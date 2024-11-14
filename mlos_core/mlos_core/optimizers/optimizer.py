@@ -267,7 +267,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             raise ValueError("No observations registered yet.")
 
         idx = observations.score.nsmallest(
-            n_max, columns=self._optimization_targets, keep="first"
+            n_max, columns=self._optimization_targets, keep="first",
         ).index
         return observations.filter_by_index(idx)
 
