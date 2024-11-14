@@ -99,9 +99,8 @@ _path_cache: Dict[str, bool] = {}
 def _check_path(path: str) -> bool:
     """Check if a path exists and cache the result."""
     path = os.path.join(_base_path, path)
-    if path in _path_cache:
-        result = _path_cache[path]
-    else:
+    result = _path_cache.get(path)
+    if result is None:
         result = os.path.exists(path)
         _path_cache[path] = result
     return result
@@ -128,9 +127,7 @@ def linkcode_resolve(domain: str, info: Dict[str, str]):
 
 def is_on_github_actions():
     """Check if the documentation is being built on GitHub Actions."""
-    if "CI" not in os.environ or not os.environ["CI"] or "GITHUB_RUN_ID" not in os.environ:
-        return False
-    return True
+    return os.environ.get("CI") and os.environ.get("GITHUB_RUN_ID")
 
 
 # Add mappings to link to external documentation.
@@ -183,7 +180,7 @@ def resolve_type_aliases(
     env: BuildEnvironment,
     node: pending_xref,
     contnode: Element,
-) -> Union[Element, None]:
+) -> Optional[Element]:
     """Resolve :class: references to our type aliases as :attr: instead."""
     if node["refdomain"] != "py":
         return None
