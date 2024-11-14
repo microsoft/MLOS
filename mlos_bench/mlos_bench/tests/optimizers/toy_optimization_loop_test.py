@@ -41,7 +41,7 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
             # pylint: disable=protected-access
             if isinstance(opt, MlosCoreOptimizer) and isinstance(opt._opt, SmacOptimizer):
                 config = tunable_values_to_configuration(tunables)
-                config_df = config_to_series(config)
+                config_series = config_to_series(config)
                 logger("config: %s", str(config))
                 try:
                     logger(
