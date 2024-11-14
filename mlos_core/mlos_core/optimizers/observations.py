@@ -140,7 +140,7 @@ class Observations:
         if len(observations) > 0:
             config = pd.concat([obs.config.to_frame().T for obs in observations])
             score = pd.concat([obs.score.to_frame().T for obs in observations])
-            assert len(config.index) == len(
+            assert (len(config.index) == len(score.index)), "config and score must have same length"
                 score.index
             ), "config and score must have the same length"
 
