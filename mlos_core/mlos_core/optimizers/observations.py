@@ -149,7 +149,7 @@ class Observations:
             else:
                 context = None
             if sum([obs.metadata is None for obs in observations]) == 0:
-                metadata = pd.concat([obs.metadata.to_frame().T for obs in observations])  # type: ignore
+                metadata = pd.concat([obs.metadata.to_frame().T for obs in observations])  # type: ignore[specific-rule]
             else:
                 metadata = None
 
