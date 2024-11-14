@@ -77,7 +77,6 @@ class Observation:
         Not Yet Implemented.
     metadata: Optional[pd.Series]
         The metadata in which the configuration was evaluated
-        Not Yet Implemented.
     """
 
     def __init__(
