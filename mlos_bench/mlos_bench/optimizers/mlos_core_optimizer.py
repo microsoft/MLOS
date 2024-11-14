@@ -233,7 +233,7 @@ class MlosCoreOptimizer(Optimizer):
         self,
     ) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
         best_observations = self._opt.get_best_observations()
-        if len(best_observations.config.index) == 0:
+        if len(best_observations.config) == 0:
             return (None, None)
         params = configspace_data_to_tunable_values(best_observations.config.iloc[0].to_dict())
         scores = self._adjust_signs_df(best_observations.score).iloc[0].to_dict()
