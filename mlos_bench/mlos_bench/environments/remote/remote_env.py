@@ -6,6 +6,8 @@
 Remotely executed benchmark/script environment.
 
 e.g. Application Environment
+
+TODO: Documentat how variable propogation works in the remote environments.
 """
 
 import logging

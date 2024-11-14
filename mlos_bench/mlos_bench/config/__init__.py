@@ -3,8 +3,8 @@
 # Licensed under the MIT License.
 #
 """
-A module for managing json config schemas and their validation for various components of
-MLOS.
+A module for managing json config schemas and their validation for various
+components of MLOS.
 
 Overview
 ++++++++
@@ -21,10 +21,11 @@ General JSON Config Structure
 +++++++++++++++++++++++++++++
 
 We use `json5 <https://pypi.org/project/json5/>`_ to parse the json files, since it
-allows for inline C style comments (e.g., ``//``, ``/* */``).
+allows for inline C style comments (e.g., ``//``, ``/* */``), trailing commas, etc.,
+so it is slightly more user friendly than strict json.
 
-By convention files use the ``*.mlos.json`` or ``*.mlos.jsonc`` extension to indicate
-that they are an ``mlos_bench`` config file.
+By convention files use the ``*.mlos.json`` or ``*.mlos.jsonc`` extension to
+indicate that they are an ``mlos_bench`` config file.
 
 This allows tools that support `JSON Schema Store
 <https://www.schemastore.org/json/>`_ (e.g., `VSCode
@@ -33,6 +34,84 @@ of the json configs while editing.
 
 CLI Configs
 ^^^^^^^^^^^
+
+:py:attr:`~.mlos_bench.config.schema.config_schemas.ConfigSchema.CLI` style configs
+are typically used to start the ``mlos_bench`` CLI using the ``--config`` argument
+and a restricted key-value dict form where each key corresponds to a CLI argument.
+
+For instance:
+
+.. code-block:: json
+
+   {
+     "experiment": "path/to/base/experiment-config.mlos.json",
+     "services": [
+       "path/to/some/service-config.mlos.json",
+     ],
+     "globals": "path/to/basic-globals-config.mlos.json",
+   }
+
+Typically CLI configs will reference some other configs, especially the base
+Environment and Services configs, but some ``globals`` may be left to be specified
+on the command line.
+
+For instance:
+
+.. code-block:: shell
+
+   mlos_bench --config path/to/cli-config.mlos.json --globals experiment-config.mlos.json
+
+This allows some of the ``globals`` to be specified on the CLI to alter the behavior
+of a set of Experiments without having to adjust many of the other config files
+themselves.
+
+See below for examples.
+
+Notes
+-----
+- See `mlos_bench CLI usage </mlos_bench.run.usage.html>`_ for more details on the
+  CLI arguments.
+- See `mlos_bench/config/cli
+  <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/cli>`_
+  and `mlos_bench/tests/config/cli
+  <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tests/config/cli>`_
+  for some examples of CLI configs.
+
+Globals and Variable Substitution
++++++++++++++++++++++++++++++++++
+
+:py:attr:`Globals <mlos_bench.config.schemas.config_schemas.ConfigSchema.GLOBALS>`
+are basically just key-value variables that can be used in other configs using
+``$variable`` substituion.
+
+For instance:
+
+.. code-block:: json
+
+   {
+     "experiment_id": "my_experiment",
+     "some_var": "some_value",
+     // environment variable expansion also works here
+     "current_dir": "$PWD",
+     "some_expanded_var": "$some_var: $experiment_id",
+     "location": "eastus",
+   }
+
+There are additional details about variable propogation in the
+:py:mod:`mlos_bench.environments` module.
+
+Well Known Variables
+^^^^^^^^^^^^^^^^^^^^
+
+Here is a list of some well known variables that are provided or required by the
+system and may be used in the config files:
+
+- ``$experiment_id``: A unique identifier for the experiment.
+    Typically provided in globals.
+- ``$trial_id``: A unique identifier for the trial currently being executed.
+    This can be useful in the configs for :py:mod:`mlos_bench.environments` for
+    instance (e.g., when writing scripts).
+- TODO: Document more variables here.
 
 Tunable Configs
 ^^^^^^^^^^^^^^^
@@ -54,18 +133,6 @@ Class style configs include most anything else and roughly take this form:
       }
    }
 
-Globals and Variable Substitution
-+++++++++++++++++++++++++++++++++
-TODO: Document globals and variable substitution.
-
-Well Known Variables
-++++++++++++++++++++
-
-Here is a list of well known variables that are used in the config files:
-
-- ``$experiment_id``: A unique identifier for the experiment.
-    Typically provided in globals.
-
 Config Processing
 +++++++++++++++++
 
@@ -76,8 +143,8 @@ at startup time by the ``mlos_bench`` CLI.
 The typical entrypoint is a CLI config which references other configs, especially
 the base Environment config, Services, Optimizer, and Storage.
 
-See `mlos_bench CLI usage </mlos_bench.run.usage.html>`_ for more details on
-those arguments.
+See `mlos_bench CLI usage </mlos_bench.run.usage.html>`_ for more details on those
+arguments.
 
 Schema Definitions
 ++++++++++++++++++

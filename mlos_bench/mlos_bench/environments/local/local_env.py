@@ -2,7 +2,10 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Scheduler-side benchmark environment to run scripts locally."""
+"""Scheduler-side benchmark environment to run scripts locally.
+
+TODO: Reference the script_env.py file for the base class.
+"""
 
 import json
 import logging

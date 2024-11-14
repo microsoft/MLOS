@@ -2,7 +2,11 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base scriptable benchmark environment."""
+"""Base scriptable benchmark environment.
+
+TODO: Document how variable propogation works in the script environments using
+shell_env_params, required_args, const_args, etc.
+"""
 
 import abc
 import logging
