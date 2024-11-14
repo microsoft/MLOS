@@ -109,15 +109,15 @@ Here's the shell command you'd actually run:
 >>> expected = "INFO Final score: {'score': 123.4, 'total_time': 123.4, 'throughput': 1234567.0}"
 >>> assert last_line.endswith(expected)
 
-See Also
---------
-`mlos_bench/README.md
-<https://github.com/microsoft/MLOS/tree/main/mlos_bench/>`_
-for additional documentation and examples in the source tree.
+Notes
+-----
+- `mlos_bench/README.md
+  <https://github.com/microsoft/MLOS/tree/main/mlos_bench/>`_
+  for additional documentation and examples in the source tree.
 
-There is also a working example of using ``mlos_bench`` in a separate repo for the
-configs in the `sqlite-autotuning
-<https://github.com/Microsoft-CISL/sqlite-autotuning>`_ repo.
+- There is also a working example of using ``mlos_bench`` in a separate repo for the
+  configs in the `sqlite-autotuning
+  <https://github.com/Microsoft-CISL/sqlite-autotuning>`_ repo.
 """
 from mlos_bench.version import VERSION
 

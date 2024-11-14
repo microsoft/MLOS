@@ -24,9 +24,9 @@ Examples
 --------
 TODO: Add example usage here.
 
-See Also
---------
-`mlos_core/spaces/adapters/README.md
+Notes
+-----
+See `mlos_core/spaces/adapters/README.md
 <https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/spaces/adapters>`_
 for additional documentation and examples in the source tree.
 """

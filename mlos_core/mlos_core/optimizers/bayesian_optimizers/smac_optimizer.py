@@ -5,9 +5,10 @@
 """
 Contains the wrapper class for the :py:class:`.SmacOptimizer`.
 
-See Also
---------
-`SMAC3 Documentation <https://automl.github.io/SMAC3/main/index.html>`_
+Notes
+-----
+See the `SMAC3 Documentation <https://automl.github.io/SMAC3/main/index.html>`_ for
+more details.
 """
 
 from logging import warning

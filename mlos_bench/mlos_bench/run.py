@@ -10,8 +10,10 @@ Note: this script is also available as a CLI tool via ``pip`` under the name ``m
 
 See the current ``--help`` `output for details </mlos_bench.run.usage.html>`_.
 
-Note: The :py:class:`mlos_bench.launcher.Launcher` class is responsible for
-processing the CLI args.
+See Also
+--------
+mlos_bench.config : documentation on the configuration system.
+mlos_bench.launcher.Launcher : class is responsible for processing the CLI args.
 """
 
 import logging

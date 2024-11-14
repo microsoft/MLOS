@@ -5,9 +5,10 @@
 """
 Contains the :py:class:`.FlamlOptimizer` class.
 
-See Also
---------
-`Flaml Documentation <https://microsoft.github.io/FLAML/>`_
+Notes
+-----
+See the `Flaml Documentation <https://microsoft.github.io/FLAML/>`_ for more
+details.
 """
 
 from typing import Dict, List, NamedTuple, Optional, Tuple, Union

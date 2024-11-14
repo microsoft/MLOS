@@ -6,9 +6,9 @@
 Small wrapper functions for plotting :py:mod:`mlos_bench` data via
 :external:py:func:`dabl.plot`.
 
-See Also
---------
-`dabl <https://dabl.github.io/stable/>`_ for more information on the dabl library.
+Notes
+-----
+See `dabl <https://dabl.github.io/stable/>`_ for more information on the dabl library.
 """
 import warnings
 from typing import Dict, Literal, Optional

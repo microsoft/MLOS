@@ -21,9 +21,9 @@ Examples
 --------
 TODO: Add example usage here.
 
-See Also
---------
-`mlos_core/optimizers/README.md
+Notes
+-----
+See `mlos_core/optimizers/README.md
 <https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/optimizers/>`_
 for additional documentation and examples in the source tree.
 """

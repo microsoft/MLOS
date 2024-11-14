@@ -44,16 +44,17 @@ At a python level, this happens by passing a
 :py:meth:`~mlos_bench.tunables.tunable_groups.TunableGroups` object to the
 ``tunable_groups`` parameter of the :py:class:`~.Environment` constructor, but that
 is typically handled by the
-:py:meth:`~mlos_bench.services.config_persistence.ConfigPersistence.load_environment`
+:py:meth:`~mlos_bench.services.config_persistence.ConfigPersistenceService.load_environment`
 method of the
 :py:meth:`~mlos_bench.services.config_persistence.ConfigPersistenceService` invoked
-by the ``mlos_bench`` command line tool's :py:class:`mlos_bench.loader.Loader`
+by the ``mlos_bench`` command line tool's :py:class:`mlos_bench.launcher.Launcher`
 class.
 
 In the typical json user level configs, this is specified in the
 ``include_tunables`` section of the Environment config to include the
-``TunableGroups`` definitions from other json files when the
-``mlos_bench.loader.Loader`` processes the initial set of config files.
+:py:class:`~mlos_bench.tunables.tunable_groups.TunableGroups` definitions from other
+json files when the :py:class:`~mlos_bench.launcher.Launcher` processes the initial
+set of config files.
 
 The ``tunable_params`` setting in the ``config`` section of the Environment config
 can also be used to limit *which* of the ``TunableGroups`` should be used for the
@@ -92,15 +93,14 @@ For more developer oriented examples please see the `mlos_bench/tests/environmen
 <https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/tests/>`_
 directory in the source tree.
 
-See Also
---------
-`mlos_bench/environments/README.md
-<https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/environments/>`_
-for additional documentation in the source tree.
-
-`mlos_bench/config/environments/README.md
-<https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/environments/>`_
-for additional config examples in the source tree.
+Notes
+-----
+- See `mlos_bench/environments/README.md
+  <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/environments/>`_
+  for additional documentation in the source tree.
+- See `mlos_bench/config/environments/README.md
+  <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/environments/>`_
+  for additional config examples in the source tree.
 """
 
 from mlos_bench.environments.base_environment import Environment

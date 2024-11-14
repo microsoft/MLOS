@@ -10,15 +10,15 @@ Used by the :py:class:`~mlos_bench.launcher.Launcher` and
 :py:class:`~mlos_bench.services.config_persistence.ConfigPersistenceService` to
 validate configs on load.
 
-See Also
---------
-`mlos_bench/config/schemas/README.md
-<https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/>`_
-for additional documentation in the source tree.
+Notes
+-----
+- See `mlos_bench/config/schemas/README.md
+  <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/>`_
+  for additional documentation in the source tree.
 
-`mlos_bench/config/README.md
-<https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_
-for additional config examples in the source tree.
+- See `mlos_bench/config/README.md
+  <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_
+  for additional config examples in the source tree.
 """
 
 import json  # schema files are pure json - no comments
@@ -142,8 +142,10 @@ class ConfigSchema(Enum):
     <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/cli/cli-schema.json>`__
     for :py:mod:`mlos_bench <mlos_bench.run>` CLI configuration.
 
-    Note: The :py:class:`mlos_bench.launcher.Launcher` class is responsible for
-    processing the CLI args.
+    See Also
+    --------
+    mlos_bench.config : documentation on the configuration system.
+    mlos_bench.launcher.Launcher : class is responsible for processing the CLI args.
     """
 
     GLOBALS = path_join(CONFIG_SCHEMA_DIR, "cli/globals-schema.json")

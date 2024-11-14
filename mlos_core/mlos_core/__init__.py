@@ -96,9 +96,9 @@ Name: 1, dtype: int64
 y    7
 Name: 1, dtype: int64
 
-See Also
---------
-`mlos_core/README.md
+Notes
+-----
+See `mlos_core/README.md
 <https://github.com/microsoft/MLOS/tree/main/mlos_core/>`_
 for additional documentation and examples in the source tree.
 """
