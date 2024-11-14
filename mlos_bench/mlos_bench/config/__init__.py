@@ -3,8 +3,8 @@
 # Licensed under the MIT License.
 #
 """
-A module for managing json config schemas and their validation for various
-components of MLOS.
+A module for managing json config schemas and their validation for various components of
+MLOS.
 
 Overview
 ++++++++

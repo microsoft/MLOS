@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Tunable Environments for mlos_bench.
+"""
+Tunable Environments for mlos_bench.
 
 Environments are classes that represent an execution setting (i.e., environment) for
 running a benchmark or tuning process.

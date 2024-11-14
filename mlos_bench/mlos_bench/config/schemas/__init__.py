@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""A module for managing config schemas and their validation.
+"""
+A module for managing config schemas and their validation.
 
 See Also
 --------

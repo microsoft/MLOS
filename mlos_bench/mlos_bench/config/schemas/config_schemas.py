@@ -37,7 +37,9 @@ _LOG = logging.getLogger(__name__)
 
 # The path to find all config schemas.
 CONFIG_SCHEMA_DIR = path_join(path.dirname(__file__), abs_path=True)
-"""The local directory where all config schemas are stored."""
+"""The local directory where all config schemas shipped as a part of the
+:py:mod:`mlos_bench` module are stored.
+"""
 
 # Allow skipping schema validation for tight dev cycle changes.
 # It is used in `ConfigSchema.validate()` method below.
@@ -128,8 +130,8 @@ class SchemaStore(Mapping):
 
 
 SCHEMA_STORE = SchemaStore()
-"""Static :py:class:`.SchemaStore` instance used for storing and retrieving schemas
-for config validation.
+"""Static :py:class:`.SchemaStore` instance used for storing and retrieving schemas for
+config validation.
 """
 
 
@@ -212,7 +214,7 @@ class ConfigSchema(Enum):
     """
     Combined global json `schema
     <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/mlos-bench-config-schema.json>`__
-    use to validate any ``mlos_bench`` config file (e.g., ``*.mlos.json`` files).
+    use to validate any ``mlos_bench`` config file (e.g., ``*.mlos.jsonc`` files).
 
     See Also
     --------
