@@ -83,7 +83,7 @@ class Observation:
     def __init__(
         self,
         *,
-        config: pd.Series = pd.Series(),
+        config: pd.Series,
         score: pd.Series = pd.Series(),
         context: Optional[pd.Series] = None,
         metadata: Optional[pd.Series] = None,
