@@ -297,6 +297,9 @@ class Observations:
 class Suggestion:
     """
     A single suggestion for a configuration.
+    
+    A Suggestion is an Observation that has not yet been scored.
+    Evaluating the Suggestion and calling `complete(scores)` can convert it to an Observation. 
 
     Attributes
     ----------
