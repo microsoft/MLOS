@@ -234,7 +234,7 @@ class Observations:
         else:
             assert metadata is None, (
                 "context of appending observation must be null"
-                + " if metadata of prior observation is null"
+                " if metadata of prior observation is null"
             )
 
     def to_list(self) -> List[Observation]:
