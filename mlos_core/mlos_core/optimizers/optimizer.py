@@ -76,7 +76,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         self,
         *,
         observations: Optional[Observations] = None,
-        observation: Optional[Observation] = None,
+        observations: Optional[Union[Observation|Observations]] = None,
     ) -> None:
         """
         Register all observations at once. Exactly one of observations or observation
