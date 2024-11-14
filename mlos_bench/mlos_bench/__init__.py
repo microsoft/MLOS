@@ -6,19 +6,18 @@
 mlos_bench is a framework to help automate benchmarking and OS/application parameter
 autotuning and the data management of the results.
 
-It can be installed from `pypi <https://pypi.org/project/mlos-bench>`_ via
-``pip install mlos-bench`` and executed using the ``mlos_bench``
-`command <../../mlos_bench.run.usage.html>`_ using a collection of `json`
-`configs <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_.
+It can be installed from `pypi <https://pypi.org/project/mlos-bench>`_ via ``pip
+install mlos-bench`` and executed using the ``mlos_bench`` `command
+<../../mlos_bench.run.usage.html>`_ using a collection of `json` `configs
+<https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_.
 
 It is intended to be used with :py:mod:`mlos_core` via
 :py:class:`~mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer` to help
 navigate complex parameter spaces more effeciently, though other
-:py:mod:`~mlos_bench.optimizers` are also available to
-help customize the search process easily by simply swapping out the
+:py:mod:`~mlos_bench.optimizers` are also available to help customize the search
+process easily by simply swapping out the
 :py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer` class in the associated
-json configs.
-For instance,
+json configs. For instance,
 :py:class:`~mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer` can be
 used to perform a grid search over the parameter space instead.
 
@@ -29,11 +28,10 @@ The other core classes in this package are:
 
   These are generally the target of the optimization process and are used to
   evaluate the performance of a given configuration, though can also be used to
-  simply run a single benchmark.
-  They can be used, for instance, to provision a :py:mod:`VM
-  <mlos_bench.environments.remote.vm_env>`, run benchmarks or execute any other
-  arbitrary code on a :py:mod:`remote machine <mlos_bench.environments.remote.remote_env>`,
-  and many other things.
+  simply run a single benchmark. They can be used, for instance, to provision a
+  :py:mod:`VM <mlos_bench.environments.remote.vm_env>`, run benchmarks or execute
+  any other arbitrary code on a :py:mod:`remote machine
+  <mlos_bench.environments.remote.remote_env>`, and many other things.
 
 - Environments are often associated with :py:mod:`~mlos_bench.tunables` which
   provide a language for specifying the set of configuration parameters that can be
@@ -43,8 +41,8 @@ The other core classes in this package are:
   with the :py:mod:`~mlos_bench.environments` in different settings.
 
   For instance, the
-  :py:class:`~mlos_bench.services.remote.azure.azure_vm_services.AzureVMService`
-  can be used to run commands on Azure VMs for a remote
+  :py:class:`~mlos_bench.services.remote.azure.azure_vm_services.AzureVMService` can
+  be used to run commands on Azure VMs for a remote
   :py:mod:`~mlos_bench.environments.remote.vm_env.VMEnv`.
 
   Alternatively, one could swap out that service for
@@ -70,9 +68,9 @@ Notes
 -----
 Note that while the docstrings in this package are generated from the source code
 and hence sometimes more focused on the implementation details, most user
-interactions with the package will be through the
-`json configs <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_.
-Even so it may be useful to look at the source code to understand how those are
+interactions with the package will be through the `json configs
+<https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_. Even
+so it may be useful to look at the source code to understand how those are
 interpretted.
 
 Examples
@@ -110,12 +108,11 @@ Here's the shell command you'd actually run:
 
 Notes
 -----
-- `mlos_bench/README.md
-  <https://github.com/microsoft/MLOS/tree/main/mlos_bench/>`_
+- `mlos_bench/README.md <https://github.com/microsoft/MLOS/tree/main/mlos_bench/>`_
   for additional documentation and examples in the source tree.
 
-- There is also a working example of using ``mlos_bench`` in a separate repo for the
-  configs in the `sqlite-autotuning
+- There is also a working example of using ``mlos_bench`` in a *separate config
+  repo* (the more expected case for most users) in the `sqlite-autotuning
   <https://github.com/Microsoft-CISL/sqlite-autotuning>`_ repo.
 """
 from mlos_bench.version import VERSION
