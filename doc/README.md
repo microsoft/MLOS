@@ -14,6 +14,8 @@ Those are included in the [`index.rst`](./source/index.rst) file which is the ma
 
 When writing docstrings, use the [`numpydoc`](https://numpydoc.readthedocs.io/en/latest/format.html) style.
 
+Where necessary embedded [reStructuredText (rst)](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html) markup can be used to help format the documentation.
+
 Each top level module should include a docstring that describes the module and its purpose and usage.
 
 These string should be written for consumption by both users and developers.
@@ -64,10 +66,13 @@ class MyClass:
     ...
 ```
 
+This code will be automatically checked with `pytest` using the `--doctest-modules` option specified in [`setup.cfg`](../setup.cfg).
+
 ## Building the documentation
 
 ```sh
-make -C .. doc
+# From the root of the repository
+make SKIP_COVERAGE=true doc
 ```
 
 This will also run some checks on the documentation.
@@ -90,6 +95,6 @@ We use the [`intersphinx`](https://www.sphinx-doc.org/en/master/usage/extensions
 
 Unfortunately, this process is not perfect and sometimes we need to provide [`nitpick_ignore`](https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-nitpick_ignore)s in the [`doc/source/conf.py`](./source/conf.py) file.
 
-In particular, currently `TypeVar` and `TypeAliases` are not resolved correctly and we need to ignore those.
+In particular, currently external `TypeVar` and `TypeAliases` are not resolved correctly and we need to ignore those.
 
 In other cases, specifying the full path to the module in the cross-reference or the `import` can help.
