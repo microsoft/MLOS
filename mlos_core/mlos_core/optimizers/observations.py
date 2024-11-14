@@ -271,7 +271,7 @@ class Observations:
     def __repr__(self) -> str:
         return (
             f"Observation(config={self.config}, score={self.score},"
-            + " context={self.context}, metadata={self.metadata})"
+            " context={self.context}, metadata={self.metadata})"
         )
 
     def __eq__(self, other: Any) -> bool:
