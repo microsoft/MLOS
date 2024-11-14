@@ -296,7 +296,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # Retrieve previously generated TrialInfo (returned by .ask()) or create
         # new TrialInfo instance
         config = ConfigSpace.Configuration(
-            self.optimizer_parameter_space, values=observation.config.dropna().to_dict()
+            self.optimizer_parameter_space, values=observation.config.dropna().to_dict(),
         )
         info: TrialInfo = self.trial_info_map.get(
             config,
