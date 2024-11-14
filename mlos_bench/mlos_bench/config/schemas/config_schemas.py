@@ -3,14 +3,22 @@
 # Licensed under the MIT License.
 #
 """
-A simple class for describing where to find different config schemas and validating
-configs against them.
+A simple class for describing where to find different `json config schemas
+<https://json-schema.org>`_ and validating configs against them.
+
+Used by the :py:class:`~mlos_bench.launcher.Launcher` and
+:py:class:`~mlos_bench.services.config_persistence.ConfigPersistenceService` to
+validate configs on load.
 
 See Also
 --------
+`mlos_bench/config/schemas/README.md
+<https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/>`_
+for additional documentation in the source tree.
+
 `mlos_bench/config/README.md
 <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_
-for additional documentation and examples in the source tree.
+for additional config examples in the source tree.
 """
 
 import json  # schema files are pure json - no comments
@@ -35,15 +43,15 @@ CONFIG_SCHEMA_DIR = path_join(path.dirname(__file__), abs_path=True)
 # It is used in `ConfigSchema.validate()` method below.
 # NOTE: this may cause pytest to fail if it's expecting exceptions
 # to be raised for invalid configs.
-_VALIDATION_ENV_FLAG = "MLOS_BENCH_SKIP_SCHEMA_VALIDATION"
+VALIDATION_ENV_FLAG = "MLOS_BENCH_SKIP_SCHEMA_VALIDATION"
 """
-The special environment flag to set to skip schema validation.
+The special environment flag to set to skip schema validation when "true".
 
 Useful for local development when you're making a lot of changes to the config or adding
 new classes that aren't in the main repo yet.
 """
 
-_SKIP_VALIDATION = environ.get(_VALIDATION_ENV_FLAG, "false").lower() in {
+_SKIP_VALIDATION = environ.get(VALIDATION_ENV_FLAG, "false").lower() in {
     "true",
     "y",
     "yes",
@@ -120,8 +128,8 @@ class SchemaStore(Mapping):
 
 
 SCHEMA_STORE = SchemaStore()
-"""Static SchemaStore instance used for storing and retrieving schemas for config
-validation.
+"""Static :py:class:`.SchemaStore` instance used for storing and retrieving schemas
+for config validation.
 """
 
 
@@ -129,36 +137,80 @@ class ConfigSchema(Enum):
     """An enum to help describe schema types and help validate configs against them."""
 
     CLI = path_join(CONFIG_SCHEMA_DIR, "cli/cli-schema.json")
-    """Schema for command line arguments."""
+    """
+    Json config `schema
+    <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/cli/cli-schema.json>`__
+    for :py:mod:`mlos_bench <mlos_bench.run>` CLI configuration.
+
+    Note: The :py:class:`mlos_bench.launcher.Launcher` class is responsible for
+    processing the CLI args.
+    """
 
     GLOBALS = path_join(CONFIG_SCHEMA_DIR, "cli/globals-schema.json")
-    """Schema for global variables."""
+    """
+    Json config `schema
+    <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/cli/globals-schema.json>`__
+    for :py:mod:`global variables <mlos_bench.config>`.
+    """
 
     ENVIRONMENT = path_join(CONFIG_SCHEMA_DIR, "environments/environment-schema.json")
-    """Schema for :py:mod:`~mlos_bench.environments` configurations."""
+    """
+    Json config `schema
+    <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/environments/environment-schema.json>`__
+    for :py:mod:`~mlos_bench.environments`.
+    """
 
     OPTIMIZER = path_join(CONFIG_SCHEMA_DIR, "optimizers/optimizer-schema.json")
-    """Schema for :py:mod:`~mlos_bench.optimizers` configurations."""
+    """
+    Json config `schema
+    <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json>`__
+    for :py:mod:`~mlos_bench.optimizers`.
+    """
 
     SCHEDULER = path_join(CONFIG_SCHEMA_DIR, "schedulers/scheduler-schema.json")
-    """Schema for :py:mod:`~mlos_bench.schedulers` configurations."""
+    """
+    Json config `schema
+    <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/schedulers/scheduler-schema.json>`__
+    for :py:mod:`~mlos_bench.schedulers`.
+    """
 
     SERVICE = path_join(CONFIG_SCHEMA_DIR, "services/service-schema.json")
-    """Schema for :py:mod:`~mlos_bench.services` configurations."""
+    """
+    Json config `schema
+    <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json>`__
+    for :py:mod:`~mlos_bench.services`.
+    """
 
     STORAGE = path_join(CONFIG_SCHEMA_DIR, "storage/storage-schema.json")
-    """Schema for :py:mod:`~mlos_bench.storage` configurations."""
+    """
+    Json config `schema
+    <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/storage/storage-schema.json>`__
+    for :py:mod:`~mlos_bench.storage` instances.
+    """
 
     TUNABLE_PARAMS = path_join(CONFIG_SCHEMA_DIR, "tunables/tunable-params-schema.json")
-    """Schema for :py:mod:`~mlos_bench.tunables.tunable_groups` configurations."""
+    """
+    Json config `schema
+    <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-params-schema.json>`__
+    for :py:mod:`~mlos_bench.tunables` instances.
+    """
 
     TUNABLE_VALUES = path_join(CONFIG_SCHEMA_DIR, "tunables/tunable-values-schema.json")
-    """Schema for :py:mod:`~mlos_bench.tunables.tunable_groups` values
-    configurations.
+    """
+    Json config `schema
+    <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-values-schema.json>`__
+    for values of :py:mod:`~mlos_bench.tunables.tunable_groups.TunableGroups` instances.
+
+    These can be used to specify the values of the tunables for a given experiment
+    using the :py:class:`~mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer`
+    for instance.
     """
 
     UNIFIED = path_join(CONFIG_SCHEMA_DIR, "mlos-bench-config-schema.json")
-    """Global combined schema file (e.g., for ``*.mlos.json`` files).
+    """
+    Combined global json `schema
+    <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/mlos-bench-config-schema.json>`__
+    use to validate any ``mlos_bench`` config file (e.g., ``*.mlos.json`` files).
 
     See Also
     --------
@@ -184,10 +236,12 @@ class ConfigSchema(Enum):
         Raises
         ------
         jsonschema.exceptions.ValidationError
+            On validation failure.
         jsonschema.exceptions.SchemaError
+            On schema loading error.
         """
         if _SKIP_VALIDATION:
-            _LOG.warning("%s is set - skip schema validation", _VALIDATION_ENV_FLAG)
+            _LOG.warning("%s is set - skip schema validation", VALIDATION_ENV_FLAG)
         else:
             jsonschema.Draft202012Validator(
                 schema=self.schema,

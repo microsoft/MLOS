@@ -9,6 +9,9 @@ mlos_bench main optimization loop and benchmark runner CLI.
 Note: this script is also available as a CLI tool via ``pip`` under the name ``mlos_bench``.
 
 See the current ``--help`` `output for details </mlos_bench.run.usage.html>`_.
+
+Note: The :py:class:`mlos_bench.launcher.Launcher` class is responsible for
+processing the CLI args.
 """
 
 import logging
