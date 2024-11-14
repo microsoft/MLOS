@@ -24,7 +24,10 @@ _LOG = logging.getLogger(__name__)
 
 
 class ScriptEnv(Environment, metaclass=abc.ABCMeta):
-    """Base Environment that runs scripts for setup/run/teardown."""
+    """
+    Base Environment that runs scripts for :py:meth:`.setup`, :py:meth:`.run`,
+    :py:meth:`.teardown`, etc. phases.
+    """
 
     _RE_INVALID = re.compile(r"[^a-zA-Z0-9_]")
 

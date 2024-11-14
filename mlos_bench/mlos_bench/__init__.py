@@ -35,10 +35,9 @@ The other core classes in this package are:
   arbitrary code on a :py:mod:`remote machine <mlos_bench.environments.remote.remote_env>`,
   and many other things.
 
-- :py:mod:`~mlos_bench.environments` are often associated with
-  :py:mod:`~mlos_bench.tunables` which provide a language for specifying the set of
-  configuration parameters that can be optimized or searched over with the
-  :py:mod:`~mlos_bench.optimizers`.
+- Environments are often associated with :py:mod:`~mlos_bench.tunables` which
+  provide a language for specifying the set of configuration parameters that can be
+  optimized or searched over with the :py:mod:`~mlos_bench.optimizers`.
 
 - :py:mod:`~mlos_bench.services` provide the necessary abstractions to run interact
   with the :py:mod:`~mlos_bench.environments` in different settings.

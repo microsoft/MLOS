@@ -5,6 +5,12 @@
 """
 Tunable Environments for mlos_bench.
 
+.. contents:: Table of Contents
+   :depth: 3
+
+Overview
+++++++++
+
 Environments are classes that represent an execution setting (i.e., environment) for
 running a benchmark or tuning process.
 
@@ -86,7 +92,7 @@ TODO: Document how variable propogation works in the script environments using
 required_args, const_args, etc.
 
 Examples
---------
+++++++++
 While this documentation is generated from the source code and is intended to be a
 useful reference on the internal details, most users will be more interested in
 generating json configs to be used with the ``mlos_bench`` command line tool.
@@ -100,7 +106,7 @@ For more developer oriented examples please see the `mlos_bench/tests/environmen
 directory in the source tree.
 
 Notes
------
++++++
 - See `mlos_bench/environments/README.md
   <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/environments/>`_
   for additional documentation in the source tree.
