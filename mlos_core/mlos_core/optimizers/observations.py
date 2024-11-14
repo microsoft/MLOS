@@ -338,7 +338,7 @@ class Suggestion:
             metadata=self.metadata,
         )
 
-    def config_to_configspace(self, space: ConfigurationSpace) -> Configuration:
+    def to_configspace_config(self, space: ConfigurationSpace) -> Configuration:
         return Configuration(space, values=self.config.to_dict())
 
     def __repr__(self) -> str:
