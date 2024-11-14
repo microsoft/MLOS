@@ -174,7 +174,7 @@ class Observations:
             The filtered observation.
         """
         return Observations(
-            config=self.config.loc[index],
+            config=self.config.loc[index].copy(),
             score=self.score.loc[index],
             context=None if self.context is None else self.context.loc[index],
             metadata=None if self.metadata is None else self.metadata.loc[index],
