@@ -55,6 +55,8 @@ For instance:
      "globals": "path/to/basic-globals-config.mlos.json",
    }
 
+.. code-block:: json
+
    // basic-globals-config.mlos.json
    {
      "location": "westus",
@@ -74,6 +76,8 @@ For instance:
 where ``experiment-config.mlos.json`` might look something like this:
 
 .. code-block:: json
+
+   // experiment-config.mlos.json (also a set of globals)
    {
      "experiment_id": "my_experiment",
      "some_var": "some_value",
@@ -146,7 +150,7 @@ There are two forms of tunable configs:
 
     .. code-block:: json
 
-       // env-tunables.json
+       // some-env-tunables.json
        {
          // a group of tunables that are tuned together
          "covariant_group_name": [
@@ -171,9 +175,9 @@ There are two forms of tunable configs:
          ],
        }
 
-       Since TunableParams are associated with Environments, they are typically kept
-       in the same directory as that environment and named something like
-       ``env-tunables.json``.
+  Since TunableParams are associated with Environments, they are typically kept
+  in the same directory as that environment and named something like
+  ``env-tunables.json``.
 
 - "TunableValues" style configs which are used to specify the values for an
   instantiation of a set of tunables params.
@@ -183,6 +187,7 @@ There are two forms of tunable configs:
 
     .. code-block:: json
 
+       // tunable-values.mlos.json
        {
           "tunable_name": 25,
           "another_tunable_name": "red",
