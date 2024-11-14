@@ -319,7 +319,7 @@ class Suggestion:
 
     def complete(self, score: pd.Series) -> Observation:
         """
-        Completes the suggestion.
+        Completes the Suggestion by adding a score to turn it into an Observation.
 
         Parameters
         ----------
