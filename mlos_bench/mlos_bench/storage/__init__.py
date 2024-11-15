@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Interfaces to the storage backends for mlos_bench.
+"""
+Interfaces to the storage backends for mlos_bench.
 
 Storage backends (for instance :py:mod:`~mlos_bench.storage.sql`) are used to store
 and retrieve the results of experiments and implement a persistent queue for

@@ -3,8 +3,8 @@
 # Licensed under the MIT License.
 #
 """
-A module for and documentation about the structure and mangement of json configs,
-their schemas and validation for various components of MLOS.
+A module for and documentation about the structure and mangement of json configs, their
+schemas and validation for various components of MLOS.
 
 .. contents:: Table of Contents
    :depth: 3
