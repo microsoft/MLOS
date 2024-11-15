@@ -85,7 +85,7 @@ class BaseConversion(metaclass=ABCMeta):
         ----------
         config_space : CS.ConfigurationSpace
             Configuration space to sample from.
-        n_samples : int, optional
+        n_samples : int
             Number of samples to use, by default 1.
         """
 

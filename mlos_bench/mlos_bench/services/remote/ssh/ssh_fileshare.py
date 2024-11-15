@@ -50,8 +50,8 @@ class SshFileShareService(FileShareService, SshService):
             Local path to the file/dir.
         remote_path : str
             Remote path to the file/dir.
-        recursive : bool, optional
-            _description_, by default True
+        recursive : bool
+            Whether to copy recursively. By default True.
 
         Raises
         ------

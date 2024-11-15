@@ -25,7 +25,7 @@ from typing import (
 import json5  # To read configs with comments and other JSON5 syntax features
 from jsonschema import SchemaError, ValidationError
 
-from mlos_bench.config.schemas import ConfigSchema
+from mlos_bench.config.schemas.config_schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.services.base_service import Service

@@ -406,7 +406,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     @property
     def category(self) -> Optional[str]:
-        """Get the current value of the tunable as a number."""
+        """Get the current value of the tunable as a string."""
         if self.is_categorical:
             return nullable(str, self._current_value)
         else:
@@ -556,7 +556,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
         Returns
         -------
-        range : (number, number)
+        range : Union[Tuple[int, int], Tuple[float, float]]
             A 2-tuple of numbers that represents the range of the tunable.
             Numbers can be int or float, depending on the type of the tunable.
         """

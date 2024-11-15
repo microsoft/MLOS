@@ -86,6 +86,8 @@ We expect development to follow a typical "forking" style workflow:
     make doc-test
     ```
 
+    > See the [documentation README](./doc/README.md) for more information on documentation and its testing.
+
 1. Submit changes for inclusion as a [Pull Request on Github](https://github.com/microsoft/MLOS/pulls).
 
     Some notes on organizing changes to help reviewers:

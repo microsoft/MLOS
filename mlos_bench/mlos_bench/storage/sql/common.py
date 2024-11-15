@@ -6,7 +6,8 @@
 from typing import Dict, Optional
 
 import pandas
-from sqlalchemy import Engine, Integer, and_, func, select
+from sqlalchemy import Integer, and_, func, select
+from sqlalchemy.engine import Engine
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_experiment_data import ExperimentData

@@ -2,7 +2,29 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base interface for accessing the stored benchmark experiment data."""
+"""
+Base interface for accessing the stored benchmark experiment data.
+
+An experiment is a collection of trials that are run with a given set of scripts and
+target system.
+
+Each trial is associated with a configuration (e.g., set of tunable parameters), but
+multiple trials may use the same config (e.g., for repeat run variability analysis).
+
+See Also
+--------
+ExperimentData.results_df :
+    Retrieves a pandas DataFrame of the Experiment's trials' results data.
+ExperimentData.trials :
+    Retrieves a dictionary of the Experiment's trials' data.
+ExperimentData.tunable_configs :
+    Retrieves a dictionary of the Experiment's sampled configs data.
+ExperimentData.tunable_config_trial_groups :
+    Retrieves a dictionary of the Experiment's trials' data, grouped by shared
+    tunable config.
+mlos_bench.storage.base_trial_data.TrialData :
+    Base interface for accessing the stored benchmark trial data.
+"""
 
 from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple
@@ -78,7 +100,7 @@ class ExperimentData(metaclass=ABCMeta):
 
         Returns
         -------
-        objectives : Dict[str, objective]
+        objectives : Dict[str, Literal["min", "max"]]
             A dictionary of the experiment's objective names (optimization_targets)
             and their directions (e.g., min or max).
         """

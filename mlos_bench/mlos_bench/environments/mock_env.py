@@ -14,7 +14,8 @@ import numpy
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
-from mlos_bench.tunables import Tunable, TunableGroups, TunableValue
+from mlos_bench.tunables.tunable import Tunable, TunableValue
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
 
@@ -87,7 +88,7 @@ class MockEnv(Environment):
 
         Returns
         -------
-        (status, timestamp, output) : (Status, datetime, dict)
+        (status, timestamp, output) : (Status, datetime.datetime, dict)
             3-tuple of (Status, timestamp, output) values, where `output` is a dict
             with the results or None if the status is not COMPLETED.
             The keys of the `output` dict are the names of the metrics
@@ -106,7 +107,7 @@ class MockEnv(Environment):
 
         Returns
         -------
-        (benchmark_status, timestamp, telemetry) : (Status, datetime, list)
+        (benchmark_status, timestamp, telemetry) : (Status, datetime.datetime, list)
             3-tuple of (benchmark status, timestamp, telemetry) values.
             `timestamp` is UTC time stamp of the status; it's current time by default.
             `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.

@@ -2,7 +2,12 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base interface for accessing the stored benchmark trial data."""
+"""
+Base interface for accessing the stored benchmark trial data.
+
+A single trial is a single run of an experiment with a given configuration (e.g., set of
+tunable parameters).
+"""
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Optional

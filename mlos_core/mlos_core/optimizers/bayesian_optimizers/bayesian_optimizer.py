@@ -29,11 +29,11 @@ class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
 
         Parameters
         ----------
-        configs : pd.DataFrame
+        configs : pandas.DataFrame
             Dataframe of configs / parameters. The columns are parameter names and
             the rows are the configs.
 
-        context : pd.DataFrame
+        context : pandas.DataFrame
             Not Yet Implemented.
         """
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
@@ -51,11 +51,11 @@ class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
 
         Parameters
         ----------
-        configs : pd.DataFrame
+        configs : pandas.DataFrame
             Dataframe of configs / parameters. The columns are parameter names and
             the rows are the configs.
 
-        context : pd.DataFrame
+        context : pandas.DataFrame
             Not Yet Implemented.
         """
         pass  # pylint: disable=unnecessary-pass # pragma: no cover

@@ -2,7 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Contains the FlamlOptimizer class."""
+"""
+Contains the :py:class:`.FlamlOptimizer` class.
+
+Notes
+-----
+See the `Flaml Documentation <https://microsoft.github.io/FLAML/>`_ for more
+details.
+"""
 
 from typing import Dict, List, NamedTuple, Optional, Tuple, Union
 from warnings import warn

@@ -188,7 +188,10 @@ Details on using a local version from git are available in [CONTRIBUTING.md](./C
 
     Working example of tuning `sqlite` with MLOS.
 
-These can be used as starting points for new autotuning projects.
+These can be used as starting points for new autotuning projects outside of the main MLOS repository if you want to keep your tuning experiment configs separate from the MLOS codebase.
+
+Alternatively, we accept PRs to add new examples to the main MLOS repository!
+See [mlos_bench/config](./mlos_bench/mlos_bench/config/) and [CONTRIBUTING.md](./CONTRIBUTING.md) for more details.
 
 ### Publications
 

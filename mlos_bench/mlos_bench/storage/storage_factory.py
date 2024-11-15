@@ -2,7 +2,15 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Factory method to create a new Storage instance from configs."""
+"""
+Factory method to create a new :py:class:`.Storage` instance from a
+:py:attr:`~mlos_bench.config.schemas.config_schemas.ConfigSchema.STORAGE` type json
+config.
+
+See Also
+--------
+mlos_bench.storage : For example usage.
+"""
 
 from typing import Any, Dict, List, Optional
 

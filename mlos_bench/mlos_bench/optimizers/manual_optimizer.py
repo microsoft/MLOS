@@ -2,7 +2,15 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Optimizer for mlos_bench that proposes an explicit sequence of configurations."""
+"""
+Manual config suggestor (Optimizer) for mlos_bench that proposes an explicit sequence of
+configurations.
+
+This is useful for testing and validation, as it allows you to run a sequence of
+configurations in a cyclic fashion.
+
+TODO: Add an example configuration.
+"""
 
 import logging
 from typing import Dict, List, Optional

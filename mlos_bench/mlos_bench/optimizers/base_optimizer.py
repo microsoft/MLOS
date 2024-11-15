@@ -9,10 +9,9 @@ optimizers.
 import logging
 from abc import ABCMeta, abstractmethod
 from types import TracebackType
-from typing import Dict, Optional, Sequence, Tuple, Type, Union
+from typing import Dict, Literal, Optional, Sequence, Tuple, Type, Union
 
 from ConfigSpace import ConfigurationSpace
-from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.status import Status
@@ -186,7 +185,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
 
         Returns
         -------
-        ConfigurationSpace
+        ConfigSpace.ConfigurationSpace
             The ConfigSpace representation of the tunable parameters.
         """
         if self._config_space is None:
@@ -206,7 +205,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
 
     @property
     def targets(self) -> Dict[str, Literal["min", "max"]]:
-        """A dictionary of {target: direction} of optimization targets."""
+        """Returns a dictionary of optimization targets and their direction."""
         return {
             opt_target: "min" if opt_dir == 1 else "max"
             for (opt_target, opt_dir) in self._opt_targets.items()

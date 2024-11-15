@@ -2,7 +2,11 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Scheduler-side benchmark environment to run scripts locally."""
+"""
+Scheduler-side benchmark environment to run scripts locally.
+
+TODO: Reference the script_env.py file for the base class.
+"""
 
 import json
 import logging
@@ -11,10 +15,20 @@ from contextlib import nullcontext
 from datetime import datetime
 from tempfile import TemporaryDirectory
 from types import TracebackType
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Type, Union
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
 import pandas
-from typing_extensions import Literal
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.script_env import ScriptEnv
@@ -167,7 +181,7 @@ class LocalEnv(ScriptEnv):
 
         Returns
         -------
-        (status, timestamp, output) : (Status, datetime, dict)
+        (status, timestamp, output) : (Status, datetime.datetime, dict)
             3-tuple of (Status, timestamp, output) values, where `output` is a dict
             with the results or None if the status is not COMPLETED.
             If run script is a benchmark, then the score is usually expected to
