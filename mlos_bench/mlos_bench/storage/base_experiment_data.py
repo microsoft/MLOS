@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base interface for accessing the stored benchmark experiment data.
+"""
+Base interface for accessing the stored benchmark experiment data.
 
 An experiment is a collection of trials that are run with a given set of scripts and
 target system.

@@ -2,8 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""DB schema definition for the
-:py:class:`~mlos_bench.storage.sql.storage.SqlStorage` backend.
+"""
+DB schema definition for the :py:class:`~mlos_bench.storage.sql.storage.SqlStorage`
+backend.
 
 Notes
 -----

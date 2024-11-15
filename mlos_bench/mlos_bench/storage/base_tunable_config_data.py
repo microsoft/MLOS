@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base interface for accessing the stored benchmark (tunable) config data.
+"""
+Base interface for accessing the stored benchmark (tunable) config data.
 
 Note: a configuration in this context is the set of tunable parameter values and can
 be used by one or more trials.

@@ -22,7 +22,8 @@ _LOG = logging.getLogger(__name__)
 
 class SqlStorage(Storage):
     """An implementation of the :py:class:`~.Storage` interface using SQLAlchemy
-    backend."""
+    backend.
+    """
 
     def __init__(
         self,
