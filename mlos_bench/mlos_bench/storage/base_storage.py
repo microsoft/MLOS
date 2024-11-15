@@ -2,7 +2,20 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base interface for saving and restoring the benchmark data."""
+"""
+Base interface for saving and restoring the benchmark data.
+
+See Also
+--------
+mlos_bench.storage.base_storage.Storage.experiments :
+    Retrieves a dictionary of the Experiments' data.
+mlos_bench.storage.base_experiment_data.ExperimentData.results_df :
+    Retrieves a pandas DataFrame of the Experiment's trials' results data.
+mlos_bench.storage.base_experiment_data.ExperimentData.trials :
+    Retrieves a dictionary of the Experiment's trials' data.
+mlos_bench.storage.base_experiment_data.ExperimentData.configs :
+    Retrieves a dictionary of the Experiment's sampled configs data.
+"""
 
 import logging
 from abc import ABCMeta, abstractmethod

@@ -10,6 +10,10 @@ target system.
 
 Each trial is associated with a configuration (e.g., set of tunable parameters), but
 multiple trials may use the same config (e.g., for repeat run variability analysis).
+
+See Also
+--------
+ExperimentData.trials : Retrieves a dictionary of the experiment's trials' data.
 """
 
 from abc import ABCMeta, abstractmethod
