@@ -253,7 +253,7 @@ documentation, which also contains links to the actual schema definitions in the
 source tree (see below).
 
 Notes
-+++++
+-----
 See `mlos_bench/config/README.md
 <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_ and
 `mlos_bench/tests/config/README.md

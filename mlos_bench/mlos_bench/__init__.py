@@ -75,7 +75,6 @@ interpretted.
 
 Examples
 --------
-
 Here is an example that shows how to run a simple benchmark using the command line.
 
 The entry point for these configs can be found `here
