@@ -2,7 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""An interface to access the tunable config data stored in SQL DB."""
+"""An interface to access the tunable config data stored in a SQL DB using the
+:py:class:`.TunableConfigData` interface.
+"""
 
 import pandas
 from sqlalchemy.engine import Engine

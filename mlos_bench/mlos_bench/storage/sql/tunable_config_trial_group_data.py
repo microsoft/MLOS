@@ -2,7 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""An interface to access the tunable config trial group data stored in SQL DB."""
+"""An interface to access the tunable config trial group data stored in a SQL DB
+using the :py:class:`.TunableConfigTrialGroupData` interface.
+"""
 
 from typing import TYPE_CHECKING, Dict, Optional
 

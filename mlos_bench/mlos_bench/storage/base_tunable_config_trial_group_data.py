@@ -2,7 +2,11 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base interface for accessing the stored benchmark config trial group data."""
+"""Base interface for accessing the stored benchmark config trial group data.
+
+Since a single config may be used by multiple trials, we can group them together for
+easier analysis.
+"""
 
 from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, Optional

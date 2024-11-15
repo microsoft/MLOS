@@ -2,7 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""An interface to access the experiment benchmark data stored in SQL DB."""
+"""An interface to access the benchmark experiment data stored in SQL DB using the
+:py:class:`.ExperimentData` interface.
+"""
 import logging
 from typing import Dict, Literal, Optional
 

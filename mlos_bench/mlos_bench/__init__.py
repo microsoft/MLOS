@@ -62,6 +62,19 @@ The other core classes in this package are:
   For instance, nearly any :py:mod:`SQL <mlos_bench.storage.sql>` backend that
   `sqlalchemy <https://www.sqlalchemy.org>`_ supports can be used.
 
+The data management and automation portions of experiment data is a key component of
+MLOS as it provides a unified way to manage experiment data across different
+Environments, enabling more reusable visualization and analysis by mapping benchmark
+metrics into common semantic types (e.g., via `OpenTelemetry
+<https://opentelemetry.io>`_).
+
+Without this most experiments are effectively siloed and require custom, and more
+critically, non-reusable scripts to setup and later parse results and are hence
+harder to scale to many users.
+
+With these features as a part of the MLOS ecosystem, benchmarking can become a
+*service* that any developer, admin, research, etc. can use and adapt.
+
 See below for more information on the classes in this package.
 
 Notes
@@ -106,6 +119,9 @@ Notes
 -----
 - `mlos_bench/README.md <https://github.com/microsoft/MLOS/tree/main/mlos_bench/>`_
   for additional documentation and examples in the source tree.
+
+- `mlos_bench/DEVNOTES.md <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/DEVNOTES.md>`_
+  for additional developer notes in the source tree.
 
 - There is also a working example of using ``mlos_bench`` in a *separate config
   repo* (the more expected case for most users) in the `sqlite-autotuning

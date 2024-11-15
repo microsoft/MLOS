@@ -2,7 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base interface for accessing the stored benchmark experiment data."""
+"""Base interface for accessing the stored benchmark experiment data.
+
+An experiment is a collection of trials that are run with a given set of scripts and
+target system.
+
+Each trial is associated with a configuration (e.g., set of tunable parameters), but
+multiple trials may use the same config (e.g., for repeat run variability analysis).
+"""
 
 from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple

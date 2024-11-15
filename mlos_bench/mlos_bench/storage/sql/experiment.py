@@ -2,7 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Saving and restoring the benchmark data using SQLAlchemy."""
+""":py:class:`.Storage.Experiment` interface implementation for saving and restoring
+the benchmark experiment data using `SQLAlchemy <https://sqlalchemy.org>`_ backend.
+"""
 
 import hashlib
 import logging
