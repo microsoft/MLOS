@@ -84,16 +84,13 @@ The entry point for these configs can be found `here
 >>> # Note: we show the command wrapped in python here for testing purposes.
 >>> # Alternatively replace test-cli-local-env-bench.jsonc with
 >>> # test-cli-local-env-opt.jsonc for one that does an optimization loop.
->>> cmd = r'''mlos_bench \
-...     --config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc \
-...     --globals experiment_test_local.jsonc \
-...     --tunable_values tunable-values/tunable-values-local.jsonc'''
+>>> cmd = "mlos_bench \
+... --config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc \
+... --globals experiment_test_local.jsonc \
+... --tunable_values tunable-values/tunable-values-local.jsonc"
 >>> print(f"Here's the shell command you'd actually run:\n# {cmd}")
 Here's the shell command you'd actually run:
-# mlos_bench \
-    --config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc \
-    --globals experiment_test_local.jsonc \
-    --tunable_values tunable-values/tunable-values-local.jsonc
+# mlos_bench --config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc --globals experiment_test_local.jsonc --tunable_values tunable-values/tunable-values-local.jsonc
 >>> # Now we run the command and check the output.
 >>> result = run(cmd, shell=True, capture_output=True, text=True, check=True)
 >>> assert result.returncode == 0
@@ -113,7 +110,7 @@ Notes
 - There is also a working example of using ``mlos_bench`` in a *separate config
   repo* (the more expected case for most users) in the `sqlite-autotuning
   <https://github.com/Microsoft-CISL/sqlite-autotuning>`_ repo.
-"""
+"""  # pylint: disable=line-too-long # noqa: E501
 from mlos_bench.version import VERSION
 
 __version__ = VERSION
