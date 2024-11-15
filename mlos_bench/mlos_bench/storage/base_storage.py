@@ -13,7 +13,7 @@ mlos_bench.storage.base_experiment_data.ExperimentData.results_df :
     Retrieves a pandas DataFrame of the Experiment's trials' results data.
 mlos_bench.storage.base_experiment_data.ExperimentData.trials :
     Retrieves a dictionary of the Experiment's trials' data.
-mlos_bench.storage.base_experiment_data.ExperimentData.configs :
+mlos_bench.storage.base_experiment_data.ExperimentData.tunable_configs :
     Retrieves a dictionary of the Experiment's sampled configs data.
 """
 
