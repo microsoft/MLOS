@@ -42,6 +42,12 @@ Example
 -------
 TODO: Add example usage.
 
+See Also
+--------
+mlos_bench.storage.base_storage : Base interface for backends.
+mlos_bench.storage.base_experiment_data : Base interface for ExperimentData.
+mlos_bench.storage.base_trial_data : Base interface for TrialData.
+
 Notes
 -----
 - See `sqlite-autotuning notebooks

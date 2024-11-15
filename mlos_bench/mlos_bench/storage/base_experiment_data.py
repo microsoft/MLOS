@@ -13,7 +13,17 @@ multiple trials may use the same config (e.g., for repeat run variability analys
 
 See Also
 --------
-ExperimentData.trials : Retrieves a dictionary of the experiment's trials' data.
+ExperimentData.results_df :
+    Retrieves a pandas DataFrame of the Experiment's trials' results data.
+ExperimentData.trials :
+    Retrieves a dictionary of the Experiment's trials' data.
+ExperimentData.tunable_configs :
+    Retrieves a dictionary of the Experiment's sampled configs data.
+ExperimentData.tunable_config_trial_groups :
+    Retrieves a dictionary of the Experiment's trials' data, grouped by shared
+    tunable config.
+mlos_bench.storage.base_trial_data.TrialData :
+    Base interface for accessing the stored benchmark trial data.
 """
 
 from abc import ABCMeta, abstractmethod

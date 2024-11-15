@@ -15,6 +15,11 @@ mlos_bench.storage.base_experiment_data.ExperimentData.trials :
     Retrieves a dictionary of the Experiment's trials' data.
 mlos_bench.storage.base_experiment_data.ExperimentData.tunable_configs :
     Retrieves a dictionary of the Experiment's sampled configs data.
+mlos_bench.storage.base_experiment_data.ExperimentData.tunable_config_trial_groups :
+    Retrieves a dictionary of the Experiment's trials' data, grouped by shared
+    tunable config.
+mlos_bench.storage.base_trial_data.TrialData :
+    Base interface for accessing the stored benchmark trial data.
 """
 
 import logging
