@@ -32,8 +32,9 @@ indicate that they are an ``mlos_bench`` config file.
 
 This allows tools that support `JSON Schema Store
 <https://www.schemastore.org/json/>`_ (e.g., `VSCode
-<https://code.visualstudio.com/>`_) to provide helpful autocomplete and validation
-of the json configs while editing.
+<https://code.visualstudio.com/>`_ with an `extension
+<https://marketplace.visualstudio.com/items?itemName=remcohaszing.schemastore>`_) to
+provide helpful autocomplete and validation of the json configs while editing.
 
 CLI Configs
 ^^^^^^^^^^^
