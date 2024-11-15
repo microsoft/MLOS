@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
+r"""
 mlos_bench is a framework to help automate benchmarking and OS/application parameter
 autotuning and the data management of the results.
 
@@ -84,15 +84,15 @@ The entry point for these configs can be found `here
 >>> # Note: we show the command wrapped in python here for testing purposes.
 >>> # Alternatively replace test-cli-local-env-bench.jsonc with
 >>> # test-cli-local-env-opt.jsonc for one that does an optimization loop.
->>> cmd = r'''mlos_bench \\
-...     --config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc \\
-...     --globals experiment_test_local.jsonc \\
+>>> cmd = r'''mlos_bench \
+...     --config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc \
+...     --globals experiment_test_local.jsonc \
 ...     --tunable_values tunable-values/tunable-values-local.jsonc'''
->>> print(f"Here's the shell command you'd actually run:\\n# {cmd}")
+>>> print(f"Here's the shell command you'd actually run:\n# {cmd}")
 Here's the shell command you'd actually run:
-# mlos_bench \\
-    --config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc \\
-    --globals experiment_test_local.jsonc \\
+# mlos_bench \
+    --config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc \
+    --globals experiment_test_local.jsonc \
     --tunable_values tunable-values/tunable-values-local.jsonc
 >>> # Now we run the command and check the output.
 >>> result = run(cmd, shell=True, capture_output=True, text=True, check=True)
