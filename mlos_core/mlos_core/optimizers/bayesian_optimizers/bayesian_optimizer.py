@@ -16,7 +16,7 @@ class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
     """Abstract base class defining the interface for Bayesian optimization."""
 
     @abstractmethod
-    def surrogate_predict(self, *, suggestion: Suggestion) -> npt.NDArray:
+    def surrogate_predict(self, suggestion: Suggestion) -> npt.NDArray:
         """
         Obtain a prediction from this Bayesian optimizer's surrogate model for the given
         configuration(s).
@@ -29,7 +29,7 @@ class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
-    def acquisition_function(self, *, suggestion: Suggestion) -> npt.NDArray:
+    def acquisition_function(self, suggestion: Suggestion) -> npt.NDArray:
         """
         Invokes the acquisition function from this Bayesian optimizer for the given
         configuration.

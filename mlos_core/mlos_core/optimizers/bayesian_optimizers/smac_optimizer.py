@@ -272,7 +272,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # release: https://github.com/automl/SMAC3/issues/946
         raise RuntimeError("This function should never be called.")
 
-    def _register(self, *, observation: Observation) -> None:
+    def _register(self, observation: Observation) -> None:
         """
         Registers the given configs and scores.
 
@@ -296,14 +296,17 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # Retrieve previously generated TrialInfo (returned by .ask()) or create
         # new TrialInfo instance
         config = ConfigSpace.Configuration(
-            self.optimizer_parameter_space, values=observation.config.dropna().to_dict(),
+            self.optimizer_parameter_space,
+            values=observation.config.dropna().to_dict(),
         )
         info: TrialInfo = self.trial_info_map.get(
             config,
             TrialInfo(config=config, seed=self.base_optimizer.scenario.seed),
         )
         value = TrialValue(
-            cost=list(observation.score.astype(float)), time=0.0, status=StatusType.SUCCESS
+            cost=list(observation.score.astype(float)),
+            time=0.0,
+            status=StatusType.SUCCESS,
         )
         self.base_optimizer.tell(info, value, save=False)
 
@@ -312,7 +315,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     def _suggest(
         self,
-        *,
         context: Optional[pd.Series] = None,
     ) -> Suggestion:
         """

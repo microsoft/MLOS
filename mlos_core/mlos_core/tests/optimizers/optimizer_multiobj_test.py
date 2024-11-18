@@ -101,8 +101,8 @@ def test_multi_target_opt(
         assert suggestion.metadata is None or isinstance(suggestion.metadata, pd.Series)
         assert set(suggestion.config.index) == {"x", "y"}
         # Check suggestion values are the expected dtype
-        assert isinstance(suggestion.config["x"], int)  # type: ignore
-        assert isinstance(suggestion.config["y"], float)  # type: ignore
+        assert isinstance(suggestion.config["x"], np.integer)
+        assert isinstance(suggestion.config["y"], np.floating)
         # Check that suggestion is in the space
         config_dict: dict = suggestion.config.to_dict()
         test_configuration = CS.Configuration(optimizer.parameter_space, config_dict)

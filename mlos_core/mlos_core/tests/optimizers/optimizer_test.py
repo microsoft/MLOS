@@ -89,8 +89,7 @@ def test_basic_interface_toy_problem(
         kwargs["max_trials"] = max_iterations * 2
 
     def objective(x: float) -> pd.Series:
-        ret: pd.Series = pd.Series({"score": (6 * x - 2) ** 2 * np.sin(12 * x - 4)})
-        return ret
+        return pd.Series({"score": (6 * x - 2) ** 2 * np.sin(12 * x - 4)})
 
     # Emukit doesn't allow specifying a random state, so we set the global seed.
     np.random.seed(SEED)

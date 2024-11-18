@@ -24,8 +24,7 @@ def config_to_series(config: Configuration) -> pd.Series:
     pd.Series
         A Series, containing the config's parameters.
     """
-    ret: pd.Series = pd.Series(dict(config))
-    return ret
+    return pd.Series(dict(config))
 
 
 def normalize_config(
