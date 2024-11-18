@@ -14,7 +14,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
-from mlos_core.optimizers.observations import Observation, Observations, Suggestion
+from mlos_core.mlos_core.data_classes.observations import Observation, Observations, Suggestion
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.util import config_to_series
 
@@ -74,9 +74,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     def register(
         self,
-        *,
-        observations: Optional[Observations] = None,
-        observations: Optional[Union[Observation|Observations]] = None,
+        observations: Optional[Union[Observation | Observations]],
     ) -> None:
         """
         Register all observations at once. Exactly one of observations or observation
@@ -89,13 +87,9 @@ class BaseOptimizer(metaclass=ABCMeta):
         observation: Observation
             The observation to register.
         """
-        assert (observations is None and observation is not None) or (
-            observations is not None and observation is None
-        ), "Only one of observations or observation can be provided."
-
-        if observation is not None:
-            self.register_single(observation=observation)
-        if observations is not None:
+        if isinstance(observations, Observation):
+            self.register_single(observation=observations)
+        if isinstance(observations, Observations):
             for obs in observations.to_list():
                 self.register_single(observation=obs)
 
@@ -110,26 +104,26 @@ class BaseOptimizer(metaclass=ABCMeta):
             The observation to register.
         """
         # Do some input validation.
-        assert observation.metadata is None or isinstance(observation.metadata, pd.Series)
-        assert set(observation.score.index) == set(
+        assert observation._metadata is None or isinstance(observation._metadata, pd.Series)
+        assert set(observation._score.index) == set(
             self._optimization_targets
         ), "Mismatched optimization targets."
         assert self._has_context is None or self._has_context ^ (
-            observation.context is None
+            observation._context is None
         ), "Context must always be added or never be added."
-        assert len(observation.config) == len(
+        assert len(observation._config) == len(
             self.parameter_space.values()
         ), "Mismatched configuration shape."
 
-        self._has_context = observation.context is not None
+        self._has_context = observation._context is not None
         self._observations.append(observation)
 
         register_observation = deepcopy(observation)  # Needed to support named tuples
         if self._space_adapter:
-            register_observation.config = self._space_adapter.inverse_transform(
-                register_observation.config
+            register_observation._config = self._space_adapter.inverse_transform(
+                register_observation._config
             )
-            assert len(register_observation.config) == len(
+            assert len(register_observation._config) == len(
                 self.optimizer_parameter_space.values()
             ), "Mismatched configuration shape after inverse transform."
 
@@ -138,8 +132,7 @@ class BaseOptimizer(metaclass=ABCMeta):
     @abstractmethod
     def _register(
         self,
-        *,
-        observation: Observation,
+        observations: Optional[Union[Observation | Observations]] = None,
     ) -> None:
         """
         Registers the given configs and scores.
@@ -266,8 +259,10 @@ class BaseOptimizer(metaclass=ABCMeta):
         if len(observations) == 0:
             raise ValueError("No observations registered yet.")
 
-        idx = observations.score.nsmallest(
-            n_max, columns=self._optimization_targets, keep="first",
+        idx = observations._score.nsmallest(
+            n_max,
+            columns=self._optimization_targets,
+            keep="first",
         ).index
         return observations.filter_by_index(idx)
 

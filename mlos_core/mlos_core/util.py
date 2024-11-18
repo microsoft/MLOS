@@ -4,10 +4,55 @@
 #
 """Internal helper functions for mlos_core package."""
 
-from typing import Union
+from typing import Optional, Union
 
 import pandas as pd
 from ConfigSpace import Configuration, ConfigurationSpace
+
+
+def compare_optional_series(left: Optional[pd.Series], right: Optional[pd.Series]) -> bool:
+    """
+    Compare Series that may also be None.
+
+    Parameters
+    ----------
+    left : Optional[pd.Series]
+        The left Series to compare
+    right : Optional[pd.Series]
+        The right Series to compare
+
+    Returns
+    -------
+    bool
+        Compare the equality of two Optional[pd.Series] objects
+    """
+    if isinstance(left, pd.Series) and isinstance(right, pd.Series):
+        return left.equals(right)
+    return left is None and right is None
+
+
+def compare_optional_dataframe(
+    left: Optional[pd.DataFrame],
+    right: Optional[pd.DataFrame],
+) -> bool:
+    """
+    Compare DataFrames that may also be None.
+
+    Parameters
+    ----------
+    left : Optional[pd.DataFrame]
+        The left DataFrame to compare
+    right : Optional[pd.DataFrame]
+        The right DataFrame to compare
+
+    Returns
+    -------
+    bool
+        Compare the equality of two Optional[pd.DataFrame] objects
+    """
+    if isinstance(left, pd.DataFrame) and isinstance(right, pd.DataFrame):
+        return left.equals(right)
+    return left is None and right is None
 
 
 def config_to_series(config: Configuration) -> pd.Series:

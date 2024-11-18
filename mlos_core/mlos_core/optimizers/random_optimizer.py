@@ -4,12 +4,12 @@
 #
 """Contains the RandomOptimizer class."""
 
-from typing import Optional
+from typing import Optional, Union
 from warnings import warn
 
 import pandas as pd
 
-from mlos_core.optimizers.observations import Observation, Observations, Suggestion
+from mlos_core.mlos_core.data_classes.observations import Observation, Observations, Suggestion
 from mlos_core.optimizers.optimizer import BaseOptimizer
 
 
@@ -24,7 +24,10 @@ class RandomOptimizer(BaseOptimizer):
         The parameter space to optimize.
     """
 
-    def _register(self, *, observation: Observation) -> None:
+    def _register(
+        self,
+        observation: Optional[Union[Observation | Observations]] = None,
+    ) -> None:
         """
         Registers the given configs and scores.
 
@@ -32,17 +35,23 @@ class RandomOptimizer(BaseOptimizer):
 
         Parameters
         ----------
-        observations : Observations
+        observations : Observation | Observations
             The observations to register.
         """
-        if observation.context is not None:
+
+        assert (
+            isinstance(observation, Observation),
+            "Internal implementation does not support Observations.",
+        )
+
+        if observation._context is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observation.context.index)}",
+                f"Not Implemented: Ignoring context {list(observation._context.index)}",
                 UserWarning,
             )
-        if observation.metadata is not None:
+        if observation._metadata is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observation.metadata.index)}",
+                f"Not Implemented: Ignoring context {list(observation._metadata.index)}",
                 UserWarning,
             )
         # should we pop them from self.pending_observations?

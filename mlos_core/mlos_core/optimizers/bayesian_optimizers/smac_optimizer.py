@@ -23,7 +23,7 @@ from smac.utils.configspace import convert_configurations_to_array
 from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import (
     BaseBayesianOptimizer,
 )
-from mlos_core.optimizers.observations import Observation, Observations, Suggestion
+from mlos_core.mlos_core.data_classes.observations import Observation, Observations, Suggestion
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 
@@ -272,7 +272,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # release: https://github.com/automl/SMAC3/issues/946
         raise RuntimeError("This function should never be called.")
 
-    def _register(self, observation: Observation) -> None:
+    def _register(
+        self,
+        observation: Optional[Union[Observation | Observations]] = None,
+    ) -> None:
         """
         Registers the given configs and scores.
 
@@ -287,9 +290,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
             TrialValue,
         )
 
-        if observation.context is not None:
+        assert (
+            isinstance(observation, Observation),
+            "Internal implementation does not support Observations.",
+        )
+
+        if observation._context is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observation.context.index)}",
+                f"Not Implemented: Ignoring context {list(observation._context.index)}",
                 UserWarning,
             )
 
@@ -297,14 +305,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # new TrialInfo instance
         config = ConfigSpace.Configuration(
             self.optimizer_parameter_space,
-            values=observation.config.dropna().to_dict(),
+            values=observation._config.dropna().to_dict(),
         )
         info: TrialInfo = self.trial_info_map.get(
             config,
             TrialInfo(config=config, seed=self.base_optimizer.scenario.seed),
         )
         value = TrialValue(
-            cost=list(observation.score.astype(float)),
+            cost=list(observation._score.astype(float)),
             time=0.0,
             status=StatusType.SUCCESS,
         )

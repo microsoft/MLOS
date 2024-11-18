@@ -11,7 +11,7 @@ import ConfigSpace
 import numpy as np
 import pandas as pd
 
-from mlos_core.optimizers.observations import Observation, Observations, Suggestion
+from mlos_core.mlos_core.data_classes.observations import Observation, Observations, Suggestion
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.util import normalize_config
@@ -93,23 +93,32 @@ class FlamlOptimizer(BaseOptimizer):
         self.evaluated_samples: Dict[ConfigSpace.Configuration, EvaluatedSample] = {}
         self._suggested_config: Optional[dict]
 
-    def _register(self, *, observation: Observation) -> None:
+    def _register(
+        self,
+        observation: Optional[Union[Observation | Observations]] = None,
+    ) -> None:
         """
         Registers the given config and scores.
 
         Parameters
         ----------
-        observation : Observation
-            The observation to register.
+        observation : Observation | Observations
+            The observations to register.
         """
-        if observation.context is not None:
+
+        assert (
+            isinstance(observation, Observation),
+            "Internal implementation does not support Observations.",
+        )
+
+        if observation._context is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observation.context.index)}",
+                f"Not Implemented: Ignoring context {list(observation._context.index)}",
                 UserWarning,
             )
-        if observation.metadata is not None:
+        if observation._metadata is not None:
             warn(
-                f"Not Implemented: Ignoring metadata {list(observation.metadata.index)}",
+                f"Not Implemented: Ignoring metadata {list(observation._metadata.index)}",
                 UserWarning,
             )
 
@@ -121,7 +130,7 @@ class FlamlOptimizer(BaseOptimizer):
         self.evaluated_samples[cs_config] = EvaluatedSample(
             config=dict(cs_config),
             score=float(
-                np.average(observation.score.astype(float), weights=self._objective_weights)
+                np.average(observation._score.astype(float), weights=self._objective_weights)
             ),
         )
 

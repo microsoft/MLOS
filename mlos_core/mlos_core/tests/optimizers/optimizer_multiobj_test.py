@@ -13,7 +13,7 @@ import pandas as pd
 import pytest
 
 from mlos_core.optimizers import BaseOptimizer, OptimizerType
-from mlos_core.optimizers.observations import Observations, Suggestion
+from mlos_core.mlos_core.data_classes.observations import Observations, Suggestion
 from mlos_core.tests import SEED
 
 _LOG = logging.getLogger(__name__)
@@ -116,20 +116,20 @@ def test_multi_target_opt(
 
     best_observations = optimizer.get_best_observations()
     assert isinstance(best_observations, Observations)
-    assert isinstance(best_observations.config, pd.DataFrame)
-    assert isinstance(best_observations.score, pd.DataFrame)
-    assert best_observations.context is None
-    assert set(best_observations.config.columns) == {"x", "y"}
-    assert set(best_observations.score.columns) == {"main_score", "other_score"}
-    assert best_observations.config.shape == (1, 2)
-    assert best_observations.score.shape == (1, 2)
+    assert isinstance(best_observations._config, pd.DataFrame)
+    assert isinstance(best_observations._score, pd.DataFrame)
+    assert best_observations._context is None
+    assert set(best_observations._config.columns) == {"x", "y"}
+    assert set(best_observations._score.columns) == {"main_score", "other_score"}
+    assert best_observations._config.shape == (1, 2)
+    assert best_observations._score.shape == (1, 2)
 
     all_observations = optimizer.get_observations()
     assert isinstance(all_observations, Observations)
-    assert isinstance(all_observations.config, pd.DataFrame)
-    assert isinstance(all_observations.score, pd.DataFrame)
-    assert all_observations.context is None
-    assert set(all_observations.config.columns) == {"x", "y"}
-    assert set(all_observations.score.columns) == {"main_score", "other_score"}
-    assert all_observations.config.shape == (max_iterations, 2)
-    assert all_observations.score.shape == (max_iterations, 2)
+    assert isinstance(all_observations._config, pd.DataFrame)
+    assert isinstance(all_observations._score, pd.DataFrame)
+    assert all_observations._context is None
+    assert set(all_observations._config.columns) == {"x", "y"}
+    assert set(all_observations._score.columns) == {"main_score", "other_score"}
+    assert all_observations._config.shape == (max_iterations, 2)
+    assert all_observations._score.shape == (max_iterations, 2)
