@@ -69,7 +69,8 @@ def config_to_series(config: Configuration) -> pd.Series:
     pd.Series
         A Series, containing the config's parameters.
     """
-    return pd.Series(dict(config))
+    series: pd.Series = pd.Series(dict(config))  # needed for type hinting
+    return series
 
 
 def normalize_config(

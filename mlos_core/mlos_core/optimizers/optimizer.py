@@ -14,7 +14,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
-from mlos_core.mlos_core.data_classes.observations import Observation, Observations, Suggestion
+from mlos_core.data_classes import Observation, Observations, Suggestion
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.util import config_to_series
 
@@ -127,7 +127,7 @@ class BaseOptimizer(metaclass=ABCMeta):
                 self.optimizer_parameter_space.values()
             ), "Mismatched configuration shape after inverse transform."
 
-        return self._register(observation=register_observation)
+        return self._register(observations=register_observation)
 
     @abstractmethod
     def _register(
@@ -174,13 +174,13 @@ class BaseOptimizer(metaclass=ABCMeta):
             suggestion = Suggestion(config=configuration, context=context, metadata=None)
         else:
             suggestion = self._suggest(context=context)
-            assert set(suggestion.config.index).issubset(set(self.optimizer_parameter_space)), (
+            assert set(suggestion._config.index).issubset(set(self.optimizer_parameter_space)), (
                 "Optimizer suggested a configuration that does "
                 "not match the expected parameter space."
             )
         if self._space_adapter:
-            suggestion.config = self._space_adapter.transform(suggestion.config)
-            assert set(suggestion.config.index).issubset(set(self.parameter_space)), (
+            suggestion._config = self._space_adapter.transform(suggestion._config)
+            assert set(suggestion._config.index).issubset(set(self.parameter_space)), (
                 "Space adapter produced a configuration that does "
                 "not match the expected parameter space."
             )

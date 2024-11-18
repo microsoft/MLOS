@@ -11,7 +11,7 @@ import ConfigSpace
 import numpy as np
 import pandas as pd
 
-from mlos_core.mlos_core.data_classes.observations import Observation, Observations, Suggestion
+from mlos_core.data_classes import Observation, Observations, Suggestion
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.util import normalize_config
@@ -95,7 +95,7 @@ class FlamlOptimizer(BaseOptimizer):
 
     def _register(
         self,
-        observation: Optional[Union[Observation | Observations]] = None,
+        observations: Optional[Union[Observation | Observations]] = None,
     ) -> None:
         """
         Registers the given config and scores.
@@ -106,23 +106,22 @@ class FlamlOptimizer(BaseOptimizer):
             The observations to register.
         """
 
-        assert (
-            isinstance(observation, Observation),
-            "Internal implementation does not support Observations.",
-        )
+        assert isinstance(
+            observations, Observation
+        ), "Internal implementation does not support Observations."
 
-        if observation._context is not None:
+        if observations._context is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observation._context.index)}",
+                f"Not Implemented: Ignoring context {list(observations._context.index)}",
                 UserWarning,
             )
-        if observation._metadata is not None:
+        if observations._metadata is not None:
             warn(
-                f"Not Implemented: Ignoring metadata {list(observation._metadata.index)}",
+                f"Not Implemented: Ignoring metadata {list(observations._metadata.index)}",
                 UserWarning,
             )
 
-        cs_config: ConfigSpace.Configuration = observation.to_suggestion().config_to_configspace(
+        cs_config: ConfigSpace.Configuration = observations.to_suggestion().to_configspace_config(
             self.optimizer_parameter_space
         )
         if cs_config in self.evaluated_samples:
@@ -130,7 +129,7 @@ class FlamlOptimizer(BaseOptimizer):
         self.evaluated_samples[cs_config] = EvaluatedSample(
             config=dict(cs_config),
             score=float(
-                np.average(observation._score.astype(float), weights=self._objective_weights)
+                np.average(observations._score.astype(float), weights=self._objective_weights)
             ),
         )
 

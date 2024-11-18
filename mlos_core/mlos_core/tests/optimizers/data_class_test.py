@@ -5,13 +5,11 @@
 """Tests for Observation Data Class."""
 
 from typing import Optional
+from mlos_core.data_classes import Observation, Observations, Suggestion
+from mlos_core.util import compare_optional_series
 import pandas as pd
 import pytest
 import ConfigSpace as CS
-from mlos_core.mlos_core.data_classes.observation import Observation
-from mlos_core.mlos_core.data_classes.observations import Observations
-
-from mlos_core.mlos_core.data_classes.suggestion import Suggestion
 
 
 @pytest.fixture
@@ -42,7 +40,20 @@ def score() -> pd.Series:
 
 
 @pytest.fixture
-def metadata() -> Optional[pd.Series]:
+def score2() -> pd.Series:
+    """
+    Toy score used for tests.
+    """
+    return pd.Series(
+        {
+            "main_score": 0.3,
+            "other_score": 0.1,
+        }
+    )
+
+
+@pytest.fixture
+def metadata() -> pd.Series:
     """
     Toy metadata used for tests.
     """
@@ -54,7 +65,7 @@ def metadata() -> Optional[pd.Series]:
 
 
 @pytest.fixture
-def context() -> Optional[pd.Series]:
+def context() -> pd.Series:
     """
     Toy context used for tests.
     """
@@ -83,8 +94,8 @@ def config2() -> pd.Series:
 def observation_with_context(
     config: pd.Series,
     score: pd.Series,
-    metadata: Optional[pd.Series],
-    context: Optional[pd.Series],
+    metadata: pd.Series,
+    context: pd.Series,
 ) -> Observation:
     """
     Toy observation used for tests.
@@ -106,36 +117,45 @@ def observation_without_context(
     Toy observation used for tests.
     """
     return Observation(
-        config=config,
-        score=score,
+        config=config2,
+        score=score2,
     )
 
 
 @pytest.fixture
 def observations_with_context(
-    config: pd.Series,
-    score: pd.Series,
-    metadata: Optional[pd.Series],
-    context: Optional[pd.Series],
+    observation_with_context: Observation,
 ) -> Observations:
     """
     Toy observation used for tests.
     """
-    observation1 = Observation(
-        config=config,
-        score=score,
-        metadata=metadata,
-        context=context,
+    return Observations(
+        observations=[observation_with_context, observation_with_context, observation_with_context]
     )
-    return Observations(observations=[observation1, observation1, observation1])
+
+
+@pytest.fixture
+def observations_without_context(
+    observation_without_context: Observation,
+) -> Observations:
+    """
+    Toy observation used for tests.
+    """
+    return Observations(
+        observations=[
+            observation_without_context,
+            observation_without_context,
+            observation_without_context,
+        ]
+    )
 
 
 @pytest.fixture
 def suggestion_with_context(
     config: pd.Series,
-    metadata: Optional[pd.Series],
-    context: Optional[pd.Series],
-) -> Observation:
+    metadata: pd.Series,
+    context: pd.Series,
+) -> Suggestion:
     """
     Toy suggestion used for tests.
     """
@@ -149,7 +169,7 @@ def suggestion_with_context(
 @pytest.fixture
 def suggestion_without_context(
     config2: pd.Series,
-) -> Observation:
+) -> Suggestion:
     """
     Toy suggestion used for tests.
     """
@@ -165,9 +185,9 @@ def test_observation_to_suggestion(
     """Toy problem to test one-hot encoding of dataframe."""
     for observation in [observation_with_context, observation_without_context]:
         suggestion = observation.to_suggestion()
-        assert suggestion._config == observation._config
-        assert suggestion._context == observation._context
-        assert suggestion._metadata == observation._metadata
+        assert compare_optional_series(suggestion._config, observation._config)
+        assert compare_optional_series(suggestion._metadata, observation._metadata)
+        assert compare_optional_series(suggestion._context, observation._context)
 
 
 def test_observation_equality_operators(
@@ -184,17 +204,17 @@ def test_observation_equality_operators(
 def test_observations_init_components(
     config: pd.Series,
     score: pd.Series,
-    metadata: Optional[pd.Series],
-    context: Optional[pd.Series],
+    metadata: pd.Series,
+    context: pd.Series,
 ) -> None:
     """
     Test Observations class.
     """
     Observations(
-        config=pd.concat[config.to_frame().T, config.to_frame().T],
-        score=pd.concat[score.to_frame().T, score.to_frame().T],
-        metadata=pd.concat[metadata.to_frame().T, metadata.to_frame().T],
-        context=pd.concat[context.to_frame().T, context.to_frame().T],
+        config=pd.concat([config.to_frame().T, config.to_frame().T]),
+        score=pd.concat([score.to_frame().T, score.to_frame().T]),
+        metadata=pd.concat([metadata.to_frame().T, metadata.to_frame().T]),
+        context=pd.concat([context.to_frame().T, context.to_frame().T]),
     )
 
 
@@ -212,39 +232,39 @@ def test_observations_init_observations(
 def test_observations_init_components_fails(
     config: pd.Series,
     score: pd.Series,
-    metadata: Optional[pd.Series],
-    context: Optional[pd.Series],
+    metadata: pd.Series,
+    context: pd.Series,
 ) -> None:
     """
     Test Observations class.
     """
     with pytest.raises(AssertionError):
         Observations(
-            config=pd.concat[config.to_frame().T],
-            score=pd.concat[score.to_frame().T, score.to_frame().T],
-            metadata=pd.concat[metadata.to_frame().T, metadata.to_frame().T],
-            context=pd.concat[context.to_frame().T, context.to_frame().T],
+            config=pd.concat([config.to_frame().T]),
+            score=pd.concat([score.to_frame().T, score.to_frame().T]),
+            metadata=pd.concat([metadata.to_frame().T, metadata.to_frame().T]),
+            context=pd.concat([context.to_frame().T, context.to_frame().T]),
         )
     with pytest.raises(AssertionError):
         Observations(
-            config=pd.concat[config.to_frame().T, config.to_frame().T],
-            score=pd.concat[score.to_frame().T],
-            metadata=pd.concat[metadata.to_frame().T, metadata.to_frame().T],
-            context=pd.concat[context.to_frame().T, context.to_frame().T],
+            config=pd.concat([config.to_frame().T, config.to_frame().T]),
+            score=pd.concat([score.to_frame().T]),
+            metadata=pd.concat([metadata.to_frame().T, metadata.to_frame().T]),
+            context=pd.concat([context.to_frame().T, context.to_frame().T]),
         )
     with pytest.raises(AssertionError):
         Observations(
-            config=pd.concat[config.to_frame().T, config.to_frame().T],
-            score=pd.concat[score.to_frame().T, score.to_frame().T],
-            metadata=pd.concat[metadata.to_frame().T],
-            context=pd.concat[context.to_frame().T, context.to_frame().T],
+            config=pd.concat([config.to_frame().T, config.to_frame().T]),
+            score=pd.concat([score.to_frame().T, score.to_frame().T]),
+            metadata=pd.concat([metadata.to_frame().T]),
+            context=pd.concat([context.to_frame().T, context.to_frame().T]),
         )
     with pytest.raises(AssertionError):
         Observations(
-            config=pd.concat[config.to_frame().T, config.to_frame().T],
-            score=pd.concat[score.to_frame().T, score.to_frame().T],
-            metadata=pd.concat[metadata.to_frame().T, metadata.to_frame().T],
-            context=pd.concat[context.to_frame().T],
+            config=pd.concat([config.to_frame().T, config.to_frame().T]),
+            score=pd.concat([score.to_frame().T, score.to_frame().T]),
+            metadata=pd.concat([metadata.to_frame().T, metadata.to_frame().T]),
+            context=pd.concat([context.to_frame().T]),
         )
 
 
@@ -279,7 +299,12 @@ def test_observations_filter_by_index(
     """
     Test Observations class.
     """
-    assert len(observations_with_context.filter_by_index([0])) == 1
+    assert (
+        len(
+            observations_with_context.filter_by_index(observations_with_context._config.index[[0]])
+        )
+        == 1
+    )
 
 
 def test_observations_to_list(
@@ -296,7 +321,7 @@ def test_observations_to_list(
 
 def test_observations_equality_test(
     observations_with_context: Observations, observations_without_context: Observations
-):
+) -> None:
     """
     Test Equality of observations.
     """
@@ -307,7 +332,7 @@ def test_observations_equality_test(
 
 def test_suggestion_equality_test(
     suggestion_with_context: Suggestion, suggestion_without_context: Suggestion
-):
+) -> None:
     """
     Test Equality of suggestions.
     """
@@ -318,7 +343,7 @@ def test_suggestion_equality_test(
 
 def test_complete_suggestion(
     suggestion_with_context: Suggestion, score: pd.Series, observation_with_context: Observation
-):
+) -> None:
     """
     Test ability to complete suggestions.
     """

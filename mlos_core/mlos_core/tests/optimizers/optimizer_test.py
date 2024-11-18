@@ -23,7 +23,7 @@ from mlos_core.optimizers.bayesian_optimizers import (
     BaseBayesianOptimizer,
     SmacOptimizer,
 )
-from mlos_core.mlos_core.data_classes.observations import Observations, Suggestion
+from mlos_core.data_classes import Observations, Suggestion
 from mlos_core.spaces.adapters import SpaceAdapterType
 from mlos_core.tests import SEED, get_all_concrete_subclasses
 
@@ -89,7 +89,10 @@ def test_basic_interface_toy_problem(
         kwargs["max_trials"] = max_iterations * 2
 
     def objective(x: float) -> pd.Series:
-        return pd.Series({"score": (6 * x - 2) ** 2 * np.sin(12 * x - 4)})
+        series: pd.Series = pd.Series(
+            {"score": (6 * x - 2) ** 2 * np.sin(12 * x - 4)}
+        )  # needed for type hinting
+        return series
 
     # Emukit doesn't allow specifying a random state, so we set the global seed.
     np.random.seed(SEED)
@@ -108,19 +111,19 @@ def test_basic_interface_toy_problem(
     for _ in range(max_iterations):
         suggestion = optimizer.suggest()
         assert isinstance(suggestion, Suggestion)
-        assert isinstance(suggestion.config, pd.Series)
-        assert suggestion.metadata is None or isinstance(suggestion.metadata, pd.Series)
-        assert set(suggestion.config.index) == {"x", "y", "z"}
+        assert isinstance(suggestion._config, pd.Series)
+        assert suggestion._metadata is None or isinstance(suggestion._metadata, pd.Series)
+        assert set(suggestion._config.index) == {"x", "y", "z"}
         # check that suggestion is in the space
-        dict_config: dict = suggestion.config.to_dict()
+        dict_config: dict = suggestion._config.to_dict()
         configuration = CS.Configuration(optimizer.parameter_space, dict_config)
         # Raises an error if outside of configuration space
         configuration.is_valid_configuration()
-        x: Any = suggestion.config["x"]
+        x: Any = suggestion._config["x"]
         assert isinstance(x, (int, float))
         observation = objective(x)
         assert isinstance(observation, pd.Series)
-        optimizer.register(observation=suggestion.complete(observation))
+        optimizer.register(observations=suggestion.complete(observation))
 
     best_observation = optimizer.get_best_observations()
     assert isinstance(best_observation, Observations)
@@ -306,16 +309,16 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
 
         # loop for optimizer
         suggestion = optimizer.suggest()
-        observation = objective(suggestion.config)
-        optimizer.register(observation=suggestion.complete(observation))
+        observation = objective(suggestion._config)
+        optimizer.register(observations=suggestion.complete(observation))
 
         # loop for llamatune-optimizer
         suggestion = llamatune_optimizer.suggest()
-        _x, _y = suggestion.config["x"], suggestion.config["y"]
+        _x, _y = suggestion._config["x"], suggestion._config["y"]
         # optimizer explores 1-dimensional space
         assert _x == pytest.approx(_y, rel=1e-3) or _x + _y == pytest.approx(3.0, rel=1e-3)
-        observation = objective(suggestion.config)
-        llamatune_optimizer.register(observation=suggestion.complete(observation))
+        observation = objective(suggestion._config)
+        llamatune_optimizer.register(observations=suggestion.complete(observation))
 
     # Retrieve best observations
     best_observation: Observations = optimizer.get_best_observations()
@@ -429,28 +432,28 @@ def test_mixed_numerics_type_input_space_types(
     for _ in range(max_iterations):
         suggestion = optimizer.suggest()
         assert isinstance(suggestion, Suggestion)
-        assert isinstance(suggestion.config, pd.Series)
-        assert set(suggestion.config.index) == {"x", "y"}
+        assert isinstance(suggestion._config, pd.Series)
+        assert set(suggestion._config.index) == {"x", "y"}
         # Check suggestion values are the expected dtype
-        assert isinstance(suggestion.config["x"], int)  # type: ignore
-        assert isinstance(suggestion.config["y"], float)  # type: ignore
+        assert isinstance(suggestion.config["x"], np.integer)  # type: ignore
+        assert isinstance(suggestion.config["y"], np.floating)  # type: ignore
         # Check that suggestion is in the space
         test_configuration = CS.Configuration(
-            optimizer.parameter_space, suggestion.config.to_dict()
+            optimizer.parameter_space, suggestion._config.to_dict()
         )
         # Raises an error if outside of configuration space
         test_configuration.is_valid_configuration()
         # Test registering the suggested configuration with a score.
-        observation = objective(suggestion.config)
+        observation = objective(suggestion._config)
         assert isinstance(observation, pd.Series)
-        optimizer.register(observation=suggestion.complete(observation))
+        optimizer.register(observations=suggestion.complete(observation))
 
     best_observations = optimizer.get_best_observations()
-    assert isinstance(best_observations.config, pd.DataFrame)
-    assert isinstance(best_observations.score, pd.DataFrame)
-    assert best_observations.context is None
+    assert isinstance(best_observations._config, pd.DataFrame)
+    assert isinstance(best_observations._score, pd.DataFrame)
+    assert best_observations._context is None
 
     all_observations = optimizer.get_observations()
-    assert isinstance(all_observations.config, pd.DataFrame)
-    assert isinstance(all_observations.score, pd.DataFrame)
-    assert all_observations.context is None
+    assert isinstance(all_observations._config, pd.DataFrame)
+    assert isinstance(all_observations._score, pd.DataFrame)
+    assert all_observations._context is None

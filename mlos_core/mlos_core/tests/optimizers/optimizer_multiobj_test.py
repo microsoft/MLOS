@@ -8,12 +8,12 @@ import logging
 from typing import List, Optional, Type
 
 import ConfigSpace as CS
+from mlos_core.data_classes import Observations, Suggestion
 import numpy as np
 import pandas as pd
 import pytest
 
 from mlos_core.optimizers import BaseOptimizer, OptimizerType
-from mlos_core.mlos_core.data_classes.observations import Observations, Suggestion
 from mlos_core.tests import SEED
 
 _LOG = logging.getLogger(__name__)
@@ -97,22 +97,22 @@ def test_multi_target_opt(
     for _ in range(max_iterations):
         suggestion = optimizer.suggest()
         assert isinstance(suggestion, Suggestion)
-        assert isinstance(suggestion.config, pd.Series)
-        assert suggestion.metadata is None or isinstance(suggestion.metadata, pd.Series)
-        assert set(suggestion.config.index) == {"x", "y"}
+        assert isinstance(suggestion._config, pd.Series)
+        assert suggestion._metadata is None or isinstance(suggestion._metadata, pd.Series)
+        assert set(suggestion._config.index) == {"x", "y"}
         # Check suggestion values are the expected dtype
-        assert isinstance(suggestion.config["x"], np.integer)
-        assert isinstance(suggestion.config["y"], np.floating)
+        assert isinstance(suggestion._config["x"], int)  # type: ignore
+        assert isinstance(suggestion._config["y"], float)  # type: ignore
         # Check that suggestion is in the space
-        config_dict: dict = suggestion.config.to_dict()
+        config_dict: dict = suggestion._config.to_dict()
         test_configuration = CS.Configuration(optimizer.parameter_space, config_dict)
         # Raises an error if outside of configuration space
         test_configuration.is_valid_configuration()
         # Test registering the suggested configuration with a score.
-        observation = objective(suggestion.config)
+        observation = objective(suggestion._config)
         assert isinstance(observation, pd.Series)
         assert set(observation.index) == {"main_score", "other_score"}
-        optimizer.register(observation=suggestion.complete(observation))
+        optimizer.register(observations=suggestion.complete(observation))
 
     best_observations = optimizer.get_best_observations()
     assert isinstance(best_observations, Observations)

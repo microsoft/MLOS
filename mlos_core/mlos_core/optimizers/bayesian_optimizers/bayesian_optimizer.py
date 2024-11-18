@@ -6,9 +6,9 @@
 
 from abc import ABCMeta, abstractmethod
 
+from mlos_core.data_classes import Suggestion
 import numpy.typing as npt
 
-from mlos_core.mlos_core.data_classes.observations import Suggestion
 from mlos_core.optimizers.optimizer import BaseOptimizer
 
 

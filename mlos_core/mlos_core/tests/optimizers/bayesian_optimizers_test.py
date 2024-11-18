@@ -39,10 +39,10 @@ def test_context_not_implemented_warning(
     suggestion = optimizer.suggest()
     scores = pd.Series({"score": [1]})
     context = pd.Series([["something"]])
-    suggestion.context = context
+    suggestion._context = context
 
     with pytest.raises(UserWarning):
-        optimizer.register(observation=suggestion.complete(scores))
+        optimizer.register(observations=suggestion.complete(scores))
 
     with pytest.raises(UserWarning):
         optimizer.suggest(context=context)

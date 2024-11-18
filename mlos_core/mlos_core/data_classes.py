@@ -1,16 +1,77 @@
-#
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
-#
-"""Contains classes for observations and suggestions."""
 from __future__ import annotations
 
 from typing import Any, Iterator, List, Optional
 
+from ConfigSpace import Configuration, ConfigurationSpace
+from mlos_core.util import compare_optional_dataframe, compare_optional_series
 import pandas as pd
 
-from mlos_core.mlos_core.data_classes.observation import Observation
-from mlos_core.mlos_core.util import compare_optional_dataframe
+
+class Observation:
+    """
+    A single observation of a configuration.
+
+    Attributes
+    ----------
+    config : pd.Series
+        The configuration observed.
+    score : pd.Series
+        The score metrics observed.
+    context : Optional[pd.Series]
+        The context in which the configuration was evaluated.
+        Not Yet Implemented.
+    metadata: Optional[pd.Series]
+        The metadata in which the configuration was evaluated
+    """
+
+    def __init__(
+        self,
+        *,
+        config: pd.Series,
+        score: pd.Series = pd.Series(),
+        context: Optional[pd.Series] = None,
+        metadata: Optional[pd.Series] = None,
+    ):
+        self._config = config
+        self._score = score
+        self._context = context
+        self._metadata = metadata
+
+    def to_suggestion(self) -> Suggestion:
+        """
+        Converts the observation to a suggestion.
+
+        Returns
+        -------
+        Suggestion
+            The suggestion.
+        """
+        return Suggestion(
+            config=self._config,
+            context=self._context,
+            metadata=self._metadata,
+        )
+
+    def __repr__(self) -> str:
+        return f"Observation(config={self._config}, score={self._score}, context={self._context}, metadata={self._metadata})"
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Observation):
+            return False
+
+        if not self._config.equals(other._config):
+            return False
+        if not self._score.equals(other._score):
+            return False
+        if not compare_optional_series(self._context, other._context):
+            return False
+        if not compare_optional_series(self._metadata, other._metadata):
+            return False
+
+        return True
+
+    def __ne__(self, other: Any) -> bool:
+        return not self.__eq__(other)
 
 
 class Observations:
@@ -44,33 +105,28 @@ class Observations:
         if len(observations) > 0:
             config = pd.concat([obs._config.to_frame().T for obs in observations])
             score = pd.concat([obs._score.to_frame().T for obs in observations])
-            assert (
-                len(config.index) == len(score.index),
-                "config and score must have same length",
-            )
 
             if sum([obs._context is None for obs in observations]) == 0:
                 context = pd.concat([obs._context.to_frame().T for obs in observations])  # type: ignore
             else:
                 context = None
             if sum([obs._metadata is None for obs in observations]) == 0:
-                metadata = pd.concat([obs._metadata.to_frame().T for obs in observations])  # type: ignore[specific-rule]
+                metadata = pd.concat([obs._metadata.to_frame().T for obs in observations])  # type: ignore
             else:
                 metadata = None
-
         assert len(config.index) == len(score.index), "config and score must have the same length"
         if context is not None:
-            assert len(config.index) == len(
-                context.index
-            ), "config and context must have the same length"
+            l1 = len(config.index)
+            l2 = len(context.index)
+            assert l1 == l2, "config and context must have the same length"
         if metadata is not None:
             assert len(config.index) == len(
                 metadata.index
             ), "config and metadata must have the same length"
-        self._config = config
-        self._score = score
-        self._context = context
-        self._metadata = metadata
+        self._config = config.reset_index(drop=True)
+        self._score = score.reset_index(drop=True)
+        self._context = None if context is None else context.reset_index(drop=True)
+        self._metadata = None if metadata is None else metadata.reset_index(drop=True)
 
     def filter_by_index(self, index: pd.Index) -> Observations:
         """
@@ -88,9 +144,9 @@ class Observations:
         """
         return Observations(
             config=self._config.loc[index].copy(),
-            score=self._score.loc[index],
-            context=None if self._context is None else self._context.loc[index],
-            metadata=None if self._metadata is None else self._metadata.loc[index],
+            score=self._score.loc[index].copy(),
+            context=None if self._context is None else self._context.loc[index].copy(),
+            metadata=None if self._metadata is None else self._metadata.loc[index].copy(),
         )
 
     def append(self, other: Observation) -> None:
@@ -204,5 +260,73 @@ class Observations:
         return True
 
     # required as per: https://stackoverflow.com/questions/30643236/does-ne-use-an-overridden-eq
+    def __ne__(self, other: Any) -> bool:
+        return not self.__eq__(other)
+
+
+class Suggestion:
+    """
+    A single suggestion for a configuration.
+
+    A Suggestion is an Observation that has not yet been scored.
+    Evaluating the Suggestion and calling `complete(scores)` can convert it to an Observation.
+
+    Attributes
+    ----------
+    config : pd.DataFrame
+        The suggested configuration.
+    """
+
+    def __init__(
+        self,
+        *,
+        config: pd.Series,
+        context: Optional[pd.Series] = None,
+        metadata: Optional[pd.Series] = None,
+    ):
+        self._config = config
+        self._context = context
+        self._metadata = metadata
+
+    def complete(self, score: pd.Series) -> Observation:
+        """
+        Completes the Suggestion by adding a score to turn it into an Observation.
+
+        Parameters
+        ----------
+        score : pd.Series
+            The score metrics observed.
+
+        Returns
+        -------
+        Observation
+            The observation of the suggestion.
+        """
+        return Observation(
+            config=self._config,
+            score=score,
+            context=self._context,
+            metadata=self._metadata,
+        )
+
+    def to_configspace_config(self, space: ConfigurationSpace) -> Configuration:
+        return Configuration(space, values=self._config.to_dict())
+
+    def __repr__(self) -> str:
+        return f"Suggestion(config={self._config}, context={self._context}, metadata={self._metadata})"
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Suggestion):
+            return False
+
+        if not self._config.equals(other._config):
+            return False
+        if not compare_optional_series(self._context, other._context):
+            return False
+        if not compare_optional_series(self._metadata, other._metadata):
+            return False
+
+        return True
+
     def __ne__(self, other: Any) -> bool:
         return not self.__eq__(other)

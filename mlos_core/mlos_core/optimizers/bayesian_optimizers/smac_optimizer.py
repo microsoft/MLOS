@@ -23,7 +23,7 @@ from smac.utils.configspace import convert_configurations_to_array
 from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import (
     BaseBayesianOptimizer,
 )
-from mlos_core.mlos_core.data_classes.observations import Observation, Observations, Suggestion
+from mlos_core.data_classes import Observation, Observations, Suggestion
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 
@@ -274,7 +274,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     def _register(
         self,
-        observation: Optional[Union[Observation | Observations]] = None,
+        observations: Optional[Union[Observation | Observations]] = None,
     ) -> None:
         """
         Registers the given configs and scores.
@@ -290,14 +290,13 @@ class SmacOptimizer(BaseBayesianOptimizer):
             TrialValue,
         )
 
-        assert (
-            isinstance(observation, Observation),
-            "Internal implementation does not support Observations.",
-        )
+        assert isinstance(
+            observations, Observation
+        ), "Internal implementation does not support Observations."
 
-        if observation._context is not None:
+        if observations._context is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observation._context.index)}",
+                f"Not Implemented: Ignoring context {list(observations._context.index)}",
                 UserWarning,
             )
 
@@ -305,14 +304,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # new TrialInfo instance
         config = ConfigSpace.Configuration(
             self.optimizer_parameter_space,
-            values=observation._config.dropna().to_dict(),
+            values=observations._config.dropna().to_dict(),
         )
         info: TrialInfo = self.trial_info_map.get(
             config,
             TrialInfo(config=config, seed=self.base_optimizer.scenario.seed),
         )
         value = TrialValue(
-            cost=list(observation._score.astype(float)),
+            cost=list(observations._score.astype(float)),
             time=0.0,
             status=StatusType.SUCCESS,
         )
@@ -356,13 +355,13 @@ class SmacOptimizer(BaseBayesianOptimizer):
     def register_pending(self, *, pending: Suggestion) -> None:
         raise NotImplementedError()
 
-    def surrogate_predict(self, *, suggestion: Suggestion) -> npt.NDArray:
+    def surrogate_predict(self, suggestion: Suggestion) -> npt.NDArray:
         # pylint: disable=import-outside-toplevel
         from smac.utils.configspace import convert_configurations_to_array
 
-        if suggestion.context is not None:
+        if suggestion._context is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(suggestion.context.index)}",
+                f"Not Implemented: Ignoring context {list(suggestion._context.index)}",
                 UserWarning,
             )
         if self._space_adapter and not isinstance(self._space_adapter, IdentityAdapter):
@@ -381,7 +380,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         config_array = convert_configurations_to_array(
             [
                 ConfigSpace.Configuration(
-                    self.optimizer_parameter_space, values=suggestion.config.to_dict()
+                    self.optimizer_parameter_space, values=suggestion._config.to_dict()
                 )
             ]
         )
@@ -390,10 +389,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
             -1,
         )
 
-    def acquisition_function(self, *, suggestion: Suggestion) -> npt.NDArray:
-        if suggestion.context is not None:
+    def acquisition_function(self, suggestion: Suggestion) -> npt.NDArray:
+        if suggestion._context is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(suggestion.context.index)}",
+                f"Not Implemented: Ignoring context {list(suggestion._context.index)}",
                 UserWarning,
             )
         if self._space_adapter:
@@ -404,7 +403,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             raise RuntimeError("Acquisition function is not yet initialized")
 
         return self.base_optimizer._config_selector._acquisition_function(
-            suggestion.config.config_to_configspace(self.optimizer_parameter_space)
+            suggestion._config.config_to_configspace(self.optimizer_parameter_space)
         ).reshape(
             -1,
         )

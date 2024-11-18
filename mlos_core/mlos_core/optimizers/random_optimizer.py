@@ -9,7 +9,7 @@ from warnings import warn
 
 import pandas as pd
 
-from mlos_core.mlos_core.data_classes.observations import Observation, Observations, Suggestion
+from mlos_core.data_classes import Observation, Observations, Suggestion
 from mlos_core.optimizers.optimizer import BaseOptimizer
 
 
@@ -26,7 +26,7 @@ class RandomOptimizer(BaseOptimizer):
 
     def _register(
         self,
-        observation: Optional[Union[Observation | Observations]] = None,
+        observations: Optional[Union[Observation | Observations]] = None,
     ) -> None:
         """
         Registers the given configs and scores.
@@ -39,19 +39,18 @@ class RandomOptimizer(BaseOptimizer):
             The observations to register.
         """
 
-        assert (
-            isinstance(observation, Observation),
-            "Internal implementation does not support Observations.",
-        )
+        assert isinstance(
+            observations, Observation
+        ), "Internal implementation does not support Observations."
 
-        if observation._context is not None:
+        if observations._context is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observation._context.index)}",
+                f"Not Implemented: Ignoring context {list(observations._context.index)}",
                 UserWarning,
             )
-        if observation._metadata is not None:
+        if observations._metadata is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observation._metadata.index)}",
+                f"Not Implemented: Ignoring context {list(observations._metadata.index)}",
                 UserWarning,
             )
         # should we pop them from self.pending_observations?

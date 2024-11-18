@@ -9,6 +9,7 @@ import os
 from types import TracebackType
 from typing import Dict, Optional, Sequence, Tuple, Type, Union
 
+from mlos_core.data_classes import Observations
 import pandas as pd
 from typing_extensions import Literal
 
@@ -29,7 +30,6 @@ from mlos_core.optimizers import (
     OptimizerType,
     SpaceAdapterType,
 )
-from mlos_core.optimizers.observations import Observations
 
 _LOG = logging.getLogger(__name__)
 
@@ -201,8 +201,8 @@ class MlosCoreOptimizer(Optimizer):
             _LOG.info("Use default values for the first trial")
         suggestion = self._opt.suggest(defaults=self._start_with_defaults)
         self._start_with_defaults = False
-        _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, suggestion.config)
-        return tunables.assign(configspace_data_to_tunable_values(suggestion.config.to_dict()))
+        _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, suggestion._config)
+        return tunables.assign(configspace_data_to_tunable_values(suggestion._config.to_dict()))
 
     def register(
         self,
@@ -233,9 +233,9 @@ class MlosCoreOptimizer(Optimizer):
         self,
     ) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
         best_observations = self._opt.get_best_observations()
-        if len(best_observations.config) == 0:
+        if len(best_observations._config) == 0:
             return (None, None)
-        params = configspace_data_to_tunable_values(best_observations.config.iloc[0].to_dict())
-        scores = self._adjust_signs_df(best_observations.score).iloc[0].to_dict()
+        params = configspace_data_to_tunable_values(best_observations._config.iloc[0].to_dict())
+        scores = self._adjust_signs_df(best_observations._score).iloc[0].to_dict()
         _LOG.debug("Best observation: %s score: %s", params, scores)
         return (scores, self._tunables.copy().assign(params))
