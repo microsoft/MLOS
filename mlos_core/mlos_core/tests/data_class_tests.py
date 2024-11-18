@@ -11,6 +11,8 @@ import ConfigSpace as CS
 from mlos_core.mlos_core.data_classes.observation import Observation
 from mlos_core.mlos_core.data_classes.observations import Observations
 
+from mlos_core.mlos_core.data_classes.suggestion import Suggestion
+
 
 @pytest.fixture
 def config() -> pd.Series:
@@ -128,6 +130,34 @@ def observations_with_context(
     return Observations(observations=[observation1, observation1, observation1])
 
 
+@pytest.fixture
+def suggestion_with_context(
+    config: pd.Series,
+    metadata: Optional[pd.Series],
+    context: Optional[pd.Series],
+) -> Observation:
+    """
+    Toy suggestion used for tests.
+    """
+    return Suggestion(
+        config=config,
+        metadata=metadata,
+        context=context,
+    )
+
+
+@pytest.fixture
+def suggestion_without_context(
+    config2: pd.Series,
+) -> Observation:
+    """
+    Toy suggestion used for tests.
+    """
+    return Suggestion(
+        config=config2,
+    )
+
+
 def test_observation_to_suggestion(
     observation_with_context: Observation,
     observation_without_context: Observation,
@@ -241,3 +271,55 @@ def test_observations_append_fails(
     observations.append(observation_with_context)
     with pytest.raises(AssertionError):
         observations.append(observation_without_context)
+
+
+def test_observations_filter_by_index(
+    observations_with_context: Observations,
+) -> None:
+    """
+    Test Observations class.
+    """
+    assert len(observations_with_context.filter_by_index([0])) == 1
+
+
+def test_observations_to_list(
+    observations_with_context: Observations,
+) -> None:
+    """
+    Test Observations class.
+    """
+    assert len(observations_with_context.to_list()) == 3
+    assert all(
+        isinstance(observation, Observation) for observation in observations_with_context.to_list()
+    )
+
+
+def test_observations_equality_test(
+    observations_with_context: Observations, observations_without_context: Observations
+):
+    """
+    Test Equality of observations.
+    """
+    assert observations_with_context == observations_with_context
+    assert observations_with_context != observations_without_context
+    assert observations_without_context == observations_without_context
+
+
+def test_suggestion_equality_test(
+    suggestion_with_context: Suggestion, suggestion_without_context: Suggestion
+):
+    """
+    Test Equality of suggestions.
+    """
+    assert suggestion_with_context == suggestion_with_context
+    assert suggestion_with_context != suggestion_without_context
+    assert suggestion_without_context == suggestion_without_context
+
+
+def test_complete_suggestion(
+    suggestion_with_context: Suggestion, score: pd.Series, observation_with_context: Observation
+):
+    """
+    Test ability to complete suggestions.
+    """
+    assert suggestion_with_context.complete(score) == observation_with_context
