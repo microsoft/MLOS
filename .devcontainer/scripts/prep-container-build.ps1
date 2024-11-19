@@ -49,5 +49,5 @@ if ($env:NO_CACHE -ne 'true') {
     $cacheFrom = 'mloscore.azurecr.io/mlos-devcontainer'
     # Skip pulling for now (see TODO note above)
     Write-Host "Consider pulling image $cacheFrom for build caching."
-    #docker pull $cacheFrom
+    #docker pull --platform linux/amd64 $cacheFrom
 }

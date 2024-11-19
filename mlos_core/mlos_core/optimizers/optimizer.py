@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Contains the BaseOptimizer abstract class."""
+"""Contains the :py:class:`.BaseOptimizer` abstract class."""
 
 import collections
 from abc import ABCMeta, abstractmethod
@@ -18,7 +18,10 @@ from mlos_core.util import config_to_dataframe
 
 
 class BaseOptimizer(metaclass=ABCMeta):
-    """Optimizer abstract base class defining the basic interface."""
+    """Optimizer abstract base class defining the basic interface:
+    :py:meth:`~.BaseOptimizer.suggest`,
+    :py:meth:`~.BaseOptimizer.register`,
+    """
 
     # pylint: disable=too-many-instance-attributes
 
@@ -39,15 +42,23 @@ class BaseOptimizer(metaclass=ABCMeta):
             The parameter space to optimize.
         optimization_targets : List[str]
             The names of the optimization targets to minimize.
+            To maximize a target, use the negative of the target when registering scores.
         objective_weights : Optional[List[float]]
             Optional list of weights of optimization targets.
         space_adapter : BaseSpaceAdapter
             The space adapter class to employ for parameter space transformations.
         """
         self.parameter_space: ConfigSpace.ConfigurationSpace = parameter_space
+        """The parameter space to optimize."""
+
         self.optimizer_parameter_space: ConfigSpace.ConfigurationSpace = (
             parameter_space if space_adapter is None else space_adapter.target_parameter_space
         )
+        """
+        The parameter space actually used by the optimizer.
+
+        (in case a :py:mod:`SpaceAdapter <mlos_core.spaces.adapters>` is used)
+        """
 
         if space_adapter is not None and space_adapter.orig_parameter_space != parameter_space:
             raise ValueError("Given parameter space differs from the one given to space adapter")
@@ -84,16 +95,16 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Parameters
         ----------
-        configs : pd.DataFrame
+        configs : pandas.DataFrame
             Dataframe of configs / parameters. The columns are parameter names and
             the rows are the configs.
-        scores : pd.DataFrame
+        scores : pandas.DataFrame
             Scores from running the configs. The index is the same as the index of the configs.
 
-        context : pd.DataFrame
+        context : pandas.DataFrame
             Not Yet Implemented.
 
-        metadata : Optional[pd.DataFrame]
+        metadata : Optional[pandas.DataFrame]
             Metadata returned by the backend optimizer's suggest method.
         """
         # Do some input validation.
@@ -134,13 +145,13 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Parameters
         ----------
-        configs : pd.DataFrame
+        configs : pandas.DataFrame
             Dataframe of configs / parameters. The columns are parameter names and
             the rows are the configs.
-        scores : pd.DataFrame
+        scores : pandas.DataFrame
             Scores from running the configs. The index is the same as the index of the configs.
 
-        context : pd.DataFrame
+        context : pandas.DataFrame
             Not Yet Implemented.
         """
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
@@ -157,7 +168,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Parameters
         ----------
-        context : pd.DataFrame
+        context : pandas.DataFrame
             Not Yet Implemented.
         defaults : bool
             Whether or not to return the default config instead of an optimizer guided one.
@@ -165,10 +176,10 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Returns
         -------
-        configuration : pd.DataFrame
+        configuration : pandas.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
 
-        metadata : Optional[pd.DataFrame]
+        metadata : Optional[pandas.DataFrame]
             The metadata associated with the given configuration used for evaluations.
             Backend optimizer specific.
         """
@@ -203,15 +214,15 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Parameters
         ----------
-        context : pd.DataFrame
+        context : pandas.DataFrame
             Not Yet Implemented.
 
         Returns
         -------
-        configuration : pd.DataFrame
+        configuration : pandas.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
 
-        metadata : Optional[pd.DataFrame]
+        metadata : Optional[pandas.DataFrame]
             The metadata associated with the given configuration used for evaluations.
             Backend optimizer specific.
         """
@@ -232,12 +243,12 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Parameters
         ----------
-        configs : pd.DataFrame
+        configs : pandas.DataFrame
             Dataframe of configs / parameters. The columns are parameter names and
             the rows are the configs.
-        context : pd.DataFrame
+        context : pandas.DataFrame
             Not Yet Implemented.
-        metadata : Optional[pd.DataFrame]
+        metadata : Optional[pandas.DataFrame]
             Metadata returned by the backend optimizer's suggest method.
         """
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
@@ -248,7 +259,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Returns
         -------
-        observations : Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]
+        observations : Tuple[pandas.DataFrame, pandas.DataFrame, Optional[pandas.DataFrame]]
             A triplet of (config, score, context) DataFrames of observations.
         """
         if len(self._observations) == 0:
@@ -281,7 +292,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Returns
         -------
-        observations : Tuple[pd.DataFrame, pd.DataFrame, Optional[pd.DataFrame]]
+        observations : Tuple[pandas.DataFrame, pandas.DataFrame, Optional[pandas.DataFrame]]
             A triplet of best (config, score, context) DataFrames of best observations.
         """
         if len(self._observations) == 0:

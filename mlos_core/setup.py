@@ -97,6 +97,9 @@ setup(
         'pandas >= 2.2.0;python_version>="3.9"',
         'pandas >= 1.0.3;python_version<"3.9"',
         "ConfigSpace>=1.0",
+        # pyparsing (required by matplotlib and needed for the notebook examples)
+        # 3.2 has incompatibilities with python 3.8 due to type hints
+        'pyparsing<3.2; python_version<"3.9"',
     ],
     extras_require=extra_requires,
     **_get_long_desc_from_readme("https://github.com/microsoft/MLOS/tree/main/mlos_core"),

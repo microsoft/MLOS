@@ -1,43 +1,42 @@
-Welcome to the MLOS documentation!
-==================================
+MLOS Documentation
+==================
 
 .. image:: badges/tests.svg
 
 .. image:: badges/coverage.svg
    :target: htmlcov/index.html
 
-`MLOS <source_tree_docs/index.html>`_ is a project to enable autotuning for systems via automated benchmarking including managing the storage and visualization of the results.
+`MLOS <source_tree_docs/index.html>`_ is a project to enable autotuning for systems via `automated benchmarking <source_tree_docs/mlos_bench/index.html>`_ including managing the storage and `visualization <source_tree_docs/mlos_viz/index.html>`_ of the results.
 
 See below for additional documentation sections.
 
+Here is some documentation pulled from the markdown files in the `MLOS source tree <https://github.com/microsoft/MLOS>`_:
+
 .. toctree::
-   :maxdepth: 2
    :caption: Source Tree Documentation
+   :maxdepth: 5
 
    source_tree_docs/index
    source_tree_docs/mlos_core/index
    source_tree_docs/mlos_bench/index
    source_tree_docs/mlos_viz/index
 
-.. toctree::
-   :maxdepth: 2
-   :caption: API Overview
-
-   overview
+Here is some documentation pulled from the Python docstrings in the `MLOS source tree <https://github.com/microsoft/MLOS>`_:
 
 .. toctree::
-   :maxdepth: 3
    :caption: API Reference
+   :titlesonly:
+   :maxdepth: 5
 
-   api/mlos_core/modules
-   api/mlos_bench/modules
-   api/mlos_viz/modules
+   autoapi/mlos_core/index
+   autoapi/mlos_bench/index
+   autoapi/mlos_viz/index
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Examples
+   :caption: mlos_bench CLI usage
+   :maxdepth: 1
 
-   auto_examples/index
+   mlos_bench.run.usage
 
 .. toctree::
    :maxdepth: 1

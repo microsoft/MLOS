@@ -38,6 +38,28 @@ from mlos_bench.run import _main
             ],
             64.53897,
         ),
+        (
+            [
+                "--config",
+                "mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc",
+                "--globals",
+                "experiment_test_local.jsonc",
+                "--tunable_values",
+                "tunable-values/tunable-values-local.jsonc",
+            ],
+            123.4,
+        ),
+        (
+            [
+                "--config",
+                "mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-opt.jsonc",
+                "--globals",
+                "experiment_test_local.jsonc",
+                "--max-suggestions",
+                "3",
+            ],
+            123.4,
+        ),
     ],
 )
 def test_main_bench(argv: List[str], expected_score: float) -> None:

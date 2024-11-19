@@ -9,10 +9,9 @@ import logging
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 from types import TracebackType
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Literal, Optional, Tuple, Type
 
 from pytz import UTC
-from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment

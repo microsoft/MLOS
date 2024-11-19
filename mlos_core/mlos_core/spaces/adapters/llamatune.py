@@ -2,7 +2,17 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Implementation of LlamaTune space adapter."""
+"""
+Implementation of LlamaTune space adapter.
+
+LlamaTune is a technique that transforms the original parameter space into a
+lower-dimensional space to try and improve the sample efficiency of the underlying
+optimizer by making use of the inherent parameter sensitivity correlations in most
+systems.
+
+See Also: `LlamaTune: Sample-Efficient DBMS Configuration Tuning
+<https://www.microsoft.com/en-us/research/publication/llamatune-sample-efficient-dbms-configuration-tuning>`_.
+"""
 import os
 from typing import Dict, List, Optional, Union
 from warnings import warn
@@ -53,11 +63,11 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         ----------
         orig_parameter_space : ConfigSpace.ConfigurationSpace
             The original (user-provided) parameter space to optimize.
-        num_low_dims: int
+        num_low_dims : int
             Number of dimensions used in the low-dimensional parameter search space.
-        special_param_values_dict: Optional[dict]
+        special_param_values_dict : Optional[dict]
             Dictionary of special
-        max_unique_values_per_param: Optional[int]:
+        max_unique_values_per_param : Optional[int]
             Number of unique values per parameter. Used to discretize the parameter space.
             If `None` space discretization is disabled.
         """

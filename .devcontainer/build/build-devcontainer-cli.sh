@@ -10,20 +10,26 @@ set -eu
 scriptdir=$(dirname "$(readlink -f "$0")")
 cd "$scriptdir/"
 
+source ../common.sh
+
 # Build the helper container that has the devcontainer CLI for building the devcontainer.
 
 if [ ! -w /var/run/docker.sock ]; then
     echo "ERROR: $USER does not have write access to /var/run/docker.sock. Please add $USER to the docker group." >&2
     exit 1
 fi
-DOCKER_GID=$(stat -c'%g' /var/run/docker.sock)
+DOCKER_GID=$(stat $STAT_FORMAT_GID_ARGS /var/run/docker.sock)
 # Make this work inside a devcontainer as well.
 if [ -w /var/run/docker-host.sock ]; then
-    DOCKER_GID=$(stat -c'%g' /var/run/docker-host.sock)
+    DOCKER_GID=$(stat $STAT_FORMAT_GID_ARGS /var/run/docker-host.sock)
 fi
 
 export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-1}
+
+# TODO: Add multiplatform build support?
+#devcontainer_cli_build_args='--platform linux/amd64,linux/arm64'
 devcontainer_cli_build_args=''
+
 if docker buildx version 2>/dev/null; then
     devcontainer_cli_build_args+=' --progress=plain'
 else
@@ -33,10 +39,10 @@ fi
 if [ "${NO_CACHE:-}" == 'true' ]; then
     devcontainer_cli_build_args+=' --no-cache --pull'
 else
-    cacheFrom='mloscore.azurecr.io/devcontainer-cli:latest'
+    cacheFrom='mloscore.azurecr.io/devcontainer-cli'
     tmpdir=$(mktemp -d)
     devcontainer_cli_build_args+=" --cache-from $cacheFrom"
-    docker --config="$tmpdir" pull "$cacheFrom" || true
+    docker --config="$tmpdir" pull --platform linux/$(uname -m) "$cacheFrom" || true
     rmdir "$tmpdir"
 fi
 

@@ -25,7 +25,7 @@ class SupportsHostOps(Protocol):
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
@@ -43,7 +43,7 @@ class SupportsHostOps(Protocol):
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
@@ -61,7 +61,7 @@ class SupportsHostOps(Protocol):
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """

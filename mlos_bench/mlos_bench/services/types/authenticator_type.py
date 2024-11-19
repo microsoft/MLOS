@@ -39,6 +39,6 @@ class SupportsAuth(Protocol[T_co]):
 
         Returns
         -------
-        credential : T
+        credential : T_co
             Cloud-specific credential object.
         """

@@ -2,12 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""An interface to access the benchmark trial data stored in SQL DB."""
+"""An interface to access the benchmark trial data stored in SQL DB using the
+:py:class:`.TrialData` interface.
+"""
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
 import pandas
-from sqlalchemy import Engine
+from sqlalchemy.engine import Engine
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_trial_data import TrialData

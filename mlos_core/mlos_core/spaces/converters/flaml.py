@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Contains space converters for FLAML."""
+"""Contains space converters for :py:class:`~mlos_core.optimizers.flaml_optimizer`"""
 
 import sys
 from typing import TYPE_CHECKING, Dict
@@ -22,7 +22,10 @@ else:
 
 
 FlamlDomain: TypeAlias = flaml.tune.sample.Domain
+"""Flaml domain type alias."""
+
 FlamlSpace: TypeAlias = Dict[str, flaml.tune.sample.Domain]
+"""Flaml space type alias - a `Dict[str, FlamlDomain]`"""
 
 
 def configspace_to_flaml_space(

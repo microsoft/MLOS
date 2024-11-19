@@ -39,14 +39,48 @@ if TYPE_CHECKING:
     from mlos_bench.services.base_service import Service
     from mlos_bench.storage.base_storage import Storage
 
-# BaseTypeVar is a generic with a constraint of the three base classes.
 BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Scheduler", "Service", "Storage")
+"""BaseTypeVar is a generic with a constraint of the main base classes (e.g.,
+:py:class:`~mlos_bench.environments.base_environment.Environment`,
+:py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer`,
+:py:class:`~mlos_bench.schedulers.base_scheduler.Scheduler`,
+:py:class:`~mlos_bench.services.base_service.Service`,
+:py:class:`~mlos_bench.storage.base_storage.Storage`, etc.).
+"""
+
 BaseTypes = Union["Environment", "Optimizer", "Scheduler", "Service", "Storage"]
+"""Similar to :py:data:`.BaseTypeVar`, BaseTypes is a Union of the main base classes."""
+
+
+# Adjusted from https://github.com/python/cpython/blob/v3.11.10/Lib/distutils/util.py#L308
+# See Also: https://github.com/microsoft/MLOS/issues/865
+def strtobool(val: str) -> bool:
+    """
+    Convert a string representation of truth to true (1) or false (0).
+
+    Parameters
+    ----------
+    val : str
+        True values are 'y', 'yes', 't', 'true', 'on', and '1';
+        False values are 'n', 'no', 'f', 'false', 'off', and '0'.
+
+    Raises
+    ------
+    ValueError
+        If 'val' is anything else.
+    """
+    val = val.lower()
+    if val in {"y", "yes", "t", "true", "on", "1"}:
+        return True
+    elif val in {"n", "no", "f", "false", "off", "0"}:
+        return False
+    else:
+        raise ValueError(f"Invalid Boolean value: '{val}'")
 
 
 def preprocess_dynamic_configs(*, dest: dict, source: Optional[dict] = None) -> dict:
     """
-    Replaces all $name values in the destination config with the corresponding value
+    Replaces all ``$name`` values in the destination config with the corresponding value
     from the source config.
 
     Parameters
@@ -335,7 +369,7 @@ def utcify_timestamp(timestamp: datetime, *, origin: Literal["utc", "local"]) ->
 
     Parameters
     ----------
-    timestamp : datetime
+    timestamp : datetime.datetime
         A timestamp to convert to UTC.
         Note: The original datetime may or may not have tzinfo associated with it.
 
@@ -349,7 +383,7 @@ def utcify_timestamp(timestamp: datetime, *, origin: Literal["utc", "local"]) ->
 
     Returns
     -------
-    datetime
+    datetime.datetime
         A datetime with zoneinfo in UTC.
     """
     if timestamp.tzinfo is not None or origin == "local":

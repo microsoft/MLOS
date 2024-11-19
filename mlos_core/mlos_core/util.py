@@ -21,7 +21,7 @@ def config_to_dataframe(config: Configuration) -> pd.DataFrame:
 
     Returns
     -------
-    pd.DataFrame
+    pandas.DataFrame
         A DataFrame with a single row, containing the config's parameters.
     """
     return pd.DataFrame([dict(config)])
@@ -56,14 +56,14 @@ def normalize_config(
 
     Parameters
     ----------
-    config_space : ConfigurationSpace
+    config_space : ConfigSpace.ConfigurationSpace
         The parameter space to use.
     config : dict
         The configuration to convert.
 
     Returns
     -------
-    cs_config: Configuration
+    cs_config: ConfigSpace.Configuration
         A valid ConfigSpace configuration with inactive parameters removed.
     """
     cs_config = Configuration(config_space, values=config, allow_inactive_with_values=True)

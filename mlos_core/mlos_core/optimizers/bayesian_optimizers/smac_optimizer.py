@@ -3,9 +3,12 @@
 # Licensed under the MIT License.
 #
 """
-Contains the wrapper class for SMAC Bayesian optimizers.
+Contains the wrapper class for the :py:class:`.SmacOptimizer`.
 
-See Also: <https://automl.github.io/SMAC3/main/index.html>
+Notes
+-----
+See the `SMAC3 Documentation <https://automl.github.io/SMAC3/main/index.html>`_ for
+more details.
 """
 
 from logging import warning
@@ -84,8 +87,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Number of points evaluated at start to bootstrap the optimizer.
             Default depends on max_trials and number of parameters and max_ratio.
             Note: it can sometimes be useful to set this to 1 when pre-warming the
-            optimizer from historical data.
-            See Also: mlos_bench.optimizer.bulk_register
+            optimizer from historical data. See Also:
+            :py:meth:`mlos_bench.optimizers.base_optimizer.Optimizer.bulk_register`
 
         max_ratio : Optional[int]
             Maximum ratio of max_trials to be random configs to be evaluated
@@ -93,10 +96,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Useful if you want to explicitly control the number of random
             configs evaluated at start.
 
-        use_default_config: bool
+        use_default_config : bool
             Whether to use the default config for the first trial after random initialization.
 
-        n_random_probability: float
+        n_random_probability : float
             Probability of choosing to evaluate a random configuration during optimization.
             Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
         """
@@ -193,6 +196,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             if max_ratio is not None:
                 assert isinstance(max_ratio, float) and 0.0 <= max_ratio <= 1.0
                 initial_design_args["max_ratio"] = max_ratio
+            self._max_ratio = max_ratio
 
         # Use the default InitialDesign from SMAC.
         # (currently SBOL instead of LatinHypercube due to better uniformity
@@ -233,6 +237,18 @@ class SmacOptimizer(BaseBayesianOptimizer):
         self.cleanup()
 
     @property
+    def max_ratio(self) -> Optional[float]:
+        """
+        Gets the `max_ratio` parameter used in py:meth:`constructor <.__init__>` of this
+        SmacOptimizer.
+
+        Returns
+        -------
+        float
+        """
+        return self._max_ratio
+
+    @property
     def n_random_init(self) -> int:
         """
         Gets the number of random samples to use to initialize the optimizer's search
@@ -240,7 +256,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         Note: This may not be equal to the value passed to the initializer, due to
         logic present in the SMAC.
-        See Also: max_ratio
+
+        See Also
+        --------
+        :py:attr:`.max_ratio`
 
         Returns
         -------
