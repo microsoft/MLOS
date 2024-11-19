@@ -435,8 +435,8 @@ def test_mixed_numerics_type_input_space_types(
         assert isinstance(suggestion._config, pd.Series)
         assert set(suggestion._config.index) == {"x", "y"}
         # Check suggestion values are the expected dtype
-        assert isinstance(suggestion.config["x"], np.integer)  # type: ignore
-        assert isinstance(suggestion.config["y"], np.floating)  # type: ignore
+        assert isinstance(suggestion._config["x"], int)  # type: ignore
+        assert isinstance(suggestion._config["y"], float)  # type: ignore
         # Check that suggestion is in the space
         test_configuration = CS.Configuration(
             optimizer.parameter_space, suggestion._config.to_dict()
