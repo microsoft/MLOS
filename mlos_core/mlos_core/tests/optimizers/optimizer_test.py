@@ -246,7 +246,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     def objective(point: pd.Series) -> pd.Series:
         # Best value can be reached by tuning an 1-dimensional search space
         ret: pd.Series = pd.Series({"score": np.sin(point.x * point.y)})
-        assert np.isnan(ret.score) == False
+        assert pd.notna(ret.score)
         return ret
 
     input_space = CS.ConfigurationSpace(seed=1234)
