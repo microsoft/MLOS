@@ -77,7 +77,7 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
-    def inverse_transform(self, configurations: pd.Series) -> pd.Series:
+    def inverse_transform(self, configuration: pd.Series) -> pd.Series:
         """
         Translates a configuration, which belongs to the original parameter space, to
         the target parameter space. This method is called by the `register` method of
@@ -87,16 +87,16 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
 
         Parameters
         ----------
-        configurations : pd.Series
+        configuration : pd.Series
             A Series of configuration parameters, which belong to the original parameter space.
-            The columns are the parameter names the original parameter space and the
+            The indices are the parameter names the original parameter space and the
             rows are the configurations.
 
         Returns
         -------
         configuration : pd.Series
             Series of the translated configurations / parameters.
-            The columns are the parameter names of the target parameter space and
+            The indices are the parameter names of the target parameter space and
             the rows are the configurations.
         """
         pass  # pylint: disable=unnecessary-pass # pragma: no cover

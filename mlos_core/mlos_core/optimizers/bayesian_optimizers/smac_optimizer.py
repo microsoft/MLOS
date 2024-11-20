@@ -153,7 +153,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             self.optimizer_parameter_space,
             objectives=self._optimization_targets,
             name=run_name,
-            output_directory=Path(output_directory),
+            output_directory=Path(output_directory) if output_directory else Path("smac3_output"),
             deterministic=True,
             use_default_config=use_default_config,
             n_trials=max_trials,
@@ -294,7 +294,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     def _register(
         self,
-        observations: Optional[Union[Observation | Observations]] = None,
+        observations: Optional[Union[Observation, Observations]] = None,
     ) -> None:
         """
         Registers the given configs and scores.
@@ -375,7 +375,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         config_sr = pd.Series(dict(trial.config), dtype=object)
         return Suggestion(config=config_sr, context=context, metadata=None)
 
-    def register_pending(self, *, pending: Suggestion) -> None:
+    def register_pending(self, pending: Suggestion) -> None:
         raise NotImplementedError()
 
     def surrogate_predict(self, suggestion: Suggestion) -> npt.NDArray:

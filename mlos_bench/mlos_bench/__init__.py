@@ -105,7 +105,8 @@ The entry point for these configs can be found `here
 Here's the shell command you'd actually run:
 # mlos_bench --config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc --globals experiment_test_local.jsonc --tunable_values tunable-values/tunable-values-local.jsonc
 >>> # Now we run the command and check the output.
->>> result = run(cmd, shell=True, capture_output=True, text=True, check=True)
+>>> run(cmd, shell=True, capture_output=True, text=True)
+>>> result = run(cmd, shell=True, capture_output=True, text=True)
 >>> assert result.returncode == 0
 >>> lines = result.stderr.splitlines()
 >>> first_line = lines[0]

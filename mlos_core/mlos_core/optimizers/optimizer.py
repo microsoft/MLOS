@@ -85,7 +85,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     def register(
         self,
-        observations: Optional[Union[Observation | Observations]],
+        observations: Optional[Union[Observation, Observations]],
     ) -> None:
         """
         Register all observations at once. Exactly one of observations or observation
@@ -104,7 +104,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             for obs in observations.to_list():
                 self.register_single(observation=obs)
 
-    def register_single(self, *, observation: Observation) -> None:
+    def register_single(self, observation: Observation) -> None:
         """
         Wrapper method, which employs the space adapter (if any), before registering the
         configs and scores.
@@ -143,7 +143,7 @@ class BaseOptimizer(metaclass=ABCMeta):
     @abstractmethod
     def _register(
         self,
-        observations: Optional[Union[Observation | Observations]] = None,
+        observations: Optional[Union[Observation, Observations]] = None,
     ) -> None:
         """
         Registers the given configs and scores.
@@ -157,7 +157,6 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     def suggest(
         self,
-        *,
         context: Optional[pd.Series] = None,
         defaults: bool = False,
     ) -> Suggestion:
@@ -200,7 +199,6 @@ class BaseOptimizer(metaclass=ABCMeta):
     @abstractmethod
     def _suggest(
         self,
-        *,
         context: Optional[pd.Series] = None,
     ) -> Suggestion:
         """
@@ -219,7 +217,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
-    def register_pending(self, *, pending: Suggestion) -> None:
+    def register_pending(self, pending: Suggestion) -> None:
         """
         Registers the given suggestion as "pending". That is it say, it has been
         suggested by the optimizer, and an experiment trial has been started. This can
@@ -247,7 +245,6 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     def get_best_observations(
         self,
-        *,
         n_max: int = 1,
     ) -> Observations:
         """
@@ -285,7 +282,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         cleanup.
         """
 
-    def _from_1hot(self, *, config: npt.NDArray) -> pd.DataFrame:
+    def _from_1hot(self, config: npt.NDArray) -> pd.DataFrame:
         """Convert numpy array from one-hot encoding to a DataFrame with categoricals
         and ints in proper columns.
         """
@@ -307,7 +304,7 @@ class BaseOptimizer(metaclass=ABCMeta):
                     j += 1
         return pd.DataFrame(df_dict)
 
-    def _to_1hot(self, *, config: Union[pd.DataFrame, pd.Series]) -> npt.NDArray:
+    def _to_1hot(self, config: Union[pd.DataFrame, pd.Series]) -> npt.NDArray:
         """Convert pandas DataFrame to one-hot-encoded numpy array."""
         n_cols = 0
         n_rows = config.shape[0] if config.ndim > 1 else 1

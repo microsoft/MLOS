@@ -22,7 +22,7 @@ class RandomOptimizer(BaseOptimizer):
 
     def _register(
         self,
-        observations: Optional[Union[Observation | Observations]] = None,
+        observations: Optional[Union[Observation, Observations]] = None,
     ) -> None:
         """
         Registers the given configs and scores.
@@ -53,7 +53,6 @@ class RandomOptimizer(BaseOptimizer):
 
     def _suggest(
         self,
-        *,
         context: Optional[pd.Series] = None,
     ) -> Suggestion:
         """
@@ -80,6 +79,6 @@ class RandomOptimizer(BaseOptimizer):
             metadata=None,
         )
 
-    def register_pending(self, *, pending: Suggestion) -> None:
+    def register_pending(self, pending: Suggestion) -> None:
         raise NotImplementedError()
         # self._pending_observations.append((configs, context))

@@ -27,5 +27,5 @@ class IdentityAdapter(BaseSpaceAdapter):
     def transform(self, configuration: pd.Series) -> pd.Series:
         return configuration
 
-    def inverse_transform(self, configurations: pd.Series) -> pd.Series:
-        return configurations
+    def inverse_transform(self, configuration: pd.Series) -> pd.Series:
+        return configuration

@@ -89,7 +89,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         # Initialize config values scaler: from (-1, 1) to (0, 1) range
         config_scaler = MinMaxScaler(feature_range=(0, 1))
         ones_vector = np.ones(len(list(self.orig_parameter_space.values())))
-        config_scaler.fit([-ones_vector, ones_vector])
+        config_scaler.fit(np.array([-ones_vector, ones_vector]))
         self._config_scaler = config_scaler
 
         # Generate random mapping from low-dimensional space to original config space
@@ -134,23 +134,110 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
                     "previously by the optimizer can be registered."
                 )
 
-            # ...yet, we try to support that by implementing an approximate
-            # reverse mapping using pseudo-inverse matrix.
-            if getattr(self, "_pinv_matrix", None) is None:
-                self._try_generate_approx_inverse_mapping()
-
-            # Replace NaNs with zeros for inactive hyperparameters
-            config_vector = np.nan_to_num(config.get_array(), nan=0.0)
-            # Perform approximate reverse mapping
-            # NOTE: applying special value biasing is not possible
-            vector = self._config_scaler.inverse_transform([config_vector])[0]
-            target_config_vector = self._pinv_matrix.dot(vector)
-            target_config = ConfigSpace.Configuration(
-                self.target_parameter_space,
-                vector=target_config_vector,
-            )
+            target_config = self._try_inverse_transform_config(config)
 
         return pd.Series(target_config, index=list(self.target_parameter_space.keys()))
+
+    def _try_inverse_transform_config(
+        self,
+        config: ConfigSpace.Configuration,
+    ) -> ConfigSpace.Configuration:
+        """
+        Attempts to generate an inverse mapping of the given configuration that wasn't
+        previously registered.
+
+        Parameters
+        ----------
+        configuration : ConfigSpace.Configuration
+            Configuration in the original high-dimensional space.
+
+        Returns
+        -------
+        ConfigSpace.Configuration
+            Configuration in the low-dimensional space.
+
+        Raises
+        ------
+        ValueError
+            On conversion errors.
+        """
+        # ...yet, we try to support that by implementing an approximate
+        # reverse mapping using pseudo-inverse matrix.
+        if getattr(self, "_pinv_matrix", None) is None:
+            self._try_generate_approx_inverse_mapping()
+
+        # Replace NaNs with zeros for inactive hyperparameters
+        config_vector = np.nan_to_num(config.get_array(), nan=0.0)
+        # Perform approximate reverse mapping
+        # NOTE: applying special value biasing is not possible
+        vector: npt.NDArray = self._config_scaler.inverse_transform(np.array([config_vector]))[0]
+        target_config_vector: npt.NDArray = self._pinv_matrix.dot(vector)
+        # Clip values to to [-1, 1] range of the low dimensional space.
+        for idx, value in enumerate(target_config_vector):
+            target_config_vector[idx] = np.clip(value, -1, 1)
+        if self._q_scaler is not None:
+            # If the max_unique_values_per_param is set, we need to scale
+            # the low dimension space back to the discretized space as well.
+            target_config_vector = self._q_scaler.inverse_transform(
+                np.array([target_config_vector])
+            )[0]
+            assert isinstance(target_config_vector, np.ndarray)
+            # Clip values to [1, max_value] range (floating point errors may occur).
+            for idx, value in enumerate(target_config_vector):
+                target_config_vector[idx] = int(np.clip(value, 1, self._q_scaler.data_max_[idx]))
+            target_config_vector = target_config_vector.astype(int)
+        # Convert the vector to a dictionary.
+        target_config_dict = dict(
+            zip(
+                self.target_parameter_space.keys(),
+                target_config_vector,
+            )
+        )
+        target_config = ConfigSpace.Configuration(
+            self.target_parameter_space,
+            values=target_config_dict,
+            # This method results in hyperparameter type conversion issues
+            # (e.g., float instead of int), so we use the values dict instead.
+            # vector=target_config_vector,
+        )
+
+        # Check to see if the approximate reverse mapping looks OK.
+        # Note: we know this isn't 100% accurate, so this is just a warning and
+        # mostly meant for internal debugging.
+        configuration_dict = dict(config)
+        double_checked_config = self._transform(dict(target_config))
+        double_checked_config = {
+            # Skip the special values that aren't in the original space.
+            k: v
+            for k, v in double_checked_config.items()
+            if k in configuration_dict
+        }
+        if double_checked_config != configuration_dict and (
+            os.environ.get("MLOS_DEBUG", "false").lower() in {"1", "true", "y", "yes"}
+        ):
+            warn(
+                (
+                    f"Note: Configuration {configuration_dict} was inverse transformed to "
+                    f"{dict(target_config)} and then back to {double_checked_config}. "
+                    "This is an approximate reverse mapping for previously unregistered "
+                    "configurations, so this is just a warning."
+                ),
+                UserWarning,
+            )
+
+        # But the inverse mapping should at least be valid in the target space.
+        try:
+            ConfigSpace.Configuration(
+                self.target_parameter_space,
+                values=target_config,
+            ).check_valid_configuration()
+        except ConfigSpace.exceptions.IllegalValueError as e:
+            raise ValueError(
+                f"Invalid configuration {target_config} generated by "
+                f"inverse mapping of {config}:\n{e}"
+            ) from e
+
+        return target_config
 
     def transform(self, configuration: pd.Series) -> pd.Series:
         target_values_dict = configuration.to_dict()
@@ -230,7 +317,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
             q_scaler = MinMaxScaler(feature_range=(-1, 1))
             ones_vector = np.ones(num_low_dims)
             max_value_vector = ones_vector * max_unique_values_per_param
-            q_scaler.fit([ones_vector, max_value_vector])
+            q_scaler.fit(np.array([ones_vector, max_value_vector]))
 
         self._q_scaler = q_scaler
 
@@ -262,7 +349,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
 
         if self._q_scaler is not None:
             # Scale parameter values from [1, max_value] to [-1, 1]
-            low_dim_config_values = self._q_scaler.transform([low_dim_config_values])[0]
+            low_dim_config_values = self._q_scaler.transform(np.array([low_dim_config_values]))[0]
 
         # Project low-dim point to original parameter space
         original_config_values = [
@@ -270,7 +357,9 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
             for idx in range(len(original_parameters))
         ]
         # Scale parameter values to [0, 1]
-        original_config_values = self._config_scaler.transform([original_config_values])[0]
+        original_config_values = self._config_scaler.transform(np.array([original_config_values]))[
+            0
+        ]
 
         original_config = {}
         for param, norm_value in zip(original_parameters, original_config_values):
@@ -477,7 +566,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
 
         # Compute pseudo-inverse matrix
         try:
-            self._pinv_matrix = pinv(proj_matrix)
+            self._pinv_matrix = pinv(proj_matrix)  # type: ignore
         except LinAlgError as err:
             raise RuntimeError(
                 f"Unable to generate reverse mapping using pseudo-inverse matrix: {repr(err)}"

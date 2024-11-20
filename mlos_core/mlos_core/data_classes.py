@@ -315,7 +315,7 @@ class Suggestion:
         )
 
     def to_configspace_config(self, space: ConfigurationSpace) -> Configuration:
-        return Configuration(space, values=self._config.to_dict())
+        return Configuration(space, values=self._config.dropna().to_dict())
 
     def __repr__(self) -> str:
         return f"Suggestion(config={self._config}, context={self._context}, metadata={self._metadata})"

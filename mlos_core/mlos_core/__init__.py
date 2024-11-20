@@ -62,39 +62,39 @@ Examples
 ...     space_adapter_kwargs=space_adpaters_kwargs,
 ... )
 >>> # Get a new configuration suggestion.
->>> (config_df, _metadata_df) = opt.suggest()
+>>> suggestion = opt.suggest()
 >>> # Examine the suggested configuration.
->>> assert len(config_df) == 1
->>> config_df.iloc[0]
+>>> assert len(suggestion._config) == 1
+>>> suggestion._config
 x    3
-Name: 0, dtype: int64
+dtype: object
 >>> # Register the configuration and its corresponding target value
 >>> score = 42 # a made up score
->>> scores_df = pandas.DataFrame({"y": [score]})
->>> opt.register(configs=config_df, scores=scores_df)
+>>> scores_sr = pandas.Series({"y": score})
+>>> opt.register(suggestion.complete(scores_sr))
 >>> # Get a new configuration suggestion.
->>> (config_df, _metadata_df) = opt.suggest()
->>> config_df.iloc[0]
+>>> suggestion = opt.suggest()
+>>> suggestion._config
 x    10
-Name: 0, dtype: int64
+dtype: object
 >>> score = 7 # a better made up score
 >>> # Optimizers minimize by convention, so a lower score is better
 >>> # You can use a negative score to maximize values instead
 >>> #
->>> # Convert it to a DataFrame again
->>> scores_df = pandas.DataFrame({"y": [score]})
->>> opt.register(configs=config_df, scores=scores_df)
+>>> # Convert it to a Series again
+>>> scores_sr = pandas.Series({"y": score})
+>>> opt.register(suggestion.complete(scores_sr))
 >>> # Get the best observations.
->>> (configs_df, scores_df, _contexts_df) = opt.get_best_observations()
+>>> observations = opt.get_best_observations()
 >>> # The default is to only return one
->>> assert len(configs_df) == 1
->>> assert len(scores_df) == 1
->>> configs_df.iloc[0]
-x    10
-Name: 1, dtype: int64
->>> scores_df.iloc[0]
-y    7
-Name: 1, dtype: int64
+>>> assert len(observations._config) == 1
+>>> assert len(observations._score) == 1
+>>> observations._config
+    x
+0  10
+>>> observations._score
+   y
+0  7
 
 Notes
 -----

@@ -123,7 +123,7 @@ def test_num_low_dims(
 
         # High-dim (i.e., original) config should be valid
         orig_config = CS.Configuration(input_space, values=orig_config_sr.to_dict())
-        input_space.check_valid_configuration(orig_config)
+        orig_config.check_valid_configuration()
 
         # Transform high-dim config back to low-dim
         target_config_sr = adapter.inverse_transform(orig_config_sr)
@@ -516,7 +516,7 @@ def test_llamatune_pipeline(
         orig_config_sr = adapter.transform(sampled_config_sr)
         # High-dim (i.e., original) config should be valid
         orig_config = CS.Configuration(input_space, values=orig_config_sr.to_dict())
-        input_space.check_valid_configuration(orig_config)
+        orig_config.check_valid_configuration()
 
         # Transform high-dim config back to low-dim
         target_config_sr = adapter.inverse_transform(orig_config_sr)

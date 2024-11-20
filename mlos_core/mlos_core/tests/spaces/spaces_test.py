@@ -176,9 +176,9 @@ class TestFlamlConversion(BaseConversion):
 
     conversion_function = staticmethod(configspace_to_flaml_space)
 
-    def sample(
+    def sample(  # type: ignore
         self,
-        config_space: FlamlSpace,  # type: ignore[override]
+        config_space: FlamlSpace,
         n_samples: int = 1,
     ) -> npt.NDArray:
         assert isinstance(config_space, dict)

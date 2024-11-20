@@ -150,6 +150,6 @@ class OptimizerFactory:
             optimization_targets=optimization_targets,
             space_adapter=space_adapter,
             **optimizer_kwargs,
-        )
+        )  # type: ignore
 
         return optimizer

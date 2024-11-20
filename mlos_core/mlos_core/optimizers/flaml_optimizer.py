@@ -102,7 +102,7 @@ class FlamlOptimizer(BaseOptimizer):
 
     def _register(
         self,
-        observations: Optional[Union[Observation | Observations]] = None,
+        observations: Optional[Union[Observation, Observations]] = None,
     ) -> None:
         """
         Registers the given config and scores.
@@ -142,7 +142,6 @@ class FlamlOptimizer(BaseOptimizer):
 
     def _suggest(
         self,
-        *,
         context: Optional[pd.Series] = None,
     ) -> Suggestion:
         """
@@ -168,7 +167,7 @@ class FlamlOptimizer(BaseOptimizer):
         config: dict = self._get_next_config()
         return Suggestion(config=pd.Series(config, dtype=object), context=context, metadata=None)
 
-    def register_pending(self, *, pending: Suggestion) -> None:
+    def register_pending(self, pending: Suggestion) -> None:
         raise NotImplementedError()
 
     def _target_function(self, config: dict) -> Union[dict, None]:
