@@ -73,6 +73,40 @@ def config_to_series(config: Configuration) -> pd.Series:
     return series
 
 
+def drop_nulls(d: dict) -> dict:
+    """
+    Remove all key-value pairs where the value is None.
+
+    Parameters
+    ----------
+    d : dict
+        The dictionary to clean.
+
+    Returns
+    -------
+    dict
+        The cleaned dictionary.
+    """
+    return {k: v for k, v in d.items() if v is not None}
+
+
+def drop_nulls(d: dict) -> dict:
+    """
+    Remove all key-value pairs where the value is None.
+
+    Parameters
+    ----------
+    d : dict
+        The dictionary to clean.
+
+    Returns
+    -------
+    dict
+        The cleaned dictionary.
+    """
+    return {k: v for k, v in d.items() if v is not None}
+
+
 def normalize_config(
     config_space: ConfigurationSpace,
     config: Union[Configuration, dict],
@@ -85,14 +119,14 @@ def normalize_config(
 
     Parameters
     ----------
-    config_space : ConfigurationSpace
+    config_space : ConfigSpace.ConfigurationSpace
         The parameter space to use.
     config : dict
         The configuration to convert.
 
     Returns
     -------
-    cs_config: Configuration
+    cs_config: ConfigSpace.Configuration
         A valid ConfigSpace configuration with inactive parameters removed.
     """
     cs_config = Configuration(config_space, values=config, allow_inactive_with_values=True)

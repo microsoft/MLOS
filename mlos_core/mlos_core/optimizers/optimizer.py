@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Contains the BaseOptimizer abstract class."""
+"""Contains the :py:class:`.BaseOptimizer` abstract class."""
 
 import collections
 from abc import ABCMeta, abstractmethod
@@ -20,7 +20,10 @@ from mlos_core.util import config_to_series
 
 
 class BaseOptimizer(metaclass=ABCMeta):
-    """Optimizer abstract base class defining the basic interface."""
+    """Optimizer abstract base class defining the basic interface:
+    :py:meth:`~.BaseOptimizer.suggest`,
+    :py:meth:`~.BaseOptimizer.register`,
+    """
 
     # pylint: disable=too-many-instance-attributes
 
@@ -41,15 +44,23 @@ class BaseOptimizer(metaclass=ABCMeta):
             The parameter space to optimize.
         optimization_targets : List[str]
             The names of the optimization targets to minimize.
+            To maximize a target, use the negative of the target when registering scores.
         objective_weights : Optional[List[float]]
             Optional list of weights of optimization targets.
         space_adapter : BaseSpaceAdapter
             The space adapter class to employ for parameter space transformations.
         """
         self.parameter_space: ConfigSpace.ConfigurationSpace = parameter_space
+        """The parameter space to optimize."""
+
         self.optimizer_parameter_space: ConfigSpace.ConfigurationSpace = (
             parameter_space if space_adapter is None else space_adapter.target_parameter_space
         )
+        """
+        The parameter space actually used by the optimizer.
+
+        (in case a :py:mod:`SpaceAdapter <mlos_core.spaces.adapters>` is used)
+        """
 
         if space_adapter is not None and space_adapter.orig_parameter_space != parameter_space:
             raise ValueError("Given parameter space differs from the one given to space adapter")

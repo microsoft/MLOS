@@ -4,11 +4,14 @@
 #
 """TunableGroups definition."""
 import copy
+import logging
 from typing import Dict, Generator, Iterable, Mapping, Optional, Tuple, Union
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
 from mlos_bench.tunables.tunable import Tunable, TunableValue
+
+_LOG = logging.getLogger(__name__)
 
 
 class TunableGroups:
@@ -175,7 +178,7 @@ class TunableGroups:
 
         Returns
         -------
-        [(tunable, group), ...] : iter(Tunable, CovariantTunableGroup)
+        [(tunable, group), ...] : Generator[Tuple[Tunable, CovariantTunableGroup], None, None]
             An iterator over all tunables in all groups. Each element is a 2-tuple
             of an instance of the Tunable parameter and covariant group it belongs to.
         """
@@ -346,11 +349,20 @@ class TunableGroups:
         param_values : Mapping[str, TunableValue]
             Dictionary mapping Tunable parameter names to new values.
 
+            As a special behavior when the mapping is empty the method will restore
+            the default values rather than no-op.
+            This allows an empty dictionary in json configs to be used to reset the
+            tunables to defaults without having to copy the original values from the
+            tunable_params definition.
+
         Returns
         -------
         self : TunableGroups
             Self-reference for chaining.
         """
+        if not param_values:
+            _LOG.info("Empty tunable values set provided. Resetting all tunables to defaults.")
+            return self.restore_defaults()
         for key, value in param_values.items():
             self[key] = value
         return self

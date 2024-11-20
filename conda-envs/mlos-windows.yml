@@ -12,18 +12,18 @@ dependencies:
   - pycodestyle
   - pydocstyle
   - flake8
-  - build
+  - python-build
   - jupyter
   - ipykernel
   - nb_conda_kernels
-  - matplotlib
+  - matplotlib-base<3.9
   - seaborn
   - pandas
   - pyarrow
   - swig
-  - libpq
-  # FIXME: https://github.com/microsoft/MLOS/issues/727
-  - python<3.12
+  # FIXME: Temporarily avoid broken libpq that's missing client headers.
+  - libpq<17.0
+  - python
   # Install an SMAC requirement pre-compiled from conda-forge.
   # This also requires a more recent vs2015_runtime from conda-forge.
   - pyrfr>=0.9.0

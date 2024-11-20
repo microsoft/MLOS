@@ -26,7 +26,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  DevContainer:
+  DevContainerLintBuildTestPublish:
+    name: DevContainer Lint/Build/Test/Publish
+
     runs-on: ubuntu-latest
 
     permissions:
@@ -128,11 +130,23 @@ jobs:
       run: |
         docker exec --user vscode --env USER=vscode mlos-devcontainer printenv
 
+    - name: Check that github.com is in the ssh known_hosts file
+      run: |
+        docker exec --user vscode --env USER=vscode mlos-devcontainer grep ^github.com /home/vscode/.ssh/known_hosts
+
     - name: Update the conda env in the devcontainer
       timeout-minutes: 10
       run: |
         set -x
         docker exec --user vscode --env USER=vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v conda-env
+
+    - name: Verify expected version of python in conda env
+      timeout-minutes: 2
+      run: |
+        set -x
+        docker exec --user vscode --env USER=vscode mlos-devcontainer \
+        conda run -n mlos python -c \
+          'from sys import version_info as vers; assert (vers.major, vers.minor) == (3, 13), f"Unexpected python version: {vers}"'
 
     - name: Check for missing licenseheaders
       timeout-minutes: 3
@@ -184,7 +198,6 @@ jobs:
         rm -f doc/build/html/htmlcov/.gitignore
 
     - uses: actions/upload-artifact@v4
-      if: github.ref == 'refs/heads/main'
       with:
         name: docs
         path: doc/build/html
@@ -232,10 +245,10 @@ jobs:
       run: |
         set -x
         image_tag=''
-        if [ "${{ github.ref }}" == 'refs/heads/main' ]; then
-          image_tag='latest'
-        elif [ "${{ github.ref_type }}" == 'tag' ]; then
+        if [ "${{ github.ref_type }}" == 'tag' ]; then
           image_tag="${{ github.ref_name }}"
+        elif [ "${{ github.ref }}" == 'refs/heads/main' ]; then
+          image_tag='latest'
         fi
         if [ -z "$image_tag" ]; then
           echo "ERROR: Unhandled event condition or ref: event=${{ github.event}}, ref=${{ github.ref }}, ref_type=${{ github.ref_type }}"
@@ -247,9 +260,12 @@ jobs:
         docker tag mlos-devcontainer:latest ${{ secrets.ACR_LOGINURL }}/mlos-devcontainer:$image_tag
         docker push ${{ secrets.ACR_LOGINURL }}/mlos-devcontainer:$image_tag
 
-  DeployDocs:
+
+  PublishDocs:
+    name: Publish Documentation
+
     if: github.ref == 'refs/heads/main'
-    needs: DevContainer
+    needs: DevContainerLintBuildTestPublish
     runs-on: ubuntu-latest
 
     # Required for github-pages-deploy-action to push to the gh-pages branch.

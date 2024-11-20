@@ -13,33 +13,57 @@ import pandas as pd
 import pytest
 
 from mlos_core.spaces.adapters import LlamaTuneAdapter
+from mlos_core.spaces.converters.util import (
+    QUANTIZATION_BINS_META_KEY,
+    monkey_patch_cs_quantization,
+)
+
+# Explicitly test quantized values with llamatune space adapter.
+# TODO: Add log scale sampling tests as well.
 
 
-def construct_parameter_space(
+def construct_parameter_space(  # pylint: disable=too-many-arguments
+    *,
     n_continuous_params: int = 0,
+    n_quantized_continuous_params: int = 0,
     n_integer_params: int = 0,
+    n_quantized_integer_params: int = 0,
     n_categorical_params: int = 0,
     seed: int = 1234,
 ) -> CS.ConfigurationSpace:
     """Helper function for construct an instance of `ConfigSpace.ConfigurationSpace`."""
-    input_space = CS.ConfigurationSpace(seed=seed)
-
-    for idx in range(n_continuous_params):
-        input_space.add_hyperparameter(
-            CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64)
-        )
-    for idx in range(n_integer_params):
-        input_space.add_hyperparameter(
-            CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=-1, upper=256)
-        )
-    for idx in range(n_categorical_params):
-        input_space.add_hyperparameter(
-            CS.CategoricalHyperparameter(
-                name=f"str_{idx}", choices=[f"option_{idx}" for idx in range(5)]
-            )
-        )
-
-    return input_space
+    input_space = CS.ConfigurationSpace(
+        seed=seed,
+        space=[
+            *(
+                CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64)
+                for idx in range(n_continuous_params)
+            ),
+            *(
+                CS.UniformFloatHyperparameter(
+                    name=f"cont_{idx}", lower=0, upper=64, meta={QUANTIZATION_BINS_META_KEY: 6}
+                )
+                for idx in range(n_quantized_continuous_params)
+            ),
+            *(
+                CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=-1, upper=256)
+                for idx in range(n_integer_params)
+            ),
+            *(
+                CS.UniformIntegerHyperparameter(
+                    name=f"int_{idx}", lower=0, upper=256, meta={QUANTIZATION_BINS_META_KEY: 17}
+                )
+                for idx in range(n_quantized_integer_params)
+            ),
+            *(
+                CS.CategoricalHyperparameter(
+                    name=f"str_{idx}", choices=[f"option_{idx}" for idx in range(5)]
+                )
+                for idx in range(n_categorical_params)
+            ),
+        ],
+    )
+    return monkey_patch_cs_quantization(input_space)
 
 
 @pytest.mark.parametrize(
@@ -53,6 +77,13 @@ def construct_parameter_space(
                 {"n_continuous_params": int(num_target_space_dims * num_orig_space_factor)},
                 {"n_integer_params": int(num_target_space_dims * num_orig_space_factor)},
                 {"n_categorical_params": int(num_target_space_dims * num_orig_space_factor)},
+                {"n_categorical_params": int(num_target_space_dims * num_orig_space_factor)},
+                {"n_quantized_integer_params": int(num_target_space_dims * num_orig_space_factor)},
+                {
+                    "n_quantized_continuous_params": int(
+                        num_target_space_dims * num_orig_space_factor
+                    )
+                },
                 # Mix of all three types
                 {
                     "n_continuous_params": int(num_target_space_dims * num_orig_space_factor / 3),
@@ -92,7 +123,7 @@ def test_num_low_dims(
 
         # High-dim (i.e., original) config should be valid
         orig_config = CS.Configuration(input_space, values=orig_config_sr.to_dict())
-        input_space.check_configuration(orig_config)
+        input_space.check_valid_configuration(orig_config)
 
         # Transform high-dim config back to low-dim
         target_config_sr = adapter.inverse_transform(orig_config_sr)
@@ -126,11 +157,11 @@ def test_special_parameter_values_validation() -> None:
     dictionary.
     """
     input_space = CS.ConfigurationSpace(seed=1234)
-    input_space.add_hyperparameter(
+    input_space.add(
         CS.CategoricalHyperparameter(name="str", choices=[f"choice_{idx}" for idx in range(5)])
     )
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="cont", lower=-1, upper=100))
-    input_space.add_hyperparameter(CS.UniformIntegerHyperparameter(name="int", lower=0, upper=100))
+    input_space.add(CS.UniformFloatHyperparameter(name="cont", lower=-1, upper=100))
+    input_space.add(CS.UniformIntegerHyperparameter(name="int", lower=0, upper=100))
 
     # Only UniformIntegerHyperparameters are currently supported
     with pytest.raises(NotImplementedError):
@@ -218,12 +249,8 @@ def gen_random_configs(adapter: LlamaTuneAdapter, num_configs: int) -> Iterator[
 def test_special_parameter_values_biasing() -> None:  # pylint: disable=too-complex
     """Tests LlamaTune's special parameter values biasing methodology."""
     input_space = CS.ConfigurationSpace(seed=1234)
-    input_space.add_hyperparameter(
-        CS.UniformIntegerHyperparameter(name="int_1", lower=0, upper=100)
-    )
-    input_space.add_hyperparameter(
-        CS.UniformIntegerHyperparameter(name="int_2", lower=0, upper=100)
-    )
+    input_space.add(CS.UniformIntegerHyperparameter(name="int_1", lower=0, upper=100))
+    input_space.add(CS.UniformIntegerHyperparameter(name="int_2", lower=0, upper=100))
 
     num_configs = 400
     bias_percentage = LlamaTuneAdapter.DEFAULT_SPECIAL_PARAM_VALUE_BIASING_PERCENTAGE
@@ -302,37 +329,29 @@ def test_special_parameter_values_biasing() -> None:  # pylint: disable=too-comp
             special_values_instances["int_2"][100] += 1
 
     assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_instances["int_1"][0]
-    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_instances["int_1"][
-        1
-    ]
-    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_instances["int_2"][
-        2
-    ]
-    assert (1 - eps) * int(num_configs * bias_percentage * 1.5) <= special_values_instances[
-        "int_2"
-    ][100]
+    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= (
+        special_values_instances["int_1"][1]
+    )
+    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= (
+        special_values_instances["int_2"][2]
+    )
+    assert (1 - eps) * int(num_configs * bias_percentage * 1.5) <= (
+        special_values_instances["int_2"][100]
+    )
 
 
 def test_max_unique_values_per_param() -> None:
     """Tests LlamaTune's parameter values discretization implementation."""
     # Define config space with a mix of different parameter types
     input_space = CS.ConfigurationSpace(seed=1234)
-    input_space.add_hyperparameter(
+    input_space.add(
         CS.UniformFloatHyperparameter(name="cont_1", lower=0, upper=5),
     )
-    input_space.add_hyperparameter(
-        CS.UniformFloatHyperparameter(name="cont_2", lower=1, upper=100)
-    )
-    input_space.add_hyperparameter(
-        CS.UniformIntegerHyperparameter(name="int_1", lower=1, upper=10)
-    )
-    input_space.add_hyperparameter(
-        CS.UniformIntegerHyperparameter(name="int_2", lower=0, upper=2048)
-    )
-    input_space.add_hyperparameter(
-        CS.CategoricalHyperparameter(name="str_1", choices=["on", "off"])
-    )
-    input_space.add_hyperparameter(
+    input_space.add(CS.UniformFloatHyperparameter(name="cont_2", lower=1, upper=100))
+    input_space.add(CS.UniformIntegerHyperparameter(name="int_1", lower=1, upper=10))
+    input_space.add(CS.UniformIntegerHyperparameter(name="int_2", lower=0, upper=2048))
+    input_space.add(CS.CategoricalHyperparameter(name="str_1", choices=["on", "off"]))
+    input_space.add(
         CS.CategoricalHyperparameter(name="str_2", choices=[f"choice_{idx}" for idx in range(10)])
     )
 
@@ -368,6 +387,12 @@ def test_max_unique_values_per_param() -> None:
                 {"n_continuous_params": int(num_target_space_dims * num_orig_space_factor)},
                 {"n_integer_params": int(num_target_space_dims * num_orig_space_factor)},
                 {"n_categorical_params": int(num_target_space_dims * num_orig_space_factor)},
+                {"n_quantized_integer_params": int(num_target_space_dims * num_orig_space_factor)},
+                {
+                    "n_quantized_continuous_params": int(
+                        num_target_space_dims * num_orig_space_factor
+                    )
+                },
                 # Mix of all three types
                 {
                     "n_continuous_params": int(num_target_space_dims * num_orig_space_factor / 3),
@@ -420,7 +445,7 @@ def test_approx_inverse_mapping(
             adapter.target_parameter_space,
             values=target_config_sr.to_dict(),
         )
-        adapter.target_parameter_space.check_configuration(target_config)
+        target_config.check_valid_configuration()
 
     # Test inverse transform with 100 random configs
     for _ in range(100):
@@ -432,7 +457,7 @@ def test_approx_inverse_mapping(
             adapter.target_parameter_space,
             values=target_config_sr.to_dict(),
         )
-        adapter.target_parameter_space.check_configuration(target_config)
+        target_config.check_valid_configuration()
 
 
 @pytest.mark.parametrize(
@@ -491,7 +516,7 @@ def test_llamatune_pipeline(
         orig_config_sr = adapter.transform(sampled_config_sr)
         # High-dim (i.e., original) config should be valid
         orig_config = CS.Configuration(input_space, values=orig_config_sr.to_dict())
-        input_space.check_configuration(orig_config)
+        input_space.check_valid_configuration(orig_config)
 
         # Transform high-dim config back to low-dim
         target_config_sr = adapter.inverse_transform(orig_config_sr)

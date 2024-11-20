@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Contains the RandomOptimizer class."""
+"""RandomOptimizer class."""
 
 from typing import Optional, Union
 from warnings import warn
@@ -15,13 +15,9 @@ from mlos_core.optimizers.optimizer import BaseOptimizer
 
 class RandomOptimizer(BaseOptimizer):
     """
-    Optimizer class that produces random suggestions. Useful for baseline comparison
-    against Bayesian optimizers.
+    Optimizer class that produces random suggestions.
 
-    Parameters
-    ----------
-    parameter_space : ConfigSpace.ConfigurationSpace
-        The parameter space to optimize.
+    Useful for baseline comparison against Bayesian optimizers.
     """
 
     def _register(

@@ -2,7 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Contains the FlamlOptimizer class."""
+"""
+Contains the :py:class:`.FlamlOptimizer` class.
+
+Notes
+-----
+See the `Flaml Documentation <https://microsoft.github.io/FLAML/>`_ for more
+details.
+"""
 
 from typing import Dict, List, NamedTuple, Optional, Union
 from warnings import warn
@@ -14,7 +21,7 @@ import pandas as pd
 from mlos_core.data_classes import Observation, Observations, Suggestion
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
-from mlos_core.util import normalize_config
+from mlos_core.util import drop_nulls, normalize_config
 
 
 class EvaluatedSample(NamedTuple):

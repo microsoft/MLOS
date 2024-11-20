@@ -2,12 +2,15 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""An interface to access the tunable config trial group data stored in SQL DB."""
+"""An interface to access the tunable config trial group data stored in a SQL DB using
+the :py:class:`.TunableConfigTrialGroupData` interface.
+"""
 
 from typing import TYPE_CHECKING, Dict, Optional
 
 import pandas
-from sqlalchemy import Engine, Integer, func
+from sqlalchemy import Integer, func
+from sqlalchemy.engine import Engine
 
 from mlos_bench.storage.base_tunable_config_data import TunableConfigData
 from mlos_bench.storage.base_tunable_config_trial_group_data import (

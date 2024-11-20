@@ -4,11 +4,13 @@
 #
 """Protocol interface for authentication for the cloud services."""
 
-from typing import Protocol, runtime_checkable
+from typing import Protocol, TypeVar, runtime_checkable
+
+T_co = TypeVar("T_co", covariant=True)
 
 
 @runtime_checkable
-class SupportsAuth(Protocol):
+class SupportsAuth(Protocol[T_co]):
     """Protocol interface for authentication for the cloud services."""
 
     def get_access_token(self) -> str:
@@ -29,4 +31,14 @@ class SupportsAuth(Protocol):
         -------
         access_header : dict
             HTTP header containing the access token.
+        """
+
+    def get_credential(self) -> T_co:
+        """
+        Get the credential object for cloud services.
+
+        Returns
+        -------
+        credential : T_co
+            Cloud-specific credential object.
         """

@@ -6,9 +6,12 @@
 Remotely executed benchmark/script environment.
 
 e.g. Application Environment
+
+TODO: Documentat how variable propogation works in the remote environments.
 """
 
 import logging
+import re
 from datetime import datetime
 from typing import Dict, Iterable, Optional, Tuple
 
@@ -31,6 +34,8 @@ class RemoteEnv(ScriptEnv):
 
     e.g. Application Environment
     """
+
+    _RE_SPECIAL = re.compile(r"\W+")
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -72,6 +77,7 @@ class RemoteEnv(ScriptEnv):
         )
 
         self._wait_boot = self.config.get("wait_boot", False)
+        self._command_prefix = "mlos-" + self._RE_SPECIAL.sub("-", self.name).lower() + "-"
 
         assert self._service is not None and isinstance(
             self._service, SupportsRemoteExec
@@ -116,7 +122,7 @@ class RemoteEnv(ScriptEnv):
 
         if self._script_setup:
             _LOG.info("Set up the remote environment: %s", self)
-            (status, _timestamp, _output) = self._remote_exec(self._script_setup)
+            (status, _timestamp, _output) = self._remote_exec("setup", self._script_setup)
             _LOG.info("Remote set up complete: %s :: %s", self, status)
             self._is_ready = status.is_succeeded()
         else:
@@ -134,7 +140,7 @@ class RemoteEnv(ScriptEnv):
 
         Returns
         -------
-        (status, timestamp, output) : (Status, datetime, dict)
+        (status, timestamp, output) : (Status, datetime.datetime, dict)
             3-tuple of (Status, timestamp, output) values, where `output` is a dict
             with the results or None if the status is not COMPLETED.
             If run script is a benchmark, then the score is usually expected to
@@ -145,7 +151,7 @@ class RemoteEnv(ScriptEnv):
         if not (status.is_ready() and self._script_run):
             return result
 
-        (status, timestamp, output) = self._remote_exec(self._script_run)
+        (status, timestamp, output) = self._remote_exec("run", self._script_run)
         if status.is_succeeded() and output is not None:
             output = self._extract_stdout_results(output.get("stdout", ""))
         _LOG.info("Remote run complete: %s :: %s = %s", self, status, output)
@@ -155,30 +161,40 @@ class RemoteEnv(ScriptEnv):
         """Clean up and shut down the remote environment."""
         if self._script_teardown:
             _LOG.info("Remote teardown: %s", self)
-            (status, _timestamp, _output) = self._remote_exec(self._script_teardown)
+            (status, _timestamp, _output) = self._remote_exec("teardown", self._script_teardown)
             _LOG.info("Remote teardown complete: %s :: %s", self, status)
         super().teardown()
 
-    def _remote_exec(self, script: Iterable[str]) -> Tuple[Status, datetime, Optional[dict]]:
+    def _remote_exec(
+        self,
+        command_name: str,
+        script: Iterable[str],
+    ) -> Tuple[Status, datetime, Optional[dict]]:
         """
         Run a script on the remote host.
 
         Parameters
         ----------
+        command_name : str
+            Name of the command to be executed on the remote host.
         script : [str]
             List of commands to be executed on the remote host.
 
         Returns
         -------
-        result : (Status, datetime, dict)
+        result : (Status, datetime.datetime, dict)
             3-tuple of Status, timestamp, and dict with the benchmark/script results.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
         env_params = self._get_env_params()
-        _LOG.debug("Submit script: %s with %s", self, env_params)
+        command_name = self._command_prefix + command_name
+        _LOG.debug("Submit command: %s with %s", command_name, env_params)
         (status, output) = self._remote_exec_service.remote_exec(
             script,
-            config=self._params,
+            config={
+                **self._params,
+                "commandName": command_name,
+            },
             env_params=env_params,
         )
         _LOG.debug("Script submitted: %s %s :: %s", self, status, output)

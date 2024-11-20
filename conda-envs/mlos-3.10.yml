@@ -1,7 +1,7 @@
 name: mlos-3.10
 channels:
-  - defaults
   - conda-forge
+  - defaults
 dependencies:
   # Basic dev environment packages.
   # All other dependencies for the mlos modules come from pip.
@@ -11,16 +11,17 @@ dependencies:
   - pycodestyle
   - pydocstyle
   - flake8
-  - build
+  - python-build
   - jupyter
   - ipykernel
   - nb_conda_kernels
-  - matplotlib
+  - matplotlib-base
   - seaborn
   - pandas
   - pyarrow
   - swig
-  - libpq
+  # FIXME: Temporarily avoid broken libpq that's missing client headers.
+  - libpq<17.0
   - python=3.10
   # See comments in mlos.yml.
   #- gcc_linux-64

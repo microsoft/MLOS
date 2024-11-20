@@ -118,7 +118,7 @@ def test_basic_interface_toy_problem(
         dict_config: dict = suggestion._config.to_dict()
         configuration = CS.Configuration(optimizer.parameter_space, dict_config)
         # Raises an error if outside of configuration space
-        configuration.is_valid_configuration()
+        configuration.check_valid_configuration()
         x: Any = suggestion._config["x"]
         assert isinstance(x, (int, float))
         observation = objective(x)
@@ -251,8 +251,8 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
 
     input_space = CS.ConfigurationSpace(seed=1234)
     # Add two continuous inputs
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="x", lower=0, upper=3))
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="y", lower=0, upper=3))
+    input_space.add(CS.UniformFloatHyperparameter(name="x", lower=0, upper=3))
+    input_space.add(CS.UniformFloatHyperparameter(name="y", lower=0, upper=3))
 
     # Initialize an optimizer that uses LlamaTune space adapter
     space_adapter_kwargs = {
@@ -406,8 +406,8 @@ def test_mixed_numerics_type_input_space_types(
 
     input_space = CS.ConfigurationSpace(seed=SEED)
     # add a mix of numeric datatypes
-    input_space.add_hyperparameter(CS.UniformIntegerHyperparameter(name="x", lower=0, upper=5))
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="y", lower=0.0, upper=5.0))
+    input_space.add(CS.UniformIntegerHyperparameter(name="x", lower=0, upper=5))
+    input_space.add(CS.UniformFloatHyperparameter(name="y", lower=0.0, upper=5.0))
 
     if optimizer_type is None:
         optimizer = OptimizerFactory.create(
@@ -442,7 +442,7 @@ def test_mixed_numerics_type_input_space_types(
             optimizer.parameter_space, suggestion._config.to_dict()
         )
         # Raises an error if outside of configuration space
-        test_configuration.is_valid_configuration()
+        test_configuration.check_valid_configuration()
         # Test registering the suggested configuration with a score.
         observation = objective(suggestion._config)
         assert isinstance(observation, pd.Series)

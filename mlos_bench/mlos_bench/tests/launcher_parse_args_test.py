@@ -103,7 +103,7 @@ def test_launcher_args_parse_defaults(config_paths: List[str]) -> None:
     assert isinstance(launcher.optimizer, OneShotOptimizer)
     # Check that the optimizer got initialized with defaults.
     assert launcher.optimizer.tunable_params.is_defaults()
-    assert launcher.optimizer.max_iterations == 1  # value for OneShotOptimizer
+    assert launcher.optimizer.max_suggestions == 1  # value for OneShotOptimizer
     # Check that we pick up the right scheduler config:
     assert isinstance(launcher.scheduler, SyncScheduler)
     assert launcher.scheduler.trial_config_repeat_count == 1  # default
@@ -155,7 +155,7 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     assert isinstance(launcher.optimizer, OneShotOptimizer)
     # Check that the optimizer got initialized with defaults.
     assert launcher.optimizer.tunable_params.is_defaults()
-    assert launcher.optimizer.max_iterations == 1  # value for OneShotOptimizer
+    assert launcher.optimizer.max_suggestions == 1  # value for OneShotOptimizer
     # Check that we pick up the right scheduler config:
     assert isinstance(launcher.scheduler, SyncScheduler)
     assert (
@@ -223,7 +223,7 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
         "max_suggestions", opt_config.get("config", {}).get("max_suggestions", 100)
     )
     assert (
-        launcher.optimizer.max_iterations
+        launcher.optimizer.max_suggestions
         == orig_max_iters
         == launcher.global_config["max_suggestions"]
     )
@@ -260,8 +260,11 @@ def test_launcher_args_parse_3(config_paths: List[str]) -> None:
         " ".join([f"--config-path {config_path}" for config_path in config_paths])
         + f" --config {config_file}"
         + f" --globals {globals_file}"
+        + " --max-suggestions 10"  # check for - to _ conversion too
     )
     launcher = _get_launcher(__name__, cli_args)
+
+    assert launcher.optimizer.max_suggestions == 10  # from CLI args
 
     # Check that CLI file parameter overrides JSON config:
     assert isinstance(launcher.scheduler, SyncScheduler)

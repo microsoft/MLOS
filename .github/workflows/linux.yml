@@ -19,7 +19,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Linux:
+  LinuxCondaBuildTest:
+    name: Linux Build/Test with Conda
+
     runs-on: ubuntu-latest
 
     permissions:
@@ -37,6 +39,8 @@ jobs:
           - "3.9"
           - "3.10"
           - "3.11"
+          - "3.12"
+          - "3.13"
 
     env:
       cache_cur_date: unset
@@ -134,6 +138,14 @@ jobs:
         ls -l $CONDA_DIR/envs/$CONDA_ENV_NAME/lib/python*/site-packages/
         conda run -n $CONDA_ENV_NAME pip cache dir
         conda run -n $CONDA_ENV_NAME pip cache info
+
+    - name: Verify expected version of python in conda env
+      if: ${{ matrix.python_version == '' }}
+      timeout-minutes: 2
+      run: |
+        set -x
+        conda run -n mlos python -c \
+          'from sys import version_info as vers; assert (vers.major, vers.minor) == (3, 13), f"Unexpected python version: {vers}"'
 
     # This is moreso about code cleanliness, which is a dev thing, not a
     # functionality thing, and the rules for that change between python versions,

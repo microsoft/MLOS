@@ -10,6 +10,7 @@ PYTHON_FILES := $(shell find ./ -type f -name '*.py' 2>/dev/null | egrep -v -e '
 MLOS_CORE_PYTHON_FILES := $(shell find ./mlos_core/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_core/build/')
 MLOS_BENCH_PYTHON_FILES := $(shell find ./mlos_bench/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_bench/build/')
 MLOS_VIZ_PYTHON_FILES := $(shell find ./mlos_viz/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_viz/build/')
+NOTEBOOK_FILES := $(shell find ./ -type f -name '*.ipynb' 2>/dev/null | egrep -v -e '/build/')
 SCRIPT_FILES := $(shell find ./ -name '*.sh' -or -name '*.ps1' -or -name '*.cmd')
 SQL_FILES := $(shell find ./ -name '*.sql')
 MD_FILES := $(shell find ./ -name '*.md' | grep -v '^./doc/')
@@ -22,7 +23,7 @@ MKDIR_BUILD := $(shell test -d build || mkdir build)
 #CONDA_INFO_LEVEL ?= -q
 
 # Run make in parallel by default.
-MAKEFLAGS += -j$(shell nproc)
+MAKEFLAGS += -j$(shell nproc 2>/dev/null || sysctl -n hw.ncpu)
 #MAKEFLAGS += -Oline
 
 .PHONY: all
@@ -389,7 +390,7 @@ build/mypy.%.${CONDA_ENV_NAME}.build-stamp: $(MYPY_COMMON_PREREQS)
 
 
 .PHONY: test
-test: pytest
+test: pytest notebook-exec-test
 
 PYTEST_CONF_FILES := $(MLOS_GLOBAL_CONF_FILES) conftest.py
 
@@ -548,7 +549,7 @@ dist-test-env: dist build/dist-test-env.$(PYTHON_VERSION).build-stamp
 
 build/dist-test-env.$(PYTHON_VERSION).build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 # Use the same version of python as the one we used to build the wheels.
-build/dist-test-env.$(PYTHON_VERSION).build-stamp: PYTHON_VERS_REQ=$(shell conda list -n ${CONDA_ENV_NAME} | egrep '^python\s+' | sed -r -e 's/^python\s+//' | cut -d' ' -f1 | cut -d. -f1-2)
+build/dist-test-env.$(PYTHON_VERSION).build-stamp: PYTHON_VERS_REQ=$(shell conda list -n ${CONDA_ENV_NAME} | egrep '^python\s+' | sed -r -e 's/^python[ \t]+//' | cut -d' ' -f1 | cut -d. -f1-2)
 build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl
 build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl
 build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl
@@ -558,13 +559,13 @@ build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_viz/dist/tmp/mlos_viz-la
 	# Install some additional dependencies necessary for clean building some of the wheels.
 	conda install -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) swig libpq
 	# Test a clean install of the mlos_core wheel.
-	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl[full-tests]"
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "`readlink -f mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl`[full-tests]"
 	# Test a clean install of the mlos_bench wheel.
-	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl[full-tests]"
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "`readlink -f mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl`[full-tests]"
 	# Test that the config dir for mlos_bench got distributed.
 	test -e `conda env list | grep "mlos-dist-test-$(PYTHON_VERSION) " | awk '{ print $$2 }'`/lib/python$(PYTHON_VERS_REQ)/site-packages/mlos_bench/config/README.md
 	# Test a clean install of the mlos_viz wheel.
-	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl[full-tests]"
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "`readlink -f mlos_viz/dist/tmp/mlos_viz-latest-py3-none-any.whl`[full-tests]"
 	touch $@
 
 .PHONY: dist-test
@@ -637,6 +638,11 @@ build/publish.${CONDA_ENV_NAME}.%.py.build-stamp: $(PUBLISH_DEPS)
 publish-pypi: build/publish.${CONDA_ENV_NAME}.pypi.py.build-stamp
 publish-test-pypi: build/publish.${CONDA_ENV_NAME}.testpypi.py.build-stamp
 
+notebook-exec-test: build/notebook-exec-test.${CONDA_ENV_NAME}.build-stamp
+
+build/notebook-exec-test.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp $(NOTEBOOK_FILES)
+	find . -name '*.ipynb' -not -path '*/build/*' -print0 | xargs -0 -n1 -P0 conda run -n ${CONDA_ENV_NAME} python -m jupyter execute
+	touch $@
 
 build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp: doc/requirements.txt
@@ -653,49 +659,32 @@ clean-doc-env:
 
 COMMON_DOC_FILES := build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp doc/source/*.rst doc/source/_templates/*.rst doc/source/conf.py
 
-doc/source/api/mlos_core/modules.rst: $(FORMAT_PREREQS) $(COMMON_DOC_FILES)
-doc/source/api/mlos_core/modules.rst: $(MLOS_CORE_PYTHON_FILES)
-	rm -rf doc/source/api/mlos_core
-	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M \
-		-o source/api/mlos_core/ \
-		../mlos_core/ \
-		../mlos_core/setup.py ../mlos_core/mlos_core/tests/
-
-doc/source/api/mlos_bench/modules.rst: $(FORMAT_PREREQS) $(COMMON_DOC_FILES)
-doc/source/api/mlos_bench/modules.rst: $(MLOS_BENCH_PYTHON_FILES)
-	rm -rf doc/source/api/mlos_bench
-	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M \
-		-o source/api/mlos_bench/ \
-		../mlos_bench/ \
-		../mlos_bench/setup.py ../mlos_bench/mlos_bench/tests/
-	# Save the help output of the mlos_bench scripts to include in the documentation.
-	# First make sure that the latest version of mlos_bench is installed (since it uses git based tagging).
-	conda run -n ${CONDA_ENV_NAME} pip install -e mlos_core -e mlos_bench -e mlos_viz
-	conda run -n ${CONDA_ENV_NAME} mlos_bench --help > doc/source/api/mlos_bench/mlos_bench.run.usage.txt
-	echo ".. literalinclude:: mlos_bench.run.usage.txt" >> doc/source/api/mlos_bench/mlos_bench.run.rst
-	echo "   :language: none" >> doc/source/api/mlos_bench/mlos_bench.run.rst
-
-doc/source/api/mlos_viz/modules.rst: $(FORMAT_PREREQS) $(COMMON_DOC_FILES)
-doc/source/api/mlos_viz/modules.rst: $(MLOS_VIZ_PYTHON_FILES)
-	rm -rf doc/source/api/mlos_viz
-	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M \
-		-o source/api/mlos_viz/ \
-		../mlos_viz/ \
-		../mlos_viz/setup.py ../mlos_viz/mlos_viz/tests/
-
-SPHINX_API_RST_FILES := doc/source/api/mlos_core/modules.rst
-SPHINX_API_RST_FILES += doc/source/api/mlos_bench/modules.rst
-SPHINX_API_RST_FILES += doc/source/api/mlos_viz/modules.rst
-
-.PHONY: sphinx-apidoc
-sphinx-apidoc: $(SPHINX_API_RST_FILES)
+SPHINX_API_RST_FILES := doc/source/index.rst doc/source/mlos_bench.run.usage.rst
 
 ifeq ($(SKIP_COVERAGE),)
 doc/build/html/index.html: build/pytest.${CONDA_ENV_NAME}.build-stamp
 doc/build/html/htmlcov/index.html: build/pytest.${CONDA_ENV_NAME}.build-stamp
 endif
 
-doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile doc/copy-source-tree-docs.sh $(MD_FILES)
+# Treat warnings as failures.
+SPHINXOPTS ?= # -v # be verbose
+SPHINXOPTS += -n -W -w $(CURDIR)/doc/build/sphinx-build.warn.log -j auto
+
+sphinx-apidoc: doc/build/html/index.html
+
+doc/source/generated/mlos_bench.run.usage.txt: build/conda-env.${CONDA_ENV_NAME}.build-stamp
+doc/source/generated/mlos_bench.run.usage.txt: $(MLOS_BENCH_PYTHON_FILES)
+	# Generate the help output from mlos_bench CLI for the docs.
+	mkdir -p doc/source/generated/
+	conda run -n ${CONDA_ENV_NAME} mlos_bench --help > doc/source/generated/mlos_bench.run.usage.txt
+
+doc/build/html/index.html: build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp
+doc/build/html/index.html: doc/source/generated/mlos_bench.run.usage.txt
+doc/build/html/index.html: $(MLOS_CORE_PYTHON_FILES)
+doc/build/html/index.html: $(MLOS_BENCH_PYTHON_FILES)
+doc/build/html/index.html: $(MLOS_VIZ_PYTHON_FILES)
+doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile doc/source/conf.py
+doc/build/html/index.html: doc/copy-source-tree-docs.sh $(MD_FILES)
 	@rm -rf doc/build
 	@mkdir -p doc/build
 	@rm -f doc/build/log.txt
@@ -709,7 +698,7 @@ doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile doc/copy-source-
 	./doc/copy-source-tree-docs.sh
 
 	# Build the rst files into html.
-	conda run -n ${CONDA_ENV_NAME} $(MAKE) -C doc/ $(MAKEFLAGS) html \
+	conda run -n ${CONDA_ENV_NAME} $(MAKE) SPHINXOPTS="$(SPHINXOPTS)" -C doc/ $(MAKEFLAGS) html \
 		>> doc/build/log.txt 2>&1 \
 		|| { cat doc/build/log.txt; exit 1; }
 	# DONE: Add some output filtering for this so we can more easily see what went wrong.
@@ -738,30 +727,25 @@ check-doc: build/check-doc.build-stamp
 build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/index.html
 	# Check for a few files to make sure the docs got generated in a way we want.
 	test -s doc/build/html/index.html
-	test -s doc/build/html/generated/mlos_core.optimizers.optimizer.BaseOptimizer.html
-	test -s doc/build/html/generated/mlos_bench.environments.Environment.html
-	test -s doc/build/html/generated/mlos_viz.plot.html
-	test -s doc/build/html/api/mlos_core/mlos_core.html
-	test -s doc/build/html/api/mlos_bench/mlos_bench.html
-	test -s doc/build/html/api/mlos_viz/mlos_viz.html
-	test -s doc/build/html/api/mlos_viz/mlos_viz.dabl.html
-	grep -q -e '--config CONFIG' doc/build/html/api/mlos_bench/mlos_bench.run.html
+	grep -q BaseOptimizer doc/build/html/autoapi/mlos_core/optimizers/optimizer/index.html
+	grep -q Environment doc/build/html/autoapi/mlos_bench/environments/base_environment/index.html
+	grep -q plot doc/build/html/autoapi/mlos_viz/index.html
+	test -s doc/build/html/autoapi/mlos_core/index.html
+	test -s doc/build/html/autoapi/mlos_bench/index.html
+	test -s doc/build/html/autoapi/mlos_viz/index.html
+	test -s doc/build/html/autoapi/mlos_viz/dabl/index.html
+	grep -q -e '--config CONFIG' doc/build/html//mlos_bench.run.usage.html
 	# Check doc logs for errors (but skip over some known ones) ...
 	@cat doc/build/log.txt \
 		| egrep -C1 -e WARNING -e CRITICAL -e ERROR \
 		| egrep -v \
 			-e "warnings.warn\(f'\"{wd.path}\" is shallow and may cause errors'\)" \
-			-e "No such file or directory: '.*.examples'.$$" \
-			-e 'Problems with "include" directive path:' \
-			-e 'duplicate object description' \
-			-e "document isn't included in any toctree" \
-			-e "more than one target found for cross-reference" \
+			-e "No such file or directory: '.*.examples'.( \[docutils\]\s*)?$$" \
 			-e "toctree contains reference to nonexisting document 'auto_examples/index'" \
-			-e "failed to import function 'create' from module '(SpaceAdapter|Optimizer)Factory'" \
-			-e "No module named '(SpaceAdapter|Optimizer)Factory'" \
 			-e '^make.*resetting jobserver mode' \
+			-e 'from cryptography.hazmat.primitives.ciphers.algorithms import' \
 		| grep -v '^\s*$$' \
-		| if grep .; then echo "Errors found in doc build. Check doc/build/log.txt for details."; exit 1; else exit 0; fi
+		| if grep .; then echo "Errors found in doc build. Check doc/build/log.txt for details."; cat doc/build/log.txt; exit 1; else exit 0; fi
 	touch $@
 
 .PHONY: linklint-doc
@@ -791,7 +775,7 @@ build/linklint-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov
 
 .PHONY: clean-doc
 clean-doc:
-	rm -rf doc/build/ doc/global/ doc/source/api/ doc/source/generated
+	rm -rf doc/build/ doc/global/ doc/source/api/ doc/source/generated doc/source/autoapi
 	rm -rf doc/source/source_tree_docs/*
 
 .PHONY: clean-format

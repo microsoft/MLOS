@@ -8,6 +8,7 @@ import logging
 import os
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
+from azure.core.credentials import TokenCredential
 from azure.core.exceptions import ResourceNotFoundError
 from azure.storage.fileshare import ShareClient
 
@@ -60,20 +61,25 @@ class AzureFileShareService(FileShareService):
                 "storageFileShareName",
             },
         )
+        assert self._parent is not None and isinstance(
+            self._parent, SupportsAuth
+        ), "Authorization service not provided. Include service-auth.jsonc?"
+        self._auth_service: SupportsAuth[TokenCredential] = self._parent
         self._share_client: Optional[ShareClient] = None
 
     def _get_share_client(self) -> ShareClient:
         """Get the Azure file share client object."""
         if self._share_client is None:
-            assert self._parent is not None and isinstance(
-                self._parent, SupportsAuth
-            ), "Authorization service not provided. Include service-auth.jsonc?"
+            credential = self._auth_service.get_credential()
+            assert isinstance(
+                credential, TokenCredential
+            ), f"Expected a TokenCredential, but got {type(credential)} instead."
             self._share_client = ShareClient.from_share_url(
                 self._SHARE_URL.format(
                     account_name=self.config["storageAccountName"],
                     fs_name=self.config["storageFileShareName"],
                 ),
-                credential=self._parent.get_access_token(),
+                credential=credential,
                 token_intent="backup",
             )
         return self._share_client
@@ -104,7 +110,7 @@ class AzureFileShareService(FileShareService):
                 data = file_client.download_file()
                 with open(local_path, "wb") as output_file:
                     _LOG.debug("Download file: %s -> %s", remote_path, local_path)
-                    data.readinto(output_file)  # type: ignore[no-untyped-call]
+                    data.readinto(output_file)
             except ResourceNotFoundError as ex:
                 # Translate into non-Azure exception:
                 raise FileNotFoundError(f"Cannot download: {remote_path}") from ex

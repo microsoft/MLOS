@@ -2,7 +2,31 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Basic initializer module for the mlos_core optimizers."""
+"""
+Initializer module for the mlos_core optimizers.
+
+Optimizers are the main component of the :py:mod:`mlos_core` package.
+They act as a wrapper around other OSS tuning libraries to provide a consistent API
+interface to allow experimenting with different autotuning algorithms.
+
+The :class:`~mlos_core.optimizers.optimizer.BaseOptimizer` class is the base class
+for all Optimizers and provides the core
+:py:meth:`~mlos_core.optimizers.optimizer.BaseOptimizer.suggest` and
+:py:meth:`~mlos_core.optimizers.optimizer.BaseOptimizer.register` methods.
+
+This module also provides a simple :py:class:`~.OptimizerFactory` class to
+:py:meth:`~.OptimizerFactory.create` an Optimizer.
+
+Examples
+--------
+TODO: Add example usage here.
+
+Notes
+-----
+See `mlos_core/optimizers/README.md
+<https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/optimizers/>`_
+for additional documentation and examples in the source tree.
+"""
 
 from enum import Enum
 from typing import List, Optional, TypeVar
@@ -16,6 +40,8 @@ from mlos_core.optimizers.random_optimizer import RandomOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterFactory, SpaceAdapterType
 
 __all__ = [
+    "OptimizerType",
+    "ConcreteOptimizer",
     "SpaceAdapterType",
     "OptimizerFactory",
     "BaseOptimizer",
@@ -26,34 +52,50 @@ __all__ = [
 
 
 class OptimizerType(Enum):
-    """Enumerate supported MlosCore optimizers."""
+    """Enumerate supported mlos_core optimizers."""
 
     RANDOM = RandomOptimizer
-    """An instance of RandomOptimizer class will be used."""
+    """An instance of :class:`~mlos_core.optimizers.random_optimizer.RandomOptimizer`
+    class will be used.
+    """
 
     FLAML = FlamlOptimizer
-    """An instance of FlamlOptimizer class will be used."""
+    """An instance of :class:`~mlos_core.optimizers.flaml_optimizer.FlamlOptimizer`
+    class will be used.
+    """
 
     SMAC = SmacOptimizer
-    """An instance of SmacOptimizer class will be used."""
+    """An instance of
+    :class:`~mlos_core.optimizers.bayesian_optimizers.smac_optimizer.SmacOptimizer`
+    class will be used.
+    """
 
 
 # To make mypy happy, we need to define a type variable for each optimizer type.
 # https://github.com/python/mypy/issues/12952
 # ConcreteOptimizer = TypeVar('ConcreteOptimizer', *[member.value for member in OptimizerType])
 # To address this, we add a test for complete coverage of the enum.
+
 ConcreteOptimizer = TypeVar(
     "ConcreteOptimizer",
     RandomOptimizer,
     FlamlOptimizer,
     SmacOptimizer,
 )
+"""
+Type variable for concrete optimizer classes.
+
+(e.g., :class:`~mlos_core.optimizers.bayesian_optimizers.smac_optimizer.SmacOptimizer`, etc.)
+"""
 
 DEFAULT_OPTIMIZER_TYPE = OptimizerType.FLAML
+"""Default optimizer type to use if none is specified."""
 
 
 class OptimizerFactory:
-    """Simple factory class for creating BaseOptimizer-derived objects."""
+    """Simple factory class for creating
+    :class:`~mlos_core.optimizers.optimizer.BaseOptimizer`-derived objects.
+    """
 
     # pylint: disable=too-few-public-methods
 

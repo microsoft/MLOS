@@ -208,7 +208,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
@@ -249,7 +249,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
@@ -274,7 +274,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
