@@ -7,7 +7,6 @@
 import logging
 from typing import Tuple
 
-from mlos_core.data_classes import Suggestion
 import pytest
 
 from mlos_bench.environments.base_environment import Environment
@@ -17,6 +16,7 @@ from mlos_bench.optimizers.convert_configspace import tunable_values_to_configur
 from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_core.data_classes import Suggestion
 from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
 from mlos_core.util import config_to_series
 

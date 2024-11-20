@@ -1,10 +1,15 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 from __future__ import annotations
 
 from typing import Any, Iterator, List, Optional
 
-from ConfigSpace import Configuration, ConfigurationSpace
-from mlos_core.util import compare_optional_dataframe, compare_optional_series
 import pandas as pd
+from ConfigSpace import Configuration, ConfigurationSpace
+
+from mlos_core.util import compare_optional_dataframe, compare_optional_series
 
 
 class Observation:

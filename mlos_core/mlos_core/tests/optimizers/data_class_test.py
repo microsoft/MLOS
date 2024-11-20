@@ -5,18 +5,18 @@
 """Tests for Observation Data Class."""
 
 from typing import Optional
-from mlos_core.data_classes import Observation, Observations, Suggestion
-from mlos_core.util import compare_optional_series
+
+import ConfigSpace as CS
 import pandas as pd
 import pytest
-import ConfigSpace as CS
+
+from mlos_core.data_classes import Observation, Observations, Suggestion
+from mlos_core.util import compare_optional_series
 
 
 @pytest.fixture
 def config() -> pd.Series:
-    """
-    Toy configuration used to build various data classes.
-    """
+    """Toy configuration used to build various data classes."""
     return pd.Series(
         {
             "y": "b",
@@ -28,9 +28,7 @@ def config() -> pd.Series:
 
 @pytest.fixture
 def score() -> pd.Series:
-    """
-    Toy score used for tests.
-    """
+    """Toy score used for tests."""
     return pd.Series(
         {
             "main_score": 0.1,
@@ -41,9 +39,7 @@ def score() -> pd.Series:
 
 @pytest.fixture
 def score2() -> pd.Series:
-    """
-    Toy score used for tests.
-    """
+    """Toy score used for tests."""
     return pd.Series(
         {
             "main_score": 0.3,
@@ -54,9 +50,7 @@ def score2() -> pd.Series:
 
 @pytest.fixture
 def metadata() -> pd.Series:
-    """
-    Toy metadata used for tests.
-    """
+    """Toy metadata used for tests."""
     return pd.Series(
         {
             "metadata": "test",
@@ -66,9 +60,7 @@ def metadata() -> pd.Series:
 
 @pytest.fixture
 def context() -> pd.Series:
-    """
-    Toy context used for tests.
-    """
+    """Toy context used for tests."""
     return pd.Series(
         {
             "context": "test",
@@ -78,9 +70,7 @@ def context() -> pd.Series:
 
 @pytest.fixture
 def config2() -> pd.Series:
-    """
-    An alternative toy configuration used to build various data classes.
-    """
+    """An alternative toy configuration used to build various data classes."""
     return pd.Series(
         {
             "y": "c",
@@ -97,9 +87,7 @@ def observation_with_context(
     metadata: pd.Series,
     context: pd.Series,
 ) -> Observation:
-    """
-    Toy observation used for tests.
-    """
+    """Toy observation used for tests."""
     return Observation(
         config=config,
         score=score,
@@ -113,9 +101,7 @@ def observation_without_context(
     config2: pd.Series,
     score2: pd.Series,
 ) -> Observation:
-    """
-    Toy observation used for tests.
-    """
+    """Toy observation used for tests."""
     return Observation(
         config=config2,
         score=score2,
@@ -126,9 +112,7 @@ def observation_without_context(
 def observations_with_context(
     observation_with_context: Observation,
 ) -> Observations:
-    """
-    Toy observation used for tests.
-    """
+    """Toy observation used for tests."""
     return Observations(
         observations=[observation_with_context, observation_with_context, observation_with_context]
     )
@@ -138,9 +122,7 @@ def observations_with_context(
 def observations_without_context(
     observation_without_context: Observation,
 ) -> Observations:
-    """
-    Toy observation used for tests.
-    """
+    """Toy observation used for tests."""
     return Observations(
         observations=[
             observation_without_context,
@@ -156,9 +138,7 @@ def suggestion_with_context(
     metadata: pd.Series,
     context: pd.Series,
 ) -> Suggestion:
-    """
-    Toy suggestion used for tests.
-    """
+    """Toy suggestion used for tests."""
     return Suggestion(
         config=config,
         metadata=metadata,
@@ -170,9 +150,7 @@ def suggestion_with_context(
 def suggestion_without_context(
     config2: pd.Series,
 ) -> Suggestion:
-    """
-    Toy suggestion used for tests.
-    """
+    """Toy suggestion used for tests."""
     return Suggestion(
         config=config2,
     )
@@ -193,9 +171,7 @@ def test_observation_to_suggestion(
 def test_observation_equality_operators(
     observation_with_context: Observation, observation_without_context: Observation
 ) -> None:
-    """
-    Test equality operators.
-    """
+    """Test equality operators."""
     assert observation_with_context == observation_with_context
     assert observation_with_context != observation_without_context
     assert observation_without_context == observation_without_context
@@ -207,9 +183,7 @@ def test_observations_init_components(
     metadata: pd.Series,
     context: pd.Series,
 ) -> None:
-    """
-    Test Observations class.
-    """
+    """Test Observations class."""
     Observations(
         config=pd.concat([config.to_frame().T, config.to_frame().T]),
         score=pd.concat([score.to_frame().T, score.to_frame().T]),
@@ -221,9 +195,7 @@ def test_observations_init_components(
 def test_observations_init_observations(
     observation_with_context: Observation,
 ) -> None:
-    """
-    Test Observations class.
-    """
+    """Test Observations class."""
     Observations(
         observations=[observation_with_context, observation_with_context],
     )
@@ -235,9 +207,7 @@ def test_observations_init_components_fails(
     metadata: pd.Series,
     context: pd.Series,
 ) -> None:
-    """
-    Test Observations class.
-    """
+    """Test Observations class."""
     with pytest.raises(AssertionError):
         Observations(
             config=pd.concat([config.to_frame().T]),
@@ -271,9 +241,7 @@ def test_observations_init_components_fails(
 def test_observations_append(
     observation_with_context: Observation,
 ) -> None:
-    """
-    Test Observations class.
-    """
+    """Test Observations class."""
     observations = Observations()
     observations.append(observation_with_context)
     observations.append(observation_with_context)
@@ -284,9 +252,7 @@ def test_observations_append_fails(
     observation_with_context: Observation,
     observation_without_context: Observation,
 ) -> None:
-    """
-    Test Observations class.
-    """
+    """Test Observations class."""
     observations = Observations()
     observations.append(observation_with_context)
     with pytest.raises(AssertionError):
@@ -296,9 +262,7 @@ def test_observations_append_fails(
 def test_observations_filter_by_index(
     observations_with_context: Observations,
 ) -> None:
-    """
-    Test Observations class.
-    """
+    """Test Observations class."""
     assert (
         len(
             observations_with_context.filter_by_index(observations_with_context._config.index[[0]])
@@ -310,9 +274,7 @@ def test_observations_filter_by_index(
 def test_observations_to_list(
     observations_with_context: Observations,
 ) -> None:
-    """
-    Test Observations class.
-    """
+    """Test Observations class."""
     assert len(observations_with_context.to_list()) == 3
     assert all(
         isinstance(observation, Observation) for observation in observations_with_context.to_list()
@@ -322,9 +284,7 @@ def test_observations_to_list(
 def test_observations_equality_test(
     observations_with_context: Observations, observations_without_context: Observations
 ) -> None:
-    """
-    Test Equality of observations.
-    """
+    """Test Equality of observations."""
     assert observations_with_context == observations_with_context
     assert observations_with_context != observations_without_context
     assert observations_without_context == observations_without_context
@@ -333,9 +293,7 @@ def test_observations_equality_test(
 def test_suggestion_equality_test(
     suggestion_with_context: Suggestion, suggestion_without_context: Suggestion
 ) -> None:
-    """
-    Test Equality of suggestions.
-    """
+    """Test Equality of suggestions."""
     assert suggestion_with_context == suggestion_with_context
     assert suggestion_with_context != suggestion_without_context
     assert suggestion_without_context == suggestion_without_context
@@ -344,7 +302,5 @@ def test_suggestion_equality_test(
 def test_complete_suggestion(
     suggestion_with_context: Suggestion, score: pd.Series, observation_with_context: Observation
 ) -> None:
-    """
-    Test ability to complete suggestions.
-    """
+    """Test ability to complete suggestions."""
     assert suggestion_with_context.complete(score) == observation_with_context

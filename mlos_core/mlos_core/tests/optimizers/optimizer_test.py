@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from mlos_core.data_classes import Observations, Suggestion
 from mlos_core.optimizers import (
     BaseOptimizer,
     ConcreteOptimizer,
@@ -23,7 +24,6 @@ from mlos_core.optimizers.bayesian_optimizers import (
     BaseBayesianOptimizer,
     SmacOptimizer,
 )
-from mlos_core.data_classes import Observations, Suggestion
 from mlos_core.spaces.adapters import SpaceAdapterType
 from mlos_core.tests import SEED, get_all_concrete_subclasses
 

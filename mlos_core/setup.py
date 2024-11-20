@@ -87,17 +87,15 @@ extra_requires["full-tests"] = extra_requires["full"] + [
 setup(
     version=VERSION,
     install_requires=[
-        "scikit-learn>=1.2",
-        # CVE-2022-21797: scikit-learn dependency, addressed in 1.2.0dev0, which
-        # isn't currently released
-        "joblib>=1.1.1",
+        "scikit-learn>=1.3",
         "scipy>=1.3.2",
         "numpy>=1.24",
-        "numpy<2.0.0",  # FIXME: https://github.com/numpy/numpy/issues/26710
         'pandas >= 2.2.0;python_version>="3.9"',
-        'Bottleneck > 1.3.5;python_version>="3.9"',
         'pandas >= 1.0.3;python_version<"3.9"',
-        "ConfigSpace==0.7.1",  # Temporarily restrict ConfigSpace version.
+        "ConfigSpace>=1.0",
+        # pyparsing (required by matplotlib and needed for the notebook examples)
+        # 3.2 has incompatibilities with python 3.8 due to type hints
+        'pyparsing<3.2; python_version<"3.9"',
     ],
     extras_require=extra_requires,
     **_get_long_desc_from_readme("https://github.com/microsoft/MLOS/tree/main/mlos_core"),

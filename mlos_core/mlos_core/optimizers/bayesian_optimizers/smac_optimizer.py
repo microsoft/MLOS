@@ -20,10 +20,10 @@ import numpy.typing as npt
 import pandas as pd
 from smac.utils.configspace import convert_configurations_to_array
 
+from mlos_core.data_classes import Observation, Observations, Suggestion
 from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import (
     BaseBayesianOptimizer,
 )
-from mlos_core.data_classes import Observation, Observations, Suggestion
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 
