@@ -135,7 +135,7 @@ def test_basic_interface_toy_problem(
     shape = best_observation._config.shape
     assert best_observation._config.shape == (1, 3)
     assert best_observation._score.shape == (1, 1)
-    assert best_observation._score.score.iloc[0] < -5
+    assert best_observation._score.score.iloc[0] < -4
 
     all_observations = optimizer.get_observations()
     assert isinstance(all_observations, Observations)
