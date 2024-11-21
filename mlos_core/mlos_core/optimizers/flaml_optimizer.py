@@ -160,11 +160,8 @@ class FlamlOptimizer(BaseOptimizer):
 
         Returns
         -------
-        configuration : pd.Series
-            Pandas dataframe with a single row. Column names are the parameter names.
-
-        metadata : None
-            Not implemented.
+        suggestion : Suggestion
+            The suggestion to be evaluated.
         """
         if context is not None:
             warn(f"Not Implemented: Ignoring context {list(context.index)}", UserWarning)
