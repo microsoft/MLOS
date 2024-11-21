@@ -110,9 +110,11 @@ class Observations:
         score: pd.DataFrame = pd.DataFrame(),
         context: Optional[pd.DataFrame] = None,
         metadata: Optional[pd.DataFrame] = None,
-        observations: List[Observation] = [],
+        observations: Optional[List[Observation]] = None,
     ):
 
+        if observations is None:
+            observations = []
         if len(observations) > 0:
             config = pd.concat([obs.config.to_frame().T for obs in observations])
             score = pd.concat([obs.score.to_frame().T for obs in observations])
