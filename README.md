@@ -67,8 +67,8 @@ To do this this repo provides two Python modules, which can be used independentl
   It is intended to provide a simple, easy to consume (e.g. via `pip`), with low dependencies abstraction to
 
   - describe a space of context, parameters, their ranges, constraints, etc. and result objectives
-  - an "optimizer" service [abstraction](https://microsoft.github.io/MLOS/overview.html#mlos-core-api) (e.g. [`register()`](https://microsoft.github.io/MLOS/generated/mlos_core.optimizers.optimizer.BaseOptimizer.html#mlos_core.optimizers.optimizer.BaseOptimizer.register) and [`suggest()`](https://microsoft.github.io/MLOS/generated/mlos_core.optimizers.optimizer.BaseOptimizer.html#mlos_core.optimizers.optimizer.BaseOptimizer.suggest)) so we can easily swap out different implementations methods of searching (e.g. random, BO, LLM, etc.)
-  - provide some helpers for [automating optimization experiment](https://microsoft.github.io/MLOS/overview.html#mlos-bench-api) runner loops and data collection
+  - an "optimizer" service [abstraction](https://microsoft.github.io/MLOS/source_tree_docs/index.html) (e.g. [`register()`](https://microsoft.github.io/MLOS/autoapi/mlos_bench/optimizers/base_optimizer/index.html#mlos_bench.optimizers.base_optimizer.Optimizer.register) and [`suggest()`](https://microsoft.github.io/MLOS/autoapi/mlos_bench/optimizers/base_optimizer/index.html#mlos_bench.optimizers.base_optimizer.Optimizer.suggest)) so we can easily swap out different implementations methods of searching (e.g. random, BO, LLM, etc.)
+  - provide some helpers for [automating optimization experiment](https://microsoft.github.io/MLOS/source_tree_docs/mlos_bench/index.html) runner loops and data collection
 
 For these design requirements we intend to reuse as much from existing OSS libraries as possible and layer policies and optimizations specifically geared towards autotuning systems over top.
 

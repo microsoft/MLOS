@@ -6,7 +6,7 @@ MLOS Documentation
 .. image:: badges/coverage.svg
    :target: htmlcov/index.html
 
-`MLOS <source_tree_docs/index.html>`_ is a project to enable autotuning for systems via `automated benchmarking <source_tree_docs/mlos_bench/index.html>`_ including managing the storage and `visualization <source_tree_docs/mlos_viz/index.html>`_ of the results.
+`MLOS <source_tree_docs/index.html>`_ is a project to enable `autotuning </autoapi/mlos_core/index.html>` with `mlos_core </autoapi/mlos_core/index.html>`_ for systems via `automated benchmarking </autoapi/mlos_bench/index.html>`_ with `mlos_bench </autoapi/mlos_bench/index.html>`_ including managing the storage and `visualization </autoapi/mlos_viz/index.html>`_ of the results via `mlos_viz </autoapi/mlos_viz/index.html>`_.
 
 See below for additional documentation sections.
 
@@ -14,7 +14,7 @@ Here is some documentation pulled from the markdown files in the `MLOS source tr
 
 .. toctree::
    :caption: Source Tree Documentation
-   :maxdepth: 5
+   :maxdepth: 4
 
    source_tree_docs/index
    source_tree_docs/mlos_core/index
@@ -26,7 +26,7 @@ Here is some documentation pulled from the Python docstrings in the `MLOS source
 .. toctree::
    :caption: API Reference
    :titlesonly:
-   :maxdepth: 5
+   :maxdepth: 4
 
    autoapi/mlos_core/index
    autoapi/mlos_bench/index
