@@ -72,6 +72,7 @@ def config_to_series(config: Configuration) -> pd.Series:
     series: pd.Series = pd.Series(dict(config))  # needed for type hinting
     return series
 
+
 def drop_nulls(d: dict) -> dict:
     """
     Remove all key-value pairs where the value is None.
