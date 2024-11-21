@@ -70,7 +70,7 @@ def _add_groupby_desc_column(
         groupby_columns = ["tunable_config_trial_group_id", "tunable_config_id"]
     groupby_column = ",".join(groupby_columns)
     results_df[groupby_column] = (
-        results_df[groupby_columns].astype(str).apply(lambda x: ",".join(x), axis=1)
+        results_df[groupby_columns].astype(str).apply(",".join, axis=1)
     )  # pylint: disable=unnecessary-lambda
     groupby_columns.append(groupby_column)
     return (results_df, groupby_columns, groupby_column)
@@ -418,7 +418,7 @@ def plot_optimizer_trends(
             else ""
         )
         plt.grid()
-        plt.show()  # type: ignore[no-untyped-call]
+        plt.show()
 
 
 def plot_top_n_configs(
@@ -496,4 +496,4 @@ def plot_top_n_configs(
         plt.yscale("log")
         extra_title = "(lower is better)" if ascending else "(lower is better)"
         plt.title(f"Top {top_n} configs {opt_tgt} {extra_title}")
-        plt.show()  # type: ignore[no-untyped-call]
+        plt.show()
