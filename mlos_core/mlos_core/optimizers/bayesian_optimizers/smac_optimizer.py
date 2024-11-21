@@ -147,11 +147,12 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 # Increase max budgeted trials to account for use_default_config.
                 max_trials += 1
 
+        assert output_directory is not None
         scenario: Scenario = Scenario(
             self.optimizer_parameter_space,
             objectives=self._optimization_targets,
             name=run_name,
-            output_directory=Path(output_directory) if output_directory else Path("smac3_output"),
+            output_directory=Path(output_directory),
             deterministic=True,
             use_default_config=use_default_config,
             n_trials=max_trials,
