@@ -40,8 +40,8 @@ class Observation:
         *,
         config: pd.Series,
         score: pd.Series = pd.Series(),
-        context: Context,
-        metadata: Metadata,
+        context: Context = None,
+        metadata: Metadata = None,
     ):
         self.config = config
         self.score = score
