@@ -4,14 +4,14 @@
 #
 """Tests for Observation Data Class."""
 
-from typing import Optional
 
-import ConfigSpace as CS
 import pandas as pd
 import pytest
 
 from mlos_core.data_classes import Observation, Observations, Suggestion
 from mlos_core.util import compare_optional_series
+
+# pylint: disable=redefined-outer-name
 
 
 @pytest.fixture
@@ -163,18 +163,22 @@ def test_observation_to_suggestion(
     """Toy problem to test one-hot encoding of dataframe."""
     for observation in [observation_with_context, observation_without_context]:
         suggestion = observation.to_suggestion()
-        assert compare_optional_series(suggestion._config, observation._config)
-        assert compare_optional_series(suggestion._metadata, observation._metadata)
-        assert compare_optional_series(suggestion._context, observation._context)
+        assert compare_optional_series(suggestion.config, observation.config)
+        assert compare_optional_series(suggestion.metadata, observation.metadata)
+        assert compare_optional_series(suggestion.context, observation.context)
 
 
 def test_observation_equality_operators(
     observation_with_context: Observation, observation_without_context: Observation
 ) -> None:
     """Test equality operators."""
-    assert observation_with_context == observation_with_context
+    assert (
+        observation_with_context == observation_with_context
+    )  # pylint: disable=comparison-with-itself
     assert observation_with_context != observation_without_context
-    assert observation_without_context == observation_without_context
+    assert (
+        observation_without_context == observation_without_context
+    )  # pylint: disable=comparison-with-itself
 
 
 def test_observations_init_components(
@@ -264,9 +268,7 @@ def test_observations_filter_by_index(
 ) -> None:
     """Test Observations class."""
     assert (
-        len(
-            observations_with_context.filter_by_index(observations_with_context._config.index[[0]])
-        )
+        len(observations_with_context.filter_by_index(observations_with_context.config.index[[0]]))
         == 1
     )
 
@@ -285,18 +287,26 @@ def test_observations_equality_test(
     observations_with_context: Observations, observations_without_context: Observations
 ) -> None:
     """Test Equality of observations."""
-    assert observations_with_context == observations_with_context
+    assert (
+        observations_with_context == observations_with_context
+    )  # pylint: disable=comparison-with-itself
     assert observations_with_context != observations_without_context
-    assert observations_without_context == observations_without_context
+    assert (
+        observations_without_context == observations_without_context
+    )  # pylint: disable=comparison-with-itself
 
 
 def test_suggestion_equality_test(
     suggestion_with_context: Suggestion, suggestion_without_context: Suggestion
 ) -> None:
     """Test Equality of suggestions."""
-    assert suggestion_with_context == suggestion_with_context
+    assert (
+        suggestion_with_context == suggestion_with_context
+    )  # pylint: disable=comparison-with-itself
     assert suggestion_with_context != suggestion_without_context
-    assert suggestion_without_context == suggestion_without_context
+    assert (
+        suggestion_without_context == suggestion_without_context
+    )  # pylint: disable=comparison-with-itself
 
 
 def test_complete_suggestion(

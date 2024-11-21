@@ -64,8 +64,8 @@ Examples
 >>> # Get a new configuration suggestion.
 >>> suggestion = opt.suggest()
 >>> # Examine the suggested configuration.
->>> assert len(suggestion._config) == 1
->>> suggestion._config
+>>> assert len(suggestion.config) == 1
+>>> suggestion.config
 x    3
 dtype: object
 >>> # Register the configuration and its corresponding target value
@@ -74,7 +74,7 @@ dtype: object
 >>> opt.register(suggestion.complete(scores_sr))
 >>> # Get a new configuration suggestion.
 >>> suggestion = opt.suggest()
->>> suggestion._config
+>>> suggestion.config
 x    10
 dtype: object
 >>> score = 7 # a better made up score
@@ -87,12 +87,12 @@ dtype: object
 >>> # Get the best observations.
 >>> observations = opt.get_best_observations()
 >>> # The default is to only return one
->>> assert len(observations._config) == 1
->>> assert len(observations._score) == 1
->>> observations._config
+>>> assert len(observations.config) == 1
+>>> assert len(observations.score) == 1
+>>> observations.config
     x
 0  10
->>> observations._score
+>>> observations.score
    y
 0  7
 

@@ -26,7 +26,7 @@ from ConfigSpace.hyperparameters import NumericalHyperparameter
 from sklearn.preprocessing import MinMaxScaler
 
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
-from mlos_core.util import drop_nulls, normalize_config
+from mlos_core.util import normalize_config
 
 
 class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-attributes
@@ -566,7 +566,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
 
         # Compute pseudo-inverse matrix
         try:
-            self._pinv_matrix = pinv(proj_matrix)
+            inv_matrix: npt.NDArray = pinv(proj_matrix)  # type: ignore
+            self._pinv_matrix = inv_matrix
         except LinAlgError as err:
             raise RuntimeError(
                 f"Unable to generate reverse mapping using pseudo-inverse matrix: {repr(err)}"

@@ -85,7 +85,7 @@ def test_os_env_expansion(source_template_dict: Dict[str, Any]) -> None:
 
     results = DictTemplater(source_template_dict).expand_vars(use_os_env=True)
     assert results == {
-        "extra_str-ref": f"{environ['extra_str']}-ref",
+        "extra_str-ref": f"{environ['extra_str']}-ref",  # pylint: disable=inconsistent-quotes
         "str": "string",
         "str_ref": "string-ref",
         "secondary_expansion": "string-ref",

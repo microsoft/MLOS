@@ -418,7 +418,7 @@ def plot_optimizer_trends(
             else ""
         )
         plt.grid()
-        plt.show()  # type: ignore[no-untyped-call]
+        plt.show()
 
 
 def plot_top_n_configs(
@@ -496,4 +496,4 @@ def plot_top_n_configs(
         plt.yscale("log")
         extra_title = "(lower is better)" if ascending else "(lower is better)"
         plt.title(f"Top {top_n} configs {opt_tgt} {extra_title}")
-        plt.show()  # type: ignore[no-untyped-call]
+        plt.show()

@@ -93,10 +93,8 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Parameters
         ----------
-        observations: Observations
+        observations: Optional[Union[Observation, Observations]]
             The observations to register.
-        observation: Observation
-            The observation to register.
         """
         if isinstance(observations, Observation):
             self.register_single(observation=observations)
@@ -115,26 +113,26 @@ class BaseOptimizer(metaclass=ABCMeta):
             The observation to register.
         """
         # Do some input validation.
-        assert observation._metadata is None or isinstance(observation._metadata, pd.Series)
-        assert set(observation._score.index) == set(
+        assert observation.metadata is None or isinstance(observation.metadata, pd.Series)
+        assert set(observation.score.index) == set(
             self._optimization_targets
         ), "Mismatched optimization targets."
         assert self._has_context is None or self._has_context ^ (
-            observation._context is None
+            observation.context is None
         ), "Context must always be added or never be added."
-        assert len(observation._config) == len(
+        assert len(observation.config) == len(
             self.parameter_space.values()
         ), "Mismatched configuration shape."
 
-        self._has_context = observation._context is not None
+        self._has_context = observation.context is not None
         self._observations.append(observation)
 
         register_observation = deepcopy(observation)  # Needed to support named tuples
         if self._space_adapter:
-            register_observation._config = self._space_adapter.inverse_transform(
-                register_observation._config
+            register_observation.config = self._space_adapter.inverse_transform(
+                register_observation.config
             )
-            assert len(register_observation._config) == len(
+            assert len(register_observation.config) == len(
                 self.optimizer_parameter_space.values()
             ), "Mismatched configuration shape after inverse transform."
 
@@ -184,13 +182,13 @@ class BaseOptimizer(metaclass=ABCMeta):
             suggestion = Suggestion(config=configuration, context=context, metadata=None)
         else:
             suggestion = self._suggest(context=context)
-            assert set(suggestion._config.index).issubset(set(self.optimizer_parameter_space)), (
+            assert set(suggestion.config.index).issubset(set(self.optimizer_parameter_space)), (
                 "Optimizer suggested a configuration that does "
                 "not match the expected parameter space."
             )
         if self._space_adapter:
-            suggestion._config = self._space_adapter.transform(suggestion._config)
-            assert set(suggestion._config.index).issubset(set(self.parameter_space)), (
+            suggestion.config = self._space_adapter.transform(suggestion.config)
+            assert set(suggestion.config.index).issubset(set(self.parameter_space)), (
                 "Space adapter produced a configuration that does "
                 "not match the expected parameter space."
             )
@@ -267,7 +265,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         if len(observations) == 0:
             raise ValueError("No observations registered yet.")
 
-        idx = observations._score.nsmallest(
+        idx = observations.score.nsmallest(
             n_max,
             columns=self._optimization_targets,
             keep="first",

@@ -38,14 +38,14 @@ class RandomOptimizer(BaseOptimizer):
             observations, Observation
         ), "Internal implementation does not support Observations."
 
-        if observations._context is not None:
+        if observations.context is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observations._context.index)}",
+                f"Not Implemented: Ignoring context {list(observations.context.index)}",
                 UserWarning,
             )
-        if observations._metadata is not None:
+        if observations.metadata is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observations._metadata.index)}",
+                f"Not Implemented: Ignoring context {list(observations.metadata.index)}",
                 UserWarning,
             )
         # should we pop them from self.pending_observations?

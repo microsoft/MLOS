@@ -21,7 +21,7 @@ import pandas as pd
 from mlos_core.data_classes import Observation, Observations, Suggestion
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
-from mlos_core.util import drop_nulls, normalize_config
+from mlos_core.util import normalize_config
 
 
 class EvaluatedSample(NamedTuple):
@@ -116,14 +116,14 @@ class FlamlOptimizer(BaseOptimizer):
             observations, Observation
         ), "Internal implementation does not support Observations."
 
-        if observations._context is not None:
+        if observations.context is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observations._context.index)}",
+                f"Not Implemented: Ignoring context {list(observations.context.index)}",
                 UserWarning,
             )
-        if observations._metadata is not None:
+        if observations.metadata is not None:
             warn(
-                f"Not Implemented: Ignoring metadata {list(observations._metadata.index)}",
+                f"Not Implemented: Ignoring metadata {list(observations.metadata.index)}",
                 UserWarning,
             )
 
@@ -135,7 +135,7 @@ class FlamlOptimizer(BaseOptimizer):
         self.evaluated_samples[cs_config] = EvaluatedSample(
             config=dict(cs_config),
             score=float(
-                np.average(observations._score.astype(float), weights=self._objective_weights)
+                np.average(observations.score.astype(float), weights=self._objective_weights)
             ),
         )
 
