@@ -24,7 +24,7 @@ def test_configspace_quant_int() -> None:
     """Check the quantization of an integer hyperparameter."""
     quantization_bins = 11
     quantized_values = set(range(0, 101, 10))
-    hyper = UniformIntegerHyperparameter(
+    hp = UniformIntegerHyperparameter(
         "hp",
         lower=0,
         upper=100,
@@ -33,12 +33,12 @@ def test_configspace_quant_int() -> None:
     )
 
     # Before patching: expect that at least one value is not quantized.
-    assert not set(hyper.sample_value(100)).issubset(quantized_values)
+    assert not set(hp.sample_value(100)).issubset(quantized_values)
 
-    monkey_patch_hp_quantization(hyper)
+    monkey_patch_hp_quantization(hp)
     # After patching: *all* values must belong to the set of quantized values.
-    assert hyper.sample_value() in quantized_values  # check scalar type
-    assert set(hyper.sample_value(100)).issubset(quantized_values)  # batch version
+    assert hp.sample_value() in quantized_values  # check scalar type
+    assert set(hp.sample_value(100)).issubset(quantized_values)  # batch version
 
 
 def test_configspace_quant_float() -> None:
@@ -46,7 +46,7 @@ def test_configspace_quant_float() -> None:
     # 5 is a nice number of bins to avoid floating point errors.
     quantization_bins = 5
     quantized_values = set(np.linspace(0, 1, num=quantization_bins, endpoint=True))
-    hyperparameter = UniformFloatHyperparameter(
+    hp = UniformFloatHyperparameter(
         "hp",
         lower=0,
         upper=1,
@@ -55,19 +55,19 @@ def test_configspace_quant_float() -> None:
     )
 
     # Before patching: expect that at least one value is not quantized.
-    assert not set(hyperparameter.sample_value(100)).issubset(quantized_values)
+    assert not set(hp.sample_value(100)).issubset(quantized_values)
 
-    monkey_patch_hp_quantization(hyperparameter)
+    monkey_patch_hp_quantization(hp)
     # After patching: *all* values must belong to the set of quantized values.
-    assert hyperparameter.sample_value() in quantized_values  # check scalar type
-    assert set(hyperparameter.sample_value(100)).issubset(quantized_values)  # batch version
+    assert hp.sample_value() in quantized_values  # check scalar type
+    assert set(hp.sample_value(100)).issubset(quantized_values)  # batch version
 
 
 def test_configspace_quant_repatch() -> None:
     """Repatch the same hyperparameter with different number of bins."""
     quantization_bins = 11
     quantized_values = set(range(0, 101, 10))
-    hyperparameter = UniformIntegerHyperparameter(
+    hp = UniformIntegerHyperparameter(
         "hp",
         lower=0,
         upper=100,
@@ -76,35 +76,35 @@ def test_configspace_quant_repatch() -> None:
     )
 
     # Before patching: expect that at least one value is not quantized.
-    assert not set(hyperparameter.sample_value(100)).issubset(quantized_values)
+    assert not set(hp.sample_value(100)).issubset(quantized_values)
 
-    monkey_patch_hp_quantization(hyperparameter)
+    monkey_patch_hp_quantization(hp)
     # After patching: *all* values must belong to the set of quantized values.
-    samples = hyperparameter.sample_value(100, seed=RandomState(SEED))
+    samples = hp.sample_value(100, seed=RandomState(SEED))
     assert set(samples).issubset(quantized_values)
 
     # Patch the same hyperparameter again and check that the results are the same.
-    monkey_patch_hp_quantization(hyperparameter)
+    monkey_patch_hp_quantization(hp)
     # After patching: *all* values must belong to the set of quantized values.
-    assert all(samples == hyperparameter.sample_value(100, seed=RandomState(SEED)))
+    assert all(samples == hp.sample_value(100, seed=RandomState(SEED)))
 
     # Repatch with the higher number of bins and make sure we get new values.
-    new_meta = dict(hyperparameter.meta or {})
+    new_meta = dict(hp.meta or {})
     new_meta[QUANTIZATION_BINS_META_KEY] = 21
-    hyperparameter.meta = new_meta
-    monkey_patch_hp_quantization(hyperparameter)
-    samples_set = set(hyperparameter.sample_value(100, seed=RandomState(SEED)))
+    hp.meta = new_meta
+    monkey_patch_hp_quantization(hp)
+    samples_set = set(hp.sample_value(100, seed=RandomState(SEED)))
     quantized_values_new = set(range(5, 96, 10))
     assert samples_set.issubset(set(range(0, 101, 5)))
     assert len(samples_set - quantized_values_new) < len(samples_set)
 
     # Repatch without quantization and make sure we get the original values.
-    new_meta = dict(hyperparameter.meta or {})
+    new_meta = dict(hp.meta or {})
     del new_meta[QUANTIZATION_BINS_META_KEY]
-    hyperparameter.meta = new_meta
-    assert hyperparameter.meta.get(QUANTIZATION_BINS_META_KEY) is None
-    monkey_patch_hp_quantization(hyperparameter)
-    samples_set = set(hyperparameter.sample_value(100, seed=RandomState(SEED)))
+    hp.meta = new_meta
+    assert hp.meta.get(QUANTIZATION_BINS_META_KEY) is None
+    monkey_patch_hp_quantization(hp)
+    samples_set = set(hp.sample_value(100, seed=RandomState(SEED)))
     assert samples_set.issubset(set(range(0, 101)))
     assert len(quantized_values_new) < len(quantized_values) < len(samples_set)
 
@@ -133,9 +133,7 @@ def test_configspace_quant() -> None:
         "hp_int": 60263,
         "hp_int_quant": 0,
     }
-    assert [
-        dict(conf) for conf in space.sample_configuration(3)  # pylint: disable=not-an-iterable
-    ] == [
+    assert [dict(conf) for conf in space.sample_configuration(3)] == [
         {
             "hp_categorical": "a",
             "hp_constant": 1337,
