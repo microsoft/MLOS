@@ -14,6 +14,9 @@ from ConfigSpace import Configuration, ConfigurationSpace
 
 from mlos_core.util import compare_optional_dataframe, compare_optional_series
 
+Context = Optional[pd.Series]
+Metadata = Optional[pd.Series]
+
 
 class Observation:
     """
@@ -25,10 +28,10 @@ class Observation:
         The configuration observed.
     score : pd.Series
         The score metrics observed.
-    context : Optional[pd.Series]
+    context : Context
         The context in which the configuration was evaluated.
         Not Yet Implemented.
-    metadata: Optional[pd.Series]
+    metadata: Metadata
         The metadata in which the configuration was evaluated
     """
 
@@ -37,8 +40,8 @@ class Observation:
         *,
         config: pd.Series,
         score: pd.Series = pd.Series(),
-        context: Optional[pd.Series] = None,
-        metadata: Optional[pd.Series] = None,
+        context: Context,
+        metadata: Metadata,
     ):
         self.config = config
         self.score = score
@@ -95,10 +98,10 @@ class Observations:
         Pandas dataframe containing configurations. Column names are the parameter names.
     score : pd.DataFrame
         The score metrics observed in a dataframe.
-    context : Optional[pd.Series]
+    context : Optional[pd.DataFrame]
         The context in which the configuration was evaluated.
         Not Yet Implemented.
-    metadata: Optional[pd.Series]
+    metadata: Optional[pd.DataFrame]
         The metadata in which the configuration was evaluated
         Not Yet Implemented.
     """
@@ -298,8 +301,8 @@ class Suggestion:
         self,
         *,
         config: pd.Series,
-        context: Optional[pd.Series] = None,
-        metadata: Optional[pd.Series] = None,
+        context: Context = None,
+        metadata: Metadata = None,
     ):
         self.config = config
         self.context = context
