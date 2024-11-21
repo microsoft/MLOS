@@ -115,11 +115,15 @@ class Observations:
             score = pd.concat([obs._score.to_frame().T for obs in observations])
 
             if sum([obs._context is None for obs in observations]) == 0:
-                context = pd.concat([obs._context.to_frame().T for obs in observations])  # type: ignore
+                context = pd.concat(
+                    [obs._context.to_frame().T for obs in observations]  # type: ignore
+                )
             else:
                 context = None
             if sum([obs._metadata is None for obs in observations]) == 0:
-                metadata = pd.concat([obs._metadata.to_frame().T for obs in observations])  # type: ignore
+                metadata = pd.concat(
+                    [obs._metadata.to_frame().T for obs in observations]  # type: ignore
+                )
             else:
                 metadata = None
         assert len(config.index) == len(score.index), "config and score must have the same length"
@@ -321,7 +325,10 @@ class Suggestion:
         return Configuration(space, values=self._config.dropna().to_dict())
 
     def __repr__(self) -> str:
-        return f"Suggestion(config={self._config}, context={self._context}, metadata={self._metadata})"
+        return (
+            f"Suggestion(config={self._config}, context={self._context},"
+            " metadata={self._metadata})"
+        )
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Suggestion):
