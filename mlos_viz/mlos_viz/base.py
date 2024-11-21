@@ -70,7 +70,7 @@ def _add_groupby_desc_column(
         groupby_columns = ["tunable_config_trial_group_id", "tunable_config_id"]
     groupby_column = ",".join(groupby_columns)
     results_df[groupby_column] = (
-        results_df[groupby_columns].astype(str).apply(lambda x: ",".join(x), axis=1)
+        results_df[groupby_columns].astype(str).apply(",".join, axis=1)
     )  # pylint: disable=unnecessary-lambda
     groupby_columns.append(groupby_column)
     return (results_df, groupby_columns, groupby_column)

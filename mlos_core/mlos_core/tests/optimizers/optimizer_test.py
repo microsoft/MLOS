@@ -88,9 +88,9 @@ def test_basic_interface_toy_problem(
         # number of max iterations.
         kwargs["max_trials"] = max_iterations * 2
 
-    def objective(x: float) -> pd.Series:
+    def objective(inp: float) -> pd.Series:
         series: pd.Series = pd.Series(
-            {"score": (6 * x - 2) ** 2 * np.sin(12 * x - 4)}
+            {"score": (6 * inp - 2) ** 2 * np.sin(12 * inp - 4)}
         )  # needed for type hinting
         return series
 
@@ -119,9 +119,9 @@ def test_basic_interface_toy_problem(
         configuration = CS.Configuration(optimizer.parameter_space, dict_config)
         # Raises an error if outside of configuration space
         configuration.check_valid_configuration()
-        x: Any = suggestion.config["x"]
-        assert isinstance(x, (int, float))
-        observation = objective(x)
+        inp: Any = suggestion.config["x"]
+        assert isinstance(inp, (int, float))
+        observation = objective(inp)
         assert isinstance(observation, pd.Series)
         optimizer.register(observations=suggestion.complete(observation))
 

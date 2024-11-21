@@ -141,8 +141,9 @@ def test_num_low_dims(
         unseen_sampled_config
     ) in unseen_sampled_configs:  # pylint: disable=not-an-iterable # (false positive)
         if (
-            unseen_sampled_config in sampled_configs
-        ):  # pylint: disable=unsupported-membership-test # (false positive)
+            unseen_sampled_config
+            in sampled_configs  # pylint: disable=unsupported-membership-test # (false positive)
+        ):
             continue
 
         unseen_sampled_config_sr = pd.Series(dict(unseen_sampled_config))
@@ -508,9 +509,11 @@ def test_llamatune_pipeline(
     unique_values_dict: Dict[str, Set] = {param: set() for param in input_space.keys()}
 
     num_configs = 1000
-    for config in adapter.target_parameter_space.sample_configuration(
+    for (
+        config
+    ) in adapter.target_parameter_space.sample_configuration(  # pylint: disable=not-an-iterable
         size=num_configs
-    ):  # pylint: disable=not-an-iterable
+    ):
         # Transform low-dim config to high-dim point/config
         sampled_config_sr = pd.Series(dict(config))
         orig_config_sr = adapter.transform(sampled_config_sr)

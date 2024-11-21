@@ -73,13 +73,13 @@ def config_to_series(config: Configuration) -> pd.Series:
     return series
 
 
-def drop_nulls(d: dict) -> dict:
+def drop_nulls(dictionary: dict) -> dict:
     """
     Remove all key-value pairs where the value is None.
 
     Parameters
     ----------
-    d : dict
+    dictionary : dict
         The dictionary to clean.
 
     Returns
@@ -87,7 +87,7 @@ def drop_nulls(d: dict) -> dict:
     dict
         The cleaned dictionary.
     """
-    return {k: v for k, v in d.items() if v is not None}
+    return {k: v for k, v in dictionary.items() if v is not None}
 
 
 def normalize_config(
