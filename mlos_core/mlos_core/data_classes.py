@@ -58,7 +58,10 @@ class Observation:
         )
 
     def __repr__(self) -> str:
-        return f"Observation(config={self._config}, score={self._score}, context={self._context}, metadata={self._metadata})"
+        return (
+            f"Observation(config={self._config}, score={self._score},"
+            " context={self._context}, metadata={self._metadata})"
+        )
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Observation):
