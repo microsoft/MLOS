@@ -566,7 +566,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
 
         # Compute pseudo-inverse matrix
         try:
-            inv_matrix: npt.NDArray = pinv(proj_matrix)  # type: ignore
+            inv_matrix: npt.NDArray = pinv(proj_matrix)
             self._pinv_matrix = inv_matrix
         except LinAlgError as err:
             raise RuntimeError(
