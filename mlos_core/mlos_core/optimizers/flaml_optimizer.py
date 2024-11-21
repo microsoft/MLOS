@@ -112,7 +112,6 @@ class FlamlOptimizer(BaseOptimizer):
         observation : Observation | Observations
             The observations to register.
         """
-
         assert isinstance(
             observations, Observation
         ), "Internal implementation does not support Observations."

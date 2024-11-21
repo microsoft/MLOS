@@ -2,6 +2,10 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+"""
+Data classes for mlos_core used to pass around
+configurations, observations, and suggestions.
+"""
 from __future__ import annotations
 
 from typing import Any, Iterator, List, Optional

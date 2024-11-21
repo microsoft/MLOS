@@ -34,7 +34,6 @@ class RandomOptimizer(BaseOptimizer):
         observations : Observation | Observations
             The observations to register.
         """
-
         assert isinstance(
             observations, Observation
         ), "Internal implementation does not support Observations."
