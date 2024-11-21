@@ -566,7 +566,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
 
         # Compute pseudo-inverse matrix
         try:
-            self._pinv_matrix = pinv(proj_matrix)  # type: ignore
+            self._pinv_matrix = pinv(proj_matrix)
         except LinAlgError as err:
             raise RuntimeError(
                 f"Unable to generate reverse mapping using pseudo-inverse matrix: {repr(err)}"
