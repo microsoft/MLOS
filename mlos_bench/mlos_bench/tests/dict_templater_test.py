@@ -116,7 +116,7 @@ def test_from_extras_expansion(source_template_dict: Dict[str, Any]) -> None:
     }
     results = DictTemplater(source_template_dict).expand_vars(extra_source_dict=extra_source_dict)
     assert results == {
-        "extra_str-ref": f"{extra_source_dict['extra_str']}-ref",  # pylint: disable=inconsistent-quotes
+        "extra_str-ref": f"{extra_source_dict['extra_str']}-ref",  # pylint: disable=inconsistent-quotes # noqa: E501
         "str": "string",
         "str_ref": "string-ref",
         "secondary_expansion": "string-ref",
@@ -134,6 +134,6 @@ def test_from_extras_expansion(source_template_dict: Dict[str, Any]) -> None:
         ],
         "dict": {
             "nested-str-ref": "nested-string-ref",
-            "nested-extra-str-ref": f"nested-{extra_source_dict['extra_str']}-ref",  # pylint: disable=inconsistent-quotes
+            "nested-extra-str-ref": f"nested-{extra_source_dict['extra_str']}-ref",  # pylint: disable=inconsistent-quotes # noqa: E501
         },
     }
