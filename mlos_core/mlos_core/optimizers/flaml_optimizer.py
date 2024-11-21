@@ -105,7 +105,7 @@ class FlamlOptimizer(BaseOptimizer):
         observations: Optional[Union[Observation, Observations]] = None,
     ) -> None:
         """
-        Registers the given config and scores.
+        Registers the given config(s) and scores.
 
         Parameters
         ----------
