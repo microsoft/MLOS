@@ -97,12 +97,12 @@ class BaseOptimizer(metaclass=ABCMeta):
             The observations to register.
         """
         if isinstance(observations, Observation):
-            self.register_single(observation=observations)
+            self._register_single(observation=observations)
         if isinstance(observations, Observations):
             for obs in observations.to_list():
-                self.register_single(observation=obs)
+                self._register_single(observation=obs)
 
-    def register_single(self, observation: Observation) -> None:
+    def _register_single(self, observation: Observation) -> None:
         """
         Wrapper method, which employs the space adapter (if any), before registering the
         configs and scores.
