@@ -103,7 +103,7 @@ class Observations:
         Not Yet Implemented.
     """
 
-    def __init__(  # pylint: disable=dangerous-default-value
+    def __init__(
         self,
         *,
         config: pd.DataFrame = pd.DataFrame(),
