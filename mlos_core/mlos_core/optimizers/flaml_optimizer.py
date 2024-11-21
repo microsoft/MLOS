@@ -112,7 +112,6 @@ class FlamlOptimizer(BaseOptimizer):
         observation : Observation | Observations
             The observations to register.
         """
-
         if observations is None:
             return
 
