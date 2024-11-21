@@ -176,7 +176,7 @@ class TestFlamlConversion(BaseConversion):
 
     conversion_function = staticmethod(configspace_to_flaml_space)
 
-    def sample(  # type: ignore
+    def sample(  # type: ignore[override]
         self,
         config_space: FlamlSpace,
         n_samples: int = 1,

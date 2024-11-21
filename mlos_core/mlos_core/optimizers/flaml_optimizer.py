@@ -112,9 +112,14 @@ class FlamlOptimizer(BaseOptimizer):
         observation : Observation | Observations
             The observations to register.
         """
-        assert isinstance(
-            observations, Observation
-        ), "Internal implementation does not support Observations."
+
+        if observations is None:
+            return
+
+        if isinstance(observations, Observations):
+            for observation in observations.to_list():
+                self._register(observation)
+            return
 
         if observations.context is not None:
             warn(

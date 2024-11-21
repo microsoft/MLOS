@@ -120,22 +120,20 @@ class Observations:
             score = pd.concat([obs.score.to_frame().T for obs in observations])
 
             if sum([obs.context is None for obs in observations]) == 0:
-                context = pd.concat(
-                    [obs.context.to_frame().T for obs in observations]  # type: ignore
-                )
+                context = pd.concat([obs.context.to_frame().T for obs in observations])  # type: ignore[union-attr]
             else:
                 context = None
             if sum([obs.metadata is None for obs in observations]) == 0:
                 metadata = pd.concat(
-                    [obs.metadata.to_frame().T for obs in observations]  # type: ignore
+                    [obs.metadata.to_frame().T for obs in observations]  # type: ignore[union-attr]
                 )
             else:
                 metadata = None
         assert len(config.index) == len(score.index), "config and score must have the same length"
         if context is not None:
-            l1 = len(config.index)
-            l2 = len(context.index)
-            assert l1 == l2, "config and context must have the same length"
+            assert len(config.index) == len(
+                context.index
+            ), "config and context must have the same length"
         if metadata is not None:
             assert len(config.index) == len(
                 metadata.index
@@ -221,7 +219,7 @@ class Observations:
         else:
             assert metadata is None, (
                 "context of appending observation must be null"
-                " if metadata of prior observation is null"
+                + " if metadata of prior observation is null"
             )
 
     def to_list(self) -> List[Observation]:
