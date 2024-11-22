@@ -152,7 +152,7 @@ def test_observation_to_suggestion(
     observation_without_context: Observation,
 ) -> None:
     """Toy problem to test one-hot encoding of dataframe."""
-    for observation in [observation_with_context, observation_without_context]:
+    for observation in (observation_with_context, observation_without_context):
         suggestion = observation.to_suggestion()
         assert compare_optional_series(suggestion.config, observation.config)
         assert compare_optional_series(suggestion.metadata, observation.metadata)
@@ -164,13 +164,10 @@ def test_observation_equality_operators(
     observation_without_context: Observation,
 ) -> None:
     """Test equality operators."""
-    assert (
-        observation_with_context == observation_with_context
-    )  # pylint: disable=comparison-with-itself
+    # pylint: disable=comparison-with-itself
+    assert observation_with_context == observation_with_context
     assert observation_with_context != observation_without_context
-    assert (
-        observation_without_context == observation_without_context
-    )  # pylint: disable=comparison-with-itself
+    assert observation_without_context == observation_without_context
 
 
 def test_observations_init_components(
