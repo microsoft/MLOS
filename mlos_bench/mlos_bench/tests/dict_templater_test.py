@@ -103,7 +103,7 @@ def test_os_env_expansion(source_template_dict: Dict[str, Any]) -> None:
         ],
         "dict": {
             "nested-str-ref": "nested-string-ref",
-            "nested-extra-str-ref": f"nested-{environ['extra_str']}-ref",
+            "nested-extra-str-ref": f"nested-{environ['extra_str']}-ref",  # pylint: disable=inconsistent-quotes # noqa: E501
         },
     }
 

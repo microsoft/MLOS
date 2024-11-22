@@ -70,6 +70,7 @@ class SshClient(asyncssh.SSHClient):
     def id_from_params(connect_params: dict) -> str:
         """Gets a unique id repr for the connection."""
         return (
+            # pylint: disable=inconsistent-quotes
             f"{connect_params.get('username')}@{connect_params['host']}"
             f":{connect_params.get('port')}"
         )
