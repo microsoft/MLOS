@@ -333,11 +333,11 @@ class Suggestion:
 
         Parameters
         ----------
-        config : pd.Series
+        config : pandas.Series
             The configuration suggested.
-        context : Optional[pd.Series]
+        context : Optional[pandas.Series]
             The context for this suggestion, by default None
-        metadata : Optional[pd.Series]
+        metadata : Optional[pandas.Series]
             Any metadata provided by the underlying optimizer, by default None
         """
         self._config = config
