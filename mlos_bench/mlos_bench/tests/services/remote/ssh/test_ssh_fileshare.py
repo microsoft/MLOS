@@ -22,7 +22,9 @@ from mlos_bench.util import path_join
 
 
 @contextmanager
-def closeable_temp_file(**kwargs: Any) -> Generator[_TemporaryFileWrapper, None, None]:
+def closeable_temp_file(
+    **kwargs: Any,
+) -> Generator[_TemporaryFileWrapper, None, None]:  # pylint: disable=unnecessary-default-type-args
     """
     Provides a context manager for a temporary file that can be closed and still
     unlinked.

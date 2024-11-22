@@ -38,7 +38,7 @@ def storage() -> SqlStorage:
 def exp_storage(
     storage: SqlStorage,
     tunable_groups: TunableGroups,
-) -> Generator[SqlStorage.Experiment, None, None]:
+) -> Generator[SqlStorage.Experiment, None, None]:  # pylint: disable=unnecessary-default-type-args
     """
     Test fixture for Experiment using in-memory SQLite3 storage.
 
@@ -60,7 +60,7 @@ def exp_storage(
 @pytest.fixture
 def exp_no_tunables_storage(
     storage: SqlStorage,
-) -> Generator[SqlStorage.Experiment, None, None]:
+) -> Generator[SqlStorage.Experiment, None, None]:  # pylint: disable=unnecessary-default-type-args
     """
     Test fixture for Experiment using in-memory SQLite3 storage.
 
@@ -84,7 +84,7 @@ def exp_no_tunables_storage(
 def mixed_numerics_exp_storage(
     storage: SqlStorage,
     mixed_numerics_tunable_groups: TunableGroups,
-) -> Generator[SqlStorage.Experiment, None, None]:
+) -> Generator[SqlStorage.Experiment, None, None]:  # pylint: disable=unnecessary-default-type-args
     """
     Test fixture for an Experiment with mixed numerics tunables using in-memory SQLite3
     storage.
