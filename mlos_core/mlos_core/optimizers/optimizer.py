@@ -109,8 +109,8 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     def _preprocess_observation(self, observation: Observation) -> Observation:
         """
-        Wrapper method, which employs the space adapter (if any), and does some
-        input validation, before registering the configs and scores.
+        Wrapper method, which employs the space adapter (if any), and does some input
+        validation, before registering the configs and scores.
 
         Parameters
         ----------
