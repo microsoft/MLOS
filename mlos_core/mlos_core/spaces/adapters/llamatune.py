@@ -548,10 +548,10 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         warn(
             (
                 "Trying to register a configuration that was not "
-                + "previously suggested by the optimizer.\n"
-                + "This inverse configuration transformation is typically not supported.\n"
-                + "However, we will try to register this configuration "
-                + "using an *experimental* method."
+                "previously suggested by the optimizer.\n"
+                "This inverse configuration transformation is typically not supported.\n"
+                "However, we will try to register this configuration "
+                "using an *experimental* method."
             ),
             UserWarning,
         )
