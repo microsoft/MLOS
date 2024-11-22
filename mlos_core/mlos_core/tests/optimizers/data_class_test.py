@@ -277,10 +277,8 @@ def test_observations_to_list(
     observations_with_context: Observations,
 ) -> None:
     """Test Observations class."""
-    assert len(observations_with_context.to_list()) == 3
-    assert all(
-        isinstance(observation, Observation) for observation in observations_with_context.to_list()
-    )
+    assert len(list(observations_with_context)) == 3
+    assert all(isinstance(observation, Observation) for observation in observations_with_context)
 
 
 def test_observations_equality_test(

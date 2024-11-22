@@ -151,13 +151,13 @@ def test_basic_interface_toy_problem(
     if isinstance(optimizer, BaseBayesianOptimizer):
         pred_best = [
             optimizer.surrogate_predict(suggestion=observation.to_suggestion())
-            for observation in best_observation.to_list()
+            for observation in best_observation
         ]
         assert len(pred_best) == 1
 
         pred_all = [
             optimizer.surrogate_predict(suggestion=observation.to_suggestion())
-            for observation in all_observations.to_list()
+            for observation in all_observations
         ]
         assert len(pred_all) == 20
 
@@ -357,7 +357,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     # .surrogate_predict method not currently implemented if space adapter is employed
     if isinstance(llamatune_optimizer, BaseBayesianOptimizer):
         with pytest.raises(NotImplementedError):
-            for obs in llamatune_best_observations.to_list():
+            for obs in llamatune_best_observations:
                 llamatune_optimizer.surrogate_predict(suggestion=obs.to_suggestion())
 
 

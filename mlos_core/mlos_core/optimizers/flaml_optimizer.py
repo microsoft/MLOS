@@ -116,7 +116,7 @@ class FlamlOptimizer(BaseOptimizer):
             return
 
         if isinstance(observations, Observations):
-            for observation in observations.to_list():
+            for observation in observations:
                 self._register(observation)
             return
 

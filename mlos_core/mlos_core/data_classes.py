@@ -225,35 +225,16 @@ class Observations:
                 "if metadata of prior observation is null"
             )
 
-    def to_list(self) -> List[Observation]:
-        """
-        Converts the Observations object to a list of Observation objects.
+    def __len__(self) -> int:
+        return len(self.config.index)
 
-        Returns
-        -------
-        List[Observation]
-            The list of observations.
-        """
-        return [
-            Observation(
+    def __iter__(self) -> Iterator["Observation"]:
+        for idx in self.config.index:
+            yield Observation(
                 config=self.config.loc[idx],
                 score=self.score.loc[idx],
                 context=None if self.context is None else self.context.loc[idx],
                 metadata=None if self.metadata is None else self.metadata.loc[idx],
-            )
-            for idx in self.config.index
-        ]
-
-    def __len__(self) -> int:
-        return len(self.config.index)
-
-    def __iter__(self) -> Iterator["Observations"]:
-        for idx in self.config.index:
-            yield Observations(
-                config=self.config.loc[[idx]],
-                score=self.score.loc[[idx]],
-                context=None if self.context is None else self.context.loc[[idx]],
-                metadata=None if self.metadata is None else self.metadata.loc[[idx]],
             )
 
     def __repr__(self) -> str:
