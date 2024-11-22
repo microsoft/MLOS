@@ -7,7 +7,8 @@ optimizers.
 """
 
 import logging
-from typing import Dict, Hashable, List, Optional, Tuple, Union
+from collections.abc import Hashable
+from typing import Dict, List, Optional, Tuple, Union
 
 from ConfigSpace import (
     Beta,
