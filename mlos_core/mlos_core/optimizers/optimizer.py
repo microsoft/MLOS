@@ -177,7 +177,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Parameters
         ----------
-        context : pd.Series
+        context : pandas.Series
             Not Yet Implemented.
         defaults : bool
             Whether or not to return the default config instead of an optimizer guided one.
@@ -222,7 +222,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         Parameters
         ----------
-        context : pd.Series
+        context : pandas.Series
             Not Yet Implemented.
 
         Returns

@@ -198,7 +198,7 @@ class Observations:
 
         Parameters
         ----------
-        index : pd.Index
+        index : pandas.Index
             The indices to filter by.
 
         Returns
