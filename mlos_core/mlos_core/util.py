@@ -16,9 +16,9 @@ def compare_optional_series(left: Optional[pd.Series], right: Optional[pd.Series
 
     Parameters
     ----------
-    left : Optional[pd.Series]
+    left : Optional[pandas.Series]
         The left Series to compare
-    right : Optional[pd.Series]
+    right : Optional[pandas.Series]
         The right Series to compare
 
     Returns
@@ -40,9 +40,9 @@ def compare_optional_dataframe(
 
     Parameters
     ----------
-    left : Optional[pd.DataFrame]
+    left : Optional[pandas.DataFrame]
         The left DataFrame to compare
-    right : Optional[pd.DataFrame]
+    right : Optional[pandas.DataFrame]
         The right DataFrame to compare
 
     Returns
@@ -66,7 +66,7 @@ def config_to_series(config: Configuration) -> pd.Series:
 
     Returns
     -------
-    pd.Series
+    pandas.Series
         A Series, containing the config's parameters.
     """
     series: pd.Series = pd.Series(dict(config))  # needed for type hinting

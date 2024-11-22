@@ -64,13 +64,13 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
 
         Parameters
         ----------
-        configuration : pd.Series
+        configuration : pandas.Series
             Pandas series. Column names are the parameter names
             of the target parameter space.
 
         Returns
         -------
-        configuration : pd.Series
+        configuration : pandas.Series
             Pandas series, containing the translated configuration.
             Column names are the parameter names of the original parameter space.
         """
@@ -87,14 +87,14 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
 
         Parameters
         ----------
-        configuration : pd.Series
+        configuration : pandas.Series
             A Series of configuration parameters, which belong to the original parameter space.
             The indices are the parameter names the original parameter space and the
             rows are the configurations.
 
         Returns
         -------
-        configuration : pd.Series
+        configuration : pandas.Series
             Series of the translated configurations / parameters.
             The indices are the parameter names of the target parameter space and
             the rows are the configurations.

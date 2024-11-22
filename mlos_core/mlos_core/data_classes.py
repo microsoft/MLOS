@@ -19,14 +19,14 @@ class Observation:
 
     Attributes
     ----------
-    config : pd.Series
+    config : pandas.Series
         The configuration observed.
-    score : pd.Series
+    score : pandas.Series
         The score metrics observed.
-    context : Optional[pd.Series]
+    context : Optional[pandas.Series]
         The context in which the configuration was evaluated.
         Not Yet Implemented.
-    metadata: Optional[pd.Series]
+    metadata: Optional[pandas.Series]
         The metadata in which the configuration was evaluated
     """
 
@@ -127,14 +127,14 @@ class Observations:
 
         Parameters
         ----------
-        configs : pd.DataFrame
+        configs : pandas.DataFrame
             Pandas dataframe containing configurations. Column names are the parameter names.
-        scores : pd.DataFrame
+        scores : pandas.DataFrame
             The score metrics observed in a dataframe.
-        contexts : Optional[pd.DataFrame]
+        contexts : Optional[pandas.DataFrame]
             The context in which the configuration was evaluated.
             Not Yet Implemented.
-        metadata: Optional[pd.DataFrame]
+        metadata: Optional[pandas.DataFrame]
             The metadata in which the configuration was evaluated
             Not Yet Implemented.
         """
@@ -318,7 +318,7 @@ class Suggestion:
 
     Attributes
     ----------
-    config : pd.DataFrame
+    config : pandas.DataFrame
         The suggested configuration.
     """
 
@@ -354,7 +354,7 @@ class Suggestion:
 
         Parameters
         ----------
-        score : pd.Series
+        score : pandas.Series
             The score metrics observed.
 
         Returns
@@ -375,12 +375,12 @@ class Suggestion:
 
         Parameters
         ----------
-        space : ConfigurationSpace
+        space : ConfigSpace.ConfigurationSpace
             The ConfigurationSpace to be converted.
 
         Returns
         -------
-        Configuration
+        ConfigSpace.Configuration
             The output Configuration.
         """
         return Configuration(space, values=self._config.dropna().to_dict())
