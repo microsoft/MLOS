@@ -341,6 +341,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     def _suggest(
         self,
+        *,
         context: Optional[pd.Series] = None,
     ) -> Suggestion:
         """

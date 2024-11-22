@@ -99,7 +99,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         if isinstance(observations, Observation):
             self._register_single(observation=observations)
         if isinstance(observations, Observations):
-            for obs in observations.to_list():
+            for obs in observations:
                 self._register_single(observation=obs)
 
     def _register_single(self, observation: Observation) -> None:
@@ -155,6 +155,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     def suggest(
         self,
+        *,
         context: Optional[pd.Series] = None,
         defaults: bool = False,
     ) -> Suggestion:
@@ -197,6 +198,7 @@ class BaseOptimizer(metaclass=ABCMeta):
     @abstractmethod
     def _suggest(
         self,
+        *,
         context: Optional[pd.Series] = None,
     ) -> Suggestion:
         """
