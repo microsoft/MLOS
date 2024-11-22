@@ -140,6 +140,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             except TypeError:
                 self._temp_output_directory = TemporaryDirectory()
             output_directory = self._temp_output_directory.name
+        assert output_directory is not None
 
         if n_random_init is not None:
             assert isinstance(n_random_init, int) and n_random_init >= 0
