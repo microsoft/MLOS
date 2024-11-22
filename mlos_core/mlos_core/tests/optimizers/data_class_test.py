@@ -97,10 +97,7 @@ def observation_with_context(
 
 
 @pytest.fixture
-def observation_without_context(
-    config2: pd.Series,
-    score2: pd.Series,
-) -> Observation:
+def observation_without_context(config2: pd.Series, score2: pd.Series) -> Observation:
     """Toy observation used for tests."""
     return Observation(
         config=config2,
@@ -109,9 +106,7 @@ def observation_without_context(
 
 
 @pytest.fixture
-def observations_with_context(
-    observation_with_context: Observation,
-) -> Observations:
+def observations_with_context(observation_with_context: Observation) -> Observations:
     """Toy observation used for tests."""
     return Observations(
         observations=[observation_with_context, observation_with_context, observation_with_context]
@@ -119,9 +114,7 @@ def observations_with_context(
 
 
 @pytest.fixture
-def observations_without_context(
-    observation_without_context: Observation,
-) -> Observations:
+def observations_without_context(observation_without_context: Observation) -> Observations:
     """Toy observation used for tests."""
     return Observations(
         observations=[
@@ -147,9 +140,7 @@ def suggestion_with_context(
 
 
 @pytest.fixture
-def suggestion_without_context(
-    config2: pd.Series,
-) -> Suggestion:
+def suggestion_without_context(config2: pd.Series) -> Suggestion:
     """Toy suggestion used for tests."""
     return Suggestion(
         config=config2,
@@ -169,7 +160,8 @@ def test_observation_to_suggestion(
 
 
 def test_observation_equality_operators(
-    observation_with_context: Observation, observation_without_context: Observation
+    observation_with_context: Observation,
+    observation_without_context: Observation,
 ) -> None:
     """Test equality operators."""
     assert (
@@ -189,16 +181,14 @@ def test_observations_init_components(
 ) -> None:
     """Test Observations class."""
     Observations(
-        config=pd.concat([config.to_frame().T, config.to_frame().T]),
-        score=pd.concat([score.to_frame().T, score.to_frame().T]),
+        configs=pd.concat([config.to_frame().T, config.to_frame().T]),
+        scores=pd.concat([score.to_frame().T, score.to_frame().T]),
+        contexts=pd.concat([context.to_frame().T, context.to_frame().T]),
         metadata=pd.concat([metadata.to_frame().T, metadata.to_frame().T]),
-        context=pd.concat([context.to_frame().T, context.to_frame().T]),
     )
 
 
-def test_observations_init_observations(
-    observation_with_context: Observation,
-) -> None:
+def test_observations_init_observations(observation_with_context: Observation) -> None:
     """Test Observations class."""
     Observations(
         observations=[observation_with_context, observation_with_context],
@@ -214,37 +204,35 @@ def test_observations_init_components_fails(
     """Test Observations class."""
     with pytest.raises(AssertionError):
         Observations(
-            config=pd.concat([config.to_frame().T]),
-            score=pd.concat([score.to_frame().T, score.to_frame().T]),
+            configs=pd.concat([config.to_frame().T]),
+            scores=pd.concat([score.to_frame().T, score.to_frame().T]),
+            contexts=pd.concat([context.to_frame().T, context.to_frame().T]),
             metadata=pd.concat([metadata.to_frame().T, metadata.to_frame().T]),
-            context=pd.concat([context.to_frame().T, context.to_frame().T]),
         )
     with pytest.raises(AssertionError):
         Observations(
-            config=pd.concat([config.to_frame().T, config.to_frame().T]),
-            score=pd.concat([score.to_frame().T]),
+            configs=pd.concat([config.to_frame().T, config.to_frame().T]),
+            scores=pd.concat([score.to_frame().T]),
+            contexts=pd.concat([context.to_frame().T, context.to_frame().T]),
             metadata=pd.concat([metadata.to_frame().T, metadata.to_frame().T]),
-            context=pd.concat([context.to_frame().T, context.to_frame().T]),
         )
     with pytest.raises(AssertionError):
         Observations(
-            config=pd.concat([config.to_frame().T, config.to_frame().T]),
-            score=pd.concat([score.to_frame().T, score.to_frame().T]),
+            configs=pd.concat([config.to_frame().T, config.to_frame().T]),
+            scores=pd.concat([score.to_frame().T, score.to_frame().T]),
+            contexts=pd.concat([context.to_frame().T, context.to_frame().T]),
             metadata=pd.concat([metadata.to_frame().T]),
-            context=pd.concat([context.to_frame().T, context.to_frame().T]),
         )
     with pytest.raises(AssertionError):
         Observations(
-            config=pd.concat([config.to_frame().T, config.to_frame().T]),
-            score=pd.concat([score.to_frame().T, score.to_frame().T]),
+            configs=pd.concat([config.to_frame().T, config.to_frame().T]),
+            scores=pd.concat([score.to_frame().T, score.to_frame().T]),
+            contexts=pd.concat([context.to_frame().T]),
             metadata=pd.concat([metadata.to_frame().T, metadata.to_frame().T]),
-            context=pd.concat([context.to_frame().T]),
         )
 
 
-def test_observations_append(
-    observation_with_context: Observation,
-) -> None:
+def test_observations_append(observation_with_context: Observation) -> None:
     """Test Observations class."""
     observations = Observations()
     observations.append(observation_with_context)
@@ -263,52 +251,48 @@ def test_observations_append_fails(
         observations.append(observation_without_context)
 
 
-def test_observations_filter_by_index(
-    observations_with_context: Observations,
-) -> None:
+def test_observations_filter_by_index(observations_with_context: Observations) -> None:
     """Test Observations class."""
     assert (
-        len(observations_with_context.filter_by_index(observations_with_context.config.index[[0]]))
+        len(
+            observations_with_context.filter_by_index(observations_with_context.configs.index[[0]])
+        )
         == 1
     )
 
 
-def test_observations_to_list(
-    observations_with_context: Observations,
-) -> None:
+def test_observations_to_list(observations_with_context: Observations) -> None:
     """Test Observations class."""
     assert len(list(observations_with_context)) == 3
     assert all(isinstance(observation, Observation) for observation in observations_with_context)
 
 
 def test_observations_equality_test(
-    observations_with_context: Observations, observations_without_context: Observations
+    observations_with_context: Observations,
+    observations_without_context: Observations,
 ) -> None:
     """Test Equality of observations."""
-    assert (
-        observations_with_context == observations_with_context
-    )  # pylint: disable=comparison-with-itself
+    # pylint: disable=comparison-with-itself
+    assert observations_with_context == observations_with_context
     assert observations_with_context != observations_without_context
-    assert (
-        observations_without_context == observations_without_context
-    )  # pylint: disable=comparison-with-itself
+    assert observations_without_context == observations_without_context
 
 
 def test_suggestion_equality_test(
-    suggestion_with_context: Suggestion, suggestion_without_context: Suggestion
+    suggestion_with_context: Suggestion,
+    suggestion_without_context: Suggestion,
 ) -> None:
     """Test Equality of suggestions."""
-    assert (
-        suggestion_with_context == suggestion_with_context
-    )  # pylint: disable=comparison-with-itself
+    # pylint: disable=comparison-with-itself
+    assert suggestion_with_context == suggestion_with_context
     assert suggestion_with_context != suggestion_without_context
-    assert (
-        suggestion_without_context == suggestion_without_context
-    )  # pylint: disable=comparison-with-itself
+    assert suggestion_without_context == suggestion_without_context
 
 
 def test_complete_suggestion(
-    suggestion_with_context: Suggestion, score: pd.Series, observation_with_context: Observation
+    suggestion_with_context: Suggestion,
+    score: pd.Series,
+    observation_with_context: Observation,
 ) -> None:
     """Test ability to complete suggestions."""
     assert suggestion_with_context.complete(score) == observation_with_context
