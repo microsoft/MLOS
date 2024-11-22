@@ -4,12 +4,12 @@
 #
 """RandomOptimizer class."""
 
-from typing import Optional, Union
+from typing import Optional
 from warnings import warn
 
 import pandas as pd
 
-from mlos_core.data_classes import Observation, Observations, Suggestion
+from mlos_core.data_classes import Observations, Suggestion
 from mlos_core.optimizers.optimizer import BaseOptimizer
 
 
