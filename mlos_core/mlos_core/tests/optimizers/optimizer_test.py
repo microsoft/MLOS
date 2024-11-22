@@ -127,24 +127,24 @@ def test_basic_interface_toy_problem(
 
     best_observation = optimizer.get_best_observations()
     assert isinstance(best_observation, Observations)
-    assert isinstance(best_observation.config, pd.DataFrame)
-    assert isinstance(best_observation.score, pd.DataFrame)
-    assert best_observation.context is None
-    assert set(best_observation.config.columns) == {"x", "y", "z"}
-    assert set(best_observation.score.columns) == {"score"}
-    assert best_observation.config.shape == (1, 3)
-    assert best_observation.score.shape == (1, 1)
-    assert best_observation.score.score.iloc[0] < -4
+    assert isinstance(best_observation.configs, pd.DataFrame)
+    assert isinstance(best_observation.scores, pd.DataFrame)
+    assert best_observation.contexts is None
+    assert set(best_observation.configs.columns) == {"x", "y", "z"}
+    assert set(best_observation.scores.columns) == {"score"}
+    assert best_observation.configs.shape == (1, 3)
+    assert best_observation.scores.shape == (1, 1)
+    assert best_observation.scores.score.iloc[0] < -4
 
     all_observations = optimizer.get_observations()
     assert isinstance(all_observations, Observations)
-    assert isinstance(all_observations.config, pd.DataFrame)
-    assert isinstance(all_observations.score, pd.DataFrame)
-    assert all_observations.context is None
-    assert set(all_observations.config.columns) == {"x", "y", "z"}
-    assert set(all_observations.score.columns) == {"score"}
-    assert all_observations.config.shape == (20, 3)
-    assert all_observations.score.shape == (20, 1)
+    assert isinstance(all_observations.configs, pd.DataFrame)
+    assert isinstance(all_observations.scores, pd.DataFrame)
+    assert all_observations.contexts is None
+    assert set(all_observations.configs.columns) == {"x", "y", "z"}
+    assert set(all_observations.scores.columns) == {"score"}
+    assert all_observations.configs.shape == (20, 3)
+    assert all_observations.scores.shape == (20, 1)
 
     # It would be better to put this into bayesian_optimizer_test but then we'd have
     # to refit the model
@@ -326,18 +326,18 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     assert isinstance(llamatune_best_observations, Observations)
 
     for observations in (best_observation, llamatune_best_observations):
-        assert isinstance(observations.config, pd.DataFrame)
-        assert isinstance(observations.score, pd.DataFrame)
-        assert observations.context is None
-        assert set(observations.config.columns) == {"x", "y"}
-        assert set(observations.score.columns) == {"score"}
+        assert isinstance(observations.configs, pd.DataFrame)
+        assert isinstance(observations.scores, pd.DataFrame)
+        assert observations.contexts is None
+        assert set(observations.configs.columns) == {"x", "y"}
+        assert set(observations.scores.columns) == {"score"}
 
     # LlamaTune's optimizer score should better (i.e., lower) than plain optimizer's
     # one, or close to that
     assert (
-        best_observation.score.score.iloc[0] > llamatune_best_observations.score.score.iloc[0]
-        or best_observation.score.score.iloc[0] + 1e-3
-        > llamatune_best_observations.score.score.iloc[0]
+        best_observation.scores.score.iloc[0] > llamatune_best_observations.scores.score.iloc[0]
+        or best_observation.scores.score.iloc[0] + 1e-3
+        > llamatune_best_observations.scores.score.iloc[0]
     )
 
     # Retrieve and check all observations
@@ -345,13 +345,13 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
         optimizer.get_observations(),
         llamatune_optimizer.get_observations(),
     ):
-        assert isinstance(all_observations.config, pd.DataFrame)
-        assert isinstance(all_observations.score, pd.DataFrame)
-        assert all_observations.context is None
-        assert set(all_observations.config.columns) == {"x", "y"}
-        assert set(all_observations.score.columns) == {"score"}
-        assert len(all_observations.config) == num_iters
-        assert len(all_observations.score) == num_iters
+        assert isinstance(all_observations.configs, pd.DataFrame)
+        assert isinstance(all_observations.scores, pd.DataFrame)
+        assert all_observations.contexts is None
+        assert set(all_observations.configs.columns) == {"x", "y"}
+        assert set(all_observations.scores.columns) == {"score"}
+        assert len(all_observations.configs) == num_iters
+        assert len(all_observations.scores) == num_iters
         assert len(all_observations) == num_iters
 
     # .surrogate_predict method not currently implemented if space adapter is employed
@@ -451,11 +451,11 @@ def test_mixed_numerics_type_input_space_types(
         optimizer.register(observations=suggestion.complete(observation))
 
     best_observations = optimizer.get_best_observations()
-    assert isinstance(best_observations.config, pd.DataFrame)
-    assert isinstance(best_observations.score, pd.DataFrame)
-    assert best_observations.context is None
+    assert isinstance(best_observations.configs, pd.DataFrame)
+    assert isinstance(best_observations.scores, pd.DataFrame)
+    assert best_observations.contexts is None
 
     all_observations = optimizer.get_observations()
-    assert isinstance(all_observations.config, pd.DataFrame)
-    assert isinstance(all_observations.score, pd.DataFrame)
-    assert all_observations.context is None
+    assert isinstance(all_observations.configs, pd.DataFrame)
+    assert isinstance(all_observations.scores, pd.DataFrame)
+    assert all_observations.contexts is None
