@@ -352,6 +352,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
         assert set(all_observations.score.columns) == {"score"}
         assert len(all_observations.config) == num_iters
         assert len(all_observations.score) == num_iters
+        assert len(all_observations) == num_iters
 
     # .surrogate_predict method not currently implemented if space adapter is employed
     if isinstance(llamatune_optimizer, BaseBayesianOptimizer):
@@ -421,6 +422,8 @@ def test_mixed_numerics_type_input_space_types(
             optimizer_type=optimizer_type,
             optimizer_kwargs=kwargs,
         )
+
+    assert isinstance(optimizer, BaseOptimizer)
 
     with pytest.raises(ValueError, match="No observations"):
         optimizer.get_best_observations()
