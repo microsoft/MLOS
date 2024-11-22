@@ -5,8 +5,6 @@
 """Data classes for mlos_core used to pass around configurations, observations, and
 suggestions.
 """
-from __future__ import annotations
-
 from typing import Any, Iterator, List, Optional
 
 import pandas as pd
@@ -48,7 +46,7 @@ class Observation:
         self.context = context
         self.metadata = metadata
 
-    def to_suggestion(self) -> Suggestion:
+    def to_suggestion(self) -> "Suggestion":
         """
         Converts the observation to a suggestion.
 
@@ -106,7 +104,7 @@ class Observations:
         Not Yet Implemented.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         config: pd.DataFrame = pd.DataFrame(),
@@ -148,7 +146,7 @@ class Observations:
         self.context = None if context is None else context.reset_index(drop=True)
         self.metadata = None if metadata is None else metadata.reset_index(drop=True)
 
-    def filter_by_index(self, index: pd.Index) -> Observations:
+    def filter_by_index(self, index: pd.Index) -> "Observations":
         """
         Filters the observation by the given indices.
 
@@ -249,7 +247,7 @@ class Observations:
     def __len__(self) -> int:
         return len(self.config.index)
 
-    def __iter__(self) -> Iterator[Observations]:
+    def __iter__(self) -> Iterator["Observations"]:
         for idx in self.config.index:
             yield Observations(
                 config=self.config.loc[[idx]],
