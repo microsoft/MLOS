@@ -102,36 +102,46 @@ class FlamlOptimizer(BaseOptimizer):
 
     def _register(
         self,
-        observations: Optional[Union[Observation, Observations]] = None,
+        observations: Observations,
     ) -> None:
         """
-        Registers the given config(s) and scores.
+        Registers one or more configs/score pairs (observations) with the underlying
+        optimizer.
 
         Parameters
         ----------
-        observation : Observation | Observations
-            The observations to register.
+        observations : Observations
+            The set of config/scores to register.
         """
-        if observations is None:
-            return
+        # TODO: Implement bulk registration.
+        # (e.g., by rebuilding the base optimizer instance with all observations).
+        for observation in observations:
+            self._register_single(observation)
 
-        if isinstance(observations, Observations):
-            for observation in observations:
-                self._register(observation)
-            return
+    def _register_single(
+        self,
+        observation: Observation,
+    ) -> None:
+        """
+        Registers the given config and its score.
 
-        if observations.context is not None:
+        Parameters
+        ----------
+        observation : Observation
+            The observation to register.
+        """
+        if observation.context is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observations.context.index)}",
+                f"Not Implemented: Ignoring context {list(observation.context.index)}",
                 UserWarning,
             )
-        if observations.metadata is not None:
+        if observation.metadata is not None:
             warn(
-                f"Not Implemented: Ignoring metadata {list(observations.metadata.index)}",
+                f"Not Implemented: Ignoring metadata {list(observation.metadata.index)}",
                 UserWarning,
             )
 
-        cs_config: ConfigSpace.Configuration = observations.to_suggestion().to_configspace_config(
+        cs_config: ConfigSpace.Configuration = observation.to_suggestion().to_configspace_config(
             self.optimizer_parameter_space
         )
         if cs_config in self.evaluated_samples:
@@ -139,7 +149,7 @@ class FlamlOptimizer(BaseOptimizer):
         self.evaluated_samples[cs_config] = EvaluatedSample(
             config=dict(cs_config),
             score=float(
-                np.average(observations.score.astype(float), weights=self._objective_weights)
+                np.average(observation.score.astype(float), weights=self._objective_weights)
             ),
         )
 

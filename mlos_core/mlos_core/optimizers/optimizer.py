@@ -85,7 +85,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
     def register(
         self,
-        observations: Optional[Union[Observation, Observations]],
+        observations: Union[Observation, Observations],
     ) -> None:
         """
         Register all observations at once. Exactly one of observations or observation
@@ -99,11 +99,15 @@ class BaseOptimizer(metaclass=ABCMeta):
         if isinstance(observations, Observation):
             observations = Observations(observations=[observations])
         # Check input and transform the observations if a space adapter is present.
-        observations = [self._check_observation(observation) for observation in observations]
+        observations = Observations(
+            observations=[
+                self._preprocess_observation(observation) for observation in observations
+            ]
+        )
         # Now bulk register all observations (details delegated to the underlying classes).
         self._register(observations)
 
-    def _check_observation(self, observation: Observation) -> Observation:
+    def _preprocess_observation(self, observation: Observation) -> Observation:
         """
         Wrapper method, which employs the space adapter (if any), and does some
         input validation, before registering the configs and scores.
@@ -133,28 +137,28 @@ class BaseOptimizer(metaclass=ABCMeta):
         self._has_context = observation.context is not None
         self._observations.append(observation)
 
-        register_observation = deepcopy(observation)  # Needed to support named tuples
+        transformed_observation = deepcopy(observation)  # Needed to support named tuples
         if self._space_adapter:
-            register_observation.config = self._space_adapter.inverse_transform(
-                register_observation.config
+            transformed_observation.config = self._space_adapter.inverse_transform(
+                transformed_observation.config
             )
-            assert len(register_observation.config) == len(
+            assert len(transformed_observation.config) == len(
                 self.optimizer_parameter_space.values()
             ), "Mismatched configuration shape after inverse transform."
-        return register_observation
+        return transformed_observation
 
     @abstractmethod
     def _register(
         self,
-        observations: Optional[Union[Observation, Observations]] = None,
+        observations: Observations,
     ) -> None:
         """
         Registers the given configs and scores.
 
         Parameters
         ----------
-        observation: Observation
-            The observation to register.
+        observations: Observations
+            The set of observations to register.
         """
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
 

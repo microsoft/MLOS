@@ -22,22 +22,20 @@ class RandomOptimizer(BaseOptimizer):
 
     def _register(
         self,
-        observations: Optional[Union[Observation, Observations]] = None,
+        observations: Observations,
     ) -> None:
         """
-        Registers the given configs and scores.
+        Registers the given config/score pairs.
 
+        Notes
+        -----
         Doesn't do anything on the RandomOptimizer except storing configs for logging.
 
         Parameters
         ----------
-        observations : Observation | Observations
+        observations : Observations
             The observations to register.
         """
-        assert isinstance(
-            observations, Observation
-        ), "Internal implementation does not support Observations."
-
         if observations.context is not None:
             warn(
                 f"Not Implemented: Ignoring context {list(observations.context.index)}",

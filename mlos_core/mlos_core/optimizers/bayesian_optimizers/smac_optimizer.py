@@ -294,10 +294,28 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     def _register(
         self,
-        observations: Optional[Union[Observation, Observations]] = None,
+        observations: Observations,
     ) -> None:
         """
-        Registers the given configs and scores.
+        Registers one or more configs/score pairs (observations) with the underlying
+        optimizer.
+
+        Parameters
+        ----------
+        observations : Observations
+            The set of config/scores to register.
+        """
+        # TODO: Implement bulk registration.
+        # (e.g., by rebuilding the base optimizer instance with all observations).
+        for observation in observations:
+            self._register_single(observation)
+
+    def _register_single(
+        self,
+        observation: Observation,
+    ) -> None:
+        """
+        Registers the given config and its score.
 
         Parameters
         ----------
@@ -310,13 +328,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
             TrialValue,
         )
 
-        assert isinstance(
-            observations, Observation
-        ), "Internal implementation does not support Observations."
-
-        if observations.context is not None:
+        if observation.context is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observations.context.index)}",
+                f"Not Implemented: Ignoring context {list(observation.context.index)}",
                 UserWarning,
             )
 
@@ -324,14 +338,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # new TrialInfo instance
         config = ConfigSpace.Configuration(
             self.optimizer_parameter_space,
-            values=observations.config.dropna().to_dict(),
+            values=observation.config.dropna().to_dict(),
         )
         info: TrialInfo = self.trial_info_map.get(
             config,
             TrialInfo(config=config, seed=self.base_optimizer.scenario.seed),
         )
         value = TrialValue(
-            cost=list(observations.score.astype(float)),
+            cost=list(observation.score.astype(float)),
             time=0.0,
             status=StatusType.SUCCESS,
         )
