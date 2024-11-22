@@ -5,15 +5,26 @@
 """Data classes for mlos_core used to pass around configurations, observations, and
 suggestions.
 """
-from typing import Any, Iterator, List, Optional
+from typing import Any, Iterator, Iterable, Optional, TypeAlias
 
 import pandas as pd
 from ConfigSpace import Configuration, ConfigurationSpace
 
 from mlos_core.util import compare_optional_dataframe, compare_optional_series
 
-Context = Optional[pd.Series]
-Metadata = Optional[pd.Series]
+Config: TypeAlias = pd.Series
+"""Data type for a configuration instance."""
+
+Score: TypeAlias = pd.Series
+"""Data type for a score of a given configuration run (trial)."""
+
+Context: TypeAlias = pd.Series
+"""Data type for the context in which a configuration was evaluated or the
+suggesttion is requested."""
+
+Metadata: TypeAlias = pd.Series
+"""Data type for additional metadata about the configuration suggestion to be fed
+back to the underlying optimizer."""
 
 
 class Observation:

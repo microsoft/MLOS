@@ -172,6 +172,8 @@ CUSTOM_REF_TYPE_MAP: Dict[Tuple[str, str], str] = {
     ("T_co", "class"): "data",
     ("CoroReturnType", "class"): "data",
     ("FutureReturnType", "class"): "data",
+    ("Context", "class"): "type",
+    ("Metadata", "class"): "type",
 }
 
 
