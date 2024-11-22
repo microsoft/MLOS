@@ -5,7 +5,7 @@
 """Data classes for mlos_core used to pass around configurations, observations, and
 suggestions.
 """
-from typing import Any, Iterator, Iterable, Optional
+from typing import Any, Iterable, Iterator, Optional
 
 import pandas as pd
 from ConfigSpace import Configuration, ConfigurationSpace
