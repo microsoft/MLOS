@@ -103,7 +103,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
 
     def __repr__(self) -> str:
         opt_targets = ",".join(
-            f"{opt_target}:{({1: 'min', -1: 'max'}[opt_dir])}"  # pylint: disable=inconsistent-quotes # noqa: E501
+            f"""{opt_target}:{({1: "min", -1: "max"}[opt_dir])}"""
             for (opt_target, opt_dir) in self._opt_targets.items()
         )
         return f"{self.name}({opt_targets},config={self._config})"

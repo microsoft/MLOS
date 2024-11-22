@@ -190,9 +190,7 @@ class AzureVMService(
         # since this is a common way to set the deploymentName and can same some
         # config work for the caller.
         if "vmName" in params and "deploymentName" not in params:
-            params["deploymentName"] = (
-                f"{params['vmName']}-deployment"  # pylint: disable=inconsistent-quotes
-            )
+            params["deploymentName"] = f"""{params["vmName"]}-deployment"""
 
             _LOG.info(
                 "deploymentName missing from params. Defaulting to '%s'.",
@@ -242,7 +240,7 @@ class AzureVMService(
         """
         _LOG.info("Wait for operation on VM %s", params["vmName"])
         # Try and provide a semi sane default for the deploymentName
-        params.setdefault(f"{params['vmName']}-deployment")  # pylint: disable=inconsistent-quotes
+        params.setdefault(f"""{params["vmName"]}-deployment""")
         return self._wait_while(self._check_operation_status, Status.RUNNING, params)
 
     def wait_remote_exec_operation(self, params: dict) -> Tuple["Status", dict]:

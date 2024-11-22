@@ -65,7 +65,7 @@ class MlosCoreOptimizer(Optimizer):
             if "max_trials" not in self._config:
                 self._config["max_trials"] = self._max_suggestions
             assert int(self._config["max_trials"]) >= self._max_suggestions, (
-                f"max_trials {self._config.get('max_trials')} "  # pylint: disable=inconsistent-quotes # noqa: E501
+                f"""max_trials {self._config.get("max_trials")} """
                 f"<= max_suggestions{self._max_suggestions}"
             )
 

@@ -30,14 +30,10 @@ def kv_df_to_dict(dataframe: pandas.DataFrame) -> Dict[str, Optional[TunableValu
     data = {}
     for _, row in dataframe.astype("O").iterrows():
         if not isinstance(row["value"], TunableValueTypeTuple):
-            raise TypeError(
-                f"Invalid column type: {type(row['value'])} value: {row['value']}"  # pylint: disable=inconsistent-quotes # noqa: E501
-            )
+            raise TypeError(f"""Invalid column type: {type(row["value"])} value: {row["value"]}""")
         assert isinstance(row["parameter"], str)
         if row["parameter"] in data:
-            raise ValueError(
-                f"Duplicate parameter '{row['parameter']}' in dataframe"  # pylint: disable=inconsistent-quotes # noqa: E501
-            )
+            raise ValueError(f"""Duplicate parameter '{row["parameter"]}' in dataframe""")
         data[row["parameter"]] = (
             try_parse_val(row["value"]) if isinstance(row["value"], str) else row["value"]
         )

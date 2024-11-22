@@ -84,9 +84,7 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
         # since this is a common way to set the deploymentName and can same some
         # config work for the caller.
         if "vnetName" in params and "deploymentName" not in params:
-            params["deploymentName"] = (
-                f"{params['vnetName']}-deployment"  # pylint: disable=inconsistent-quotes
-            )
+            params["deploymentName"] = f"""{params["vnetName"]}-deployment"""
             _LOG.info(
                 "deploymentName missing from params. Defaulting to '%s'.",
                 params["deploymentName"],
