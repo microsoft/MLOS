@@ -79,7 +79,7 @@ def drop_nulls(d: dict) -> dict:
 
     Parameters
     ----------
-    dictionary : dict
+    d : dict
         The dictionary to clean.
 
     Returns
