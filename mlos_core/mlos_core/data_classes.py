@@ -120,13 +120,13 @@ class Observations:
             config = pd.concat([obs.config.to_frame().T for obs in observations])
             score = pd.concat([obs.score.to_frame().T for obs in observations])
 
-            if sum([obs.context is None for obs in observations]) == 0:
+            if sum(obs.context is None for obs in observations) == 0:
                 context = pd.concat(
                     [obs.context.to_frame().T for obs in observations]  # type: ignore[union-attr]
                 )
             else:
                 context = None
-            if sum([obs.metadata is None for obs in observations]) == 0:
+            if sum(obs.metadata is None for obs in observations) == 0:
                 metadata = pd.concat(
                     [obs.metadata.to_frame().T for obs in observations]  # type: ignore[union-attr]
                 )
