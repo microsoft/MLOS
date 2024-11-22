@@ -76,7 +76,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         if num_low_dims >= len(orig_parameter_space):
             raise ValueError(
                 "Number of target config space dimensions should be "
-                + "less than those of original config space."
+                "less than those of original config space."
             )
 
         # Validate input special param values dict
