@@ -97,20 +97,26 @@ class BaseOptimizer(metaclass=ABCMeta):
             The observations to register.
         """
         if isinstance(observations, Observation):
-            self._register_single(observation=observations)
-        if isinstance(observations, Observations):
-            for obs in observations:
-                self._register_single(observation=obs)
+            observations = Observations(observations=[observations])
+        # Check input and transform the observations if a space adapter is present.
+        observations = [self._check_observation(observation) for observation in observations]
+        # Now bulk register all observations (details delegated to the underlying classes).
+        self._register(observations)
 
-    def _register_single(self, observation: Observation) -> None:
+    def _check_observation(self, observation: Observation) -> Observation:
         """
-        Wrapper method, which employs the space adapter (if any), before registering the
-        configs and scores.
+        Wrapper method, which employs the space adapter (if any), and does some
+        input validation, before registering the configs and scores.
 
         Parameters
         ----------
         observation: Observation
             The observation to register.
+
+        Returns
+        -------
+        observation: Observation
+            The (possibly transformed) observation to register.
         """
         # Do some input validation.
         assert observation.metadata is None or isinstance(observation.metadata, pd.Series)
@@ -135,8 +141,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             assert len(register_observation.config) == len(
                 self.optimizer_parameter_space.values()
             ), "Mismatched configuration shape after inverse transform."
-
-        return self._register(observations=register_observation)
+        return register_observation
 
     @abstractmethod
     def _register(
