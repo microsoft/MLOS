@@ -16,18 +16,6 @@ from mlos_core.util import compare_optional_dataframe, compare_optional_series
 class Observation:
     """
     A single observation of a configuration.
-
-    Attributes
-    ----------
-    config : pandas.Series
-        The configuration observed.
-    score : pandas.Series
-        The score metrics observed.
-    context : Optional[pandas.Series]
-        The context in which the configuration was evaluated.
-        Not Yet Implemented.
-    metadata: Optional[pandas.Series]
-        The metadata in which the configuration was evaluated
     """
 
     def __init__(
@@ -38,6 +26,22 @@ class Observation:
         context: Optional[pd.Series] = None,
         metadata: Optional[pd.Series] = None,
     ):
+        """
+        Creates a new Observation object.
+
+        Parameters
+        ----------
+        config : pandas.Series
+            The configuration observed.
+        score : pandas.Series
+            The score metrics observed.
+        context : Optional[pandas.Series]
+            The context in which the configuration was evaluated.
+            Not Yet Implemented.
+        metadata: Optional[pandas.Series]
+            The metadata in which the configuration was evaluated
+        """
+
         self._config = config
         self._score = score
         self._context = context
@@ -315,11 +319,6 @@ class Suggestion:
 
     A Suggestion is an Observation that has not yet been scored.
     Evaluating the Suggestion and calling `complete(scores)` can convert it to an Observation.
-
-    Attributes
-    ----------
-    config : pandas.DataFrame
-        The suggested configuration.
     """
 
     def __init__(
@@ -329,6 +328,18 @@ class Suggestion:
         context: Optional[pd.Series] = None,
         metadata: Optional[pd.Series] = None,
     ):
+        """
+        Creates a new Suggestion.
+
+        Parameters
+        ----------
+        config : pd.Series
+            The configuration suggested.
+        context : Optional[pd.Series]
+            The context for this suggestion, by default None
+        metadata : Optional[pd.Series]
+            Any metadata provided by the underlying optimizer, by default None
+        """
         self._config = config
         self._context = context
         self._metadata = metadata
