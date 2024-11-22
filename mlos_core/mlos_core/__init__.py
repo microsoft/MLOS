@@ -18,6 +18,12 @@ To do this it provides a small set of wrapper classes around other OSS tuning
 libraries in order to provide a consistent interface so that the rest of the code
 using it can easily exchange one optimizer for another (or even stack them).
 
+TODO: Mention LlamaTune and space adapters.
+
+TODO: Mention ConfigSpace
+
+TODO: Mention pandas
+
 Specifically:
 
 - :py:class:`~mlos_core.optimizers.optimizer.BaseOptimizer` is the base class for all Optimizers
@@ -56,7 +62,7 @@ Examples
 >>> opt = OptimizerFactory.create(
 ...     parameter_space=cs,
 ...     optimization_targets=["y"],
-...     optimizer_type=OptimizerType.SMAC,
+...     optimizer_type=OptimizerType.SMAC,  # or FLAML, etc.
 ...     optimizer_kwargs=opt_args,
 ...     space_adapter_type=SpaceAdapterType.IDENTITY,   # or LLAMATUNE
 ...     space_adapter_kwargs=space_adpaters_kwargs,

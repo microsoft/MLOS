@@ -21,6 +21,9 @@ json configs. For instance,
 :py:class:`~mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer` can be
 used to perform a grid search over the parameter space instead.
 
+TODO: Mention intent and philosophy of the project (repeatable, reproducible, etc.)
+TODO: Mention where to find configs and examples and how to think about them.
+
 The other core classes in this package are:
 
 - :py:mod:`~mlos_bench.environments` which provide abstractions for representing an
