@@ -136,8 +136,8 @@ class BaseConversion(metaclass=ABCMeta):
         assert -10 <= point[1] <= -5
 
     def test_uniform_samples(self) -> None:
-        c_hyper = CS.UniformIntegerHyperparameter("c", lower=1, upper=20)
-        input_space = CS.ConfigurationSpace({"a": (1.0, 5.0), "c": c_hyper})
+        c = CS.UniformIntegerHyperparameter("c", lower=1, upper=20)
+        input_space = CS.ConfigurationSpace({"a": (1.0, 5.0), "c": c})
         converted_space = self.conversion_function(input_space)
 
         np.random.seed(42)  # pylint: disable=unreachable
@@ -147,8 +147,8 @@ class BaseConversion(metaclass=ABCMeta):
         assert_is_uniform(uniform)
 
         # Check that we get both ends of the sampled range returned to us.
-        assert c_hyper.upper in integer_uniform
-        assert c_hyper.lower in integer_uniform
+        assert c.upper in integer_uniform
+        assert c.lower in integer_uniform
         # integer uniform
         assert_is_uniform(integer_uniform)
 
@@ -176,9 +176,9 @@ class TestFlamlConversion(BaseConversion):
 
     conversion_function = staticmethod(configspace_to_flaml_space)
 
-    def sample(  # type: ignore[override]
+    def sample(
         self,
-        config_space: FlamlSpace,
+        config_space: FlamlSpace,  # type: ignore[override]
         n_samples: int = 1,
     ) -> npt.NDArray:
         assert isinstance(config_space, dict)
