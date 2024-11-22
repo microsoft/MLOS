@@ -129,7 +129,7 @@ class MlosCoreOptimizer(Optimizer):
 
         # TODO: Specify (in the config) which metrics to pass to the optimizer.
         # Issue: https://github.com/microsoft/MLOS/issues/745
-        self._opt.register(observations=Observations(config=df_configs, score=df_scores))
+        self._opt.register(observations=Observations(configs=df_configs, scores=df_scores))
 
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
@@ -223,8 +223,8 @@ class MlosCoreOptimizer(Optimizer):
             # Issue: https://github.com/microsoft/MLOS/issues/745
             self._opt.register(
                 observations=Observations(
-                    config=df_config,
-                    score=pd.DataFrame([registered_score], dtype=float),
+                    configs=df_config,
+                    scores=pd.DataFrame([registered_score], dtype=float),
                 )
             )
         return registered_score
@@ -235,7 +235,7 @@ class MlosCoreOptimizer(Optimizer):
         best_observations = self._opt.get_best_observations()
         if len(best_observations) == 0:
             return (None, None)
-        params = configspace_data_to_tunable_values(best_observations.config.iloc[0].to_dict())
-        scores = self._adjust_signs_df(best_observations.score).iloc[0].to_dict()
+        params = configspace_data_to_tunable_values(best_observations.configs.iloc[0].to_dict())
+        scores = self._adjust_signs_df(best_observations.scores).iloc[0].to_dict()
         _LOG.debug("Best observation: %s score: %s", params, scores)
         return (scores, self._tunables.copy().assign(params))

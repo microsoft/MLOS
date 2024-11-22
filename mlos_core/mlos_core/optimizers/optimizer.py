@@ -139,8 +139,11 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         transformed_observation = deepcopy(observation)  # Needed to support named tuples
         if self._space_adapter:
-            transformed_observation.config = self._space_adapter.inverse_transform(
-                transformed_observation.config
+            transformed_observation = Observation(
+                config=self._space_adapter.transform(transformed_observation.config),
+                score=transformed_observation.score,
+                context=transformed_observation.context,
+                metadata=transformed_observation.metadata,
             )
             assert len(transformed_observation.config) == len(
                 self.optimizer_parameter_space.values()
@@ -197,7 +200,11 @@ class BaseOptimizer(metaclass=ABCMeta):
                 "not match the expected parameter space."
             )
         if self._space_adapter:
-            suggestion.config = self._space_adapter.transform(suggestion.config)
+            suggestion = Suggestion(
+                config=self._space_adapter.inverse_transform(suggestion.config),
+                context=suggestion.context,
+                metadata=suggestion.metadata,
+            )
             assert set(suggestion.config.index).issubset(set(self.parameter_space)), (
                 "Space adapter produced a configuration that does "
                 "not match the expected parameter space."
@@ -276,7 +283,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         if len(observations) == 0:
             raise ValueError("No observations registered yet.")
 
-        idx = observations.score.nsmallest(
+        idx = observations.scores.nsmallest(
             n_max,
             columns=self._optimization_targets,
             keep="first",

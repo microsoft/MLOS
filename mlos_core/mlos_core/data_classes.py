@@ -35,13 +35,33 @@ class Observation:
         *,
         config: pd.Series,
         score: pd.Series = pd.Series(),
-        context: Context = None,
-        metadata: Metadata = None,
+        context: Optional[pd.Series] = None,
+        metadata: Optional[pd.Series] = None,
     ):
-        self.config = config
-        self.score = score
-        self.context = context
-        self.metadata = metadata
+        self._config = config
+        self._score = score
+        self._context = context
+        self._metadata = metadata
+
+    @property
+    def config(self) -> pd.Series:
+        """Gets (a copy of) the config of the Observation."""
+        return self._config.copy()
+
+    @property
+    def score(self) -> pd.Series:
+        """Gets (a copy of) the score of the Observation."""
+        return self._score.copy()
+
+    @property
+    def context(self) -> Optional[pd.Series]:
+        """Gets (a copy of) the context of the Observation."""
+        return self._context.copy() if self._context is not None else None
+
+    @property
+    def metadata(self) -> Optional[pd.Series]:
+        """Gets (a copy of) the metadata of the Observation."""
+        return self._metadata.copy() if self._metadata is not None else None
 
     def to_suggestion(self) -> "Suggestion":
         """
@@ -60,21 +80,21 @@ class Observation:
 
     def __repr__(self) -> str:
         return (
-            f"Observation(config={self.config}, score={self.score}, "
-            f"context={self.context}, metadata={self.metadata})"
+            f"Observation(config={self._config}, score={self._score}, "
+            f"context={self._context}, metadata={self._metadata})"
         )
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Observation):
             return False
 
-        if not self.config.equals(other.config):
+        if not self._config.equals(other._config):
             return False
-        if not self.score.equals(other.score):
+        if not self._score.equals(other._score):
             return False
-        if not compare_optional_series(self.context, other.context):
+        if not compare_optional_series(self._context, other._context):
             return False
-        if not compare_optional_series(self.metadata, other.metadata):
+        if not compare_optional_series(self._metadata, other._metadata):
             return False
 
         return True
@@ -85,63 +105,92 @@ class Observation:
 
 class Observations:
     """
-    A set of observations of a configuration's score.
-
-    Attributes
-    ----------
-    config : pd.DataFrame
-        Pandas dataframe containing configurations. Column names are the parameter names.
-    score : pd.DataFrame
-        The score metrics observed in a dataframe.
-    context : Optional[pd.DataFrame]
-        The context in which the configuration was evaluated.
-        Not Yet Implemented.
-    metadata: Optional[pd.DataFrame]
-        The metadata in which the configuration was evaluated
-        Not Yet Implemented.
+    A set of observations of a configuration scores.
     """
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
-        config: pd.DataFrame = pd.DataFrame(),
-        score: pd.DataFrame = pd.DataFrame(),
-        context: Optional[pd.DataFrame] = None,
+        configs: pd.DataFrame = pd.DataFrame(),
+        scores: pd.DataFrame = pd.DataFrame(),
+        contexts: Optional[pd.DataFrame] = None,
         metadata: Optional[pd.DataFrame] = None,
-        observations: Optional[List[Observation]] = None,
+        observations: Optional[Iterable[Observation]] = None,
     ):
+        """
+        Creates a new Observation object.
 
+        Can accept either a set of Observations or a collection of aligned config and
+        score (and optionally context) dataframes.
+
+        If both are provided the two sets will be merged.
+
+        Parameters
+        ----------
+        configs : pd.DataFrame
+            Pandas dataframe containing configurations. Column names are the parameter names.
+        scores : pd.DataFrame
+            The score metrics observed in a dataframe.
+        contexts : Optional[pd.DataFrame]
+            The context in which the configuration was evaluated.
+            Not Yet Implemented.
+        metadata: Optional[pd.DataFrame]
+            The metadata in which the configuration was evaluated
+            Not Yet Implemented.
+        """
         if observations is None:
             observations = []
-        if len(observations) > 0:
-            config = pd.concat([obs.config.to_frame().T for obs in observations])
-            score = pd.concat([obs.score.to_frame().T for obs in observations])
+        if any(observations):
+            configs = pd.concat([obs.config.to_frame().T for obs in observations])
+            scores = pd.concat([obs.score.to_frame().T for obs in observations])
 
             if sum(obs.context is None for obs in observations) == 0:
-                context = pd.concat(
+                contexts = pd.concat(
                     [obs.context.to_frame().T for obs in observations]  # type: ignore[union-attr]
                 )
             else:
-                context = None
+                contexts = None
             if sum(obs.metadata is None for obs in observations) == 0:
                 metadata = pd.concat(
                     [obs.metadata.to_frame().T for obs in observations]  # type: ignore[union-attr]
                 )
             else:
                 metadata = None
-        assert len(config.index) == len(score.index), "config and score must have the same length"
-        if context is not None:
-            assert len(config.index) == len(
-                context.index
+        assert len(configs.index) == len(
+            scores.index
+        ), "config and score must have the same length"
+        if contexts is not None:
+            assert len(configs.index) == len(
+                contexts.index
             ), "config and context must have the same length"
         if metadata is not None:
-            assert len(config.index) == len(
+            assert len(configs.index) == len(
                 metadata.index
             ), "config and metadata must have the same length"
-        self.config = config.reset_index(drop=True)
-        self.score = score.reset_index(drop=True)
-        self.context = None if context is None else context.reset_index(drop=True)
-        self.metadata = None if metadata is None else metadata.reset_index(drop=True)
+        self._configs = configs.reset_index(drop=True)
+        self._scores = scores.reset_index(drop=True)
+        self._contexts = None if contexts is None else contexts.reset_index(drop=True)
+        self._metadata = None if metadata is None else metadata.reset_index(drop=True)
+
+    @property
+    def configs(self) -> pd.DataFrame:
+        """Gets a copy of the configs of the Observations."""
+        return self._configs.copy()
+
+    @property
+    def scores(self) -> pd.DataFrame:
+        """Gets a copy of the scores of the Observations."""
+        return self._scores.copy()
+
+    @property
+    def contexts(self) -> Optional[pd.DataFrame]:
+        """Gets a copy of the contexts of the Observations."""
+        return self._contexts.copy() if self._contexts is not None else None
+
+    @property
+    def metadata(self) -> Optional[pd.DataFrame]:
+        """Gets a copy of the metadata of the Observations."""
+        return self._metadata.copy() if self._metadata is not None else None
 
     def filter_by_index(self, index: pd.Index) -> "Observations":
         """
@@ -158,63 +207,63 @@ class Observations:
             The filtered observation.
         """
         return Observations(
-            config=self.config.loc[index].copy(),
-            score=self.score.loc[index].copy(),
-            context=None if self.context is None else self.context.loc[index].copy(),
-            metadata=None if self.metadata is None else self.metadata.loc[index].copy(),
+            configs=self._configs.loc[index].copy(),
+            scores=self._scores.loc[index].copy(),
+            contexts=None if self._contexts is None else self._contexts.loc[index].copy(),
+            metadata=None if self._metadata is None else self._metadata.loc[index].copy(),
         )
 
-    def append(self, other: Observation) -> None:
+    def append(self, observation: Observation) -> None:
         """
         Appends the given observation to this observation.
 
         Parameters
         ----------
-        other : Observation
+        observation : Observation
             The observation to append.
         """
-        config = other.config.to_frame().T
-        score = other.score.to_frame().T
-        context = None if other.context is None else other.context.to_frame().T
-        metadata = None if other.metadata is None else other.metadata.to_frame().T
-        if len(self.config.index) == 0:
-            self.config = config
-            self.score = score
-            self.context = context
-            self.metadata = metadata
-            assert set(self.config.index) == set(
-                self.score.index
+        config = observation.config.to_frame().T
+        score = observation.score.to_frame().T
+        context = None if observation.context is None else observation.context.to_frame().T
+        metadata = None if observation.metadata is None else observation.metadata.to_frame().T
+        if len(self._configs.index) == 0:
+            self._configs = config
+            self._scores = score
+            self._contexts = context
+            self._metadata = metadata
+            assert set(self.configs.index) == set(
+                self.scores.index
             ), "config and score must have the same index"
             return
 
-        self.config = pd.concat([self.config, config]).reset_index(drop=True)
-        self.score = pd.concat([self.score, score]).reset_index(drop=True)
-        assert set(self.config.index) == set(
-            self.score.index
+        self._configs = pd.concat([self._configs, config]).reset_index(drop=True)
+        self._scores = pd.concat([self._scores, score]).reset_index(drop=True)
+        assert set(self.configs.index) == set(
+            self.scores.index
         ), "config and score must have the same index"
 
-        if self.context is not None:
+        if self._contexts is not None:
             assert context is not None, (
                 "context of appending observation must not be null "
                 "if context of prior observation is not null"
             )
-            self.context = pd.concat([self.context, context]).reset_index(drop=True)
-            assert self.config.index.equals(
-                self.context.index
+            self._contexts = pd.concat([self._contexts, context]).reset_index(drop=True)
+            assert self._configs.index.equals(
+                self._contexts.index
             ), "config and context must have the same index"
         else:
             assert context is None, (
                 "context of appending observation must be null "
                 "if context of prior observation is null"
             )
-        if self.metadata is not None:
+        if self._metadata is not None:
             assert metadata is not None, (
                 "context of appending observation must not be null "
                 "if metadata of prior observation is not null"
             )
-            self.metadata = pd.concat([self.metadata, metadata]).reset_index(drop=True)
-            assert self.config.index.equals(
-                self.metadata.index
+            self._metadata = pd.concat([self._metadata, metadata]).reset_index(drop=True)
+            assert self._configs.index.equals(
+                self._metadata.index
             ), "config and metadata must have the same index"
         else:
             assert metadata is None, (
@@ -223,34 +272,34 @@ class Observations:
             )
 
     def __len__(self) -> int:
-        return len(self.config.index)
+        return len(self._configs.index)
 
     def __iter__(self) -> Iterator["Observation"]:
-        for idx in self.config.index:
+        for idx in self._configs.index:
             yield Observation(
-                config=self.config.loc[idx],
-                score=self.score.loc[idx],
-                context=None if self.context is None else self.context.loc[idx],
-                metadata=None if self.metadata is None else self.metadata.loc[idx],
+                config=self._configs.loc[idx],
+                score=self._scores.loc[idx],
+                context=None if self._contexts is None else self._contexts.loc[idx],
+                metadata=None if self._metadata is None else self._metadata.loc[idx],
             )
 
     def __repr__(self) -> str:
         return (
-            f"Observation(config={self.config}, score={self.score}, "
-            "context={self.context}, metadata={self.metadata})"
+            f"Observation(configs={self._configs}, score={self._scores}, "
+            "contexts={self._contexts}, metadata={self._metadata})"
         )
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Observations):
             return False
 
-        if not self.config.equals(other.config):
+        if not self._configs.equals(other._configs):
             return False
-        if not self.score.equals(other.score):
+        if not self._scores.equals(other._scores):
             return False
-        if not compare_optional_dataframe(self.context, other.context):
+        if not compare_optional_dataframe(self._contexts, other._contexts):
             return False
-        if not compare_optional_dataframe(self.metadata, other.metadata):
+        if not compare_optional_dataframe(self._metadata, other._metadata):
             return False
 
         return True
@@ -277,12 +326,27 @@ class Suggestion:
         self,
         *,
         config: pd.Series,
-        context: Context = None,
-        metadata: Metadata = None,
+        context: Optional[pd.Series] = None,
+        metadata: Optional[pd.Series] = None,
     ):
-        self.config = config
-        self.context = context
-        self.metadata = metadata
+        self._config = config
+        self._context = context
+        self._metadata = metadata
+
+    @property
+    def config(self) -> pd.Series:
+        """Gets (a copy of) the config of the Suggestion."""
+        return self._config.copy()
+
+    @property
+    def context(self) -> Optional[pd.Series]:
+        """Gets (a copy of) the context of the Suggestion."""
+        return self._context.copy() if self._context is not None else None
+
+    @property
+    def metadata(self) -> Optional[pd.Series]:
+        """Gets (a copy of) the metadata of the Suggestion."""
+        return self._metadata.copy() if self._metadata is not None else None
 
     def complete(self, score: pd.Series) -> Observation:
         """
@@ -319,11 +383,11 @@ class Suggestion:
         Configuration
             The output Configuration.
         """
-        return Configuration(space, values=self.config.dropna().to_dict())
+        return Configuration(space, values=self._config.dropna().to_dict())
 
     def __repr__(self) -> str:
         return (
-            f"Suggestion(config={self.config}, context={self.context}, "
+            f"Suggestion(config={self._config}, context={self._context}, "
             "metadata={self._metadata})"
         )
 
@@ -331,11 +395,11 @@ class Suggestion:
         if not isinstance(other, Suggestion):
             return False
 
-        if not self.config.equals(other.config):
+        if not self._config.equals(other._config):
             return False
-        if not compare_optional_series(self.context, other.context):
+        if not compare_optional_series(self._context, other._context):
             return False
-        if not compare_optional_series(self.metadata, other.metadata):
+        if not compare_optional_series(self._metadata, other._metadata):
             return False
 
         return True
