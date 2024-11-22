@@ -63,8 +63,8 @@ class Observation:
 
     def __repr__(self) -> str:
         return (
-            f"Observation(config={self.config}, score={self.score},"
-            f" context={self.context}, metadata={self.metadata})"
+            f"Observation(config={self.config}, score={self.score}, "
+            f"context={self.context}, metadata={self.metadata})"
         )
 
     def __eq__(self, other: Any) -> bool:
@@ -198,8 +198,8 @@ class Observations:
 
         if self.context is not None:
             assert context is not None, (
-                "context of appending observation must not be null"
-                + " if context of prior observation is not null"
+                "context of appending observation must not be null "
+                "if context of prior observation is not null"
             )
             self.context = pd.concat([self.context, context]).reset_index(drop=True)
             assert self.config.index.equals(
@@ -207,13 +207,13 @@ class Observations:
             ), "config and context must have the same index"
         else:
             assert context is None, (
-                "context of appending observation must be null"
-                + " if context of prior observation is null"
+                "context of appending observation must be null "
+                "if context of prior observation is null"
             )
         if self.metadata is not None:
             assert metadata is not None, (
-                "context of appending observation must not be null"
-                + " if metadata of prior observation is not null"
+                "context of appending observation must not be null "
+                "if metadata of prior observation is not null"
             )
             self.metadata = pd.concat([self.metadata, metadata]).reset_index(drop=True)
             assert self.config.index.equals(
@@ -221,8 +221,8 @@ class Observations:
             ), "config and metadata must have the same index"
         else:
             assert metadata is None, (
-                "context of appending observation must be null"
-                + " if metadata of prior observation is null"
+                "context of appending observation must be null "
+                "if metadata of prior observation is null"
             )
 
     def to_list(self) -> List[Observation]:
@@ -258,8 +258,8 @@ class Observations:
 
     def __repr__(self) -> str:
         return (
-            f"Observation(config={self.config}, score={self.score},"
-            " context={self.context}, metadata={self.metadata})"
+            f"Observation(config={self.config}, score={self.score}, "
+            "context={self.context}, metadata={self.metadata})"
         )
 
     def __eq__(self, other: Any) -> bool:
@@ -345,8 +345,8 @@ class Suggestion:
 
     def __repr__(self) -> str:
         return (
-            f"Suggestion(config={self.config}, context={self.context},"
-            " metadata={self._metadata})"
+            f"Suggestion(config={self.config}, context={self.context}, "
+            "metadata={self._metadata})"
         )
 
     def __eq__(self, other: Any) -> bool:
