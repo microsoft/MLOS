@@ -39,8 +39,8 @@ def test_context_not_implemented_warning(
     suggestion = optimizer.suggest()
     scores = pd.Series({"score": [1]})
     context = pd.Series([["something"]])
-    suggestion.context = context
 
+    suggestion._context = context  # pylint: disable=protected-access
     with pytest.raises(UserWarning):
         optimizer.register(observations=suggestion.complete(scores))
 
