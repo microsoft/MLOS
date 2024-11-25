@@ -21,6 +21,7 @@
         "discretization",
         "discretize",
         "drivername",
+        "dropna",
         "dstpath",
         "dtype",
         "duckdb",

@@ -11,16 +11,17 @@ See the `Flaml Documentation <https://microsoft.github.io/FLAML/>`_ for more
 details.
 """
 
-from typing import Dict, List, NamedTuple, Optional, Tuple, Union
+from typing import Dict, List, NamedTuple, Optional, Union
 from warnings import warn
 
 import ConfigSpace
 import numpy as np
 import pandas as pd
 
+from mlos_core.data_classes import Observation, Observations, Suggestion
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
-from mlos_core.util import drop_nulls, normalize_config
+from mlos_core.util import normalize_config
 
 
 class EvaluatedSample(NamedTuple):
@@ -101,54 +102,62 @@ class FlamlOptimizer(BaseOptimizer):
 
     def _register(
         self,
-        *,
-        configs: pd.DataFrame,
-        scores: pd.DataFrame,
-        context: Optional[pd.DataFrame] = None,
-        metadata: Optional[pd.DataFrame] = None,
+        observations: Observations,
     ) -> None:
         """
-        Registers the given configs and scores.
+        Registers one or more configs/score pairs (observations) with the underlying
+        optimizer.
 
         Parameters
         ----------
-        configs : pd.DataFrame
-            Dataframe of configs / parameters. The columns are parameter names and
-            the rows are the configs.
-
-        scores : pd.DataFrame
-            Scores from running the configs. The index is the same as the index of the configs.
-
-        context : None
-            Not Yet Implemented.
-
-        metadata : None
-            Not Yet Implemented.
+        observations : Observations
+            The set of config/scores to register.
         """
-        if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
-        if metadata is not None:
-            warn(f"Not Implemented: Ignoring metadata {list(metadata.columns)}", UserWarning)
+        # TODO: Implement bulk registration.
+        # (e.g., by rebuilding the base optimizer instance with all observations).
+        for observation in observations:
+            self._register_single(observation)
 
-        for (_, config), (_, score) in zip(configs.astype("O").iterrows(), scores.iterrows()):
-            # Remove None values for inactive config parameters
-            config_dict = drop_nulls(config.to_dict())
-            cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
-                self.optimizer_parameter_space,
-                values=config_dict,
+    def _register_single(
+        self,
+        observation: Observation,
+    ) -> None:
+        """
+        Registers the given config and its score.
+
+        Parameters
+        ----------
+        observation : Observation
+            The observation to register.
+        """
+        if observation.context is not None:
+            warn(
+                f"Not Implemented: Ignoring context {list(observation.context.index)}",
+                UserWarning,
             )
-            if cs_config in self.evaluated_samples:
-                warn(f"Configuration {config} was already registered", UserWarning)
-            self.evaluated_samples[cs_config] = EvaluatedSample(
-                config=config_dict,
-                score=float(np.average(score.astype(float), weights=self._objective_weights)),
+        if observation.metadata is not None:
+            warn(
+                f"Not Implemented: Ignoring metadata {list(observation.metadata.index)}",
+                UserWarning,
             )
+
+        cs_config: ConfigSpace.Configuration = observation.to_suggestion().to_configspace_config(
+            self.optimizer_parameter_space
+        )
+        if cs_config in self.evaluated_samples:
+            warn(f"Configuration {cs_config} was already registered", UserWarning)
+        self.evaluated_samples[cs_config] = EvaluatedSample(
+            config=dict(cs_config),
+            score=float(
+                np.average(observation.score.astype(float), weights=self._objective_weights)
+            ),
+        )
 
     def _suggest(
         self,
         *,
-        context: Optional[pd.DataFrame] = None,
-    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
+        context: Optional[pd.Series] = None,
+    ) -> Suggestion:
         """
         Suggests a new configuration.
 
@@ -161,24 +170,15 @@ class FlamlOptimizer(BaseOptimizer):
 
         Returns
         -------
-        configuration : pd.DataFrame
-            Pandas dataframe with a single row. Column names are the parameter names.
-
-        metadata : None
-            Not implemented.
+        suggestion : Suggestion
+            The suggestion to be evaluated.
         """
         if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
+            warn(f"Not Implemented: Ignoring context {list(context.index)}", UserWarning)
         config: dict = self._get_next_config()
-        return pd.DataFrame(config, index=[0]), None
+        return Suggestion(config=pd.Series(config, dtype=object), context=context, metadata=None)
 
-    def register_pending(
-        self,
-        *,
-        configs: pd.DataFrame,
-        context: Optional[pd.DataFrame] = None,
-        metadata: Optional[pd.DataFrame] = None,
-    ) -> None:
+    def register_pending(self, pending: Suggestion) -> None:
         raise NotImplementedError()
 
     def _target_function(self, config: dict) -> Union[dict, None]:
