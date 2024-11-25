@@ -14,9 +14,7 @@ from mlos_core.util import compare_optional_dataframe, compare_optional_series
 
 
 class Observation:
-    """
-    A single observation of a configuration.
-    """
+    """A single observation of a configuration."""
 
     def __init__(
         self,
@@ -108,9 +106,7 @@ class Observation:
 
 
 class Observations:
-    """
-    A set of observations of a configuration scores.
-    """
+    """A set of observations of a configuration scores."""
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -317,8 +313,8 @@ class Suggestion:
     """
     A single suggestion for a configuration.
 
-    A Suggestion is an Observation that has not yet been scored.
-    Evaluating the Suggestion and calling `complete(scores)` can convert it to an Observation.
+    A Suggestion is an Observation that has not yet been scored. Evaluating the
+    Suggestion and calling `complete(scores)` can convert it to an Observation.
     """
 
     def __init__(
