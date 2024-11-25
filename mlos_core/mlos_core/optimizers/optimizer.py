@@ -140,7 +140,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         transformed_observation = deepcopy(observation)  # Needed to support named tuples
         if self._space_adapter:
             transformed_observation = Observation(
-                config=self._space_adapter.transform(transformed_observation.config),
+                config=self._space_adapter.inverse_transform(transformed_observation.config),
                 score=transformed_observation.score,
                 context=transformed_observation.context,
                 metadata=transformed_observation.metadata,
@@ -201,7 +201,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             )
         if self._space_adapter:
             suggestion = Suggestion(
-                config=self._space_adapter.inverse_transform(suggestion.config),
+                config=self._space_adapter.transform(suggestion.config),
                 context=suggestion.context,
                 metadata=suggestion.metadata,
             )
