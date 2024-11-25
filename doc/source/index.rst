@@ -6,7 +6,7 @@ MLOS Documentation
 .. image:: badges/coverage.svg
    :target: htmlcov/index.html
 
-`MLOS <source_tree_docs/index.html>`_ is a project to enable `autotuning </autoapi/mlos_core/index.html>` with `mlos_core </autoapi/mlos_core/index.html>`_ for systems via `automated benchmarking </autoapi/mlos_bench/index.html>`_ with `mlos_bench </autoapi/mlos_bench/index.html>`_ including managing the storage and `visualization </autoapi/mlos_viz/index.html>`_ of the results via `mlos_viz </autoapi/mlos_viz/index.html>`_.
+`MLOS <source_tree_docs/index.html>`_ is a project to enable `autotuning <autoapi/mlos_core/index.html>`_ with `mlos_core <autoapi/mlos_core/index.html>`_ for systems via `automated benchmarking <autoapi/mlos_bench/index.html>`_ with `mlos_bench </autoapi/mlos_bench/index.html>`_ including managing the storage and `visualization <autoapi/mlos_viz/index.html>`_ of the results via `mlos_viz <autoapi/mlos_viz/index.html>`_.
 
 See below for additional documentation sections.
 
