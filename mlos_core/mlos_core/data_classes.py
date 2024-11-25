@@ -39,7 +39,6 @@ class Observation:
         metadata: Optional[pandas.Series]
             The metadata in which the configuration was evaluated
         """
-
         self._config = config
         self._score = score
         self._context = context
