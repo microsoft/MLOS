@@ -36,9 +36,9 @@ class RandomOptimizer(BaseOptimizer):
         observations : Observations
             The observations to register.
         """
-        if observations.context is not None:
+        if observations.contexts is not None:
             warn(
-                f"Not Implemented: Ignoring context {list(observations.context.index)}",
+                f"Not Implemented: Ignoring context {list(observations.contexts.index)}",
                 UserWarning,
             )
         if observations.metadata is not None:
