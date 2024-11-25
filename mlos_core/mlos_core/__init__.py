@@ -88,10 +88,10 @@ dtype: object
 >>> observations = opt.get_best_observations()
 >>> # The default is to only return one
 >>> assert len(observations) == 1
->>> observations.config
+>>> observations.configs
     x
 0  10
->>> observations.score
+>>> observations.scores
    y
 0  7
 
