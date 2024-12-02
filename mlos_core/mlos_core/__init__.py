@@ -41,7 +41,7 @@ their own strengths and weaknesses.
 
 When used with :py:mod:`mlos_bench` doing this is as simple as a one line json
 config change for the ``mlos_bench``
-:py:mod:`~mlos_bench.optimizers.base_optimizers.Optimizer` config.
+:py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer` config.
 
 Data Classes
 ++++++++++++
@@ -87,6 +87,10 @@ One example is for automatic search space reduction (e.g., using
 effeciency (see the :py:mod:`~mlos_core.spaces.adapters.llamatune` and
 :py:mod:`space adapters <mlos.spaces.adapters>` modules for additional
 documentation.)
+
+As with the Optimizers, the Space Adapters are designed to be easily swappable,
+especially in the :py:mod:`mlos_bench`
+:py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer` config.
 
 Classes Overview
 ++++++++++++++++
