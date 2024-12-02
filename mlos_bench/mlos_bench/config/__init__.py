@@ -61,13 +61,13 @@ Additional details about the organization of the files and directories are as fo
 - ``environments/``:
     Contains the configs for :py:mod:`~mlos_bench.environments`, and their
     associated scripts (if relevant, e.g., for
-    `:py:class:`~mlos_bench.enviroments.remote_env.RemoteEnv` or
-    :py:class:`~mlos_bench.enviroments.script_env.ScriptEnv`) and
+    `:py:class:`~mlos_bench.environments.remote_env.RemoteEnv` or
+    :py:class:`~mlos_bench.environments.script_env.ScriptEnv`) and
     :py:mod:`~mlos_bench.tunables`.
 
     There is usally one *root* environment that chains the others together to build
     a full experiment (e.g., via
-    :py:class:`~mlos_bench.environments.composite_environment.CompositeEnv` and the
+    :py:class:`~mlos_bench.environments.composite_env.CompositeEnv` and the
     ``include_children`` field).
     The *root* environment is the one referenced in the CLI config ``environment``
     field.
