@@ -6,8 +6,14 @@ r"""
 mlos_bench is a framework to help automate benchmarking and OS/application parameter
 autotuning and the data management of the results.
 
-It can be installed from `pypi <https://pypi.org/project/mlos-bench>`_ via ``pip
-install mlos-bench`` and executed using the ``mlos_bench`` `command
+.. contents:: Table of Contents
+   :depth: 3
+
+Overview
+++++++++
+
+``mlos_bench`` can be installed from `pypi <https://pypi.org/project/mlos-bench>`_
+via ``pip install mlos-bench`` and executed using the ``mlos_bench`` `command
 <../../mlos_bench.run.usage.html>`_ using a collection of `json` `configs
 <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_.
 
@@ -19,10 +25,51 @@ process easily by simply swapping out the
 :py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer` class in the associated
 json configs. For instance,
 :py:class:`~mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer` can be
-used to perform a grid search over the parameter space instead.
+used to perform a grid search over the parameter space instead, or no tuning at all
+and ``mlos_bench`` can be used as only a repeatable benchmarking tool.
 
-TODO: Mention intent and philosophy of the project (repeatable, reproducible, etc.)
-TODO: Mention where to find configs and examples and how to think about them.
+Goals
+^^^^^
+
+The overall goal of the MLOS project is to enable *reproducible* and *trackable*
+benchmarking and *effecient* autotuning for systems software.
+
+In this, automation of the benchmarking process is a key component that
+``mlos_bench`` seaks to enable.
+
+Interaction
+^^^^^^^^^^^
+
+Users are expected to provide JSON :py:mod:`mlos_bench.config` s that instruct the
+framework how to automate their benchmark.
+
+This may involve several steps such as
+
+1. deploying a VM
+2. installing some software
+3. loading a dataset
+4. running a benchmark
+5. collecting and storing the results
+6. repeating for statistical and noise measures
+7. analyzing the results
+
+Since many of these phases are common across different benchmarks, the framework is
+intended to be modular and composable to allow reuse and faster development of new
+benchmarks.
+
+Where possible, the framework will provide common configs for reuse (e.g., deploying
+a VM on Azure, or run benchbase against a database system) to allow users to focus
+on the specifics of their experiments.
+
+Where none are currently available, one can create them external to MLOS, however
+users are also encouraged to submit PRs to add new classes or config and script
+snippets for others to use as well.
+
+For more details on the configuration files, please see the documentation in the
+:py:mod:`mlos_bench.config` module.
+
+Classes Overview
+++++++++++++++++
 
 The other core classes in this package are:
 

@@ -29,9 +29,12 @@ The caller is expected to score the associated config manually (or provide a
 historical value) and :py:meth:`~mlos_core.data_classes.Suggestion.complete` it
 convert it to an :py:class:`~mlos_core.data_classes.Observation` that can be
 registered with the Optimizer before repeating.
+In doing so, the Optimizer will attempt to find the best configuration to minimize
+the score provided, ideally learning from the previous observations in order to
+converge to the best possible configuration as quickly as possible.
 
-To do this it provides a small set of wrapper classes around other OSS tuning
-libraries (e.g.,
+To do this ``mlos_core`` provides a small set of wrapper classes around other OSS
+tuning libraries (e.g.,
 :py:mod:`~mlos_core.optimizers.bayesian_optimizers.smac_optimizer.SmacOptimizer`,
 :py:mod:`~mlos_core.optimizers.flaml_optimizer.FlamlOptimizer`, etc.) in order to
 provide a consistent interface so that the rest of the code
@@ -48,15 +51,15 @@ Data Classes
 
 The :py:class:`~mlos_core.data_classes.Suggestion` and
 :py:class:`~mlos_core.data_classes.Observation` :py:mod:`mlos_core.data_classes`
-mentioned above internally use :ex:py:mod:`pandas` as the acknowledged lingua franca
-of data science tasks, as is the focus of the ``mlos_core`` package.
+mentioned above internally use :external:py:mod:`pandas` as the acknowledged lingua
+franca of data science tasks, as is the focus of the ``mlos_core`` package.
 
 Spaces
 ++++++
 
 In ``mlos_core`` parameter :py:mod:`~mlos_core.spaces` telling the optimizers which
 configs to search over are specified using
-:ex:py:class:`ConfigSpace.ConfigurationSpace`s which provide features like
+:external:py:class:`ConfigSpace.ConfigurationSpace` s which provide features like
 
 - log sampling
 - quantization
@@ -77,7 +80,7 @@ is currently used instead (which is then internally converted into a
 Space Adapters
 ^^^^^^^^^^^^^^
 
-MLOS also provides :py:mod:`space adapters <mlos.spaces.adapters>` to help transform
+MLOS also provides :py:mod:`space adapters <mlos_core.spaces.adapters>` to help transform
 one space to another.
 
 This can be done for a variety for reasons.
@@ -85,7 +88,7 @@ This can be done for a variety for reasons.
 One example is for automatic search space reduction (e.g., using
 :py:mod:`~mlos_core.spaces.adapters.llamatune`) in order to try and improve search
 effeciency (see the :py:mod:`~mlos_core.spaces.adapters.llamatune` and
-:py:mod:`space adapters <mlos.spaces.adapters>` modules for additional
+:py:mod:`space adapters <mlos_core.spaces.adapters>` modules for additional
 documentation.)
 
 As with the Optimizers, the Space Adapters are designed to be easily swappable,
