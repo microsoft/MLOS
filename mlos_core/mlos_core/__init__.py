@@ -6,25 +6,90 @@
 mlos_core is a wrapper around other OSS tuning libraries to provide a consistent
 interface for autotuning experimentation.
 
+``mlos_core`` focuses on the optimization portion of the autotuning process.
+
+.. contents:: Table of Contents
+   :depth: 3
+
+Overview
+++++++++
+
 :py:mod:`mlos_core` can be installed from `pypi <https://pypi.org/project/mlos-core>`_
 with ``pip install mlos-core`` from and provides the main
 :py:mod:`Optimizer <mlos_core.optimizers>` portions of the MLOS project for use with
 autotuning purposes.
 Although it is generally intended to be used with :py:mod:`mlos_bench` to help
-automate the generation of ``(config, score)`` pairs to register with the Optimizer,
-it can be used independently as well.
+automate the generation of ``(config, score)`` pairs (which we call
+:py:class:`~mlos_core.data_classes.Observations`) to
+:py:meth:`~mlos_core.optimizers.optimizer.BaseOptimizer.register` with the
+Optimizer, it can be used independently as well.
+In that case, a :py:class:`~mlos_core.data_classes.Suggestion` is returned from a
+:py:meth:`~mlos_core.optimizers.optimizer.BaseOptimizer.suggest` call.
+The caller is expected to score the associated config manually (or provide a
+historical value) and :py:meth:`~mlos_core.data_classes.Suggestion.complete` it
+convert it to an :py:class:`~mlos_core.data_classes.Observation` that can be
+registered with the Optimizer before repeating.
 
 To do this it provides a small set of wrapper classes around other OSS tuning
-libraries in order to provide a consistent interface so that the rest of the code
+libraries (e.g.,
+:py:mod:`~mlos_core.optimizers.bayesian_optimizers.smac_optimizer.SmacOptimizer`,
+:py:mod:`~mlos_core.optimizers.flaml_optimizer.FlamlOptimizer`, etc.) in order to
+provide a consistent interface so that the rest of the code
 using it can easily exchange one optimizer for another (or even stack them).
+This allows for easy experimentation with different optimizers, each of which have
+their own strengths and weaknesses.
 
-TODO: Mention LlamaTune and space adapters.
+When used with :py:mod:`mlos_bench` doing this is as simple as a one line json
+config change for the ``mlos_bench``
+:py:mod:`~mlos_bench.optimizers.base_optimizers.Optimizer` config.
 
-TODO: Mention ConfigSpace
+Data Classes
+++++++++++++
 
-TODO: Mention pandas
+The :py:class:`~mlos_core.data_classes.Suggestion` and
+:py:class:`~mlos_core.data_classes.Observation` :py:mod:`mlos_core.data_classes`
+mentioned above internally use :ex:py:mod:`pandas` as the acknowledged lingua franca
+of data science tasks, as is the focus of the ``mlos_core`` package.
 
-Specifically:
+Spaces
+++++++
+
+In ``mlos_core`` parameter :py:mod:`~mlos_core.spaces` telling the optimizers which
+configs to search over are specified using
+:ex:py:class:`ConfigSpace.ConfigurationSpace`s which provide features like
+
+- log sampling
+- quantization
+- weighted distributions
+- etc.
+
+Refer to the `ConfigSpace documentation <https://automl.github.org/ConfigSpace/>`_
+for additional details.
+
+Internally, converter functions are used to adapt those to whatever the underlying
+Optimizer needs (in case it isn't using ConfigSpace).
+
+*However*, note that in :py:mod:`mlos_bench`, a separate
+:py:mod:`~mlos_bench.tunables.tunable_groups.TunableGroups` configuration language
+is currently used instead (which is then internally converted into a
+:py:class:`ConfigSpace.ConfigurationSpace`).
+
+Space Adapters
+^^^^^^^^^^^^^^
+
+MLOS also provides :py:mod:`space adapters <mlos.spaces.adapters>` to help transform
+one space to another.
+
+This can be done for a variety for reasons.
+
+One example is for automatic search space reduction (e.g., using
+:py:mod:`~mlos_core.spaces.adapters.llamatune`) in order to try and improve search
+effeciency (see the :py:mod:`~mlos_core.spaces.adapters.llamatune` and
+:py:mod:`space adapters <mlos.spaces.adapters>` modules for additional
+documentation.)
+
+Classes Overview
+++++++++++++++++
 
 - :py:class:`~mlos_core.optimizers.optimizer.BaseOptimizer` is the base class for all Optimizers
 
