@@ -670,8 +670,6 @@ endif
 SPHINXOPTS ?= # -v # be verbose
 SPHINXOPTS += -n -W -w $(CURDIR)/doc/build/sphinx-build.warn.log -j auto
 
-sphinx-apidoc: doc/build/html/index.html
-
 doc/source/generated/mlos_bench.run.usage.txt: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 doc/source/generated/mlos_bench.run.usage.txt: $(MLOS_BENCH_PYTHON_FILES)
 	# Generate the help output from mlos_bench CLI for the docs.
@@ -685,7 +683,7 @@ doc/build/html/index.html: $(MLOS_BENCH_PYTHON_FILES)
 doc/build/html/index.html: $(MLOS_VIZ_PYTHON_FILES)
 doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile doc/source/conf.py
 doc/build/html/index.html: doc/copy-source-tree-docs.sh $(MD_FILES)
-	@rm -rf doc/build
+	#@rm -rf doc/build	# let us cache things
 	@mkdir -p doc/build
 	@rm -f doc/build/log.txt
 
