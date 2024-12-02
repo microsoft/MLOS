@@ -39,8 +39,12 @@ provide helpful autocomplete and validation of the json configs while editing.
 Organization
 ^^^^^^^^^^^^
 
-Since the configs are intended to be modular and reusable they are usually split
-into several files and directory structures.
+Ultimately, each experiment is slightly different so it can take some time to get
+the automation right.
+
+Therefore the configs are intended to be modular and reusable to reduce the time to
+do that for the next set.
+Hence, they are usually split into several files and directory structures.
 
 We attempt to provide some examples and reuable templates in the core ``mlos_bench``
 package, but users are encouraged to create their own configs as needed, or to
@@ -56,7 +60,10 @@ Additional details about the organization of the files and directories are as fo
 
 - ``environments/``:
     Contains the configs for :py:mod:`~mlos_bench.environments`, and their
-    associated scripts (if relevant) and :py:mod:`~mlos_bench.tunables`.
+    associated scripts (if relevant, e.g., for
+    `:py:class:`~mlos_bench.enviroments.remote_env.RemoteEnv` or
+    :py:class:`~mlos_bench.enviroments.script_env.ScriptEnv`) and
+    :py:mod:`~mlos_bench.tunables`.
 
     There is usally one *root* environment that chains the others together to build
     a full experiment (e.g., via
@@ -74,8 +81,8 @@ Additional details about the organization of the files and directories are as fo
     This allows for easy swapping of Services (e.g., a different cloud vendor) using
     a different ``services`` config in the CLI config.
 
-    Batching the scripts and tunables together with the environment allows for
-    easier reuse and readability.
+    Grouping the scripts and tunables together with the environment allows for
+    easier reuse, readability, and debugging.
 
     Note that tunables are also separated into "groups" each of which can be enabled
     for tuning or not, again controllable via ``globals`` variable expansion.
@@ -322,6 +329,17 @@ For further details on the schema definitions and validation, see the
 :py:class:`~mlos_bench.config.schemas.config_schemas.ConfigSchema` class
 documentation, which also contains links to the actual schema definitions in the
 source tree (see below).
+
+Debugging
++++++++++
+
+Most of the time issues in running an Experiment involve issues with the json
+configs and/or user scripts that are being run by the framework.
+
+It can help to run ``mlos_bench`` with ``--log-level DEBUG`` to see more detailed
+output about the steps it is taking.
+Alternatively, it can help to add additional debug logging to the user scripts
+themselves to see what about the unique automation process is failing.
 
 Notes
 -----

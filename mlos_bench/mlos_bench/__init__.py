@@ -41,7 +41,7 @@ Interaction
 ^^^^^^^^^^^
 
 Users are expected to provide JSON :py:mod:`mlos_bench.config` s that instruct the
-framework how to automate their benchmark.
+framework how to automate their benchmark, autotuning, or other Experiment.
 
 This may involve several steps such as
 
@@ -50,7 +50,7 @@ This may involve several steps such as
 3. loading a dataset
 4. running a benchmark
 5. collecting and storing the results
-6. repeating for statistical and noise measures
+6. repeating for statistical and noise measures (we call each iteration a ``Trial``)
 7. (optionally) repeating with a different configuration (e.g., for autotuning purposes)
 8. analyzing the results
 
