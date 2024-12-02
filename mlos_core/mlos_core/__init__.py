@@ -66,8 +66,8 @@ configs to search over are specified using
 Refer to the `ConfigSpace documentation <https://automl.github.org/ConfigSpace/>`_
 for additional details.
 
-Internally, converter functions are used to adapt those to whatever the underlying
-Optimizer needs (in case it isn't using ConfigSpace).
+Internally, :py:mod:`~mlos_core.spaces.converters` are used to adapt those to
+whatever the underlying Optimizer needs (in case it isn't using ConfigSpace).
 
 *However*, note that in :py:mod:`mlos_bench`, a separate
 :py:mod:`~mlos_bench.tunables.tunable_groups.TunableGroups` configuration language
