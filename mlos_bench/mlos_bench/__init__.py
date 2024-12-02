@@ -51,19 +51,21 @@ This may involve several steps such as
 4. running a benchmark
 5. collecting and storing the results
 6. repeating for statistical and noise measures
-7. analyzing the results
+7. (optionally) repeating with a different configuration (e.g., for autotuning purposes)
+8. analyzing the results
 
 Since many of these phases are common across different benchmarks, the framework is
 intended to be modular and composable to allow reuse and faster development of new
-benchmarks.
+benchmarking environments or autotuning experiments.
 
 Where possible, the framework will provide common configs for reuse (e.g., deploying
 a VM on Azure, or run benchbase against a database system) to allow users to focus
 on the specifics of their experiments.
 
 Where none are currently available, one can create them external to MLOS, however
-users are also encouraged to submit PRs to add new classes or config and script
-snippets for others to use as well.
+users are also encouraged to `submit PRs or Issues
+<https://github.com/microsoft/MLOS/CONTRIBUTING.md>`_ to add new classes or config
+and script snippets for others to use as well.
 
 For more details on the configuration files, please see the documentation in the
 :py:mod:`mlos_bench.config` module.
