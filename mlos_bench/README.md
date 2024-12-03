@@ -251,4 +251,4 @@ TODO: Add notes on debugging user scripts and configs (also in the `mlos_bench` 
 
 ## See Also
 
-- <https://microsoft.github.io/MLOS> for full documentation
+- <https://microsoft.github.io/MLOS/autoapi/mlos_bench/> for more documentation details

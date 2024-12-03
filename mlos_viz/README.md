@@ -8,4 +8,6 @@ In the future, we plan to add more automatic visualizations, interactive visuali
 
 It's available for `pip install` via the pypi repository at [mlos-viz](https://pypi.org/project/mlos-viz/).
 
-See Also: <https://microsoft.github.io/MLOS> for full API details.
+## See Also
+
+- <https://microsoft.github.io/MLOS/autoapi/mlos_viz/> for more documentation details
