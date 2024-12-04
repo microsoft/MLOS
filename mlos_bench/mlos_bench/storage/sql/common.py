@@ -164,7 +164,6 @@ def get_results_df(
             .join(
                 schema.config_param,
                 schema.config_param.c.config_id == schema.trial.c.config_id,
-                isouter=True,
             )
             .order_by(
                 schema.trial.c.trial_id,
@@ -185,7 +184,6 @@ def get_results_df(
                     row.param_value,
                 )
                 for row in configs.fetchall()
-                if row.param_id is not None
             ],
             columns=["trial_id", "tunable_config_id", "param", "value"],
         ).pivot(
