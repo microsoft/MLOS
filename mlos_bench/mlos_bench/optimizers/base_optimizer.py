@@ -8,12 +8,10 @@ optimizers.
 
 import logging
 from abc import ABCMeta, abstractmethod
-from distutils.util import strtobool  # pylint: disable=deprecated-module
 from types import TracebackType
-from typing import Dict, Optional, Sequence, Tuple, Type, Union
+from typing import Dict, Literal, Optional, Sequence, Tuple, Type, Union
 
 from ConfigSpace import ConfigurationSpace
-from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.status import Status
@@ -21,6 +19,7 @@ from mlos_bench.optimizers.convert_configspace import tunable_groups_to_configsp
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.util import strtobool
 
 _LOG = logging.getLogger(__name__)
 
@@ -78,7 +77,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
         self._start_with_defaults: bool = bool(
             strtobool(str(self._config.pop("start_with_defaults", True)))
         )
-        self._max_iter = int(self._config.pop("max_suggestions", 100))
+        self._max_suggestions = int(self._config.pop("max_suggestions", 100))
 
         opt_targets: Dict[str, str] = self._config.pop("optimization_targets", {"score": "min"})
         self._opt_targets: Dict[str, Literal[1, -1]] = {}
@@ -104,7 +103,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
 
     def __repr__(self) -> str:
         opt_targets = ",".join(
-            f"{opt_target}:{({1: 'min', -1: 'max'}[opt_dir])}"
+            f"""{opt_target}:{({1: "min", -1: "max"}[opt_dir])}"""
             for (opt_target, opt_dir) in self._opt_targets.items()
         )
         return f"{self.name}({opt_targets},config={self._config})"
@@ -142,18 +141,15 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
         """
         return self._iter
 
-    # TODO: finish renaming iterations to suggestions.
-    # See Also: https://github.com/microsoft/MLOS/pull/713
-
     @property
-    def max_iterations(self) -> int:
+    def max_suggestions(self) -> int:
         """
         The maximum number of iterations (suggestions) to run.
 
         Note: this may or may not be the same as the number of configurations.
         See Also: Scheduler.trial_config_repeat_count and Scheduler.max_trials.
         """
-        return self._max_iter
+        return self._max_suggestions
 
     @property
     def seed(self) -> int:
@@ -189,7 +185,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
 
         Returns
         -------
-        ConfigurationSpace
+        ConfigSpace.ConfigurationSpace
             The ConfigSpace representation of the tunable parameters.
         """
         if self._config_space is None:
@@ -209,7 +205,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
 
     @property
     def targets(self) -> Dict[str, Literal["min", "max"]]:
-        """A dictionary of {target: direction} of optimization targets."""
+        """Returns a dictionary of optimization targets and their direction."""
         return {
             opt_target: "min" if opt_dir == 1 else "max"
             for (opt_target, opt_dir) in self._opt_targets.items()
@@ -362,7 +358,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
 
         Base implementation just checks the iteration count.
         """
-        return self._iter < self._max_iter
+        return self._iter < self._max_suggestions
 
     @abstractmethod
     def get_best_observation(

@@ -85,7 +85,7 @@ def test_os_env_expansion(source_template_dict: Dict[str, Any]) -> None:
 
     results = DictTemplater(source_template_dict).expand_vars(use_os_env=True)
     assert results == {
-        "extra_str-ref": f"{environ['extra_str']}-ref",
+        "extra_str-ref": f"""{environ["extra_str"]}-ref""",
         "str": "string",
         "str_ref": "string-ref",
         "secondary_expansion": "string-ref",
@@ -103,7 +103,7 @@ def test_os_env_expansion(source_template_dict: Dict[str, Any]) -> None:
         ],
         "dict": {
             "nested-str-ref": "nested-string-ref",
-            "nested-extra-str-ref": f"nested-{environ['extra_str']}-ref",
+            "nested-extra-str-ref": f"""nested-{environ["extra_str"]}-ref""",
         },
     }
 
@@ -116,7 +116,7 @@ def test_from_extras_expansion(source_template_dict: Dict[str, Any]) -> None:
     }
     results = DictTemplater(source_template_dict).expand_vars(extra_source_dict=extra_source_dict)
     assert results == {
-        "extra_str-ref": f"{extra_source_dict['extra_str']}-ref",
+        "extra_str-ref": f"""{extra_source_dict["extra_str"]}-ref""",
         "str": "string",
         "str_ref": "string-ref",
         "secondary_expansion": "string-ref",
@@ -134,6 +134,6 @@ def test_from_extras_expansion(source_template_dict: Dict[str, Any]) -> None:
         ],
         "dict": {
             "nested-str-ref": "nested-string-ref",
-            "nested-extra-str-ref": f"nested-{extra_source_dict['extra_str']}-ref",
+            "nested-extra-str-ref": f"""nested-{extra_source_dict["extra_str"]}-ref""",
         },
     }

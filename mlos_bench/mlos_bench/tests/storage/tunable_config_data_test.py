@@ -4,7 +4,10 @@
 #
 """Unit tests for loading the TunableConfigData."""
 
+from math import ceil
+
 from mlos_bench.storage.base_experiment_data import ExperimentData
+from mlos_bench.tests.storage import CONFIG_TRIAL_REPEAT_COUNT
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
@@ -27,10 +30,14 @@ def test_trial_metadata(exp_data: ExperimentData) -> None:
     """Check expected return values for TunableConfigData metadata."""
     assert exp_data.objectives == {"score": "min"}
     for trial_id, trial in exp_data.trials.items():
+        assert trial.tunable_config_id == ceil(trial_id / CONFIG_TRIAL_REPEAT_COUNT)
         assert trial.metadata_dict == {
+            # Only the first CONFIG_TRIAL_REPEAT_COUNT set should be the defaults.
+            "is_defaults": str(trial_id <= CONFIG_TRIAL_REPEAT_COUNT),
             "opt_target_0": "score",
             "opt_direction_0": "min",
-            "trial_number": trial_id,
+            "optimizer": "MockOptimizer",
+            "repeat_i": ((trial_id - 1) % CONFIG_TRIAL_REPEAT_COUNT) + 1,
         }
 
 

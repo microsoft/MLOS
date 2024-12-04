@@ -1,0 +1,13 @@
+{
+    "test_local_tunable_group": {
+        "cost": 1,
+        "params": {
+            "shared_buffers": {
+                "type": "int",
+                "default": 128,
+                "range": [1, 1024],
+                "meta": {"suffix": "MB"}
+            }
+        }
+    }
+}

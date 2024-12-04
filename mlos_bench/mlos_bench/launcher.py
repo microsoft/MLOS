@@ -6,8 +6,8 @@
 A helper class to load the configuration files, parse the command line parameters, and
 instantiate the main components of mlos_bench system.
 
-It is used in `mlos_bench.run` module to run the benchmark/optimizer from the
-command line.
+It is used in the :py:mod:`mlos_bench.run` module to run the benchmark/optimizer
+from the command line.
 """
 
 import argparse
@@ -398,6 +398,10 @@ class Launcher:
         if key is not None:
             # Handles missing trailing elem from last --key arg.
             raise ValueError("Command line argument has no value: " + key)
+
+        # Convert "max-suggestions" to "max_suggestions" for compatibility with
+        # other CLI options to use as common python/json variable replacements.
+        config = {k.replace("-", "_"): v for k, v in config.items()}
 
         _LOG.debug("Parsed config: %s", config)
         return config

@@ -31,7 +31,7 @@ To save space in the ACR, we purge images older than 7 days.
 ```sh
 #DRY_RUN_ARGS='--dry-run'
 
-PURGE_CMD="acr purge --filter 'devcontainer-cli:.*' --filter 'mlos-devcontainer:.*' --untagged --ago 7d $DRY_RUN_ARGS"
+PURGE_CMD="acr purge --filter 'devcontainer-cli:.*' --filter 'mlos-devcontainer:.*' --untagged --ago 30d --keep 3 $DRY_RUN_ARGS"
 
 # Setup a daily task:
 az acr task create --name dailyPurgeTask --cmd "$PURGE_CMD" --registry mloscore --schedule "0 1 * * *" --context /dev/null

@@ -70,7 +70,7 @@ def _add_groupby_desc_column(
         groupby_columns = ["tunable_config_trial_group_id", "tunable_config_id"]
     groupby_column = ",".join(groupby_columns)
     results_df[groupby_column] = (
-        results_df[groupby_columns].astype(str).apply(lambda x: ",".join(x), axis=1)
+        results_df[groupby_columns].astype(str).apply(",".join, axis=1)
     )  # pylint: disable=unnecessary-lambda
     groupby_columns.append(groupby_column)
     return (results_df, groupby_columns, groupby_column)
@@ -222,13 +222,14 @@ def limit_top_n_configs(
     exp_data : Optional[ExperimentData]
         The ExperimentData (e.g., obtained from the storage layer) to operate on.
     results_df : Optional[pandas.DataFrame]
-        The results dataframe to augment, by default None to use the results_df property.
-    objectives : Iterable[str], optional
+        The results dataframe to augment, by default None to use
+        :py:attr:`.ExperimentData.results_df` property.
+    objectives : Iterable[str]
         Which result column(s) to use for sorting the configs, and in which
         direction ("min" or "max").
-        By default None to automatically select the experiment objectives.
-    top_n_configs : int, optional
-        How many configs to return, including the default, by default 20.
+        By default None to automatically select the :py:attr:`.ExperimentData.objectives`.
+    top_n_configs : int
+        How many configs to return, including the default, by default 10.
     method: Literal["mean", "median", "p50", "p75", "p90", "p95", "p99"] = "mean",
         Which statistical method to use when sorting the config groups before
         determining the cutoff, by default "mean".
@@ -348,12 +349,12 @@ def plot_optimizer_trends(
     ----------
     exp_data : ExperimentData
         The ExperimentData (e.g., obtained from the storage layer) to plot.
-    results_df : Optional["pandas.DataFrame"]
+    results_df : Optional[pandas.DataFrame]
         Optional results_df to plot.
-        If not provided, defaults to exp_data.results_df property.
+        If not provided, defaults to :py:attr:`.ExperimentData.results_df` property.
     objectives : Optional[Dict[str, Literal["min", "max"]]]
         Optional objectives to plot.
-        If not provided, defaults to exp_data.objectives property.
+        If not provided, defaults to :py:attr:`.ExperimentData.objectives` property.
     """
     (results_df, obj_cols) = expand_results_data_args(exp_data, results_df, objectives)
     (results_df, groupby_columns, groupby_column) = _add_groupby_desc_column(results_df)
@@ -417,7 +418,7 @@ def plot_optimizer_trends(
             else ""
         )
         plt.grid()
-        plt.show()  # type: ignore[no-untyped-call]
+        plt.show()
 
 
 def plot_top_n_configs(
@@ -430,7 +431,8 @@ def plot_top_n_configs(
 ) -> None:
     # pylint: disable=too-many-locals
     """
-    Plots the top-N configs along with the default config for the given ExperimentData.
+    Plots the top-N configs along with the default config for the given
+    :py:class:`.ExperimentData`.
 
     Intended to be used from a Jupyter notebook.
 
@@ -438,16 +440,17 @@ def plot_top_n_configs(
     ----------
     exp_data: ExperimentData
         The experiment data to plot.
-    results_df : Optional["pandas.DataFrame"]
+    results_df : Optional[pandas.DataFrame]
         Optional results_df to plot.
-        If not provided, defaults to exp_data.results_df property.
+        If not provided, defaults to :py:attr:`.ExperimentData.results_df` property.
     objectives : Optional[Dict[str, Literal["min", "max"]]]
         Optional objectives to plot.
-        If not provided, defaults to exp_data.objectives property.
+        If not provided, defaults to :py:attr:`.ExperimentData.objectives` property.
     with_scatter_plot : bool
         Whether to also add scatter plot to the output figure.
     kwargs : dict
-        Remaining keyword arguments are passed along to the limit_top_n_configs function.
+        Remaining keyword arguments are passed along to the
+        :py:func:`limit_top_n_configs` function.
     """
     (results_df, _obj_cols) = expand_results_data_args(exp_data, results_df, objectives)
     top_n_config_args = _get_kwarg_defaults(limit_top_n_configs, **kwargs)
@@ -493,4 +496,4 @@ def plot_top_n_configs(
         plt.yscale("log")
         extra_title = "(lower is better)" if ascending else "(lower is better)"
         plt.title(f"Top {top_n} configs {opt_tgt} {extra_title}")
-        plt.show()  # type: ignore[no-untyped-call]
+        plt.show()

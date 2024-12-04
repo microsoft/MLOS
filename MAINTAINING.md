@@ -2,6 +2,10 @@
 
 Some notes for maintainers.
 
+## Documentation
+
+See the [documentation README](./doc/README.md) for more information on writing (and testing) documentation.
+
 ## Releasing
 
 1. Bump the version using the [`update-version.sh`](./scripts/update-version.sh) script:

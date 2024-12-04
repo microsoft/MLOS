@@ -21,8 +21,6 @@ class OneShotOptimizer(MockOptimizer):
     Explicit configs (partial or full) are possible using configuration files.
     """
 
-    # TODO: Add support for multiple explicit configs (i.e., FewShot or Manual Optimizer) - #344
-
     def __init__(
         self,
         tunables: TunableGroups,
@@ -32,7 +30,7 @@ class OneShotOptimizer(MockOptimizer):
     ):
         super().__init__(tunables, config, global_config, service)
         _LOG.info("Run a single iteration for: %s", self._tunables)
-        self._max_iter = 1  # Always run for just one iteration.
+        self._max_suggestions = 1  # Always run for just one iteration.
 
     def suggest(self) -> TunableGroups:
         """Always produce the same (initial) suggestion."""

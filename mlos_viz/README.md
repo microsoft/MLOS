@@ -1,4 +1,4 @@
-# mlos_viz
+# mlos-viz
 
 The [`mlos_viz`](./) module is an aid to visualizing experiment benchmarking and optimization results generated and stored by [`mlos_bench`](../mlos_bench/).
 

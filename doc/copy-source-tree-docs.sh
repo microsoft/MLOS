@@ -24,6 +24,7 @@ for readme_file_path in README.md mlos_core/README.md mlos_bench/README.md mlos_
     cp "$readme_file_path" "doc/source/source_tree_docs/$file_dir/index.md"
 
     # Tweak source source code links.
+    # FIXME: This sed expression doesn't work in MacOS.
     sed -i -r -e "s|\]\(([^:#)]+)(#[a-zA-Z0-9_-]+)?\)|\]\(https://github.com/microsoft/MLOS/tree/main/$file_dir/\1\2\)|g" \
         "doc/source/source_tree_docs/$file_dir/index.md"
     # Tweak the lexers for local expansion by pygments instead of github's.

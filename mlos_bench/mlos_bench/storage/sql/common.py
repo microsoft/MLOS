@@ -6,7 +6,8 @@
 from typing import Dict, Optional
 
 import pandas
-from sqlalchemy import Engine, Integer, and_, func, select
+from sqlalchemy import Integer, and_, func, select
+from sqlalchemy.engine import Engine
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_experiment_data import ExperimentData
@@ -192,7 +193,7 @@ def get_results_df(
             columns="param",
             values="value",
         )
-        configs_df = configs_df.apply(  # type: ignore[assignment]  # (fp)
+        configs_df = configs_df.apply(
             pandas.to_numeric,
             errors="coerce",
         ).fillna(configs_df)
@@ -238,7 +239,7 @@ def get_results_df(
             columns="metric",
             values="value",
         )
-        results_df = results_df.apply(  # type: ignore[assignment]  # (fp)
+        results_df = results_df.apply(
             pandas.to_numeric,
             errors="coerce",
         ).fillna(results_df)

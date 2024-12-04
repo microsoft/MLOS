@@ -24,8 +24,8 @@ class IdentityAdapter(BaseSpaceAdapter):
     def target_parameter_space(self) -> ConfigSpace.ConfigurationSpace:
         return self._orig_parameter_space
 
-    def transform(self, configuration: pd.DataFrame) -> pd.DataFrame:
+    def transform(self, configuration: pd.Series) -> pd.Series:
         return configuration
 
-    def inverse_transform(self, configurations: pd.DataFrame) -> pd.DataFrame:
-        return configurations
+    def inverse_transform(self, configuration: pd.Series) -> pd.Series:
+        return configuration

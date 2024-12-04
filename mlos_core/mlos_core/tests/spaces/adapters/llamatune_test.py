@@ -13,29 +13,57 @@ import pandas as pd
 import pytest
 
 from mlos_core.spaces.adapters import LlamaTuneAdapter
+from mlos_core.spaces.converters.util import (
+    QUANTIZATION_BINS_META_KEY,
+    monkey_patch_cs_quantization,
+)
+
+# Explicitly test quantized values with llamatune space adapter.
+# TODO: Add log scale sampling tests as well.
 
 
-def construct_parameter_space(
+def construct_parameter_space(  # pylint: disable=too-many-arguments
+    *,
     n_continuous_params: int = 0,
+    n_quantized_continuous_params: int = 0,
     n_integer_params: int = 0,
+    n_quantized_integer_params: int = 0,
     n_categorical_params: int = 0,
     seed: int = 1234,
 ) -> CS.ConfigurationSpace:
     """Helper function for construct an instance of `ConfigSpace.ConfigurationSpace`."""
-    input_space = CS.ConfigurationSpace(seed=seed)
-
-    for idx in range(n_continuous_params):
-        input_space.add(CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64))
-    for idx in range(n_integer_params):
-        input_space.add(CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=-1, upper=256))
-    for idx in range(n_categorical_params):
-        input_space.add(
-            CS.CategoricalHyperparameter(
-                name=f"str_{idx}", choices=[f"option_{idx}" for idx in range(5)]
-            )
-        )
-
-    return input_space
+    input_space = CS.ConfigurationSpace(
+        seed=seed,
+        space=[
+            *(
+                CS.UniformFloatHyperparameter(name=f"cont_{idx}", lower=0, upper=64)
+                for idx in range(n_continuous_params)
+            ),
+            *(
+                CS.UniformFloatHyperparameter(
+                    name=f"cont_{idx}", lower=0, upper=64, meta={QUANTIZATION_BINS_META_KEY: 6}
+                )
+                for idx in range(n_quantized_continuous_params)
+            ),
+            *(
+                CS.UniformIntegerHyperparameter(name=f"int_{idx}", lower=-1, upper=256)
+                for idx in range(n_integer_params)
+            ),
+            *(
+                CS.UniformIntegerHyperparameter(
+                    name=f"int_{idx}", lower=0, upper=256, meta={QUANTIZATION_BINS_META_KEY: 17}
+                )
+                for idx in range(n_quantized_integer_params)
+            ),
+            *(
+                CS.CategoricalHyperparameter(
+                    name=f"str_{idx}", choices=[f"option_{idx}" for idx in range(5)]
+                )
+                for idx in range(n_categorical_params)
+            ),
+        ],
+    )
+    return monkey_patch_cs_quantization(input_space)
 
 
 @pytest.mark.parametrize(
@@ -49,6 +77,13 @@ def construct_parameter_space(
                 {"n_continuous_params": int(num_target_space_dims * num_orig_space_factor)},
                 {"n_integer_params": int(num_target_space_dims * num_orig_space_factor)},
                 {"n_categorical_params": int(num_target_space_dims * num_orig_space_factor)},
+                {"n_categorical_params": int(num_target_space_dims * num_orig_space_factor)},
+                {"n_quantized_integer_params": int(num_target_space_dims * num_orig_space_factor)},
+                {
+                    "n_quantized_continuous_params": int(
+                        num_target_space_dims * num_orig_space_factor
+                    )
+                },
                 # Mix of all three types
                 {
                     "n_continuous_params": int(num_target_space_dims * num_orig_space_factor / 3),
@@ -83,22 +118,20 @@ def test_num_low_dims(
     sampled_configs = adapter.target_parameter_space.sample_configuration(size=100)
     for sampled_config in sampled_configs:  # pylint: disable=not-an-iterable # (false positive)
         # Transform low-dim config to high-dim point/config
-        sampled_config_df = pd.DataFrame(
-            [sampled_config.values()], columns=list(sampled_config.keys())
-        )
-        orig_config_df = adapter.transform(sampled_config_df)
+        sampled_config_sr = pd.Series(dict(sampled_config))
+        orig_config_sr = adapter.transform(sampled_config_sr)
 
         # High-dim (i.e., original) config should be valid
-        orig_config = CS.Configuration(input_space, values=orig_config_df.iloc[0].to_dict())
+        orig_config = CS.Configuration(input_space, values=orig_config_sr.to_dict())
         orig_config.check_valid_configuration()
 
         # Transform high-dim config back to low-dim
-        target_config_df = adapter.inverse_transform(orig_config_df)
+        target_config_sr = adapter.inverse_transform(orig_config_sr)
 
         # Sampled config and this should be the same
         target_config = CS.Configuration(
             adapter.target_parameter_space,
-            values=target_config_df.iloc[0].to_dict(),
+            values=target_config_sr.to_dict(),
         )
         assert target_config == sampled_config
 
@@ -108,16 +141,15 @@ def test_num_low_dims(
         unseen_sampled_config
     ) in unseen_sampled_configs:  # pylint: disable=not-an-iterable # (false positive)
         if (
-            unseen_sampled_config in sampled_configs
-        ):  # pylint: disable=unsupported-membership-test # (false positive)
+            unseen_sampled_config
+            in sampled_configs  # pylint: disable=unsupported-membership-test # (false positive)
+        ):
             continue
 
-        unseen_sampled_config_df = pd.DataFrame(
-            [unseen_sampled_config.values()], columns=list(unseen_sampled_config.keys())
-        )
+        unseen_sampled_config_sr = pd.Series(dict(unseen_sampled_config))
         with pytest.raises(ValueError):
             _ = adapter.inverse_transform(
-                unseen_sampled_config_df
+                unseen_sampled_config_sr
             )  # pylint: disable=redefined-variable-type
 
 
@@ -206,13 +238,11 @@ def test_special_parameter_values_validation() -> None:
 def gen_random_configs(adapter: LlamaTuneAdapter, num_configs: int) -> Iterator[CS.Configuration]:
     for sampled_config in adapter.target_parameter_space.sample_configuration(size=num_configs):
         # Transform low-dim config to high-dim config
-        sampled_config_df = pd.DataFrame(
-            [sampled_config.values()], columns=list(sampled_config.keys())
-        )
-        orig_config_df = adapter.transform(sampled_config_df)
+        sampled_config_sr = pd.Series(dict(sampled_config))
+        orig_config_sr = adapter.transform(sampled_config_sr)
         orig_config = CS.Configuration(
             adapter.orig_parameter_space,
-            values=orig_config_df.iloc[0].to_dict(),
+            values=orig_config_sr.to_dict(),
         )
         yield orig_config
 
@@ -300,15 +330,15 @@ def test_special_parameter_values_biasing() -> None:  # pylint: disable=too-comp
             special_values_instances["int_2"][100] += 1
 
     assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_instances["int_1"][0]
-    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_instances["int_1"][
-        1
-    ]
-    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_instances["int_2"][
-        2
-    ]
-    assert (1 - eps) * int(num_configs * bias_percentage * 1.5) <= special_values_instances[
-        "int_2"
-    ][100]
+    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= (
+        special_values_instances["int_1"][1]
+    )
+    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= (
+        special_values_instances["int_2"][2]
+    )
+    assert (1 - eps) * int(num_configs * bias_percentage * 1.5) <= (
+        special_values_instances["int_2"][100]
+    )
 
 
 def test_max_unique_values_per_param() -> None:
@@ -358,6 +388,12 @@ def test_max_unique_values_per_param() -> None:
                 {"n_continuous_params": int(num_target_space_dims * num_orig_space_factor)},
                 {"n_integer_params": int(num_target_space_dims * num_orig_space_factor)},
                 {"n_categorical_params": int(num_target_space_dims * num_orig_space_factor)},
+                {"n_quantized_integer_params": int(num_target_space_dims * num_orig_space_factor)},
+                {
+                    "n_quantized_continuous_params": int(
+                        num_target_space_dims * num_orig_space_factor
+                    )
+                },
                 # Mix of all three types
                 {
                     "n_continuous_params": int(num_target_space_dims * num_orig_space_factor / 3),
@@ -388,10 +424,8 @@ def test_approx_inverse_mapping(
 
     sampled_config = input_space.sample_configuration()  # size=1)
     with pytest.raises(ValueError):
-        sampled_config_df = pd.DataFrame(
-            [sampled_config.values()], columns=list(sampled_config.keys())
-        )
-        _ = adapter.inverse_transform(sampled_config_df)
+        sampled_config_sr = pd.Series(dict(sampled_config))
+        _ = adapter.inverse_transform(sampled_config_sr)
 
     # Enable low-dimensional space projection *and* reverse mapping
     adapter = LlamaTuneAdapter(
@@ -405,28 +439,24 @@ def test_approx_inverse_mapping(
     # Warning should be printed the first time
     sampled_config = input_space.sample_configuration()  # size=1)
     with pytest.warns(UserWarning):
-        sampled_config_df = pd.DataFrame(
-            [sampled_config.values()], columns=list(sampled_config.keys())
-        )
-        target_config_df = adapter.inverse_transform(sampled_config_df)
+        sampled_config_sr = pd.Series(dict(sampled_config))
+        target_config_sr = adapter.inverse_transform(sampled_config_sr)
         # Low-dim (i.e., target) config should be valid
         target_config = CS.Configuration(
             adapter.target_parameter_space,
-            values=target_config_df.iloc[0].to_dict(),
+            values=target_config_sr.to_dict(),
         )
         target_config.check_valid_configuration()
 
     # Test inverse transform with 100 random configs
     for _ in range(100):
         sampled_config = input_space.sample_configuration()  # size=1)
-        sampled_config_df = pd.DataFrame(
-            [sampled_config.values()], columns=list(sampled_config.keys())
-        )
-        target_config_df = adapter.inverse_transform(sampled_config_df)
+        sampled_config_sr = pd.Series(dict(sampled_config))
+        target_config_sr = adapter.inverse_transform(sampled_config_sr)
         # Low-dim (i.e., target) config should be valid
         target_config = CS.Configuration(
             adapter.target_parameter_space,
-            values=target_config_df.iloc[0].to_dict(),
+            values=target_config_sr.to_dict(),
         )
         target_config.check_valid_configuration()
 
@@ -479,22 +509,24 @@ def test_llamatune_pipeline(
     unique_values_dict: Dict[str, Set] = {param: set() for param in input_space.keys()}
 
     num_configs = 1000
-    for config in adapter.target_parameter_space.sample_configuration(
+    for (
+        config
+    ) in adapter.target_parameter_space.sample_configuration(  # pylint: disable=not-an-iterable
         size=num_configs
-    ):  # pylint: disable=not-an-iterable
+    ):
         # Transform low-dim config to high-dim point/config
-        sampled_config_df = pd.DataFrame([config.values()], columns=list(config.keys()))
-        orig_config_df = adapter.transform(sampled_config_df)
+        sampled_config_sr = pd.Series(dict(config))
+        orig_config_sr = adapter.transform(sampled_config_sr)
         # High-dim (i.e., original) config should be valid
-        orig_config = CS.Configuration(input_space, values=orig_config_df.iloc[0].to_dict())
+        orig_config = CS.Configuration(input_space, values=orig_config_sr.to_dict())
         orig_config.check_valid_configuration()
 
         # Transform high-dim config back to low-dim
-        target_config_df = adapter.inverse_transform(orig_config_df)
+        target_config_sr = adapter.inverse_transform(orig_config_sr)
         # Sampled config and this should be the same
         target_config = CS.Configuration(
             adapter.target_parameter_space,
-            values=target_config_df.iloc[0].to_dict(),
+            values=target_config_sr.to_dict(),
         )
         assert target_config == config
 

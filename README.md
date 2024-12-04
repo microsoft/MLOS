@@ -2,6 +2,7 @@
 
 [![MLOS DevContainer](https://github.com/microsoft/MLOS/actions/workflows/devcontainer.yml/badge.svg)](https://github.com/microsoft/MLOS/actions/workflows/devcontainer.yml)
 [![MLOS Linux](https://github.com/microsoft/MLOS/actions/workflows/linux.yml/badge.svg)](https://github.com/microsoft/MLOS/actions/workflows/linux.yml)
+[![MLOS MacOS](https://github.com/microsoft/MLOS/actions/workflows/macos.yml/badge.svg)](https://github.com/microsoft/MLOS/actions/workflows/macos.yml)
 [![MLOS Windows](https://github.com/microsoft/MLOS/actions/workflows/windows.yml/badge.svg)](https://github.com/microsoft/MLOS/actions/workflows/windows.yml)
 [![Code Coverage Status](https://microsoft.github.io/MLOS/_images/coverage.svg)](https://microsoft.github.io/MLOS/htmlcov/index.html)
 
@@ -25,6 +26,7 @@ MLOS is a project to enable autotuning for systems.
     - [Installation](#installation)
     - [See Also](#see-also)
         - [Examples](#examples)
+        - [Publications](#publications)
 
 <!-- /TOC -->
 
@@ -65,8 +67,8 @@ To do this this repo provides two Python modules, which can be used independentl
   It is intended to provide a simple, easy to consume (e.g. via `pip`), with low dependencies abstraction to
 
   - describe a space of context, parameters, their ranges, constraints, etc. and result objectives
-  - an "optimizer" service [abstraction](https://microsoft.github.io/MLOS/overview.html#mlos-core-api) (e.g. [`register()`](https://microsoft.github.io/MLOS/generated/mlos_core.optimizers.optimizer.BaseOptimizer.html#mlos_core.optimizers.optimizer.BaseOptimizer.register) and [`suggest()`](https://microsoft.github.io/MLOS/generated/mlos_core.optimizers.optimizer.BaseOptimizer.html#mlos_core.optimizers.optimizer.BaseOptimizer.suggest)) so we can easily swap out different implementations methods of searching (e.g. random, BO, LLM, etc.)
-  - provide some helpers for [automating optimization experiment](https://microsoft.github.io/MLOS/overview.html#mlos-bench-api) runner loops and data collection
+  - an "optimizer" service [abstraction](https://microsoft.github.io/MLOS/source_tree_docs/index.html) (e.g. [`register()`](https://microsoft.github.io/MLOS/autoapi/mlos_bench/optimizers/base_optimizer/index.html#mlos_bench.optimizers.base_optimizer.Optimizer.register) and [`suggest()`](https://microsoft.github.io/MLOS/autoapi/mlos_bench/optimizers/base_optimizer/index.html#mlos_bench.optimizers.base_optimizer.Optimizer.suggest)) so we can easily swap out different implementations methods of searching (e.g. random, BO, LLM, etc.)
+  - provide some helpers for [automating optimization experiment](https://microsoft.github.io/MLOS/source_tree_docs/mlos_bench/index.html) runner loops and data collection
 
 For these design requirements we intend to reuse as much from existing OSS libraries as possible and layer policies and optimizations specifically geared towards autotuning systems over top.
 
@@ -186,4 +188,14 @@ Details on using a local version from git are available in [CONTRIBUTING.md](./C
 
     Working example of tuning `sqlite` with MLOS.
 
-These can be used as starting points for new autotuning projects.
+These can be used as starting points for new autotuning projects outside of the main MLOS repository if you want to keep your tuning experiment configs separate from the MLOS codebase.
+
+Alternatively, we accept PRs to add new examples to the main MLOS repository!
+See [mlos_bench/config](./mlos_bench/mlos_bench/config/) and [CONTRIBUTING.md](./CONTRIBUTING.md) for more details.
+
+### Publications
+
+- [MLOS in Action: Bridging the Gap Between Experimentation and Auto-Tuning in the Cloud](https://www.vldb.org/pvldb/vol17/p4269-kroth.pdf) at [VLDB 2024](https://www.vldb.org/2024/?papers-demo)
+- [Towards Building Autonomous Data Services on Azure](https://dl.acm.org/doi/abs/10.1145/3555041.3589674) in [SIGMOD Companion 2023](https://dl.acm.org/doi/proceedings/10.1145/3555041)
+- [LlamaTune: Sample-efficient DBMS configuration tuning](https://www.microsoft.com/en-us/research/publication/llamatune-sample-efficient-dbms-configuration-tuning) at [VLDB 2022](https://vldb.org/pvldb/volumes/15/)
+- [MLOS: An infrastructure for automated software performance engineering](https://arxiv.org/abs/2006.02155) at [DEEM 2020](https://deem-workshop.github.io/2020/index.html)

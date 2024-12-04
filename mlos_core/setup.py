@@ -68,7 +68,10 @@ def _get_long_desc_from_readme(base_url: str) -> dict:
 
 
 extra_requires: Dict[str, List[str]] = {  # pylint: disable=consider-using-namedtuple-or-dataclass
-    "flaml": ["flaml[blendsearch]"],
+    "flaml": [
+        "flaml<2.2.0",  # FIXME: temporarily avoid changes in new FLAML package (#839).
+        "flaml[blendsearch]",
+    ],
     # NOTE: Major refactoring on SMAC and ConfigSpace v1.0 starting from v2.2
     "smac": ["smac>=2.2.0"],
 }
@@ -94,6 +97,9 @@ setup(
         'pandas >= 2.2.0;python_version>="3.9"',
         'pandas >= 1.0.3;python_version<"3.9"',
         "ConfigSpace>=1.0",
+        # pyparsing (required by matplotlib and needed for the notebook examples)
+        # 3.2 has incompatibilities with python 3.8 due to type hints
+        'pyparsing<3.2; python_version<"3.9"',
     ],
     extras_require=extra_requires,
     **_get_long_desc_from_readme("https://github.com/microsoft/MLOS/tree/main/mlos_core"),

@@ -10,10 +10,9 @@ import time
 from asyncio import AbstractEventLoop
 from threading import Thread
 from types import TracebackType
-from typing import Optional, Type
+from typing import Literal, Optional, Type
 
 import pytest
-from typing_extensions import Literal
 
 from mlos_bench.event_loop_context import EventLoopContext
 

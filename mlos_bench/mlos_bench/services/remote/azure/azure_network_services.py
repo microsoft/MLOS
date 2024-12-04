@@ -84,7 +84,7 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
         # since this is a common way to set the deploymentName and can same some
         # config work for the caller.
         if "vnetName" in params and "deploymentName" not in params:
-            params["deploymentName"] = f"{params['vnetName']}-deployment"
+            params["deploymentName"] = f"""{params["vnetName"]}-deployment"""
             _LOG.info(
                 "deploymentName missing from params. Defaulting to '%s'.",
                 params["deploymentName"],
@@ -125,7 +125,7 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is the input `params` plus the
             parameters extracted from the response JSON, or {} if the status is FAILED.
             Status is one of {PENDING, SUCCEEDED, FAILED}
@@ -140,13 +140,13 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
         ----------
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
-        ignore_errors : boolean
+        ignore_errors : bool
             Whether to ignore errors (default) encountered during the operation
             (e.g., due to dependent resources still in use).
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """

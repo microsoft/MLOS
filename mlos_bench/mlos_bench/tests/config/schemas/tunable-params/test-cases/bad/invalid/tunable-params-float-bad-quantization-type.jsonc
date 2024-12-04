@@ -6,7 +6,7 @@
                 "type": "float",
                 "default": 10,
                 "range": [0, 10],
-                "quantization": true  // <-- this is invalid
+                "quantization_bins": true  // <-- this is invalid
             }
         }
     }
