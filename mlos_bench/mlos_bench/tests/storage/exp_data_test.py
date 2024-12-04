@@ -93,6 +93,18 @@ def test_exp_data_results_df(exp_data: ExperimentData, tunable_groups: TunableGr
     )
 
 
+def test_exp_no_tunables_data_results_df(exp_no_tunables_data: ExperimentData) -> None:
+    """Tests the results_df property of ExperimentData when there are no tunables"""
+    results_df = exp_no_tunables_data.results_df
+    expected_trials_count = CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT
+    assert len(results_df) == expected_trials_count
+    assert len(results_df["trial_id"].unique()) == expected_trials_count
+    obj_target = next(iter(exp_no_tunables_data.objectives))
+    assert (
+        len(results_df[ExperimentData.RESULT_COLUMN_PREFIX + obj_target]) == expected_trials_count
+    )
+
+
 def test_exp_data_tunable_config_trial_group_id_in_results_df(exp_data: ExperimentData) -> None:
     """
     Tests the tunable_config_trial_group_id property of ExperimentData.results_df.
