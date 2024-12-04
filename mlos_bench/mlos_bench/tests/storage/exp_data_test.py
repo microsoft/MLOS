@@ -94,7 +94,7 @@ def test_exp_data_results_df(exp_data: ExperimentData, tunable_groups: TunableGr
 
 
 def test_exp_no_tunables_data_results_df(exp_no_tunables_data: ExperimentData) -> None:
-    """Tests the results_df property of ExperimentData when there are no tunables"""
+    """Tests the results_df property of ExperimentData when there are no tunables."""
     results_df = exp_no_tunables_data.results_df
     expected_trials_count = CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT
     assert len(results_df) == expected_trials_count
