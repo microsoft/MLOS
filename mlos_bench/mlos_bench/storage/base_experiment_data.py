@@ -50,7 +50,19 @@ class ExperimentData(metaclass=ABCMeta):
     """
 
     RESULT_COLUMN_PREFIX = "result."
+    """Prefix given to columns in :py:attr:`.ExperimentData.results_df` that contain
+    trial results metrics.
+
+    For example, if the result metric is "time", the column name will be "result.time".
+    """
+
     CONFIG_COLUMN_PREFIX = "config."
+    """Prefix given to columns in :py:attr:`.ExperimentData.results_df` that contain
+    trial config parameters.
+
+    For example, if the config parameter name is "param1", the column name will be
+    "config.param1".
+    """
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -84,7 +96,7 @@ class ExperimentData(metaclass=ABCMeta):
 
         Returns
         -------
-        root_env_config : Tuple[str, str, str]
+        (root_env_config, git_repo, git_commit) : Tuple[str, str, str]
             A tuple of (root_env_config, git_repo, git_commit) for the root environment.
         """
         return (self._root_env_config, self._git_repo, self._git_commit)
@@ -184,4 +196,9 @@ class ExperimentData(metaclass=ABCMeta):
             followed by tunable config parameters (prefixed with "config.") and
             trial results (prefixed with "result."). The latter can be NULLs if the
             trial was not successful.
+
+        See Also
+        --------
+        :py:attr:`.ExperimentData.CONFIG_COLUMN_PREFIX`
+        :py:attr:`.ExperimentData.RESULT_COLUMN_PREFIX`
         """

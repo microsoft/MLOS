@@ -28,8 +28,8 @@ def get_trials(
 
     See Also
     --------
-    - :py:class:`~mlos_bench.storage.sql.tunable_config_trial_group_data.TunableConfigTrialGroupSqlData`
-    - :py:class:`~mlos_bench.storage.sql.experiment_data.ExperimentSqlData`
+    :py:class:`~mlos_bench.storage.sql.tunable_config_trial_group_data.TunableConfigTrialGroupSqlData`
+    :py:class:`~mlos_bench.storage.sql.experiment_data.ExperimentSqlData`
     """  # pylint: disable=line-too-long # noqa: E501
     # pylint: disable=import-outside-toplevel,cyclic-import
     from mlos_bench.storage.sql.trial_data import TrialSqlData
@@ -79,13 +79,13 @@ def get_results_df(
 
     The returned DataFrame includes each trial's metadata, config, and results in
     wide format, with config parameters prefixed with
-    :py:data:`ExperimentData.CONFIG_COLUMN_PREFIX` and results prefixed with
-    :py:data:`ExperimentData.RESULT_COLUMN_PREFIX`.
+    :py:attr:`.ExperimentData.CONFIG_COLUMN_PREFIX` and results prefixed with
+    :py:attr:`.ExperimentData.RESULT_COLUMN_PREFIX`.
 
     See Also
     --------
-    - :py:class:`~mlos_bench.storage.sql.tunable_config_trial_group_data.TunableConfigTrialGroupSqlData`
-    - :py:class:`~mlos_bench.storage.sql.experiment_data.ExperimentSqlData`
+    :py:class:`~mlos_bench.storage.sql.tunable_config_trial_group_data.TunableConfigTrialGroupSqlData`
+    :py:class:`~mlos_bench.storage.sql.experiment_data.ExperimentSqlData`
     """  # pylint: disable=line-too-long # noqa: E501
     # pylint: disable=too-many-locals
     with engine.connect() as conn:
