@@ -103,6 +103,7 @@ def test_exp_no_tunables_data_results_df(exp_no_tunables_data: ExperimentData) -
     assert (
         len(results_df[ExperimentData.RESULT_COLUMN_PREFIX + obj_target]) == expected_trials_count
     )
+    assert not results_df.columns.str.startswith(ExperimentData.CONFIG_COLUMN_PREFIX).any()
 
 
 def test_exp_data_tunable_config_trial_group_id_in_results_df(exp_data: ExperimentData) -> None:
