@@ -6,7 +6,6 @@
 benchmark environments, tunable parameters, and service functions.
 """
 
-import json  # For logging only
 import logging
 import os
 import sys
@@ -157,7 +156,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
     def load_config(
         self,
-        json_file_name: str,
+        json: str,
         schema_type: Optional[ConfigSchema],
     ) -> Dict[str, Any]:
         """
@@ -166,8 +165,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         Parameters
         ----------
-        json_file_name : str
-            Path to the input config file.
+        json : str
+            Path to the input config file or a JSON string.
         schema_type : Optional[ConfigSchema]
             The schema type to validate the config against.
 
@@ -176,22 +175,28 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         config : Union[dict, List[dict]]
             Free-format dictionary that contains the configuration.
         """
-        json_file_name = self.resolve_path(json_file_name)
-        _LOG.info("Load config: %s", json_file_name)
-        with open(json_file_name, mode="r", encoding="utf-8") as fh_json:
-            config = json5.load(fh_json)
+        if "{" in json:
+            # If the path contains curly braces, it is likely already a json string,
+            # so just parse it.
+            _LOG.info("Load config: {json string}")
+            config: Any = json5.loads(json)
+        else:
+            json = self.resolve_path(json)
+            _LOG.info("Load config: %s", json)
+            with open(json, mode="r", encoding="utf-8") as fh_json:
+                config = json5.load(fh_json)
         if schema_type is not None:
             try:
                 schema_type.validate(config)
             except (ValidationError, SchemaError) as ex:
                 _LOG.error(
                     "Failed to validate config %s against schema type %s at %s",
-                    json_file_name,
+                    json,
                     schema_type.name,
                     schema_type.value,
                 )
                 raise ValueError(
-                    f"Failed to validate config {json_file_name} against "
+                    f"Failed to validate config {json} against "
                     f"schema type {schema_type.name} at {schema_type.value}"
                 ) from ex
             if isinstance(config, dict) and config.get("$schema"):
@@ -203,7 +208,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                 # (e.g. Azure ARM templates).
                 del config["$schema"]
         else:
-            _LOG.warning("Config %s is not validated against a schema.", json_file_name)
+            _LOG.warning("Config %s is not validated against a schema.", json)
         return config  # type: ignore[no-any-return]
 
     def prepare_class_load(
@@ -256,7 +261,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             _LOG.debug(
                 "Instantiating: %s with config:\n%s",
                 class_name,
-                json.dumps(class_config, indent=2),
+                json5.dumps(class_config, indent=2),
             )
 
         return (class_name, class_config)
@@ -294,7 +299,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         tunables_path = config.get("include_tunables")
         if tunables_path is not None:
-            tunables = self._load_tunables(tunables_path, tunables)
+            tunables = self.load_tunables(tunables_path, tunables)
         (class_name, class_config) = self.prepare_class_load(config, global_config)
         inst = instantiate_from_config(
             Optimizer,  # type: ignore[type-abstract]
@@ -440,7 +445,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         env_tunables_path = config.get("include_tunables")
         if env_tunables_path is not None:
-            tunables = self._load_tunables(env_tunables_path, tunables)
+            tunables = self.load_tunables(env_tunables_path, tunables)
 
         _LOG.debug("Creating env: %s :: %s", env_name, env_class)
         env = Environment.new(
@@ -552,7 +557,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             services from the list plus the parent mix-in.
         """
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Build service from config:\n%s", json.dumps(config, indent=2))
+            _LOG.debug("Build service from config:\n%s", json5.dumps(config, indent=2))
 
         assert isinstance(config, dict)
         config_list: List[Dict[str, Any]]
@@ -569,7 +574,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
     def load_environment(
         self,
-        json_file_name: str,
+        json: str,
         tunables: TunableGroups,
         global_config: Optional[Dict[str, Any]] = None,
         parent_args: Optional[Dict[str, TunableValue]] = None,
@@ -581,8 +586,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         Parameters
         ----------
-        json_file_name : str
-            The environment JSON configuration file.
+        json : str
+            The environment JSON configuration file or JSON string.
         tunables : TunableGroups
             A (possibly empty) collection of tunables to add to the environment.
         global_config : dict
@@ -598,13 +603,13 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         env : Environment
             A new benchmarking environment.
         """
-        config = self.load_config(json_file_name, ConfigSchema.ENVIRONMENT)
+        config = self.load_config(json, ConfigSchema.ENVIRONMENT)
         assert isinstance(config, dict)
         return self.build_environment(config, tunables, global_config, parent_args, service)
 
     def load_environment_list(
         self,
-        json_file_name: str,
+        json: str,
         tunables: TunableGroups,
         global_config: Optional[Dict[str, Any]] = None,
         parent_args: Optional[Dict[str, TunableValue]] = None,
@@ -616,8 +621,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         Parameters
         ----------
-        json_file_name : str
-            The environment JSON configuration file.
+        json : str
+            The environment JSON configuration file or a JSON string.
             Can contain either one environment or a list of environments.
         tunables : TunableGroups
             An (possibly empty) collection of tunables to add to the environment.
@@ -634,12 +639,12 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         env : List[Environment]
             A list of new benchmarking environments.
         """
-        config = self.load_config(json_file_name, ConfigSchema.ENVIRONMENT)
+        config = self.load_config(json, ConfigSchema.ENVIRONMENT)
         return [self.build_environment(config, tunables, global_config, parent_args, service)]
 
     def load_services(
         self,
-        json_file_names: Iterable[str],
+        jsons: Iterable[str],
         global_config: Optional[Dict[str, Any]] = None,
         parent: Optional[Service] = None,
     ) -> Service:
@@ -649,8 +654,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         Parameters
         ----------
-        json_file_names : list of str
-            A list of service JSON configuration files.
+        jsons : list of str
+            A list of service JSON configuration files or JSON strings.
         global_config : dict
             Global parameters to add to the service config.
         parent : Service
@@ -661,16 +666,16 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         service : Service
             A collection of service methods.
         """
-        _LOG.info("Load services: %s parent: %s", json_file_names, parent.__class__.__name__)
+        _LOG.info("Load services: %s parent: %s", jsons, parent.__class__.__name__)
         service = Service({}, global_config, parent)
-        for fname in json_file_names:
-            config = self.load_config(fname, ConfigSchema.SERVICE)
+        for json in jsons:
+            config = self.load_config(json, ConfigSchema.SERVICE)
             service.register(self.build_service(config, global_config, service).export())
         return service
 
-    def _load_tunables(
+    def load_tunables(
         self,
-        json_file_names: Iterable[str],
+        jsons: Iterable[str],
         parent: TunableGroups,
     ) -> TunableGroups:
         """
@@ -683,8 +688,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         Parameters
         ----------
-        json_file_names : list of str
-            A list of JSON files to load.
+        jsons : list of str
+            A list of JSON files or JSON strings to load.
         parent : TunableGroups
             A (possibly empty) collection of tunables to add to the new collection.
 
@@ -693,10 +698,10 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         tunables : TunableGroup
             The larger collection of tunable parameters.
         """
-        _LOG.info("Load tunables: '%s'", json_file_names)
+        _LOG.info("Load tunables: '%s'", jsons)
         tunables = parent.copy()
-        for fname in json_file_names:
-            config = self.load_config(fname, ConfigSchema.TUNABLE_PARAMS)
+        for json in jsons:
+            config = self.load_config(json, ConfigSchema.TUNABLE_PARAMS)
             assert isinstance(config, dict)
             tunables.merge(TunableGroups(config))
         return tunables

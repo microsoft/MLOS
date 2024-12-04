@@ -50,7 +50,7 @@ class SupportsConfigLoading(Protocol):
 
     def load_config(
         self,
-        json_file_name: str,
+        json: str,
         schema_type: Optional[ConfigSchema],
     ) -> Union[dict, List[dict]]:
         """
@@ -59,8 +59,8 @@ class SupportsConfigLoading(Protocol):
 
         Parameters
         ----------
-        json_file_name : str
-            Path to the input config file.
+        json : str
+            Path to the input config file or a JSON string.
         schema_type : Optional[ConfigSchema]
             The schema type to validate the config against.
 
@@ -109,7 +109,7 @@ class SupportsConfigLoading(Protocol):
 
     def load_environment_list(
         self,
-        json_file_name: str,
+        json: str,
         tunables: "TunableGroups",
         global_config: Optional[dict] = None,
         parent_args: Optional[Dict[str, TunableValue]] = None,
@@ -121,8 +121,8 @@ class SupportsConfigLoading(Protocol):
 
         Parameters
         ----------
-        json_file_name : str
-            The environment JSON configuration file.
+        json : str
+            The environment JSON configuration file or a JSON string.
             Can contain either one environment or a list of environments.
         tunables : TunableGroups
             A (possibly empty) collection of tunables to add to the environment.
@@ -142,7 +142,7 @@ class SupportsConfigLoading(Protocol):
 
     def load_services(
         self,
-        json_file_names: Iterable[str],
+        jsons: Iterable[str],
         global_config: Optional[Dict[str, Any]] = None,
         parent: Optional["Service"] = None,
     ) -> "Service":
@@ -152,8 +152,8 @@ class SupportsConfigLoading(Protocol):
 
         Parameters
         ----------
-        json_file_names : list of str
-            A list of service JSON configuration files.
+        jsons : list of str
+            A list of service JSON configuration files or JSON strings.
         global_config : dict
             Global parameters to add to the service config.
         parent : Service
