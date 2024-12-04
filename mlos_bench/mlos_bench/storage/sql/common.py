@@ -74,8 +74,8 @@ def get_results_df(
     tunable_config_id: Optional[int] = None,
 ) -> pandas.DataFrame:
     """
-    Gets TrialData for the given experiment_id and optionally additionally restricted
-    by tunable_config_id.
+    Gets TrialData for the given experiment_id and optionally additionally restricted by
+    tunable_config_id.
 
     The returned DataFrame includes each trial's metadata, config, and results in
     wide format, with config parameters prefixed with
