@@ -184,6 +184,7 @@ def get_results_df(
                     row.param_value,
                 )
                 for row in configs.fetchall()
+                if row.param_id is not None
             ],
             columns=["trial_id", "tunable_config_id", "param", "value"],
         ).pivot(
