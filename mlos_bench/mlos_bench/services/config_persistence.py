@@ -2,8 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Helper functions to load, instantiate, and serialize Python objects that encapsulate
-benchmark environments, tunable parameters, and service functions.
+"""Helper functions to load, instantiate, and serialize Python objects that
+encapsulate a benchmark :py:class:`.Environment`, :py:mod:`~mlos_bench.tunables`,
+:py:class:`.Service` functions, etc. from JSON configuration files and strings.
 """
 
 import logging
@@ -126,15 +127,17 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
     def resolve_path(self, file_path: str, extra_paths: Optional[Iterable[str]] = None) -> str:
         """
-        Prepend the suitable `_config_path` to `path` if the latter is not absolute. If
-        `_config_path` is `None` or `path` is absolute, return `path` as is.
+        Resolves and prepends the suitable :py:attr:`.config_paths` to ``file_path``
+        if the latter is not absolute. If :py:attr:`.config_paths` is ``None`` or
+        ``file_path`` is absolute, return ``file_path`` as is.
 
         Parameters
         ----------
         file_path : str
             Path to the input config file.
         extra_paths : Iterable[str]
-            Additional directories to prepend to the list of search paths.
+            Additional directories to prepend to the list of
+            :py:attr:`.config_paths` search paths.
 
         Returns
         -------
@@ -160,8 +163,10 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         schema_type: Optional[ConfigSchema],
     ) -> Dict[str, Any]:
         """
-        Load JSON config file. Search for a file relative to `_config_path` if the input
-        path is not absolute. This method is exported to be used as a service.
+        Load JSON config file or JSON string.
+        Search for a file relative to :py:attr:`.config_paths` if the input path is
+        not absolute. This method is exported to be used as a
+        :py:class:`.SupportsConfigLoading` type :py:class:`.Service`.
 
         Parameters
         ----------
@@ -175,14 +180,14 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         config : Union[dict, List[dict]]
             Free-format dictionary that contains the configuration.
         """
-        if "{" in json:
-            # If the path contains curly braces, it is likely already a json string,
+        if any(c in json for c in ("{", "[")):
+            # If the path contains braces, it is likely already a json string,
             # so just parse it.
-            _LOG.info("Load config: {json string}")
+            _LOG.info("Load config from json string: %s", json)
             config: Any = json5.loads(json)
         else:
             json = self.resolve_path(json)
-            _LOG.info("Load config: %s", json)
+            _LOG.info("Load config file: %s", json)
             with open(json, mode="r", encoding="utf-8") as fh_json:
                 config = json5.load(fh_json)
         if schema_type is not None:
@@ -275,10 +280,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         global_config: Optional[Dict[str, Any]] = None,
     ) -> Optimizer:
         """
-        Instantiation of mlos_bench Optimizer that depend on Service and TunableGroups.
-
-        A class *MUST* have a constructor that takes four named arguments:
-        (tunables, config, global_config, service)
+        Instantiation of :py:mod:`mlos_bench` :py:class:`.Optimizer` that depend on
+        :py:class:`.Service` and :py:class:`.TunableGroups`.
 
         Parameters
         ----------
@@ -320,7 +323,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         global_config: Optional[Dict[str, Any]] = None,
     ) -> "Storage":
         """
-        Instantiation of mlos_bench Storage objects.
+        Instantiation of mlos_bench :py:class:`.Storage` objects.
 
         Parameters
         ----------
@@ -361,7 +364,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         root_env_config: str,
     ) -> "Scheduler":
         """
-        Instantiation of mlos_bench Scheduler.
+        Instantiation of mlos_bench :py:class:`.Scheduler`.
 
         Parameters
         ----------
@@ -410,7 +413,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
     ) -> Environment:
         # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
-        Factory method for a new environment with a given config.
+        Factory method for a new :py:class:`.Environment` with a given config.
 
         Parameters
         ----------
@@ -434,7 +437,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         Returns
         -------
         env : Environment
-            An instance of the `Environment` class initialized with `config`.
+            An instance of the ``Environment`` class initialized with ``config``.
         """
         env_name = config["name"]
         (env_class, env_config) = self.prepare_class_load(config, global_config, parent_args)
@@ -582,7 +585,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
     ) -> Environment:
         # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
-        Load and build new environment from the config file.
+        Load and build new :py:class:`.Environment` from the config file or JSON string.
 
         Parameters
         ----------
@@ -617,7 +620,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
     ) -> List[Environment]:
         # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
-        Load and build a list of environments from the config file.
+        Load and build a list of Environments from the config file or JSON string.
 
         Parameters
         ----------
@@ -649,8 +652,13 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         parent: Optional[Service] = None,
     ) -> Service:
         """
-        Read the configuration files and bundle all service methods from those configs
-        into a single Service object.
+        Read the configuration files or JSON strings and bundle all Service methods
+        from those configs into a single Service object.
+
+        Notes
+        -----
+        Order of the services in the list matters. If multiple Services export the
+        same method, the last one in the list will be used.
 
         Parameters
         ----------
@@ -676,11 +684,11 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
     def load_tunables(
         self,
         jsons: Iterable[str],
-        parent: TunableGroups,
+        parent: Optional[TunableGroups] = None,
     ) -> TunableGroups:
         """
-        Load a collection of tunable parameters from JSON files into the parent
-        TunableGroup.
+        Load a collection of tunable parameters from JSON files or strings into the
+        parent TunableGroup.
 
         This helps allow standalone environment configs to reference
         overlapping tunable groups configs but still allow combining them into
@@ -695,7 +703,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         Returns
         -------
-        tunables : TunableGroup
+        tunables : TunableGroups
             The larger collection of tunable parameters.
         """
         _LOG.info("Load tunables: '%s'", jsons)
