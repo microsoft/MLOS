@@ -2,9 +2,12 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Helper functions to load, instantiate, and serialize Python objects that
-encapsulate a benchmark :py:class:`.Environment`, :py:mod:`~mlos_bench.tunables`,
-:py:class:`.Service` functions, etc. from JSON configuration files and strings.
+"""
+Helper functions to load, instantiate, and serialize Python objects that encapsulate a
+benchmark :py:class:`.Environment`, :py:mod:`~mlos_bench.tunables`, :py:class:`.Service`
+functions, etc.
+
+from JSON configuration files and strings.
 """
 
 import logging
@@ -127,8 +130,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
     def resolve_path(self, file_path: str, extra_paths: Optional[Iterable[str]] = None) -> str:
         """
-        Resolves and prepends the suitable :py:attr:`.config_paths` to ``file_path``
-        if the latter is not absolute. If :py:attr:`.config_paths` is ``None`` or
+        Resolves and prepends the suitable :py:attr:`.config_paths` to ``file_path`` if
+        the latter is not absolute. If :py:attr:`.config_paths` is ``None`` or
         ``file_path`` is absolute, return ``file_path`` as is.
 
         Parameters
@@ -163,10 +166,10 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         schema_type: Optional[ConfigSchema],
     ) -> Dict[str, Any]:
         """
-        Load JSON config file or JSON string.
-        Search for a file relative to :py:attr:`.config_paths` if the input path is
-        not absolute. This method is exported to be used as a
-        :py:class:`.SupportsConfigLoading` type :py:class:`.Service`.
+        Load JSON config file or JSON string. Search for a file relative to
+        :py:attr:`.config_paths` if the input path is not absolute. This method is
+        exported to be used as a :py:class:`.SupportsConfigLoading` type
+        :py:class:`.Service`.
 
         Parameters
         ----------
@@ -652,8 +655,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         parent: Optional[Service] = None,
     ) -> Service:
         """
-        Read the configuration files or JSON strings and bundle all Service methods
-        from those configs into a single Service object.
+        Read the configuration files or JSON strings and bundle all Service methods from
+        those configs into a single Service object.
 
         Notes
         -----
