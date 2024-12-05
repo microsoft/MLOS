@@ -107,7 +107,7 @@ def test_load_config(config_persistence_service: ConfigPersistenceService) -> No
 
 
 def test_load_config_string(config_persistence_service: ConfigPersistenceService) -> None:
-    """Check if we can load a valid json string as well"""
+    """Check if we can load a valid json string as well."""
     json_str = """
     {
         "tunable_param_1": "value_1",
