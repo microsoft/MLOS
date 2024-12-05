@@ -61,7 +61,7 @@ Additional details about the organization of the files and directories are as fo
 - ``environments/``:
     Contains the configs for :py:mod:`~mlos_bench.environments`, and their
     associated scripts (if relevant, e.g., for
-    :py:class:`~mlos_bench.environments.remote_env.RemoteEnv` or
+    :py:class:`~mlos_bench.environments.remote.remote_env.RemoteEnv` or
     :py:class:`~mlos_bench.environments.script_env.ScriptEnv`) and
     :py:mod:`~mlos_bench.tunables`.
 
