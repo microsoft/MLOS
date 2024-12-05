@@ -276,6 +276,9 @@ There are two forms of tunable configs:
   :py:class:`~mlos_bench.optimizers.manual_optimizer.ManualOptimizer` to run a
   benchmark with a particular config or set of configs.
 
+For more information on tunable configs, see the :py:mod:`mlos_bench.tunables`
+module.
+
 Class Configs
 ^^^^^^^^^^^^^
 

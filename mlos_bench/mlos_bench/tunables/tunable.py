@@ -100,6 +100,11 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             Human-readable identifier of the tunable parameter.
         config : dict
             Python dict that represents a Tunable (e.g., deserialized from JSON)
+
+        See Also
+        --------
+        :py:mod:`mlos_bench.tunables` : for more information on tunable parameters and
+            their configuration.
         """
         if not isinstance(name, str) or "!" in name:  # TODO: Use a regex here and in JSON schema
             raise ValueError(f"Invalid name of the tunable: {name}")
