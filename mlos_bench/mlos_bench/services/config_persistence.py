@@ -707,6 +707,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             The larger collection of tunable parameters.
         """
         _LOG.info("Load tunables: '%s'", jsons)
+        if parent is None:
+            parent = TunableGroups()
         tunables = parent.copy()
         for json in jsons:
             config = self.load_config(json, ConfigSchema.TUNABLE_PARAMS)
