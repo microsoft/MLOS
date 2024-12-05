@@ -149,6 +149,7 @@ class Environment(metaclass=abc.ABCMeta):
             )
             tunables = TunableGroups()
 
+        # TODO: add user docstrings for these in the module
         groups = self._expand_groups(
             config.get("tunable_params", []),
             (global_config or {}).get("tunable_params_map", {}),
