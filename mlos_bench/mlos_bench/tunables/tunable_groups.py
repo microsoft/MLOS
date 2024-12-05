@@ -17,7 +17,6 @@ _LOG = logging.getLogger(__name__)
 class TunableGroups:
     """A collection of :py:class:`.CovariantTunableGroup` s of :py:class:`.Tunable`
     parameters.
-
     """
 
     def __init__(self, config: Optional[dict] = None):
