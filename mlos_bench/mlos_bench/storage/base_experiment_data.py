@@ -50,15 +50,17 @@ class ExperimentData(metaclass=ABCMeta):
     """
 
     RESULT_COLUMN_PREFIX = "result."
-    """Prefix given to columns in :py:attr:`.ExperimentData.results_df` that contain
-    trial results metrics.
+    """
+    Prefix given to columns in :py:attr:`.ExperimentData.results_df` that contain trial
+    results metrics.
 
     For example, if the result metric is "time", the column name will be "result.time".
     """
 
     CONFIG_COLUMN_PREFIX = "config."
-    """Prefix given to columns in :py:attr:`.ExperimentData.results_df` that contain
-    trial config parameters.
+    """
+    Prefix given to columns in :py:attr:`.ExperimentData.results_df` that contain trial
+    config parameters.
 
     For example, if the config parameter name is "param1", the column name will be
     "config.param1".
