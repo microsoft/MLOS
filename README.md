@@ -54,7 +54,7 @@ For a brief overview of some of the features and capabilities of MLOS, please se
 
 ## Organization
 
-To do this this repo provides two Python modules, which can be used independently or in combination:
+To do this this repo provides three Python modules, which can be used independently or in combination:
 
 - [`mlos-bench`](./mlos_bench/) provides a framework to help automate running benchmarks as described above.
 

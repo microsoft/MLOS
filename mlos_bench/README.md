@@ -28,7 +28,10 @@ It's available for `pip install` via the pypi repository at [mlos-bench](https:/
     - [Optimization](#optimization)
         - [Resuming interrupted experiments](#resuming-interrupted-experiments)
     - [Analyzing Results](#analyzing-results)
+    - [Debugging](#debugging)
+    - [See Also](#see-also)
 
+<!-- /TOC -->
 <!-- /TOC -->
 
 <!-- markdownlint-enable MD007 -->
@@ -242,4 +245,10 @@ trial_data = experiment_data.trials[trial_id]
 trial_config = trial_data.config
 ```
 
-See Also: <https://microsoft.github.io/MLOS> for full API documentation.
+## Debugging
+
+TODO: Add notes on debugging user scripts and configs (also in the `mlos_bench` and `mlos_bench.config` module docstrings).
+
+## See Also
+
+- <https://microsoft.github.io/MLOS/autoapi/mlos_bench/> for more documentation details

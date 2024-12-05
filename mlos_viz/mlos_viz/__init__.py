@@ -6,6 +6,12 @@
 mlos_viz is a framework to help visualizing, explain, and gain insights from results
 from the :py:mod:`mlos_bench` framework for benchmarking and optimization automation.
 
+It can be installed from `pypi <https://pypi.org/project/mlos-viz>`_ via ``pip
+install mlos-viz``.
+
+Overview
+++++++++
+
 Its main entrypoint is the :py:func:`plot` function, which can be used to
 automatically visualize :py:class:`~.ExperimentData` from :py:mod:`mlos_bench` using
 other libraries for automatic data correlation and visualization like
