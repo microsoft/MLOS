@@ -6,27 +6,23 @@ MLOS Documentation
 .. image:: badges/coverage.svg
    :target: htmlcov/index.html
 
-`MLOS <source_tree_docs/index.html>`_ is a project to enable `autotuning </autoapi/mlos_core/index.html>` with `mlos_core </autoapi/mlos_core/index.html>`_ for systems via `automated benchmarking </autoapi/mlos_bench/index.html>`_ with `mlos_bench </autoapi/mlos_bench/index.html>`_ including managing the storage and `visualization </autoapi/mlos_viz/index.html>`_ of the results via `mlos_viz </autoapi/mlos_viz/index.html>`_.
+`MLOS <source_tree_docs/index.html>`_ is a project to enable `autotuning <autoapi/mlos_core/index.html>`_ with `mlos_core <autoapi/mlos_core/index.html>`_ for systems via `automated benchmarking <autoapi/mlos_bench/index.html>`_ with `mlos_bench </autoapi/mlos_bench/index.html>`_ including managing the storage and `visualization <autoapi/mlos_viz/index.html>`_ of the results via `mlos_viz <autoapi/mlos_viz/index.html>`_.
 
-See below for additional documentation sections.
-
-Here is some documentation pulled from the markdown files in the `MLOS source tree <https://github.com/microsoft/MLOS>`_:
+Documentation is generated from both the `source tree markdown <source_tree_docs/index.html>`_ and the Python docstrings for each of the packages with navigation links on the side.
 
 .. toctree::
    :caption: Source Tree Documentation
    :maxdepth: 4
+   :hidden:
 
    source_tree_docs/index
    source_tree_docs/mlos_core/index
    source_tree_docs/mlos_bench/index
    source_tree_docs/mlos_viz/index
 
-Here is some documentation pulled from the Python docstrings in the `MLOS source tree <https://github.com/microsoft/MLOS>`_:
-
 .. toctree::
    :caption: API Reference
-   :titlesonly:
-   :maxdepth: 4
+   :maxdepth: 2
 
    autoapi/mlos_core/index
    autoapi/mlos_bench/index

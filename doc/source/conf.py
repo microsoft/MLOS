@@ -21,7 +21,7 @@
 import json
 import os
 import sys
-from typing import Dict, Union, Tuple
+from typing import Dict, Optional, Tuple
 
 from logging import warning
 

@@ -2,7 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Contains space converters for :py:class:`~mlos_core.optimizers.flaml_optimizer`"""
+"""Contains space converters for
+:py:class:`~mlos_core.optimizers.flaml_optimizer.FlamlOptimizer`
+"""
 
 import sys
 from typing import TYPE_CHECKING, Dict

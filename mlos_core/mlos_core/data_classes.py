@@ -2,8 +2,15 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Data classes for mlos_core used to pass around configurations, observations, and
+"""
+Data classes for ``mlos_core`` used to pass around configurations, observations, and
 suggestions.
+
+``mlos_core`` uses :external:py:mod:`pandas` :external:py:class:`~pandas.DataFrame`
+s and :external:py:class:`~pandas.Series` to represent configurations and scores and
+context (information about where the configuration was evaluated).
+
+These modules encapsulate tuples of those for easier passing around and manipulation.
 """
 from typing import Any, Iterable, Iterator, Optional
 

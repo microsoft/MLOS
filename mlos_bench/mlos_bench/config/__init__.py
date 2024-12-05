@@ -36,6 +36,83 @@ This allows tools that support `JSON Schema Store
 <https://marketplace.visualstudio.com/items?itemName=remcohaszing.schemastore>`_) to
 provide helpful autocomplete and validation of the json configs while editing.
 
+Organization
+^^^^^^^^^^^^
+
+Ultimately, each experiment is slightly different so it can take some time to get
+the automation right.
+
+Therefore the configs are intended to be modular and reusable to reduce the time to
+do that for the next set.
+Hence, they are usually split into several files and directory structures.
+
+We attempt to provide some examples and reuable templates in the core ``mlos_bench``
+package, but users are encouraged to create their own configs as needed, or to
+`submit PRs or Issues <https://github.com/microsoft/MLOS/CONTRIBUTING.md>`_ to add
+additional ones.
+
+References to some examples are provided below.
+
+Additional details about the organization of the files and directories are as follows:
+
+- ``cli/``:
+    Contains the cli configs that control the overall setup for a set of Experiments.
+
+- ``environments/``:
+    Contains the configs for :py:mod:`~mlos_bench.environments`, and their
+    associated scripts (if relevant, e.g., for
+    `:py:class:`~mlos_bench.environments.remote_env.RemoteEnv` or
+    :py:class:`~mlos_bench.environments.script_env.ScriptEnv`) and
+    :py:mod:`~mlos_bench.tunables`.
+
+    There is usally one *root* environment that chains the others together to build
+    a full experiment (e.g., via
+    :py:class:`~mlos_bench.environments.composite_env.CompositeEnv` and the
+    ``include_children`` field).
+    The *root* environment is the one referenced in the CLI config ``environment``
+    field.
+
+    Note that each separate Environment config is really more of a template that
+    allows for variable expansion so that the same environment can be used in
+    multiple experiments with different configurations (see below).
+
+    Similarly, Environments declare a need for a particular Service, but not which
+    implementation of it.
+    This allows for easy swapping of Services (e.g., a different cloud vendor) using
+    a different ``services`` config in the CLI config.
+
+    Grouping the scripts and tunables together with the environment allows for
+    easier reuse, readability, and debugging.
+
+    Note that tunables are also separated into "groups" each of which can be enabled
+    for tuning or not, again controllable via ``globals`` variable expansion.
+
+- ``experiments/``:
+    Contains some ``globals`` (variables) that help expand a set of other config
+    templates out into a full set of configs.
+    Since each experiment may only slightly differ from a previous one, this allows
+    a greater reuse across individual experiments.
+
+- ``optimizers/``:
+    Contains the configs for :py:mod:`mlos_bench.optimizers`.
+    The optimizer is referenced in the CLI config's ``optimizer`` field.
+    This config controls which optimizer to use and any custom settings for it.
+
+- ``services/``:
+    Contains the configs for :py:mod:`mlos_bench.services`.
+
+    In general servies can simply be referenced in the CLI config's ``services``
+    field, though sometimes additional settings are required, possibly provided by
+    an additional ``globals`` config in the CLI config.
+
+- ``storage/``:
+    Contains the configs for :py:mod:`mlos_bench.storage`.
+
+    The storage config is referenced in the CLI config's ``storage`` field and
+    controls how data is stored and retrieved for the experiments and trials.
+
+See below for additional details about each configuration type.
+
 CLI Configs
 ^^^^^^^^^^^
 
@@ -252,6 +329,17 @@ For further details on the schema definitions and validation, see the
 :py:class:`~mlos_bench.config.schemas.config_schemas.ConfigSchema` class
 documentation, which also contains links to the actual schema definitions in the
 source tree (see below).
+
+Debugging
++++++++++
+
+Most of the time issues in running an Experiment involve issues with the json
+configs and/or user scripts that are being run by the framework.
+
+It can help to run ``mlos_bench`` with ``--log-level DEBUG`` to see more detailed
+output about the steps it is taking.
+Alternatively, it can help to add additional debug logging to the user scripts
+themselves to see what about the unique automation process is failing.
 
 Notes
 -----
