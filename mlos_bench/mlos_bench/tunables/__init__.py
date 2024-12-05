@@ -201,10 +201,10 @@ Internally, :py:class:`.TunableGroups` are converted to
 
 See Also
 --------
-:py:mod:`mlos_bench.config`
-:py:mod:`mlos_bench.environments`
-:py:mod:`mlos_core.optimizers`
-:py:mod:`mlos_core.spaces`
+:py:mod:`mlos_bench.config` : Overview of the configuration system.
+:py:mod:`mlos_bench.environments` : Overview of Environments and their configurations.
+:py:mod:`mlos_core.optimizers` : Overview of mlos_core optimizers.
+:py:mod:`mlos_core.spaces` : Overview of the mlos_core configuration space system.
 """
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
