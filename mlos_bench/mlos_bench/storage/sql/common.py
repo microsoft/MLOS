@@ -175,7 +175,6 @@ def get_results_df(
             .join(
                 schema.config_param,
                 schema.config_param.c.config_id == schema.trial.c.config_id,
-                isouter=True,
             )
             .order_by(
                 schema.trial.c.trial_id,
