@@ -7,6 +7,7 @@
 import os
 import sys
 
+import json5
 import pytest
 
 from mlos_bench.config.schemas import ConfigSchema
@@ -100,6 +101,20 @@ def test_load_config(config_persistence_service: ConfigPersistenceService) -> No
         "tunable-values/tunable-values-example.jsonc",
         ConfigSchema.TUNABLE_VALUES,
     )
+    assert tunables_data is not None
+    assert isinstance(tunables_data, dict)
+    assert len(tunables_data) >= 1
+
+
+def test_load_config_string(config_persistence_service: ConfigPersistenceService) -> None:
+    """Check if we can load a valid json string as well"""
+    json_str = """
+    {
+        "tunable_param_1": "value_1",
+        "tunable_param_2": "value_2",
+    }
+    """
+    tunables_data = config_persistence_service.load_config(json_str, ConfigSchema.TUNABLE_VALUES)
     assert tunables_data is not None
     assert isinstance(tunables_data, dict)
     assert len(tunables_data) >= 1
