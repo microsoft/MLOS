@@ -7,7 +7,6 @@
 import os
 import sys
 
-import json5
 import pytest
 
 from mlos_bench.config.schemas import ConfigSchema
