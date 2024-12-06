@@ -198,6 +198,8 @@ Notes
 Internally, :py:class:`.TunableGroups` are converted to
 :external:py:class:`ConfigSpace.ConfigurationSpace` objects for use with
 :py:mod:`mlos_core`.
+See the "Spaces" section in the :py:mod:`mlos_core` module documentation for more
+information.
 
 See Also
 --------
@@ -205,6 +207,7 @@ See Also
 :py:mod:`mlos_bench.environments` : Overview of Environments and their configurations.
 :py:mod:`mlos_core.optimizers` : Overview of mlos_core optimizers.
 :py:mod:`mlos_core.spaces` : Overview of the mlos_core configuration space system.
+:py:meth:`.TunableGroups.assign` : Notes on special cases for assigning tunable values.
 """
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
