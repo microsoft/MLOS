@@ -19,7 +19,7 @@ via ``pip install mlos-bench`` and executed using the ``mlos_bench`` `command
 
 It is intended to be used with :py:mod:`mlos_core` via
 :py:class:`~mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer` to help
-navigate complex parameter spaces more effeciently, though other
+navigate complex parameter spaces more efficiently, though other
 :py:mod:`~mlos_bench.optimizers` are also available to help customize the search
 process easily by simply swapping out the
 :py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer` class in the associated
@@ -32,10 +32,10 @@ Goals
 ^^^^^
 
 The overall goal of the MLOS project is to enable *reproducible* and *trackable*
-benchmarking and *effecient* autotuning for systems software.
+benchmarking and *efficient* autotuning for systems software.
 
 In this, automation of the benchmarking process is a key component that
-``mlos_bench`` seaks to enable.
+``mlos_bench`` seeks to enable.
 
 Interaction
 ^^^^^^^^^^^
@@ -136,7 +136,7 @@ and hence sometimes more focused on the implementation details, most user
 interactions with the package will be through the `json configs
 <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_. Even
 so it may be useful to look at the source code to understand how those are
-interpretted.
+interpreted.
 
 Examples
 --------

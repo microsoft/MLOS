@@ -86,9 +86,9 @@ Although this can be done in the Environment config directly with the
 used in different settings (e.g., local machine, SSH accessible machine, Azure VM,
 etc.) without having to change the Environment config.
 
-Variable Propogation
+Variable Propagation
 ++++++++++++++++++++
-TODO: Document how variable propogation works in the script environments using
+TODO: Document how variable propagation works in the script environments using
 required_args, const_args, etc.
 
 Examples
