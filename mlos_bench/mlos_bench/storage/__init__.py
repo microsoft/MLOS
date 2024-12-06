@@ -133,6 +133,10 @@ sqlite::memory:
 >>> # Access TrialData for an Experiment by trial id.
 >>> trial_data = experiment_data.trials[1]
 >>> assert trial_data.status == Status.SUCCEEDED
+>>> # Retrieve the tunable configuration from the TrialData as a dictionary.
+>>> trial_config_data = trial_data.tunable_config
+>>> trial_config_data.config_dict
+{'param1': 50}
 >>> # Retrieve the results from the TrialData as a dictionary.
 >>> trial_data.results_dict
 {'objective_metric': 42}
