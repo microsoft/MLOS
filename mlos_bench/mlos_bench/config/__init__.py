@@ -169,7 +169,7 @@ See below for examples.
 
 Notes
 -----
-- See `mlos_bench CLI usage </mlos_bench.run.usage.html>`_ for more details on the
+- See `mlos_bench CLI usage <../../../mlos_bench.run.usage.html>`_ for more details on the
   CLI arguments.
 - See `mlos_bench/config/cli
   <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/cli>`_
@@ -322,8 +322,8 @@ at startup time by the ``mlos_bench`` CLI.
 The typical entrypoint is a CLI config which references other configs, especially
 the base Environment config, Services, Optimizer, and Storage.
 
-See `mlos_bench CLI usage </mlos_bench.run.usage.html>`_ for more details on those
-arguments.
+See `mlos_bench CLI usage <../../../mlos_bench.run.usage.html>`__ for more details
+on those arguments.
 
 Schema Definitions
 ++++++++++++++++++

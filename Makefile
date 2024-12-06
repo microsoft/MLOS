@@ -754,16 +754,19 @@ else
 linklint-doc: build/linklint-doc.build-stamp
 endif
 
-build/linklint-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/index.html build/check-doc.build-stamp
+.PHONY: nginx_port_env
+nginx_port_env:
 	@echo "Starting nginx docker container for serving docs."
 	./doc/nginx-docker.sh restart
-	docker port mlos-doc-nginx
 	nginx_port=`docker port mlos-doc-nginx | grep 0.0.0.0:8080 | cut -d/ -f1` \
-		&& echo nginx_port=$${nginx_port} \
-		&& set -x \
-		&& docker exec mlos-doc-nginx curl -sSf http://localhost:$${nginx_port}/index.html >/dev/null
-	@echo "Running linklint on the docs."
-	docker exec mlos-doc-nginx linklint -net -redirect -root /doc/build/html/ /@ -error -warn > doc/build/linklint.out 2>&1
+		&& echo nginx_port=$${nginx_port} > doc/build/nginx_port.env
+
+build/linklint-doc.build-stamp: nginx_port=$(shell cat doc/build/nginx_port.env | cut -d= -f2 | egrep -x '[0-9]+')
+build/linklint-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/index.html build/check-doc.build-stamp nginx_port_env
+	@echo "Running linklint on the docs at http://localhost:${nginx_port}/MLOS/ ..."
+	docker exec mlos-doc-nginx curl -sSf http://localhost:${nginx_port}/MLOS/index.html >/dev/null
+	docker exec mlos-doc-nginx linklint -root /doc/build/html/ /@ -error -warn > doc/build/linklint.out 2>&1
+	docker exec mlos-doc-nginx linklint -net -redirect -host localhost:${nginx_port} /MLOS/@ -http -error -warn > doc/build/linklint.out 2>&1
 	@if cat doc/build/linklint.out | grep -e ^ERROR -e ^WARN | grep -v 'missing named anchors' | grep -q .; then \
 		echo "Found errors in the documentation:"; cat doc/build/linklint.out; exit 1; \
 	fi

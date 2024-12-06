@@ -8,7 +8,7 @@ mlos_bench main optimization loop and benchmark runner CLI.
 
 Note: this script is also available as a CLI tool via ``pip`` under the name ``mlos_bench``.
 
-See the current ``--help`` `output for details </mlos_bench.run.usage.html>`_.
+See the current ``--help`` `output for details <../../../mlos_bench.run.usage.html>`_.
 
 See Also
 --------
