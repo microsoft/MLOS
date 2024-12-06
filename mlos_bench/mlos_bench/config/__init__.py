@@ -61,7 +61,7 @@ Additional details about the organization of the files and directories are as fo
 - ``environments/``:
     Contains the configs for :py:mod:`~mlos_bench.environments`, and their
     associated scripts (if relevant, e.g., for
-    `:py:class:`~mlos_bench.environments.remote_env.RemoteEnv` or
+    :py:class:`~mlos_bench.environments.remote.remote_env.RemoteEnv` or
     :py:class:`~mlos_bench.environments.script_env.ScriptEnv`) and
     :py:mod:`~mlos_bench.tunables`.
 
@@ -253,9 +253,9 @@ There are two forms of tunable configs:
          ],
        }
 
-  Since TunableParams are associated with Environments, they are typically kept
-  in the same directory as that environment and named something like
-  ``env-tunables.json``.
+  Since TunableParams are associated with an :py:mod:`~mlos_bench.environments`,
+  they are typically kept in the same directory as that Environment's config and
+  named something like ``env-tunables.json``.
 
 - "TunableValues" style configs which are used to specify the values for an
   instantiation of a set of tunables params.
@@ -275,6 +275,9 @@ There are two forms of tunable configs:
   :py:class:`~mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer`
   :py:class:`~mlos_bench.optimizers.manual_optimizer.ManualOptimizer` to run a
   benchmark with a particular config or set of configs.
+
+For more information on tunable configs, see the :py:mod:`mlos_bench.tunables`
+module.
 
 Class Configs
 ^^^^^^^^^^^^^

@@ -16,15 +16,16 @@ are expected to interact with the data using the
 obtained from the initial :py:class:`.SqlStorage` instance obtained by
 :py:func:`mlos_bench.storage.storage_factory.from_config`.
 
-Examples
---------
-TODO: Add example usage.
-
 Notes
 -----
 See the `mlos_bench/config/storage
 <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/storage>`_
 tree for some configuration examples.
+
+See Also
+--------
+:py:mod:`mlos_bench.storage` : The base storage module for mlos_bench, which
+    includes some basic examples in the documentation.
 """
 from mlos_bench.storage.sql.storage import SqlStorage
 

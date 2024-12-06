@@ -25,22 +25,28 @@ import numpy as np
 from mlos_bench.util import nullable
 
 _LOG = logging.getLogger(__name__)
-"""A tunable parameter value type alias."""
+
 TunableValue = Union[int, float, Optional[str]]
-"""Tunable value type."""
+"""A tunable parameter value type alias."""
+
 TunableValueType = Union[Type[int], Type[float], Type[str]]
+"""Tunable value type."""
+
+TunableValueTypeTuple = (int, float, str, type(None))
 """
 Tunable value type tuple.
 
 For checking with isinstance()
 """
-TunableValueTypeTuple = (int, float, str, type(None))
-"""The string name of a tunable value type."""
+
 TunableValueTypeName = Literal["int", "float", "categorical"]
-"""Tunable values dictionary type."""
+"""The string name of a tunable value type."""
+
 TunableValuesDict = Dict[str, TunableValue]
-"""Tunable value distribution type."""
+"""Tunable values dictionary type."""
+
 DistributionName = Literal["uniform", "normal", "beta"]
+"""Tunable value distribution type."""
 
 
 class DistributionDict(TypedDict, total=False):
@@ -94,6 +100,11 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             Human-readable identifier of the tunable parameter.
         config : dict
             Python dict that represents a Tunable (e.g., deserialized from JSON)
+
+        See Also
+        --------
+        :py:mod:`mlos_bench.tunables` : for more information on tunable parameters and
+            their configuration.
         """
         if not isinstance(name, str) or "!" in name:  # TODO: Use a regex here and in JSON schema
             raise ValueError(f"Invalid name of the tunable: {name}")

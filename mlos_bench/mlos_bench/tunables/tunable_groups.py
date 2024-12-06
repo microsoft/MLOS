@@ -15,7 +15,9 @@ _LOG = logging.getLogger(__name__)
 
 
 class TunableGroups:
-    """A collection of covariant groups of tunable parameters."""
+    """A collection of :py:class:`.CovariantTunableGroup` s of :py:class:`.Tunable`
+    parameters.
+    """
 
     def __init__(self, config: Optional[dict] = None):
         """
@@ -25,6 +27,11 @@ class TunableGroups:
         ----------
         config : dict
             Python dict of serialized representation of the covariant tunable groups.
+
+        See Also
+        --------
+        :py:mod:`mlos_bench.tunables` : for more information on tunable parameters and
+            their configuration.
         """
         if config is None:
             config = {}

@@ -11,4 +11,8 @@ as input to the underlying Optimizer's parameter description language (in case i
 doesn't use :py:class:`ConfigSpace.ConfigurationSpace`).
 
 They are not generally intended to be used directly by the user.
+
+See Also
+--------
+:py:mod:`mlos_core` : for an overview of configuration spaces in ``mlos_core``.
 """

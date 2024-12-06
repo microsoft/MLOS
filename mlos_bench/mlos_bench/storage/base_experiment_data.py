@@ -13,6 +13,9 @@ multiple trials may use the same config (e.g., for repeat run variability analys
 
 See Also
 --------
+mlos_bench.storage :
+    The base storage module for mlos_bench, which includes some basic examples
+    in the documentation.
 ExperimentData.results_df :
     Retrieves a pandas DataFrame of the Experiment's trials' results data.
 ExperimentData.trials :
