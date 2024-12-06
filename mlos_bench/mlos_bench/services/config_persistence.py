@@ -187,7 +187,11 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             # If the path contains braces, it is likely already a json string,
             # so just parse it.
             _LOG.info("Load config from json string: %s", json)
-            config: Any = json5.loads(json)
+            try:
+                config: Any = json5.loads(json)
+            except ValueError as ex:
+                _LOG.error("Failed to parse config from JSON string: %s", json)
+                raise ValueError(f"Failed to parse config from JSON string: {json}") from ex
         else:
             json = self.resolve_path(json)
             _LOG.info("Load config file: %s", json)
