@@ -63,7 +63,7 @@ TunableGroups
 +++++++++++++
 
 The :py:class:`~mlos_bench.tunables.tunable_groups.TunableGroups` class is used to
-define an entire set of tunable paratmers (e.g., combined set of covariant groups).
+define an entire set of tunable parameters (e.g., combined set of covariant groups).
 
 Usage
 ^^^^^
