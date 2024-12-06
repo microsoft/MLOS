@@ -5,9 +5,7 @@
 """
 Helper functions to load, instantiate, and serialize Python objects that encapsulate a
 benchmark :py:class:`.Environment`, :py:mod:`~mlos_bench.tunables`, :py:class:`.Service`
-functions, etc.
-
-from JSON configuration files and strings.
+functions, etc. from JSON configuration files and strings.
 """
 
 import logging
