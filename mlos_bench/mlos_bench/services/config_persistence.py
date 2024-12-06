@@ -182,6 +182,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         config : Union[dict, List[dict]]
             Free-format dictionary that contains the configuration.
         """
+        assert isinstance(json, str)
         if any(c in json for c in ("{", "[")):
             # If the path contains braces, it is likely already a json string,
             # so just parse it.
