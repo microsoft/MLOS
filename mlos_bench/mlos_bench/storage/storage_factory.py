@@ -20,7 +20,7 @@ from mlos_bench.storage.base_storage import Storage
 
 
 def from_config(
-    config_file: str,
+    config: str,
     global_configs: Optional[List[str]] = None,
     **kwargs: Any,
 ) -> Storage:
@@ -29,8 +29,8 @@ def from_config(
 
     Parameters
     ----------
-    config_file : str
-        JSON5 config file to load.
+    config : str
+        JSON5 config file or string to load.
     global_configs : Optional[List[str]]
         An optional list of config files with global parameters.
     kwargs : dict
@@ -45,13 +45,13 @@ def from_config(
     config_loader = ConfigPersistenceService({"config_path": config_path})
     global_config = {}
     for fname in global_configs or []:
-        config = config_loader.load_config(fname, ConfigSchema.GLOBALS)
-        global_config.update(config)
-        config_path += config.get("config_path", [])
+        gconfig = config_loader.load_config(fname, ConfigSchema.GLOBALS)
+        global_config.update(gconfig)
+        config_path += gconfig.get("config_path", [])
         config_loader = ConfigPersistenceService({"config_path": config_path})
     global_config.update(kwargs)
 
-    class_config = config_loader.load_config(config_file, ConfigSchema.STORAGE)
+    class_config = config_loader.load_config(config, ConfigSchema.STORAGE)
     assert isinstance(class_config, Dict)
 
     ret = config_loader.build_storage(
