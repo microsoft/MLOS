@@ -58,6 +58,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
     """
 
     BUILTIN_CONFIG_PATH = str(files("mlos_bench.config").joinpath("")).replace("\\", "/")
+    """A calculated path to the built-in configuration files shipped with the
+    mlos_bench package."""
 
     def __init__(
         self,
