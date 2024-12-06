@@ -88,10 +88,26 @@ sqlite::memory:
 >>> # Create a new experiment with a single trial.
 >>> # (Normally, we'd use a real environment config, but for this example we'll use a string.)
 >>> #
->>> from mlos_bench.tunables.tunable_groups import TunableGroups
+>>> # Create a dummy tunable group.
+>>> from mlos_bench.services.config_persistence import ConfigPersistenceService
+>>> config_persistence_service = ConfigPersistenceService()
+>>> tunables_config = '''
+... {
+...   "param_group": {
+...     "cost": 1,
+...     "params": {
+...       "param1": {
+...         "type": "int",
+...         "range": [0, 100],
+...         "default": 50
+...       }
+...     }
+...   }
+... }
+... '''
+>>> tunables = config_persistence_service.load_tunables([tunables_config])
 >>> from mlos_bench.environments.status import Status
 >>> from datetime import datetime
->>> tunables = TunableGroups()
 >>> with storage.experiment(
 ...   experiment_id="my_experiment_id",
 ...   trial_id=1,
@@ -122,12 +138,12 @@ sqlite::memory:
 {'objective_metric': 42}
 >>> # Retrieve the results of all Trials in the Experiment as a DataFrame.
 >>> experiment_data.results_df.columns.tolist()
-['trial_id', 'ts_start', 'ts_end', 'tunable_config_id', 'tunable_config_trial_group_id', 'status', 'result.objective_metric']
+['trial_id', 'ts_start', 'ts_end', 'tunable_config_id', 'tunable_config_trial_group_id', 'status', 'config.param1', 'result.objective_metric']
 >>> experiment_data.results_df.drop(columns=["ts_start"])
    trial_id  ... result.objective_metric
 0         1  ...                      42
 <BLANKLINE>
-[1 rows x 6 columns]
+[1 rows x 7 columns]
 
 See Also
 --------
