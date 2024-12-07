@@ -43,10 +43,6 @@ Example
 
 Here's a very basic example of the Storage APIs.
 
->>> # Import and configure Pandas to make unit tests pass.
->>> import pandas
->>> pandas.options.display.width = 120
->>> pandas.options.display.max_columns = 10
 >>> # Create a new storage object from a JSON config.
 >>> # Normally, we'd load these from a file, but for this example we'll use a string.
 >>> global_config = '''
