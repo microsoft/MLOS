@@ -87,7 +87,7 @@ This can be done for a variety for reasons.
 
 One example is for automatic search space reduction (e.g., using
 :py:mod:`~mlos_core.spaces.adapters.llamatune`) in order to try and improve search
-effeciency (see the :py:mod:`~mlos_core.spaces.adapters.llamatune` and
+efficiency (see the :py:mod:`~mlos_core.spaces.adapters.llamatune` and
 :py:mod:`space adapters <mlos_core.spaces.adapters>` modules for additional
 documentation.)
 
@@ -130,14 +130,14 @@ Examples
 >>> _ = cs.add(UniformIntegerHyperparameter("x", lower=0, upper=10))
 >>> # Create a new optimizer instance using the SMAC optimizer.
 >>> opt_args = {"seed": 1234, "max_trials": 100}
->>> space_adpaters_kwargs = {} # no additional args for this example
+>>> space_adapters_kwargs = {} # no additional args for this example
 >>> opt = OptimizerFactory.create(
 ...     parameter_space=cs,
 ...     optimization_targets=["y"],
 ...     optimizer_type=OptimizerType.SMAC,  # or FLAML, etc.
 ...     optimizer_kwargs=opt_args,
 ...     space_adapter_type=SpaceAdapterType.IDENTITY,   # or LLAMATUNE
-...     space_adapter_kwargs=space_adpaters_kwargs,
+...     space_adapter_kwargs=space_adapters_kwargs,
 ... )
 >>> # Get a new configuration suggestion.
 >>> suggestion = opt.suggest()

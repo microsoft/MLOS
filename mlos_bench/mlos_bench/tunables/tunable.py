@@ -607,7 +607,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @property
     def quantized_values(self) -> Optional[Union[Iterable[int], Iterable[float]]]:
         """
-        Get a sequence of quanitized values for this tunable.
+        Get a sequence of quantized values for this tunable.
 
         Returns
         -------

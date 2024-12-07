@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-A module for and documentation about the structure and mangement of json configs, their
+A module for and documentation about the structure and management of json configs, their
 schemas and validation for various components of MLOS.
 
 .. contents:: Table of Contents
@@ -46,7 +46,7 @@ Therefore the configs are intended to be modular and reusable to reduce the time
 do that for the next set.
 Hence, they are usually split into several files and directory structures.
 
-We attempt to provide some examples and reuable templates in the core ``mlos_bench``
+We attempt to provide some examples and reusable templates in the core ``mlos_bench``
 package, but users are encouraged to create their own configs as needed, or to
 `submit PRs or Issues <https://github.com/microsoft/MLOS/CONTRIBUTING.md>`_ to add
 additional ones.
@@ -65,7 +65,7 @@ Additional details about the organization of the files and directories are as fo
     :py:class:`~mlos_bench.environments.script_env.ScriptEnv`) and
     :py:mod:`~mlos_bench.tunables`.
 
-    There is usally one *root* environment that chains the others together to build
+    There is usually one *root* environment that chains the others together to build
     a full experiment (e.g., via
     :py:class:`~mlos_bench.environments.composite_env.CompositeEnv` and the
     ``include_children`` field).
@@ -101,7 +101,7 @@ Additional details about the organization of the files and directories are as fo
 - ``services/``:
     Contains the configs for :py:mod:`mlos_bench.services`.
 
-    In general servies can simply be referenced in the CLI config's ``services``
+    In general services can simply be referenced in the CLI config's ``services``
     field, though sometimes additional settings are required, possibly provided by
     an additional ``globals`` config in the CLI config.
 
@@ -169,7 +169,7 @@ See below for examples.
 
 Notes
 -----
-- See `mlos_bench CLI usage </mlos_bench.run.usage.html>`_ for more details on the
+- See `mlos_bench CLI usage <../../../mlos_bench.run.usage.html>`_ for more details on the
   CLI arguments.
 - See `mlos_bench/config/cli
   <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/cli>`_
@@ -182,7 +182,7 @@ Globals and Variable Substitution
 
 :py:attr:`Globals <mlos_bench.config.schemas.config_schemas.ConfigSchema.GLOBALS>`
 are basically just key-value variables that can be used in other configs using
-``$variable`` substituion via the
+``$variable`` substitution via the
 :py:meth:`~mlos_bench.dict_templater.DictTemplater.expand_vars` method.
 
 For instance:
@@ -199,7 +199,7 @@ For instance:
      "location": "eastus",
    }
 
-There are additional details about variable propogation in the
+There are additional details about variable propagation in the
 :py:mod:`mlos_bench.environments` module.
 
 Well Known Variables
@@ -322,8 +322,8 @@ at startup time by the ``mlos_bench`` CLI.
 The typical entrypoint is a CLI config which references other configs, especially
 the base Environment config, Services, Optimizer, and Storage.
 
-See `mlos_bench CLI usage </mlos_bench.run.usage.html>`_ for more details on those
-arguments.
+See `mlos_bench CLI usage <../../../mlos_bench.run.usage.html>`__ for more details
+on those arguments.
 
 Schema Definitions
 ++++++++++++++++++
