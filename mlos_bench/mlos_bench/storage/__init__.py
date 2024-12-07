@@ -43,6 +43,10 @@ Example
 
 Here's a very basic example of the Storage APIs.
 
+>>> # Import and configure Pandas to make unit tests pass.
+>>> import pandas
+>>> pandas.options.display.width = 120
+>>> pandas.options.display.max_columns = 10
 >>> # Create a new storage object from a JSON config.
 >>> # Normally, we'd load these from a file, but for this example we'll use a string.
 >>> global_config = '''
@@ -143,11 +147,12 @@ sqlite::memory:
 >>> # Retrieve the results of all Trials in the Experiment as a DataFrame.
 >>> experiment_data.results_df.columns.tolist()
 ['trial_id', 'ts_start', 'ts_end', 'tunable_config_id', 'tunable_config_trial_group_id', 'status', 'config.param1', 'result.objective_metric']
->>> experiment_data.results_df.drop(columns=["ts_start"])
-   trial_id  ... result.objective_metric
-0         1  ...                      42
-<BLANKLINE>
-[1 rows x 7 columns]
+>>> # Drop the timestamp columns to make it a repeatable test.
+>>> experiment_data.results_df.drop(columns=["ts_start", "ts_end"])
+   trial_id  tunable_config_id  tunable_config_trial_group_id     status  config.param1  result.objective_metric
+0         1                  1                              1  SUCCEEDED             50                       42
+
+[1 rows x 6 columns]
 
 See Also
 --------
