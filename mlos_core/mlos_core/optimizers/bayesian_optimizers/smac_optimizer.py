@@ -20,7 +20,6 @@ from warnings import warn
 import ConfigSpace
 import numpy.typing as npt
 import pandas as pd
-from smac.utils.configspace import convert_configurations_to_array
 
 from mlos_core.data_classes import Observation, Observations, Suggestion
 from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import (
@@ -121,6 +120,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
         from smac.main.config_selector import ConfigSelector
         from smac.random_design.probability_design import ProbabilityRandomDesign
         from smac.runhistory import TrialInfo
+        from smac.utils.configspace import convert_configurations_to_array
+
+        # Save util function here as a property for later usage, also to satisfy linter
+        self._convert_configurations_to_array = convert_configurations_to_array
 
         # Store for TrialInfo instances returned by .ask()
         self.trial_info_map: Dict[ConfigSpace.Configuration, TrialInfo] = {}
@@ -411,7 +414,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if self.base_optimizer._config_selector._model is None:
             raise RuntimeError("Surrogate model is not yet trained")
 
-        config_array = convert_configurations_to_array(
+        config_array = self._convert_configurations_to_array(
             [
                 ConfigSpace.Configuration(
                     self.optimizer_parameter_space, values=suggestion.config.to_dict()
