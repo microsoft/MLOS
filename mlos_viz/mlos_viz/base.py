@@ -46,6 +46,15 @@ def ignore_plotter_warnings() -> None:
             module="seaborn",  # but actually comes from pandas
             message="is_categorical_dtype is deprecated and will be removed in a future version.",
         )
+    warnings.filterwarnings(
+        "ignore",
+        category=PendingDeprecationWarning,
+        module="seaborn",  # but actually comes from matplotlib
+        message=(
+            "vert: bool will be deprecated in a future version. "
+            "Use orientation: {'vertical', 'horizontal'} instead."
+        ),
+    )
 
 
 def _add_groupby_desc_column(
