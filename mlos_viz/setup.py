@@ -83,7 +83,7 @@ setup(
     version=VERSION,
     install_requires=[
         "mlos-bench==" + VERSION,
-        "dabl>=0.3.1",
+        "dabl>=0.3.2",
         "matplotlib",
         "seaborn>=0.12.2",
     ],
