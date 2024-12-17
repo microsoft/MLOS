@@ -46,6 +46,7 @@ def ignore_plotter_warnings() -> None:
             module="seaborn",  # but actually comes from pandas
             message="is_categorical_dtype is deprecated and will be removed in a future version.",
         )
+    # See Also: https://github.com/mwaskom/seaborn/issues/3804
     warnings.filterwarnings(
         "ignore",
         category=PendingDeprecationWarning,
