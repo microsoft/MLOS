@@ -50,15 +50,18 @@ def test_load_service_config_examples(
     """Tests loading a config example."""
     parent: Service = config_loader_service
     config = config_loader_service.load_config(config_path, ConfigSchema.SERVICE)
+
     # Add other services that require a SupportsAuth parent service as necessary.
+    # AzureFileShareService requires an AzureAuth service to be loaded as well.
+    # mock_auth_service_config = "services/remote/mock/mock_auth_service.jsonc"
+    azure_auth_service_config = "services/remote/azure/service-auth.jsonc"
     requires_auth_service_parent = {
-        "AzureFileShareService",
+        "AzureFileShareService": azure_auth_service_config,
     }
     config_class_name = str(config.get("class", "MISSING CLASS")).rsplit(".", maxsplit=1)[-1]
-    if config_class_name in requires_auth_service_parent:
-        # AzureFileShareService requires an auth service to be loaded as well.
+    if auth_service_config_path := requires_auth_service_parent.get(config_class_name):
         auth_service_config = config_loader_service.load_config(
-            "services/remote/mock/mock_auth_service.jsonc",
+            auth_service_config_path,
             ConfigSchema.SERVICE,
         )
         auth_service = config_loader_service.build_service(
@@ -66,6 +69,7 @@ def test_load_service_config_examples(
             parent=config_loader_service,
         )
         parent = auth_service
+
     # Make an instance of the class based on the config.
     service_inst = config_loader_service.build_service(
         config=config,
