@@ -19,6 +19,7 @@
         "ms-python.pylint",
         "ms-python.python",
         "ms-python.vscode-pylance",
+        "ms-python.debugpy",
         "ms-vscode-remote.remote-containers",
         "ms-vsliveshare.vsliveshare",
         "njpwerner.autodocstring",

@@ -75,6 +75,7 @@
                 "ms-python.pylint",
                 "ms-python.python",
                 "ms-python.vscode-pylance",
+                "ms-python.debugpy",
                 "ms-vsliveshare.vsliveshare",
                 "njpwerner.autodocstring",
                 "redhat.vscode-yaml",
