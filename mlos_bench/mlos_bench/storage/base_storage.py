@@ -34,7 +34,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import get_git_info
+from mlos_bench.util import get_git_info, nullable
 
 _LOG = logging.getLogger(__name__)
 
@@ -433,7 +433,7 @@ class Storage(metaclass=ABCMeta):
         @property
         def trial_runner_id(self) -> Optional[int]:
             """ID of the TrialRunner this trial is assigned to."""
-            return self._config.get("trial_runner_id")
+            return nullable(int, self._config.get("trial_runner_id"))
 
         @property
         def opt_targets(self) -> Dict[str, Literal["min", "max"]]:
