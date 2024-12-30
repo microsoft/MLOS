@@ -164,7 +164,7 @@ class Scheduler(metaclass=ABCMeta):
         """Gets the Storage."""
         return self._storage
 
-    def _assign_trial_runner(
+    def assign_trial_runner(
         self,
         trial: Storage.Trial,
         trial_runner: Optional[TrialRunner] = None,
@@ -175,25 +175,23 @@ class Scheduler(metaclass=ABCMeta):
         The base class implements a simple round-robin scheduling algorithm.
 
         Subclasses can override this method to implement a more sophisticated policy.
-        For instance:
+        For instance::
 
-        ```python
-        def assign_trial_runner(
-            self,
-            trial: Storage.Trial,
-            trial_runner: Optional[TrialRunner] = None,
-        ) -> TrialRunner:
-            if trial_runner is None:
-                # Implement a more sophisticated policy here.
-                # For example, to assign the Trial to the TrialRunner with the least
-                # number of running Trials.
-                # Or assign the Trial to the TrialRunner that hasn't executed this
-                # TunableValues Config yet.
-                trial_runner = ...
-            # Call the base class method to assign the TrialRunner in the Trial's metadata.
-            return super().assign_trial_runner(trial, trial_runner)
-            ...
-        ```
+            def assign_trial_runner(
+                self,
+                trial: Storage.Trial,
+                trial_runner: Optional[TrialRunner] = None,
+            ) -> TrialRunner:
+                if trial_runner is None:
+                    # Implement a more sophisticated policy here.
+                    # For example, to assign the Trial to the TrialRunner with the least
+                    # number of running Trials.
+                    # Or assign the Trial to the TrialRunner that hasn't executed this
+                    # TunableValues Config yet.
+                    trial_runner = ...
+                # Call the base class method to assign the TrialRunner in the Trial's metadata.
+                return super().assign_trial_runner(trial, trial_runner)
+                ...
 
         Parameters
         ----------
@@ -240,7 +238,7 @@ class Scheduler(metaclass=ABCMeta):
         TrialRunner
         """
         if trial.trial_runner_id is None:
-            self._assign_trial_runner(trial, trial_runner=None)
+            self.assign_trial_runner(trial, trial_runner=None)
         assert trial.trial_runner_id is not None
         return self._trial_runners[trial.trial_runner_id]
 
@@ -402,7 +400,7 @@ class Scheduler(metaclass=ABCMeta):
         # Select a TrialRunner based on the trial's metadata.
         # TODO: May want to further split this in the future to support scheduling a
         # batch of new trials.
-        trial_runner = self._assign_trial_runner(trial, trial_runner=None)
+        trial_runner = self.assign_trial_runner(trial, trial_runner=None)
         _LOG.info("QUEUE: Added new trial: %s (assigned to %s)", trial, trial_runner)
 
     def _run_schedule(self, running: bool = False) -> None:
