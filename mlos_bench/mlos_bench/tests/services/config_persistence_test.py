@@ -5,15 +5,13 @@
 """Unit tests for configuration persistence service."""
 
 import os
+from importlib.resources import files
 
 import pytest
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.util import path_join
-
-from importlib.resources import files
-
 
 # pylint: disable=redefined-outer-name
 
