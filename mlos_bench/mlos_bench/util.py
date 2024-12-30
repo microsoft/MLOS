@@ -345,7 +345,7 @@ def try_parse_val(val: Optional[str]) -> Optional[Union[int, float, str]]:
 
 
 NullableT = TypeVar("NullableT")
-"""A generic type variable for nullable types."""
+"""A generic type variable for :py:func:`nullable` return types."""
 
 
 def nullable(func: Callable[..., NullableT], value: Optional[Any]) -> Optional[NullableT]:
