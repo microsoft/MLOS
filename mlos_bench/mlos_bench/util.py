@@ -368,6 +368,10 @@ def nullable(func: Callable[..., NullableT], value: Optional[Any]) -> Optional[N
     --------
     >>> nullable(int, "1")
     1
+    >>> nullable(int, None)
+    ...
+    >>> nullable(str, 1)
+    '1'
     """
     return None if value is None else func(value)
 
