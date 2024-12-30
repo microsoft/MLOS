@@ -1,11 +1,11 @@
 [tool.black]
 line-length = 99
-target-version = ["py38", "py39", "py310", "py311", "py312"]
+target-version = ["py39", "py310", "py311", "py312", "py313"]
 include = '\.pyi?$'
 
 [tool.isort]
 profile = "black"
-py_version = 311
+py_version = 313
 src_paths = ["mlos_core", "mlos_bench", "mlos_viz"]
 
 # TODO: Consider switching to pydocstringformatter
