@@ -329,6 +329,7 @@ class Scheduler(metaclass=ABCMeta):
         """Load the existing tunable configuration from the storage."""
         assert self.experiment is not None
         tunable_values = self.experiment.load_tunable_config(config_id)
+        tunables = TunableGroups()
         for environment in self.environments:
             tunables = environment.tunable_params.assign(tunable_values)
         _LOG.info("Load config from storage: %d", config_id)
