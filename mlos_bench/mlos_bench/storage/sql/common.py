@@ -23,7 +23,8 @@ def save_params(
     params: Dict[str, Any],
     **kwargs: Any,
 ) -> None:
-    """Updates a set of (param_id, param_value) tuples in the given Table.
+    """
+    Updates a set of (param_id, param_value) tuples in the given Table.
 
     Parameters
     ----------

@@ -16,7 +16,11 @@ from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.storage import SqlStorage
 from mlos_bench.tests import SEED
-from mlos_bench.tests.storage import CONFIG_COUNT, CONFIG_TRIAL_REPEAT_COUNT, TRIAL_RUNNER_COUNT
+from mlos_bench.tests.storage import (
+    CONFIG_COUNT,
+    CONFIG_TRIAL_REPEAT_COUNT,
+    TRIAL_RUNNER_COUNT,
+)
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
