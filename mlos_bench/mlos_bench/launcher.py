@@ -125,7 +125,7 @@ class Launcher:
             self.global_config["num_trial_runners"] = args.num_trial_runners
         if self.global_config["num_trial_runners"] <= 0:
             raise ValueError(
-                f"Invalid num_trial_runners: {self.global_config['num_trial_runners']}"
+                f"""Invalid num_trial_runners: {self.global_config["num_trial_runners"]}"""
             )
         # Ensure that the trial_id is present since it gets used by some other
         # configs but is typically controlled by the run optimize loop.
