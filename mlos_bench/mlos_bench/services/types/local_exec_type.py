@@ -71,6 +71,6 @@ class SupportsLocalExec(Protocol):
 
         Returns
         -------
-        temp_dir_context : TemporaryDirectory
+        temp_dir_context : tempfile.TemporaryDirectory
             Temporary directory context to use in the `with` clause.
         """

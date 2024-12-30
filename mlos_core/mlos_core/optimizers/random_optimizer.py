@@ -2,66 +2,57 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Contains the RandomOptimizer class."""
+"""RandomOptimizer class."""
 
-from typing import Optional, Tuple
+from typing import Optional
 from warnings import warn
 
 import pandas as pd
 
+from mlos_core.data_classes import Observations, Suggestion
 from mlos_core.optimizers.optimizer import BaseOptimizer
 
 
 class RandomOptimizer(BaseOptimizer):
     """
-    Optimizer class that produces random suggestions. Useful for baseline comparison
-    against Bayesian optimizers.
+    Optimizer class that produces random suggestions.
 
-    Parameters
-    ----------
-    parameter_space : ConfigSpace.ConfigurationSpace
-        The parameter space to optimize.
+    Useful for baseline comparison against Bayesian optimizers.
     """
 
     def _register(
         self,
-        *,
-        configs: pd.DataFrame,
-        scores: pd.DataFrame,
-        context: Optional[pd.DataFrame] = None,
-        metadata: Optional[pd.DataFrame] = None,
+        observations: Observations,
     ) -> None:
         """
-        Registers the given configs and scores.
+        Registers the given config/score pairs.
 
+        Notes
+        -----
         Doesn't do anything on the RandomOptimizer except storing configs for logging.
 
         Parameters
         ----------
-        configs : pd.DataFrame
-            Dataframe of configs / parameters. The columns are parameter names and
-            the rows are the configs.
-
-        scores : pd.DataFrame
-            Scores from running the configs. The index is the same as the index of the configs.
-
-        context : None
-            Not Yet Implemented.
-
-        metadata : None
-            Not Yet Implemented.
+        observations : Observations
+            The observations to register.
         """
-        if context is not None:
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
-        if metadata is not None:
-            warn(f"Not Implemented: Ignoring context {list(metadata.columns)}", UserWarning)
+        if observations.contexts is not None:
+            warn(
+                f"Not Implemented: Ignoring context {list(observations.contexts.index)}",
+                UserWarning,
+            )
+        if observations.metadata is not None:
+            warn(
+                f"Not Implemented: Ignoring context {list(observations.metadata.index)}",
+                UserWarning,
+            )
         # should we pop them from self.pending_observations?
 
     def _suggest(
         self,
         *,
-        context: Optional[pd.DataFrame] = None,
-    ) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
+        context: Optional[pd.Series] = None,
+    ) -> Suggestion:
         """
         Suggests a new configuration.
 
@@ -74,26 +65,18 @@ class RandomOptimizer(BaseOptimizer):
 
         Returns
         -------
-        configuration : pd.DataFrame
-            Pandas dataframe with a single row. Column names are the parameter names.
-
-        metadata : None
-            Not implemented.
+        suggestion: Suggestion
+            The suggestion to evaluate.
         """
         if context is not None:
             # not sure how that works here?
-            warn(f"Not Implemented: Ignoring context {list(context.columns)}", UserWarning)
-        return (
-            pd.DataFrame(dict(self.optimizer_parameter_space.sample_configuration()), index=[0]),
-            None,
+            warn(f"Not Implemented: Ignoring context {list(context.index)}", UserWarning)
+        return Suggestion(
+            config=pd.Series(self.optimizer_parameter_space.sample_configuration(), dtype=object),
+            context=context,
+            metadata=None,
         )
 
-    def register_pending(
-        self,
-        *,
-        configs: pd.DataFrame,
-        context: Optional[pd.DataFrame] = None,
-        metadata: Optional[pd.DataFrame] = None,
-    ) -> None:
+    def register_pending(self, pending: Suggestion) -> None:
         raise NotImplementedError()
         # self._pending_observations.append((configs, context))

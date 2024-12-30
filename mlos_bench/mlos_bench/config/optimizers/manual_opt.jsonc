@@ -1,0 +1,16 @@
+// Manual optimizer to run fixed set of tunable values on repeat via the benchmarking framework.
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json",
+
+    "class": "mlos_bench.optimizers.ManualOptimizer",
+
+    "config": {
+        "max_cycles": 30,
+        "tunable_values_cycle": [
+            // Add one or more set of tunable values here as a dictionary:
+            // {"tunable_param_1": "tunable_value_1", ... },
+            // The empty dictionary {} can be used to represent the default tunable values.
+            {}
+        ]
+    }
+}

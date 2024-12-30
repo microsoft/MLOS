@@ -7,6 +7,7 @@
 from typing import Protocol, TypeVar, runtime_checkable
 
 T_co = TypeVar("T_co", covariant=True)
+"""Type variable for the return type of the credential object."""
 
 
 @runtime_checkable
@@ -39,6 +40,6 @@ class SupportsAuth(Protocol[T_co]):
 
         Returns
         -------
-        credential : T
+        credential : T_co
             Cloud-specific credential object.
         """

@@ -119,6 +119,7 @@ def test_load_cli_config_examples_via_launcher(
     # To do this we need to make sure to give it a few extra paths and globals
     # to look for for our examples.
     cli_args = (
+        # pylint: disable=inconsistent-quotes
         f"--config {config_path}"
         f" --config-path {files('mlos_bench.config')} "
         f" --config-path {files('mlos_bench.tests.config')}"

@@ -190,7 +190,8 @@ class AzureVMService(
         # since this is a common way to set the deploymentName and can same some
         # config work for the caller.
         if "vmName" in params and "deploymentName" not in params:
-            params["deploymentName"] = f"{params['vmName']}-deployment"
+            params["deploymentName"] = f"""{params["vmName"]}-deployment"""
+
             _LOG.info(
                 "deploymentName missing from params. Defaulting to '%s'.",
                 params["deploymentName"],
@@ -239,7 +240,7 @@ class AzureVMService(
         """
         _LOG.info("Wait for operation on VM %s", params["vmName"])
         # Try and provide a semi sane default for the deploymentName
-        params.setdefault(f"{params['vmName']}-deployment")
+        params.setdefault(f"""{params["vmName"]}-deployment""")
         return self._wait_while(self._check_operation_status, Status.RUNNING, params)
 
     def wait_remote_exec_operation(self, params: dict) -> Tuple["Status", dict]:
@@ -280,7 +281,7 @@ class AzureVMService(
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is the input `params` plus the
             parameters extracted from the response JSON, or {} if the status is FAILED.
             Status is one of {PENDING, SUCCEEDED, FAILED}
@@ -298,7 +299,7 @@ class AzureVMService(
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
@@ -340,7 +341,7 @@ class AzureVMService(
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
@@ -375,7 +376,7 @@ class AzureVMService(
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
@@ -412,7 +413,7 @@ class AzureVMService(
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
@@ -452,7 +453,7 @@ class AzureVMService(
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """

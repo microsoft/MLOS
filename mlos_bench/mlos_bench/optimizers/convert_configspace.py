@@ -7,7 +7,8 @@ optimizers.
 """
 
 import logging
-from typing import Dict, Hashable, List, Optional, Tuple, Union
+from collections.abc import Hashable
+from typing import Dict, List, Optional, Tuple, Union
 
 from ConfigSpace import (
     Beta,
@@ -73,7 +74,7 @@ def _tunable_to_configspace(
 
     Returns
     -------
-    cs : ConfigurationSpace
+    cs : ConfigSpace.ConfigurationSpace
         A ConfigurationSpace object that corresponds to the Tunable.
     """
     # pylint: disable=too-complex
@@ -206,7 +207,7 @@ def tunable_groups_to_configspace(
 
     Returns
     -------
-    configspace : ConfigurationSpace
+    configspace : ConfigSpace.ConfigurationSpace
         A new ConfigurationSpace instance that corresponds to the input TunableGroups.
     """
     space = ConfigurationSpace(seed=seed)
@@ -234,7 +235,7 @@ def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
 
     Returns
     -------
-    Configuration
+    ConfigSpace.Configuration
         A ConfigSpace Configuration.
     """
     values: Dict[str, TunableValue] = {}

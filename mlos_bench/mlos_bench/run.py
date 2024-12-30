@@ -4,11 +4,16 @@
 # Licensed under the MIT License.
 #
 """
-OS Autotune main optimization loop.
+mlos_bench main optimization loop and benchmark runner CLI.
 
-Note: this script is also available as a CLI tool via pip under the name "mlos_bench".
+Note: this script is also available as a CLI tool via ``pip`` under the name ``mlos_bench``.
 
-See `--help` output for details.
+See the current ``--help`` `output for details <../../../mlos_bench.run.usage.html>`_.
+
+See Also
+--------
+mlos_bench.config : documentation on the configuration system.
+mlos_bench.launcher.Launcher : class is responsible for processing the CLI args.
 """
 
 import logging

@@ -2,15 +2,31 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base interface for saving and restoring the benchmark data."""
+"""
+Base interface for saving and restoring the benchmark data.
+
+See Also
+--------
+mlos_bench.storage.base_storage.Storage.experiments :
+    Retrieves a dictionary of the Experiments' data.
+mlos_bench.storage.base_experiment_data.ExperimentData.results_df :
+    Retrieves a pandas DataFrame of the Experiment's trials' results data.
+mlos_bench.storage.base_experiment_data.ExperimentData.trials :
+    Retrieves a dictionary of the Experiment's trials' data.
+mlos_bench.storage.base_experiment_data.ExperimentData.tunable_configs :
+    Retrieves a dictionary of the Experiment's sampled configs data.
+mlos_bench.storage.base_experiment_data.ExperimentData.tunable_config_trial_groups :
+    Retrieves a dictionary of the Experiment's trials' data, grouped by shared
+    tunable config.
+mlos_bench.storage.base_trial_data.TrialData :
+    Base interface for accessing the stored benchmark trial data.
+"""
 
 import logging
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 from types import TracebackType
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Type, Union
-
-from typing_extensions import Literal
+from typing import Any, Dict, Iterator, Literal, List, Optional, Tuple, Type, Union
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.dict_templater import DictTemplater
@@ -258,7 +274,7 @@ class Storage(metaclass=ABCMeta):
 
             Returns
             -------
-            metrics : List[Tuple[datetime, str, Any]]
+            metrics : List[Tuple[datetime.datetime, str, Any]]
                 Telemetry data.
             """
 
@@ -298,7 +314,7 @@ class Storage(metaclass=ABCMeta):
 
             Parameters
             ----------
-            timestamp : datetime
+            timestamp : datetime.datetime
                 The time in UTC to check for scheduled trials.
             running : bool
                 If True, include the trials that are already running.
@@ -323,7 +339,7 @@ class Storage(metaclass=ABCMeta):
             ----------
             tunables : TunableGroups
                 Tunable parameters to use for the trial.
-            ts_start : Optional[datetime]
+            ts_start : Optional[datetime.datetime]
                 Timestamp of the trial start (can be in the future).
             config : dict
                 Key/value pairs of additional non-tunable parameters of the trial.
@@ -360,7 +376,7 @@ class Storage(metaclass=ABCMeta):
             ----------
             tunables : TunableGroups
                 Tunable parameters to use for the trial.
-            ts_start : Optional[datetime]
+            ts_start : Optional[datetime.datetime]
                 Timestamp of the trial start (can be in the future).
             config : dict
                 Key/value pairs of additional non-tunable parameters of the trial.
@@ -512,7 +528,7 @@ class Storage(metaclass=ABCMeta):
             ----------
             status : Status
                 Status of the experiment run.
-            timestamp: datetime
+            timestamp: datetime.datetime
                 Timestamp of the status and metrics.
             metrics : Optional[Dict[str, Any]]
                 One or several metrics of the experiment run.
@@ -551,9 +567,9 @@ class Storage(metaclass=ABCMeta):
             ----------
             status : Status
                 Current status of the trial.
-            timestamp: datetime
+            timestamp: datetime.datetime
                 Timestamp of the status (but not the metrics).
-            metrics : List[Tuple[datetime, str, Any]]
+            metrics : List[Tuple[datetime.datetime, str, Any]]
                 Telemetry data.
             """
             _LOG.info("Store telemetry: %s :: %s %d records", self, status, len(metrics))

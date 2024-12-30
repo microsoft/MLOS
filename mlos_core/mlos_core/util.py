@@ -4,15 +4,60 @@
 #
 """Internal helper functions for mlos_core package."""
 
-from typing import Union
+from typing import Optional, Union
 
 import pandas as pd
 from ConfigSpace import Configuration, ConfigurationSpace
 
 
-def config_to_dataframe(config: Configuration) -> pd.DataFrame:
+def compare_optional_series(left: Optional[pd.Series], right: Optional[pd.Series]) -> bool:
     """
-    Converts a ConfigSpace config to a DataFrame.
+    Compare Series that may also be None.
+
+    Parameters
+    ----------
+    left : Optional[pandas.Series]
+        The left Series to compare
+    right : Optional[pandas.Series]
+        The right Series to compare
+
+    Returns
+    -------
+    bool
+        Compare the equality of two Optional[pd.Series] objects
+    """
+    if isinstance(left, pd.Series) and isinstance(right, pd.Series):
+        return left.equals(right)
+    return left is None and right is None
+
+
+def compare_optional_dataframe(
+    left: Optional[pd.DataFrame],
+    right: Optional[pd.DataFrame],
+) -> bool:
+    """
+    Compare DataFrames that may also be None.
+
+    Parameters
+    ----------
+    left : Optional[pandas.DataFrame]
+        The left DataFrame to compare
+    right : Optional[pandas.DataFrame]
+        The right DataFrame to compare
+
+    Returns
+    -------
+    bool
+        Compare the equality of two Optional[pd.DataFrame] objects
+    """
+    if isinstance(left, pd.DataFrame) and isinstance(right, pd.DataFrame):
+        return left.equals(right)
+    return left is None and right is None
+
+
+def config_to_series(config: Configuration) -> pd.Series:
+    """
+    Converts a ConfigSpace config to a Series.
 
     Parameters
     ----------
@@ -21,10 +66,11 @@ def config_to_dataframe(config: Configuration) -> pd.DataFrame:
 
     Returns
     -------
-    pd.DataFrame
-        A DataFrame with a single row, containing the config's parameters.
+    pandas.Series
+        A Series, containing the config's parameters.
     """
-    return pd.DataFrame([dict(config)])
+    series: pd.Series = pd.Series(dict(config))  # needed for type hinting
+    return series
 
 
 def drop_nulls(d: dict) -> dict:
@@ -56,14 +102,14 @@ def normalize_config(
 
     Parameters
     ----------
-    config_space : ConfigurationSpace
+    config_space : ConfigSpace.ConfigurationSpace
         The parameter space to use.
     config : dict
         The configuration to convert.
 
     Returns
     -------
-    cs_config: Configuration
+    cs_config: ConfigSpace.Configuration
         A valid ConfigSpace configuration with inactive parameters removed.
     """
     cs_config = Configuration(config_space, values=config, allow_inactive_with_values=True)

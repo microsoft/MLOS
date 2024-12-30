@@ -2,13 +2,16 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Saving and updating benchmark data using SQLAlchemy backend."""
+""":py:class:`.Storage.Trial` interface implementation for saving and restoring
+the benchmark trial data using `SQLAlchemy <https://sqlalchemy.org>`_ backend.
+"""
+
 
 import logging
 from datetime import datetime
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
-from sqlalchemy import Connection, Engine
+from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import IntegrityError
 
 from mlos_bench.environments.status import Status

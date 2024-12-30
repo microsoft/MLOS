@@ -5,9 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Unit Test",
-            "type": "python",
-            "request": "test",
+            // See Also: https://code.visualstudio.com/docs/python/testing#_debug-tests
+            "name": "Python: Debug Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "purpose": ["debug-test"],
+            "console": "integratedTerminal",
             "justMyCode": false,
             "env": {
                 // When debugging tests, only run a single pytest worker instance.

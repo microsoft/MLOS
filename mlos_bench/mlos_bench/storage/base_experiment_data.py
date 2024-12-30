@@ -2,7 +2,32 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base interface for accessing the stored benchmark experiment data."""
+"""
+Base interface for accessing the stored benchmark experiment data.
+
+An experiment is a collection of trials that are run with a given set of scripts and
+target system.
+
+Each trial is associated with a configuration (e.g., set of tunable parameters), but
+multiple trials may use the same config (e.g., for repeat run variability analysis).
+
+See Also
+--------
+mlos_bench.storage :
+    The base storage module for mlos_bench, which includes some basic examples
+    in the documentation.
+ExperimentData.results_df :
+    Retrieves a pandas DataFrame of the Experiment's trials' results data.
+ExperimentData.trials :
+    Retrieves a dictionary of the Experiment's trials' data.
+ExperimentData.tunable_configs :
+    Retrieves a dictionary of the Experiment's sampled configs data.
+ExperimentData.tunable_config_trial_groups :
+    Retrieves a dictionary of the Experiment's trials' data, grouped by shared
+    tunable config.
+mlos_bench.storage.base_trial_data.TrialData :
+    Base interface for accessing the stored benchmark trial data.
+"""
 
 from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple
@@ -28,7 +53,21 @@ class ExperimentData(metaclass=ABCMeta):
     """
 
     RESULT_COLUMN_PREFIX = "result."
+    """
+    Prefix given to columns in :py:attr:`.ExperimentData.results_df` that contain trial
+    results metrics.
+
+    For example, if the result metric is "time", the column name will be "result.time".
+    """
+
     CONFIG_COLUMN_PREFIX = "config."
+    """
+    Prefix given to columns in :py:attr:`.ExperimentData.results_df` that contain trial
+    config parameters.
+
+    For example, if the config parameter name is "param1", the column name will be
+    "config.param1".
+    """
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -62,7 +101,7 @@ class ExperimentData(metaclass=ABCMeta):
 
         Returns
         -------
-        root_env_config : Tuple[str, str, str]
+        (root_env_config, git_repo, git_commit) : Tuple[str, str, str]
             A tuple of (root_env_config, git_repo, git_commit) for the root environment.
         """
         return (self._root_env_config, self._git_repo, self._git_commit)
@@ -78,7 +117,7 @@ class ExperimentData(metaclass=ABCMeta):
 
         Returns
         -------
-        objectives : Dict[str, objective]
+        objectives : Dict[str, Literal["min", "max"]]
             A dictionary of the experiment's objective names (optimization_targets)
             and their directions (e.g., min or max).
         """
@@ -162,4 +201,9 @@ class ExperimentData(metaclass=ABCMeta):
             followed by tunable config parameters (prefixed with "config.") and
             trial results (prefixed with "result."). The latter can be NULLs if the
             trial was not successful.
+
+        See Also
+        --------
+        :py:attr:`.ExperimentData.CONFIG_COLUMN_PREFIX`
+        :py:attr:`.ExperimentData.RESULT_COLUMN_PREFIX`
         """

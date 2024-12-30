@@ -2,7 +2,12 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base scriptable benchmark environment."""
+"""
+Base scriptable benchmark environment.
+
+TODO: Document how variable propogation works in the script environments using
+shell_env_params, required_args, const_args, etc.
+"""
 
 import abc
 import logging
@@ -19,7 +24,10 @@ _LOG = logging.getLogger(__name__)
 
 
 class ScriptEnv(Environment, metaclass=abc.ABCMeta):
-    """Base Environment that runs scripts for setup/run/teardown."""
+    """Base Environment that runs scripts for the different phases (e.g.,
+    :py:meth:`.Environment.setup`, :py:meth:`.Environment.run`,
+    :py:meth:`.Environment.teardown`, etc.)
+    """
 
     _RE_INVALID = re.compile(r"[^a-zA-Z0-9_]")
 
@@ -37,7 +45,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        name: str
+        name : str
             Human-readable name of the environment.
         config : dict
             Free-format dictionary that contains the benchmark environment
@@ -45,11 +53,13 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
             and the `const_args` sections. It must also have at least one of
             the following parameters: {`setup`, `run`, `teardown`}.
             Additional parameters:
-                * `shell_env_params` - an array of parameters to pass to the script
-                  as shell environment variables, and
-                * `shell_env_params_rename` - a dictionary of {to: from} mappings
-                  of the script parameters. If not specified, replace all
-                  non-alphanumeric characters with underscores.
+
+            - `shell_env_params` - an array of parameters to pass to the script
+               as shell environment variables, and
+            - `shell_env_params_rename` - a dictionary of {to: from} mappings
+               of the script parameters. If not specified, replace all
+               non-alphanumeric characters with underscores.
+
             If neither `shell_env_params` nor `shell_env_params_rename` are specified,
             *no* additional shell parameters will be passed to the script.
         global_config : dict
@@ -57,7 +67,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
             to be mixed in into the "const_args" section of the local config.
         tunables : TunableGroups
             A collection of tunable parameters for *all* environments.
-        service: Service
+        service : Service
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """

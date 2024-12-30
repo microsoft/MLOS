@@ -1,0 +1,218 @@
+# Note: this file is based on the linux.yml
+
+name: MLOS MacOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: Manual MLOS MacOS run
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  merge_group:
+    types: [checks_requested]
+  schedule:
+    - cron: "1 0 * * *"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  MacOSCondaBuildTest:
+    name: MacOS Build/Test with Conda
+
+    runs-on: macos-latest
+
+    permissions:
+      contents: read
+
+    # Test multiple versions of python.
+    strategy:
+      fail-fast: false
+      matrix:
+        python_version:
+          # Empty string is the floating most recent version of python
+          # (useful to catch new compatibility issues in nightly builds)
+          - ""
+          # For now we only test the latest version of python on MacOS.
+          #- "3.8"
+          #- "3.9"
+          #- "3.10"
+          #- "3.11"
+          #- "3.12"
+          #- "3.13"
+
+    env:
+      cache_cur_date: unset
+      cache_cur_hour: unset
+      cache_prev_hour: unset
+      CONDA_ENV_NAME: unset
+      # See notes about $CONDA below.
+      CONDA_DIR: unset
+      # When parallel jobs are used, group the output to make debugging easier.
+      MAKEFLAGS: -Oline
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: conda-incubator/setup-miniconda@v3
+
+    - name: Set cache timestamp variables
+      id: set_cache_vars
+      run: |
+        set -x
+        if [ -z "${{ matrix.python_version }}" ]; then
+          CONDA_ENV_NAME=mlos
+        else
+          CONDA_ENV_NAME="mlos-${{ matrix.python_version }}"
+        fi
+        echo "CONDA_ENV_NAME=$CONDA_ENV_NAME" >> $GITHUB_ENV
+        echo "cache_cur_date=$(date -u +%Y-%m-%d)" >> $GITHUB_ENV
+        echo "cache_cur_hour=$(date -u +%H)" >> $GITHUB_ENV
+        echo "cache_prev_hour=$(date -u -d'1 hour ago' +%H)" >> $GITHUB_ENV
+        # $CONDA should be set by the setup-miniconda action.
+        # We set a separate environment variable to allow the dependabot tool
+        # to parse this file since it expects all env vars to be declared above.
+        echo "CONDA_DIR=$CONDA" >> $GITHUB_ENV
+        echo "PIP_CACHE_DIR=$(conda run -n base pip cache dir)" >> $GITHUB_ENV
+
+    #- name: Restore cached conda environment
+    - name: Restore cached conda packages
+      id: restore-conda-cache
+      if: ${{ github.event_name != 'schedule' }}
+      uses: actions/cache@v4
+      with:
+        #path: ${{ env.CONDA_DIR }}/envs/${{ env.CONDA_ENV_NAME }}
+        path: ${{ env.CONDA_DIR }}/pkgs
+        key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
+        restore-keys: |
+          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
+          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}
+
+    - name: Restore cached pip packages
+      id: restore-pip-cache
+      if: ${{ github.event_name != 'schedule' }}
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.PIP_CACHE_DIR }}
+        key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
+        restore-keys: |
+          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
+          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}
+
+    - name: Log some environment variables for debugging
+      run: |
+        set -x
+        printenv
+        echo "cache_cur_date: $cache_cur_date"
+        echo "cache_cur_hour: $cache_cur_hour"
+        echo "cache_prev_hour: $cache_prev_hour"
+        echo "cache-hit: ${{ steps.restore-conda-cache.outputs.cache-hit }}"
+
+    - name: Update and configure conda
+      run: |
+        set -x
+        conda config --set channel_priority strict
+        conda update -v -y -n base -c defaults --all
+
+    # Try and speed up the pipeline by using a faster solver:
+    - name: Install and default to mamba solver
+      run: |
+        set -x
+        conda install -v -y -n base conda-libmamba-solver
+        # Try to set either of the configs for the solver.
+        conda config --set experimental_solver libmamba || true
+        conda config --set solver libmamba || true
+        echo "CONDA_EXPERIMENTAL_SOLVER=libmamba" >> $GITHUB_ENV
+        echo "EXPERIMENTAL_SOLVER=libmamba" >> $GITHUB_ENV
+
+    - name: Create/update mlos conda environment
+      run: make CONDA_ENV_NAME=$CONDA_ENV_NAME CONDA_INFO_LEVEL=-v conda-env
+
+    - name: Log conda info
+      run: |
+        conda info
+        conda config --show
+        conda config --show-sources
+        conda list -n $CONDA_ENV_NAME
+        ls -l $CONDA_DIR/envs/$CONDA_ENV_NAME/lib/python*/site-packages/
+        conda run -n $CONDA_ENV_NAME pip cache dir
+        conda run -n $CONDA_ENV_NAME pip cache info
+
+    - name: Verify expected version of python in conda env
+      if: ${{ matrix.python_version == '' }}
+      timeout-minutes: 2
+      run: |
+        set -x
+        conda run -n mlos python -c \
+          'from sys import version_info as vers; assert (vers.major, vers.minor) == (3, 13), f"Unexpected python version: {vers}"'
+
+    # This is moreso about code cleanliness, which is a dev thing, not a
+    # functionality thing, and the rules for that change between python versions,
+    # so only do this for the default in the devcontainer.
+    #- name: Run lint checks
+    #  run: make CONDA_ENV_NAME=$CONDA_ENV_NAME check
+
+    # Only run the coverage checks on the devcontainer job.
+    - name: Run tests
+      run: make CONDA_ENV_NAME=$CONDA_ENV_NAME SKIP_COVERAGE=true test
+
+    - name: Generate and test binary distribution files
+      run: make CONDA_ENV_NAME=$CONDA_ENV_NAME CONDA_INFO_LEVEL=-v dist dist-test
+
+
+  MacOSDevContainerBuildTest:
+    name: MacOS DevContainer Build/Test
+    runs-on: macos-latest
+
+    # Skip this for now.
+    # Note: no linux platform build support due to lack of nested virtualization on M series chips.
+    # https://github.com/orgs/community/discussions/69211#discussioncomment-7242133
+    if: false
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install docker
+      timeout-minutes: 15
+      run: |
+        # Install the docker desktop app.
+        brew install --cask docker
+        brew install docker-buildx
+        brew install jq
+        # Make sure the cli knows where to find the buildx plugin.
+        mkdir -p ~/.docker
+        (cat ~/.docker/config.json 2>/dev/null || echo "{}") \
+          | jq '.cliPluginsExtraDirs = ((.cliPluginsExtraDirs // []) + ["/opt/homebrew/lib/docker-cli-plugins"])' \
+          | tee ~/.docker/config.json.new
+        mv ~/.docker/config.json.new ~/.docker/config.json
+        cat ~/.docker/config.json
+        # Restart docker service.
+        ps auxwww | grep -i docker || true
+        osascript -e 'quit app "Docker"' || true; open -a Docker; while [ -z "$(docker info 2> /dev/null )" ]; do printf "."; sleep 1; done; echo ""
+
+    - name: Check docker
+      run: |
+        # Check and see if it's running.
+        ps auxwww | grep -i docker || true
+        ls -l /var/run/docker.sock
+        # Dump some debug info.
+        docker --version
+        docker info
+        docker system info || true
+        docker ps
+        DOCKER_BUILDKIT=1 docker builder ls
+
+    - name: Build the devcontainer
+      run: |
+        .devcontainer/build/build-devcontainer.sh
+
+    - name: Basic test of the devcontainer
+      run: |
+        .devcontainer/script/run-devcontainer.sh conda run -n mlos python --version | grep "Python 3.13"

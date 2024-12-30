@@ -7,10 +7,9 @@
 import logging
 import os
 from types import TracebackType
-from typing import Dict, Optional, Sequence, Tuple, Type, Union
+from typing import Dict, Literal, Optional, Sequence, Tuple, Type, Union
 
 import pandas as pd
-from typing_extensions import Literal
 
 from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.base_optimizer import Optimizer
@@ -22,6 +21,7 @@ from mlos_bench.optimizers.convert_configspace import (
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_core.data_classes import Observations
 from mlos_core.optimizers import (
     DEFAULT_OPTIMIZER_TYPE,
     BaseOptimizer,
@@ -66,7 +66,7 @@ class MlosCoreOptimizer(Optimizer):
             if "max_trials" not in self._config:
                 self._config["max_trials"] = self._max_suggestions
             assert int(self._config["max_trials"]) >= self._max_suggestions, (
-                f"max_trials {self._config.get('max_trials')} "
+                f"""max_trials {self._config.get("max_trials")} """
                 f"<= max_suggestions{self._max_suggestions}"
             )
 
@@ -129,7 +129,7 @@ class MlosCoreOptimizer(Optimizer):
 
         # TODO: Specify (in the config) which metrics to pass to the optimizer.
         # Issue: https://github.com/microsoft/MLOS/issues/745
-        self._opt.register(configs=df_configs, scores=df_scores)
+        self._opt.register(observations=Observations(configs=df_configs, scores=df_scores))
 
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
@@ -199,10 +199,10 @@ class MlosCoreOptimizer(Optimizer):
         tunables = super().suggest()
         if self._start_with_defaults:
             _LOG.info("Use default values for the first trial")
-        df_config, _metadata = self._opt.suggest(defaults=self._start_with_defaults)
+        suggestion = self._opt.suggest(defaults=self._start_with_defaults)
         self._start_with_defaults = False
-        _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, df_config)
-        return tunables.assign(configspace_data_to_tunable_values(df_config.loc[0].to_dict()))
+        _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, suggestion.config)
+        return tunables.assign(configspace_data_to_tunable_values(suggestion.config.to_dict()))
 
     def register(
         self,
@@ -222,18 +222,20 @@ class MlosCoreOptimizer(Optimizer):
             # TODO: Specify (in the config) which metrics to pass to the optimizer.
             # Issue: https://github.com/microsoft/MLOS/issues/745
             self._opt.register(
-                configs=df_config,
-                scores=pd.DataFrame([registered_score], dtype=float),
+                observations=Observations(
+                    configs=df_config,
+                    scores=pd.DataFrame([registered_score], dtype=float),
+                )
             )
         return registered_score
 
     def get_best_observation(
         self,
     ) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
-        (df_config, df_score, _df_context) = self._opt.get_best_observations()
-        if len(df_config) == 0:
+        best_observations = self._opt.get_best_observations()
+        if len(best_observations) == 0:
             return (None, None)
-        params = configspace_data_to_tunable_values(df_config.iloc[0].to_dict())
-        scores = self._adjust_signs_df(df_score).iloc[0].to_dict()
+        params = configspace_data_to_tunable_values(best_observations.configs.iloc[0].to_dict())
+        scores = self._adjust_signs_df(best_observations.scores).iloc[0].to_dict()
         _LOG.debug("Best observation: %s score: %s", params, scores)
         return (scores, self._tunables.copy().assign(params))

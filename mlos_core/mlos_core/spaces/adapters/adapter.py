@@ -2,7 +2,18 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Contains the BaseSpaceAdapter abstract class."""
+"""
+Contains the BaseSpaceAdapter abstract class.
+
+As mentioned in :py:mod:`mlos_core.spaces.adapters`, the space adapters provide a
+mechanism for automatic transformation of the original
+:py:class:`ConfigSpace.ConfigurationSpace` provided to the Optimizer into a new
+space for the Optimizer to search over.
+
+It's main APIs are the :py:meth:`~.BaseSpaceAdapter.transform` and
+:py:meth:`~.BaseSpaceAdapter.inverse_transform` methods, which are used to translate
+configurations from one space to another.
+"""
 
 from abc import ABCMeta, abstractmethod
 
@@ -44,46 +55,48 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
-    def transform(self, configuration: pd.DataFrame) -> pd.DataFrame:
+    def transform(self, configuration: pd.Series) -> pd.Series:
         """
         Translates a configuration, which belongs to the target parameter space, to the
-        original parameter space. This method is called by the `suggest` method of the
-        `BaseOptimizer` class.
+        original parameter space. This method is called by the
+        :py:meth:`~mlos_core.optimizers.optimizer.BaseOptimizer.suggest` method of the
+        :py:class:`~mlos_core.optimizers.optimizer.BaseOptimizer` class.
 
         Parameters
         ----------
-        configuration : pd.DataFrame
-            Pandas dataframe with a single row. Column names are the parameter names
+        configuration : pandas.Series
+            Pandas series. Column names are the parameter names
             of the target parameter space.
 
         Returns
         -------
-        configuration : pd.DataFrame
-            Pandas dataframe with a single row, containing the translated configuration.
+        configuration : pandas.Series
+            Pandas series, containing the translated configuration.
             Column names are the parameter names of the original parameter space.
         """
         pass  # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
-    def inverse_transform(self, configurations: pd.DataFrame) -> pd.DataFrame:
+    def inverse_transform(self, configuration: pd.Series) -> pd.Series:
         """
         Translates a configuration, which belongs to the original parameter space, to
         the target parameter space. This method is called by the `register` method of
-        the `BaseOptimizer` class, and performs the inverse operation of
-        `BaseSpaceAdapter.transform` method.
+        the :py:class:`~mlos_core.optimizers.optimizer.BaseOptimizer` class, and
+        performs the inverse operation of :py:meth:`~.BaseSpaceAdapter.transform`
+        method.
 
         Parameters
         ----------
-        configurations : pd.DataFrame
-            Dataframe of configurations / parameters, which belong to the original parameter space.
-            The columns are the parameter names the original parameter space and the
+        configuration : pandas.Series
+            A Series of configuration parameters, which belong to the original parameter space.
+            The indices are the parameter names the original parameter space and the
             rows are the configurations.
 
         Returns
         -------
-        configurations : pd.DataFrame
-            Dataframe of the translated configurations / parameters.
-            The columns are the parameter names of the target parameter space and
+        configuration : pandas.Series
+            Series of the translated configurations / parameters.
+            The indices are the parameter names of the target parameter space and
             the rows are the configurations.
         """
         pass  # pylint: disable=unnecessary-pass # pragma: no cover

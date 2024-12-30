@@ -25,3 +25,7 @@ Since the tunable parameter search space is often extremely large, `mlos-core` a
     - Support for various optimizer algorithms (default Bayesian optimizer, Flaml, SMAC, and random for baseline comparison), that handle multiple types of constraints.
     This includes cost-aware optimization, that considers experiment costs given current tunable parameters.
     - Integrated with `mlos-bench`, proposed configurations are logged and evaluated.
+
+## See Also
+
+- <https://microsoft.github.io/MLOS/autoapi/mlos_core/> for more documentation details

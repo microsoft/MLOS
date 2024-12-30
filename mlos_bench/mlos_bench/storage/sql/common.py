@@ -6,7 +6,8 @@
 from typing import Any, Dict, Optional
 
 import pandas
-from sqlalchemy import Connection, Engine, Integer, Table, and_, func, select
+from sqlalchemy import Integer, Table, and_, func, select
+from sqlalchemy.engine import Connection, Engine
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_experiment_data import ExperimentData
@@ -52,11 +53,14 @@ def get_trials(
     tunable_config_id: Optional[int] = None,
 ) -> Dict[int, TrialData]:
     """
-    Gets TrialData for the given experiment_data and optionally additionally restricted
-    by tunable_config_id.
+    Gets :py:class:`~.TrialData` for the given ``experiment_id`` and optionally
+    additionally restricted by ``tunable_config_id``.
 
-    Used by both TunableConfigTrialGroupSqlData and ExperimentSqlData.
-    """
+    See Also
+    --------
+    :py:class:`~mlos_bench.storage.sql.tunable_config_trial_group_data.TunableConfigTrialGroupSqlData`
+    :py:class:`~mlos_bench.storage.sql.experiment_data.ExperimentSqlData`
+    """  # pylint: disable=line-too-long # noqa: E501
     # pylint: disable=import-outside-toplevel,cyclic-import
     from mlos_bench.storage.sql.trial_data import TrialSqlData
 
@@ -108,11 +112,19 @@ def get_results_df(
     tunable_config_id: Optional[int] = None,
 ) -> pandas.DataFrame:
     """
-    Gets TrialData for the given experiment_data and optionally additionally restricted
-    by tunable_config_id.
+    Gets TrialData for the given experiment_id and optionally additionally restricted by
+    tunable_config_id.
 
-    Used by both TunableConfigTrialGroupSqlData and ExperimentSqlData.
-    """
+    The returned DataFrame includes each trial's metadata, config, and results in
+    wide format, with config parameters prefixed with
+    :py:attr:`.ExperimentData.CONFIG_COLUMN_PREFIX` and results prefixed with
+    :py:attr:`.ExperimentData.RESULT_COLUMN_PREFIX`.
+
+    See Also
+    --------
+    :py:class:`~mlos_bench.storage.sql.tunable_config_trial_group_data.TunableConfigTrialGroupSqlData`
+    :py:class:`~mlos_bench.storage.sql.experiment_data.ExperimentSqlData`
+    """  # pylint: disable=line-too-long # noqa: E501
     # pylint: disable=too-many-locals
     with engine.connect() as conn:
         # Compose a subquery to fetch the tunable_config_trial_group_id for each tunable config.
@@ -210,7 +222,6 @@ def get_results_df(
             .join(
                 schema.config_param,
                 schema.config_param.c.config_id == schema.trial.c.config_id,
-                isouter=True,
             )
             .order_by(
                 schema.trial.c.trial_id,
@@ -238,7 +249,7 @@ def get_results_df(
             columns="param",
             values="value",
         )
-        configs_df = configs_df.apply(  # type: ignore[assignment]  # (fp)
+        configs_df = configs_df.apply(
             pandas.to_numeric,
             errors="coerce",
         ).fillna(configs_df)
@@ -284,7 +295,7 @@ def get_results_df(
             columns="metric",
             values="value",
         )
-        results_df = results_df.apply(  # type: ignore[assignment]  # (fp)
+        results_df = results_df.apply(
             pandas.to_numeric,
             errors="coerce",
         ).fillna(results_df)

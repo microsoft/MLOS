@@ -103,3 +103,42 @@ def test_load_config(config_persistence_service: ConfigPersistenceService) -> No
     assert tunables_data is not None
     assert isinstance(tunables_data, dict)
     assert len(tunables_data) >= 1
+
+
+def test_load_bad_config_path(config_persistence_service: ConfigPersistenceService) -> None:
+    """Check if we can successfully load a config file located relative to
+    `config_path`.
+    """
+    with pytest.raises(FileNotFoundError) as exc_info:
+        _ = config_persistence_service.load_config(
+            "DNE/tunable-values/tunable-values-example.jsonc-DNE-}]",
+            ConfigSchema.TUNABLE_VALUES,
+        )
+    assert "No such file or directory" in str(exc_info.value)
+
+
+def test_load_config_string(config_persistence_service: ConfigPersistenceService) -> None:
+    """Check if we can load a valid json string as well."""
+    json_str = """
+    {
+        "tunable_param_1": "value_1",
+        "tunable_param_2": "value_2",
+    }
+    """
+    tunables_data = config_persistence_service.load_config(json_str, ConfigSchema.TUNABLE_VALUES)
+    assert tunables_data is not None
+    assert isinstance(tunables_data, dict)
+    assert len(tunables_data) >= 1
+
+
+def test_load_bad_config_string(config_persistence_service: ConfigPersistenceService) -> None:
+    """Check how we handle loading a bad config string."""
+    json_str = """
+    {
+        "tunable_param_1": "value_1",
+        "tunable_param_2": "value_2",
+    //} // Missing closing brace
+    """
+    with pytest.raises(ValueError) as exc_info:
+        _ = config_persistence_service.load_config(json_str, ConfigSchema.TUNABLE_VALUES)
+    assert "Failed to parse config from JSON string" in str(exc_info.value)

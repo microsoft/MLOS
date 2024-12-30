@@ -2,7 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Saving and restoring the benchmark data using SQLAlchemy."""
+""":py:class:`.Storage.Experiment` interface implementation for saving and restoring
+the benchmark experiment data using `SQLAlchemy <https://sqlalchemy.org>`_ backend.
+"""
 
 import hashlib
 import logging
@@ -10,7 +12,8 @@ from datetime import datetime
 from typing import Any, Dict, Iterator, List, Literal, Optional, Tuple
 
 from pytz import UTC
-from sqlalchemy import Connection, CursorResult, Engine, Table, column, func, select
+from sqlalchemy import Connection, CursorResult, Table, column, func, select
+from sqlalchemy.engine import Engine
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_storage import Storage
