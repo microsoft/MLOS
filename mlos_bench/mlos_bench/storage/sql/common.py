@@ -6,8 +6,9 @@
 from typing import Any, Dict, Optional
 
 import pandas
-from sqlalchemy import Integer, Table, and_, func, select
+from sqlalchemy import Integer, and_, func, select
 from sqlalchemy.engine import Connection, Engine
+from sqlalchemy.schema import Table
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_experiment_data import ExperimentData
@@ -26,9 +27,9 @@ def save_params(
 
     Parameters
     ----------
-    conn : Connection
+    conn : sqlalchemy.engine.Connection
         A connection to the backend database.
-    table : Table
+    table : sqlalchemy.schema.Table
         The table to update.
     params : Dict[str, Any]
         The new (param_id, param_value) tuples to upsert to the Table.
