@@ -69,11 +69,12 @@ FORMAT_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
 FORMAT_COMMON_PREREQS += .pre-commit-config.yaml
 FORMAT_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 
-FORMATTERS := licenseheaders isort black docformatter
+FORMATTERS := licenseheaders isort black docformatter trailing-whitespace end-of-file-fixer
 # TODO: pyupgrade
+# TODO: pretty-format-json
 
 build/format.${CONDA_ENV_NAME}.build-stamp: $(FORMAT_COMMON_PREREQS)
-	conda run -n ${CONDA_ENV_NAME} pre-commit run --all-files $(FORMATTERS)
+	conda run -n ${CONDA_ENV_NAME} pre-commit run -v --all-files $(FORMATTERS)
 	touch $@
 
 .PHONY: check
@@ -88,7 +89,7 @@ build/check.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/check.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
 build/check.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
 build/check.${CONDA_ENV_NAME}.build-stamp: $(CHECK_COMMON_PREREQS)
-	SKIP="$(FORMATTERS)" conda run -n ${CONDA_ENV_NAME} pre-commit run --all-files
+	SKIP=`echo '$(FORMATTERS)' | tr ' ' ','` conda run -n ${CONDA_ENV_NAME} pre-commit run -v --all-files
 	touch $@
 
 .PHONY: cspell
