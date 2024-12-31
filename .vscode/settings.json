@@ -139,6 +139,7 @@
     ],
     "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source/",
     "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/",
+    "pre-commit-helper.runOnSave": "fixes",
     "pylint.severity": {
         // display refactor warnings as information messages
         "refactor": "Information"
@@ -149,6 +150,5 @@
         "--log-level=DEBUG",
         "."
     ],
-    "python.testing.unittestEnabled": false,
-    "pre-commit-helper.runOnSave": "fixes"
+    "python.testing.unittestEnabled": false
 }
