@@ -139,6 +139,10 @@
     ],
     "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source/",
     "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/",
+    "pre-commit-helper.excludedHookIds": [
+        "mypy",
+        "pylint"
+    ],
     "pre-commit-helper.runOnSave": "fixes",
     "pylint.severity": {
         // display refactor warnings as information messages
