@@ -70,6 +70,7 @@ ifneq (,$(filter format,$(MAKECMDGOALS)))
 endif
 
 build/format.${CONDA_ENV_NAME}.build-stamp: build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
+build/format.${CONDA_ENV_NAME}.build-stamp: build/pyupgrade.${CONDA_ENV_NAME}.build-stamp
 build/format.${CONDA_ENV_NAME}.build-stamp: build/isort.${CONDA_ENV_NAME}.build-stamp
 build/format.${CONDA_ENV_NAME}.build-stamp: build/black.${CONDA_ENV_NAME}.build-stamp
 build/format.${CONDA_ENV_NAME}.build-stamp: build/docformatter.${CONDA_ENV_NAME}.build-stamp
@@ -96,6 +97,35 @@ build/licenseheaders.${CONDA_ENV_NAME}.build-stamp:
 		-x mlos_bench/setup.py mlos_core/setup.py mlos_viz/setup.py
 	touch $@
 
+.PHONY: pyupgrade
+pyupgrade: build/pyupgrade.${CONDA_ENV_NAME}.build-stamp
+
+ifneq (,$(filter pyupgrade,$(MAKECMDGOALS)))
+    FORMAT_PREREQS += build/pyupgrade.${CONDA_ENV_NAME}.build-stamp
+endif
+
+build/pyupgrade.${CONDA_ENV_NAME}.build-stamp: build/pyupgrade.mlos_core.${CONDA_ENV_NAME}.build-stamp
+build/pyupgrade.${CONDA_ENV_NAME}.build-stamp: build/pyupgrade.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+build/pyupgrade.${CONDA_ENV_NAME}.build-stamp: build/pyupgrade.mlos_viz.${CONDA_ENV_NAME}.build-stamp
+build/pyupgrade.${CONDA_ENV_NAME}.build-stamp:
+	touch $@
+
+PYUPGRADE_COMMON_PREREQS :=
+ifneq (,$(filter format licenseheaders,$(MAKECMDGOALS)))
+PYUPGRADE_COMMON_PREREQS += build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
+endif
+PYUPGRADE_COMMON_PREREQS += build/conda-env.${CONDA_ENV_NAME}.build-stamp
+PYUPGRADE_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
+
+build/pyupgrade.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
+build/pyupgrade.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
+build/pyupgrade.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
+
+build/pyupgrade.%.${CONDA_ENV_NAME}.build-stamp: $(PYUPGRADE_COMMON_PREREQS)
+	# Reformat python file imports with pyupgrade.
+	conda run -n ${CONDA_ENV_NAME} pyupgrade --py39-plus --exit-zero-even-if-changed $(filter %.py,$+)
+	touch $@
+
 .PHONY: isort
 isort: build/isort.${CONDA_ENV_NAME}.build-stamp
 
@@ -117,6 +147,9 @@ build/isort.${CONDA_ENV_NAME}.build-stamp:
 ISORT_COMMON_PREREQS :=
 ifneq (,$(filter format licenseheaders,$(MAKECMDGOALS)))
 ISORT_COMMON_PREREQS += build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
+endif
+ifneq (,$(filter format pyupgrade,$(MAKECMDGOALS)))
+ISORT_COMMON_PREREQS += build/pyupgrade.${CONDA_ENV_NAME}.build-stamp
 endif
 ISORT_COMMON_PREREQS += build/conda-env.${CONDA_ENV_NAME}.build-stamp
 ISORT_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
@@ -148,6 +181,9 @@ build/black.${CONDA_ENV_NAME}.build-stamp:
 BLACK_COMMON_PREREQS :=
 ifneq (,$(filter format licenseheaders,$(MAKECMDGOALS)))
 BLACK_COMMON_PREREQS += build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
+endif
+ifneq (,$(filter format pyupgrade,$(MAKECMDGOALS)))
+BLACK_COMMON_PREREQS += build/pyupgrade.${CONDA_ENV_NAME}.build-stamp
 endif
 ifneq (,$(filter format isort,$(MAKECMDGOALS)))
 BLACK_COMMON_PREREQS += build/isort.${CONDA_ENV_NAME}.build-stamp
@@ -182,6 +218,9 @@ build/docformatter.${CONDA_ENV_NAME}.build-stamp:
 DOCFORMATTER_COMMON_PREREQS :=
 ifneq (,$(filter format licenseheaders,$(MAKECMDGOALS)))
 DOCFORMATTER_COMMON_PREREQS += build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
+endif
+ifneq (,$(filter format pyupgrade,$(MAKECMDGOALS)))
+DOCFORMATTER_COMMON_PREREQS += build/pyupgrade.${CONDA_ENV_NAME}.build-stamp
 endif
 ifneq (,$(filter format isort,$(MAKECMDGOALS)))
 DOCFORMATTER_COMMON_PREREQS += build/isort.${CONDA_ENV_NAME}.build-stamp

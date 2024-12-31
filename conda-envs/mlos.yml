@@ -8,6 +8,7 @@ dependencies:
   - pip
   - pylint
   - black
+  - pyupgrade
   - pycodestyle
   - pydocstyle
   - flake8
