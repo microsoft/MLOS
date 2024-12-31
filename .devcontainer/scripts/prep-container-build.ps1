@@ -25,6 +25,7 @@ if (Test-Path .devcontainer/tmp) {
 }
 New-Item -Type Directory .devcontainer/tmp
 
+Copy-Item .pre-commit-config.yaml .devcontainer/tmp/.pre-commit-config.yaml
 Copy-Item conda-envs/mlos.yml .devcontainer/tmp/mlos.yml
 foreach ($pkg in @('mlos_core', 'mlos_bench', 'mlos_viz')) {
     New-Item -Type Directory ".devcontainer/tmp/$pkg"

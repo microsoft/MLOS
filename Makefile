@@ -55,10 +55,6 @@ clean-conda-env:
 	rm -f build/conda-env.${CONDA_ENV_NAME}.build-stamp
 
 
-# Since these targets potentially change the files we need to run them in sequence.
-# In future versions of make we can do that by marking each as a .NOTPARALLEL psuedo target.
-# But with make 4.3 that changes the entire Makefile to be serial.
-
 # Here we make dynamic prereqs to apply to other targets that need to run in sequence.
 FORMAT_PREREQS :=
 
@@ -69,279 +65,30 @@ ifneq (,$(filter format,$(MAKECMDGOALS)))
     FORMAT_PREREQS += build/format.${CONDA_ENV_NAME}.build-stamp
 endif
 
-build/format.${CONDA_ENV_NAME}.build-stamp: build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
-# TODO: Disabled for now.  Will enable and format in a future PR.
-#build/format.${CONDA_ENV_NAME}.build-stamp: build/pyupgrade.${CONDA_ENV_NAME}.build-stamp
-build/format.${CONDA_ENV_NAME}.build-stamp: build/isort.${CONDA_ENV_NAME}.build-stamp
-build/format.${CONDA_ENV_NAME}.build-stamp: build/black.${CONDA_ENV_NAME}.build-stamp
-build/format.${CONDA_ENV_NAME}.build-stamp: build/docformatter.${CONDA_ENV_NAME}.build-stamp
-build/format.${CONDA_ENV_NAME}.build-stamp:
+FORMAT_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
+FORMAT_COMMON_PREREQS += .pre-commit-config.yaml
+FORMAT_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
+
+FORMATTERS := licenseheaders isort black docformatter
+# TODO: pyupgrade
+
+build/format.${CONDA_ENV_NAME}.build-stamp: $(FORMAT_COMMON_PREREQS)
+	conda run -n ${CONDA_ENV_NAME} pre-commit run --all-files $(FORMATTERS)
 	touch $@
-
-.PHONY: licenseheaders
-licenseheaders: build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
-
-ifneq (,$(filter licenseheaders,$(MAKECMDGOALS)))
-    FORMAT_PREREQS += build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
-endif
-
-build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
-build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: $(PYTHON_FILES)
-build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: $(SCRIPT_FILES)
-build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: $(SQL_FILES) doc/mit-license.tmpl
-build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: doc/mit-license.tmpl
-build/licenseheaders.${CONDA_ENV_NAME}.build-stamp:
-	# Note: to avoid makefile dependency loops, we don't touch the setup.py
-	# files as that would force the conda-env to be rebuilt.
-	conda run -n ${CONDA_ENV_NAME} licenseheaders -t doc/mit-license.tmpl \
-		-E .py .sh .ps1 .sql .cmd \
-		-x mlos_bench/setup.py mlos_core/setup.py mlos_viz/setup.py
-	touch $@
-
-.PHONY: pyupgrade
-pyupgrade: build/pyupgrade.${CONDA_ENV_NAME}.build-stamp
-
-ifneq (,$(filter pyupgrade,$(MAKECMDGOALS)))
-    FORMAT_PREREQS += build/pyupgrade.${CONDA_ENV_NAME}.build-stamp
-endif
-
-build/pyupgrade.${CONDA_ENV_NAME}.build-stamp: build/pyupgrade.mlos_core.${CONDA_ENV_NAME}.build-stamp
-build/pyupgrade.${CONDA_ENV_NAME}.build-stamp: build/pyupgrade.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-build/pyupgrade.${CONDA_ENV_NAME}.build-stamp: build/pyupgrade.mlos_viz.${CONDA_ENV_NAME}.build-stamp
-build/pyupgrade.${CONDA_ENV_NAME}.build-stamp:
-	touch $@
-
-PYUPGRADE_COMMON_PREREQS :=
-ifneq (,$(filter format licenseheaders,$(MAKECMDGOALS)))
-PYUPGRADE_COMMON_PREREQS += build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
-endif
-PYUPGRADE_COMMON_PREREQS += build/conda-env.${CONDA_ENV_NAME}.build-stamp
-PYUPGRADE_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
-
-build/pyupgrade.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
-build/pyupgrade.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
-build/pyupgrade.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
-
-build/pyupgrade.%.${CONDA_ENV_NAME}.build-stamp: $(PYUPGRADE_COMMON_PREREQS)
-	# Reformat python file imports with pyupgrade.
-	conda run -n ${CONDA_ENV_NAME} pyupgrade --py39-plus --exit-zero-even-if-changed $(filter %.py,$+)
-	touch $@
-
-.PHONY: isort
-isort: build/isort.${CONDA_ENV_NAME}.build-stamp
-
-ifneq (,$(filter isort,$(MAKECMDGOALS)))
-    FORMAT_PREREQS += build/isort.${CONDA_ENV_NAME}.build-stamp
-endif
-
-build/isort.${CONDA_ENV_NAME}.build-stamp: build/isort.mlos_core.${CONDA_ENV_NAME}.build-stamp
-build/isort.${CONDA_ENV_NAME}.build-stamp: build/isort.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-build/isort.${CONDA_ENV_NAME}.build-stamp: build/isort.mlos_viz.${CONDA_ENV_NAME}.build-stamp
-build/isort.${CONDA_ENV_NAME}.build-stamp:
-	touch $@
-
-# NOTE: when using pattern rules (involving %) we can only add one line of
-# prerequisities, so we use this pattern to compose the list as variables.
-
-# black, licenseheaders, isort, and docformatter all alter files, so only run
-# one at a time, by adding prerequisites, but only as necessary.
-ISORT_COMMON_PREREQS :=
-ifneq (,$(filter format licenseheaders,$(MAKECMDGOALS)))
-ISORT_COMMON_PREREQS += build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
-endif
-ifneq (,$(filter format pyupgrade,$(MAKECMDGOALS)))
-ISORT_COMMON_PREREQS += build/pyupgrade.${CONDA_ENV_NAME}.build-stamp
-endif
-ISORT_COMMON_PREREQS += build/conda-env.${CONDA_ENV_NAME}.build-stamp
-ISORT_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
-
-build/isort.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
-build/isort.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
-build/isort.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
-
-build/isort.%.${CONDA_ENV_NAME}.build-stamp: $(ISORT_COMMON_PREREQS)
-	# Reformat python file imports with isort.
-	conda run -n ${CONDA_ENV_NAME} isort --verbose --only-modified --atomic -j0 $(filter %.py,$+)
-	touch $@
-
-.PHONY: black
-black: build/black.${CONDA_ENV_NAME}.build-stamp
-
-ifneq (,$(filter black,$(MAKECMDGOALS)))
-    FORMAT_PREREQS += build/black.${CONDA_ENV_NAME}.build-stamp
-endif
-
-build/black.${CONDA_ENV_NAME}.build-stamp: build/black.mlos_core.${CONDA_ENV_NAME}.build-stamp
-build/black.${CONDA_ENV_NAME}.build-stamp: build/black.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-build/black.${CONDA_ENV_NAME}.build-stamp: build/black.mlos_viz.${CONDA_ENV_NAME}.build-stamp
-build/black.${CONDA_ENV_NAME}.build-stamp:
-	touch $@
-
-# black, licenseheaders, isort, and docformatter all alter files, so only run
-# one at a time, by adding prerequisites, but only as necessary.
-BLACK_COMMON_PREREQS :=
-ifneq (,$(filter format licenseheaders,$(MAKECMDGOALS)))
-BLACK_COMMON_PREREQS += build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
-endif
-ifneq (,$(filter format pyupgrade,$(MAKECMDGOALS)))
-BLACK_COMMON_PREREQS += build/pyupgrade.${CONDA_ENV_NAME}.build-stamp
-endif
-ifneq (,$(filter format isort,$(MAKECMDGOALS)))
-BLACK_COMMON_PREREQS += build/isort.${CONDA_ENV_NAME}.build-stamp
-endif
-BLACK_COMMON_PREREQS += build/conda-env.${CONDA_ENV_NAME}.build-stamp
-BLACK_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
-
-build/black.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
-build/black.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
-build/black.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
-
-build/black.%.${CONDA_ENV_NAME}.build-stamp: $(BLACK_COMMON_PREREQS)
-	# Reformat python files with black.
-	conda run -n ${CONDA_ENV_NAME} black $(filter %.py,$+)
-	touch $@
-
-.PHONY: docformatter
-docformatter: build/docformatter.${CONDA_ENV_NAME}.build-stamp
-
-ifneq (,$(filter docformatter,$(MAKECMDGOALS)))
-    FORMAT_PREREQS += build/docformatter.${CONDA_ENV_NAME}.build-stamp
-endif
-
-build/docformatter.${CONDA_ENV_NAME}.build-stamp: build/docformatter.mlos_core.${CONDA_ENV_NAME}.build-stamp
-build/docformatter.${CONDA_ENV_NAME}.build-stamp: build/docformatter.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-build/docformatter.${CONDA_ENV_NAME}.build-stamp: build/docformatter.mlos_viz.${CONDA_ENV_NAME}.build-stamp
-build/docformatter.${CONDA_ENV_NAME}.build-stamp:
-	touch $@
-
-# black, licenseheaders, isort, and docformatter all alter files, so only run
-# one at a time, by adding prerequisites, but only as necessary.
-DOCFORMATTER_COMMON_PREREQS :=
-ifneq (,$(filter format licenseheaders,$(MAKECMDGOALS)))
-DOCFORMATTER_COMMON_PREREQS += build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
-endif
-ifneq (,$(filter format pyupgrade,$(MAKECMDGOALS)))
-DOCFORMATTER_COMMON_PREREQS += build/pyupgrade.${CONDA_ENV_NAME}.build-stamp
-endif
-ifneq (,$(filter format isort,$(MAKECMDGOALS)))
-DOCFORMATTER_COMMON_PREREQS += build/isort.${CONDA_ENV_NAME}.build-stamp
-endif
-ifneq (,$(filter format black,$(MAKECMDGOALS)))
-DOCFORMATTER_COMMON_PREREQS += build/black.${CONDA_ENV_NAME}.build-stamp
-endif
-DOCFORMATTER_COMMON_PREREQS += build/conda-env.${CONDA_ENV_NAME}.build-stamp
-DOCFORMATTER_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
-
-build/docformatter.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
-build/docformatter.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
-build/docformatter.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
-
-# docformatter returns non-zero when it changes anything so instead we ignore that
-# return code and just have it recheck itself immediately
-build/docformatter.%.${CONDA_ENV_NAME}.build-stamp: $(DOCFORMATTER_COMMON_PREREQS)
-	# Reformat python file docstrings with docformatter.
-	conda run -n ${CONDA_ENV_NAME} docformatter --in-place $(filter %.py,$+) || true
-	conda run -n ${CONDA_ENV_NAME} docformatter --check --diff $(filter %.py,$+)
-	touch $@
-
 
 .PHONY: check
-check: isort-check black-check docformatter-check pycodestyle pydocstyle pylint mypy # cspell markdown-link-check
+check: build/check.${CONDA_ENV_NAME}.build-stamp
 
-.PHONY: black-check
-black-check: build/black-check.mlos_core.${CONDA_ENV_NAME}.build-stamp
-black-check: build/black-check.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-black-check: build/black-check.mlos_viz.${CONDA_ENV_NAME}.build-stamp
+CHECK_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
+CHECK_COMMON_PREREQS += .pre-commit-config.yaml
+CHECK_COMMON_PREREQS += $(FORMAT_PREREQS)
+CHECK_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 
-# Make sure black format rules run before black-check rules.
-build/black-check.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
-build/black-check.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
-build/black-check.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
-
-BLACK_CHECK_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
-BLACK_CHECK_COMMON_PREREQS += $(FORMAT_PREREQS)
-BLACK_CHECK_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
-
-build/black-check.%.${CONDA_ENV_NAME}.build-stamp: $(BLACK_CHECK_COMMON_PREREQS)
-	# Check for import sort order.
-	# Note: if this fails use "make format" or "make black" to fix it.
-	conda run -n ${CONDA_ENV_NAME} black --verbose --check --diff $(filter %.py,$+)
-	touch $@
-
-.PHONY: docformatter-check
-docformatter-check: build/docformatter-check.mlos_core.${CONDA_ENV_NAME}.build-stamp
-docformatter-check: build/docformatter-check.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-docformatter-check: build/docformatter-check.mlos_viz.${CONDA_ENV_NAME}.build-stamp
-
-# Make sure docformatter format rules run before docformatter-check rules.
-build/docformatter-check.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
-build/docformatter-check.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
-build/docformatter-check.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
-
-BLACK_CHECK_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
-BLACK_CHECK_COMMON_PREREQS += $(FORMAT_PREREQS)
-BLACK_CHECK_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
-
-build/docformatter-check.%.${CONDA_ENV_NAME}.build-stamp: $(BLACK_CHECK_COMMON_PREREQS)
-	# Check for import sort order.
-	# Note: if this fails use "make format" or "make docformatter" to fix it.
-	conda run -n ${CONDA_ENV_NAME} docformatter --check --diff $(filter %.py,$+)
-	touch $@
-
-.PHONY: isort-check
-isort-check: build/isort-check.mlos_core.${CONDA_ENV_NAME}.build-stamp
-isort-check: build/isort-check.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-isort-check: build/isort-check.mlos_viz.${CONDA_ENV_NAME}.build-stamp
-
-# Make sure isort format rules run before isort-check rules.
-build/isort-check.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
-build/isort-check.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
-build/isort-check.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
-
-ISORT_CHECK_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
-ISORT_CHECK_COMMON_PREREQS += $(FORMAT_PREREQS)
-ISORT_CHECK_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
-
-build/isort-check.%.${CONDA_ENV_NAME}.build-stamp: $(ISORT_CHECK_COMMON_PREREQS)
-	# Note: if this fails use "make format" or "make isort" to fix it.
-	conda run -n ${CONDA_ENV_NAME} isort --only-modified --check --diff -j0 $(filter %.py,$+)
-	touch $@
-
-.PHONY: pycodestyle
-pycodestyle: build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp
-pycodestyle: build/pycodestyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-pycodestyle: build/pycodestyle.mlos_viz.${CONDA_ENV_NAME}.build-stamp
-
-build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
-build/pycodestyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
-build/pycodestyle.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
-
-PYCODESTYLE_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
-PYCODESTYLE_COMMON_PREREQS += $(FORMAT_PREREQS)
-PYCODESTYLE_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
-
-build/pycodestyle.%.${CONDA_ENV_NAME}.build-stamp: $(PYCODESTYLE_COMMON_PREREQS)
-	# Check for decent pep8 code style with pycodestyle.
-	# Note: if this fails, try using 'make format' to fix it.
-	conda run -n ${CONDA_ENV_NAME} pycodestyle $(filter %.py,$+)
-	touch $@
-
-.PHONY: pydocstyle
-pydocstyle: build/pydocstyle.mlos_core.${CONDA_ENV_NAME}.build-stamp
-pydocstyle: build/pydocstyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-pydocstyle: build/pydocstyle.mlos_viz.${CONDA_ENV_NAME}.build-stamp
-
-build/pydocstyle.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
-build/pydocstyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
-build/pydocstyle.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
-
-PYDOCSTYLE_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
-PYDOCSTYLE_COMMON_PREREQS += $(FORMAT_PREREQS)
-PYDOCSTYLE_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
-
-build/pydocstyle.%.${CONDA_ENV_NAME}.build-stamp: $(PYDOCSTYLE_COMMON_PREREQS)
-	# Check for decent pep8 doc style with pydocstyle.
-	conda run -n ${CONDA_ENV_NAME} pydocstyle $(filter %.py,$+)
+build/check.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
+build/check.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
+build/check.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
+build/check.${CONDA_ENV_NAME}.build-stamp: $(CHECK_COMMON_PREREQS)
+	SKIP="$(FORMATTERS)" conda run -n ${CONDA_ENV_NAME} pre-commit run --all-files
 	touch $@
 
 .PHONY: cspell
@@ -372,63 +119,6 @@ build/markdown-link-check-container.build-stamp: $(FORMAT_PREREQS)
 	$(MAKE) -C .devcontainer/build markdown-link-check
 	touch $@
 
-.PHONY: pylint
-pylint: build/pylint.mlos_core.${CONDA_ENV_NAME}.build-stamp
-pylint: build/pylint.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-pylint: build/pylint.mlos_viz.${CONDA_ENV_NAME}.build-stamp
-
-
-build/pylint.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
-build/pylint.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
-build/pylint.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
-
-PYLINT_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
-PYLINT_COMMON_PREREQS += $(FORMAT_PREREQS)
-PYLINT_COMMON_PREREQS += pyproject.toml
-
-build/pylint.%.${CONDA_ENV_NAME}.build-stamp: $(PYLINT_COMMON_PREREQS)
-	conda run -n ${CONDA_ENV_NAME} pylint -j0 $(filter %.py,$+)
-	touch $@
-
-.PHONY: flake8
-flake8: build/flake8.mlos_core.${CONDA_ENV_NAME}.build-stamp
-flake8: build/flake8.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-flake8: build/flake8.mlos_viz.${CONDA_ENV_NAME}.build-stamp
-
-build/flake8.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
-build/flake8.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
-build/flake8.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
-
-FLAKE8_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
-FLAKE8_COMMON_PREREQS += $(FORMAT_PREREQS)
-FLAKE8_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
-
-build/flake8.%.${CONDA_ENV_NAME}.build-stamp: $(FLAKE8_COMMON_PREREQS)
-	conda run -n ${CONDA_ENV_NAME} flake8 -j0 $(filter %.py,$+)
-	touch $@
-
-.PHONY: mypy
-mypy: build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp
-mypy: build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-mypy: build/mypy.mlos_viz.${CONDA_ENV_NAME}.build-stamp
-
-
-# Run these in order.
-build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
-build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES) build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp
-build/mypy.mlos_viz.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES) build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
-
-MYPY_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
-MYPY_COMMON_PREREQS += $(FORMAT_PREREQS)
-MYPY_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
-MYPY_COMMON_PREREQS += scripts/dmypy-wrapper.sh
-
-build/mypy.%.${CONDA_ENV_NAME}.build-stamp: $(MYPY_COMMON_PREREQS)
-	conda run -n ${CONDA_ENV_NAME} scripts/dmypy-wrapper.sh \
-		$(filter %.py,$+)
-	touch $@
-
-
 .PHONY: test
 test: pytest notebook-exec-test
 
@@ -450,7 +140,7 @@ build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp: PYTEST_MODULE := ml
 build/pytest.mlos_viz.${CONDA_ENV_NAME}.needs-build-stamp: $(MLOS_VIZ_PYTHON_FILES) $(MLOS_VIZ_CONF_FILES)
 build/pytest.mlos_viz.${CONDA_ENV_NAME}.needs-build-stamp: PYTEST_MODULE := mlos_viz
 
-# Invividual package test rules (for tight loop dev work).
+# Individual package test rules (for tight loop dev work).
 # Skip code coverage tests for these.
 PYTEST_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
 PYTEST_COMMON_PREREQS += $(FORMAT_PREREQS)
@@ -829,6 +519,7 @@ clean-format:
 	rm -f build/isort.mlos_*.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/licenseheaders-prereqs.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/format.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: clean-check
 clean-check:
@@ -849,6 +540,7 @@ clean-check:
 	rm -f build/pydocstyle.build-stamp
 	rm -f build/pydocstyle.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pydocstyle.mlos_*.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/check.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: clean-test
 clean-test:

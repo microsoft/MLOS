@@ -1,0 +1,80 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+#
+# Formatting
+#
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+    -   id: check-added-large-files
+    -   id: check-executables-have-shebangs
+    -   id: check-merge-conflict
+    -   id: check-toml
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+        require_serial: true
+    -   id: pretty-format-json
+        args: [--autofix, --no-sort-keys]
+        require_serial: true
+    -   id: trailing-whitespace
+        require_serial: true
+-   repo: https://github.com/johann-petrak/licenseheaders
+    rev: v0.8.8
+    hooks:
+    -   id: licenseheaders
+        files: '\.(sh|cmd|ps1|sql|py)$'
+        args: [-t, doc/mit-license.tmpl, -E, .py, .sh, .ps1, .sql, .cmd, -x, mlos_bench/setup.py, mlos_core/setup.py, mlos_viz/setup.py]
+        require_serial: true
+# TODO:
+#-   repo: https://github.com/asottile/pyupgrade
+#    rev: v3.19.1
+#    hooks:
+#    -   id: pyupgrade
+#        args: [--py310-plus]
+#        require_serial: true
+-   repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+    -   id: isort
+        require_serial: true
+-   repo: https://github.com/psf/black
+    rev: 22.10.0
+    hooks:
+    -   id: black
+        require_serial: true
+-   repo: https://github.com/PyCQA/docformatter
+    rev: 06907d0 # v1.7.5
+    hooks:
+    -   id: docformatter
+        require_serial: true
+#
+# Linting
+#
+-   repo: https://github.com/PyCQA/pydocstyle
+    rev: 6.3.0
+    hooks:
+    - id: pydocstyle
+      types: [python]
+# Use pylint and mypy from the local (conda) environment so that vscode can reuse them too.
+-   repo: local
+    hooks:
+    -   id: pycodestyle
+        name: pycodestyle
+        entry: pycodestyle
+        language: system
+        types: [python]
+    -   id: pylint
+        name: pylint
+        entry: pylint -j0
+        language: system
+        types: [python]
+    -   id: mypy
+        name: mypy
+        entry: mypy
+        language: system
+        types: [python]
+-   repo: meta
+    hooks:
+    -   id: check-hooks-apply
+    -   id: check-useless-excludes
