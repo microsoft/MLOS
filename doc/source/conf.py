@@ -106,7 +106,7 @@ def _check_path(path: str) -> bool:
 
 
 def linkcode_resolve(domain: str, info: Dict[str, str]):
-    """linkcode extension override to link to the source code on GitHub."""
+    """Linkcode extension override to link to the source code on GitHub."""
     if domain != "py":
         return None
     if not info["module"]:
