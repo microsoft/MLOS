@@ -70,7 +70,8 @@ ifneq (,$(filter format,$(MAKECMDGOALS)))
 endif
 
 build/format.${CONDA_ENV_NAME}.build-stamp: build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
-build/format.${CONDA_ENV_NAME}.build-stamp: build/pyupgrade.${CONDA_ENV_NAME}.build-stamp
+# TODO: Disabled for now.  Will enable and format in a future PR.
+#build/format.${CONDA_ENV_NAME}.build-stamp: build/pyupgrade.${CONDA_ENV_NAME}.build-stamp
 build/format.${CONDA_ENV_NAME}.build-stamp: build/isort.${CONDA_ENV_NAME}.build-stamp
 build/format.${CONDA_ENV_NAME}.build-stamp: build/black.${CONDA_ENV_NAME}.build-stamp
 build/format.${CONDA_ENV_NAME}.build-stamp: build/docformatter.${CONDA_ENV_NAME}.build-stamp
