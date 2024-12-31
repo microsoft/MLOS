@@ -9,11 +9,10 @@ Provides some pytest configuration overrides for both modules.
 # Note: This file is named conftest.py so that pytest picks it up automatically
 # without the need to adjust PYTHONPATH or sys.path as much.
 
-from warnings import warn
-from tempfile import mkdtemp
-
 import os
 import shutil
+from tempfile import mkdtemp
+from warnings import warn
 
 import pytest
 from xdist.workermanage import WorkerController
