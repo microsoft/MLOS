@@ -10,6 +10,7 @@ See Also: test_load_cli_config_examples.py
 import os
 import sys
 from getpass import getuser
+from importlib.resources import files
 from typing import List
 
 import pytest
@@ -28,11 +29,6 @@ from mlos_bench.services.types import (
 )
 from mlos_bench.tests import check_class_name
 from mlos_bench.util import path_join
-
-if sys.version_info < (3, 10):
-    from importlib_resources import files
-else:
-    from importlib.resources import files
 
 # pylint: disable=redefined-outer-name
 

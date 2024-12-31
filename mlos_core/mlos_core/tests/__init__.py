@@ -4,7 +4,6 @@
 #
 """Common functions for mlos_core Optimizer tests."""
 
-import sys
 from importlib import import_module
 from pkgutil import walk_packages
 from typing import List, Optional, Set, Type, TypeVar
@@ -13,11 +12,7 @@ from typing import List, Optional, Set, Type, TypeVar
 # issues of seeds across tests that run in non-deterministic parallel orders.
 SEED = 42
 
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
-
+from typing import TypeAlias
 
 T = TypeVar("T")
 
