@@ -14,6 +14,7 @@ repos:
     -   id: check-yaml
     -   id: end-of-file-fixer
         require_serial: true
+    # TODO:
     #-   id: pretty-format-json
     #    args: [--autofix, --no-sort-keys]
     #    require_serial: true
