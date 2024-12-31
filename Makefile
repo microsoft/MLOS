@@ -6,6 +6,7 @@ PYTHON_VERSION := $(shell echo "${CONDA_ENV_NAME}" | sed -r -e 's/^mlos[-]?//')
 ENV_YML := conda-envs/${CONDA_ENV_NAME}.yml
 
 # Find the non-build python files we should consider as rule dependencies.
+# FIXME: Do a single find and multiple filters
 PYTHON_FILES := $(shell find ./ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./(mlos_(core|bench|viz)/)?build/' -e '^./doc/source/')
 MLOS_CORE_PYTHON_FILES := $(shell find ./mlos_core/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_core/build/')
 MLOS_BENCH_PYTHON_FILES := $(shell find ./mlos_bench/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_bench/build/')
@@ -74,7 +75,7 @@ FORMATTERS := licenseheaders isort black docformatter trailing-whitespace end-of
 # TODO: pretty-format-json
 
 build/format.${CONDA_ENV_NAME}.build-stamp: $(FORMAT_COMMON_PREREQS)
-	conda run -n ${CONDA_ENV_NAME} pre-commit run -v --all-files $(FORMATTERS)
+	for formatter in $(FORMATTERS); do conda run -n ${CONDA_ENV_NAME} pre-commit run -v --all-files $$formatter; done
 	touch $@
 
 .PHONY: check
