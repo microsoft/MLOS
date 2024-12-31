@@ -44,7 +44,8 @@ def pytest_configure(config: pytest.Config) -> None:
                         (
                             "DISPLAY environment variable is set, "
                             "which can cause problems in some setups (e.g. WSL). "
-                            f"""Adjusting matplotlib backend to '{matplotlib.rcParams["backend"]}' """
+                            "Adjusting matplotlib backend to "
+                            f"""'{matplotlib.rcParams["backend"]}' """
                             "to compensate."
                         )
                     )
