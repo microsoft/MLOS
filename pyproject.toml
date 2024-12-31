@@ -5,7 +5,7 @@ include = '\.pyi?$'
 
 [tool.isort]
 profile = "black"
-py_version = 313
+py_version = 312
 src_paths = ["mlos_core", "mlos_bench", "mlos_viz"]
 
 # TODO: Consider switching to pydocstringformatter
