@@ -67,14 +67,32 @@ repos:
         types: [python]
     -   id: pylint
         name: pylint
-        entry: pylint -j0
+        entry: pylint
         language: system
         types: [python]
+        args: [
+          "-j0",
+          "--rcfile=pyproject.toml",
+          "-rn", # Only display messages
+          "-sn", # Don't display the score
+        ]
+        exclude: |
+            (?x)^(
+                doc/source/conf.py
+            )$
     -   id: mypy
         name: mypy
         entry: mypy
         language: system
         types: [python]
+        exclude: |
+            (?x)^(
+                doc/source/conf.py|
+                mlos_core/setup.py|
+                mlos_bench/setup.py|
+                mlos_viz/setup.py|
+                conftest.py
+            )$
 -   repo: meta
     hooks:
     -   id: check-hooks-apply
