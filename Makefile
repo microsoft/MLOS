@@ -500,6 +500,7 @@ endif
 .PHONY: nginx_port_env
 nginx_port_env:
 	@echo "Starting nginx docker container for serving docs."
+	mkdir -p doc/build
 	./doc/nginx-docker.sh restart
 	nginx_port=`docker port mlos-doc-nginx | grep 0.0.0.0:8080 | cut -d/ -f1` \
 		&& echo nginx_port=$${nginx_port} > doc/build/nginx_port.env
