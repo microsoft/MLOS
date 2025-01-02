@@ -6,6 +6,7 @@ channels:
 dependencies:
   # Basic dev environment packages.
   # All other dependencies for the mlos modules come from pip.
+  - yq
   - pip
   - python-build
   - jupyter
