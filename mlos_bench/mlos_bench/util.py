@@ -36,7 +36,9 @@ BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Scheduler", "S
 :py:class:`~mlos_bench.storage.base_storage.Storage`, etc.).
 """
 
-BaseTypes = Union["Environment", "Optimizer", "Scheduler", "Service", "Storage"]  # pylint: disable=consider-alternative-union-syntax # noqa: E501
+BaseTypes = Union[  # pylint: disable=consider-alternative-union-syntax
+    "Environment", "Optimizer", "Scheduler", "Service", "Storage"
+]
 """Similar to :py:data:`.BaseTypeVar`, BaseTypes is a Union of the main base classes."""
 
 
