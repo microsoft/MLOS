@@ -3,7 +3,7 @@
 
     "config": {
         "fileShareName": "test-fileshare",
-        
+
         "extras": "invalid"
     }
 }
