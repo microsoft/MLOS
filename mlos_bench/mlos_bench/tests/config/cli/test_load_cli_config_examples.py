@@ -146,8 +146,8 @@ def test_load_cli_config_examples_via_launcher(
         assert launcher.global_config["trial_id"] == config["trial_id"]
 
     expected_log_level = logging.getLevelName(config.get("log_level", "INFO"))
-    if isinstance(expected_log_level, int):
-        expected_log_level = logging.getLevelName(expected_log_level)
+    if isinstance(expected_log_level, int):  # type: ignore[unreachable]
+        expected_log_level = logging.getLevelName(expected_log_level)  # type: ignore[unreachable]
     current_log_level = logging.getLevelName(logging.root.getEffectiveLevel())
     assert current_log_level == expected_log_level
 
