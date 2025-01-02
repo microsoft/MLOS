@@ -112,8 +112,8 @@ def test_local_env_telemetry_no_header(
 
 
 @pytest.mark.filterwarnings(
-        "ignore:.*(Could not infer format, so each element will be parsed individually, "
-        "falling back to `dateutil`).*:UserWarning::0"
+    "ignore:.*(Could not infer format, so each element will be parsed individually, "
+    "falling back to `dateutil`).*:UserWarning::0"
 )  # pylint: disable=line-too-long # noqa
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_local_env_telemetry_wrong_header(

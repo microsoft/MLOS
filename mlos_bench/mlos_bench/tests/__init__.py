@@ -29,9 +29,7 @@ ZONE_NAMES = [
     # Implicit local time zone.
     None,
 ]
-ZONE_INFO: list[tzinfo | None] = [
-    nullable(pytz.timezone, zone_name) for zone_name in ZONE_NAMES
-]
+ZONE_INFO: list[tzinfo | None] = [nullable(pytz.timezone, zone_name) for zone_name in ZONE_NAMES]
 
 
 # A decorator for tests that require docker.
@@ -141,8 +139,8 @@ def are_dir_trees_equal(dir1: str, dir2: str) -> bool:
         or len(dirs_cmp.funny_files) > 0
     ):
         warning(
-                f"Found differences in dir trees {dir1}, {dir2}:\n"
-                f"{dirs_cmp.diff_files}\n{dirs_cmp.funny_files}"
+            f"Found differences in dir trees {dir1}, {dir2}:\n"
+            f"{dirs_cmp.diff_files}\n{dirs_cmp.funny_files}"
         )
         return False
     (_, mismatch, errors) = filecmp.cmpfiles(dir1, dir2, dirs_cmp.common_files, shallow=False)

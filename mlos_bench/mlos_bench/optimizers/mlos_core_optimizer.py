@@ -57,8 +57,8 @@ class MlosCoreOptimizer(Optimizer):
                 self._config["output_directory"] = os.path.abspath(output_directory)
             else:
                 _LOG.warning(
-                        "SMAC optimizer output_directory was null. "
-                        "SMAC will use a temporary directory."
+                    "SMAC optimizer output_directory was null. "
+                    "SMAC will use a temporary directory."
                 )
 
             # Make sure max_trials >= max_suggestions.

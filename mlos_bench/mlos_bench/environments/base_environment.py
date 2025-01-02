@@ -211,8 +211,8 @@ class Environment(metaclass=abc.ABCMeta):
                 tunable_group_name = grp[1:]
                 if tunable_group_name not in groups_exp:
                     raise KeyError(
-                            f"Expected tunable group name ${tunable_group_name} "
-                            "undefined in {groups_exp}"
+                        f"Expected tunable group name ${tunable_group_name} "
+                        "undefined in {groups_exp}"
                     )
                 add_groups = groups_exp[tunable_group_name]
                 res += [add_groups] if isinstance(add_groups, str) else add_groups
