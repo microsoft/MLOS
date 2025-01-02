@@ -77,11 +77,12 @@ FORMATTERS := licenseheaders trailing-whitespace end-of-file-fixer isort black d
 
 .PHONY: $(FORMATTERS)
 .NOTPARALLEL: $(FORMATTERS)
+FORMATTERS_RC := 0
 $(FORMATTERS): $(MLOS_CORE_PYTHON_FILES)
 $(FORMATTERS): $(MLOS_BENCH_PYTHON_FILES)
 $(FORMATTERS): $(MLOS_VIZ_PYTHON_FILES)
 $(FORMATTERS): $(FORMAT_COMMON_PREREQS)
-	conda run -n ${CONDA_ENV_NAME} pre-commit run -v --all-files $@
+	conda run -n ${CONDA_ENV_NAME} pre-commit run -v --all-files $@ || true
 
 build/format.${CONDA_ENV_NAME}.build-stamp: $(FORMATTERS)
 	touch $@
