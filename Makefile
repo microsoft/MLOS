@@ -72,16 +72,18 @@ FORMAT_COMMON_PREREQS += .pre-commit-config.yaml
 FORMAT_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 
 # Formatting pre-commit hooks are marked with the "manual" stage.
-FORMATTERS := $(shell cat .pre-commit-config.yaml | yq -r '.repos[].hooks[] | select((.stages // [])[] | contains("manual")) | .id')
+FORMATTERS := $(shell cat .pre-commit-config.yaml | yq -r '.repos[].hooks[] | select((.stages // []) | contains(["manual"])) | .id')
+CHECKERS := $(shell cat .pre-commit-config.yaml | yq -r '.repos[].hooks[] | select((.stages // []) | contains(["manual"]) | not) | .id')
 
-# Provide convenience methods to call individual formatters via `make` as well (e.g., `make black`).
-.PHONY: $(FORMATTERS)
+# Provide convenience methods to call individual formatters and checkers via `make` as well.
+# e.g., `make black` or `make pylint`
+.PHONY: $(FORMATTERS) $(CHECKERS)
 .NOTPARALLEL: $(FORMATTERS)
-$(FORMATTERS): $(MLOS_CORE_PYTHON_FILES)
-$(FORMATTERS): $(MLOS_BENCH_PYTHON_FILES)
-$(FORMATTERS): $(MLOS_VIZ_PYTHON_FILES)
-$(FORMATTERS): $(FORMAT_COMMON_PREREQS)
-	conda run -n ${CONDA_ENV_NAME} pre-commit run -v --all-files $@ || true
+$(FORMATTERS) $(CHECKERS): $(MLOS_CORE_PYTHON_FILES)
+$(FORMATTERS) $(CHECKERS): $(MLOS_BENCH_PYTHON_FILES)
+$(FORMATTERS) $(CHECKERS): $(MLOS_VIZ_PYTHON_FILES)
+$(FORMATTERS) $(CHECKERS): $(FORMAT_COMMON_PREREQS)
+	conda run -n ${CONDA_ENV_NAME} pre-commit run -v --all-files $@
 
 build/format.${CONDA_ENV_NAME}.build-stamp:
 	conda run -n ${CONDA_ENV_NAME} pre-commit run -v --all-files --hook-stage manual
