@@ -71,7 +71,7 @@ FORMAT_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
 FORMAT_COMMON_PREREQS += .pre-commit-config.yaml
 FORMAT_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 
-FORMATTERS := licenseheaders isort black docformatter trailing-whitespace end-of-file-fixer
+FORMATTERS := licenseheaders trailing-whitespace end-of-file-fixer isort black docformatter
 # TODO: pyupgrade
 # TODO: pretty-format-json
 
