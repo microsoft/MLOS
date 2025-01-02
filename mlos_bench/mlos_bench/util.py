@@ -344,7 +344,11 @@ def try_parse_val(val: Optional[str]) -> Optional[Union[int, float, str]]:
         return str(val)
 
 
-def nullable(func: Callable, value: Optional[Any]) -> Optional[Any]:
+NullableT = TypeVar("NullableT")
+"""A generic type variable for :py:func:`nullable` return types."""
+
+
+def nullable(func: Callable[..., NullableT], value: Optional[Any]) -> Optional[NullableT]:
     """
     Poor man's Maybe monad: apply the function to the value if it's not None.
 
@@ -359,6 +363,15 @@ def nullable(func: Callable, value: Optional[Any]) -> Optional[Any]:
     -------
     value : Optional[Any]
         The result of the function application or None if the value is None.
+
+    Examples
+    --------
+    >>> nullable(int, "1")
+    1
+    >>> nullable(int, None)
+    ...
+    >>> nullable(str, 1)
+    '1'
     """
     return None if value is None else func(value)
 
