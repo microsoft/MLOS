@@ -75,11 +75,14 @@ FORMATTERS := licenseheaders trailing-whitespace end-of-file-fixer isort black d
 # TODO: pyupgrade
 # TODO: pretty-format-json
 
-build/format.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
-build/format.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
-build/format.${CONDA_ENV_NAME}.build-stamp: $(MLOS_VIZ_PYTHON_FILES)
-build/format.${CONDA_ENV_NAME}.build-stamp: $(FORMAT_COMMON_PREREQS)
-	for formatter in $(FORMATTERS); do conda run -n ${CONDA_ENV_NAME} pre-commit run -v --all-files $$formatter; done
+.PHONY: $(FORMATTERS)
+$(FORMATTERS): $(MLOS_CORE_PYTHON_FILES)
+$(FORMATTERS): $(MLOS_BENCH_PYTHON_FILES)
+$(FORMATTERS): $(MLOS_VIZ_PYTHON_FILES)
+$(FORMATTERS): $(FORMAT_COMMON_PREREQS)
+	conda run -n ${CONDA_ENV_NAME} pre-commit run -v --all-files $@
+
+build/format.${CONDA_ENV_NAME}.build-stamp: $(FORMATTERS)
 	touch $@
 
 .PHONY: check
