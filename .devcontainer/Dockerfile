@@ -95,6 +95,7 @@ RUN echo "Setup miniconda" \
     && echo "# reliable useable across vscode uid changes." \
     && sg conda -c "/opt/conda/bin/conda env create -n mlos -v -f /tmp/conda-tmp/mlos_deps.yml" \
     && sg conda -c "/opt/conda/bin/conda run -n mlos pip install --no-cache-dir -U -r /tmp/conda-tmp/combined.requirements.txt" \
+    && sg conda -c "git -C /tmp/conda-tmp init" \
     && sg conda -c "/opt/conda/bin/conda run -n mlos pre-commit install-hooks -c /tmp/conda-tmp/.pre-commit-config.yaml" \
     && sg conda -c "/opt/conda/bin/conda run -n mlos pip cache purge" \
     && sg conda -c "/opt/conda/bin/conda clean -v -y -a" \
