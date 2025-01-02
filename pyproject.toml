@@ -60,9 +60,7 @@ disable = [
     "fixme",
     "no-else-return",
     "consider-using-assignment-expr",
-    "deprecated-typing-alias",            # disable for now - still supporting python 3.8
     "docstring-first-line-empty",
-    "consider-alternative-union-syntax",  # disable for now - still supporting python 3.9
     "missing-raises-doc",
     "unnecessary-default-type-args",      # affects Generator type hints, but we still support python 3.8
 ]
