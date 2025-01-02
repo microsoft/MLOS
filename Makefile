@@ -76,6 +76,7 @@ FORMATTERS := licenseheaders trailing-whitespace end-of-file-fixer isort black d
 # TODO: pretty-format-json
 
 .PHONY: $(FORMATTERS)
+.NOTPARALLEL: $(FORMATTERS)
 $(FORMATTERS): $(MLOS_CORE_PYTHON_FILES)
 $(FORMATTERS): $(MLOS_BENCH_PYTHON_FILES)
 $(FORMATTERS): $(MLOS_VIZ_PYTHON_FILES)
