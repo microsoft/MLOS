@@ -25,13 +25,13 @@ for readme_file_path in README.md mlos_core/README.md mlos_bench/README.md mlos_
 
     # Tweak source source code links.
     # FIXME: This sed expression doesn't work in MacOS.
-    sed -i -r -e "s|\]\(([^:#)]+)(#[a-zA-Z0-9_-]+)?\)|\]\(https://github.com/microsoft/MLOS/tree/main/$file_dir/\1\2\)|g" \
+    sed -i '' -r -e "s|\]\(([^:#)]+)(#[a-zA-Z0-9_-]+)?\)|\]\(https://github.com/microsoft/MLOS/tree/main/$file_dir/\1\2\)|g" \
         "doc/source/source_tree_docs/$file_dir/index.md"
     # Tweak the lexers for local expansion by pygments instead of github's.
-    sed -i -r -e 's/```jsonc/```json/' \
+    sed -i '' -r -e 's/```jsonc/```json/' \
         "doc/source/source_tree_docs/$file_dir/index.md"
 done
 
 # Do an explicit fixup for some static content.
-sed -i -r -e 's#="[^"]*(_static/[^"]+)"#="../\1"#g' \
+sed -i '' -r -e 's#="[^"]*(_static/[^"]+)"#="../\1"#g' \
     "doc/source/source_tree_docs/index.md"
