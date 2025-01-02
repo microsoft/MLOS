@@ -198,7 +198,7 @@ class FlamlOptimizer(BaseOptimizer):
 
         Returns
         -------
-        result: Union[dict, None]
+        result: dict | None
             Dictionary with a single key, `FLAML_score`, if config already
             evaluated; `None` otherwise.
         """
