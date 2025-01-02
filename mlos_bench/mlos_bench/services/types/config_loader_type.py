@@ -5,7 +5,7 @@
 """Protocol interface for helper functions to lookup and load configs."""
 
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, Optional, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 from mlos_bench.config.schemas.config_schemas import ConfigSchema
 from mlos_bench.tunables.tunable import TunableValue
@@ -67,7 +67,7 @@ class SupportsConfigLoading(Protocol):
         tunables: "TunableGroups",
         global_config: dict | None = None,
         parent_args: dict[str, TunableValue] | None = None,
-        service: Optional["Service"] = None,
+        service: "Service" | None = None,
     ) -> "Environment":
         # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
@@ -104,7 +104,7 @@ class SupportsConfigLoading(Protocol):
         tunables: "TunableGroups",
         global_config: dict | None = None,
         parent_args: dict[str, TunableValue] | None = None,
-        service: Optional["Service"] = None,
+        service: "Service" | None = None,
     ) -> list["Environment"]:
         # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
@@ -135,7 +135,7 @@ class SupportsConfigLoading(Protocol):
         self,
         jsons: Iterable[str],
         global_config: dict[str, Any] | None = None,
-        parent: Optional["Service"] = None,
+        parent: "Service" | None = None,
     ) -> "Service":
         """
         Read the configuration files and bundle all service methods from those configs

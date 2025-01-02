@@ -13,7 +13,7 @@ import os
 import subprocess
 from collections.abc import Callable, Iterable, Mapping
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Literal, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Literal, TypeVar
 
 import pandas
 import pytz
@@ -36,7 +36,7 @@ BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Scheduler", "S
 :py:class:`~mlos_bench.storage.base_storage.Storage`, etc.).
 """
 
-BaseTypes = Union["Environment", "Optimizer", "Scheduler", "Service", "Storage"]
+BaseTypes = "Environment" | "Optimizer" | "Scheduler" | "Service" | "Storage"
 """Similar to :py:data:`.BaseTypeVar`, BaseTypes is a Union of the main base classes."""
 
 

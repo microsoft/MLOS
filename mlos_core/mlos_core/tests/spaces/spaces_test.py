@@ -8,7 +8,7 @@
 
 from abc import ABCMeta, abstractmethod
 from collections.abc import Callable
-from typing import Any, NoReturn, Union
+from typing import Any, NoReturn
 
 import ConfigSpace as CS
 import flaml.tune.sample
@@ -24,8 +24,8 @@ from mlos_core.spaces.converters.flaml import (
     configspace_to_flaml_space,
 )
 
-OptimizerSpace = Union[FlamlSpace, CS.ConfigurationSpace]
-OptimizerParam = Union[FlamlDomain, Hyperparameter]
+OptimizerSpace = FlamlSpace | CS.ConfigurationSpace
+OptimizerParam = FlamlDomain | Hyperparameter
 
 NP_E: float = np.e
 

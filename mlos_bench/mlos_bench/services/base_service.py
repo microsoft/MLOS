@@ -8,7 +8,7 @@ import json
 import logging
 from collections.abc import Callable
 from types import TracebackType
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
@@ -26,7 +26,7 @@ class Service:
         class_name: str,
         config: dict[str, Any] | None = None,
         global_config: dict[str, Any] | None = None,
-        parent: Optional["Service"] = None,
+        parent: "Service" | None = None,
     ) -> "Service":
         """
         Factory method for a new service with a given config.
@@ -58,7 +58,7 @@ class Service:
         self,
         config: dict[str, Any] | None = None,
         global_config: dict[str, Any] | None = None,
-        parent: Optional["Service"] = None,
+        parent: "Service" | None = None,
         methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """

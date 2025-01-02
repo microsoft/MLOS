@@ -7,7 +7,7 @@ import collections
 import copy
 import logging
 from collections.abc import Iterable, Sequence
-from typing import Any, Literal, Optional, TypedDict, Union
+from typing import Any, Literal, TypedDict
 
 import numpy as np
 
@@ -15,10 +15,10 @@ from mlos_bench.util import nullable
 
 _LOG = logging.getLogger(__name__)
 
-TunableValue = Union[int, float, Optional[str]]
+TunableValue = int | float | str | None
 """A tunable parameter value type alias."""
 
-TunableValueType = Union[type[int], type[float], type[str]]
+TunableValueType = type[int] | type[float] | type[str]
 """Tunable value type."""
 
 TunableValueTypeTuple = (int, float, str, type(None))
@@ -354,7 +354,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
         Parameters
         ----------
-        value : Union[int, float, str]
+        value : int | float | str
             Value to assign.
 
         Returns
@@ -372,7 +372,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
         Parameters
         ----------
-        value : Union[int, float, str]
+        value : int | float | str
             Value to validate.
 
         Returns
