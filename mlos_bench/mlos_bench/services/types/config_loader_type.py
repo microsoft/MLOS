@@ -4,6 +4,8 @@
 #
 """Protocol interface for helper functions to lookup and load configs."""
 
+from __future__ import annotations
+
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
@@ -67,7 +69,7 @@ class SupportsConfigLoading(Protocol):
         tunables: "TunableGroups",
         global_config: dict | None = None,
         parent_args: dict[str, TunableValue] | None = None,
-        service: "Service" | None = None,
+        service: Service | None = None,
     ) -> "Environment":
         # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
@@ -104,7 +106,7 @@ class SupportsConfigLoading(Protocol):
         tunables: "TunableGroups",
         global_config: dict | None = None,
         parent_args: dict[str, TunableValue] | None = None,
-        service: "Service" | None = None,
+        service: Service | None = None,
     ) -> list["Environment"]:
         # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
@@ -135,7 +137,7 @@ class SupportsConfigLoading(Protocol):
         self,
         jsons: Iterable[str],
         global_config: dict[str, Any] | None = None,
-        parent: "Service" | None = None,
+        parent: Service | None = None,
     ) -> "Service":
         """
         Read the configuration files and bundle all service methods from those configs

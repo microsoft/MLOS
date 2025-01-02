@@ -4,6 +4,8 @@
 #
 """Base class for the service mix-ins."""
 
+from __future__ import annotations
+
 import json
 import logging
 from collections.abc import Callable
@@ -26,7 +28,7 @@ class Service:
         class_name: str,
         config: dict[str, Any] | None = None,
         global_config: dict[str, Any] | None = None,
-        parent: "Service" | None = None,
+        parent: Service | None = None,
     ) -> "Service":
         """
         Factory method for a new service with a given config.
@@ -58,7 +60,7 @@ class Service:
         self,
         config: dict[str, Any] | None = None,
         global_config: dict[str, Any] | None = None,
-        parent: "Service" | None = None,
+        parent: Service | None = None,
         methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """
