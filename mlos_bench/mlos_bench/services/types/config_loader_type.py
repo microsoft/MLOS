@@ -66,11 +66,11 @@ class SupportsConfigLoading(Protocol):
     def build_environment(  # pylint: disable=too-many-arguments
         self,
         config: dict,
-        tunables: "TunableGroups",
+        tunables: TunableGroups,
         global_config: dict | None = None,
         parent_args: dict[str, TunableValue] | None = None,
         service: Service | None = None,
-    ) -> "Environment":
+    ) -> Environment:
         # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
         Factory method for a new environment with a given config.
@@ -103,11 +103,11 @@ class SupportsConfigLoading(Protocol):
     def load_environment_list(
         self,
         json: str,
-        tunables: "TunableGroups",
+        tunables: TunableGroups,
         global_config: dict | None = None,
         parent_args: dict[str, TunableValue] | None = None,
         service: Service | None = None,
-    ) -> list["Environment"]:
+    ) -> list[Environment]:
         # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
         Load and build a list of environments from the config file.
@@ -138,7 +138,7 @@ class SupportsConfigLoading(Protocol):
         jsons: Iterable[str],
         global_config: dict[str, Any] | None = None,
         parent: Service | None = None,
-    ) -> "Service":
+    ) -> Service:
         """
         Read the configuration files and bundle all service methods from those configs
         into a single Service object.

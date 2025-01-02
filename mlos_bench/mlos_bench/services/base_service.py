@@ -29,7 +29,7 @@ class Service:
         config: dict[str, Any] | None = None,
         global_config: dict[str, Any] | None = None,
         parent: Service | None = None,
-    ) -> "Service":
+    ) -> Service:
         """
         Factory method for a new service with a given config.
 
@@ -126,7 +126,7 @@ class Service:
         local_methods.update(ext_methods)
         return local_methods
 
-    def __enter__(self) -> "Service":
+    def __enter__(self) -> Service:
         """
         Enter the Service mix-in context.
 
@@ -173,7 +173,7 @@ class Service:
         self._in_context = False
         return False
 
-    def _enter_context(self) -> "Service":
+    def _enter_context(self) -> Service:
         """
         Enters the context for this particular Service instance.
 
