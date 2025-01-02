@@ -54,7 +54,7 @@ class SupportsConfigLoading(Protocol):
         ----------
         json : str
             Path to the input config file or a JSON string.
-        schema_type : Optional[ConfigSchema]
+        schema_type : ConfigSchema | None
             The schema type to validate the config against.
 
         Returns
@@ -85,12 +85,12 @@ class SupportsConfigLoading(Protocol):
         tunables : TunableGroups
             A (possibly empty) collection of groups of tunable parameters for
             all environments.
-        global_config : Optional[dict]
+        global_config : dict | None
             Global parameters to add to the environment config.
         parent_args : Optional[dict[str, TunableValue]]
             An optional reference of the parent CompositeEnv's const_args used to
             expand dynamic config parameters from.
-        service: Optional[Service]
+        service: Service | None
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
 
@@ -119,12 +119,12 @@ class SupportsConfigLoading(Protocol):
             Can contain either one environment or a list of environments.
         tunables : TunableGroups
             A (possibly empty) collection of tunables to add to the environment.
-        global_config : Optional[dict]
+        global_config : dict | None
             Global parameters to add to the environment config.
         parent_args : Optional[dict[str, TunableValue]]
             An optional reference of the parent CompositeEnv's const_args used to
             expand dynamic config parameters from.
-        service : Optional[Service]
+        service : Service | None
             An optional reference of the parent service to mix in.
 
         Returns

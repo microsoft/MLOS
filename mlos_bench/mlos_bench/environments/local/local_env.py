@@ -297,7 +297,7 @@ class LocalEnv(ScriptEnv):
         script : Iterable[str]
             Lines of the script to run locally.
             Treat every line as a separate command to run.
-        cwd : Optional[str]
+        cwd : str | None
             Work directory to run the script at.
 
         Returns

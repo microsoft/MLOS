@@ -34,7 +34,7 @@ def plot(
     ----------
     exp_data : ExperimentData
         The ExperimentData (e.g., obtained from the storage layer) to plot.
-    results_df : Optional[pandas.DataFrame]
+    results_df : pandas.DataFrame | None
         Optional results_df to plot.
         If not provided, defaults to exp_data.results_df property.
     objectives : Optional[dict[str, Literal["min", "max"]]]

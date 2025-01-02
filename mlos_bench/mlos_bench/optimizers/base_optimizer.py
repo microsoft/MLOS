@@ -55,8 +55,8 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
             The tunables to optimize.
         config : dict
             Free-format key/value pairs of configuration parameters to pass to the optimizer.
-        global_config : Optional[dict]
-        service : Optional[Service]
+        global_config : dict | None
+        service : Service | None
         """
         _LOG.info("Create optimizer for: %s", tunables)
         _LOG.debug("Optimizer config: %s", config)

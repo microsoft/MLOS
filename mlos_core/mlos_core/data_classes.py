@@ -41,10 +41,10 @@ class Observation:
             The configuration observed.
         score : pandas.Series
             The score metrics observed.
-        context : Optional[pandas.Series]
+        context : pandas.Series | None
             The context in which the configuration was evaluated.
             Not Yet Implemented.
-        metadata: Optional[pandas.Series]
+        metadata: pandas.Series | None
             The metadata in which the configuration was evaluated
         """
         self._config = config
@@ -138,10 +138,10 @@ class Observations:
             Pandas dataframe containing configurations. Column names are the parameter names.
         scores : pandas.DataFrame
             The score metrics observed in a dataframe.
-        contexts : Optional[pandas.DataFrame]
+        contexts : pandas.DataFrame | None
             The context in which the configuration was evaluated.
             Not Yet Implemented.
-        metadata: Optional[pandas.DataFrame]
+        metadata: pandas.DataFrame | None
             The metadata in which the configuration was evaluated
             Not Yet Implemented.
         """
@@ -338,9 +338,9 @@ class Suggestion:
         ----------
         config : pandas.Series
             The configuration suggested.
-        context : Optional[pandas.Series]
+        context : pandas.Series | None
             The context for this suggestion, by default None
-        metadata : Optional[pandas.Series]
+        metadata : pandas.Series | None
             Any metadata provided by the underlying optimizer, by default None
         """
         self._config = config

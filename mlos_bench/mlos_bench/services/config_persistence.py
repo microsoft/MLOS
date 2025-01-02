@@ -161,7 +161,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         ----------
         json : str
             Path to the input config file or a JSON string.
-        schema_type : Optional[ConfigSchema]
+        schema_type : ConfigSchema | None
             The schema type to validate the config against.
 
         Returns

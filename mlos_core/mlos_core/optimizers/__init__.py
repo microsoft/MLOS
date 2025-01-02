@@ -121,11 +121,11 @@ class OptimizerFactory:
             The names of the optimization targets to minimize.
         optimizer_type : OptimizerType
             Optimizer class as defined by Enum.
-        optimizer_kwargs : Optional[dict]
+        optimizer_kwargs : dict | None
             Optional arguments passed in Optimizer class constructor.
-        space_adapter_type : Optional[SpaceAdapterType]
+        space_adapter_type : SpaceAdapterType | None
             Space adapter class to be used alongside the optimizer.
-        space_adapter_kwargs : Optional[dict]
+        space_adapter_kwargs : dict | None
             Optional arguments passed in SpaceAdapter class constructor.
 
         Returns

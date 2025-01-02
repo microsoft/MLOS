@@ -65,16 +65,16 @@ class SmacOptimizer(BaseBayesianOptimizer):
         space_adapter : BaseSpaceAdapter
             The space adapter class to employ for parameter space transformations.
 
-        seed : Optional[int]
+        seed : int | None
             By default SMAC uses a known seed (0) to keep results reproducible.
             However, if a `None` seed is explicitly provided, we let a random seed
             be produced by SMAC.
 
-        run_name : Optional[str]
+        run_name : str | None
             Name of this run. This is used to easily distinguish across different runs.
             If set to `None` (default), SMAC will generate a hash from metadata.
 
-        output_directory : Optional[str]
+        output_directory : str | None
             The directory where SMAC output will saved. If set to `None` (default),
             a temporary dir will be used.
 
@@ -83,14 +83,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Note that modifying this value directly affects the value of
             `n_random_init`, if latter is set to `None`.
 
-        n_random_init : Optional[int]
+        n_random_init : int | None
             Number of points evaluated at start to bootstrap the optimizer.
             Default depends on max_trials and number of parameters and max_ratio.
             Note: it can sometimes be useful to set this to 1 when pre-warming the
             optimizer from historical data. See Also:
             :py:meth:`mlos_bench.optimizers.base_optimizer.Optimizer.bulk_register`
 
-        max_ratio : Optional[int]
+        max_ratio : int | None
             Maximum ratio of max_trials to be random configs to be evaluated
             at start to bootstrap the optimizer.
             Useful if you want to explicitly control the number of random

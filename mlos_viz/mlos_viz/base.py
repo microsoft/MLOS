@@ -129,7 +129,7 @@ def augment_results_df_with_config_trial_group_stats(
     ----------
     exp_data : ExperimentData
         The ExperimentData (e.g., obtained from the storage layer) to plot.
-    results_df : Optional[pandas.DataFrame]
+    results_df : pandas.DataFrame | None
         The results dataframe to augment, by default None to use the results_df property.
     requested_result_cols : Optional[Iterable[str]]
         Which results columns to augment, by default None to use all results columns
@@ -230,9 +230,9 @@ def limit_top_n_configs(
 
     Parameters
     ----------
-    exp_data : Optional[ExperimentData]
+    exp_data : ExperimentData | None
         The ExperimentData (e.g., obtained from the storage layer) to operate on.
-    results_df : Optional[pandas.DataFrame]
+    results_df : pandas.DataFrame | None
         The results dataframe to augment, by default None to use
         :py:attr:`.ExperimentData.results_df` property.
     objectives : Iterable[str]
@@ -360,7 +360,7 @@ def plot_optimizer_trends(
     ----------
     exp_data : ExperimentData
         The ExperimentData (e.g., obtained from the storage layer) to plot.
-    results_df : Optional[pandas.DataFrame]
+    results_df : pandas.DataFrame | None
         Optional results_df to plot.
         If not provided, defaults to :py:attr:`.ExperimentData.results_df` property.
     objectives : Optional[dict[str, Literal["min", "max"]]]
@@ -451,7 +451,7 @@ def plot_top_n_configs(
     ----------
     exp_data: ExperimentData
         The experiment data to plot.
-    results_df : Optional[pandas.DataFrame]
+    results_df : pandas.DataFrame | None
         Optional results_df to plot.
         If not provided, defaults to :py:attr:`.ExperimentData.results_df` property.
     objectives : Optional[dict[str, Literal["min", "max"]]]

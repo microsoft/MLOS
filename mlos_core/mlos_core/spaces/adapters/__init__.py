@@ -97,9 +97,9 @@ class SpaceAdapterFactory:
         ----------
         parameter_space : ConfigSpace.ConfigurationSpace
             Input configuration space.
-        space_adapter_type : Optional[SpaceAdapterType]
+        space_adapter_type : SpaceAdapterType | None
             Space adapter class to be used alongside the optimizer.
-        space_adapter_kwargs : Optional[dict]
+        space_adapter_kwargs : dict | None
             Optional arguments passed in SpaceAdapter class constructor.
 
         Returns

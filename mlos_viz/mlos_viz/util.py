@@ -22,9 +22,9 @@ def expand_results_data_args(
 
     Parameters
     ----------
-    exp_data : Optional[ExperimentData]
+    exp_data : ExperimentData | None
         ExperimentData to operate on.
-    results_df : Optional[pandas.DataFrame]
+    results_df : pandas.DataFrame | None
         Optional results_df argument.
         If not provided, defaults to :py:attr:`.ExperimentData.results_df` property.
     objectives : Optional[dict[str, Literal["min", "max"]]]

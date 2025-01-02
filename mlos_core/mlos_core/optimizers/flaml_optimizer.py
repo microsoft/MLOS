@@ -70,7 +70,7 @@ class FlamlOptimizer(BaseOptimizer):
             More info:
             https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
 
-        seed : Optional[int]
+        seed : int | None
             If provided, calls np.random.seed() with the provided value to set the
             seed globally at init.
         """

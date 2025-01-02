@@ -201,7 +201,7 @@ def tunable_groups_to_configspace(
     tunables : TunableGroups
         A collection of tunable parameters.
 
-    seed : Optional[int]
+    seed : int | None
         Random seed to use.
 
     Returns

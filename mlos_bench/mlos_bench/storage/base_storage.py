@@ -298,7 +298,7 @@ class Storage(metaclass=ABCMeta):
 
             Returns
             -------
-            (trial_ids, configs, scores, status) : ([int], [dict], [Optional[dict]], [Status])
+            (trial_ids, configs, scores, status) : ([int], [dict], [dict] | None, [Status])
                 Trial ids, Tunable values, benchmark scores, and status of the trials.
             """
 
@@ -340,7 +340,7 @@ class Storage(metaclass=ABCMeta):
             ----------
             tunables : TunableGroups
                 Tunable parameters to use for the trial.
-            ts_start : Optional[datetime.datetime]
+            ts_start : datetime.datetime | None
                 Timestamp of the trial start (can be in the future).
             config : dict
                 Key/value pairs of additional non-tunable parameters of the trial.
@@ -377,7 +377,7 @@ class Storage(metaclass=ABCMeta):
             ----------
             tunables : TunableGroups
                 Tunable parameters to use for the trial.
-            ts_start : Optional[datetime.datetime]
+            ts_start : datetime.datetime | None
                 Timestamp of the trial start (can be in the future).
             config : dict
                 Key/value pairs of additional non-tunable parameters of the trial.

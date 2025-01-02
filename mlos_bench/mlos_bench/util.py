@@ -77,7 +77,7 @@ def preprocess_dynamic_configs(*, dest: dict, source: dict | None = None) -> dic
     ----------
     dest : dict
         Destination config.
-    source : Optional[dict]
+    source : dict | None
         Source config.
 
     Returns
@@ -107,7 +107,7 @@ def merge_parameters(
     ----------
     dest : dict
         Destination config.
-    source : Optional[dict]
+    source : dict | None
         Source config.
     required_keys : Optional[Iterable[str]]
         An optional list of keys that must be present in the destination config.
