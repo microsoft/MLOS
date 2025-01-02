@@ -5,8 +5,8 @@
 """A collection Service functions for mocking authentication."""
 
 import logging
-from typing import Any, Dict, List, Optional, Union
 from collections.abc import Callable
+from typing import Any
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.authenticator_type import SupportsAuth

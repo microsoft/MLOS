@@ -12,7 +12,7 @@ See Also
 mlos_bench.storage : For example usage.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.config_persistence import ConfigPersistenceService

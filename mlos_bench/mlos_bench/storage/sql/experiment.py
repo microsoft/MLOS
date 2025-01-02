@@ -8,9 +8,9 @@ the benchmark experiment data using `SQLAlchemy <https://sqlalchemy.org>`_ backe
 
 import hashlib
 import logging
-from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional, Tuple
 from collections.abc import Iterator
+from datetime import datetime
+from typing import Any, Literal
 
 from pytz import UTC
 from sqlalchemy import Connection, CursorResult, Table, column, func, select

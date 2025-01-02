@@ -5,8 +5,8 @@
 """A collection Service functions for managing virtual networks on Azure."""
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
 from collections.abc import Callable
+from typing import Any
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service

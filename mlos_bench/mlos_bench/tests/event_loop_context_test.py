@@ -10,7 +10,7 @@ import time
 from asyncio import AbstractEventLoop
 from threading import Thread
 from types import TracebackType
-from typing import Literal, Optional, Type
+from typing import Literal
 
 import pytest
 

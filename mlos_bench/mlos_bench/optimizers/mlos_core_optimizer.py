@@ -6,9 +6,9 @@
 
 import logging
 import os
-from types import TracebackType
-from typing import Dict, Literal, Optional, Tuple, Type, Union
 from collections.abc import Sequence
+from types import TracebackType
+from typing import Literal
 
 import pandas as pd
 

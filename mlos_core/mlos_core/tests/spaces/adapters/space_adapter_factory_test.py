@@ -6,7 +6,6 @@
 
 # pylint: disable=missing-function-docstring
 
-from typing import List, Optional, Type
 
 import ConfigSpace as CS
 import pytest

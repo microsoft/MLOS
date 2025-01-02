@@ -5,7 +5,7 @@
 """Tests for service schema validation."""
 
 from os import path
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 

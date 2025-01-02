@@ -8,11 +8,11 @@ import asyncio
 import logging
 import sys
 from asyncio import AbstractEventLoop
+from collections.abc import Coroutine
 from concurrent.futures import Future
 from threading import Lock as ThreadLock
 from threading import Thread
-from typing import Any, Optional, TypeAlias, TypeVar
-from collections.abc import Coroutine
+from typing import Any, TypeAlias, TypeVar
 
 CoroReturnType = TypeVar("CoroReturnType")  # pylint: disable=invalid-name
 """Type variable for the return type of an :external:py:mod:`asyncio` coroutine."""

@@ -5,7 +5,6 @@
 """TunableGroups definition."""
 import copy
 import logging
-from typing import Dict, Optional, Tuple, Union
 from collections.abc import Generator, Iterable, Mapping
 
 from mlos_bench.config.schemas import ConfigSchema

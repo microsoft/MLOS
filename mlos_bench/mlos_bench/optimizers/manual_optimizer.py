@@ -13,7 +13,6 @@ TODO: Add an example configuration.
 """
 
 import logging
-from typing import Dict, List, Optional
 
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.services.base_service import Service

@@ -4,7 +4,6 @@
 #
 """Unit tests for the storage subsystem."""
 from datetime import datetime, tzinfo
-from typing import Optional
 
 import pytest
 from pytz import UTC

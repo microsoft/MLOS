@@ -15,7 +15,7 @@ The ``mlos_bench`` CLI will do this automatically if the logging level is set to
 """
 
 import logging
-from typing import Any, List
+from typing import Any
 
 from sqlalchemy import (
     Column,

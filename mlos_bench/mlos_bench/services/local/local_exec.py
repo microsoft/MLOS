@@ -10,17 +10,9 @@ import os
 import shlex
 import subprocess
 import sys
-from string import Template
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Union,
-)
 from collections.abc import Callable, Iterable, Mapping
+from string import Template
+from typing import TYPE_CHECKING, Any
 
 from mlos_bench.os_environ import environ
 from mlos_bench.services.base_service import Service

@@ -11,7 +11,7 @@ See the `Flaml Documentation <https://microsoft.github.io/FLAML/>`_ for more
 details.
 """
 
-from typing import Dict, List, NamedTuple, Optional, Union
+from typing import NamedTuple
 from warnings import warn
 
 import ConfigSpace

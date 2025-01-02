@@ -29,7 +29,7 @@ for additional documentation and examples in the source tree.
 """
 
 from enum import Enum
-from typing import List, Optional, TypeVar
+from typing import TypeVar
 
 import ConfigSpace
 

@@ -14,7 +14,6 @@ import socket
 from datetime import tzinfo
 from logging import debug, warning
 from subprocess import run
-from typing import List, Optional
 
 import pytest
 import pytz

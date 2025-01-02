@@ -12,8 +12,8 @@ context (information about where the configuration was evaluated).
 
 These modules encapsulate tuples of those for easier passing around and manipulation.
 """
-from typing import Any, Optional
 from collections.abc import Iterable, Iterator
+from typing import Any
 
 import pandas as pd
 from ConfigSpace import Configuration, ConfigurationSpace

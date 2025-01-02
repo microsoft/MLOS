@@ -5,7 +5,6 @@
 """Unit tests for the composition of several LocalEnv benchmark environments."""
 import sys
 from datetime import datetime, timedelta, tzinfo
-from typing import Optional
 
 import pytest
 from pytz import UTC

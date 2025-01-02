@@ -7,8 +7,8 @@
 # pylint: disable=missing-function-docstring
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, List, NoReturn, Union
 from collections.abc import Callable
+from typing import Any, NoReturn, Union
 
 import ConfigSpace as CS
 import flaml.tune.sample

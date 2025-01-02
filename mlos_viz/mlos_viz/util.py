@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """Utility functions for manipulating experiment results data."""
-from typing import Dict, Literal, Optional, Tuple
+from typing import Literal
 
 import pandas
 

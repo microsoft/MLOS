@@ -7,7 +7,6 @@
 import itertools
 import math
 import random
-from typing import Dict, List
 
 import numpy as np
 import pytest

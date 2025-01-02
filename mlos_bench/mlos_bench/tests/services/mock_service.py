@@ -8,8 +8,8 @@ Basic MockService for testing.
 See Also: test_service_method_registering.py
 """
 
-from typing import Dict, List, Optional, Protocol, Union, runtime_checkable
 from collections.abc import Callable
+from typing import Protocol, runtime_checkable
 
 from mlos_bench.services.base_service import Service
 

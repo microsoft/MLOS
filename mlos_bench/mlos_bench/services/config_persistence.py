@@ -9,17 +9,9 @@ a benchmark :py:class:`.Environment`, :py:mod:`~mlos_bench.tunables`,
 
 import logging
 import os
-from importlib.resources import files
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Union,
-)
 from collections.abc import Callable, Iterable
+from importlib.resources import files
+from typing import TYPE_CHECKING, Any
 
 import json5  # To read configs with comments and other JSON5 syntax features
 from jsonschema import SchemaError, ValidationError

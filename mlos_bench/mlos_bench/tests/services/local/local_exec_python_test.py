@@ -5,7 +5,7 @@
 """Unit tests for LocalExecService to run Python scripts locally."""
 
 import json
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 

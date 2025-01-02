@@ -6,7 +6,6 @@
 
 import logging
 import random
-from typing import Dict, Optional
 from collections.abc import Callable, Sequence
 
 from mlos_bench.environments.status import Status

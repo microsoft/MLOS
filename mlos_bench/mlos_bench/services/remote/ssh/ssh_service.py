@@ -9,19 +9,10 @@ import os
 from abc import ABCMeta
 from asyncio import Event as CoroEvent
 from asyncio import Lock as CoroLock
+from collections.abc import Callable, Coroutine
 from threading import current_thread
 from types import TracebackType
-from typing import (
-    Any,
-    Dict,
-    List,
-    Literal,
-    Optional,
-    Tuple,
-    Type,
-    Union,
-)
-from collections.abc import Callable, Coroutine
+from typing import Any, Literal
 from warnings import warn
 
 import asyncssh

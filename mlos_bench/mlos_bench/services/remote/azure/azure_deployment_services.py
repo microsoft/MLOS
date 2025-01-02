@@ -8,8 +8,8 @@ import abc
 import json
 import logging
 import time
-from typing import Any, Dict, List, Optional, Tuple, Union
 from collections.abc import Callable
+from typing import Any
 
 import requests
 from requests.adapters import HTTPAdapter, Retry

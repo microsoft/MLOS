@@ -5,7 +5,6 @@
 """Unit tests to check the main CLI launcher."""
 import os
 import re
-from typing import List
 
 import pytest
 

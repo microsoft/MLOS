@@ -5,9 +5,8 @@
 """Helper functions for config example loading tests."""
 
 import os
-from importlib.resources import files
-from typing import List, Optional
 from collections.abc import Callable
+from importlib.resources import files
 
 from mlos_bench.util import path_join
 

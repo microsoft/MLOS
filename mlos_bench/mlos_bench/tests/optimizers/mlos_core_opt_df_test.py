@@ -4,7 +4,6 @@
 #
 """Unit tests for internal methods of the `MlosCoreOptimizer`."""
 
-from typing import List
 
 import pandas
 import pytest

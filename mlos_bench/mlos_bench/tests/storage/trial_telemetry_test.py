@@ -4,7 +4,7 @@
 #
 """Unit tests for saving and restoring the telemetry data."""
 from datetime import datetime, timedelta, tzinfo
-from typing import Any, List, Optional, Tuple
+from typing import Any
 
 import pytest
 from pytz import UTC

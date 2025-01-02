@@ -6,7 +6,6 @@
 
 from dataclasses import dataclass
 from subprocess import run
-from typing import Optional
 
 from pytest_docker.plugin import Services as DockerServices
 

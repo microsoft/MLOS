@@ -11,8 +11,8 @@ Note: these are not in the conftest.py file because they are also used by remote
 import os
 import sys
 import tempfile
-from subprocess import run
 from collections.abc import Generator
+from subprocess import run
 
 import pytest
 from pytest_docker.plugin import Services as DockerServices

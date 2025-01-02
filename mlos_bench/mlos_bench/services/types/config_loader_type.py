@@ -4,17 +4,8 @@
 #
 """Protocol interface for helper functions to lookup and load configs."""
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Optional,
-    Protocol,
-    Union,
-    runtime_checkable,
-)
 from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, Optional, Protocol, runtime_checkable
 
 from mlos_bench.config.schemas.config_schemas import ConfigSchema
 from mlos_bench.tunables.tunable import TunableValue

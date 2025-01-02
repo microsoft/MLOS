@@ -7,7 +7,6 @@
 import collections
 from abc import ABCMeta, abstractmethod
 from copy import deepcopy
-from typing import List, Optional, Tuple, Union
 
 import ConfigSpace
 import numpy as np

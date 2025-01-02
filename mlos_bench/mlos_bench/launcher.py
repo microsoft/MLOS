@@ -13,8 +13,8 @@ from the command line.
 import argparse
 import logging
 import sys
-from typing import Any, Dict, List, Optional, Tuple
 from collections.abc import Iterable
+from typing import Any
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.dict_templater import DictTemplater

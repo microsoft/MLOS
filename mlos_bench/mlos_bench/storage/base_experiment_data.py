@@ -30,7 +30,7 @@ mlos_bench.storage.base_trial_data.TrialData :
 """
 
 from abc import ABCMeta, abstractmethod
-from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple
+from typing import TYPE_CHECKING, Literal
 
 import pandas
 

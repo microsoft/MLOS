@@ -7,7 +7,6 @@
 import os
 import sys
 from subprocess import run
-from typing import Optional
 
 import pytest
 

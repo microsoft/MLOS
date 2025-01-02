@@ -6,9 +6,9 @@
 
 import json
 import logging
-from types import TracebackType
-from typing import Any, Dict, List, Literal, Optional, Set, Type, Union
 from collections.abc import Callable
+from types import TracebackType
+from typing import Any, Literal, Optional
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading

@@ -4,7 +4,7 @@
 #
 """Common fixtures for mock TunableGroups."""
 
-from typing import Any, Dict
+from typing import Any
 
 import json5 as json
 import pytest

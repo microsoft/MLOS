@@ -12,7 +12,6 @@ shell_env_params, required_args, const_args, etc.
 import abc
 import logging
 import re
-from typing import Dict, Optional
 from collections.abc import Iterable
 
 from mlos_bench.environments.base_environment import Environment

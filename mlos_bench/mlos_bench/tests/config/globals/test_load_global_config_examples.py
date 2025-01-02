@@ -4,7 +4,6 @@
 #
 """Tests for loading globals config examples."""
 import logging
-from typing import List
 
 import pytest
 

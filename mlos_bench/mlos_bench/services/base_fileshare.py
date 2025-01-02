@@ -6,8 +6,8 @@
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, List, Optional, Union
 from collections.abc import Callable
+from typing import Any
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.fileshare_type import SupportsFileShareOps

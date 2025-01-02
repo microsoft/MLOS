@@ -10,7 +10,6 @@ import os
 import re
 from itertools import chain
 from logging import warning
-from typing import Dict, List
 
 from setuptools import setup
 

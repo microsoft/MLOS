@@ -6,7 +6,7 @@
 :py:class:`.ExperimentData` interface.
 """
 import logging
-from typing import Dict, Literal, Optional
+from typing import Literal
 
 import pandas
 from sqlalchemy import Integer, String, func

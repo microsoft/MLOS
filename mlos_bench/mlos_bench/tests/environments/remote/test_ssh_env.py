@@ -6,7 +6,6 @@
 
 import os
 from importlib.resources import files
-from typing import Dict
 
 import numpy as np
 import pytest

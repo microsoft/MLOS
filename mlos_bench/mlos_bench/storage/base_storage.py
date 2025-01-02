@@ -24,10 +24,10 @@ mlos_bench.storage.base_trial_data.TrialData :
 
 import logging
 from abc import ABCMeta, abstractmethod
+from collections.abc import Iterator
 from datetime import datetime
 from types import TracebackType
-from typing import Any, Dict, List, Literal, Optional, Tuple, Type
-from collections.abc import Iterator
+from typing import Any, Literal
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.dict_templater import DictTemplater

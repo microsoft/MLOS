@@ -6,8 +6,8 @@
 
 import os
 import sys
-from typing import Any, List, Union
 from collections.abc import Generator
+from typing import Any
 
 import pytest
 from fasteners import InterProcessLock, InterProcessReaderWriterLock

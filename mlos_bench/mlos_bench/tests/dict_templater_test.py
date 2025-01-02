@@ -5,7 +5,7 @@
 """Unit tests for DictTemplater class."""
 
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 

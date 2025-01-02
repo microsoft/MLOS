@@ -4,7 +4,6 @@
 #
 """Unit tests for base environment class functionality."""
 
-from typing import Dict
 
 import pytest
 

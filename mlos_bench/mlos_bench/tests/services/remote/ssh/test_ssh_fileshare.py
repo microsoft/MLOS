@@ -6,12 +6,12 @@
 
 import os
 import tempfile
+from collections.abc import Generator
 from contextlib import contextmanager
 from os.path import basename
 from pathlib import Path
 from tempfile import _TemporaryFileWrapper  # pylint: disable=import-private-name
-from typing import Any, Dict, List
-from collections.abc import Generator
+from typing import Any
 
 import pytest
 

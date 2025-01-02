@@ -12,9 +12,8 @@ TODO: Documentat how variable propogation works in the remote environments.
 
 import logging
 import re
-from datetime import datetime
-from typing import Dict, Optional, Tuple
 from collections.abc import Iterable
+from datetime import datetime
 
 from pytz import UTC
 

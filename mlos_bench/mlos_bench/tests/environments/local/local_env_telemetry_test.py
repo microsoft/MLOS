@@ -4,7 +4,6 @@
 #
 """Unit tests for telemetry and status of LocalEnv benchmark environment."""
 from datetime import datetime, timedelta, tzinfo
-from typing import Optional
 
 import pytest
 from pytz import UTC

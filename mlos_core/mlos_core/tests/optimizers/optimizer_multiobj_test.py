@@ -5,7 +5,6 @@
 """Test multi-target optimization."""
 
 import logging
-from typing import List, Optional, Type
 
 import ConfigSpace as CS
 import pandas as pd

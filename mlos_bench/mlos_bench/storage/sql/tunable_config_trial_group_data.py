@@ -6,7 +6,7 @@
 the :py:class:`.TunableConfigTrialGroupData` interface.
 """
 
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING
 
 import pandas
 from sqlalchemy import Integer, func

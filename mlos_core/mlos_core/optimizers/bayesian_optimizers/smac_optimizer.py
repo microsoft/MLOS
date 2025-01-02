@@ -14,7 +14,7 @@ more details.
 from logging import warning
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING
 from warnings import warn
 
 import ConfigSpace

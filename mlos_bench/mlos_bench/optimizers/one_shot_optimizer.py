@@ -5,7 +5,6 @@
 """No-op optimizer for mlos_bench that proposes a single configuration."""
 
 import logging
-from typing import Optional
 
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.services.base_service import Service

@@ -6,8 +6,8 @@
 
 # pylint: disable=missing-function-docstring
 
-from typing import Any, Dict, List, Set
 from collections.abc import Iterator
+from typing import Any
 
 import ConfigSpace as CS
 import pandas as pd

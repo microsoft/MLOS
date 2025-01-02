@@ -11,7 +11,6 @@ import os
 import sys
 from getpass import getuser
 from importlib.resources import files
-from typing import List
 
 import pytest
 

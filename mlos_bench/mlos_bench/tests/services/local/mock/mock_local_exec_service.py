@@ -5,16 +5,8 @@
 """A collection Service functions for mocking local exec."""
 
 import logging
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Union,
-)
 from collections.abc import Callable, Iterable, Mapping
+from typing import TYPE_CHECKING, Any
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.local.temp_dir_context import TempDirContextService

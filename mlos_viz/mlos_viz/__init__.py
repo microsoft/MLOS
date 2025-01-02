@@ -19,7 +19,7 @@ other libraries for automatic data correlation and visualization like
 """
 
 from enum import Enum
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Literal
 
 import pandas
 

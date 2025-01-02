@@ -6,8 +6,8 @@
 
 import logging
 import os
-from typing import Any, Dict, List, Optional, Set, Union
 from collections.abc import Callable
+from typing import Any
 
 from azure.core.credentials import TokenCredential
 from azure.core.exceptions import ResourceNotFoundError

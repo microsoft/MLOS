@@ -4,7 +4,6 @@
 #
 """Tunable parameter definition."""
 import copy
-from typing import Dict, Union
 from collections.abc import Iterable
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue

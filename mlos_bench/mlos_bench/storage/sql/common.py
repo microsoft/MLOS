@@ -3,7 +3,6 @@
 # Licensed under the MIT License.
 #
 """Common SQL methods for accessing the stored benchmark data."""
-from typing import Dict, Optional
 
 import pandas
 from sqlalchemy import Integer, and_, func, select

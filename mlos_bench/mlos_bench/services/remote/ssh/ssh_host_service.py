@@ -5,9 +5,9 @@
 """A collection Service functions for managing hosts via SSH."""
 
 import logging
-from concurrent.futures import Future
-from typing import Any, Dict, List, Optional, Tuple, Union
 from collections.abc import Callable, Iterable
+from concurrent.futures import Future
+from typing import Any
 
 from asyncssh import ConnectionLost, DisconnectError, ProcessError, SSHCompletedProcess
 

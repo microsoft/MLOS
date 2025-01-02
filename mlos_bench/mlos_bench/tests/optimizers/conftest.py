@@ -4,7 +4,6 @@
 #
 """Test fixtures for mlos_bench optimizers."""
 
-from typing import List
 
 import pytest
 

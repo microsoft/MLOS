@@ -4,7 +4,6 @@
 #
 """Tests for Bayesian Optimizers."""
 
-from typing import Optional, Type
 
 import ConfigSpace as CS
 import pandas as pd

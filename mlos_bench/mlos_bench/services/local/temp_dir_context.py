@@ -7,11 +7,11 @@
 import abc
 import logging
 import os
+from collections.abc import Callable
 from contextlib import nullcontext
 from string import Template
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, List, Optional, Union
-from collections.abc import Callable
+from typing import Any
 
 from mlos_bench.services.base_service import Service
 

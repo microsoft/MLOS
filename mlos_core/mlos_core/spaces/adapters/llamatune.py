@@ -14,7 +14,6 @@ See Also: `LlamaTune: Sample-Efficient DBMS Configuration Tuning
 <https://www.microsoft.com/en-us/research/publication/llamatune-sample-efficient-dbms-configuration-tuning>`_.
 """
 import os
-from typing import Dict, List, Optional, Union
 from warnings import warn
 
 import ConfigSpace

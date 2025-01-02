@@ -6,9 +6,9 @@
 
 import re
 import warnings
-from importlib.metadata import version
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 from collections.abc import Callable, Iterable
+from importlib.metadata import version
+from typing import Any, Literal
 
 import pandas
 import seaborn as sns

@@ -6,7 +6,7 @@
 :py:class:`.TrialData` interface.
 """
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pandas
 from sqlalchemy.engine import Engine

@@ -4,7 +4,6 @@
 #
 """Unit tests for mock mlos_bench optimizer."""
 
-from typing import Dict, List, Optional
 
 import pytest
 

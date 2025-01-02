@@ -6,7 +6,6 @@
 
 import logging
 from importlib.resources import files
-from typing import List
 
 import pytest
 

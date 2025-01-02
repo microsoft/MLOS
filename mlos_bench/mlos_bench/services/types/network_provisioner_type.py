@@ -4,7 +4,7 @@
 #
 """Protocol interface for Network provisioning operations."""
 
-from typing import TYPE_CHECKING, Protocol, Tuple, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from mlos_bench.environments.status import Status

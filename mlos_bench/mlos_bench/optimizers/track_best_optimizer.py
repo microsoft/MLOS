@@ -6,7 +6,6 @@
 
 import logging
 from abc import ABCMeta
-from typing import Dict, Optional, Tuple, Union
 
 from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.base_optimizer import Optimizer

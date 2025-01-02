@@ -6,7 +6,6 @@
 
 import logging
 from enum import Enum
-from typing import Tuple, Union
 
 from asyncssh import SFTPError, SFTPFailure, SFTPNoSuchFile, SSHClientConnection, scp
 

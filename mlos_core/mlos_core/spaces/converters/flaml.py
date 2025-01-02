@@ -6,7 +6,7 @@
 :py:class:`~mlos_core.optimizers.flaml_optimizer.FlamlOptimizer`
 """
 
-from typing import TYPE_CHECKING, Dict, TypeAlias
+from typing import TYPE_CHECKING, TypeAlias
 
 import ConfigSpace
 import flaml.tune

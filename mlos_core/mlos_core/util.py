@@ -4,7 +4,6 @@
 #
 """Internal helper functions for mlos_core package."""
 
-from typing import Optional, Union
 
 import pandas as pd
 from ConfigSpace import Configuration, ConfigurationSpace

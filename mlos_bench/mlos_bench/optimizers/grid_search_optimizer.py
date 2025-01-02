@@ -5,7 +5,6 @@
 """Grid search optimizer for mlos_bench."""
 
 import logging
-from typing import Dict, Optional, Set, Tuple
 from collections.abc import Iterable, Sequence
 
 import ConfigSpace

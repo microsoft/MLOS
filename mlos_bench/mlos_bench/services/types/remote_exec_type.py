@@ -6,8 +6,8 @@
 a remote host OS.
 """
 
-from typing import TYPE_CHECKING, Protocol, Tuple, runtime_checkable
 from collections.abc import Iterable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from mlos_bench.environments.status import Status

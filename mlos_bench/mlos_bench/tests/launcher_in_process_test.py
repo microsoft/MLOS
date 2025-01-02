@@ -4,7 +4,6 @@
 #
 """Unit tests to check the launcher and the main optimization loop in-process."""
 
-from typing import List
 
 import pytest
 

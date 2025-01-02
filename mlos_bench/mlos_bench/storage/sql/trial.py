@@ -9,7 +9,7 @@ the benchmark trial data using `SQLAlchemy <https://sqlalchemy.org>`_ backend.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional, Tuple
+from typing import Any, Literal
 
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import IntegrityError

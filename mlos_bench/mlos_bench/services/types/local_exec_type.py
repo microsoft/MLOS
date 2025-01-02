@@ -8,14 +8,8 @@ commands locally on the scheduler side.
 
 import contextlib
 import tempfile
-from typing import (
-    Optional,
-    Protocol,
-    Tuple,
-    Union,
-    runtime_checkable,
-)
 from collections.abc import Iterable, Mapping
+from typing import Protocol, runtime_checkable
 
 from mlos_bench.tunables.tunable import TunableValue
 

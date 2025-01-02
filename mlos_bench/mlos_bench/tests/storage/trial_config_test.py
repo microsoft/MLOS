@@ -4,7 +4,7 @@
 #
 """Unit tests for saving and retrieving additional parameters of pending trials."""
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 from pytz import UTC

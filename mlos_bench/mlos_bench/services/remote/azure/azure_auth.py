@@ -6,9 +6,9 @@
 
 import logging
 from base64 import b64decode
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
 from collections.abc import Callable
+from datetime import datetime
+from typing import Any
 
 from azure.core.credentials import TokenCredential
 from azure.identity import CertificateCredential, DefaultAzureCredential

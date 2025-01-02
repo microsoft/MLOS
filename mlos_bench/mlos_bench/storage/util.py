@@ -4,7 +4,6 @@
 #
 """Utility functions for the storage subsystem."""
 
-from typing import Dict, Optional
 
 import pandas
 

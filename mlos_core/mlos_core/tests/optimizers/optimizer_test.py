@@ -6,7 +6,7 @@
 
 import logging
 from copy import deepcopy
-from typing import Any, List, Optional, Type
+from typing import Any
 
 import ConfigSpace as CS
 import numpy as np

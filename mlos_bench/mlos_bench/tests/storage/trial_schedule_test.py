@@ -3,9 +3,8 @@
 # Licensed under the MIT License.
 #
 """Unit tests for scheduling trials for some future time."""
-from datetime import datetime, timedelta
-from typing import Set
 from collections.abc import Iterator
+from datetime import datetime, timedelta
 
 from pytz import UTC
 

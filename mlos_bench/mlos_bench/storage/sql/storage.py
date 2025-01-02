@@ -5,7 +5,7 @@
 """Saving and restoring the benchmark data in SQL database."""
 
 import logging
-from typing import Dict, Literal, Optional
+from typing import Literal
 
 from sqlalchemy import URL, create_engine
 

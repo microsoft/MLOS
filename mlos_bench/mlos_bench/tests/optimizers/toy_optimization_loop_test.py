@@ -5,7 +5,6 @@
 """Toy optimization loop to test the optimizers on mock benchmark environment."""
 
 import logging
-from typing import Tuple
 
 import pytest
 

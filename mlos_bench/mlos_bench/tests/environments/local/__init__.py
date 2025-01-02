@@ -8,7 +8,7 @@ Tests for mlos_bench.environments.local.
 Used to make mypy happy about multiple conftest.py modules.
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 from mlos_bench.environments.composite_env import CompositeEnv
 from mlos_bench.environments.local.local_env import LocalEnv

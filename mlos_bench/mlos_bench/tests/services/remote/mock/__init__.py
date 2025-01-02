@@ -4,7 +4,7 @@
 #
 """Mock remote services for testing purposes."""
 
-from typing import Any, Tuple
+from typing import Any
 
 from mlos_bench.environments.status import Status
 
