@@ -55,7 +55,7 @@ def pytest_configure(config: pytest.Config) -> None:
     # Set pandas display options to make inline tests stable.
     import pandas  # pylint: disable=import-outside-toplevel
 
-    pandas.options.display.width = 120
+    pandas.options.display.width = 150
     pandas.options.display.max_columns = 10
 
     # Create a temporary directory for sharing files between master and worker nodes.

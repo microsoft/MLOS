@@ -101,7 +101,7 @@ def get_trials(
                 ts_start=utcify_timestamp(trial.ts_start, origin="utc"),
                 ts_end=utcify_nullable_timestamp(trial.ts_end, origin="utc"),
                 status=Status[trial.status],
-                trial_runner_id=trial.param_value,
+                trial_runner_id=trial.param_value if "param_value" in trial else None,
             )
             for trial in trials.fetchall()
         }
@@ -194,7 +194,7 @@ def get_results_df(
                     row.config_id,
                     row.tunable_config_trial_group_id,
                     row.status,
-                    row.param_value,
+                    row.param_value if "param_value" in row else None,  # trial_runner_id
                 )
                 for row in cur_trials.fetchall()
             ],
