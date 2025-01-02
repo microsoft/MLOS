@@ -36,7 +36,9 @@ BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Scheduler", "S
 :py:class:`~mlos_bench.storage.base_storage.Storage`, etc.).
 """
 
-BaseTypes = "Environment" | "Optimizer" | "Scheduler" | "Service" | "Storage"
+BaseTypes = (
+    type["Environment"] | type["Optimizer"] | type["Scheduler"] | type["Service"] | type["Storage"]
+)
 """Similar to :py:data:`.BaseTypeVar`, BaseTypes is a Union of the main base classes."""
 
 

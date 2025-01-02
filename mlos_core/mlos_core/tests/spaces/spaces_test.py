@@ -24,8 +24,8 @@ from mlos_core.spaces.converters.flaml import (
     configspace_to_flaml_space,
 )
 
-OptimizerSpace = FlamlSpace | CS.ConfigurationSpace
-OptimizerParam = FlamlDomain | Hyperparameter
+OptimizerSpace = type[FlamlSpace] | type[CS.ConfigurationSpace]
+OptimizerParam = type[FlamlDomain] | type[Hyperparameter]
 
 NP_E: float = np.e
 
