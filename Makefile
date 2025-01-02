@@ -6,14 +6,16 @@ PYTHON_VERSION := $(shell echo "${CONDA_ENV_NAME}" | sed -r -e 's/^mlos[-]?//')
 ENV_YML := conda-envs/${CONDA_ENV_NAME}.yml
 
 # Find the non-build python files we should consider as rule dependencies.
-PYTHON_FILES := $(shell find ./ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./(mlos_(core|bench|viz)/)?build/' -e '^./doc/source/')
-MLOS_CORE_PYTHON_FILES := $(shell find ./mlos_core/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_core/build/')
-MLOS_BENCH_PYTHON_FILES := $(shell find ./mlos_bench/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_bench/build/')
-MLOS_VIZ_PYTHON_FILES := $(shell find ./mlos_viz/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_viz/build/')
-NOTEBOOK_FILES := $(shell find ./ -type f -name '*.ipynb' 2>/dev/null | egrep -v -e '/build/')
-SCRIPT_FILES := $(shell find ./ -name '*.sh' -or -name '*.ps1' -or -name '*.cmd')
-SQL_FILES := $(shell find ./ -name '*.sql')
-MD_FILES := $(shell find ./ -name '*.md' | grep -v '^./doc/')
+# Do a single find and multiple filters for better performance.
+REPO_FILES := $(shell find . -type f 2>/dev/null | egrep -v -e '^./(mlos_(core|bench|viz)/)?build/' -e '^./doc/source/' -e '^./doc/build/')
+PYTHON_FILES := $(filter %.py, $(REPO_FILES))
+MLOS_CORE_PYTHON_FILES := $(filter ./mlos_core/%, $(PYTHON_FILES))
+MLOS_BENCH_PYTHON_FILES := $(filter ./mlos_bench/%, $(PYTHON_FILES))
+MLOS_VIZ_PYTHON_FILES := $(filter ./mlos_viz/%, $(PYTHON_FILES))
+NOTEBOOK_FILES := $(filter %.ipynb, $(REPO_FILES))
+SCRIPT_FILES := $(filter %.sh %.ps1 %.cmd, $(REPO_FILES))
+SQL_FILES := $(filter %.sql, $(REPO_FILES))
+MD_FILES := $(filter-out ./doc/%, $(filter %.md, $(REPO_FILES)))
 
 DOCKER := $(shell which docker)
 # Make sure the build directory exists.
