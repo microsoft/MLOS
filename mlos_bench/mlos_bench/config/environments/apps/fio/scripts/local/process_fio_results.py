@@ -8,8 +8,8 @@
 import argparse
 import itertools
 import json
-from typing import Any, Tuple
 from collections.abc import Iterator
+from typing import Any
 
 import pandas
 

@@ -23,10 +23,9 @@ Notes
 
 import json  # schema files are pure json - no comments
 import logging
+from collections.abc import Iterator, Mapping
 from enum import Enum
 from os import environ, path, walk
-from typing import Dict
-from collections.abc import Iterator, Mapping
 
 import jsonschema
 from referencing import Registry, Resource

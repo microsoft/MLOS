@@ -5,7 +5,6 @@
 """OS-level remote Environment on Azure."""
 
 import logging
-from typing import Optional
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.status import Status

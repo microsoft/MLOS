@@ -7,20 +7,10 @@
 import abc
 import json
 import logging
+from collections.abc import Iterable, Sequence
 from datetime import datetime
 from types import TracebackType
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Literal,
-    Optional,
-    Tuple,
-    Type,
-    Union,
-)
-from collections.abc import Iterable, Sequence
+from typing import TYPE_CHECKING, Any, Literal
 
 from pytz import UTC
 

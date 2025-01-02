@@ -8,7 +8,7 @@ expansions.
 
 from copy import deepcopy
 from string import Template
-from typing import Any, Dict, Optional
+from typing import Any
 
 from mlos_bench.os_environ import environ
 

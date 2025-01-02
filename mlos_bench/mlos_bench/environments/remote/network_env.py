@@ -5,7 +5,6 @@
 """Network Environment."""
 
 import logging
-from typing import Optional
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
