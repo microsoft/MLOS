@@ -170,6 +170,7 @@ CUSTOM_REF_TYPE_MAP: dict[tuple[str, str], str] = {
     ("T_co", "class"): "data",
     ("CoroReturnType", "class"): "data",
     ("FutureReturnType", "class"): "data",
+    ("NullableT", "class"): "data",
 }
 
 
@@ -207,6 +208,7 @@ def setup(app: SphinxApp) -> None:
 # sphinx has a hard time finding typealiases and typevars instead of classes.
 # See Also: https://github.com/sphinx-doc/sphinx/issues/10974
 nitpick_ignore = [
+    ("py:class", "Ellipsis"),
     # Internal typevars and aliases:
     ("py:class", "EnvironType"),
     # External typevars and aliases:
