@@ -30,9 +30,9 @@ def check_env_success(
         Tunable parameters (usually come from a fixture).
     env : Environment
         An environment to query for the results.
-    expected_results : Dict[str, float]
+    expected_results : dict[str, float]
         Expected results of the benchmark.
-    expected_telemetry : List[Tuple[datetime, str, Any]]
+    expected_telemetry : list[tuple[datetime, str, Any]]
         Expected telemetry data of the benchmark.
     global_config : dict
         Global params.

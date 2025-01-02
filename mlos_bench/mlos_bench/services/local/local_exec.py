@@ -38,7 +38,7 @@ def split_cmdline(cmdline: str) -> Iterable[list[str]]:
 
     Yields
     ------
-    Iterable[List[str]]
+    Iterable[list[str]]
         A list of subcommands or separators, each one a list of tokens.
         Can be rejoined as a flattened array.
     """
@@ -88,7 +88,7 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
             Free-format dictionary of global parameters.
         parent : Service
             An optional parent service that can provide mixin functions.
-        methods : Union[Dict[str, Callable], List[Callable], None]
+        methods : Union[dict[str, Callable], list[Callable], None]
             New methods to register with the service.
         """
         super().__init__(
@@ -151,12 +151,12 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
 
         Parameters
         ----------
-        subcmd_tokens : List[str]
+        subcmd_tokens : list[str]
             The previously split tokens of the subcmd.
 
         Returns
         -------
-        List[str]
+        list[str]
             A modified sub command line with the script paths resolved.
         """
         script_path = self.config_loader_service.resolve_path(subcmd_tokens[0])

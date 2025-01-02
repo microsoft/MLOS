@@ -67,7 +67,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             Free-format dictionary of global parameters.
         parent : Service
             An optional parent service that can provide mixin functions.
-        methods : Union[Dict[str, Callable], List[Callable], None]
+        methods : Union[dict[str, Callable], list[Callable], None]
             New methods to register with the service.
         """
         super().__init__(
@@ -110,7 +110,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         Returns
         -------
-        List[str]
+        list[str]
         """
         return list(self._config_path)  # make a copy to avoid modifications
 
@@ -166,7 +166,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         Returns
         -------
-        config : Union[dict, List[dict]]
+        config : Union[dict, list[dict]]
             Free-format dictionary that contains the configuration.
         """
         assert isinstance(json, str)
@@ -226,7 +226,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             Configuration of the optimizer.
         global_config : dict
             Global configuration parameters (optional).
-        parent_args : Dict[str, TunableValue]
+        parent_args : dict[str, TunableValue]
             An optional reference of the parent CompositeEnv's const_args used to
             expand dynamic config parameters from.
 
@@ -421,7 +421,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             all environments.
         global_config : dict
             Global parameters to add to the environment config.
-        parent_args : Dict[str, TunableValue]
+        parent_args : dict[str, TunableValue]
             An optional reference of the parent CompositeEnv's const_args used to
             expand dynamic config parameters from.
         service: Service
@@ -589,7 +589,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             A (possibly empty) collection of tunables to add to the environment.
         global_config : dict
             Global parameters to add to the environment config.
-        parent_args : Dict[str, TunableValue]
+        parent_args : dict[str, TunableValue]
             An optional reference of the parent CompositeEnv's const_args used to
             expand dynamic config parameters from.
         service : Service
@@ -627,13 +627,13 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             Global parameters to add to the environment config.
         service : Service
             An optional reference of the parent service to mix in.
-        parent_args : Dict[str, TunableValue]
+        parent_args : dict[str, TunableValue]
             An optional reference of the parent CompositeEnv's const_args used to
             expand dynamic config parameters from.
 
         Returns
         -------
-        env : List[Environment]
+        env : list[Environment]
             A list of new benchmarking environments.
         """
         config = self.load_config(json, ConfigSchema.ENVIRONMENT)

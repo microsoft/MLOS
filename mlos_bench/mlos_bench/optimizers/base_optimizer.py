@@ -233,7 +233,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
         ----------
         configs : Sequence[dict]
             Records of tunable values from other experiments.
-        scores : Sequence[Optional[Dict[str, TunableValue]]]
+        scores : Sequence[Optional[dict[str, TunableValue]]]
             Benchmark results from experiments that correspond to `configs`.
         status : Optional[Sequence[Status]]
             Status of the experiments that correspond to `configs`.
@@ -292,13 +292,13 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
             Usually it's the same config that the `.suggest()` method returned.
         status : Status
             Final status of the experiment (e.g., SUCCEEDED or FAILED).
-        score : Optional[Dict[str, TunableValue]]
+        score : Optional[dict[str, TunableValue]]
             A dict with the final benchmark results.
             None if the experiment was not successful.
 
         Returns
         -------
-        value : Optional[Dict[str, float]]
+        value : Optional[dict[str, float]]
             Benchmark scores extracted (and possibly transformed)
             from the dataframe that's being MINIMIZED.
         """
@@ -326,13 +326,13 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
         ----------
         status : Status
             Final status of the experiment (e.g., SUCCEEDED or FAILED).
-        scores : Optional[Dict[str, TunableValue]]
+        scores : Optional[dict[str, TunableValue]]
             A dict with the final benchmark results.
             None if the experiment was not successful.
 
         Returns
         -------
-        score : Optional[Dict[str, float]]
+        score : Optional[dict[str, float]]
             An optional dict of benchmark scores to be used as targets for MINIMIZATION.
         """
         if not status.is_completed():
@@ -370,7 +370,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
 
         Returns
         -------
-        (value, tunables) : Tuple[Dict[str, float], TunableGroups]
+        (value, tunables) : tuple[dict[str, float], TunableGroups]
             The best value and the corresponding configuration.
             (None, None) if no successful observation has been registered yet.
         """

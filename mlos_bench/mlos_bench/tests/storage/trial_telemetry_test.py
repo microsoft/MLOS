@@ -24,7 +24,7 @@ def zoned_telemetry_data(zone_info: tzinfo | None) -> list[tuple[datetime, str, 
 
     Returns
     -------
-    List[Tuple[datetime, str, str]]
+    list[tuple[datetime, str, str]]
         A list of (timestamp, metric_id, metric_value)
     """
     timestamp1 = datetime.now(zone_info)

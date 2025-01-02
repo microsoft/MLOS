@@ -91,7 +91,7 @@ class TunableConfigTrialGroupSqlData(TunableConfigTrialGroupData):
 
         Returns
         -------
-        trials : Dict[int, TrialData]
+        trials : dict[int, TrialData]
             A dictionary of the trials' data, keyed by trial id.
         """
         return common.get_trials(

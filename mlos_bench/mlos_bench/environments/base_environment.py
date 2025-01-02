@@ -184,7 +184,7 @@ class Environment(metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        groups : List[str]
+        groups : list[str]
             Names of the groups of tunables, maybe with `$` prefix (subject to expansion).
         groups_exp : dict
             A dictionary that maps dollar variables for tunable groups to the lists
@@ -192,7 +192,7 @@ class Environment(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        groups : List[str]
+        groups : list[str]
             A flat list of tunable groups IDs for the environment.
         """
         res: list[str] = []
@@ -300,7 +300,7 @@ class Environment(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        params : Dict[str, Union[int, float, str]]
+        params : dict[str, Union[int, float, str]]
             Free-format dictionary that contains the new environment configuration.
         """
         return tunables.get_param_values(
@@ -329,7 +329,7 @@ class Environment(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        parameters : Dict[str, TunableValue]
+        parameters : dict[str, TunableValue]
             Key/value pairs of all environment parameters
             (i.e., `const_args` and `tunable_params`).
         """

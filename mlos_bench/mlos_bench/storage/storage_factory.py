@@ -31,7 +31,7 @@ def from_config(
     ----------
     config : str
         JSON5 config file or string to load.
-    global_configs : Optional[List[str]]
+    global_configs : Optional[list[str]]
         An optional list of config files with global parameters.
     kwargs : dict
         Additional configuration parameters.

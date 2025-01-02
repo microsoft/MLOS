@@ -27,13 +27,13 @@ def expand_results_data_args(
     results_df : Optional[pandas.DataFrame]
         Optional results_df argument.
         If not provided, defaults to :py:attr:`.ExperimentData.results_df` property.
-    objectives : Optional[Dict[str, Literal["min", "max"]]]
+    objectives : Optional[dict[str, Literal["min", "max"]]]
         Optional objectives set to operate on.
         If not provided, defaults to :py:attr:`.ExperimentData.objectives` property.
 
     Returns
     -------
-    Tuple[pandas.DataFrame, Dict[str, bool]]
+    tuple[pandas.DataFrame, dict[str, bool]]
         The results dataframe and the objectives columns in the dataframe, plus
         whether or not they are in ascending order.
     """

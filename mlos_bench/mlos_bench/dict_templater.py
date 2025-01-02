@@ -22,7 +22,7 @@ class DictTemplater:  # pylint: disable=too-few-public-methods
 
         Parameters
         ----------
-        source_dict : Dict[str, Any]
+        source_dict : dict[str, Any]
             The template dict to use for source variables.
         """
         # A copy of the initial data structure we were given with templates intact.
@@ -41,14 +41,14 @@ class DictTemplater:  # pylint: disable=too-few-public-methods
 
         Parameters
         ----------
-        extra_source_dict : Dict[str, Any]
+        extra_source_dict : dict[str, Any]
             An optional extra source dictionary to use for expansion.
         use_os_env : bool
             Whether to use the os environment variables a final fallback for expansion.
 
         Returns
         -------
-        Dict[str, Any]
+        dict[str, Any]
             The expanded dictionary.
 
         Raises

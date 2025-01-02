@@ -20,9 +20,9 @@ class SupportsRemoteConfig(Protocol):
 
         Parameters
         ----------
-        config : Dict[str, Any]
+        config : dict[str, Any]
             Key/value pairs of configuration parameters (e.g., vmName).
-        params : Dict[str, Any]
+        params : dict[str, Any]
             Key/value pairs of the service parameters to update.
 
         Returns
@@ -38,7 +38,7 @@ class SupportsRemoteConfig(Protocol):
 
         Parameters
         ----------
-        config : Dict[str, Any]
+        config : dict[str, Any]
             Key/value pairs of configuration parameters (e.g., vmName).
 
         Returns

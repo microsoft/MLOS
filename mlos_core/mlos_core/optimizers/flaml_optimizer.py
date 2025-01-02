@@ -56,10 +56,10 @@ class FlamlOptimizer(BaseOptimizer):
         parameter_space : ConfigSpace.ConfigurationSpace
             The parameter space to optimize.
 
-        optimization_targets : List[str]
+        optimization_targets : list[str]
             The names of the optimization targets to minimize.
 
-        objective_weights : Optional[List[float]]
+        objective_weights : Optional[list[float]]
             Optional list of weights of optimization targets.
 
         space_adapter : BaseSpaceAdapter

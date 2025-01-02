@@ -108,7 +108,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        env_params : Dict[str, str]
+        env_params : dict[str, str]
             Parameters to pass as *shell* environment variables into the script.
             This is usually a subset of `_params` with some possible conversions.
         """
@@ -128,7 +128,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        results : Dict[str, TunableValue]
+        results : dict[str, TunableValue]
             A dictionary of results extracted from the stdout.
         """
         if not self._results_stdout_pattern:

@@ -46,7 +46,7 @@ class AzureFileShareService(FileShareService):
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
-        methods : Union[Dict[str, Callable], List[Callable], None]
+        methods : Union[dict[str, Callable], list[Callable], None]
             New methods to register with the service.
         """
         super().__init__(
@@ -141,7 +141,7 @@ class AzureFileShareService(FileShareService):
         recursive : bool
             If False, ignore the subdirectories;
             if True (the default), upload the entire directory tree.
-        seen: Set[str]
+        seen: set[str]
             Helper set for keeping track of visited directories to break circular paths.
         """
         local_path = os.path.abspath(local_path)

@@ -556,7 +556,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
         Returns
         -------
-        range : Union[Tuple[int, int], Tuple[float, float]]
+        range : Union[tuple[int, int], tuple[float, float]]
             A 2-tuple of numbers that represents the range of the tunable.
             Numbers can be int or float, depending on the type of the tunable.
         """
@@ -678,7 +678,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
         Returns
         -------
-        distribution_params : Dict[str, float]
+        distribution_params : dict[str, float]
             Parameters of the distribution or None.
         """
         assert self._distribution is not None
@@ -692,7 +692,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
         Returns
         -------
-        values : List[str]
+        values : list[str]
             List of all possible values of a categorical tunable.
         """
         assert self.is_categorical

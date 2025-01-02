@@ -168,7 +168,7 @@ class SshClientCache:
 
         Returns
         -------
-        Tuple[asyncssh.connection.SSHClientConnection, SshClient]
+        tuple[asyncssh.connection.SSHClientConnection, SshClient]
             A tuple of (SSHClientConnection, SshClient).
         """
         _LOG.debug("%s: get_client_connection: %s", current_thread().name, connect_params)
@@ -392,7 +392,7 @@ class SshService(Service, metaclass=ABCMeta):
 
         Returns
         -------
-        Tuple[SSHClientConnection, SshClient]
+        tuple[SSHClientConnection, SshClient]
             The connection and client objects.
         """
         assert self._in_context

@@ -117,7 +117,7 @@ class OptimizerFactory:
         ----------
         parameter_space : ConfigSpace.ConfigurationSpace
             Input configuration space.
-        optimization_targets : List[str]
+        optimization_targets : list[str]
             The names of the optimization targets to minimize.
         optimizer_type : OptimizerType
             Optimizer class as defined by Enum.

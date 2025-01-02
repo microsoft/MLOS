@@ -37,7 +37,7 @@ def plot(
     results_df : Optional[pandas.DataFrame]
         Optional results_df to plot.
         If not provided, defaults to exp_data.results_df property.
-    objectives : Optional[Dict[str, Literal["min", "max"]]]
+    objectives : Optional[dict[str, Literal["min", "max"]]]
         Optional objectives to plot.
         If not provided, defaults to exp_data.objectives property.
     """

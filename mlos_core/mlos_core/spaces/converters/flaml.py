@@ -20,7 +20,7 @@ FlamlDomain: TypeAlias = flaml.tune.sample.Domain
 """Flaml domain type alias."""
 
 FlamlSpace: TypeAlias = dict[str, flaml.tune.sample.Domain]
-"""Flaml space type alias - a `Dict[str, FlamlDomain]`"""
+"""Flaml space type alias - a `dict[str, FlamlDomain]`"""
 
 
 def configspace_to_flaml_space(

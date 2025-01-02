@@ -70,7 +70,7 @@ def _add_groupby_desc_column(
     ----------
     results_df: ExperimentData
         The experiment data to add the descriptor column to.
-    groupby_columns: Optional[List[str]]
+    groupby_columns: Optional[list[str]]
     """
     # Compose a new groupby_column for display purposes that is the
     # concatenation of the min trial_id (the first one) of each config trial
@@ -248,7 +248,7 @@ def limit_top_n_configs(
     Returns
     -------
     (top_n_config_results_df, top_n_config_ids, orderby_cols) :
-    Tuple[pandas.DataFrame, List[int], Dict[str, bool]]
+    tuple[pandas.DataFrame, list[int], dict[str, bool]]
         The filtered results dataframe, the config ids, and the columns used to
         order the configs.
     """
@@ -363,7 +363,7 @@ def plot_optimizer_trends(
     results_df : Optional[pandas.DataFrame]
         Optional results_df to plot.
         If not provided, defaults to :py:attr:`.ExperimentData.results_df` property.
-    objectives : Optional[Dict[str, Literal["min", "max"]]]
+    objectives : Optional[dict[str, Literal["min", "max"]]]
         Optional objectives to plot.
         If not provided, defaults to :py:attr:`.ExperimentData.objectives` property.
     """
@@ -454,7 +454,7 @@ def plot_top_n_configs(
     results_df : Optional[pandas.DataFrame]
         Optional results_df to plot.
         If not provided, defaults to :py:attr:`.ExperimentData.results_df` property.
-    objectives : Optional[Dict[str, Literal["min", "max"]]]
+    objectives : Optional[dict[str, Literal["min", "max"]]]
         Optional objectives to plot.
         If not provided, defaults to :py:attr:`.ExperimentData.objectives` property.
     with_scatter_plot : bool

@@ -25,7 +25,7 @@ def create_local_env(tunable_groups: TunableGroups, config: dict[str, Any]) -> L
     ----------
     tunable_groups : TunableGroups
         Tunable parameters (usually come from a fixture).
-    config : Dict[str, Any]
+    config : dict[str, Any]
         Environment configuration.
 
     Returns
@@ -54,11 +54,11 @@ def create_composite_local_env(
     ----------
     tunable_groups : TunableGroups
         Tunable parameters (usually come from a fixture).
-    global_config : Dict[str, Any]
+    global_config : dict[str, Any]
         Global configuration parameters.
-    params: Dict[str, Any]
+    params: dict[str, Any]
         Additional config params for the CompositeEnv.
-    local_configs: List[Dict[str, Any]]
+    local_configs: list[dict[str, Any]]
         Configurations of the local environments.
 
     Returns

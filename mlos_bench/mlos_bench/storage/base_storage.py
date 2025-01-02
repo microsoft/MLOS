@@ -85,7 +85,7 @@ class Storage(metaclass=ABCMeta):
 
         Returns
         -------
-        experiments : Dict[str, ExperimentData]
+        experiments : dict[str, ExperimentData]
             A dictionary of the experiments' data, keyed by experiment id.
         """
 
@@ -118,7 +118,7 @@ class Storage(metaclass=ABCMeta):
         description : str
             Human-readable description of the experiment.
         tunables : TunableGroups
-        opt_targets : Dict[str, Literal["min", "max"]]
+        opt_targets : dict[str, Literal["min", "max"]]
             Names of metrics we're optimizing for and the optimization direction {min, max}.
 
         Returns
@@ -255,7 +255,7 @@ class Storage(metaclass=ABCMeta):
 
             Parameters
             ----------
-            experiment_ids : List[str]
+            experiment_ids : list[str]
                 List of IDs of the experiments to merge in.
             """
 
@@ -275,7 +275,7 @@ class Storage(metaclass=ABCMeta):
 
             Returns
             -------
-            metrics : List[Tuple[datetime.datetime, str, Any]]
+            metrics : list[tuple[datetime.datetime, str, Any]]
                 Telemetry data.
             """
 
@@ -479,13 +479,13 @@ class Storage(metaclass=ABCMeta):
                 Status of the experiment run.
             timestamp: datetime.datetime
                 Timestamp of the status and metrics.
-            metrics : Optional[Dict[str, Any]]
+            metrics : Optional[dict[str, Any]]
                 One or several metrics of the experiment run.
                 Must contain the (float) optimization target if the status is SUCCEEDED.
 
             Returns
             -------
-            metrics : Optional[Dict[str, Any]]
+            metrics : Optional[dict[str, Any]]
                 Same as `metrics`, but always in the dict format.
             """
             _LOG.info("Store trial: %s :: %s %s", self, status, metrics)
@@ -518,7 +518,7 @@ class Storage(metaclass=ABCMeta):
                 Current status of the trial.
             timestamp: datetime.datetime
                 Timestamp of the status (but not the metrics).
-            metrics : List[Tuple[datetime.datetime, str, Any]]
+            metrics : list[tuple[datetime.datetime, str, Any]]
                 Telemetry data.
             """
             _LOG.info("Store telemetry: %s :: %s %d records", self, status, len(metrics))

@@ -57,7 +57,7 @@ class SupportsConfigLoading(Protocol):
 
         Returns
         -------
-        config : Union[dict, List[dict]]
+        config : Union[dict, list[dict]]
             Free-format dictionary that contains the configuration.
         """
 
@@ -85,7 +85,7 @@ class SupportsConfigLoading(Protocol):
             all environments.
         global_config : Optional[dict]
             Global parameters to add to the environment config.
-        parent_args : Optional[Dict[str, TunableValue]]
+        parent_args : Optional[dict[str, TunableValue]]
             An optional reference of the parent CompositeEnv's const_args used to
             expand dynamic config parameters from.
         service: Optional[Service]
@@ -119,7 +119,7 @@ class SupportsConfigLoading(Protocol):
             A (possibly empty) collection of tunables to add to the environment.
         global_config : Optional[dict]
             Global parameters to add to the environment config.
-        parent_args : Optional[Dict[str, TunableValue]]
+        parent_args : Optional[dict[str, TunableValue]]
             An optional reference of the parent CompositeEnv's const_args used to
             expand dynamic config parameters from.
         service : Optional[Service]
@@ -127,7 +127,7 @@ class SupportsConfigLoading(Protocol):
 
         Returns
         -------
-        env : List[Environment]
+        env : list[Environment]
             A list of new benchmarking environments.
         """
 

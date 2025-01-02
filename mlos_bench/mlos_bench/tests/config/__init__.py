@@ -32,7 +32,7 @@ def locate_config_examples(
 
     Returns
     -------
-    config_examples: List[str]
+    config_examples: list[str]
         List of paths to config examples.
     """
     if examples_filter is None:

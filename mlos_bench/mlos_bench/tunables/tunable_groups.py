@@ -185,7 +185,7 @@ class TunableGroups:
 
         Returns
         -------
-        [(tunable, group), ...] : Generator[Tuple[Tunable, CovariantTunableGroup], None, None]
+        [(tunable, group), ...] : Generator[tuple[Tunable, CovariantTunableGroup], None, None]
             An iterator over all tunables in all groups. Each element is a 2-tuple
             of an instance of the Tunable parameter and covariant group it belongs to.
         """

@@ -101,7 +101,7 @@ class ExperimentData(metaclass=ABCMeta):
 
         Returns
         -------
-        (root_env_config, git_repo, git_commit) : Tuple[str, str, str]
+        (root_env_config, git_repo, git_commit) : tuple[str, str, str]
             A tuple of (root_env_config, git_repo, git_commit) for the root environment.
         """
         return (self._root_env_config, self._git_repo, self._git_commit)
@@ -117,7 +117,7 @@ class ExperimentData(metaclass=ABCMeta):
 
         Returns
         -------
-        objectives : Dict[str, Literal["min", "max"]]
+        objectives : dict[str, Literal["min", "max"]]
             A dictionary of the experiment's objective names (optimization_targets)
             and their directions (e.g., min or max).
         """
@@ -130,7 +130,7 @@ class ExperimentData(metaclass=ABCMeta):
 
         Returns
         -------
-        trials : Dict[int, TrialData]
+        trials : dict[int, TrialData]
             A dictionary of the trials' data, keyed by trial id.
         """
 
@@ -142,7 +142,7 @@ class ExperimentData(metaclass=ABCMeta):
 
         Returns
         -------
-        trials : Dict[int, TunableConfigData]
+        trials : dict[int, TunableConfigData]
             A dictionary of the configs' data, keyed by (tunable) config id.
         """
 
@@ -154,7 +154,7 @@ class ExperimentData(metaclass=ABCMeta):
 
         Returns
         -------
-        trials : Dict[int, TunableConfigTrialGroupData]
+        trials : dict[int, TunableConfigTrialGroupData]
             A dictionary of the trials' data, keyed by (tunable) by config id.
         """
 

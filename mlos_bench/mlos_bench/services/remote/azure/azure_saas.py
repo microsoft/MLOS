@@ -57,7 +57,7 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
-        methods : Union[Dict[str, Callable], List[Callable], None]
+        methods : Union[dict[str, Callable], list[Callable], None]
             New methods to register with the service.
         """
         super().__init__(
@@ -124,9 +124,9 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
 
         Parameters
         ----------
-        config : Dict[str, Any]
+        config : dict[str, Any]
             Key/value pairs of configuration parameters (e.g., vmName).
-        params : Dict[str, Any]
+        params : dict[str, Any]
             Key/value pairs of the service parameters to update.
 
         Returns
@@ -145,7 +145,7 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
 
         Parameters
         ----------
-        config : Dict[str, Any]
+        config : dict[str, Any]
             Key/value pairs of configuration parameters (e.g., vmName).
 
         Returns
@@ -194,7 +194,7 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
 
         Parameters
         ----------
-        config : Dict[str, Any]
+        config : dict[str, Any]
             Key/value pairs of configuration parameters (e.g., vmName).
         param_name : str
             Name of the parameter to update.
@@ -230,9 +230,9 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
 
         Parameters
         ----------
-        config : Dict[str, Any]
+        config : dict[str, Any]
             Key/value pairs of configuration parameters (e.g., vmName).
-        params : Dict[str, Any]
+        params : dict[str, Any]
             Key/value pairs of the service parameters to update.
 
         Returns
@@ -253,9 +253,9 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
 
         Parameters
         ----------
-        config : Dict[str, Any]
+        config : dict[str, Any]
             Key/value pairs of configuration parameters (e.g., vmName).
-        params : Dict[str, Any]
+        params : dict[str, Any]
             Key/value pairs of the service parameters to update.
 
         Returns

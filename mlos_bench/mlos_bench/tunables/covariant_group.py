@@ -184,7 +184,7 @@ class CovariantTunableGroup:
 
         Returns
         -------
-        tunables : Dict[str, TunableValue]
+        tunables : dict[str, TunableValue]
         """
         return {name: tunable.value for (name, tunable) in self._tunables.items()}
 

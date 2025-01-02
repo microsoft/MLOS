@@ -45,7 +45,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
-        methods : Union[Dict[str, Callable], List[Callable], None]
+        methods : Union[dict[str, Callable], list[Callable], None]
             New methods to register with the service.
         """
         # Same methods are also provided by the AzureVMService class
@@ -202,7 +202,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
 
         Parameters
         ----------
-        cmd_opts_list : List[str]
+        cmd_opts_list : list[str]
             List of commands to try to execute.
         params : dict
             The params used to connect to the host.

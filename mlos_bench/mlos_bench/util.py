@@ -283,7 +283,7 @@ def get_git_info(path: str = __file__) -> tuple[str, str, str]:
 
     Returns
     -------
-    (git_repo, git_commit, git_path) : Tuple[str, str, str]
+    (git_repo, git_commit, git_path) : tuple[str, str, str]
         Git repository URL, last commit hash, and relative file path.
     """
     dirname = os.path.dirname(path)

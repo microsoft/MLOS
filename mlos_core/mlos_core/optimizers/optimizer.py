@@ -41,10 +41,10 @@ class BaseOptimizer(metaclass=ABCMeta):
         ----------
         parameter_space : ConfigSpace.ConfigurationSpace
             The parameter space to optimize.
-        optimization_targets : List[str]
+        optimization_targets : list[str]
             The names of the optimization targets to minimize.
             To maximize a target, use the negative of the target when registering scores.
-        objective_weights : Optional[List[float]]
+        objective_weights : Optional[list[float]]
             Optional list of weights of optimization targets.
         space_adapter : BaseSpaceAdapter
             The space adapter class to employ for parameter space transformations.

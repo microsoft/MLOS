@@ -64,7 +64,7 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
-        methods : Union[Dict[str, Callable], List[Callable], None]
+        methods : Union[dict[str, Callable], list[Callable], None]
             New methods to register with the service.
         """
         super().__init__(config, global_config, parent, methods)

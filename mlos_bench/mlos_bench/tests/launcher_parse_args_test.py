@@ -39,7 +39,7 @@ def config_paths() -> list[str]:
 
     Returns
     -------
-    List[str]
+    list[str]
     """
     return [
         path_join(os.getcwd(), abs_path=True),

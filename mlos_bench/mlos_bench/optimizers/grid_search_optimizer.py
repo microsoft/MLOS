@@ -96,7 +96,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
 
         Returns
         -------
-        Iterable[Dict[str, TunableValue]]
+        Iterable[dict[str, TunableValue]]
         """
         # See NOTEs above.
         return (dict(zip(self._config_keys, config)) for config in self._pending_configs.keys())
@@ -108,7 +108,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
 
         Returns
         -------
-        Iterable[Dict[str, TunableValue]]
+        Iterable[dict[str, TunableValue]]
         """
         # See NOTEs above.
         return (dict(zip(self._config_keys, config)) for config in self._suggested_configs)
