@@ -96,7 +96,7 @@ RUN echo "Setup miniconda" \
     && sg conda -c "/opt/conda/bin/conda env create -n mlos -v -f /tmp/conda-tmp/mlos_deps.yml" \
     && sg conda -c "/opt/conda/bin/conda run -n mlos pip install --no-cache-dir -U -r /tmp/conda-tmp/combined.requirements.txt" \
     && sg conda -c "git -C /tmp/conda-tmp init" \
-    && sg conda -c "/opt/conda/bin/conda run -n mlos pre-commit install-hooks -c /tmp/conda-tmp/.pre-commit-config.yaml" \
+    && sg conda -c "/opt/conda/bin/conda run --cwd /tmp/conda-tmp -n mlos pre-commit install-hooks -c .pre-commit-config.yaml" \
     && sg conda -c "/opt/conda/bin/conda run -n mlos pip cache purge" \
     && sg conda -c "/opt/conda/bin/conda clean -v -y -a" \
     && mkdir -p /opt/conda/pkgs/cache/ && chown -R vscode:conda /opt/conda/pkgs/cache/ \
