@@ -16,7 +16,7 @@ from mlos_bench.tests.environments.local import create_composite_local_env
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
-def _format_str(zone_info: Optional[tzinfo]) -> str:
+def _format_str(zone_info: tzinfo | None) -> str:
     if zone_info is not None:
         return "%Y-%m-%d %H:%M:%S %z"
     return "%Y-%m-%d %H:%M:%S"
@@ -24,7 +24,7 @@ def _format_str(zone_info: Optional[tzinfo]) -> str:
 
 # FIXME: This fails with zone_info = None when run with `TZ="America/Chicago pytest -n0 ...`
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
-def test_composite_env(tunable_groups: TunableGroups, zone_info: Optional[tzinfo]) -> None:
+def test_composite_env(tunable_groups: TunableGroups, zone_info: tzinfo | None) -> None:
     """
     Produce benchmark and telemetry data in TWO local environments and combine the
     results.

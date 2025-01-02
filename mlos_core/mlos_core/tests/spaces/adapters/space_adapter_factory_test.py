@@ -45,8 +45,8 @@ def test_concrete_optimizer_type(space_adapter_type: SpaceAdapterType) -> None:
     ],
 )
 def test_create_space_adapter_with_factory_method(
-    space_adapter_type: Optional[SpaceAdapterType],
-    kwargs: Optional[dict],
+    space_adapter_type: SpaceAdapterType | None,
+    kwargs: dict | None,
 ) -> None:
     # Start defining a ConfigurationSpace for the Optimizer to search.
     input_space = CS.ConfigurationSpace(seed=1234)
@@ -85,7 +85,7 @@ def test_create_space_adapter_with_factory_method(
 
 # Dynamically determine all of the optimizers we have implemented.
 # Note: these must be sorted.
-space_adapter_subclasses: List[Type[BaseSpaceAdapter]] = get_all_concrete_subclasses(
+space_adapter_subclasses: list[type[BaseSpaceAdapter]] = get_all_concrete_subclasses(
     BaseSpaceAdapter,  # type: ignore[type-abstract]
     pkg_name="mlos_core",
 )
@@ -93,7 +93,7 @@ assert space_adapter_subclasses
 
 
 @pytest.mark.parametrize(("space_adapter_class"), space_adapter_subclasses)
-def test_space_adapter_type_defs(space_adapter_class: Type[BaseSpaceAdapter]) -> None:
+def test_space_adapter_type_defs(space_adapter_class: type[BaseSpaceAdapter]) -> None:
     """Test that all space adapter classes are listed in the SpaceAdapterType enum."""
     space_adapter_type_classes = {
         space_adapter_type.value for space_adapter_type in SpaceAdapterType

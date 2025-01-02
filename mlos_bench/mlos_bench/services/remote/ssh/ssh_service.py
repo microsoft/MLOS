@@ -13,8 +13,6 @@ from threading import current_thread
 from types import TracebackType
 from typing import (
     Any,
-    Callable,
-    Coroutine,
     Dict,
     List,
     Literal,
@@ -23,6 +21,7 @@ from typing import (
     Type,
     Union,
 )
+from collections.abc import Callable, Coroutine
 from warnings import warn
 
 import asyncssh
@@ -53,7 +52,7 @@ class SshClient(asyncssh.SSHClient):
 
     def __init__(self, *args: tuple, **kwargs: dict):
         self._connection_id: str = SshClient._CONNECTION_PENDING
-        self._connection: Optional[SSHClientConnection] = None
+        self._connection: SSHClientConnection | None = None
         self._conn_event: CoroEvent = CoroEvent()
         super().__init__(*args, **kwargs)
 
@@ -92,7 +91,7 @@ class SshClient(asyncssh.SSHClient):
         self._conn_event.set()
         return super().connection_made(conn)
 
-    def connection_lost(self, exc: Optional[Exception]) -> None:
+    def connection_lost(self, exc: Exception | None) -> None:
         self._conn_event.clear()
         _LOG.debug("%s: %s", current_thread().name, "connection_lost")
         if exc is None:
@@ -114,7 +113,7 @@ class SshClient(asyncssh.SSHClient):
         self._conn_event.set()
         return super().connection_lost(exc)
 
-    async def connection(self) -> Optional[SSHClientConnection]:
+    async def connection(self) -> SSHClientConnection | None:
         """Waits for and returns the asyncssh.connection.SSHClientConnection to be
         established or lost.
         """
@@ -133,7 +132,7 @@ class SshClientCache:
     """
 
     def __init__(self) -> None:
-        self._cache: Dict[str, Tuple[SSHClientConnection, SshClient]] = {}
+        self._cache: dict[str, tuple[SSHClientConnection, SshClient]] = {}
         self._cache_lock = CoroLock()
         self._refcnt: int = 0
 
@@ -167,7 +166,7 @@ class SshClientCache:
     async def get_client_connection(
         self,
         connect_params: dict,
-    ) -> Tuple[SSHClientConnection, SshClient]:
+    ) -> tuple[SSHClientConnection, SshClient]:
         """
         Gets a (possibly cached) client connection.
 
@@ -184,7 +183,7 @@ class SshClientCache:
         _LOG.debug("%s: get_client_connection: %s", current_thread().name, connect_params)
         async with self._cache_lock:
             connection_id = SshClient.id_from_params(connect_params)
-            client: Union[None, SshClient, asyncssh.SSHClient]
+            client: None | SshClient | asyncssh.SSHClient
             _, client = self._cache.get(connection_id, (None, None))
             if client:
                 _LOG.debug("%s: Checking cached client %s", current_thread().name, connection_id)
@@ -249,14 +248,14 @@ class SshService(Service, metaclass=ABCMeta):
     _EVENT_LOOP_CONTEXT = EventLoopContext()
     _EVENT_LOOP_THREAD_SSH_CLIENT_CACHE = SshClientCache()
 
-    _REQUEST_TIMEOUT: Optional[float] = None  # seconds
+    _REQUEST_TIMEOUT: float | None = None  # seconds
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         super().__init__(config, global_config, parent, methods)
 
@@ -308,9 +307,9 @@ class SshService(Service, metaclass=ABCMeta):
 
     def _exit_context(
         self,
-        ex_type: Optional[Type[BaseException]],
-        ex_val: Optional[BaseException],
-        ex_tb: Optional[TracebackType],
+        ex_type: type[BaseException] | None,
+        ex_val: BaseException | None,
+        ex_tb: TracebackType | None,
     ) -> Literal[False]:
         # Stop the background thread if it's not needed anymore and potentially
         # cleanup the cache as well.
@@ -379,7 +378,7 @@ class SshService(Service, metaclass=ABCMeta):
         elif self.config["ssh_username"]:
             connect_params["username"] = str(self.config["ssh_username"])
 
-        priv_key_file: Optional[str] = params.get(
+        priv_key_file: str | None = params.get(
             "ssh_priv_key_path",
             self.config["ssh_priv_key_path"],
         )
@@ -391,7 +390,7 @@ class SshService(Service, metaclass=ABCMeta):
 
         return connect_params
 
-    async def _get_client_connection(self, params: dict) -> Tuple[SSHClientConnection, SshClient]:
+    async def _get_client_connection(self, params: dict) -> tuple[SSHClientConnection, SshClient]:
         """
         Gets a (possibly cached) SshClient (connection) for the given connection params.
 

@@ -87,7 +87,7 @@ class SpaceAdapterFactory:
         *,
         parameter_space: ConfigSpace.ConfigurationSpace,
         space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
-        space_adapter_kwargs: Optional[dict] = None,
+        space_adapter_kwargs: dict | None = None,
     ) -> ConcreteSpaceAdapter:  # type: ignore[type-var]
         """
         Create a new space adapter instance, given the parameter space and potential

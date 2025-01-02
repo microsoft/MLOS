@@ -18,7 +18,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 @pytest.fixture
-def mock_configs() -> List[dict]:
+def mock_configs() -> list[dict]:
     """Mock configurations of earlier experiments."""
     return [
         {
@@ -160,7 +160,7 @@ def smac_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
 
 
 @pytest.fixture
-def manual_opt(tunable_groups: TunableGroups, mock_configs: List[dict]) -> ManualOptimizer:
+def manual_opt(tunable_groups: TunableGroups, mock_configs: list[dict]) -> ManualOptimizer:
     """Test fixture for ManualOptimizer."""
     return ManualOptimizer(
         tunables=tunable_groups,

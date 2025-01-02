@@ -21,10 +21,10 @@ from mlos_viz.util import expand_results_data_args
 
 
 def plot(
-    exp_data: Optional[ExperimentData] = None,
+    exp_data: ExperimentData | None = None,
     *,
-    results_df: Optional[pandas.DataFrame] = None,
-    objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
+    results_df: pandas.DataFrame | None = None,
+    objectives: dict[str, Literal["min", "max"]] | None = None,
 ) -> None:
     """
     Plots the :py:class:`~mlos_bench.storage.base_storage.Storage.Experiment` results

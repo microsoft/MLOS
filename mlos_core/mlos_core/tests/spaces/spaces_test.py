@@ -7,7 +7,8 @@
 # pylint: disable=missing-function-docstring
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Callable, List, NoReturn, Union
+from typing import Any, List, NoReturn, Union
+from collections.abc import Callable
 
 import ConfigSpace as CS
 import flaml.tune.sample
@@ -90,7 +91,7 @@ class BaseConversion(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_parameter_names(self, config_space: OptimizerSpace) -> List[str]:
+    def get_parameter_names(self, config_space: OptimizerSpace) -> list[str]:
         """
         Get the parameter names from the given configuration space.
 
@@ -188,9 +189,9 @@ class TestFlamlConversion(BaseConversion):
         ).T
         return ret
 
-    def get_parameter_names(self, config_space: FlamlSpace) -> List[str]:  # type: ignore[override]
+    def get_parameter_names(self, config_space: FlamlSpace) -> list[str]:  # type: ignore[override]
         assert isinstance(config_space, dict)
-        ret: List[str] = list(config_space.keys())
+        ret: list[str] = list(config_space.keys())
         return ret
 
     def categorical_counts(self, points: npt.NDArray) -> npt.NDArray:

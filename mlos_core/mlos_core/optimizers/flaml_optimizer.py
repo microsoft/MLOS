@@ -42,11 +42,11 @@ class FlamlOptimizer(BaseOptimizer):
         self,
         *,  # pylint: disable=too-many-arguments
         parameter_space: ConfigSpace.ConfigurationSpace,
-        optimization_targets: List[str],
-        objective_weights: Optional[List[float]] = None,
-        space_adapter: Optional[BaseSpaceAdapter] = None,
-        low_cost_partial_config: Optional[dict] = None,
-        seed: Optional[int] = None,
+        optimization_targets: list[str],
+        objective_weights: list[float] | None = None,
+        space_adapter: BaseSpaceAdapter | None = None,
+        low_cost_partial_config: dict | None = None,
+        seed: int | None = None,
     ):
         """
         Create an MLOS wrapper for FLAML.
@@ -92,13 +92,13 @@ class FlamlOptimizer(BaseOptimizer):
             configspace_to_flaml_space,
         )
 
-        self.flaml_parameter_space: Dict[str, FlamlDomain] = configspace_to_flaml_space(
+        self.flaml_parameter_space: dict[str, FlamlDomain] = configspace_to_flaml_space(
             self.optimizer_parameter_space
         )
         self.low_cost_partial_config = low_cost_partial_config
 
-        self.evaluated_samples: Dict[ConfigSpace.Configuration, EvaluatedSample] = {}
-        self._suggested_config: Optional[dict]
+        self.evaluated_samples: dict[ConfigSpace.Configuration, EvaluatedSample] = {}
+        self._suggested_config: dict | None
 
     def _register(
         self,
@@ -156,7 +156,7 @@ class FlamlOptimizer(BaseOptimizer):
     def _suggest(
         self,
         *,
-        context: Optional[pd.Series] = None,
+        context: pd.Series | None = None,
     ) -> Suggestion:
         """
         Suggests a new configuration.
@@ -181,7 +181,7 @@ class FlamlOptimizer(BaseOptimizer):
     def register_pending(self, pending: Suggestion) -> None:
         raise NotImplementedError()
 
-    def _target_function(self, config: dict) -> Union[dict, None]:
+    def _target_function(self, config: dict) -> dict | None:
         """
         Configuration evaluation function called by FLAML optimizer.
 

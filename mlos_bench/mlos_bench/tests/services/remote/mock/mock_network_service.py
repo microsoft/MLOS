@@ -4,7 +4,8 @@
 #
 """A collection Service functions for mocking managing (Virtual) Networks."""
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
+from collections.abc import Callable
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.network_provisioner_type import (
@@ -18,10 +19,10 @@ class MockNetworkService(Service, SupportsNetworkProvisioning):
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """
         Create a new instance of mock network services proxy.

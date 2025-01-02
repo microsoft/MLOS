@@ -22,7 +22,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 @requires_docker
 def test_remote_ssh_env(ssh_test_server: SshTestServerInfo) -> None:
     """Produce benchmark and telemetry data in a local script and read it."""
-    global_config: Dict[str, TunableValue] = {
+    global_config: dict[str, TunableValue] = {
         "ssh_hostname": ssh_test_server.hostname,
         "ssh_port": ssh_test_server.get_port(),
         "ssh_username": ssh_test_server.username,

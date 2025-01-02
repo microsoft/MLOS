@@ -41,7 +41,7 @@ class TunableConfigTrialGroupSqlData(TunableConfigTrialGroupData):
         schema: DbSchema,
         experiment_id: str,
         tunable_config_id: int,
-        tunable_config_trial_group_id: Optional[int] = None,
+        tunable_config_trial_group_id: int | None = None,
     ):
         super().__init__(
             experiment_id=experiment_id,
@@ -84,7 +84,7 @@ class TunableConfigTrialGroupSqlData(TunableConfigTrialGroupData):
         )
 
     @property
-    def trials(self) -> Dict[int, "TrialData"]:
+    def trials(self) -> dict[int, "TrialData"]:
         """
         Retrieve the trials' data for this (tunable) config trial group from the
         storage.

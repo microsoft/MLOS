@@ -60,8 +60,8 @@ def _sanity_check_results(launcher: Launcher) -> None:
 
 
 def _main(
-    argv: Optional[List[str]] = None,
-) -> Tuple[Optional[Dict[str, float]], Optional[TunableGroups]]:
+    argv: list[str] | None = None,
+) -> tuple[dict[str, float] | None, TunableGroups | None]:
     launcher = Launcher("mlos_bench", "Systems autotuning and benchmarking tool", argv=argv)
 
     with launcher.scheduler as scheduler_context:
@@ -77,7 +77,7 @@ def _main(
 
 
 def _shell_main(
-    argv: Optional[List[str]] = None,
+    argv: list[str] | None = None,
 ) -> int:
     (best_score, best_config) = _main(argv)
     # Exit zero if it looks like the overall operation was successful.

@@ -47,7 +47,7 @@ class TunableValueKind:
     RANGE = "range"
 
 
-def _normalize_weights(weights: List[float]) -> List[float]:
+def _normalize_weights(weights: list[float]) -> list[float]:
     """Helper function for normalizing weights to probabilities."""
     total = sum(weights)
     return [w / total for w in weights]
@@ -55,7 +55,7 @@ def _normalize_weights(weights: List[float]) -> List[float]:
 
 def _tunable_to_configspace(
     tunable: Tunable,
-    group_name: Optional[str] = None,
+    group_name: str | None = None,
     cost: int = 0,
 ) -> ConfigurationSpace:
     """
@@ -78,7 +78,7 @@ def _tunable_to_configspace(
         A ConfigurationSpace object that corresponds to the Tunable.
     """
     # pylint: disable=too-complex
-    meta: Dict[Hashable, TunableValue] = {"cost": cost}
+    meta: dict[Hashable, TunableValue] = {"cost": cost}
     if group_name is not None:
         meta["group"] = group_name
     if tunable.is_numerical and tunable.quantization_bins:
@@ -99,7 +99,7 @@ def _tunable_to_configspace(
             }
         )
 
-    distribution: Union[Uniform, Normal, Beta, None] = None
+    distribution: Uniform | Normal | Beta | None = None
     if tunable.distribution == "uniform":
         distribution = Uniform()
     elif tunable.distribution == "normal":
@@ -150,7 +150,7 @@ def _tunable_to_configspace(
         return ConfigurationSpace(space=[range_hp])
 
     # Compute the probabilities of switching between regular and special values.
-    special_weights: Optional[List[float]] = None
+    special_weights: list[float] | None = None
     switch_weights = [0.5, 0.5]  # FLAML requires uniform weights.
     if tunable.weights and tunable.range_weight is not None:
         special_weights = _normalize_weights(tunable.weights)
@@ -192,7 +192,7 @@ def _tunable_to_configspace(
 
 def tunable_groups_to_configspace(
     tunables: TunableGroups,
-    seed: Optional[int] = None,
+    seed: int | None = None,
 ) -> ConfigurationSpace:
     """
     Convert TunableGroups to  hyperparameters in ConfigurationSpace.
@@ -238,7 +238,7 @@ def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
     ConfigSpace.Configuration
         A ConfigSpace Configuration.
     """
-    values: Dict[str, TunableValue] = {}
+    values: dict[str, TunableValue] = {}
     for tunable, _group in tunables:
         if tunable.special:
             (special_name, type_name) = special_param_names(tunable.name)
@@ -254,7 +254,7 @@ def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
     return Configuration(configspace, values=values)
 
 
-def configspace_data_to_tunable_values(data: dict) -> Dict[str, TunableValue]:
+def configspace_data_to_tunable_values(data: dict) -> dict[str, TunableValue]:
     """
     Remove the fields that correspond to special values in ConfigSpace.
 
@@ -274,7 +274,7 @@ def configspace_data_to_tunable_values(data: dict) -> Dict[str, TunableValue]:
     return data
 
 
-def special_param_names(name: str) -> Tuple[str, str]:
+def special_param_names(name: str) -> tuple[str, str]:
     """
     Generate the names of the auxiliary hyperparameters that correspond to a tunable
     that can have special values.

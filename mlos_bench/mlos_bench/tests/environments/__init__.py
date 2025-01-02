@@ -17,9 +17,9 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 def check_env_success(
     env: Environment,
     tunable_groups: TunableGroups,
-    expected_results: Dict[str, TunableValue],
-    expected_telemetry: List[Tuple[datetime, str, Any]],
-    global_config: Optional[dict] = None,
+    expected_results: dict[str, TunableValue],
+    expected_telemetry: list[tuple[datetime, str, Any]],
+    global_config: dict | None = None,
 ) -> None:
     """
     Set up an environment and run a test experiment there.

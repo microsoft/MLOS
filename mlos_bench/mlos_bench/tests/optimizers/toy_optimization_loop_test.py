@@ -27,7 +27,7 @@ if DEBUG:
     logger = logging.warning
 
 
-def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
+def _optimize(env: Environment, opt: Optimizer) -> tuple[float, TunableGroups]:
     """Toy optimization loop."""
     assert opt.not_converged()
 

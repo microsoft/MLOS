@@ -23,9 +23,9 @@ class HostEnv(Environment):
         *,
         name: str,
         config: dict,
-        global_config: Optional[dict] = None,
-        tunables: Optional[TunableGroups] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        tunables: TunableGroups | None = None,
+        service: Service | None = None,
     ):
         """
         Create a new environment for host operations.
@@ -60,7 +60,7 @@ class HostEnv(Environment):
         ), "HostEnv requires a service that supports host provisioning operations"
         self._host_service: SupportsHostProvisioning = self._service
 
-    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict | None = None) -> bool:
         """
         Check if host is ready. (Re)provision and start it, if necessary.
 

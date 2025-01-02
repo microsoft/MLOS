@@ -35,8 +35,8 @@ class Trial(Storage.Trial):
         experiment_id: str,
         trial_id: int,
         config_id: int,
-        opt_targets: Dict[str, Literal["min", "max"]],
-        config: Optional[Dict[str, Any]] = None,
+        opt_targets: dict[str, Literal["min", "max"]],
+        config: dict[str, Any] | None = None,
     ):
         super().__init__(
             tunables=tunables,
@@ -53,8 +53,8 @@ class Trial(Storage.Trial):
         self,
         status: Status,
         timestamp: datetime,
-        metrics: Optional[Dict[str, Any]] = None,
-    ) -> Optional[Dict[str, Any]]:
+        metrics: dict[str, Any] | None = None,
+    ) -> dict[str, Any] | None:
         # Make sure to convert the timestamp to UTC before storing it in the database.
         timestamp = utcify_timestamp(timestamp, origin="local")
         metrics = super().update(status, timestamp, metrics)
@@ -128,7 +128,7 @@ class Trial(Storage.Trial):
         self,
         status: Status,
         timestamp: datetime,
-        metrics: List[Tuple[datetime, str, Any]],
+        metrics: list[tuple[datetime, str, Any]],
     ) -> None:
         super().update_telemetry(status, timestamp, metrics)
         # Make sure to convert the timestamp to UTC before storing it in the database.

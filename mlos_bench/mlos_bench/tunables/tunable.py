@@ -9,16 +9,15 @@ import logging
 from typing import (
     Any,
     Dict,
-    Iterable,
     List,
     Literal,
     Optional,
-    Sequence,
     Tuple,
     Type,
     TypedDict,
     Union,
 )
+from collections.abc import Iterable, Sequence
 
 import numpy as np
 
@@ -29,7 +28,7 @@ _LOG = logging.getLogger(__name__)
 TunableValue = Union[int, float, Optional[str]]
 """A tunable parameter value type alias."""
 
-TunableValueType = Union[Type[int], Type[float], Type[str]]
+TunableValueType = Union[type[int], type[float], type[str]]
 """Tunable value type."""
 
 TunableValueTypeTuple = (int, float, str, type(None))
@@ -42,7 +41,7 @@ For checking with isinstance()
 TunableValueTypeName = Literal["int", "float", "categorical"]
 """The string name of a tunable value type."""
 
-TunableValuesDict = Dict[str, TunableValue]
+TunableValuesDict = dict[str, TunableValue]
 """Tunable values dictionary type."""
 
 DistributionName = Literal["uniform", "normal", "beta"]
@@ -53,7 +52,7 @@ class DistributionDict(TypedDict, total=False):
     """A typed dict for tunable parameters' distributions."""
 
     type: DistributionName
-    params: Optional[Dict[str, float]]
+    params: dict[str, float] | None
 
 
 class TunableDict(TypedDict, total=False):
@@ -66,25 +65,25 @@ class TunableDict(TypedDict, total=False):
     """
 
     type: TunableValueTypeName
-    description: Optional[str]
+    description: str | None
     default: TunableValue
-    values: Optional[List[Optional[str]]]
-    range: Optional[Union[Sequence[int], Sequence[float]]]
-    quantization_bins: Optional[int]
-    log: Optional[bool]
-    distribution: Optional[DistributionDict]
-    special: Optional[Union[List[int], List[float]]]
-    values_weights: Optional[List[float]]
-    special_weights: Optional[List[float]]
-    range_weight: Optional[float]
-    meta: Dict[str, Any]
+    values: list[str | None] | None
+    range: Sequence[int] | Sequence[float] | None
+    quantization_bins: int | None
+    log: bool | None
+    distribution: DistributionDict | None
+    special: list[int] | list[float] | None
+    values_weights: list[float] | None
+    special_weights: list[float] | None
+    range_weight: float | None
+    meta: dict[str, Any]
 
 
 class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-methods
     """A tunable parameter definition and its current value."""
 
     # Maps tunable types to their corresponding Python types by name.
-    _DTYPE: Dict[TunableValueTypeName, TunableValueType] = {
+    _DTYPE: dict[TunableValueTypeName, TunableValueType] = {
         "int": int,
         "float": float,
         "categorical": str,
@@ -118,12 +117,12 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         self._values = config.get("values")
         if self._values:
             self._values = [str(v) if v is not None else v for v in self._values]
-        self._meta: Dict[str, Any] = config.get("meta", {})
-        self._range: Optional[Union[Tuple[int, int], Tuple[float, float]]] = None
-        self._quantization_bins: Optional[int] = config.get("quantization_bins")
-        self._log: Optional[bool] = config.get("log")
-        self._distribution: Optional[DistributionName] = None
-        self._distribution_params: Dict[str, float] = {}
+        self._meta: dict[str, Any] = config.get("meta", {})
+        self._range: tuple[int, int] | tuple[float, float] | None = None
+        self._quantization_bins: int | None = config.get("quantization_bins")
+        self._log: bool | None = config.get("log")
+        self._distribution: DistributionName | None = None
+        self._distribution_params: dict[str, float] = {}
         distr = config.get("distribution")
         if distr:
             self._distribution = distr["type"]  # required
@@ -133,11 +132,11 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             assert len(config_range) == 2, f"Invalid range: {config_range}"
             config_range = (config_range[0], config_range[1])
             self._range = config_range
-        self._special: Union[List[int], List[float]] = config.get("special") or []
-        self._weights: List[float] = (
+        self._special: list[int] | list[float] = config.get("special") or []
+        self._weights: list[float] = (
             config.get("values_weights") or config.get("special_weights") or []
         )
-        self._range_weight: Optional[float] = config.get("range_weight")
+        self._range_weight: float | None = config.get("range_weight")
         self._current_value = None
         self._sanity_check()
         self.value = self._default
@@ -401,7 +400,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         else:
             raise ValueError(f"Invalid parameter type: {self._type}")
 
-    def in_range(self, value: Union[int, float, str, None]) -> bool:
+    def in_range(self, value: int | float | str | None) -> bool:
         """
         Check if the value is within the range of the tunable.
 
@@ -416,7 +415,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         )
 
     @property
-    def category(self) -> Optional[str]:
+    def category(self) -> str | None:
         """Get the current value of the tunable as a string."""
         if self.is_categorical:
             return nullable(str, self._current_value)
@@ -424,7 +423,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             raise ValueError("Cannot get categorical values for a numerical tunable.")
 
     @category.setter
-    def category(self, new_value: Optional[str]) -> Optional[str]:
+    def category(self, new_value: str | None) -> str | None:
         """Set the current value of the tunable."""
         assert self.is_categorical
         assert isinstance(new_value, (str, type(None)))
@@ -432,7 +431,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self.value
 
     @property
-    def numerical_value(self) -> Union[int, float]:
+    def numerical_value(self) -> int | float:
         """Get the current value of the tunable as a number."""
         assert self._current_value is not None
         if self._type == "int":
@@ -443,7 +442,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             raise ValueError("Cannot get numerical value for a categorical tunable.")
 
     @numerical_value.setter
-    def numerical_value(self, new_value: Union[int, float]) -> Union[int, float]:
+    def numerical_value(self, new_value: int | float) -> int | float:
         """Set the current numerical value of the tunable."""
         # We need this coercion for the values produced by some optimizers
         # (e.g., scikit-optimize) and for data restored from certain storage
@@ -458,7 +457,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._name
 
     @property
-    def special(self) -> Union[List[int], List[float]]:
+    def special(self) -> list[int] | list[float]:
         """
         Get the special values of the tunable. Return an empty list if there are none.
 
@@ -482,7 +481,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self.value in self._special
 
     @property
-    def weights(self) -> Optional[List[float]]:
+    def weights(self) -> list[float] | None:
         """
         Get the weights of the categories or special values of the tunable. Return None
         if there are none.
@@ -495,7 +494,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._weights
 
     @property
-    def range_weight(self) -> Optional[float]:
+    def range_weight(self) -> float | None:
         """
         Get weight of the range of the numeric tunable. Return None if there are no
         weights or a tunable is categorical.
@@ -561,7 +560,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._type in {"int", "float"}
 
     @property
-    def range(self) -> Union[Tuple[int, int], Tuple[float, float]]:
+    def range(self) -> tuple[int, int] | tuple[float, float]:
         """
         Get the range of the tunable if it is numerical, None otherwise.
 
@@ -576,7 +575,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._range
 
     @property
-    def span(self) -> Union[int, float]:
+    def span(self) -> int | float:
         """
         Gets the span of the range.
 
@@ -591,7 +590,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return num_range[1] - num_range[0]
 
     @property
-    def quantization_bins(self) -> Optional[int]:
+    def quantization_bins(self) -> int | None:
         """
         Get the number of quantization bins, if specified.
 
@@ -605,7 +604,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._quantization_bins
 
     @property
-    def quantized_values(self) -> Optional[Union[Iterable[int], Iterable[float]]]:
+    def quantized_values(self) -> Iterable[int] | Iterable[float] | None:
         """
         Get a sequence of quantized values for this tunable.
 
@@ -637,7 +636,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         )
 
     @property
-    def cardinality(self) -> Optional[int]:
+    def cardinality(self) -> int | None:
         """
         Gets the cardinality of elements in this tunable, or else None. (i.e., when the
         tunable is continuous float and not quantized).
@@ -658,7 +657,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return None
 
     @property
-    def is_log(self) -> Optional[bool]:
+    def is_log(self) -> bool | None:
         """
         Check if numeric tunable is log scale.
 
@@ -671,7 +670,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._log
 
     @property
-    def distribution(self) -> Optional[DistributionName]:
+    def distribution(self) -> DistributionName | None:
         """
         Get the name of the distribution (uniform, normal, or beta) if specified.
 
@@ -683,7 +682,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._distribution
 
     @property
-    def distribution_params(self) -> Dict[str, float]:
+    def distribution_params(self) -> dict[str, float]:
         """
         Get the parameters of the distribution, if specified.
 
@@ -696,7 +695,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._distribution_params
 
     @property
-    def categories(self) -> List[Optional[str]]:
+    def categories(self) -> list[str | None]:
         """
         Get the list of all possible values of a categorical tunable. Return None if the
         tunable is not categorical.
@@ -711,7 +710,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self._values
 
     @property
-    def values(self) -> Optional[Union[Iterable[Optional[str]], Iterable[int], Iterable[float]]]:
+    def values(self) -> Iterable[str | None] | Iterable[int] | Iterable[float] | None:
         """
         Gets the categories or quantized values for this tunable.
 
@@ -726,7 +725,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return self.quantized_values
 
     @property
-    def meta(self) -> Dict[str, Any]:
+    def meta(self) -> dict[str, Any]:
         """
         Get the tunable's metadata.
 

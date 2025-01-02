@@ -6,7 +6,8 @@
 
 import logging
 import random
-from typing import Callable, Dict, Optional, Sequence
+from typing import Dict, Optional
+from collections.abc import Callable, Sequence
 
 from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.track_best_optimizer import TrackBestOptimizer
@@ -24,12 +25,12 @@ class MockOptimizer(TrackBestOptimizer):
         self,
         tunables: TunableGroups,
         config: dict,
-        global_config: Optional[dict] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        service: Service | None = None,
     ):
         super().__init__(tunables, config, global_config, service)
         rnd = random.Random(self.seed)
-        self._random: Dict[str, Callable[[Tunable], TunableValue]] = {
+        self._random: dict[str, Callable[[Tunable], TunableValue]] = {
             "categorical": lambda tunable: rnd.choice(tunable.categories),
             "float": lambda tunable: rnd.uniform(*tunable.range),
             "int": lambda tunable: rnd.randint(*tunable.range),
@@ -38,8 +39,8 @@ class MockOptimizer(TrackBestOptimizer):
     def bulk_register(
         self,
         configs: Sequence[dict],
-        scores: Sequence[Optional[Dict[str, TunableValue]]],
-        status: Optional[Sequence[Status]] = None,
+        scores: Sequence[dict[str, TunableValue] | None],
+        status: Sequence[Status] | None = None,
     ) -> bool:
         if not super().bulk_register(configs, scores, status):
             return False

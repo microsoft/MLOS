@@ -6,7 +6,8 @@
 
 import os
 from importlib.resources import files
-from typing import Callable, List, Optional
+from typing import List, Optional
+from collections.abc import Callable
 
 from mlos_bench.util import path_join
 
@@ -16,8 +17,8 @@ BUILTIN_TEST_CONFIG_PATH = str(files("mlos_bench.tests.config").joinpath("")).re
 def locate_config_examples(
     root_dir: str,
     config_examples_dir: str,
-    examples_filter: Optional[Callable[[List[str]], List[str]]] = None,
-) -> List[str]:
+    examples_filter: Callable[[list[str]], list[str]] | None = None,
+) -> list[str]:
     """
     Locates all config examples in the given directory.
 

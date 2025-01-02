@@ -10,7 +10,7 @@ import pandas as pd
 from ConfigSpace import Configuration, ConfigurationSpace
 
 
-def compare_optional_series(left: Optional[pd.Series], right: Optional[pd.Series]) -> bool:
+def compare_optional_series(left: pd.Series | None, right: pd.Series | None) -> bool:
     """
     Compare Series that may also be None.
 
@@ -32,8 +32,8 @@ def compare_optional_series(left: Optional[pd.Series], right: Optional[pd.Series
 
 
 def compare_optional_dataframe(
-    left: Optional[pd.DataFrame],
-    right: Optional[pd.DataFrame],
+    left: pd.DataFrame | None,
+    right: pd.DataFrame | None,
 ) -> bool:
     """
     Compare DataFrames that may also be None.
@@ -92,7 +92,7 @@ def drop_nulls(d: dict) -> dict:
 
 def normalize_config(
     config_space: ConfigurationSpace,
-    config: Union[Configuration, dict],
+    config: Configuration | dict,
 ) -> Configuration:
     """
     Convert a dictionary to a valid ConfigSpace configuration.

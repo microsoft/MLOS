@@ -23,7 +23,7 @@ _LOG.setLevel(logging.DEBUG)
 CONFIG_TYPE = "environments"
 
 
-def filter_configs(configs_to_filter: List[str]) -> List[str]:
+def filter_configs(configs_to_filter: list[str]) -> list[str]:
     """If necessary, filter out json files that aren't for the module we're testing."""
     configs_to_filter = [
         config_path
@@ -56,7 +56,7 @@ def test_load_environment_config_examples(
 def load_environment_config_examples(
     config_loader_service: ConfigPersistenceService,
     config_path: str,
-) -> List[Environment]:
+) -> list[Environment]:
     """Loads an environment config example."""
     # Make sure that any "required_args" are provided.
     global_config = config_loader_service.load_config(

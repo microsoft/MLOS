@@ -19,13 +19,13 @@ if TYPE_CHECKING:
 FlamlDomain: TypeAlias = flaml.tune.sample.Domain
 """Flaml domain type alias."""
 
-FlamlSpace: TypeAlias = Dict[str, flaml.tune.sample.Domain]
+FlamlSpace: TypeAlias = dict[str, flaml.tune.sample.Domain]
 """Flaml space type alias - a `Dict[str, FlamlDomain]`"""
 
 
 def configspace_to_flaml_space(
     config_space: ConfigSpace.ConfigurationSpace,
-) -> Dict[str, FlamlDomain]:
+) -> dict[str, FlamlDomain]:
     """
     Converts a ConfigSpace.ConfigurationSpace to dict.
 

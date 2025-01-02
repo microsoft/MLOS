@@ -30,11 +30,11 @@ class ManualOptimizer(MockOptimizer):
         self,
         tunables: TunableGroups,
         config: dict,
-        global_config: Optional[dict] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        service: Service | None = None,
     ):
         super().__init__(tunables, config, global_config, service)
-        self._tunable_values_cycle: List[Dict[str, TunableValue]] = config.get(
+        self._tunable_values_cycle: list[dict[str, TunableValue]] = config.get(
             "tunable_values_cycle", []
         )
         assert len(self._tunable_values_cycle) > 0, "No tunable values provided."

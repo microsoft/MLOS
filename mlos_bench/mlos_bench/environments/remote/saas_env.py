@@ -24,9 +24,9 @@ class SaaSEnv(Environment):
         *,
         name: str,
         config: dict,
-        global_config: Optional[dict] = None,
-        tunables: Optional[TunableGroups] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        tunables: TunableGroups | None = None,
+        service: Service | None = None,
     ):
         """
         Create a new environment for (configurable) cloud-based SaaS instance.
@@ -66,7 +66,7 @@ class SaaSEnv(Environment):
         ), "SaaSEnv requires a service that supports remote host configuration API"
         self._config_service: SupportsRemoteConfig = self._service
 
-    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict | None = None) -> bool:
         """
         Update the configuration of a remote SaaS instance.
 

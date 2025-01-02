@@ -25,7 +25,7 @@ _LOG = logging.getLogger(__name__)
     ],
 )
 def test_multi_target_opt_wrong_weights(
-    optimizer_class: Type[BaseOptimizer],
+    optimizer_class: type[BaseOptimizer],
     kwargs: dict,
 ) -> None:
     """Make sure that the optimizer raises an error if the number of objective weights
@@ -55,8 +55,8 @@ def test_multi_target_opt_wrong_weights(
     ],
 )
 def test_multi_target_opt(
-    objective_weights: Optional[List[float]],
-    optimizer_class: Type[BaseOptimizer],
+    objective_weights: list[float] | None,
+    optimizer_class: type[BaseOptimizer],
     kwargs: dict,
 ) -> None:
     """Toy multi-target optimization problem to test the optimizers with mixed numeric

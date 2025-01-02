@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class SupportsHostOps(Protocol):
     """Protocol interface for Host/VM boot operations."""
 
-    def start_host(self, params: dict) -> Tuple["Status", dict]:
+    def start_host(self, params: dict) -> tuple["Status", dict]:
         """
         Start a Host/VM.
 
@@ -30,7 +30,7 @@ class SupportsHostOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def stop_host(self, params: dict, force: bool = False) -> Tuple["Status", dict]:
+    def stop_host(self, params: dict, force: bool = False) -> tuple["Status", dict]:
         """
         Stops the Host/VM by initiating a (graceful) shutdown.
 
@@ -48,7 +48,7 @@ class SupportsHostOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def restart_host(self, params: dict, force: bool = False) -> Tuple["Status", dict]:
+    def restart_host(self, params: dict, force: bool = False) -> tuple["Status", dict]:
         """
         Restarts the host by initiating a (graceful) shutdown.
 
@@ -66,7 +66,7 @@ class SupportsHostOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def wait_host_operation(self, params: dict) -> Tuple["Status", dict]:
+    def wait_host_operation(self, params: dict) -> tuple["Status", dict]:
         """
         Waits for a pending operation on a Host/VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.

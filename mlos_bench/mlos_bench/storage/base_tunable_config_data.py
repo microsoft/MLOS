@@ -61,7 +61,7 @@ class TunableConfigData(metaclass=ABCMeta):
         """
 
     @property
-    def config_dict(self) -> Dict[str, Optional[TunableValue]]:
+    def config_dict(self) -> dict[str, TunableValue | None]:
         """
         Retrieve the trials' tunable configuration from the storage as a dict.
 

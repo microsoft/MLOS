@@ -29,7 +29,7 @@ class SshTestServerInfo:
     hostname: str
     username: str
     id_rsa_path: str
-    _port: Optional[int] = None
+    _port: int | None = None
 
     def get_port(self, uncached: bool = False) -> int:
         """

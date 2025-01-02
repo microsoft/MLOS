@@ -5,7 +5,8 @@
 """A collection Service functions for managing virtual networks on Azure."""
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
+from collections.abc import Callable
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
@@ -39,10 +40,10 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """
         Create a new instance of Azure Network services proxy.
@@ -91,7 +92,7 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
             )
         return params
 
-    def wait_network_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
+    def wait_network_deployment(self, params: dict, *, is_setup: bool) -> tuple[Status, dict]:
         """
         Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
@@ -112,7 +113,7 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
         """
         return self._wait_deployment(params, is_setup=is_setup)
 
-    def provision_network(self, params: dict) -> Tuple[Status, dict]:
+    def provision_network(self, params: dict) -> tuple[Status, dict]:
         """
         Deploy a virtual network, if necessary.
 
@@ -132,7 +133,7 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
         """
         return self._provision_resource(params)
 
-    def deprovision_network(self, params: dict, ignore_errors: bool = True) -> Tuple[Status, dict]:
+    def deprovision_network(self, params: dict, ignore_errors: bool = True) -> tuple[Status, dict]:
         """
         Deprovisions the virtual network on Azure by deleting it.
 

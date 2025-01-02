@@ -29,7 +29,7 @@ ZONE_NAMES = [
     # Implicit local time zone.
     None,
 ]
-ZONE_INFO: List[Optional[tzinfo]] = [
+ZONE_INFO: list[tzinfo | None] = [
     nullable(pytz.timezone, zone_name) for zone_name in ZONE_NAMES
 ]
 
@@ -68,7 +68,7 @@ SEED = 42
 # np.random.seed(SEED)
 
 
-def try_resolve_class_name(class_name: Optional[str]) -> Optional[str]:
+def try_resolve_class_name(class_name: str | None) -> str | None:
     """Gets the full class name from the given name or None on error."""
     if class_name is None:
         return None
@@ -105,7 +105,7 @@ def check_socket(host: str, port: int, timeout: float = 1.0) -> bool:
         return result == 0
 
 
-def resolve_host_name(host: str) -> Optional[str]:
+def resolve_host_name(host: str) -> str | None:
     """
     Resolves the host name to an IP address.
 
@@ -141,10 +141,8 @@ def are_dir_trees_equal(dir1: str, dir2: str) -> bool:
         or len(dirs_cmp.funny_files) > 0
     ):
         warning(
-            (
                 f"Found differences in dir trees {dir1}, {dir2}:\n"
                 f"{dirs_cmp.diff_files}\n{dirs_cmp.funny_files}"
-            )
         )
         return False
     (_, mismatch, errors) = filecmp.cmpfiles(dir1, dir2, dirs_cmp.common_files, shallow=False)

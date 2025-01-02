@@ -10,7 +10,8 @@ import os
 from contextlib import nullcontext
 from string import Template
 from tempfile import TemporaryDirectory
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
+from collections.abc import Callable
 
 from mlos_bench.services.base_service import Service
 
@@ -28,10 +29,10 @@ class TempDirContextService(Service, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """
         Create a new instance of a service that provides temporary directory context for
@@ -65,8 +66,8 @@ class TempDirContextService(Service, metaclass=abc.ABCMeta):
 
     def temp_dir_context(
         self,
-        path: Optional[str] = None,
-    ) -> Union[TemporaryDirectory, nullcontext]:
+        path: str | None = None,
+    ) -> TemporaryDirectory | nullcontext:
         """
         Create a temp directory or use the provided path.
 

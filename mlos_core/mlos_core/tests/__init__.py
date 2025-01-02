@@ -15,7 +15,7 @@ SEED = 42
 T = TypeVar("T")
 
 
-def get_all_submodules(pkg: TypeAlias) -> List[str]:
+def get_all_submodules(pkg: TypeAlias) -> list[str]:
     """
     Imports all submodules for a package and returns their names.
 
@@ -29,7 +29,7 @@ def get_all_submodules(pkg: TypeAlias) -> List[str]:
     return submodules
 
 
-def _get_all_subclasses(cls: Type[T]) -> Set[Type[T]]:
+def _get_all_subclasses(cls: type[T]) -> set[type[T]]:
     """
     Gets the set of all of the subclasses of the given class.
 
@@ -40,7 +40,7 @@ def _get_all_subclasses(cls: Type[T]) -> Set[Type[T]]:
     )
 
 
-def get_all_concrete_subclasses(cls: Type[T], pkg_name: Optional[str] = None) -> List[Type[T]]:
+def get_all_concrete_subclasses(cls: type[T], pkg_name: str | None = None) -> list[type[T]]:
     """
     Gets a sorted list of all of the concrete subclasses of the given class. Useful for
     dynamically enumerating expected test cases.

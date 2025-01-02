@@ -60,13 +60,13 @@ def test_expand_groups_unknown() -> None:
 
 def test_expand_const_args() -> None:
     """Test expansion of const args via expand_vars."""
-    const_args: Dict[str, TunableValue] = {
+    const_args: dict[str, TunableValue] = {
         "a": "b",
         "foo": "$bar/baz",
         "1": 1,
         "recursive": "$foo/expansion",
     }
-    global_config: Dict[str, TunableValue] = {
+    global_config: dict[str, TunableValue] = {
         "bar": "blah",
     }
     result = Environment._expand_vars(const_args, global_config)

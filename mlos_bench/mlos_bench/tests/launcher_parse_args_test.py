@@ -34,7 +34,7 @@ from mlos_bench.util import path_join
 
 
 @pytest.fixture
-def config_paths() -> List[str]:
+def config_paths() -> list[str]:
     """
     Returns a list of config paths.
 
@@ -69,7 +69,7 @@ def _get_launcher(desc: str, cli_args: str) -> Launcher:
     return launcher
 
 
-def test_launcher_args_parse_defaults(config_paths: List[str]) -> None:
+def test_launcher_args_parse_defaults(config_paths: list[str]) -> None:
     """Test that we get the defaults we expect when using minimal config arg
     examples.
     """
@@ -106,7 +106,7 @@ def test_launcher_args_parse_defaults(config_paths: List[str]) -> None:
     assert launcher.scheduler.max_trials == -1  # default
 
 
-def test_launcher_args_parse_1(config_paths: List[str]) -> None:
+def test_launcher_args_parse_1(config_paths: list[str]) -> None:
     """
     Test that using multiple --globals arguments works and that multiple space separated
     options to --config-paths works.
@@ -160,7 +160,7 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     assert launcher.scheduler.max_trials == -1
 
 
-def test_launcher_args_parse_2(config_paths: List[str]) -> None:
+def test_launcher_args_parse_2(config_paths: list[str]) -> None:
     """Test multiple --config-path instances, --config file vs --arg, --var=val
     overrides, $var templates, option args, --random-init, etc.
     """
@@ -246,7 +246,7 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     # assert launcher.optimizer.seed == 1234
 
 
-def test_launcher_args_parse_3(config_paths: List[str]) -> None:
+def test_launcher_args_parse_3(config_paths: list[str]) -> None:
     """Check that cli file values take precedence over other values."""
     config_file = "cli/test-cli-config.jsonc"
     globals_file = "globals/global_test_config.jsonc"

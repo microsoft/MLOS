@@ -7,7 +7,8 @@
 import json
 import logging
 from types import TracebackType
-from typing import Any, Callable, Dict, List, Literal, Optional, Set, Type, Union
+from typing import Any, Dict, List, Literal, Optional, Set, Type, Union
+from collections.abc import Callable
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
@@ -23,8 +24,8 @@ class Service:
     def new(
         cls,
         class_name: str,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
         parent: Optional["Service"] = None,
     ) -> "Service":
         """
@@ -55,10 +56,10 @@ class Service:
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
         parent: Optional["Service"] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """
         Create a new service with a given config.
@@ -79,9 +80,9 @@ class Service:
         self.config = config or {}
         self._validate_json_config(self.config)
         self._parent = parent
-        self._service_methods: Dict[str, Callable] = {}
-        self._services: Set[Service] = set()
-        self._service_contexts: List[Service] = []
+        self._service_methods: dict[str, Callable] = {}
+        self._services: set[Service] = set()
+        self._service_contexts: list[Service] = []
         self._in_context = False
 
         if parent:
@@ -100,9 +101,9 @@ class Service:
 
     @staticmethod
     def merge_methods(
-        ext_methods: Union[Dict[str, Callable], List[Callable], None],
-        local_methods: Union[Dict[str, Callable], List[Callable]],
-    ) -> Dict[str, Callable]:
+        ext_methods: dict[str, Callable] | list[Callable] | None,
+        local_methods: dict[str, Callable] | list[Callable],
+    ) -> dict[str, Callable]:
         """
         Merge methods from the external caller with the local ones.
 
@@ -141,9 +142,9 @@ class Service:
 
     def __exit__(
         self,
-        ex_type: Optional[Type[BaseException]],
-        ex_val: Optional[BaseException],
-        ex_tb: Optional[TracebackType],
+        ex_type: type[BaseException] | None,
+        ex_val: BaseException | None,
+        ex_tb: TracebackType | None,
     ) -> Literal[False]:
         """
         Exit the Service mix-in context.
@@ -183,9 +184,9 @@ class Service:
 
     def _exit_context(
         self,
-        ex_type: Optional[Type[BaseException]],
-        ex_val: Optional[BaseException],
-        ex_tb: Optional[TracebackType],
+        ex_type: type[BaseException] | None,
+        ex_val: BaseException | None,
+        ex_tb: TracebackType | None,
     ) -> Literal[False]:
         """
         Exits the context for this particular Service instance.
@@ -237,7 +238,7 @@ class Service:
         """
         return self._config_loader_service
 
-    def register(self, services: Union[Dict[str, Callable], List[Callable]]) -> None:
+    def register(self, services: dict[str, Callable] | list[Callable]) -> None:
         """
         Register new mix-in services.
 
@@ -277,7 +278,7 @@ class Service:
             if hasattr(svc_method, "__self__") and isinstance(svc_method.__self__, Service)
         }
 
-    def export(self) -> Dict[str, Callable]:
+    def export(self) -> dict[str, Callable]:
         """
         Return a dictionary of functions available in this service.
 

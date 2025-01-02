@@ -6,7 +6,8 @@
 
 import logging
 import os
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set, Union
+from collections.abc import Callable
 
 from azure.core.credentials import TokenCredential
 from azure.core.exceptions import ResourceNotFoundError
@@ -27,10 +28,10 @@ class AzureFileShareService(FileShareService):
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """
         Create a new file share Service for Azure environments with a given config.
@@ -65,7 +66,7 @@ class AzureFileShareService(FileShareService):
             self._parent, SupportsAuth
         ), "Authorization service not provided. Include service-auth.jsonc?"
         self._auth_service: SupportsAuth[TokenCredential] = self._parent
-        self._share_client: Optional[ShareClient] = None
+        self._share_client: ShareClient | None = None
 
     def _get_share_client(self) -> ShareClient:
         """Get the Azure file share client object."""
@@ -125,7 +126,7 @@ class AzureFileShareService(FileShareService):
         super().upload(params, local_path, remote_path, recursive)
         self._upload(local_path, remote_path, recursive, set())
 
-    def _upload(self, local_path: str, remote_path: str, recursive: bool, seen: Set[str]) -> None:
+    def _upload(self, local_path: str, remote_path: str, recursive: bool, seen: set[str]) -> None:
         """
         Upload contents from a local path to an Azure file share. This method is called
         from `.upload()` above. We need it to avoid exposing the `seen` parameter and to

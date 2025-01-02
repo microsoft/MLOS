@@ -17,7 +17,7 @@ from setuptools import setup
 PKG_NAME = "mlos_viz"
 
 try:
-    ns: Dict[str, str] = {}
+    ns: dict[str, str] = {}
     with open(f"{PKG_NAME}/version.py", encoding="utf-8") as version_file:
         exec(version_file.read(), ns)  # pylint: disable=exec-used
     VERSION = ns["VERSION"]
@@ -53,7 +53,7 @@ def _get_long_desc_from_readme(base_url: str) -> dict:
         }
     jsonc_re = re.compile(r"```jsonc")
     link_re = re.compile(r"\]\(([^:#)]+)(#[a-zA-Z0-9_-]+)?\)")
-    with open(readme_path, mode="r", encoding="utf-8") as readme_fh:
+    with open(readme_path, encoding="utf-8") as readme_fh:
         lines = readme_fh.readlines()
         # Tweak the lexers for local expansion by pygments instead of github's.
         lines = [link_re.sub(f"]({base_url}" + r"/\1\2)", line) for line in lines]
@@ -65,7 +65,7 @@ def _get_long_desc_from_readme(base_url: str) -> dict:
         }
 
 
-extra_requires: Dict[str, List[str]] = {}
+extra_requires: dict[str, list[str]] = {}
 
 # construct special 'full' extra that adds requirements for all built-in
 # backend integrations and additional extra features.

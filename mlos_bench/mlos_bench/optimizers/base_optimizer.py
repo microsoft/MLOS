@@ -9,7 +9,8 @@ optimizers.
 import logging
 from abc import ABCMeta, abstractmethod
 from types import TracebackType
-from typing import Dict, Literal, Optional, Sequence, Tuple, Type, Union
+from typing import Dict, Literal, Optional, Tuple, Type, Union
+from collections.abc import Sequence
 
 from ConfigSpace import ConfigurationSpace
 
@@ -41,8 +42,8 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
         self,
         tunables: TunableGroups,
         config: dict,
-        global_config: Optional[dict] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        service: Service | None = None,
     ):
         """
         Create a new optimizer for the given configuration space defined by the
@@ -63,7 +64,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
         self._config = config.copy()
         self._global_config = global_config or {}
         self._tunables = tunables
-        self._config_space: Optional[ConfigurationSpace] = None
+        self._config_space: ConfigurationSpace | None = None
         self._service = service
         self._seed = int(config.get("seed", 42))
         self._in_context = False
@@ -79,8 +80,8 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
         )
         self._max_suggestions = int(self._config.pop("max_suggestions", 100))
 
-        opt_targets: Dict[str, str] = self._config.pop("optimization_targets", {"score": "min"})
-        self._opt_targets: Dict[str, Literal[1, -1]] = {}
+        opt_targets: dict[str, str] = self._config.pop("optimization_targets", {"score": "min"})
+        self._opt_targets: dict[str, Literal[1, -1]] = {}
         for opt_target, opt_dir in opt_targets.items():
             if opt_dir == "min":
                 self._opt_targets[opt_target] = 1
@@ -117,9 +118,9 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
 
     def __exit__(
         self,
-        ex_type: Optional[Type[BaseException]],
-        ex_val: Optional[BaseException],
-        ex_tb: Optional[TracebackType],
+        ex_type: type[BaseException] | None,
+        ex_val: BaseException | None,
+        ex_tb: TracebackType | None,
     ) -> Literal[False]:
         """Exit the context of the optimizer."""
         if ex_val is None:
@@ -204,7 +205,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
         return self.__class__.__name__
 
     @property
-    def targets(self) -> Dict[str, Literal["min", "max"]]:
+    def targets(self) -> dict[str, Literal["min", "max"]]:
         """Returns a dictionary of optimization targets and their direction."""
         return {
             opt_target: "min" if opt_dir == 1 else "max"
@@ -222,8 +223,8 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
     def bulk_register(
         self,
         configs: Sequence[dict],
-        scores: Sequence[Optional[Dict[str, TunableValue]]],
-        status: Optional[Sequence[Status]] = None,
+        scores: Sequence[dict[str, TunableValue] | None],
+        status: Sequence[Status] | None = None,
     ) -> bool:
         """
         Pre-load the optimizer with the bulk data from previous experiments.
@@ -279,8 +280,8 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
         self,
         tunables: TunableGroups,
         status: Status,
-        score: Optional[Dict[str, TunableValue]] = None,
-    ) -> Optional[Dict[str, float]]:
+        score: dict[str, TunableValue] | None = None,
+    ) -> dict[str, float] | None:
         """
         Register the observation for the given configuration.
 
@@ -315,8 +316,8 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
     def _get_scores(
         self,
         status: Status,
-        scores: Optional[Union[Dict[str, TunableValue], Dict[str, float]]],
-    ) -> Optional[Dict[str, float]]:
+        scores: dict[str, TunableValue] | dict[str, float] | None,
+    ) -> dict[str, float] | None:
         """
         Extract a scalar benchmark score from the dataframe. Change the sign if we are
         maximizing.
@@ -344,7 +345,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
             return {opt_target: float("inf") for opt_target in self._opt_targets}
 
         assert scores is not None
-        target_metrics: Dict[str, float] = {}
+        target_metrics: dict[str, float] = {}
         for opt_target, opt_dir in self._opt_targets.items():
             val = scores[opt_target]
             assert val is not None
@@ -363,7 +364,7 @@ class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attribu
     @abstractmethod
     def get_best_observation(
         self,
-    ) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
+    ) -> tuple[dict[str, float], TunableGroups] | tuple[None, None]:
         """
         Get the best observation so far.
 

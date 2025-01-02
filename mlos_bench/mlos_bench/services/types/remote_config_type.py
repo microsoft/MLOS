@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class SupportsRemoteConfig(Protocol):
     """Protocol interface for configuring cloud services."""
 
-    def configure(self, config: Dict[str, Any], params: Dict[str, Any]) -> Tuple["Status", dict]:
+    def configure(self, config: dict[str, Any], params: dict[str, Any]) -> tuple["Status", dict]:
         """
         Update the parameters of a SaaS service in the cloud.
 
@@ -32,7 +32,7 @@ class SupportsRemoteConfig(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def is_config_pending(self, config: Dict[str, Any]) -> Tuple["Status", dict]:
+    def is_config_pending(self, config: dict[str, Any]) -> tuple["Status", dict]:
         """
         Check if the configuration of a service requires reboot or restart.
 

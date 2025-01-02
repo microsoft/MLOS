@@ -7,7 +7,8 @@
 import re
 import warnings
 from importlib.metadata import version
-from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from collections.abc import Callable, Iterable
 
 import pandas
 import seaborn as sns
@@ -21,7 +22,7 @@ from mlos_viz.util import expand_results_data_args
 _SEABORN_VERS = version("seaborn")
 
 
-def _get_kwarg_defaults(target: Callable, **kwargs: Any) -> Dict[str, Any]:
+def _get_kwarg_defaults(target: Callable, **kwargs: Any) -> dict[str, Any]:
     """
     Assembles a smaller kwargs dict for the specified target function.
 
@@ -60,8 +61,8 @@ def ignore_plotter_warnings() -> None:
 
 def _add_groupby_desc_column(
     results_df: pandas.DataFrame,
-    groupby_columns: Optional[List[str]] = None,
-) -> Tuple[pandas.DataFrame, List[str], str]:
+    groupby_columns: list[str] | None = None,
+) -> tuple[pandas.DataFrame, list[str], str]:
     """
     Adds a group descriptor column to the results_df.
 
@@ -87,10 +88,10 @@ def _add_groupby_desc_column(
 
 
 def augment_results_df_with_config_trial_group_stats(
-    exp_data: Optional[ExperimentData] = None,
+    exp_data: ExperimentData | None = None,
     *,
-    results_df: Optional[pandas.DataFrame] = None,
-    requested_result_cols: Optional[Iterable[str]] = None,
+    results_df: pandas.DataFrame | None = None,
+    requested_result_cols: Iterable[str] | None = None,
 ) -> pandas.DataFrame:
     # pylint: disable=too-complex
     """
@@ -148,30 +149,30 @@ def augment_results_df_with_config_trial_group_stats(
         raise ValueError(f"Not enough data: {len(results_groups)}")
 
     if requested_result_cols is None:
-        result_cols = set(
+        result_cols = {
             col
             for col in results_df.columns
             if col.startswith(ExperimentData.RESULT_COLUMN_PREFIX)
-        )
+        }
     else:
-        result_cols = set(
+        result_cols = {
             col
             for col in requested_result_cols
             if col.startswith(ExperimentData.RESULT_COLUMN_PREFIX) and col in results_df.columns
-        )
+        }
         result_cols.update(
-            set(
+            {
                 ExperimentData.RESULT_COLUMN_PREFIX + col
                 for col in requested_result_cols
                 if ExperimentData.RESULT_COLUMN_PREFIX in results_df.columns
-            )
+            }
         )
 
     def compute_zscore_for_group_agg(
         results_groups_perf: "SeriesGroupBy",
         stats_df: pandas.DataFrame,
         result_col: str,
-        agg: Union[Literal["mean"], Literal["var"], Literal["std"]],
+        agg: Literal["mean"] | Literal["var"] | Literal["std"],
     ) -> None:
         results_groups_perf_aggs = results_groups_perf.agg(agg)  # TODO: avoid recalculating?
         # Compute the zscore of the chosen aggregate performance of each group into
@@ -215,13 +216,13 @@ def augment_results_df_with_config_trial_group_stats(
 
 
 def limit_top_n_configs(
-    exp_data: Optional[ExperimentData] = None,
+    exp_data: ExperimentData | None = None,
     *,
-    results_df: Optional[pandas.DataFrame] = None,
-    objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
+    results_df: pandas.DataFrame | None = None,
+    objectives: dict[str, Literal["min", "max"]] | None = None,
     top_n_configs: int = 10,
     method: Literal["mean", "p50", "p75", "p90", "p95", "p99"] = "mean",
-) -> Tuple[pandas.DataFrame, List[int], Dict[str, bool]]:
+) -> tuple[pandas.DataFrame, list[int], dict[str, bool]]:
     # pylint: disable=too-many-locals
     """
     Utility function to process the results and determine the best performing configs
@@ -273,7 +274,7 @@ def limit_top_n_configs(
     # results_df is not None and is in fact a DataFrame, so we periodically assert
     # it in this func for now.
     assert results_df is not None
-    orderby_cols: Dict[str, bool] = {
+    orderby_cols: dict[str, bool] = {
         obj_col + f".{method}": ascending for (obj_col, ascending) in objs_cols.items()
     }
 
@@ -321,7 +322,7 @@ def limit_top_n_configs(
     group_results_df: pandas.DataFrame = results_df.groupby(config_id_col).first()[
         orderby_cols.keys()
     ]
-    top_n_config_ids: List[int] = (
+    top_n_config_ids: list[int] = (
         group_results_df.sort_values(
             by=list(orderby_cols.keys()), ascending=list(orderby_cols.values())
         )
@@ -347,10 +348,10 @@ def limit_top_n_configs(
 
 
 def plot_optimizer_trends(
-    exp_data: Optional[ExperimentData] = None,
+    exp_data: ExperimentData | None = None,
     *,
-    results_df: Optional[pandas.DataFrame] = None,
-    objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
+    results_df: pandas.DataFrame | None = None,
+    objectives: dict[str, Literal["min", "max"]] | None = None,
 ) -> None:
     """
     Plots the optimizer trends for the Experiment.
@@ -432,10 +433,10 @@ def plot_optimizer_trends(
 
 
 def plot_top_n_configs(
-    exp_data: Optional[ExperimentData] = None,
+    exp_data: ExperimentData | None = None,
     *,
-    results_df: Optional[pandas.DataFrame] = None,
-    objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
+    results_df: pandas.DataFrame | None = None,
+    objectives: dict[str, Literal["min", "max"]] | None = None,
     with_scatter_plot: bool = False,
     **kwargs: Any,
 ) -> None:

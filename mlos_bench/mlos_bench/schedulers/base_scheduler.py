@@ -30,8 +30,8 @@ class Scheduler(metaclass=ABCMeta):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
-        config: Dict[str, Any],
-        global_config: Dict[str, Any],
+        config: dict[str, Any],
+        global_config: dict[str, Any],
         environment: Environment,
         optimizer: Optimizer,
         storage: Storage,
@@ -80,13 +80,13 @@ class Scheduler(metaclass=ABCMeta):
 
         self._do_teardown = bool(config.get("teardown", True))
 
-        self.experiment: Optional[Storage.Experiment] = None
+        self.experiment: Storage.Experiment | None = None
         self.environment = environment
         self.optimizer = optimizer
         self.storage = storage
         self._root_env_config = root_env_config
         self._last_trial_id = -1
-        self._ran_trials: List[Storage.Trial] = []
+        self._ran_trials: list[Storage.Trial] = []
 
         _LOG.debug("Scheduler instantiated: %s :: %s", self, config)
 
@@ -158,9 +158,9 @@ class Scheduler(metaclass=ABCMeta):
 
     def __exit__(
         self,
-        ex_type: Optional[Type[BaseException]],
-        ex_val: Optional[BaseException],
-        ex_tb: Optional[TracebackType],
+        ex_type: type[BaseException] | None,
+        ex_val: BaseException | None,
+        ex_tb: TracebackType | None,
     ) -> Literal[False]:
         """Exit the context of the scheduler."""
         if ex_val is None:
@@ -202,7 +202,7 @@ class Scheduler(metaclass=ABCMeta):
         if self._do_teardown:
             self.environment.teardown()
 
-    def get_best_observation(self) -> Tuple[Optional[Dict[str, float]], Optional[TunableGroups]]:
+    def get_best_observation(self) -> tuple[dict[str, float] | None, TunableGroups | None]:
         """Get the best observation from the optimizer."""
         (best_score, best_config) = self.optimizer.get_best_observation()
         _LOG.info("Env: %s best score: %s", self.environment, best_score)
@@ -266,8 +266,8 @@ class Scheduler(metaclass=ABCMeta):
     def _add_trial_to_queue(
         self,
         tunables: TunableGroups,
-        ts_start: Optional[datetime] = None,
-        config: Optional[Dict[str, Any]] = None,
+        ts_start: datetime | None = None,
+        config: dict[str, Any] | None = None,
     ) -> None:
         """
         Add a configuration to the queue of trials.
@@ -311,6 +311,6 @@ class Scheduler(metaclass=ABCMeta):
         _LOG.info("QUEUE: Execute trial # %d/%d :: %s", self._trial_count, self._max_trials, trial)
 
     @property
-    def ran_trials(self) -> List[Storage.Trial]:
+    def ran_trials(self) -> list[Storage.Trial]:
         """Get the list of trials that were run."""
         return self._ran_trials

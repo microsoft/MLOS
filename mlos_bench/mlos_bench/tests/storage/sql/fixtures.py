@@ -5,7 +5,7 @@
 """Test fixtures for mlos_bench storage."""
 
 from random import seed as rand_seed
-from typing import Generator
+from collections.abc import Generator
 
 import pytest
 

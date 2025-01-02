@@ -31,7 +31,7 @@ def mlos_core_optimizer(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
     return MlosCoreOptimizer(tunable_groups, test_opt_config)
 
 
-def test_df(mlos_core_optimizer: MlosCoreOptimizer, mock_configs: List[dict]) -> None:
+def test_df(mlos_core_optimizer: MlosCoreOptimizer, mock_configs: list[dict]) -> None:
     """Test `MlosCoreOptimizer._to_df()` method on tunables that have special values."""
     df_config = mlos_core_optimizer._to_df(mock_configs)
     assert isinstance(df_config, pandas.DataFrame)
@@ -80,7 +80,7 @@ def test_df(mlos_core_optimizer: MlosCoreOptimizer, mock_configs: List[dict]) ->
     ]
 
 
-def test_df_str(mlos_core_optimizer: MlosCoreOptimizer, mock_configs: List[dict]) -> None:
+def test_df_str(mlos_core_optimizer: MlosCoreOptimizer, mock_configs: list[dict]) -> None:
     """Test `MlosCoreOptimizer._to_df()` type coercion on tunables with string
     values.
     """

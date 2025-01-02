@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class SupportsNetworkProvisioning(Protocol):
     """Protocol interface for Network provisioning operations."""
 
-    def provision_network(self, params: dict) -> Tuple["Status", dict]:
+    def provision_network(self, params: dict) -> tuple["Status", dict]:
         """
         Check if Network is ready. Deploy a new Network, if necessary.
 
@@ -32,7 +32,7 @@ class SupportsNetworkProvisioning(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def wait_network_deployment(self, params: dict, *, is_setup: bool) -> Tuple["Status", dict]:
+    def wait_network_deployment(self, params: dict, *, is_setup: bool) -> tuple["Status", dict]:
         """
         Waits for a pending operation on a Network to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
@@ -57,7 +57,7 @@ class SupportsNetworkProvisioning(Protocol):
         self,
         params: dict,
         ignore_errors: bool = True,
-    ) -> Tuple["Status", dict]:
+    ) -> tuple["Status", dict]:
         """
         Deprovisions the Network by deleting it.
 

@@ -25,9 +25,9 @@ class OSEnv(Environment):
         *,
         name: str,
         config: dict,
-        global_config: Optional[dict] = None,
-        tunables: Optional[TunableGroups] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        tunables: TunableGroups | None = None,
+        service: Service | None = None,
     ):
         """
         Create a new environment for remote execution.
@@ -69,7 +69,7 @@ class OSEnv(Environment):
         ), "RemoteEnv requires a service that supports host operations"
         self._os_service: SupportsOSOps = self._service
 
-    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict | None = None) -> bool:
         """
         Check if the host is up and running; boot it, if necessary.
 

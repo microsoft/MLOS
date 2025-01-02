@@ -18,7 +18,7 @@ from mlos_bench.util import nullable
 # pylint: disable=redefined-outer-name
 
 
-def zoned_telemetry_data(zone_info: Optional[tzinfo]) -> List[Tuple[datetime, str, Any]]:
+def zoned_telemetry_data(zone_info: tzinfo | None) -> list[tuple[datetime, str, Any]]:
     """
     Mock telemetry data for the trial.
 
@@ -42,8 +42,8 @@ def zoned_telemetry_data(zone_info: Optional[tzinfo]) -> List[Tuple[datetime, st
 
 
 def _telemetry_str(
-    data: List[Tuple[datetime, str, Any]],
-) -> List[Tuple[datetime, str, Optional[str]]]:
+    data: list[tuple[datetime, str, Any]],
+) -> list[tuple[datetime, str, str | None]]:
     """Convert telemetry values to strings."""
     # All retrieved timestamps should have been converted to UTC.
     return [(ts.astimezone(UTC), key, nullable(str, val)) for (ts, key, val) in data]
@@ -54,7 +54,7 @@ def test_update_telemetry(
     storage: Storage,
     exp_storage: Storage.Experiment,
     tunable_groups: TunableGroups,
-    origin_zone_info: Optional[tzinfo],
+    origin_zone_info: tzinfo | None,
 ) -> None:
     """Make sure update_telemetry() and load_telemetry() methods work."""
     telemetry_data = zoned_telemetry_data(origin_zone_info)
@@ -75,7 +75,7 @@ def test_update_telemetry(
 def test_update_telemetry_twice(
     exp_storage: Storage.Experiment,
     tunable_groups: TunableGroups,
-    origin_zone_info: Optional[tzinfo],
+    origin_zone_info: tzinfo | None,
 ) -> None:
     """Make sure update_telemetry() call is idempotent."""
     telemetry_data = zoned_telemetry_data(origin_zone_info)

@@ -8,13 +8,13 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
-    Iterable,
     List,
     Optional,
     Protocol,
     Union,
     runtime_checkable,
 )
+from collections.abc import Iterable
 
 from mlos_bench.config.schemas.config_schemas import ConfigSchema
 from mlos_bench.tunables.tunable import TunableValue
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 class SupportsConfigLoading(Protocol):
     """Protocol interface for helper functions to lookup and load configs."""
 
-    def resolve_path(self, file_path: str, extra_paths: Optional[Iterable[str]] = None) -> str:
+    def resolve_path(self, file_path: str, extra_paths: Iterable[str] | None = None) -> str:
         """
         Prepend the suitable `_config_path` to `path` if the latter is not absolute. If
         `_config_path` is `None` or `path` is absolute, return `path` as is.
@@ -51,8 +51,8 @@ class SupportsConfigLoading(Protocol):
     def load_config(
         self,
         json: str,
-        schema_type: Optional[ConfigSchema],
-    ) -> Union[dict, List[dict]]:
+        schema_type: ConfigSchema | None,
+    ) -> dict | list[dict]:
         """
         Load JSON config file. Search for a file relative to `_config_path` if the input
         path is not absolute. This method is exported to be used as a service.
@@ -74,8 +74,8 @@ class SupportsConfigLoading(Protocol):
         self,
         config: dict,
         tunables: "TunableGroups",
-        global_config: Optional[dict] = None,
-        parent_args: Optional[Dict[str, TunableValue]] = None,
+        global_config: dict | None = None,
+        parent_args: dict[str, TunableValue] | None = None,
         service: Optional["Service"] = None,
     ) -> "Environment":
         # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -111,10 +111,10 @@ class SupportsConfigLoading(Protocol):
         self,
         json: str,
         tunables: "TunableGroups",
-        global_config: Optional[dict] = None,
-        parent_args: Optional[Dict[str, TunableValue]] = None,
+        global_config: dict | None = None,
+        parent_args: dict[str, TunableValue] | None = None,
         service: Optional["Service"] = None,
-    ) -> List["Environment"]:
+    ) -> list["Environment"]:
         # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
         Load and build a list of environments from the config file.
@@ -143,7 +143,7 @@ class SupportsConfigLoading(Protocol):
     def load_services(
         self,
         jsons: Iterable[str],
-        global_config: Optional[Dict[str, Any]] = None,
+        global_config: dict[str, Any] | None = None,
         parent: Optional["Service"] = None,
     ) -> "Service":
         """

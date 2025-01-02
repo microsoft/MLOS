@@ -11,7 +11,8 @@ from asyncio import AbstractEventLoop
 from concurrent.futures import Future
 from threading import Lock as ThreadLock
 from threading import Thread
-from typing import Any, Coroutine, Optional, TypeAlias, TypeVar
+from typing import Any, Optional, TypeAlias, TypeVar
+from collections.abc import Coroutine
 
 CoroReturnType = TypeVar("CoroReturnType")  # pylint: disable=invalid-name
 """Type variable for the return type of an :external:py:mod:`asyncio` coroutine."""
@@ -36,8 +37,8 @@ class EventLoopContext:
     """
 
     def __init__(self) -> None:
-        self._event_loop: Optional[AbstractEventLoop] = None
-        self._event_loop_thread: Optional[Thread] = None
+        self._event_loop: AbstractEventLoop | None = None
+        self._event_loop_thread: Thread | None = None
         self._event_loop_thread_lock = ThreadLock()
         self._event_loop_thread_refcnt: int = 0
 

@@ -103,11 +103,11 @@ class OptimizerFactory:
     def create(  # pylint: disable=too-many-arguments
         *,
         parameter_space: ConfigSpace.ConfigurationSpace,
-        optimization_targets: List[str],
+        optimization_targets: list[str],
         optimizer_type: OptimizerType = DEFAULT_OPTIMIZER_TYPE,
-        optimizer_kwargs: Optional[dict] = None,
+        optimizer_kwargs: dict | None = None,
         space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
-        space_adapter_kwargs: Optional[dict] = None,
+        space_adapter_kwargs: dict | None = None,
     ) -> ConcreteOptimizer:  # type: ignore[type-var]
         """
         Create a new optimizer instance, given the parameter space, optimizer type, and

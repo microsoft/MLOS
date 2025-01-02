@@ -25,7 +25,7 @@ TZ_TEST_FILES = [
 @pytest.mark.skipif(sys.platform == "win32", reason="TZ environment variable is a UNIXism")
 @pytest.mark.parametrize(("tz_name"), ZONE_NAMES)
 @pytest.mark.parametrize(("test_file"), TZ_TEST_FILES)
-def test_trial_telemetry_alt_tz(tz_name: Optional[str], test_file: str) -> None:
+def test_trial_telemetry_alt_tz(tz_name: str | None, test_file: str) -> None:
     """Run the tests under alternative default (un-named) TZ info."""
     env = os.environ.copy()
     if tz_name is None:

@@ -39,8 +39,8 @@ _LOG.setLevel(logging.DEBUG)
 )
 def test_create_optimizer_and_suggest(
     configuration_space: CS.ConfigurationSpace,
-    optimizer_class: Type[BaseOptimizer],
-    kwargs: Optional[dict],
+    optimizer_class: type[BaseOptimizer],
+    kwargs: dict | None,
 ) -> None:
     """Test that we can create an optimizer and get a suggestion from it."""
     if kwargs is None:
@@ -73,8 +73,8 @@ def test_create_optimizer_and_suggest(
 )
 def test_basic_interface_toy_problem(
     configuration_space: CS.ConfigurationSpace,
-    optimizer_class: Type[BaseOptimizer],
-    kwargs: Optional[dict],
+    optimizer_class: type[BaseOptimizer],
+    kwargs: dict | None,
 ) -> None:
     """Toy problem to test the optimizers."""
     # pylint: disable=too-many-locals
@@ -188,8 +188,8 @@ def test_concrete_optimizer_type(optimizer_type: OptimizerType) -> None:
 )
 def test_create_optimizer_with_factory_method(
     configuration_space: CS.ConfigurationSpace,
-    optimizer_type: Optional[OptimizerType],
-    kwargs: Optional[dict],
+    optimizer_type: OptimizerType | None,
+    kwargs: dict | None,
 ) -> None:
     """Test that we can create an optimizer via a factory."""
     if kwargs is None:
@@ -235,7 +235,7 @@ def test_create_optimizer_with_factory_method(
         ),
     ],
 )
-def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optional[dict]) -> None:
+def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: dict | None) -> None:
     """Toy problem to test the optimizers with llamatune space adapter."""
     # pylint: disable=too-complex,disable=too-many-statements,disable=too-many-locals
     num_iters = 50
@@ -363,7 +363,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
 
 # Dynamically determine all of the optimizers we have implemented.
 # Note: these must be sorted.
-optimizer_subclasses: List[Type[BaseOptimizer]] = get_all_concrete_subclasses(
+optimizer_subclasses: list[type[BaseOptimizer]] = get_all_concrete_subclasses(
     BaseOptimizer,  # type: ignore[type-abstract]
     pkg_name="mlos_core",
 )
@@ -371,7 +371,7 @@ assert optimizer_subclasses
 
 
 @pytest.mark.parametrize(("optimizer_class"), optimizer_subclasses)
-def test_optimizer_type_defs(optimizer_class: Type[BaseOptimizer]) -> None:
+def test_optimizer_type_defs(optimizer_class: type[BaseOptimizer]) -> None:
     """Test that all optimizer classes are listed in the OptimizerType enum."""
     optimizer_type_classes = {member.value for member in OptimizerType}
     assert optimizer_class in optimizer_type_classes
@@ -388,8 +388,8 @@ def test_optimizer_type_defs(optimizer_class: Type[BaseOptimizer]) -> None:
     ],
 )
 def test_mixed_numerics_type_input_space_types(
-    optimizer_type: Optional[OptimizerType],
-    kwargs: Optional[dict],
+    optimizer_type: OptimizerType | None,
+    kwargs: dict | None,
 ) -> None:
     """Toy problem to test the optimizers with mixed numeric types to ensure that
     original dtypes are retained.

@@ -95,7 +95,7 @@ class ExperimentData(metaclass=ABCMeta):
         return self._description
 
     @property
-    def root_env_config(self) -> Tuple[str, str, str]:
+    def root_env_config(self) -> tuple[str, str, str]:
         """
         Root environment configuration.
 
@@ -111,7 +111,7 @@ class ExperimentData(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def objectives(self) -> Dict[str, Literal["min", "max"]]:
+    def objectives(self) -> dict[str, Literal["min", "max"]]:
         """
         Retrieve the experiment's objectives data from the storage.
 
@@ -124,7 +124,7 @@ class ExperimentData(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def trials(self) -> Dict[int, "TrialData"]:
+    def trials(self) -> dict[int, "TrialData"]:
         """
         Retrieve the experiment's trials' data from the storage.
 
@@ -136,7 +136,7 @@ class ExperimentData(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def tunable_configs(self) -> Dict[int, TunableConfigData]:
+    def tunable_configs(self) -> dict[int, TunableConfigData]:
         """
         Retrieve the experiment's (tunable) configs' data from the storage.
 
@@ -148,7 +148,7 @@ class ExperimentData(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def tunable_config_trial_groups(self) -> Dict[int, "TunableConfigTrialGroupData"]:
+    def tunable_config_trial_groups(self) -> dict[int, "TunableConfigTrialGroupData"]:
         """
         Retrieve the Experiment's (Tunable) Config Trial Group data from the storage.
 
@@ -159,7 +159,7 @@ class ExperimentData(metaclass=ABCMeta):
         """
 
     @property
-    def default_tunable_config_id(self) -> Optional[int]:
+    def default_tunable_config_id(self) -> int | None:
         """
         Retrieves the (tunable) config id for the default tunable values for this
         experiment.

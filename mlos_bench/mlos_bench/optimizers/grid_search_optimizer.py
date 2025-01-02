@@ -5,7 +5,8 @@
 """Grid search optimizer for mlos_bench."""
 
 import logging
-from typing import Dict, Iterable, Optional, Sequence, Set, Tuple
+from typing import Dict, Optional, Set, Tuple
+from collections.abc import Iterable, Sequence
 
 import ConfigSpace
 import numpy as np
@@ -28,8 +29,8 @@ class GridSearchOptimizer(TrackBestOptimizer):
         self,
         tunables: TunableGroups,
         config: dict,
-        global_config: Optional[dict] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        service: Service | None = None,
     ):
         super().__init__(tunables, config, global_config, service)
 
@@ -44,7 +45,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
         self._config_keys, self._pending_configs = self._get_grid()
         assert self._pending_configs
         # A set of suggested configs that have not yet been registered.
-        self._suggested_configs: Set[Tuple[TunableValue, ...]] = set()
+        self._suggested_configs: set[tuple[TunableValue, ...]] = set()
 
     def _sanity_check(self) -> None:
         size = np.prod([tunable.cardinality or np.inf for (tunable, _group) in self._tunables])
@@ -65,7 +66,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
                 self._max_suggestions,
             )
 
-    def _get_grid(self) -> Tuple[Tuple[str, ...], Dict[Tuple[TunableValue, ...], None]]:
+    def _get_grid(self) -> tuple[tuple[str, ...], dict[tuple[TunableValue, ...], None]]:
         """
         Gets a grid of configs to try.
 
@@ -85,12 +86,12 @@ class GridSearchOptimizer(TrackBestOptimizer):
                 },
             )
         ]
-        names = set(tuple(configs.keys()) for configs in configs)
+        names = {tuple(configs.keys()) for configs in configs}
         assert len(names) == 1
         return names.pop(), {tuple(configs.values()): None for configs in configs}
 
     @property
-    def pending_configs(self) -> Iterable[Dict[str, TunableValue]]:
+    def pending_configs(self) -> Iterable[dict[str, TunableValue]]:
         """
         Gets the set of pending configs in this grid search optimizer.
 
@@ -102,7 +103,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
         return (dict(zip(self._config_keys, config)) for config in self._pending_configs.keys())
 
     @property
-    def suggested_configs(self) -> Iterable[Dict[str, TunableValue]]:
+    def suggested_configs(self) -> Iterable[dict[str, TunableValue]]:
         """
         Gets the set of configs that have been suggested but not yet registered.
 
@@ -116,8 +117,8 @@ class GridSearchOptimizer(TrackBestOptimizer):
     def bulk_register(
         self,
         configs: Sequence[dict],
-        scores: Sequence[Optional[Dict[str, TunableValue]]],
-        status: Optional[Sequence[Status]] = None,
+        scores: Sequence[dict[str, TunableValue] | None],
+        status: Sequence[Status] | None = None,
     ) -> bool:
         if not super().bulk_register(configs, scores, status):
             return False
@@ -166,8 +167,8 @@ class GridSearchOptimizer(TrackBestOptimizer):
         self,
         tunables: TunableGroups,
         status: Status,
-        score: Optional[Dict[str, TunableValue]] = None,
-    ) -> Optional[Dict[str, float]]:
+        score: dict[str, TunableValue] | None = None,
+    ) -> dict[str, float] | None:
         registered_score = super().register(tunables, status, score)
         try:
             config = dict(

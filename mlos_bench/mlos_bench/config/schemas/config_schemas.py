@@ -25,7 +25,8 @@ import json  # schema files are pure json - no comments
 import logging
 from enum import Enum
 from os import environ, path, walk
-from typing import Dict, Iterator, Mapping
+from typing import Dict
+from collections.abc import Iterator, Mapping
 
 import jsonschema
 from referencing import Registry, Resource
@@ -70,7 +71,7 @@ class SchemaStore(Mapping):
     """
 
     # A class member mapping of schema id to schema object.
-    _SCHEMA_STORE: Dict[str, dict] = {}
+    _SCHEMA_STORE: dict[str, dict] = {}
     _REGISTRY: Registry = Registry()
 
     def __len__(self) -> int:
@@ -99,7 +100,7 @@ class SchemaStore(Mapping):
                 file_path = path_join(root, file_name)
                 if path.getsize(file_path) == 0:
                     continue
-                with open(file_path, mode="r", encoding="utf-8") as schema_file:
+                with open(file_path, encoding="utf-8") as schema_file:
                     schema = json.load(schema_file)
                     cls._SCHEMA_STORE[file_path] = schema
                     # Let the schema be referenced by its id as well.

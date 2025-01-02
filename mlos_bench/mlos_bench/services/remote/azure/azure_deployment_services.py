@@ -8,7 +8,8 @@ import abc
 import json
 import logging
 import time
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
+from collections.abc import Callable
 
 import requests
 from requests.adapters import HTTPAdapter, Retry
@@ -46,10 +47,10 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """
         Create a new instance of an Azure Services proxy.
@@ -167,7 +168,7 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
             if val.get("value") is not None
         }
 
-    def _azure_rest_api_post_helper(self, params: dict, url: str) -> Tuple[Status, dict]:
+    def _azure_rest_api_post_helper(self, params: dict, url: str) -> tuple[Status, dict]:
         """
         General pattern for performing an action on an Azure resource via its REST API.
 
@@ -211,7 +212,7 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
             # _LOG.error("Bad Request:\n%s", response.request.body)
             return (Status.FAILED, {})
 
-    def _check_operation_status(self, params: dict) -> Tuple[Status, dict]:
+    def _check_operation_status(self, params: dict) -> tuple[Status, dict]:
         """
         Checks the status of a pending operation on an Azure resource.
 
@@ -261,7 +262,7 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         _LOG.error("Response: %s :: %s", response, response.text)
         return Status.FAILED, {}
 
-    def _wait_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
+    def _wait_deployment(self, params: dict, *, is_setup: bool) -> tuple[Status, dict]:
         """
         Waits for a pending operation on an Azure resource to resolve to SUCCEEDED or
         FAILED. Return TIMED_OUT when timing out.
@@ -291,10 +292,10 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
 
     def _wait_while(
         self,
-        func: Callable[[dict], Tuple[Status, dict]],
+        func: Callable[[dict], tuple[Status, dict]],
         loop_status: Status,
         params: dict,
-    ) -> Tuple[Status, dict]:
+    ) -> tuple[Status, dict]:
         """
         Invoke `func` periodically while the status is equal to `loop_status`. Return
         TIMED_OUT when timing out.
@@ -353,7 +354,7 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         _LOG.warning("Request timed out: %s", params)
         return (Status.TIMED_OUT, {})
 
-    def _check_deployment(self, params: dict) -> Tuple[Status, dict]:
+    def _check_deployment(self, params: dict) -> tuple[Status, dict]:
         # pylint: disable=too-many-return-statements
         """
         Check if Azure deployment exists. Return SUCCEEDED if true, PENDING otherwise.
@@ -419,7 +420,7 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         _LOG.error("Response: %s :: %s", response, response.text)
         return (Status.FAILED, {})
 
-    def _provision_resource(self, params: dict) -> Tuple[Status, dict]:
+    def _provision_resource(self, params: dict) -> tuple[Status, dict]:
         """
         Attempts to (re)deploy a resource.
 

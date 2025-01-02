@@ -14,15 +14,13 @@ from string import Template
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Dict,
-    Iterable,
     List,
-    Mapping,
     Optional,
     Tuple,
     Union,
 )
+from collections.abc import Callable, Iterable, Mapping
 
 from mlos_bench.os_environ import environ
 from mlos_bench.services.base_service import Service
@@ -35,7 +33,7 @@ if TYPE_CHECKING:
 _LOG = logging.getLogger(__name__)
 
 
-def split_cmdline(cmdline: str) -> Iterable[List[str]]:
+def split_cmdline(cmdline: str) -> Iterable[list[str]]:
     """
     A single command line may contain multiple commands separated by special characters
     (e.g., &&, ||, etc.) so further split the commandline into an array of subcommand
@@ -81,10 +79,10 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """
         Create a new instance of a service to run scripts locally.
@@ -112,9 +110,9 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
     def local_exec(
         self,
         script_lines: Iterable[str],
-        env: Optional[Mapping[str, "TunableValue"]] = None,
-        cwd: Optional[str] = None,
-    ) -> Tuple[int, str, str]:
+        env: Mapping[str, "TunableValue"] | None = None,
+        cwd: str | None = None,
+    ) -> tuple[int, str, str]:
         """
         Execute the script lines from `script_lines` in a local process.
 
@@ -154,7 +152,7 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
 
         return (return_code, stdout, stderr)
 
-    def _resolve_cmdline_script_path(self, subcmd_tokens: List[str]) -> List[str]:
+    def _resolve_cmdline_script_path(self, subcmd_tokens: list[str]) -> list[str]:
         """
         Resolves local script path (first token) in the (sub)command line tokens to its
         full path.
@@ -185,9 +183,9 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
     def _local_exec_script(
         self,
         script_line: str,
-        env_params: Optional[Mapping[str, "TunableValue"]],
+        env_params: Mapping[str, "TunableValue"] | None,
         cwd: str,
-    ) -> Tuple[int, str, str]:
+    ) -> tuple[int, str, str]:
         """
         Execute the script from `script_path` in a local process.
 
@@ -212,7 +210,7 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
         # Finally recombine all of the fixed up subcmd tokens into the original.
         cmd = [token for subcmd in subcmds for token in subcmd]
 
-        env: Dict[str, str] = {}
+        env: dict[str, str] = {}
         if env_params:
             env = {key: str(val) for (key, val) in env_params.items()}
 

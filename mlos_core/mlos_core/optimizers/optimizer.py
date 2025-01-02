@@ -31,9 +31,9 @@ class BaseOptimizer(metaclass=ABCMeta):
         self,
         *,
         parameter_space: ConfigSpace.ConfigurationSpace,
-        optimization_targets: List[str],
-        objective_weights: Optional[List[float]] = None,
-        space_adapter: Optional[BaseSpaceAdapter] = None,
+        optimization_targets: list[str],
+        objective_weights: list[float] | None = None,
+        space_adapter: BaseSpaceAdapter | None = None,
     ):
         """
         Create a new instance of the base optimizer.
@@ -70,22 +70,22 @@ class BaseOptimizer(metaclass=ABCMeta):
         if objective_weights is not None and len(objective_weights) != len(optimization_targets):
             raise ValueError("Number of weights must match the number of optimization targets")
 
-        self._space_adapter: Optional[BaseSpaceAdapter] = space_adapter
+        self._space_adapter: BaseSpaceAdapter | None = space_adapter
         self._observations: Observations = Observations()
-        self._has_context: Optional[bool] = None
-        self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame]]] = []
+        self._has_context: bool | None = None
+        self._pending_observations: list[tuple[pd.DataFrame, pd.DataFrame | None]] = []
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(space_adapter={self.space_adapter})"
 
     @property
-    def space_adapter(self) -> Optional[BaseSpaceAdapter]:
+    def space_adapter(self) -> BaseSpaceAdapter | None:
         """Get the space adapter instance (if any)."""
         return self._space_adapter
 
     def register(
         self,
-        observations: Union[Observation, Observations],
+        observations: Observation | Observations,
     ) -> None:
         """
         Register all observations at once. Exactly one of observations or observation
@@ -168,7 +168,7 @@ class BaseOptimizer(metaclass=ABCMeta):
     def suggest(
         self,
         *,
-        context: Optional[pd.Series] = None,
+        context: pd.Series | None = None,
         defaults: bool = False,
     ) -> Suggestion:
         """
@@ -215,7 +215,7 @@ class BaseOptimizer(metaclass=ABCMeta):
     def _suggest(
         self,
         *,
-        context: Optional[pd.Series] = None,
+        context: pd.Series | None = None,
     ) -> Suggestion:
         """
         Suggests a new configuration.
@@ -320,7 +320,7 @@ class BaseOptimizer(metaclass=ABCMeta):
                     j += 1
         return pd.DataFrame(df_dict)
 
-    def _to_1hot(self, config: Union[pd.DataFrame, pd.Series]) -> npt.NDArray:
+    def _to_1hot(self, config: pd.DataFrame | pd.Series) -> npt.NDArray:
         """Convert pandas DataFrame to one-hot-encoded numpy array."""
         n_cols = 0
         n_rows = config.shape[0] if config.ndim > 1 else 1

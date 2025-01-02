@@ -58,10 +58,10 @@ def ignore_plotter_warnings(plotter_method: MlosVizMethod = MlosVizMethod.AUTO) 
 
 
 def plot(
-    exp_data: Optional[ExperimentData] = None,
+    exp_data: ExperimentData | None = None,
     *,
-    results_df: Optional[pandas.DataFrame] = None,
-    objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
+    results_df: pandas.DataFrame | None = None,
+    objectives: dict[str, Literal["min", "max"]] | None = None,
     plotter_method: MlosVizMethod = MlosVizMethod.AUTO,
     filter_warnings: bool = True,
     **kwargs: Any,

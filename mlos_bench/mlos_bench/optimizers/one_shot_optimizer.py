@@ -25,8 +25,8 @@ class OneShotOptimizer(MockOptimizer):
         self,
         tunables: TunableGroups,
         config: dict,
-        global_config: Optional[dict] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        service: Service | None = None,
     ):
         super().__init__(tunables, config, global_config, service)
         _LOG.info("Run a single iteration for: %s", self._tunables)

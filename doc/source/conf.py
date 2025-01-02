@@ -92,7 +92,7 @@ napoleon_use_keyword = True
 napoleon_custom_sections = None
 
 _base_path = os.path.abspath(os.path.join(__file__, "../../.."))
-_path_cache: Dict[str, bool] = {}
+_path_cache: dict[str, bool] = {}
 
 
 def _check_path(path: str) -> bool:
@@ -105,7 +105,7 @@ def _check_path(path: str) -> bool:
     return result
 
 
-def linkcode_resolve(domain: str, info: Dict[str, str]):
+def linkcode_resolve(domain: str, info: dict[str, str]):
     """Linkcode extension override to link to the source code on GitHub."""
     if domain != "py":
         return None
@@ -156,7 +156,7 @@ intersphinx_mapping.update(
 
 # Type alias resolution map
 # (original, refname) -> new
-CUSTOM_REF_TYPE_MAP: Dict[Tuple[str, str], str] = {
+CUSTOM_REF_TYPE_MAP: dict[tuple[str, str], str] = {
     # Internal typevars and aliases:
     ("BaseTypeVar", "class"): "data",
     ("ConcreteOptimizer", "class"): "data",
@@ -179,7 +179,7 @@ def resolve_type_aliases(
     env: BuildEnvironment,
     node: pending_xref,
     contnode: Element,
-) -> Optional[Element]:
+) -> Element | None:
     """Resolve :class: references to our type aliases as :attr: instead."""
     if node["refdomain"] != "py":
         return None

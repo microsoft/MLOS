@@ -26,7 +26,8 @@ import logging
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 from types import TracebackType
-from typing import Any, Dict, Iterator, List, Literal, Optional, Tuple, Type
+from typing import Any, Dict, List, Literal, Optional, Tuple, Type
+from collections.abc import Iterator
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.dict_templater import DictTemplater
@@ -46,9 +47,9 @@ class Storage(metaclass=ABCMeta):
 
     def __init__(
         self,
-        config: Dict[str, Any],
-        global_config: Optional[dict] = None,
-        service: Optional[Service] = None,
+        config: dict[str, Any],
+        global_config: dict | None = None,
+        service: Service | None = None,
     ):
         """
         Create a new storage object.
@@ -78,7 +79,7 @@ class Storage(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def experiments(self) -> Dict[str, ExperimentData]:
+    def experiments(self) -> dict[str, ExperimentData]:
         """
         Retrieve the experiments' data from the storage.
 
@@ -97,7 +98,7 @@ class Storage(metaclass=ABCMeta):
         root_env_config: str,
         description: str,
         tunables: TunableGroups,
-        opt_targets: Dict[str, Literal["min", "max"]],
+        opt_targets: dict[str, Literal["min", "max"]],
     ) -> "Storage.Experiment":
         """
         Create a new experiment in the storage.
@@ -143,7 +144,7 @@ class Storage(metaclass=ABCMeta):
             trial_id: int,
             root_env_config: str,
             description: str,
-            opt_targets: Dict[str, Literal["min", "max"]],
+            opt_targets: dict[str, Literal["min", "max"]],
         ):
             self._tunables = tunables.copy()
             self._trial_id = trial_id
@@ -169,9 +170,9 @@ class Storage(metaclass=ABCMeta):
 
         def __exit__(
             self,
-            exc_type: Optional[Type[BaseException]],
-            exc_val: Optional[BaseException],
-            exc_tb: Optional[TracebackType],
+            exc_type: type[BaseException] | None,
+            exc_val: BaseException | None,
+            exc_tb: TracebackType | None,
         ) -> Literal[False]:
             """
             End the context of the experiment.
@@ -242,12 +243,12 @@ class Storage(metaclass=ABCMeta):
             return self._tunables
 
         @property
-        def opt_targets(self) -> Dict[str, Literal["min", "max"]]:
+        def opt_targets(self) -> dict[str, Literal["min", "max"]]:
             """Get the Experiment's optimization targets and directions."""
             return self._opt_targets
 
         @abstractmethod
-        def merge(self, experiment_ids: List[str]) -> None:
+        def merge(self, experiment_ids: list[str]) -> None:
             """
             Merge in the results of other (compatible) experiments trials. Used to help
             warm up the optimizer for this experiment.
@@ -259,11 +260,11 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def load_tunable_config(self, config_id: int) -> Dict[str, Any]:
+        def load_tunable_config(self, config_id: int) -> dict[str, Any]:
             """Load tunable values for a given config ID."""
 
         @abstractmethod
-        def load_telemetry(self, trial_id: int) -> List[Tuple[datetime, str, Any]]:
+        def load_telemetry(self, trial_id: int) -> list[tuple[datetime, str, Any]]:
             """
             Retrieve the telemetry data for a given trial.
 
@@ -282,7 +283,7 @@ class Storage(metaclass=ABCMeta):
         def load(
             self,
             last_trial_id: int = -1,
-        ) -> Tuple[List[int], List[dict], List[Optional[Dict[str, Any]]], List[Status]]:
+        ) -> tuple[list[int], list[dict], list[dict[str, Any] | None], list[Status]]:
             """
             Load (tunable values, benchmark scores, status) to warm-up the optimizer.
 
@@ -329,8 +330,8 @@ class Storage(metaclass=ABCMeta):
         def new_trial(
             self,
             tunables: TunableGroups,
-            ts_start: Optional[datetime] = None,
-            config: Optional[Dict[str, Any]] = None,
+            ts_start: datetime | None = None,
+            config: dict[str, Any] | None = None,
         ) -> "Storage.Trial":
             """
             Create a new experiment run in the storage.
@@ -366,8 +367,8 @@ class Storage(metaclass=ABCMeta):
         def _new_trial(
             self,
             tunables: TunableGroups,
-            ts_start: Optional[datetime] = None,
-            config: Optional[Dict[str, Any]] = None,
+            ts_start: datetime | None = None,
+            config: dict[str, Any] | None = None,
         ) -> "Storage.Trial":
             """
             Create a new experiment run in the storage.
@@ -403,8 +404,8 @@ class Storage(metaclass=ABCMeta):
             experiment_id: str,
             trial_id: int,
             tunable_config_id: int,
-            opt_targets: Dict[str, Literal["min", "max"]],
-            config: Optional[Dict[str, Any]] = None,
+            opt_targets: dict[str, Literal["min", "max"]],
+            config: dict[str, Any] | None = None,
         ):
             self._tunables = tunables
             self._experiment_id = experiment_id
@@ -428,7 +429,7 @@ class Storage(metaclass=ABCMeta):
             return self._tunable_config_id
 
         @property
-        def opt_targets(self) -> Dict[str, Literal["min", "max"]]:
+        def opt_targets(self) -> dict[str, Literal["min", "max"]]:
             """Get the Trial's optimization targets and directions."""
             return self._opt_targets
 
@@ -441,7 +442,7 @@ class Storage(metaclass=ABCMeta):
             """
             return self._tunables
 
-        def config(self, global_config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        def config(self, global_config: dict[str, Any] | None = None) -> dict[str, Any]:
             """
             Produce a copy of the global configuration updated with the parameters of
             the current trial.
@@ -467,8 +468,8 @@ class Storage(metaclass=ABCMeta):
             self,
             status: Status,
             timestamp: datetime,
-            metrics: Optional[Dict[str, Any]] = None,
-        ) -> Optional[Dict[str, Any]]:
+            metrics: dict[str, Any] | None = None,
+        ) -> dict[str, Any] | None:
             """
             Update the storage with the results of the experiment.
 
@@ -506,7 +507,7 @@ class Storage(metaclass=ABCMeta):
             self,
             status: Status,
             timestamp: datetime,
-            metrics: List[Tuple[datetime, str, Any]],
+            metrics: list[tuple[datetime, str, Any]],
         ) -> None:
             """
             Save the experiment's telemetry data and intermediate status.

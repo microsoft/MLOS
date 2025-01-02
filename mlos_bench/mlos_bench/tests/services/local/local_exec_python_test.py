@@ -30,23 +30,23 @@ def test_run_python_script(local_exec_service: LocalExecService) -> None:
     output_file = "./config-kernel.sh"
 
     # Tunable parameters to save in JSON
-    params: Dict[str, TunableValue] = {
+    params: dict[str, TunableValue] = {
         "sched_migration_cost_ns": 40000,
         "sched_granularity_ns": 800000,
     }
 
     # Tunable parameters metadata
-    params_meta: Dict[str, Any] = {
+    params_meta: dict[str, Any] = {
         "sched_migration_cost_ns": {"name_prefix": "/proc/sys/kernel/"},
         "sched_granularity_ns": {"name_prefix": "/proc/sys/kernel/"},
     }
 
     with local_exec_service.temp_dir_context() as temp_dir:
 
-        with open(path_join(temp_dir, input_file), "wt", encoding="utf-8") as fh_input:
+        with open(path_join(temp_dir, input_file), "w", encoding="utf-8") as fh_input:
             json.dump(params, fh_input)
 
-        with open(path_join(temp_dir, meta_file), "wt", encoding="utf-8") as fh_meta:
+        with open(path_join(temp_dir, meta_file), "w", encoding="utf-8") as fh_meta:
             json.dump(params_meta, fh_meta)
 
         script_path = local_exec_service.config_loader_service.resolve_path(
@@ -63,7 +63,7 @@ def test_run_python_script(local_exec_service: LocalExecService) -> None:
         assert return_code == 0
         # assert stdout.strip() == ""
 
-        with open(path_join(temp_dir, output_file), "rt", encoding="utf-8") as fh_output:
+        with open(path_join(temp_dir, output_file), encoding="utf-8") as fh_output:
             assert [ln.strip() for ln in fh_output.readlines()] == [
                 'echo "40000" > /proc/sys/kernel/sched_migration_cost_ns',
                 'echo "800000" > /proc/sys/kernel/sched_granularity_ns',

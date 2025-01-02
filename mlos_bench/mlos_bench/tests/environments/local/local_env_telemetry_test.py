@@ -15,7 +15,7 @@ from mlos_bench.tests.environments.local import create_local_env
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
-def _format_str(zone_info: Optional[tzinfo]) -> str:
+def _format_str(zone_info: tzinfo | None) -> str:
     if zone_info is not None:
         return "%Y-%m-%d %H:%M:%S %z"
     return "%Y-%m-%d %H:%M:%S"
@@ -23,7 +23,7 @@ def _format_str(zone_info: Optional[tzinfo]) -> str:
 
 # FIXME: This fails with zone_info = None when run with `TZ="America/Chicago pytest -n0 ...`
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
-def test_local_env_telemetry(tunable_groups: TunableGroups, zone_info: Optional[tzinfo]) -> None:
+def test_local_env_telemetry(tunable_groups: TunableGroups, zone_info: tzinfo | None) -> None:
     """Produce benchmark and telemetry data in a local script and read it."""
     ts1 = datetime.now(zone_info)
     ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
@@ -74,7 +74,7 @@ def test_local_env_telemetry(tunable_groups: TunableGroups, zone_info: Optional[
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_local_env_telemetry_no_header(
     tunable_groups: TunableGroups,
-    zone_info: Optional[tzinfo],
+    zone_info: tzinfo | None,
 ) -> None:
     """Read the telemetry data with no header."""
     ts1 = datetime.now(zone_info)
@@ -112,15 +112,13 @@ def test_local_env_telemetry_no_header(
 
 
 @pytest.mark.filterwarnings(
-    (
         "ignore:.*(Could not infer format, so each element will be parsed individually, "
         "falling back to `dateutil`).*:UserWarning::0"
-    )
 )  # pylint: disable=line-too-long # noqa
 @pytest.mark.parametrize(("zone_info"), ZONE_INFO)
 def test_local_env_telemetry_wrong_header(
     tunable_groups: TunableGroups,
-    zone_info: Optional[tzinfo],
+    zone_info: tzinfo | None,
 ) -> None:
     """Read the telemetry data with incorrect header."""
     ts1 = datetime.now(zone_info)

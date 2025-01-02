@@ -15,17 +15,15 @@ from datetime import datetime
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Dict,
-    Iterable,
     Literal,
-    Mapping,
     Optional,
     Tuple,
     Type,
     TypeVar,
     Union,
 )
+from collections.abc import Callable, Iterable, Mapping
 
 import pandas
 import pytz
@@ -78,7 +76,7 @@ def strtobool(val: str) -> bool:
         raise ValueError(f"Invalid Boolean value: '{val}'")
 
 
-def preprocess_dynamic_configs(*, dest: dict, source: Optional[dict] = None) -> dict:
+def preprocess_dynamic_configs(*, dest: dict, source: dict | None = None) -> dict:
     """
     Replaces all ``$name`` values in the destination config with the corresponding value
     from the source config.
@@ -106,8 +104,8 @@ def preprocess_dynamic_configs(*, dest: dict, source: Optional[dict] = None) -> 
 def merge_parameters(
     *,
     dest: dict,
-    source: Optional[dict] = None,
-    required_keys: Optional[Iterable[str]] = None,
+    source: dict | None = None,
+    required_keys: Iterable[str] | None = None,
 ) -> dict:
     """
     Merge the source config dict into the destination config. Pick from the source
@@ -169,8 +167,8 @@ def path_join(*args: str, abs_path: bool = False) -> str:
 
 def prepare_class_load(
     config: dict,
-    global_config: Optional[Dict[str, Any]] = None,
-) -> Tuple[str, Dict[str, Any]]:
+    global_config: dict[str, Any] | None = None,
+) -> tuple[str, dict[str, Any]]:
     """
     Extract the class instantiation parameters from the configuration.
 
@@ -226,7 +224,7 @@ def get_class_from_name(class_name: str) -> type:
 
 # FIXME: Technically, this should return a type "class_name" derived from "base_class".
 def instantiate_from_config(
-    base_class: Type[BaseTypeVar],
+    base_class: type[BaseTypeVar],
     class_name: str,
     *args: Any,
     **kwargs: Any,
@@ -284,7 +282,7 @@ def check_required_params(config: Mapping[str, Any], required_params: Iterable[s
         )
 
 
-def get_git_info(path: str = __file__) -> Tuple[str, str, str]:
+def get_git_info(path: str = __file__) -> tuple[str, str, str]:
     """
     Get the git repository, commit hash, and local path of the given file.
 
@@ -314,7 +312,7 @@ def get_git_info(path: str = __file__) -> Tuple[str, str, str]:
 
 
 # Note: to avoid circular imports, we don't specify TunableValue here.
-def try_parse_val(val: Optional[str]) -> Optional[Union[int, float, str]]:
+def try_parse_val(val: str | None) -> int | float | str | None:
     """
     Try to parse the value as an int or float, otherwise return the string.
 
@@ -344,7 +342,7 @@ def try_parse_val(val: Optional[str]) -> Optional[Union[int, float, str]]:
         return str(val)
 
 
-def nullable(func: Callable, value: Optional[Any]) -> Optional[Any]:
+def nullable(func: Callable, value: Any | None) -> Any | None:
     """
     Poor man's Maybe monad: apply the function to the value if it's not None.
 
@@ -402,10 +400,10 @@ def utcify_timestamp(timestamp: datetime, *, origin: Literal["utc", "local"]) ->
 
 
 def utcify_nullable_timestamp(
-    timestamp: Optional[datetime],
+    timestamp: datetime | None,
     *,
     origin: Literal["utc", "local"],
-) -> Optional[datetime]:
+) -> datetime | None:
     """A nullable version of utcify_timestamp."""
     return utcify_timestamp(timestamp, origin=origin) if timestamp is not None else None
 

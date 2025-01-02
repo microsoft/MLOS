@@ -46,7 +46,7 @@ class _DDL:
 
     def __init__(self, dialect: Dialect):
         self._dialect = dialect
-        self.statements: List[str] = []
+        self.statements: list[str] = []
 
     def __call__(self, sql: Any, *_args: Any, **_kwargs: Any) -> None:
         self.statements.append(str(sql.compile(dialect=self._dialect)))

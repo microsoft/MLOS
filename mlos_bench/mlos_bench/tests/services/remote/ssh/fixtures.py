@@ -12,7 +12,7 @@ import os
 import sys
 import tempfile
 from subprocess import run
-from typing import Generator
+from collections.abc import Generator
 
 import pytest
 from pytest_docker.plugin import Services as DockerServices

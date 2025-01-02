@@ -36,7 +36,7 @@ class TrialSqlData(TrialData):
         trial_id: int,
         config_id: int,
         ts_start: datetime,
-        ts_end: Optional[datetime],
+        ts_end: datetime | None,
         status: Status,
     ):
         super().__init__(

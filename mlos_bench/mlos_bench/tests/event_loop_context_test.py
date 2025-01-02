@@ -40,9 +40,9 @@ class EventLoopContextCaller:
 
     def __exit__(
         self,
-        ex_type: Optional[Type[BaseException]],
-        ex_val: Optional[BaseException],
-        ex_tb: Optional[TracebackType],
+        ex_type: type[BaseException] | None,
+        ex_val: BaseException | None,
+        ex_tb: TracebackType | None,
     ) -> Literal[False]:
         assert self._in_context
         self.EVENT_LOOP_CONTEXT.exit()
@@ -66,7 +66,7 @@ def test_event_loop_context() -> None:
     assert not event_loop_caller_instance_1._in_context
     assert event_loop_caller_instance_1.EVENT_LOOP_CONTEXT._event_loop_thread is None
 
-    event_loop: Optional[AbstractEventLoop] = None
+    event_loop: AbstractEventLoop | None = None
 
     # After we enter the instance context, we should have a background thread.
     with event_loop_caller_instance_1:

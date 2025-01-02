@@ -22,7 +22,7 @@ _LOG.setLevel(logging.DEBUG)
 CONFIG_TYPE = "storage"
 
 
-def filter_configs(configs_to_filter: List[str]) -> List[str]:
+def filter_configs(configs_to_filter: list[str]) -> list[str]:
     """If necessary, filter out json files that aren't for the module we're testing."""
     return configs_to_filter
 

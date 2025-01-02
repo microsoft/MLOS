@@ -35,13 +35,11 @@ def pytest_configure(config: pytest.Config) -> None:
                 # Only warn once.
                 warn(
                     UserWarning(
-                        (
                             "DISPLAY environment variable is set, "
                             "which can cause problems in some setups (e.g. WSL). "
                             "Adjusting matplotlib backend to "
                             f"""'{matplotlib.rcParams["backend"]}' """
                             "to compensate."
-                        )
                     )
                 )
         except ImportError:
