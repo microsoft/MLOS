@@ -7,7 +7,7 @@ ENV_YML := conda-envs/${CONDA_ENV_NAME}.yml
 
 # Find the non-build python files we should consider as rule dependencies.
 # Do a single find and multiple filters for better performance.
-REPO_FILES := $(shell find ./ -type f 2>/dev/null | egrep -v -e '^./(mlos_(core|bench|viz)/)?build/' -e '^./doc/source/' -e '^./doc/build/')
+REPO_FILES := $(shell find . -type f 2>/dev/null | egrep -v -e '^./(mlos_(core|bench|viz)/)?build/' -e '^./doc/source/' -e '^./doc/build/')
 PYTHON_FILES := $(filter %.py, $(REPO_FILES))
 MLOS_CORE_PYTHON_FILES := $(filter ./mlos_core/%, $(PYTHON_FILES))
 MLOS_BENCH_PYTHON_FILES := $(filter ./mlos_bench/%, $(PYTHON_FILES))
