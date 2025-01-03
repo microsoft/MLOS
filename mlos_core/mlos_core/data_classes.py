@@ -12,7 +12,8 @@ context (information about where the configuration was evaluated).
 
 These modules encapsulate tuples of those for easier passing around and manipulation.
 """
-from typing import Any, Iterable, Iterator, Optional
+from collections.abc import Iterable, Iterator
+from typing import Any
 
 import pandas as pd
 from ConfigSpace import Configuration, ConfigurationSpace
@@ -28,8 +29,8 @@ class Observation:
         *,
         config: pd.Series,
         score: pd.Series = pd.Series(),
-        context: Optional[pd.Series] = None,
-        metadata: Optional[pd.Series] = None,
+        context: pd.Series | None = None,
+        metadata: pd.Series | None = None,
     ):
         """
         Creates a new Observation object.
@@ -40,10 +41,10 @@ class Observation:
             The configuration observed.
         score : pandas.Series
             The score metrics observed.
-        context : Optional[pandas.Series]
+        context : pandas.Series | None
             The context in which the configuration was evaluated.
             Not Yet Implemented.
-        metadata: Optional[pandas.Series]
+        metadata: pandas.Series | None
             The metadata in which the configuration was evaluated
         """
         self._config = config
@@ -62,12 +63,12 @@ class Observation:
         return self._score.copy()
 
     @property
-    def context(self) -> Optional[pd.Series]:
+    def context(self) -> pd.Series | None:
         """Gets (a copy of) the context of the Observation."""
         return self._context.copy() if self._context is not None else None
 
     @property
-    def metadata(self) -> Optional[pd.Series]:
+    def metadata(self) -> pd.Series | None:
         """Gets (a copy of) the metadata of the Observation."""
         return self._metadata.copy() if self._metadata is not None else None
 
@@ -119,9 +120,9 @@ class Observations:
         *,
         configs: pd.DataFrame = pd.DataFrame(),
         scores: pd.DataFrame = pd.DataFrame(),
-        contexts: Optional[pd.DataFrame] = None,
-        metadata: Optional[pd.DataFrame] = None,
-        observations: Optional[Iterable[Observation]] = None,
+        contexts: pd.DataFrame | None = None,
+        metadata: pd.DataFrame | None = None,
+        observations: Iterable[Observation] | None = None,
     ):
         """
         Creates a new Observation object.
@@ -137,10 +138,10 @@ class Observations:
             Pandas dataframe containing configurations. Column names are the parameter names.
         scores : pandas.DataFrame
             The score metrics observed in a dataframe.
-        contexts : Optional[pandas.DataFrame]
+        contexts : pandas.DataFrame | None
             The context in which the configuration was evaluated.
             Not Yet Implemented.
-        metadata: Optional[pandas.DataFrame]
+        metadata: pandas.DataFrame | None
             The metadata in which the configuration was evaluated
             Not Yet Implemented.
         """
@@ -189,12 +190,12 @@ class Observations:
         return self._scores.copy()
 
     @property
-    def contexts(self) -> Optional[pd.DataFrame]:
+    def contexts(self) -> pd.DataFrame | None:
         """Gets a copy of the contexts of the Observations."""
         return self._contexts.copy() if self._contexts is not None else None
 
     @property
-    def metadata(self) -> Optional[pd.DataFrame]:
+    def metadata(self) -> pd.DataFrame | None:
         """Gets a copy of the metadata of the Observations."""
         return self._metadata.copy() if self._metadata is not None else None
 
@@ -327,8 +328,8 @@ class Suggestion:
         self,
         *,
         config: pd.Series,
-        context: Optional[pd.Series] = None,
-        metadata: Optional[pd.Series] = None,
+        context: pd.Series | None = None,
+        metadata: pd.Series | None = None,
     ):
         """
         Creates a new Suggestion.
@@ -337,9 +338,9 @@ class Suggestion:
         ----------
         config : pandas.Series
             The configuration suggested.
-        context : Optional[pandas.Series]
+        context : pandas.Series | None
             The context for this suggestion, by default None
-        metadata : Optional[pandas.Series]
+        metadata : pandas.Series | None
             Any metadata provided by the underlying optimizer, by default None
         """
         self._config = config
@@ -352,12 +353,12 @@ class Suggestion:
         return self._config.copy()
 
     @property
-    def context(self) -> Optional[pd.Series]:
+    def context(self) -> pd.Series | None:
         """Gets (a copy of) the context of the Suggestion."""
         return self._context.copy() if self._context is not None else None
 
     @property
-    def metadata(self) -> Optional[pd.Series]:
+    def metadata(self) -> pd.Series | None:
         """Gets (a copy of) the metadata of the Suggestion."""
         return self._metadata.copy() if self._metadata is not None else None
 

@@ -5,7 +5,7 @@
 """Saving and restoring the benchmark data in SQL database."""
 
 import logging
-from typing import Dict, Literal, Optional
+from typing import Literal
 
 from sqlalchemy import URL, create_engine
 
@@ -28,8 +28,8 @@ class SqlStorage(Storage):
     def __init__(
         self,
         config: dict,
-        global_config: Optional[dict] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        service: Service | None = None,
     ):
         super().__init__(config, global_config, service)
         lazy_schema_create = self._config.pop("lazy_schema_create", False)
@@ -74,7 +74,7 @@ class SqlStorage(Storage):
         root_env_config: str,
         description: str,
         tunables: TunableGroups,
-        opt_targets: Dict[str, Literal["min", "max"]],
+        opt_targets: dict[str, Literal["min", "max"]],
     ) -> Storage.Experiment:
         return Experiment(
             engine=self._engine,
@@ -88,7 +88,7 @@ class SqlStorage(Storage):
         )
 
     @property
-    def experiments(self) -> Dict[str, ExperimentData]:
+    def experiments(self) -> dict[str, ExperimentData]:
         # FIXME: this is somewhat expensive if only fetching a single Experiment.
         # May need to expand the API or data structures to lazily fetch data and/or cache it.
         with self._engine.connect() as conn:

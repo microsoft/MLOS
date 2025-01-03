@@ -5,7 +5,6 @@
 """Tests for optimizer schema validation."""
 
 from os import path
-from typing import Optional
 
 import pytest
 
@@ -78,7 +77,7 @@ def test_case_coverage_mlos_bench_optimizer_type(
 @pytest.mark.parametrize("mlos_core_optimizer_type", expected_mlos_core_optimizer_types)
 def test_case_coverage_mlos_core_optimizer_type(
     test_case_type: str,
-    mlos_core_optimizer_type: Optional[OptimizerType],
+    mlos_core_optimizer_type: OptimizerType | None,
 ) -> None:
     """Checks to see if there is a given type of test case for the given mlos_core
     optimizer type.
@@ -105,7 +104,7 @@ def test_case_coverage_mlos_core_optimizer_type(
 @pytest.mark.parametrize("mlos_core_space_adapter_type", expected_mlos_core_space_adapter_types)
 def test_case_coverage_mlos_core_space_adapter_type(
     test_case_type: str,
-    mlos_core_space_adapter_type: Optional[SpaceAdapterType],
+    mlos_core_space_adapter_type: SpaceAdapterType | None,
 ) -> None:
     """Checks to see if there is a given type of test case for the given mlos_core space
     adapter type.

@@ -59,7 +59,7 @@ RUN mkdir -p /home/vscode/.ssh \
         || ssh-keyscan github.com | tee -a /home/vscode/.ssh/known_hosts \
     )
 
-COPY --from=deps-prep --chown=vscode:conda /tmp/conda-tmp/mlos_deps.yml /tmp/conda-tmp/combined.requirements.txt /tmp/conda-tmp/
+COPY --from=deps-prep --chown=vscode:conda /tmp/conda-tmp/.pre-commit-config.yaml /tmp/conda-tmp/mlos_deps.yml /tmp/conda-tmp/combined.requirements.txt /tmp/conda-tmp/
 
 # Combine the installation of miniconda and the mlos dependencies into a single step in order to save space.
 # This allows the mlos env to reference the base env's packages without duplication across layers.
@@ -95,6 +95,8 @@ RUN echo "Setup miniconda" \
     && echo "# reliable useable across vscode uid changes." \
     && sg conda -c "/opt/conda/bin/conda env create -n mlos -v -f /tmp/conda-tmp/mlos_deps.yml" \
     && sg conda -c "/opt/conda/bin/conda run -n mlos pip install --no-cache-dir -U -r /tmp/conda-tmp/combined.requirements.txt" \
+    && sg conda -c "git -C /tmp/conda-tmp init" \
+    && sg conda -c "/opt/conda/bin/conda run --cwd /tmp/conda-tmp -n mlos pre-commit install-hooks -c .pre-commit-config.yaml" \
     && sg conda -c "/opt/conda/bin/conda run -n mlos pip cache purge" \
     && sg conda -c "/opt/conda/bin/conda clean -v -y -a" \
     && mkdir -p /opt/conda/pkgs/cache/ && chown -R vscode:conda /opt/conda/pkgs/cache/ \

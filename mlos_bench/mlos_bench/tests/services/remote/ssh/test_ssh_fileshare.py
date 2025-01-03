@@ -6,11 +6,12 @@
 
 import os
 import tempfile
+from collections.abc import Generator
 from contextlib import contextmanager
 from os.path import basename
 from pathlib import Path
 from tempfile import _TemporaryFileWrapper  # pylint: disable=import-private-name
-from typing import Any, Dict, Generator, List
+from typing import Any
 
 import pytest
 
@@ -86,7 +87,7 @@ def test_ssh_fileshare_single_file(
                 local_path=temp_file.name,
             )
             # Download will replace the inode at that name, so we need to reopen the file.
-            with open(temp_file.name, mode="r", encoding="utf-8") as temp_file_h:
+            with open(temp_file.name, encoding="utf-8") as temp_file_h:
                 read_lines = temp_file_h.readlines()
                 assert read_lines == lines
 
@@ -101,7 +102,7 @@ def test_ssh_fileshare_recursive(
         config = ssh_test_server.to_ssh_service_config()
 
         remote_file_path = "/tmp/test_ssh_fileshare_recursive_dir"
-        files_lines: Dict[str, List[str]] = {
+        files_lines: dict[str, list[str]] = {
             "file-a.txt": [
                 "a",
                 "1",
@@ -172,7 +173,7 @@ def test_ssh_fileshare_download_file_dne(
                     remote_path="/tmp/file-dne.txt",
                     local_path=temp_file.name,
                 )
-            with open(temp_file.name, mode="r", encoding="utf-8") as temp_file_h:
+            with open(temp_file.name, encoding="utf-8") as temp_file_h:
                 read_lines = temp_file_h.readlines()
             assert read_lines == [canary_str]
 

@@ -8,12 +8,13 @@
 import argparse
 import itertools
 import json
-from typing import Any, Iterator, Tuple
+from collections.abc import Iterator
+from typing import Any
 
 import pandas
 
 
-def _flat_dict(data: Any, path: str) -> Iterator[Tuple[str, Any]]:
+def _flat_dict(data: Any, path: str) -> Iterator[tuple[str, Any]]:
     """Flatten every dict in the hierarchy and rename the keys with the dict path."""
     if isinstance(data, dict):
         for key, val in data.items():
@@ -24,7 +25,7 @@ def _flat_dict(data: Any, path: str) -> Iterator[Tuple[str, Any]]:
 
 def _main(input_file: str, output_file: str, prefix: str) -> None:
     """Convert FIO read data from JSON to tall CSV."""
-    with open(input_file, mode="r", encoding="utf-8") as fh_input:
+    with open(input_file, encoding="utf-8") as fh_input:
         json_data = json.load(fh_input)
 
     data = list(

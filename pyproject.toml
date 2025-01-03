@@ -1,6 +1,6 @@
 [tool.black]
 line-length = 99
-target-version = ["py39", "py310", "py311", "py312", "py313"]
+target-version = ["py310", "py311", "py312", "py313"]
 include = '\.pyi?$'
 
 [tool.isort]
@@ -32,7 +32,7 @@ fail-on = [
 
 # Help inform pylint where to find the project's source code without needing to relyon PYTHONPATH.
 #init-hook="from pylint.config import find_pylintrc; import os, sys; sys.path.append(os.path.dirname(find_pylintrc())); from logging import warning; warning(sys.path)"
-init-hook = "from logging import warning; warning(sys.path)"
+#init-hook = "from logging import warning; warning(sys.path)"
 
 # Load some extra checkers.
 load-plugins = [
@@ -56,12 +56,11 @@ max-line-length = 99
 
 [tool.pylint."messages control"]
 disable = [
+    "R0801", # ignore similar code messages
     "fixme",
     "no-else-return",
     "consider-using-assignment-expr",
-    "deprecated-typing-alias",            # disable for now - still supporting python 3.8
     "docstring-first-line-empty",
-    "consider-alternative-union-syntax",  # disable for now - still supporting python 3.9
     "missing-raises-doc",
     "unnecessary-default-type-args",      # affects Generator type hints, but we still support python 3.8
 ]

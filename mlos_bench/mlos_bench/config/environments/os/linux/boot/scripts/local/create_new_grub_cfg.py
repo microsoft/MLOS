@@ -17,7 +17,7 @@ NEW_CFG = "zz-mlos-boot-params.cfg"
 
 def _write_config() -> None:
     with (
-        open(JSON_CONFIG_FILE, "r", encoding="UTF-8") as fh_json,
+        open(JSON_CONFIG_FILE, encoding="UTF-8") as fh_json,
         open(NEW_CFG, "w", encoding="UTF-8") as fh_config,
     ):
         for key, val in json.load(fh_json).items():

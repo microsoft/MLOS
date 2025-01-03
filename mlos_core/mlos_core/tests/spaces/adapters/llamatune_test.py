@@ -6,7 +6,8 @@
 
 # pylint: disable=missing-function-docstring
 
-from typing import Any, Dict, Iterator, List, Set
+from collections.abc import Iterator
+from typing import Any
 
 import ConfigSpace as CS
 import pandas as pd
@@ -194,7 +195,7 @@ def test_special_parameter_values_validation() -> None:
         )
 
     # Invalid dicts; ValueError should be thrown
-    invalid_special_param_values_dicts: List[Dict[str, Any]] = [
+    invalid_special_param_values_dicts: list[dict[str, Any]] = [
         {"int-Q": 0},  # parameter does not exist
         {"int": {0: 0.2}},  # invalid definition
         {"int": 0.2},  # invalid parameter value
@@ -258,7 +259,7 @@ def test_special_parameter_values_biasing() -> None:  # pylint: disable=too-comp
     eps = 0.2
 
     # Single parameter; single special value
-    special_param_value_dicts: List[Dict[str, Any]] = [
+    special_param_value_dicts: list[dict[str, Any]] = [
         {"int_1": 0},
         {"int_1": (0, bias_percentage)},
         {"int_1": [0]},
@@ -314,7 +315,7 @@ def test_special_parameter_values_biasing() -> None:  # pylint: disable=too-comp
         max_unique_values_per_param=None,
     )
 
-    special_values_instances: Dict[str, Dict[int, int]] = {
+    special_values_instances: dict[str, dict[int, int]] = {
         "int_1": {0: 0, 1: 0},
         "int_2": {2: 0, 100: 0},
     }
@@ -367,7 +368,7 @@ def test_max_unique_values_per_param() -> None:
         )
 
         # Keep track of unique values generated for each parameter
-        unique_values_dict: Dict[str, set] = {param: set() for param in list(input_space.keys())}
+        unique_values_dict: dict[str, set] = {param: set() for param in list(input_space.keys())}
         for config in gen_random_configs(adapter, num_configs):
             for param, value in config.items():
                 unique_values_dict[param].add(value)
@@ -506,7 +507,7 @@ def test_llamatune_pipeline(
         param: {special_value: 0 for special_value, _ in tuples_list}
         for param, tuples_list in adapter._special_param_values_dict.items()
     }
-    unique_values_dict: Dict[str, Set] = {param: set() for param in input_space.keys()}
+    unique_values_dict: dict[str, set] = {param: set() for param in input_space.keys()}
 
     num_configs = 1000
     for (
@@ -584,7 +585,7 @@ def test_deterministic_behavior_for_same_seed(
     the input parameter space.
     """
 
-    def generate_target_param_space_configs(seed: int) -> List[CS.Configuration]:
+    def generate_target_param_space_configs(seed: int) -> list[CS.Configuration]:
         input_space = construct_parameter_space(**param_space_kwargs, seed=seed)
 
         # Init adapter and sample points in the low-dim space
@@ -596,7 +597,7 @@ def test_deterministic_behavior_for_same_seed(
             use_approximate_reverse_mapping=False,
         )
 
-        sample_configs: List[CS.Configuration] = (
+        sample_configs: list[CS.Configuration] = (
             adapter.target_parameter_space.sample_configuration(size=100)
         )
         return sample_configs

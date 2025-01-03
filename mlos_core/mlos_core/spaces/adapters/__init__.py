@@ -32,7 +32,7 @@ for additional documentation and examples in the source tree.
 """
 
 from enum import Enum
-from typing import Optional, TypeVar
+from typing import TypeVar
 
 import ConfigSpace
 
@@ -87,7 +87,7 @@ class SpaceAdapterFactory:
         *,
         parameter_space: ConfigSpace.ConfigurationSpace,
         space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
-        space_adapter_kwargs: Optional[dict] = None,
+        space_adapter_kwargs: dict | None = None,
     ) -> ConcreteSpaceAdapter:  # type: ignore[type-var]
         """
         Create a new space adapter instance, given the parameter space and potential
@@ -97,9 +97,9 @@ class SpaceAdapterFactory:
         ----------
         parameter_space : ConfigSpace.ConfigurationSpace
             Input configuration space.
-        space_adapter_type : Optional[SpaceAdapterType]
+        space_adapter_type : SpaceAdapterType | None
             Space adapter class to be used alongside the optimizer.
-        space_adapter_kwargs : Optional[dict]
+        space_adapter_kwargs : dict | None
             Optional arguments passed in SpaceAdapter class constructor.
 
         Returns

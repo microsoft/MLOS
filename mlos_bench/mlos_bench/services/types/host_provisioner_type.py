@@ -4,7 +4,7 @@
 #
 """Protocol interface for Host/VM provisioning operations."""
 
-from typing import TYPE_CHECKING, Protocol, Tuple, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from mlos_bench.environments.status import Status
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class SupportsHostProvisioning(Protocol):
     """Protocol interface for Host/VM provisioning operations."""
 
-    def provision_host(self, params: dict) -> Tuple["Status", dict]:
+    def provision_host(self, params: dict) -> tuple["Status", dict]:
         """
         Check if Host/VM is ready. Deploy a new Host/VM, if necessary.
 
@@ -32,7 +32,7 @@ class SupportsHostProvisioning(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def wait_host_deployment(self, params: dict, *, is_setup: bool) -> Tuple["Status", dict]:
+    def wait_host_deployment(self, params: dict, *, is_setup: bool) -> tuple["Status", dict]:
         """
         Waits for a pending operation on a Host/VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
@@ -53,7 +53,7 @@ class SupportsHostProvisioning(Protocol):
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
 
-    def deprovision_host(self, params: dict) -> Tuple["Status", dict]:
+    def deprovision_host(self, params: dict) -> tuple["Status", dict]:
         """
         Deprovisions the Host/VM by deleting it.
 
@@ -69,7 +69,7 @@ class SupportsHostProvisioning(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def deallocate_host(self, params: dict) -> Tuple["Status", dict]:
+    def deallocate_host(self, params: dict) -> tuple["Status", dict]:
         """
         Deallocates the Host/VM by shutting it down then releasing the compute
         resources.

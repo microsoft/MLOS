@@ -3,7 +3,6 @@
 # Licensed under the MIT License.
 #
 """Common SQL methods for accessing the stored benchmark data."""
-from typing import Dict, Optional
 
 import pandas
 from sqlalchemy import Integer, and_, func, select
@@ -20,8 +19,8 @@ def get_trials(
     engine: Engine,
     schema: DbSchema,
     experiment_id: str,
-    tunable_config_id: Optional[int] = None,
-) -> Dict[int, TrialData]:
+    tunable_config_id: int | None = None,
+) -> dict[int, TrialData]:
     """
     Gets :py:class:`~.TrialData` for the given ``experiment_id`` and optionally
     additionally restricted by ``tunable_config_id``.
@@ -71,7 +70,7 @@ def get_results_df(
     engine: Engine,
     schema: DbSchema,
     experiment_id: str,
-    tunable_config_id: Optional[int] = None,
+    tunable_config_id: int | None = None,
 ) -> pandas.DataFrame:
     """
     Gets TrialData for the given experiment_id and optionally additionally restricted by

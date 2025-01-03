@@ -5,7 +5,7 @@
 """TunableGroups definition."""
 import copy
 import logging
-from typing import Dict, Generator, Iterable, Mapping, Optional, Tuple, Union
+from collections.abc import Generator, Iterable, Mapping
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
@@ -19,7 +19,7 @@ class TunableGroups:
     parameters.
     """
 
-    def __init__(self, config: Optional[dict] = None):
+    def __init__(self, config: dict | None = None):
         """
         Create a new group of tunable parameters.
 
@@ -37,8 +37,8 @@ class TunableGroups:
             config = {}
         ConfigSchema.TUNABLE_PARAMS.validate(config)
         # Index (Tunable id -> CovariantTunableGroup)
-        self._index: Dict[str, CovariantTunableGroup] = {}
-        self._tunable_groups: Dict[str, CovariantTunableGroup] = {}
+        self._index: dict[str, CovariantTunableGroup] = {}
+        self._tunable_groups: dict[str, CovariantTunableGroup] = {}
         for name, group_config in config.items():
             self._add_group(CovariantTunableGroup(name, group_config))
 
@@ -155,20 +155,20 @@ class TunableGroups:
             + " }"
         )
 
-    def __contains__(self, tunable: Union[str, Tunable]) -> bool:
+    def __contains__(self, tunable: str | Tunable) -> bool:
         """Checks if the given name/tunable is in this tunable group."""
         name: str = tunable.name if isinstance(tunable, Tunable) else tunable
         return name in self._index
 
-    def __getitem__(self, tunable: Union[str, Tunable]) -> TunableValue:
+    def __getitem__(self, tunable: str | Tunable) -> TunableValue:
         """Get the current value of a single tunable parameter."""
         name: str = tunable.name if isinstance(tunable, Tunable) else tunable
         return self._index[name][name]
 
     def __setitem__(
         self,
-        tunable: Union[str, Tunable],
-        tunable_value: Union[TunableValue, Tunable],
+        tunable: str | Tunable,
+        tunable_value: TunableValue | Tunable,
     ) -> TunableValue:
         """Update the current value of a single tunable parameter."""
         # Use double index to make sure we set the is_updated flag of the group
@@ -179,19 +179,19 @@ class TunableGroups:
         self._index[name][name] = value
         return self._index[name][name]
 
-    def __iter__(self) -> Generator[Tuple[Tunable, CovariantTunableGroup], None, None]:
+    def __iter__(self) -> Generator[tuple[Tunable, CovariantTunableGroup], None, None]:
         """
         An iterator over all tunables in the group.
 
         Returns
         -------
-        [(tunable, group), ...] : Generator[Tuple[Tunable, CovariantTunableGroup], None, None]
+        [(tunable, group), ...] : Generator[tuple[Tunable, CovariantTunableGroup], None, None]
             An iterator over all tunables in all groups. Each element is a 2-tuple
             of an instance of the Tunable parameter and covariant group it belongs to.
         """
         return ((group.get_tunable(name), group) for (name, group) in self._index.items())
 
-    def get_tunable(self, tunable: Union[str, Tunable]) -> Tuple[Tunable, CovariantTunableGroup]:
+    def get_tunable(self, tunable: str | Tunable) -> tuple[Tunable, CovariantTunableGroup]:
         """
         Access the entire Tunable (not just its value) and its covariant group. Throw
         KeyError if the tunable is not found.
@@ -252,9 +252,9 @@ class TunableGroups:
 
     def get_param_values(
         self,
-        group_names: Optional[Iterable[str]] = None,
-        into_params: Optional[Dict[str, TunableValue]] = None,
-    ) -> Dict[str, TunableValue]:
+        group_names: Iterable[str] | None = None,
+        into_params: dict[str, TunableValue] | None = None,
+    ) -> dict[str, TunableValue]:
         """
         Get the current values of the tunables that belong to the specified covariance
         groups.
@@ -280,7 +280,7 @@ class TunableGroups:
             into_params.update(self._tunable_groups[name].get_tunable_values_dict())
         return into_params
 
-    def is_updated(self, group_names: Optional[Iterable[str]] = None) -> bool:
+    def is_updated(self, group_names: Iterable[str] | None = None) -> bool:
         """
         Check if any of the given covariant tunable groups has been updated.
 
@@ -310,7 +310,7 @@ class TunableGroups:
         """
         return all(group.is_defaults() for group in self._tunable_groups.values())
 
-    def restore_defaults(self, group_names: Optional[Iterable[str]] = None) -> "TunableGroups":
+    def restore_defaults(self, group_names: Iterable[str] | None = None) -> "TunableGroups":
         """
         Restore all tunable parameters to their default values.
 
@@ -328,7 +328,7 @@ class TunableGroups:
             self._tunable_groups[name].restore_defaults()
         return self
 
-    def reset(self, group_names: Optional[Iterable[str]] = None) -> "TunableGroups":
+    def reset(self, group_names: Iterable[str] | None = None) -> "TunableGroups":
         """
         Clear the update flag of given covariant groups.
 
