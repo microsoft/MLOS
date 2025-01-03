@@ -501,8 +501,8 @@ class Launcher:
 
     def _load_storage(
         self,
-        args_storage: Optional[str],
-        lazy_schema_create: Optional[bool] = None,
+        args_storage: str | None,
+        lazy_schema_create: bool | None = None,
     ) -> Storage:
         """
         Instantiate the Storage object from JSON file provided in the --storage command
