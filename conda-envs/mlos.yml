@@ -7,13 +7,6 @@ dependencies:
   # All other dependencies for the mlos modules come from pip.
   - yq
   - pip
-<<<<<<< HEAD
-=======
-  - black
-  - pycodestyle
-  - pydocstyle
-  - flake8
->>>>>>> nullable-typehint-tweak
   - python-build
   - jupyter
   - ipykernel
