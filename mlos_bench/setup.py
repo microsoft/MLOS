@@ -69,11 +69,11 @@ extra_requires: Dict[str, List[str]] = {  # pylint: disable=consider-using-named
     # Additional tools for extra functionality.
     "azure": ["azure-storage-file-share", "azure-identity", "azure-keyvault"],
     "ssh": ["asyncssh<2.15.0"],  # FIXME: asyncssh 2.15.0 has a bug that breaks the tests
-    "storage-sql-duckdb": ["sqlalchemy", "duckdb_engine"],
-    "storage-sql-mysql": ["sqlalchemy", "mysql-connector-python"],
-    "storage-sql-postgres": ["sqlalchemy", "psycopg2"],
+    "storage-sql-duckdb": ["sqlalchemy", "alembic", "duckdb_engine"],
+    "storage-sql-mysql": ["sqlalchemy", "alembic", "mysql-connector-python"],
+    "storage-sql-postgres": ["sqlalchemy", , "alembic", "psycopg2"],
     # sqlite3 comes with python, so we don't need to install it.
-    "storage-sql-sqlite": ["sqlalchemy"],
+    "storage-sql-sqlite": ["sqlalchemy", "alembic"],
     # Transitive extra_requires from mlos-core.
     "flaml": ["flaml[blendsearch]"],
     "smac": ["smac"],
