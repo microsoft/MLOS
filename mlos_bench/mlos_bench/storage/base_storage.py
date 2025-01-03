@@ -64,6 +64,10 @@ class Storage(metaclass=ABCMeta):
         self._config = config.copy()
         self._global_config = global_config or {}
 
+    @abstractmethod
+    def update_schema(self) -> None:
+        """Update the schema of the storage backend if needed."""
+
     def _validate_json_config(self, config: dict) -> None:
         """Reconstructs a basic json config that this class might have been instantiated
         from in order to validate configs provided outside the file loading

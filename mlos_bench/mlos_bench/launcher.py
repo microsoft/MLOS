@@ -124,6 +124,17 @@ class Launcher:
         self.global_config = DictTemplater(self.global_config).expand_vars(use_os_env=True)
         assert isinstance(self.global_config, dict)
 
+        self.storage = self._load_storage(
+            args.storage or config.get("storage"),
+            lazy_schema_create=args.create_update_storage_schema_only or None,
+        )
+        _LOG.info("Init storage: %s", self.storage)
+
+        if args.create_update_storage_schema_only:
+            _LOG.info("Create/update storage schema only.")
+            self.storage.update_schema()
+            sys.exit(0)
+
         # --service cli args should override the config file values.
         service_files: List[str] = config.get("services", []) + (args.service or [])
         assert isinstance(self._parent_service, SupportsConfigLoading)
@@ -157,9 +168,6 @@ class Launcher:
 
         self.optimizer = self._load_optimizer(args.optimizer or config.get("optimizer"))
         _LOG.info("Init optimizer: %s", self.optimizer)
-
-        self.storage = self._load_storage(args.storage or config.get("storage"))
-        _LOG.info("Init storage: %s", self.storage)
 
         self.teardown: bool = (
             bool(args.teardown)
@@ -365,6 +373,15 @@ class Launcher:
                 """,
         )
 
+        parser.add_argument(
+            "--create-update-storage-schema-only",
+            required=False,
+            default=False,
+            dest="create_update_storage_schema_only",
+            action="store_true",
+            help="Makes sure that the storage schema is update to date for the current version of mlos_bench.",
+        )
+
         # By default we use the command line arguments, but allow the caller to
         # provide some explicitly for testing purposes.
         if argv is None:
@@ -482,7 +499,11 @@ class Launcher:
         )
         return optimizer
 
-    def _load_storage(self, args_storage: Optional[str]) -> Storage:
+    def _load_storage(
+        self,
+        args_storage: Optional[str],
+        lazy_schema_create: Optional[bool] = None,
+    ) -> Storage:
         """
         Instantiate the Storage object from JSON file provided in the --storage command
         line parameter.
@@ -503,6 +524,8 @@ class Launcher:
             )
         class_config = self._config_loader.load_config(args_storage, ConfigSchema.STORAGE)
         assert isinstance(class_config, Dict)
+        if lazy_schema_create:
+            class_config["lazy_schema_create"] = lazy_schema_create
         storage = self._config_loader.build_storage(
             service=self._parent_service,
             config=class_config,

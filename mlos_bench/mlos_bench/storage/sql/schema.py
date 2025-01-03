@@ -17,8 +17,6 @@ The ``mlos_bench`` CLI will do this automatically if the logging level is set to
 import logging
 from typing import Any, List, Optional
 
-import alembic
-import alembic.command
 from sqlalchemy import (
     Column,
     DateTime,
