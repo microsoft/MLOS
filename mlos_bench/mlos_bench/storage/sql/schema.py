@@ -15,8 +15,8 @@ The ``mlos_bench`` CLI will do this automatically if the logging level is set to
 """
 
 import logging
-import sys
-from typing import Any, List, Optional
+from importlib.resources import files
+from typing import Any, List
 
 from alembic import command, config
 from sqlalchemy import (
@@ -37,11 +37,6 @@ from sqlalchemy import (
 from sqlalchemy.engine import Engine
 
 from mlos_bench.util import path_join
-
-if sys.version_info < (3, 10):
-    from importlib_resources import files
-else:
-    from importlib.resources import files
 
 _LOG = logging.getLogger(__name__)
 
@@ -78,13 +73,13 @@ class DbSchema:
     _METRIC_VALUE_LEN = 255
     _STATUS_LEN = 16
 
-    def __init__(self, engine: Optional[Engine]):
+    def __init__(self, engine: Engine | None):
         """
         Declare the SQLAlchemy schema for the database.
 
         Parameters
         ----------
-        engine : sqlalchemy.engine.Engine
+        engine : sqlalchemy.engine.Engine | None
             The SQLAlchemy engine to use for the DB schema.
             Listed as optional for :external:mod:`alembic` schema migration
             purposes, but won't be functional without one.
