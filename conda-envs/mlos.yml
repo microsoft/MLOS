@@ -6,7 +6,6 @@ dependencies:
   # Basic dev environment packages.
   # All other dependencies for the mlos modules come from pip.
   - pip
-  - pylint
   - black
   - pyupgrade
   - pycodestyle
@@ -30,6 +29,7 @@ dependencies:
     - isort
     - docformatter
     - licenseheaders
+    - pylint
     - mypy
     - pandas-stubs
     - types-beautifulsoup4
