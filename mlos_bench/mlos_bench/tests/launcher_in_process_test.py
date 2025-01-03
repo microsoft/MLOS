@@ -4,7 +4,6 @@
 #
 """Unit tests to check the launcher and the main optimization loop in-process."""
 
-from typing import List
 
 import pytest
 
@@ -65,7 +64,7 @@ from mlos_bench.run import _main
 @pytest.mark.filterwarnings(
     "ignore:.*(Configuration.*was already registered).*:UserWarning:.*flaml_optimizer.*:0"
 )
-def test_main_bench(argv: List[str], expected_score: float) -> None:
+def test_main_bench(argv: list[str], expected_score: float) -> None:
     """Run mlos_bench optimization loop with given config and check the results."""
     (score, _config) = _main(argv)
     assert score is not None

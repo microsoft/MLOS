@@ -12,8 +12,8 @@ TODO: Documentat how variable propogation works in the remote environments.
 
 import logging
 import re
+from collections.abc import Iterable
 from datetime import datetime
-from typing import Dict, Iterable, Optional, Tuple
 
 from pytz import UTC
 
@@ -42,9 +42,9 @@ class RemoteEnv(ScriptEnv):
         *,
         name: str,
         config: dict,
-        global_config: Optional[dict] = None,
-        tunables: Optional[TunableGroups] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        tunables: TunableGroups | None = None,
+        service: Service | None = None,
     ):
         """
         Create a new environment for remote execution.
@@ -90,7 +90,7 @@ class RemoteEnv(ScriptEnv):
             ), "RemoteEnv requires a service that supports host operations"
             self._host_service: SupportsHostOps = self._service
 
-    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict | None = None) -> bool:
         """
         Check if the environment is ready and set up the application and benchmarks on a
         remote host.
@@ -130,7 +130,7 @@ class RemoteEnv(ScriptEnv):
 
         return self._is_ready
 
-    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> tuple[Status, datetime, dict[str, TunableValue] | None]:
         """
         Runs the run script on the remote environment.
 
@@ -169,7 +169,7 @@ class RemoteEnv(ScriptEnv):
         self,
         command_name: str,
         script: Iterable[str],
-    ) -> Tuple[Status, datetime, Optional[dict]]:
+    ) -> tuple[Status, datetime, dict | None]:
         """
         Run a script on the remote host.
 

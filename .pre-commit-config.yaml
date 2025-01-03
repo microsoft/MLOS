@@ -36,14 +36,13 @@ repos:
         args: [-t, doc/mit-license.tmpl, -E, .py, .sh, .ps1, .sql, .cmd, -x, mlos_bench/setup.py, mlos_core/setup.py, mlos_viz/setup.py]
         require_serial: true
         stages: [pre-commit, manual]
-# TODO:
-#-   repo: https://github.com/asottile/pyupgrade
-#    rev: v3.19.1
-#    hooks:
-#    -   id: pyupgrade
-#        args: [--py310-plus]
-#        require_serial: true
-#        stages: [pre-commit, manual]
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v3.19.1
+    hooks:
+    -   id: pyupgrade
+        args: [--py310-plus]
+        require_serial: true
+        stages: [pre-commit, manual]
 -   repo: https://github.com/PyCQA/isort
     rev: 5.13.2
     hooks:

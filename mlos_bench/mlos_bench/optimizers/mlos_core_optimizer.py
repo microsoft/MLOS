@@ -6,8 +6,9 @@
 
 import logging
 import os
+from collections.abc import Sequence
 from types import TracebackType
-from typing import Dict, Literal, Optional, Sequence, Tuple, Type, Union
+from typing import Literal
 
 import pandas as pd
 
@@ -40,8 +41,8 @@ class MlosCoreOptimizer(Optimizer):
         self,
         tunables: TunableGroups,
         config: dict,
-        global_config: Optional[dict] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        service: Service | None = None,
     ):
         super().__init__(tunables, config, global_config, service)
 
@@ -56,10 +57,8 @@ class MlosCoreOptimizer(Optimizer):
                 self._config["output_directory"] = os.path.abspath(output_directory)
             else:
                 _LOG.warning(
-                    (
-                        "SMAC optimizer output_directory was null. "
-                        "SMAC will use a temporary directory."
-                    )
+                    "SMAC optimizer output_directory was null. "
+                    "SMAC will use a temporary directory."
                 )
 
             # Make sure max_trials >= max_suggestions.
@@ -90,9 +89,9 @@ class MlosCoreOptimizer(Optimizer):
 
     def __exit__(
         self,
-        ex_type: Optional[Type[BaseException]],
-        ex_val: Optional[BaseException],
-        ex_tb: Optional[TracebackType],
+        ex_type: type[BaseException] | None,
+        ex_val: BaseException | None,
+        ex_tb: TracebackType | None,
     ) -> Literal[False]:
         self._opt.cleanup()
         return super().__exit__(ex_type, ex_val, ex_tb)
@@ -104,8 +103,8 @@ class MlosCoreOptimizer(Optimizer):
     def bulk_register(
         self,
         configs: Sequence[dict],
-        scores: Sequence[Optional[Dict[str, TunableValue]]],
-        status: Optional[Sequence[Status]] = None,
+        scores: Sequence[dict[str, TunableValue] | None],
+        status: Sequence[Status] | None = None,
     ) -> bool:
 
         if not super().bulk_register(configs, scores, status):
@@ -152,7 +151,7 @@ class MlosCoreOptimizer(Optimizer):
             )
             raise ValueError("Some score values cannot be converted to float") from ex
 
-    def _to_df(self, configs: Sequence[Dict[str, TunableValue]]) -> pd.DataFrame:
+    def _to_df(self, configs: Sequence[dict[str, TunableValue]]) -> pd.DataFrame:
         """
         Select from past trials only the columns required in this experiment and impute
         default values for the tunables that are missing in the dataframe.
@@ -208,8 +207,8 @@ class MlosCoreOptimizer(Optimizer):
         self,
         tunables: TunableGroups,
         status: Status,
-        score: Optional[Dict[str, TunableValue]] = None,
-    ) -> Optional[Dict[str, float]]:
+        score: dict[str, TunableValue] | None = None,
+    ) -> dict[str, float] | None:
         registered_score = super().register(
             tunables,
             status,
@@ -231,7 +230,7 @@ class MlosCoreOptimizer(Optimizer):
 
     def get_best_observation(
         self,
-    ) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
+    ) -> tuple[dict[str, float], TunableGroups] | tuple[None, None]:
         best_observations = self._opt.get_best_observations()
         if len(best_observations) == 0:
             return (None, None)

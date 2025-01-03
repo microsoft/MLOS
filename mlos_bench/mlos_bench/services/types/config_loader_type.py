@@ -4,17 +4,10 @@
 #
 """Protocol interface for helper functions to lookup and load configs."""
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Protocol,
-    Union,
-    runtime_checkable,
-)
+from __future__ import annotations
+
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 from mlos_bench.config.schemas.config_schemas import ConfigSchema
 from mlos_bench.tunables.tunable import TunableValue
@@ -30,7 +23,7 @@ if TYPE_CHECKING:
 class SupportsConfigLoading(Protocol):
     """Protocol interface for helper functions to lookup and load configs."""
 
-    def resolve_path(self, file_path: str, extra_paths: Optional[Iterable[str]] = None) -> str:
+    def resolve_path(self, file_path: str, extra_paths: Iterable[str] | None = None) -> str:
         """
         Prepend the suitable `_config_path` to `path` if the latter is not absolute. If
         `_config_path` is `None` or `path` is absolute, return `path` as is.
@@ -51,8 +44,8 @@ class SupportsConfigLoading(Protocol):
     def load_config(
         self,
         json: str,
-        schema_type: Optional[ConfigSchema],
-    ) -> Union[dict, List[dict]]:
+        schema_type: ConfigSchema | None,
+    ) -> dict | list[dict]:
         """
         Load JSON config file. Search for a file relative to `_config_path` if the input
         path is not absolute. This method is exported to be used as a service.
@@ -61,23 +54,23 @@ class SupportsConfigLoading(Protocol):
         ----------
         json : str
             Path to the input config file or a JSON string.
-        schema_type : Optional[ConfigSchema]
+        schema_type : ConfigSchema | None
             The schema type to validate the config against.
 
         Returns
         -------
-        config : Union[dict, List[dict]]
+        config : Union[dict, list[dict]]
             Free-format dictionary that contains the configuration.
         """
 
     def build_environment(  # pylint: disable=too-many-arguments
         self,
         config: dict,
-        tunables: "TunableGroups",
-        global_config: Optional[dict] = None,
-        parent_args: Optional[Dict[str, TunableValue]] = None,
-        service: Optional["Service"] = None,
-    ) -> "Environment":
+        tunables: TunableGroups,
+        global_config: dict | None = None,
+        parent_args: dict[str, TunableValue] | None = None,
+        service: Service | None = None,
+    ) -> Environment:
         # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
         Factory method for a new environment with a given config.
@@ -92,12 +85,12 @@ class SupportsConfigLoading(Protocol):
         tunables : TunableGroups
             A (possibly empty) collection of groups of tunable parameters for
             all environments.
-        global_config : Optional[dict]
+        global_config : dict | None
             Global parameters to add to the environment config.
-        parent_args : Optional[Dict[str, TunableValue]]
+        parent_args : Optional[dict[str, TunableValue]]
             An optional reference of the parent CompositeEnv's const_args used to
             expand dynamic config parameters from.
-        service: Optional[Service]
+        service: Service | None
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
 
@@ -110,11 +103,11 @@ class SupportsConfigLoading(Protocol):
     def load_environment_list(
         self,
         json: str,
-        tunables: "TunableGroups",
-        global_config: Optional[dict] = None,
-        parent_args: Optional[Dict[str, TunableValue]] = None,
-        service: Optional["Service"] = None,
-    ) -> List["Environment"]:
+        tunables: TunableGroups,
+        global_config: dict | None = None,
+        parent_args: dict[str, TunableValue] | None = None,
+        service: Service | None = None,
+    ) -> list[Environment]:
         # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
         Load and build a list of environments from the config file.
@@ -126,26 +119,26 @@ class SupportsConfigLoading(Protocol):
             Can contain either one environment or a list of environments.
         tunables : TunableGroups
             A (possibly empty) collection of tunables to add to the environment.
-        global_config : Optional[dict]
+        global_config : dict | None
             Global parameters to add to the environment config.
-        parent_args : Optional[Dict[str, TunableValue]]
+        parent_args : Optional[dict[str, TunableValue]]
             An optional reference of the parent CompositeEnv's const_args used to
             expand dynamic config parameters from.
-        service : Optional[Service]
+        service : Service | None
             An optional reference of the parent service to mix in.
 
         Returns
         -------
-        env : List[Environment]
+        env : list[Environment]
             A list of new benchmarking environments.
         """
 
     def load_services(
         self,
         jsons: Iterable[str],
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional["Service"] = None,
-    ) -> "Service":
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+    ) -> Service:
         """
         Read the configuration files and bundle all service methods from those configs
         into a single Service object.

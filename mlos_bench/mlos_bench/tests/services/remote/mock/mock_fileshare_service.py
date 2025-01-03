@@ -5,7 +5,8 @@
 """A collection Service functions for mocking file share ops."""
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from collections.abc import Callable
+from typing import Any
 
 from mlos_bench.services.base_fileshare import FileShareService
 from mlos_bench.services.base_service import Service
@@ -19,10 +20,10 @@ class MockFileShareService(FileShareService, SupportsFileShareOps):
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         super().__init__(
             config,
@@ -30,8 +31,8 @@ class MockFileShareService(FileShareService, SupportsFileShareOps):
             parent,
             self.merge_methods(methods, [self.upload, self.download]),
         )
-        self._upload: List[Tuple[str, str]] = []
-        self._download: List[Tuple[str, str]] = []
+        self._upload: list[tuple[str, str]] = []
+        self._download: list[tuple[str, str]] = []
 
     def upload(
         self,
@@ -51,10 +52,10 @@ class MockFileShareService(FileShareService, SupportsFileShareOps):
     ) -> None:
         self._download.append((remote_path, local_path))
 
-    def get_upload(self) -> List[Tuple[str, str]]:
+    def get_upload(self) -> list[tuple[str, str]]:
         """Get the list of files that were uploaded."""
         return self._upload
 
-    def get_download(self) -> List[Tuple[str, str]]:
+    def get_download(self) -> list[tuple[str, str]]:
         """Get the list of files that were downloaded."""
         return self._download

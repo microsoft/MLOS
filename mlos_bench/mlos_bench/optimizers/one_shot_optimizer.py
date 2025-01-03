@@ -5,7 +5,6 @@
 """No-op optimizer for mlos_bench that proposes a single configuration."""
 
 import logging
-from typing import Optional
 
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.services.base_service import Service
@@ -25,8 +24,8 @@ class OneShotOptimizer(MockOptimizer):
         self,
         tunables: TunableGroups,
         config: dict,
-        global_config: Optional[dict] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        service: Service | None = None,
     ):
         super().__init__(tunables, config, global_config, service)
         _LOG.info("Run a single iteration for: %s", self._tunables)

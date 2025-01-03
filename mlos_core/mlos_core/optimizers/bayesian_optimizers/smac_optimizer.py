@@ -14,7 +14,7 @@ more details.
 from logging import warning
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING
 from warnings import warn
 
 import ConfigSpace
@@ -36,15 +36,15 @@ class SmacOptimizer(BaseBayesianOptimizer):
         self,
         *,  # pylint: disable=too-many-locals,too-many-arguments
         parameter_space: ConfigSpace.ConfigurationSpace,
-        optimization_targets: List[str],
-        objective_weights: Optional[List[float]] = None,
-        space_adapter: Optional[BaseSpaceAdapter] = None,
-        seed: Optional[int] = 0,
-        run_name: Optional[str] = None,
-        output_directory: Optional[str] = None,
+        optimization_targets: list[str],
+        objective_weights: list[float] | None = None,
+        space_adapter: BaseSpaceAdapter | None = None,
+        seed: int | None = 0,
+        run_name: str | None = None,
+        output_directory: str | None = None,
         max_trials: int = 100,
-        n_random_init: Optional[int] = None,
-        max_ratio: Optional[float] = None,
+        n_random_init: int | None = None,
+        max_ratio: float | None = None,
         use_default_config: bool = False,
         n_random_probability: float = 0.1,
     ):
@@ -56,25 +56,25 @@ class SmacOptimizer(BaseBayesianOptimizer):
         parameter_space : ConfigSpace.ConfigurationSpace
             The parameter space to optimize.
 
-        optimization_targets : List[str]
+        optimization_targets : list[str]
             The names of the optimization targets to minimize.
 
-        objective_weights : Optional[List[float]]
+        objective_weights : Optional[list[float]]
             Optional list of weights of optimization targets.
 
         space_adapter : BaseSpaceAdapter
             The space adapter class to employ for parameter space transformations.
 
-        seed : Optional[int]
+        seed : int | None
             By default SMAC uses a known seed (0) to keep results reproducible.
             However, if a `None` seed is explicitly provided, we let a random seed
             be produced by SMAC.
 
-        run_name : Optional[str]
+        run_name : str | None
             Name of this run. This is used to easily distinguish across different runs.
             If set to `None` (default), SMAC will generate a hash from metadata.
 
-        output_directory : Optional[str]
+        output_directory : str | None
             The directory where SMAC output will saved. If set to `None` (default),
             a temporary dir will be used.
 
@@ -83,14 +83,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Note that modifying this value directly affects the value of
             `n_random_init`, if latter is set to `None`.
 
-        n_random_init : Optional[int]
+        n_random_init : int | None
             Number of points evaluated at start to bootstrap the optimizer.
             Default depends on max_trials and number of parameters and max_ratio.
             Note: it can sometimes be useful to set this to 1 when pre-warming the
             optimizer from historical data. See Also:
             :py:meth:`mlos_bench.optimizers.base_optimizer.Optimizer.bulk_register`
 
-        max_ratio : Optional[int]
+        max_ratio : int | None
             Maximum ratio of max_trials to be random configs to be evaluated
             at start to bootstrap the optimizer.
             Useful if you want to explicitly control the number of random
@@ -111,7 +111,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         )
 
         # Declare at the top because we need it in __del__/cleanup()
-        self._temp_output_directory: Optional[TemporaryDirectory] = None
+        self._temp_output_directory: TemporaryDirectory | None = None
 
         # pylint: disable=import-outside-toplevel
         from smac import HyperparameterOptimizationFacade as Optimizer_Smac
@@ -126,7 +126,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         self._convert_configurations_to_array = convert_configurations_to_array
 
         # Store for TrialInfo instances returned by .ask()
-        self.trial_info_map: Dict[ConfigSpace.Configuration, TrialInfo] = {}
+        self.trial_info_map: dict[ConfigSpace.Configuration, TrialInfo] = {}
 
         # The default when not specified is to use a known seed (0) to keep results reproducible.
         # However, if a `None` seed is explicitly provided, we let a random seed be
@@ -179,7 +179,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # doesn't reperform random init.
         # See Also: #488
 
-        initial_design_args: Dict[str, Union[list, int, float, Scenario]] = {
+        initial_design_args: dict[str, list | int | float | Scenario] = {
             "scenario": scenario,
             # Workaround a bug in SMAC that sets a default arg to a mutable
             # value that can cause issues when multiple optimizers are
@@ -242,7 +242,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         self.cleanup()
 
     @property
-    def max_ratio(self) -> Optional[float]:
+    def max_ratio(self) -> float | None:
         """
         Gets the `max_ratio` parameter used in py:meth:`constructor <.__init__>` of this
         SmacOptimizer.
@@ -359,7 +359,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
     def _suggest(
         self,
         *,
-        context: Optional[pd.Series] = None,
+        context: pd.Series | None = None,
     ) -> Suggestion:
         """
         Suggests a new configuration.
@@ -450,7 +450,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             self._temp_output_directory.cleanup()
             self._temp_output_directory = None
 
-    def _to_configspace_configs(self, *, configs: pd.DataFrame) -> List[ConfigSpace.Configuration]:
+    def _to_configspace_configs(self, *, configs: pd.DataFrame) -> list[ConfigSpace.Configuration]:
         """
         Convert a dataframe of configs to a list of ConfigSpace configs.
 

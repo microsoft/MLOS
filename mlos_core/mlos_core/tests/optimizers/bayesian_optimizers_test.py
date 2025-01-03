@@ -4,7 +4,6 @@
 #
 """Tests for Bayesian Optimizers."""
 
-from typing import Optional, Type
 
 import ConfigSpace as CS
 import pandas as pd
@@ -23,8 +22,8 @@ from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
 )
 def test_context_not_implemented_warning(
     configuration_space: CS.ConfigurationSpace,
-    optimizer_class: Type[BaseOptimizer],
-    kwargs: Optional[dict],
+    optimizer_class: type[BaseOptimizer],
+    kwargs: dict | None,
 ) -> None:
     """Make sure we raise warnings for the functionality that has not been implemented
     yet.

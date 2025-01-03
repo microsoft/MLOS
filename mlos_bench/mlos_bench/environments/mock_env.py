@@ -7,7 +7,7 @@
 import logging
 import random
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy
 
@@ -31,9 +31,9 @@ class MockEnv(Environment):
         *,
         name: str,
         config: dict,
-        global_config: Optional[dict] = None,
-        tunables: Optional[TunableGroups] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        tunables: TunableGroups | None = None,
+        service: Service | None = None,
     ):
         """
         Create a new environment that produces mock benchmark data.
@@ -68,7 +68,7 @@ class MockEnv(Environment):
         self._metrics = self.config.get("mock_env_metrics", ["score"])
         self._is_ready = True
 
-    def _produce_metrics(self, rand: Optional[random.Random]) -> Dict[str, TunableValue]:
+    def _produce_metrics(self, rand: random.Random | None) -> dict[str, TunableValue]:
         # Simple convex function of all tunable parameters.
         score = numpy.mean(
             numpy.square([self._normalized(tunable) for (tunable, _group) in self._tunable_params])
@@ -82,7 +82,7 @@ class MockEnv(Environment):
 
         return {metric: score for metric in self._metrics}
 
-    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> tuple[Status, datetime, dict[str, TunableValue] | None]:
         """
         Produce mock benchmark data for one experiment.
 
@@ -101,7 +101,7 @@ class MockEnv(Environment):
         metrics = self._produce_metrics(self._run_random)
         return (Status.SUCCEEDED, timestamp, metrics)
 
-    def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
+    def status(self) -> tuple[Status, datetime, list[tuple[datetime, str, Any]]]:
         """
         Produce mock benchmark status telemetry for one experiment.
 

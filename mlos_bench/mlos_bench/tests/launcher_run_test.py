@@ -5,7 +5,6 @@
 """Unit tests to check the main CLI launcher."""
 import os
 import re
-from typing import List
 
 import pytest
 
@@ -41,7 +40,7 @@ def _launch_main_app(
     root_path: str,
     local_exec_service: LocalExecService,
     cli_config: str,
-    re_expected: List[str],
+    re_expected: list[str],
 ) -> None:
     """Run mlos_bench command-line application with given config and check the results
     in the log.
@@ -65,7 +64,7 @@ def _launch_main_app(
         try:
             iter_expected = iter(re_expected)
             re_log = re.compile(next(iter_expected))
-            with open(log_path, "rt", encoding="utf-8") as fh_out:
+            with open(log_path, encoding="utf-8") as fh_out:
                 for line in fh_out:
                     if re_log.match(line):
                         re_log = re.compile(next(iter_expected))

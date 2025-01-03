@@ -6,7 +6,8 @@
 a remote host OS.
 """
 
-from typing import TYPE_CHECKING, Iterable, Protocol, Tuple, runtime_checkable
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from mlos_bench.environments.status import Status
@@ -23,7 +24,7 @@ class SupportsRemoteExec(Protocol):
         script: Iterable[str],
         config: dict,
         env_params: dict,
-    ) -> Tuple["Status", dict]:
+    ) -> tuple["Status", dict]:
         """
         Run a command on remote host OS.
 
@@ -46,7 +47,7 @@ class SupportsRemoteExec(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def get_remote_exec_results(self, config: dict) -> Tuple["Status", dict]:
+    def get_remote_exec_results(self, config: dict) -> tuple["Status", dict]:
         """
         Get the results of the asynchronously running command.
 

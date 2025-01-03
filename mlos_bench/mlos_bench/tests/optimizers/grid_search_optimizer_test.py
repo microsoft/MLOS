@@ -7,7 +7,6 @@
 import itertools
 import math
 import random
-from typing import Dict, List
 
 import numpy as np
 import pytest
@@ -51,7 +50,7 @@ def grid_search_tunables_config() -> dict:
 @pytest.fixture
 def grid_search_tunables_grid(
     grid_search_tunables: TunableGroups,
-) -> List[Dict[str, TunableValue]]:
+) -> list[dict[str, TunableValue]]:
     """
     Test fixture for grid from tunable groups.
 
@@ -77,7 +76,7 @@ def grid_search_tunables(grid_search_tunables_config: dict) -> TunableGroups:
 @pytest.fixture
 def grid_search_opt(
     grid_search_tunables: TunableGroups,
-    grid_search_tunables_grid: List[Dict[str, TunableValue]],
+    grid_search_tunables_grid: list[dict[str, TunableValue]],
 ) -> GridSearchOptimizer:
     """Test fixture for grid search optimizer."""
     assert len(grid_search_tunables) == 3
@@ -96,7 +95,7 @@ def grid_search_opt(
 def test_grid_search_grid(
     grid_search_opt: GridSearchOptimizer,
     grid_search_tunables: TunableGroups,
-    grid_search_tunables_grid: List[Dict[str, TunableValue]],
+    grid_search_tunables_grid: list[dict[str, TunableValue]],
 ) -> None:
     """Make sure that grid search optimizer initializes and works correctly."""
     # Check the size.
@@ -106,7 +105,7 @@ def test_grid_search_grid(
     assert expected_grid_size > len(grid_search_tunables)
     assert len(grid_search_tunables_grid) == expected_grid_size
     # Check for specific example configs inclusion.
-    expected_config_example: Dict[str, TunableValue] = {
+    expected_config_example: dict[str, TunableValue] = {
         "cat": "a",
         "int": 2,
         "float": 0.75,
@@ -127,10 +126,10 @@ def test_grid_search_grid(
 def test_grid_search(
     grid_search_opt: GridSearchOptimizer,
     grid_search_tunables: TunableGroups,
-    grid_search_tunables_grid: List[Dict[str, TunableValue]],
+    grid_search_tunables_grid: list[dict[str, TunableValue]],
 ) -> None:
     """Make sure that grid search optimizer initializes and works correctly."""
-    score: Dict[str, TunableValue] = {"score": 1.0, "other_score": 2.0}
+    score: dict[str, TunableValue] = {"score": 1.0, "other_score": 2.0}
     status = Status.SUCCEEDED
     suggestion = grid_search_opt.suggest()
     suggestion_dict = suggestion.get_param_values()
@@ -208,7 +207,7 @@ def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
     are called out of order.
     """
     # pylint: disable=too-many-locals
-    score: Dict[str, TunableValue] = {"score": 1.0, "other_score": 2.0}
+    score: dict[str, TunableValue] = {"score": 1.0, "other_score": 2.0}
     status = Status.SUCCEEDED
     suggest_count = 10
     suggested = [grid_search_opt.suggest() for _ in range(suggest_count)]
@@ -236,7 +235,7 @@ def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
     assert best_suggestion_dict not in grid_search_opt.pending_configs
     assert best_suggestion_dict not in grid_search_opt.suggested_configs
 
-    best_suggestion_score: Dict[str, TunableValue] = {}
+    best_suggestion_score: dict[str, TunableValue] = {}
     for opt_target, opt_dir in grid_search_opt.targets.items():
         val = score[opt_target]
         assert isinstance(val, (int, float))

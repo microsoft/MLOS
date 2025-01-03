@@ -14,7 +14,6 @@ See Also: `LlamaTune: Sample-Efficient DBMS Configuration Tuning
 <https://www.microsoft.com/en-us/research/publication/llamatune-sample-efficient-dbms-configuration-tuning>`_.
 """
 import os
-from typing import Dict, List, Optional, Union
 from warnings import warn
 
 import ConfigSpace
@@ -52,8 +51,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         *,
         orig_parameter_space: ConfigSpace.ConfigurationSpace,
         num_low_dims: int = DEFAULT_NUM_LOW_DIMS,
-        special_param_values: Optional[dict] = None,
-        max_unique_values_per_param: Optional[int] = DEFAULT_MAX_UNIQUE_VALUES_PER_PARAM,
+        special_param_values: dict | None = None,
+        max_unique_values_per_param: int | None = DEFAULT_MAX_UNIQUE_VALUES_PER_PARAM,
         use_approximate_reverse_mapping: bool = False,
     ):
         """
@@ -65,9 +64,9 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
             The original (user-provided) parameter space to optimize.
         num_low_dims : int
             Number of dimensions used in the low-dimensional parameter search space.
-        special_param_values_dict : Optional[dict]
+        special_param_values_dict : dict | None
             Dictionary of special
-        max_unique_values_per_param : Optional[int]
+        max_unique_values_per_param : int | None
             Number of unique values per parameter. Used to discretize the parameter space.
             If `None` space discretization is disabled.
         """
@@ -98,7 +97,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         self._sigma_vector = self._random_state.choice([-1, 1], num_orig_dims)
 
         # Used to retrieve the low-dim point, given the high-dim one
-        self._suggested_configs: Dict[ConfigSpace.Configuration, ConfigSpace.Configuration] = {}
+        self._suggested_configs: dict[ConfigSpace.Configuration, ConfigSpace.Configuration] = {}
         self._pinv_matrix: npt.NDArray
         self._use_approximate_reverse_mapping = use_approximate_reverse_mapping
 
@@ -272,7 +271,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
     def _construct_low_dim_space(
         self,
         num_low_dims: int,
-        max_unique_values_per_param: Optional[int],
+        max_unique_values_per_param: int | None,
     ) -> None:
         """
         Constructs the low-dimensional parameter (potentially discretized) search space.
@@ -282,14 +281,14 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         num_low_dims : int
             Number of dimensions used in the low-dimensional parameter search space.
 
-        max_unique_values_per_param: Optional[int]:
+        max_unique_values_per_param: int | None:
             Number of unique values per parameter. Used to discretize the parameter space.
             If `None` space discretization is disabled.
         """
         # Define target space parameters
         q_scaler = None
-        hyperparameters: List[
-            Union[ConfigSpace.UniformFloatHyperparameter, ConfigSpace.UniformIntegerHyperparameter]
+        hyperparameters: list[
+            ConfigSpace.UniformFloatHyperparameter | ConfigSpace.UniformIntegerHyperparameter
         ]
         if max_unique_values_per_param is None:
             hyperparameters = [
@@ -493,7 +492,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
                     + f"'{param}' value domain."
                 )
             # Are user-provided special values unique?
-            if len(set(v for v, _ in tuple_list)) != len(tuple_list):
+            if len({v for v, _ in tuple_list}) != len(tuple_list):
                 raise ValueError(
                     error_prefix
                     + "One (or more) special values are defined more than once "

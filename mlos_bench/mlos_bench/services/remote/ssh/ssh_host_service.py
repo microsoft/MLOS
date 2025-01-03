@@ -5,8 +5,9 @@
 """A collection Service functions for managing hosts via SSH."""
 
 import logging
+from collections.abc import Callable, Iterable
 from concurrent.futures import Future
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any
 
 from asyncssh import ConnectionLost, DisconnectError, ProcessError, SSHCompletedProcess
 
@@ -27,10 +28,10 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """
         Create a new instance of an SSH Service.
@@ -44,7 +45,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
-        methods : Union[Dict[str, Callable], List[Callable], None]
+        methods : Union[dict[str, Callable], list[Callable], None]
             New methods to register with the service.
         """
         # Same methods are also provided by the AzureVMService class
@@ -114,7 +115,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         script: Iterable[str],
         config: dict,
         env_params: dict,
-    ) -> Tuple["Status", dict]:
+    ) -> tuple["Status", dict]:
         """
         Start running a command on remote host OS.
 
@@ -152,7 +153,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         )
         return (Status.PENDING, config)
 
-    def get_remote_exec_results(self, config: dict) -> Tuple["Status", dict]:
+    def get_remote_exec_results(self, config: dict) -> tuple["Status", dict]:
         """
         Get the results of the asynchronously running command.
 
@@ -195,13 +196,13 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             _LOG.error("Failed to get remote exec results: %s", ex)
             return (Status.FAILED, {"result": result})
 
-    def _exec_os_op(self, cmd_opts_list: List[str], params: dict) -> Tuple[Status, dict]:
+    def _exec_os_op(self, cmd_opts_list: list[str], params: dict) -> tuple[Status, dict]:
         """
         _summary_
 
         Parameters
         ----------
-        cmd_opts_list : List[str]
+        cmd_opts_list : list[str]
             List of commands to try to execute.
         params : dict
             The params used to connect to the host.
@@ -236,7 +237,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         """
         return self.remote_exec(script, config, env_params={})
 
-    def shutdown(self, params: dict, force: bool = False) -> Tuple[Status, dict]:
+    def shutdown(self, params: dict, force: bool = False) -> tuple[Status, dict]:
         """
         Initiates a (graceful) shutdown of the Host/VM OS.
 
@@ -261,7 +262,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         ]
         return self._exec_os_op(cmd_opts_list=cmd_opts_list, params=params)
 
-    def reboot(self, params: dict, force: bool = False) -> Tuple[Status, dict]:
+    def reboot(self, params: dict, force: bool = False) -> tuple[Status, dict]:
         """
         Initiates a (graceful) shutdown of the Host/VM OS.
 
@@ -287,7 +288,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         ]
         return self._exec_os_op(cmd_opts_list=cmd_opts_list, params=params)
 
-    def wait_os_operation(self, params: dict) -> Tuple[Status, dict]:
+    def wait_os_operation(self, params: dict) -> tuple[Status, dict]:
         """
         Waits for a pending operation on an OS to resolve to SUCCEEDED or FAILED. Return
         TIMED_OUT when timing out.

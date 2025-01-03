@@ -1,6 +1,6 @@
 [tool.black]
 line-length = 99
-target-version = ["py39", "py310", "py311", "py312", "py313"]
+target-version = ["py310", "py311", "py312", "py313"]
 include = '\.pyi?$'
 
 [tool.isort]
@@ -60,9 +60,7 @@ disable = [
     "fixme",
     "no-else-return",
     "consider-using-assignment-expr",
-    "deprecated-typing-alias",            # disable for now - still supporting python 3.8
     "docstring-first-line-empty",
-    "consider-alternative-union-syntax",  # disable for now - still supporting python 3.9
     "missing-raises-doc",
     "unnecessary-default-type-args",      # affects Generator type hints, but we still support python 3.8
 ]

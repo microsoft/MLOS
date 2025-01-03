@@ -4,7 +4,6 @@
 #
 """Utility functions for the storage subsystem."""
 
-from typing import Dict, Optional
 
 import pandas
 
@@ -12,7 +11,7 @@ from mlos_bench.tunables.tunable import TunableValue, TunableValueTypeTuple
 from mlos_bench.util import try_parse_val
 
 
-def kv_df_to_dict(dataframe: pandas.DataFrame) -> Dict[str, Optional[TunableValue]]:
+def kv_df_to_dict(dataframe: pandas.DataFrame) -> dict[str, TunableValue | None]:
     """
     Utility function to convert certain flat key-value dataframe formats used by the
     mlos_bench.storage modules to a dict.
