@@ -30,7 +30,7 @@ mlos_bench.storage.base_trial_data.TrialData :
 """
 
 from abc import ABCMeta, abstractmethod
-from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple
+from typing import TYPE_CHECKING, Literal
 
 import pandas
 
@@ -95,13 +95,13 @@ class ExperimentData(metaclass=ABCMeta):
         return self._description
 
     @property
-    def root_env_config(self) -> Tuple[str, str, str]:
+    def root_env_config(self) -> tuple[str, str, str]:
         """
         Root environment configuration.
 
         Returns
         -------
-        (root_env_config, git_repo, git_commit) : Tuple[str, str, str]
+        (root_env_config, git_repo, git_commit) : tuple[str, str, str]
             A tuple of (root_env_config, git_repo, git_commit) for the root environment.
         """
         return (self._root_env_config, self._git_repo, self._git_commit)
@@ -111,55 +111,55 @@ class ExperimentData(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def objectives(self) -> Dict[str, Literal["min", "max"]]:
+    def objectives(self) -> dict[str, Literal["min", "max"]]:
         """
         Retrieve the experiment's objectives data from the storage.
 
         Returns
         -------
-        objectives : Dict[str, Literal["min", "max"]]
+        objectives : dict[str, Literal["min", "max"]]
             A dictionary of the experiment's objective names (optimization_targets)
             and their directions (e.g., min or max).
         """
 
     @property
     @abstractmethod
-    def trials(self) -> Dict[int, "TrialData"]:
+    def trials(self) -> dict[int, "TrialData"]:
         """
         Retrieve the experiment's trials' data from the storage.
 
         Returns
         -------
-        trials : Dict[int, TrialData]
+        trials : dict[int, TrialData]
             A dictionary of the trials' data, keyed by trial id.
         """
 
     @property
     @abstractmethod
-    def tunable_configs(self) -> Dict[int, TunableConfigData]:
+    def tunable_configs(self) -> dict[int, TunableConfigData]:
         """
         Retrieve the experiment's (tunable) configs' data from the storage.
 
         Returns
         -------
-        trials : Dict[int, TunableConfigData]
+        trials : dict[int, TunableConfigData]
             A dictionary of the configs' data, keyed by (tunable) config id.
         """
 
     @property
     @abstractmethod
-    def tunable_config_trial_groups(self) -> Dict[int, "TunableConfigTrialGroupData"]:
+    def tunable_config_trial_groups(self) -> dict[int, "TunableConfigTrialGroupData"]:
         """
         Retrieve the Experiment's (Tunable) Config Trial Group data from the storage.
 
         Returns
         -------
-        trials : Dict[int, TunableConfigTrialGroupData]
+        trials : dict[int, TunableConfigTrialGroupData]
             A dictionary of the trials' data, keyed by (tunable) by config id.
         """
 
     @property
-    def default_tunable_config_id(self) -> Optional[int]:
+    def default_tunable_config_id(self) -> int | None:
         """
         Retrieves the (tunable) config id for the default tunable values for this
         experiment.

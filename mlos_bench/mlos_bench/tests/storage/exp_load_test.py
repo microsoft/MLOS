@@ -4,7 +4,6 @@
 #
 """Unit tests for the storage subsystem."""
 from datetime import datetime, tzinfo
-from typing import Optional
 
 import pytest
 from pytz import UTC
@@ -34,7 +33,7 @@ def test_exp_pending_empty(exp_storage: Storage.Experiment) -> None:
 def test_exp_trial_pending(
     exp_storage: Storage.Experiment,
     tunable_groups: TunableGroups,
-    zone_info: Optional[tzinfo],
+    zone_info: tzinfo | None,
 ) -> None:
     """Start a trial and check that it is pending."""
     trial = exp_storage.new_trial(tunable_groups)
@@ -47,7 +46,7 @@ def test_exp_trial_pending(
 def test_exp_trial_pending_many(
     exp_storage: Storage.Experiment,
     tunable_groups: TunableGroups,
-    zone_info: Optional[tzinfo],
+    zone_info: tzinfo | None,
 ) -> None:
     """Start THREE trials and check that both are pending."""
     config1 = tunable_groups.copy().assign({"idle": "mwait"})
@@ -69,7 +68,7 @@ def test_exp_trial_pending_many(
 def test_exp_trial_pending_fail(
     exp_storage: Storage.Experiment,
     tunable_groups: TunableGroups,
-    zone_info: Optional[tzinfo],
+    zone_info: tzinfo | None,
 ) -> None:
     """Start a trial, fail it, and and check that it is NOT pending."""
     trial = exp_storage.new_trial(tunable_groups)
@@ -82,7 +81,7 @@ def test_exp_trial_pending_fail(
 def test_exp_trial_success(
     exp_storage: Storage.Experiment,
     tunable_groups: TunableGroups,
-    zone_info: Optional[tzinfo],
+    zone_info: tzinfo | None,
 ) -> None:
     """Start a trial, finish it successfully, and and check that it is NOT pending."""
     trial = exp_storage.new_trial(tunable_groups)
@@ -95,7 +94,7 @@ def test_exp_trial_success(
 def test_exp_trial_update_categ(
     exp_storage: Storage.Experiment,
     tunable_groups: TunableGroups,
-    zone_info: Optional[tzinfo],
+    zone_info: tzinfo | None,
 ) -> None:
     """Update the trial with multiple metrics, some of which are categorical."""
     trial = exp_storage.new_trial(tunable_groups)
@@ -119,7 +118,7 @@ def test_exp_trial_update_categ(
 def test_exp_trial_update_twice(
     exp_storage: Storage.Experiment,
     tunable_groups: TunableGroups,
-    zone_info: Optional[tzinfo],
+    zone_info: tzinfo | None,
 ) -> None:
     """Update the trial status twice and receive an error."""
     trial = exp_storage.new_trial(tunable_groups)
@@ -132,7 +131,7 @@ def test_exp_trial_update_twice(
 def test_exp_trial_pending_3(
     exp_storage: Storage.Experiment,
     tunable_groups: TunableGroups,
-    zone_info: Optional[tzinfo],
+    zone_info: tzinfo | None,
 ) -> None:
     """
     Start THREE trials, let one succeed, another one fail and keep one not updated.

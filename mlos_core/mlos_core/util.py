@@ -4,27 +4,26 @@
 #
 """Internal helper functions for mlos_core package."""
 
-from typing import Optional, Union
 
 import pandas as pd
 from ConfigSpace import Configuration, ConfigurationSpace
 
 
-def compare_optional_series(left: Optional[pd.Series], right: Optional[pd.Series]) -> bool:
+def compare_optional_series(left: pd.Series | None, right: pd.Series | None) -> bool:
     """
     Compare Series that may also be None.
 
     Parameters
     ----------
-    left : Optional[pandas.Series]
+    left : pandas.Series | None
         The left Series to compare
-    right : Optional[pandas.Series]
+    right : pandas.Series | None
         The right Series to compare
 
     Returns
     -------
     bool
-        Compare the equality of two Optional[pd.Series] objects
+        Compare the equality of two pd.Series | None objects
     """
     if isinstance(left, pd.Series) and isinstance(right, pd.Series):
         return left.equals(right)
@@ -32,23 +31,23 @@ def compare_optional_series(left: Optional[pd.Series], right: Optional[pd.Series
 
 
 def compare_optional_dataframe(
-    left: Optional[pd.DataFrame],
-    right: Optional[pd.DataFrame],
+    left: pd.DataFrame | None,
+    right: pd.DataFrame | None,
 ) -> bool:
     """
     Compare DataFrames that may also be None.
 
     Parameters
     ----------
-    left : Optional[pandas.DataFrame]
+    left : pandas.DataFrame | None
         The left DataFrame to compare
-    right : Optional[pandas.DataFrame]
+    right : pandas.DataFrame | None
         The right DataFrame to compare
 
     Returns
     -------
     bool
-        Compare the equality of two Optional[pd.DataFrame] objects
+        Compare the equality of two pd.DataFrame | None objects
     """
     if isinstance(left, pd.DataFrame) and isinstance(right, pd.DataFrame):
         return left.equals(right)
@@ -92,7 +91,7 @@ def drop_nulls(d: dict) -> dict:
 
 def normalize_config(
     config_space: ConfigurationSpace,
-    config: Union[Configuration, dict],
+    config: Configuration | dict,
 ) -> Configuration:
     """
     Convert a dictionary to a valid ConfigSpace configuration.

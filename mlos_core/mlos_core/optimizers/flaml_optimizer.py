@@ -11,7 +11,7 @@ See the `Flaml Documentation <https://microsoft.github.io/FLAML/>`_ for more
 details.
 """
 
-from typing import Dict, List, NamedTuple, Optional, Union
+from typing import NamedTuple
 from warnings import warn
 
 import ConfigSpace
@@ -42,11 +42,11 @@ class FlamlOptimizer(BaseOptimizer):
         self,
         *,  # pylint: disable=too-many-arguments
         parameter_space: ConfigSpace.ConfigurationSpace,
-        optimization_targets: List[str],
-        objective_weights: Optional[List[float]] = None,
-        space_adapter: Optional[BaseSpaceAdapter] = None,
-        low_cost_partial_config: Optional[dict] = None,
-        seed: Optional[int] = None,
+        optimization_targets: list[str],
+        objective_weights: list[float] | None = None,
+        space_adapter: BaseSpaceAdapter | None = None,
+        low_cost_partial_config: dict | None = None,
+        seed: int | None = None,
     ):
         """
         Create an MLOS wrapper for FLAML.
@@ -56,10 +56,10 @@ class FlamlOptimizer(BaseOptimizer):
         parameter_space : ConfigSpace.ConfigurationSpace
             The parameter space to optimize.
 
-        optimization_targets : List[str]
+        optimization_targets : list[str]
             The names of the optimization targets to minimize.
 
-        objective_weights : Optional[List[float]]
+        objective_weights : Optional[list[float]]
             Optional list of weights of optimization targets.
 
         space_adapter : BaseSpaceAdapter
@@ -70,7 +70,7 @@ class FlamlOptimizer(BaseOptimizer):
             More info:
             https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
 
-        seed : Optional[int]
+        seed : int | None
             If provided, calls np.random.seed() with the provided value to set the
             seed globally at init.
         """
@@ -92,13 +92,13 @@ class FlamlOptimizer(BaseOptimizer):
             configspace_to_flaml_space,
         )
 
-        self.flaml_parameter_space: Dict[str, FlamlDomain] = configspace_to_flaml_space(
+        self.flaml_parameter_space: dict[str, FlamlDomain] = configspace_to_flaml_space(
             self.optimizer_parameter_space
         )
         self.low_cost_partial_config = low_cost_partial_config
 
-        self.evaluated_samples: Dict[ConfigSpace.Configuration, EvaluatedSample] = {}
-        self._suggested_config: Optional[dict]
+        self.evaluated_samples: dict[ConfigSpace.Configuration, EvaluatedSample] = {}
+        self._suggested_config: dict | None
 
     def _register(
         self,
@@ -156,7 +156,7 @@ class FlamlOptimizer(BaseOptimizer):
     def _suggest(
         self,
         *,
-        context: Optional[pd.Series] = None,
+        context: pd.Series | None = None,
     ) -> Suggestion:
         """
         Suggests a new configuration.
@@ -181,7 +181,7 @@ class FlamlOptimizer(BaseOptimizer):
     def register_pending(self, pending: Suggestion) -> None:
         raise NotImplementedError()
 
-    def _target_function(self, config: dict) -> Union[dict, None]:
+    def _target_function(self, config: dict) -> dict | None:
         """
         Configuration evaluation function called by FLAML optimizer.
 
@@ -198,7 +198,7 @@ class FlamlOptimizer(BaseOptimizer):
 
         Returns
         -------
-        result: Union[dict, None]
+        result: dict | None
             Dictionary with a single key, `FLAML_score`, if config already
             evaluated; `None` otherwise.
         """

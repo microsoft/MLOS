@@ -6,7 +6,8 @@
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Union
+from collections.abc import Callable
+from typing import Any
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.fileshare_type import SupportsFileShareOps
@@ -19,10 +20,10 @@ class FileShareService(Service, SupportsFileShareOps, metaclass=ABCMeta):
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """
         Create a new file share with a given config.
@@ -37,7 +38,7 @@ class FileShareService(Service, SupportsFileShareOps, metaclass=ABCMeta):
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
-        methods : Union[Dict[str, Callable], List[Callable], None]
+        methods : Union[dict[str, Callable], list[Callable], None]
             New methods to register with the service.
         """
         super().__init__(

@@ -4,7 +4,7 @@
 #
 """Tunable parameter definition."""
 import copy
-from typing import Dict, Iterable, Union
+from collections.abc import Iterable
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 
@@ -31,7 +31,7 @@ class CovariantTunableGroup:
         self._is_updated = True
         self._name = name
         self._cost = int(config.get("cost", 0))
-        self._tunables: Dict[str, Tunable] = {
+        self._tunables: dict[str, Tunable] = {
             name: Tunable(name, tunable_config)
             for (name, tunable_config) in config.get("params", {}).items()
         }
@@ -178,13 +178,13 @@ class CovariantTunableGroup:
         """Get the names of all tunables in the group."""
         return self._tunables.keys()
 
-    def get_tunable_values_dict(self) -> Dict[str, TunableValue]:
+    def get_tunable_values_dict(self) -> dict[str, TunableValue]:
         """
         Get current values of all tunables in the group as a dict.
 
         Returns
         -------
-        tunables : Dict[str, TunableValue]
+        tunables : dict[str, TunableValue]
         """
         return {name: tunable.value for (name, tunable) in self._tunables.items()}
 
@@ -200,7 +200,7 @@ class CovariantTunableGroup:
         """
         return f"{self._name}: {self._tunables}"
 
-    def get_tunable(self, tunable: Union[str, Tunable]) -> Tunable:
+    def get_tunable(self, tunable: str | Tunable) -> Tunable:
         """
         Access the entire Tunable in a group (not just its value). Throw KeyError if the
         tunable is not in the group.
@@ -228,17 +228,17 @@ class CovariantTunableGroup:
         """
         return self._tunables.values()
 
-    def __contains__(self, tunable: Union[str, Tunable]) -> bool:
+    def __contains__(self, tunable: str | Tunable) -> bool:
         name: str = tunable.name if isinstance(tunable, Tunable) else tunable
         return name in self._tunables
 
-    def __getitem__(self, tunable: Union[str, Tunable]) -> TunableValue:
+    def __getitem__(self, tunable: str | Tunable) -> TunableValue:
         return self.get_tunable(tunable).value
 
     def __setitem__(
         self,
-        tunable: Union[str, Tunable],
-        tunable_value: Union[TunableValue, Tunable],
+        tunable: str | Tunable,
+        tunable_value: TunableValue | Tunable,
     ) -> TunableValue:
         value: TunableValue = (
             tunable_value.value if isinstance(tunable_value, Tunable) else tunable_value

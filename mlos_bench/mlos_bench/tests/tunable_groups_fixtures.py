@@ -4,7 +4,7 @@
 #
 """Common fixtures for mock TunableGroups."""
 
-from typing import Any, Dict
+from typing import Any
 
 import json5 as json
 import pytest
@@ -72,7 +72,7 @@ TUNABLE_GROUPS_JSON = """
 
 
 @pytest.fixture
-def tunable_groups_config() -> Dict[str, Any]:
+def tunable_groups_config() -> dict[str, Any]:
     """Fixture to get the JSON string for the tunable groups."""
     conf = json.loads(TUNABLE_GROUPS_JSON)
     assert isinstance(conf, dict)
