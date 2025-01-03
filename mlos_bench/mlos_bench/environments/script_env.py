@@ -12,7 +12,7 @@ shell_env_params, required_args, const_args, etc.
 import abc
 import logging
 import re
-from typing import Dict, Iterable, Optional
+from collections.abc import Iterable
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
@@ -36,9 +36,9 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
         *,
         name: str,
         config: dict,
-        global_config: Optional[dict] = None,
-        tunables: Optional[TunableGroups] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        tunables: TunableGroups | None = None,
+        service: Service | None = None,
     ):
         """
         Create a new environment for script execution.
@@ -84,18 +84,18 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
         self._script_teardown = self.config.get("teardown")
 
         self._shell_env_params: Iterable[str] = self.config.get("shell_env_params", [])
-        self._shell_env_params_rename: Dict[str, str] = self.config.get(
+        self._shell_env_params_rename: dict[str, str] = self.config.get(
             "shell_env_params_rename", {}
         )
 
         results_stdout_pattern = self.config.get("results_stdout_pattern")
-        self._results_stdout_pattern: Optional[re.Pattern[str]] = (
+        self._results_stdout_pattern: re.Pattern[str] | None = (
             re.compile(results_stdout_pattern, flags=re.MULTILINE)
             if results_stdout_pattern
             else None
         )
 
-    def _get_env_params(self, restrict: bool = True) -> Dict[str, str]:
+    def _get_env_params(self, restrict: bool = True) -> dict[str, str]:
         """
         Get the *shell* environment parameters to be passed to the script.
 
@@ -108,7 +108,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        env_params : Dict[str, str]
+        env_params : dict[str, str]
             Parameters to pass as *shell* environment variables into the script.
             This is usually a subset of `_params` with some possible conversions.
         """
@@ -117,7 +117,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
         rename.update(self._shell_env_params_rename)
         return {key_sub: str(self._params[key]) for (key_sub, key) in rename.items()}
 
-    def _extract_stdout_results(self, stdout: str) -> Dict[str, TunableValue]:
+    def _extract_stdout_results(self, stdout: str) -> dict[str, TunableValue]:
         """
         Extract the results from the stdout of the script.
 
@@ -128,7 +128,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        results : Dict[str, TunableValue]
+        results : dict[str, TunableValue]
             A dictionary of results extracted from the stdout.
         """
         if not self._results_stdout_pattern:

@@ -98,6 +98,17 @@ jobs:
           conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
           conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}
 
+    - name: Restore cached pre-commit hooks
+      id: restore-pre-commit-cache
+      if: ${{ github.event_name != 'schedule' }}
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pre-commit
+        key: pre-commit-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('.pre-commit-config.yaml') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
+        restore-keys: |
+          pre-commit-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('.pre-commit-config.yaml') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
+          pre-commit-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('.pre-commit-config.yaml') }}-${{ env.cache_cur_date }}
+
     - name: Log some environment variables for debugging
       run: |
         set -x

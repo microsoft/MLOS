@@ -8,7 +8,7 @@ Tests for mlos_bench.environments.local.
 Used to make mypy happy about multiple conftest.py modules.
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 from mlos_bench.environments.composite_env import CompositeEnv
 from mlos_bench.environments.local.local_env import LocalEnv
@@ -17,7 +17,7 @@ from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
-def create_local_env(tunable_groups: TunableGroups, config: Dict[str, Any]) -> LocalEnv:
+def create_local_env(tunable_groups: TunableGroups, config: dict[str, Any]) -> LocalEnv:
     """
     Create a LocalEnv with the given configuration.
 
@@ -25,7 +25,7 @@ def create_local_env(tunable_groups: TunableGroups, config: Dict[str, Any]) -> L
     ----------
     tunable_groups : TunableGroups
         Tunable parameters (usually come from a fixture).
-    config : Dict[str, Any]
+    config : dict[str, Any]
         Environment configuration.
 
     Returns
@@ -43,9 +43,9 @@ def create_local_env(tunable_groups: TunableGroups, config: Dict[str, Any]) -> L
 
 def create_composite_local_env(
     tunable_groups: TunableGroups,
-    global_config: Dict[str, Any],
-    params: Dict[str, Any],
-    local_configs: List[Dict[str, Any]],
+    global_config: dict[str, Any],
+    params: dict[str, Any],
+    local_configs: list[dict[str, Any]],
 ) -> CompositeEnv:
     """
     Create a CompositeEnv with several LocalEnv instances.
@@ -54,11 +54,11 @@ def create_composite_local_env(
     ----------
     tunable_groups : TunableGroups
         Tunable parameters (usually come from a fixture).
-    global_config : Dict[str, Any]
+    global_config : dict[str, Any]
         Global configuration parameters.
-    params: Dict[str, Any]
+    params: dict[str, Any]
         Additional config params for the CompositeEnv.
-    local_configs: List[Dict[str, Any]]
+    local_configs: list[dict[str, Any]]
         Configurations of the local environments.
 
     Returns

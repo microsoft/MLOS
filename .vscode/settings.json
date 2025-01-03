@@ -137,16 +137,16 @@
     "restructuredtext.linter.doc8.extraArgs": [
         "--ignore D001"
     ],
-    "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source",
+    "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source/",
     "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/",
+    "pre-commit-helper.excludedHookIds": [
+        "mypy",
+        "pylint"
+    ],
+    "pre-commit-helper.runOnSave": "fixes",
     "pylint.severity": {
         // display refactor warnings as information messages
         "refactor": "Information"
-    },
-    "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter",
-        "editor.formatOnSave": true,
-        "editor.formatOnSaveMode": "modifications"
     },
     // See Also .vscode/launch.json for environment variable args to pytest during debug sessions.
     // For the rest, see setup.cfg

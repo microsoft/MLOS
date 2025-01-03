@@ -6,7 +6,8 @@
 
 import os
 import sys
-from typing import Any, Generator, List, Union
+from collections.abc import Generator
+from typing import Any
 
 import pytest
 from fasteners import InterProcessLock, InterProcessReaderWriterLock
@@ -60,7 +61,7 @@ def mock_env_no_noise(tunable_groups: TunableGroups) -> MockEnv:
 
 # Fixtures to configure the pytest-docker plugin.
 @pytest.fixture(scope="session")
-def docker_setup() -> Union[List[str], str]:
+def docker_setup() -> list[str] | str:
     """Setup for docker services."""
     if sys.platform == "darwin" or os.environ.get("HOST_OSTYPE", "").lower().startswith("darwin"):
         # Workaround an oddity on macOS where the "docker-compose up"
@@ -73,7 +74,7 @@ def docker_setup() -> Union[List[str], str]:
 
 
 @pytest.fixture(scope="session")
-def docker_compose_file(pytestconfig: pytest.Config) -> List[str]:
+def docker_compose_file(pytestconfig: pytest.Config) -> list[str]:
     """
     Returns the path to the docker-compose file.
 

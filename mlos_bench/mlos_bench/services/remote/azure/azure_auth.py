@@ -6,8 +6,9 @@
 
 import logging
 from base64 import b64decode
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any
 
 from azure.core.credentials import TokenCredential
 from azure.identity import CertificateCredential, DefaultAzureCredential
@@ -28,10 +29,10 @@ class AzureAuthService(Service, SupportsAuth[TokenCredential]):
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """
         Create a new instance of Azure authentication services proxy.
@@ -45,7 +46,7 @@ class AzureAuthService(Service, SupportsAuth[TokenCredential]):
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
-        methods : Union[Dict[str, Callable], List[Callable], None]
+        methods : Union[dict[str, Callable], list[Callable], None]
             New methods to register with the service.
         """
         super().__init__(
@@ -67,7 +68,7 @@ class AzureAuthService(Service, SupportsAuth[TokenCredential]):
 
         self._access_token = "RENEW *NOW*"
         self._token_expiration_ts = datetime.now(UTC)  # Typically, some future timestamp.
-        self._cred: Optional[TokenCredential] = None
+        self._cred: TokenCredential | None = None
 
         # Verify info required for SP auth early
         if "spClientId" in self.config:

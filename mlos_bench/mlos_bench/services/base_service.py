@@ -4,10 +4,13 @@
 #
 """Base class for the service mix-ins."""
 
+from __future__ import annotations
+
 import json
 import logging
+from collections.abc import Callable
 from types import TracebackType
-from typing import Any, Callable, Dict, List, Literal, Optional, Set, Type, Union
+from typing import Any, Literal
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
@@ -23,10 +26,10 @@ class Service:
     def new(
         cls,
         class_name: str,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional["Service"] = None,
-    ) -> "Service":
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+    ) -> Service:
         """
         Factory method for a new service with a given config.
 
@@ -55,10 +58,10 @@ class Service:
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional["Service"] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """
         Create a new service with a given config.
@@ -73,15 +76,15 @@ class Service:
             Free-format dictionary of global parameters.
         parent : Service
             An optional parent service that can provide mixin functions.
-        methods : Union[Dict[str, Callable], List[Callable], None]
+        methods : Union[dict[str, Callable], list[Callable], None]
             New methods to register with the service.
         """
         self.config = config or {}
         self._validate_json_config(self.config)
         self._parent = parent
-        self._service_methods: Dict[str, Callable] = {}
-        self._services: Set[Service] = set()
-        self._service_contexts: List[Service] = []
+        self._service_methods: dict[str, Callable] = {}
+        self._services: set[Service] = set()
+        self._service_contexts: list[Service] = []
         self._in_context = False
 
         if parent:
@@ -100,9 +103,9 @@ class Service:
 
     @staticmethod
     def merge_methods(
-        ext_methods: Union[Dict[str, Callable], List[Callable], None],
-        local_methods: Union[Dict[str, Callable], List[Callable]],
-    ) -> Dict[str, Callable]:
+        ext_methods: dict[str, Callable] | list[Callable] | None,
+        local_methods: dict[str, Callable] | list[Callable],
+    ) -> dict[str, Callable]:
         """
         Merge methods from the external caller with the local ones.
 
@@ -123,7 +126,7 @@ class Service:
         local_methods.update(ext_methods)
         return local_methods
 
-    def __enter__(self) -> "Service":
+    def __enter__(self) -> Service:
         """
         Enter the Service mix-in context.
 
@@ -141,9 +144,9 @@ class Service:
 
     def __exit__(
         self,
-        ex_type: Optional[Type[BaseException]],
-        ex_val: Optional[BaseException],
-        ex_tb: Optional[TracebackType],
+        ex_type: type[BaseException] | None,
+        ex_val: BaseException | None,
+        ex_tb: TracebackType | None,
     ) -> Literal[False]:
         """
         Exit the Service mix-in context.
@@ -170,7 +173,7 @@ class Service:
         self._in_context = False
         return False
 
-    def _enter_context(self) -> "Service":
+    def _enter_context(self) -> Service:
         """
         Enters the context for this particular Service instance.
 
@@ -183,9 +186,9 @@ class Service:
 
     def _exit_context(
         self,
-        ex_type: Optional[Type[BaseException]],
-        ex_val: Optional[BaseException],
-        ex_tb: Optional[TracebackType],
+        ex_type: type[BaseException] | None,
+        ex_val: BaseException | None,
+        ex_tb: TracebackType | None,
     ) -> Literal[False]:
         """
         Exits the context for this particular Service instance.
@@ -237,7 +240,7 @@ class Service:
         """
         return self._config_loader_service
 
-    def register(self, services: Union[Dict[str, Callable], List[Callable]]) -> None:
+    def register(self, services: dict[str, Callable] | list[Callable]) -> None:
         """
         Register new mix-in services.
 
@@ -277,7 +280,7 @@ class Service:
             if hasattr(svc_method, "__self__") and isinstance(svc_method.__self__, Service)
         }
 
-    def export(self) -> Dict[str, Callable]:
+    def export(self) -> dict[str, Callable]:
         """
         Return a dictionary of functions available in this service.
 

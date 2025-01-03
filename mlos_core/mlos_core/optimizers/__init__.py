@@ -29,7 +29,7 @@ for additional documentation and examples in the source tree.
 """
 
 from enum import Enum
-from typing import List, Optional, TypeVar
+from typing import TypeVar
 
 import ConfigSpace
 
@@ -103,11 +103,11 @@ class OptimizerFactory:
     def create(  # pylint: disable=too-many-arguments
         *,
         parameter_space: ConfigSpace.ConfigurationSpace,
-        optimization_targets: List[str],
+        optimization_targets: list[str],
         optimizer_type: OptimizerType = DEFAULT_OPTIMIZER_TYPE,
-        optimizer_kwargs: Optional[dict] = None,
+        optimizer_kwargs: dict | None = None,
         space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
-        space_adapter_kwargs: Optional[dict] = None,
+        space_adapter_kwargs: dict | None = None,
     ) -> ConcreteOptimizer:  # type: ignore[type-var]
         """
         Create a new optimizer instance, given the parameter space, optimizer type, and
@@ -117,15 +117,15 @@ class OptimizerFactory:
         ----------
         parameter_space : ConfigSpace.ConfigurationSpace
             Input configuration space.
-        optimization_targets : List[str]
+        optimization_targets : list[str]
             The names of the optimization targets to minimize.
         optimizer_type : OptimizerType
             Optimizer class as defined by Enum.
-        optimizer_kwargs : Optional[dict]
+        optimizer_kwargs : dict | None
             Optional arguments passed in Optimizer class constructor.
-        space_adapter_type : Optional[SpaceAdapterType]
+        space_adapter_type : SpaceAdapterType | None
             Space adapter class to be used alongside the optimizer.
-        space_adapter_kwargs : Optional[dict]
+        space_adapter_kwargs : dict | None
             Optional arguments passed in SpaceAdapter class constructor.
 
         Returns

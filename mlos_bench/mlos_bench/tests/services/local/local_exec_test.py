@@ -136,7 +136,7 @@ def test_run_script_write_read_txt(local_exec_service: LocalExecService) -> None
     with local_exec_service.temp_dir_context() as temp_dir:
 
         input_file = "input.txt"
-        with open(path_join(temp_dir, input_file), "wt", encoding="utf-8") as fh_input:
+        with open(path_join(temp_dir, input_file), "w", encoding="utf-8") as fh_input:
             fh_input.write("hello\n")
 
         (return_code, stdout, stderr) = local_exec_service.local_exec(
@@ -151,7 +151,7 @@ def test_run_script_write_read_txt(local_exec_service: LocalExecService) -> None
         assert stdout.strip() == ""
         assert stderr.strip() == ""
 
-        with open(path_join(temp_dir, input_file), "rt", encoding="utf-8") as fh_input:
+        with open(path_join(temp_dir, input_file), encoding="utf-8") as fh_input:
             assert fh_input.read().split() == ["hello", "world", "test"]
 
 

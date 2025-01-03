@@ -35,6 +35,7 @@ if [ -d .devcontainer/tmp ]; then
     rm -rf .devcontainer/tmp
 fi
 mkdir -p .devcontainer/tmp/
+cp -v .pre-commit-config.yaml .devcontainer/tmp/.pre-commit-config.yaml
 cp -v conda-envs/mlos.yml .devcontainer/tmp/mlos.yml
 for pkg in mlos_core mlos_bench mlos_viz; do
     mkdir -p .devcontainer/tmp/$pkg/$pkg

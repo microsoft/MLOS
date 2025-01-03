@@ -6,7 +6,6 @@
 
 from dataclasses import dataclass
 from subprocess import run
-from typing import Optional
 
 from pytest_docker.plugin import Services as DockerServices
 
@@ -29,7 +28,7 @@ class SshTestServerInfo:
     hostname: str
     username: str
     id_rsa_path: str
-    _port: Optional[int] = None
+    _port: int | None = None
 
     def get_port(self, uncached: bool = False) -> int:
         """

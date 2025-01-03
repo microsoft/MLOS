@@ -6,7 +6,6 @@
 
 import logging
 from enum import Enum
-from typing import Tuple, Union
 
 from asyncssh import SFTPError, SFTPFailure, SFTPNoSuchFile, SSHClientConnection, scp
 
@@ -63,8 +62,8 @@ class SshFileShareService(FileShareService, SshService):
             If the remote file does not exist, the SFTPError is converted to a FileNotFoundError.
         """
         connection, _ = await self._get_client_connection(params)
-        srcpaths: Union[str, Tuple[SSHClientConnection, str]]
-        dstpath: Union[str, Tuple[SSHClientConnection, str]]
+        srcpaths: str | tuple[SSHClientConnection, str]
+        dstpath: str | tuple[SSHClientConnection, str]
         if mode == CopyMode.DOWNLOAD:
             srcpaths = (connection, remote_path)
             dstpath = local_path

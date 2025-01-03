@@ -16,7 +16,7 @@ The ``mlos_bench`` CLI will do this automatically if the logging level is set to
 
 import logging
 from importlib.resources import files
-from typing import Any, List
+from typing import Any
 
 from alembic import command, config
 from sqlalchemy import (
@@ -50,7 +50,7 @@ class _DDL:
 
     def __init__(self, dialect: Dialect):
         self._dialect = dialect
-        self.statements: List[str] = []
+        self.statements: list[str] = []
 
     def __call__(self, sql: Any, *_args: Any, **_kwargs: Any) -> None:
         self.statements.append(str(sql.compile(dialect=self._dialect)))

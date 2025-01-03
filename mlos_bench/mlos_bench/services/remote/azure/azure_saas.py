@@ -4,7 +4,8 @@
 #
 """A collection Service functions for configuring SaaS instances on Azure."""
 import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from collections.abc import Callable
+from typing import Any
 
 import requests
 
@@ -39,10 +40,10 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """
         Create a new instance of Azure services proxy.
@@ -56,7 +57,7 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
-        methods : Union[Dict[str, Callable], List[Callable], None]
+        methods : Union[dict[str, Callable], list[Callable], None]
             New methods to register with the service.
         """
         super().__init__(
@@ -117,15 +118,15 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
         # These parameters can come from command line as strings, so conversion is needed.
         self._request_timeout = float(self.config.get("requestTimeout", self._REQUEST_TIMEOUT))
 
-    def configure(self, config: Dict[str, Any], params: Dict[str, Any]) -> Tuple[Status, dict]:
+    def configure(self, config: dict[str, Any], params: dict[str, Any]) -> tuple[Status, dict]:
         """
         Update the parameters of an Azure DB service.
 
         Parameters
         ----------
-        config : Dict[str, Any]
+        config : dict[str, Any]
             Key/value pairs of configuration parameters (e.g., vmName).
-        params : Dict[str, Any]
+        params : dict[str, Any]
             Key/value pairs of the service parameters to update.
 
         Returns
@@ -138,13 +139,13 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             return self._config_batch(config, params)
         return self._config_many(config, params)
 
-    def is_config_pending(self, config: Dict[str, Any]) -> Tuple[Status, dict]:
+    def is_config_pending(self, config: dict[str, Any]) -> tuple[Status, dict]:
         """
         Check if the configuration of an Azure DB service requires a reboot or restart.
 
         Parameters
         ----------
-        config : Dict[str, Any]
+        config : dict[str, Any]
             Key/value pairs of configuration parameters (e.g., vmName).
 
         Returns
@@ -184,16 +185,16 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
 
     def _config_one(
         self,
-        config: Dict[str, Any],
+        config: dict[str, Any],
         param_name: str,
         param_value: Any,
-    ) -> Tuple[Status, dict]:
+    ) -> tuple[Status, dict]:
         """
         Update a single parameter of the Azure DB service.
 
         Parameters
         ----------
-        config : Dict[str, Any]
+        config : dict[str, Any]
             Key/value pairs of configuration parameters (e.g., vmName).
         param_name : str
             Name of the parameter to update.
@@ -222,16 +223,16 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             return (Status.SUCCEEDED, {})
         return (Status.FAILED, {})
 
-    def _config_many(self, config: Dict[str, Any], params: Dict[str, Any]) -> Tuple[Status, dict]:
+    def _config_many(self, config: dict[str, Any], params: dict[str, Any]) -> tuple[Status, dict]:
         """
         Update the parameters of an Azure DB service one-by-one. (If batch API is not
         available for it).
 
         Parameters
         ----------
-        config : Dict[str, Any]
+        config : dict[str, Any]
             Key/value pairs of configuration parameters (e.g., vmName).
-        params : Dict[str, Any]
+        params : dict[str, Any]
             Key/value pairs of the service parameters to update.
 
         Returns
@@ -246,15 +247,15 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
                 return (status, result)
         return (Status.SUCCEEDED, {})
 
-    def _config_batch(self, config: Dict[str, Any], params: Dict[str, Any]) -> Tuple[Status, dict]:
+    def _config_batch(self, config: dict[str, Any], params: dict[str, Any]) -> tuple[Status, dict]:
         """
         Batch update the parameters of an Azure DB service.
 
         Parameters
         ----------
-        config : Dict[str, Any]
+        config : dict[str, Any]
             Key/value pairs of configuration parameters (e.g., vmName).
-        params : Dict[str, Any]
+        params : dict[str, Any]
             Key/value pairs of the service parameters to update.
 
         Returns
