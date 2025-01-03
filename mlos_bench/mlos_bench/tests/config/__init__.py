@@ -5,16 +5,10 @@
 """Helper functions for config example loading tests."""
 
 import os
-import sys
+from importlib.resources import files
 from typing import Callable, List, Optional
 
 from mlos_bench.util import path_join
-
-if sys.version_info < (3, 10):
-    from importlib_resources import files
-else:
-    from importlib.resources import files
-
 
 BUILTIN_TEST_CONFIG_PATH = str(files("mlos_bench.tests.config").joinpath("")).replace("\\", "/")
 

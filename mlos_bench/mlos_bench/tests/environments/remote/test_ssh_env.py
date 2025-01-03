@@ -5,7 +5,7 @@
 """Unit tests for RemoveEnv benchmark environment via local SSH test services."""
 
 import os
-import sys
+from importlib.resources import files
 from typing import Dict
 
 import numpy as np
@@ -17,11 +17,6 @@ from mlos_bench.tests.environments import check_env_success
 from mlos_bench.tests.services.remote.ssh import SshTestServerInfo
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
-
-if sys.version_info < (3, 10):
-    from importlib_resources import files
-else:
-    from importlib.resources import files
 
 
 @requires_docker

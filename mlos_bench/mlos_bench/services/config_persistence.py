@@ -9,7 +9,7 @@ a benchmark :py:class:`.Environment`, :py:mod:`~mlos_bench.tunables`,
 
 import logging
 import os
-import sys
+from importlib.resources import files
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -38,11 +38,6 @@ from mlos_bench.util import (
     path_join,
     preprocess_dynamic_configs,
 )
-
-if sys.version_info < (3, 10):
-    from importlib_resources import files
-else:
-    from importlib.resources import files
 
 if TYPE_CHECKING:
     from mlos_bench.schedulers.base_scheduler import Scheduler

@@ -5,7 +5,7 @@
 """Tests for loading storage config examples."""
 
 import logging
-import sys
+from importlib.resources import files
 from typing import List
 
 import pytest
@@ -20,12 +20,6 @@ from mlos_bench.storage import Storage
 from mlos_bench.tests import check_class_name
 from mlos_bench.tests.config import BUILTIN_TEST_CONFIG_PATH, locate_config_examples
 from mlos_bench.util import path_join
-
-if sys.version_info < (3, 10):
-    from importlib_resources import files
-else:
-    from importlib.resources import files
-
 
 _LOG = logging.getLogger(__name__)
 _LOG.setLevel(logging.DEBUG)
