@@ -15,8 +15,10 @@ The ``mlos_bench`` CLI will do this automatically if the logging level is set to
 """
 
 import logging
-from typing import Any, List
+from typing import Any, List, Optional
 
+import alembic
+import alembic.command
 from sqlalchemy import (
     Column,
     DateTime,
@@ -69,11 +71,19 @@ class DbSchema:
     _METRIC_VALUE_LEN = 255
     _STATUS_LEN = 16
 
-    def __init__(self, engine: Engine):
-        """Declare the SQLAlchemy schema for the database."""
+    def __init__(self, engine: Optional[Engine]):
+        """
+        Declare the SQLAlchemy schema for the database.
+
+        Parameters
+        ----------
+        engine : sqlalchemy.engine.Engine
+            The SQLAlchemy engine to use for the DB schema.
+            Listed as optional for :external:mod:`alembic` schema migration
+            purposes, but won't be functional without one.
+        """
         _LOG.info("Create the DB schema for: %s", engine)
         self._engine = engine
-        # TODO: bind for automatic schema updates? (#649)
         self._meta = MetaData()
 
         self.experiment = Table(
@@ -103,7 +113,7 @@ class DbSchema:
         )
 
         # A workaround for SQLAlchemy issue with autoincrement in DuckDB:
-        if engine.dialect.name == "duckdb":
+        if engine and engine.dialect.name == "duckdb":
             seq_config_id = Sequence("seq_config_id")
             col_config_id = Column(
                 "config_id",
@@ -217,11 +227,21 @@ class DbSchema:
 
         _LOG.debug("Schema: %s", self._meta)
 
+    @property
+    def meta(self) -> MetaData:
+        """Return the SQLAlchemy MetaData object."""
+        return self._meta
+
     def create(self) -> "DbSchema":
         """Create the DB schema."""
         _LOG.info("Create the DB schema")
+        assert self._engine
         self._meta.create_all(self._engine)
         return self
+
+    def update(self) -> "DbSchema":
+        """Updates the DB schema to the latest version."""
+        raise NotImplementedError("TODO: Schema updates are not supported yet.")
 
     def __repr__(self) -> str:
         """
@@ -237,6 +257,7 @@ class DbSchema:
         sql : str
             A multi-line string with SQL statements to create the DB schema from scratch.
         """
+        assert self._engine
         ddl = _DDL(self._engine.dialect)
         mock_engine = create_mock_engine(self._engine.url, executor=ddl)
         self._meta.create_all(mock_engine, checkfirst=False)
