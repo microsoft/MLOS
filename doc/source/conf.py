@@ -21,15 +21,14 @@
 import json
 import os
 import sys
-from typing import Dict, Optional, Tuple
-
 from logging import warning
+from typing import Dict, Optional, Tuple
 
 from docutils.nodes import Element
 from intersphinx_registry import get_intersphinx_mapping
+from sphinx.addnodes import pending_xref
 from sphinx.application import Sphinx as SphinxApp
 from sphinx.environment import BuildEnvironment
-from sphinx.addnodes import pending_xref
 
 sys.path.insert(0, os.path.abspath("../../mlos_core/mlos_core"))
 sys.path.insert(1, os.path.abspath("../../mlos_bench/mlos_bench"))
@@ -107,7 +106,7 @@ def _check_path(path: str) -> bool:
 
 
 def linkcode_resolve(domain: str, info: Dict[str, str]):
-    """linkcode extension override to link to the source code on GitHub."""
+    """Linkcode extension override to link to the source code on GitHub."""
     if domain != "py":
         return None
     if not info["module"]:

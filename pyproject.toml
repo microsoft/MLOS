@@ -32,7 +32,7 @@ fail-on = [
 
 # Help inform pylint where to find the project's source code without needing to relyon PYTHONPATH.
 #init-hook="from pylint.config import find_pylintrc; import os, sys; sys.path.append(os.path.dirname(find_pylintrc())); from logging import warning; warning(sys.path)"
-init-hook = "from logging import warning; warning(sys.path)"
+#init-hook = "from logging import warning; warning(sys.path)"
 
 # Load some extra checkers.
 load-plugins = [
@@ -56,6 +56,7 @@ max-line-length = 99
 
 [tool.pylint."messages control"]
 disable = [
+    "R0801", # ignore similar code messages
     "fixme",
     "no-else-return",
     "consider-using-assignment-expr",

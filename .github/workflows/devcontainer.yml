@@ -148,11 +148,11 @@ jobs:
         conda run -n mlos python -c \
           'from sys import version_info as vers; assert (vers.major, vers.minor) == (3, 13), f"Unexpected python version: {vers}"'
 
-    - name: Check for missing licenseheaders
+    - name: Check for formatting issues
       timeout-minutes: 3
       run: |
         set -x
-        docker exec --user vscode --env USER=vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v licenseheaders
+        docker exec --user vscode --env USER=vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v format
         # licenseheaders changes the contents of the files, so make this check fail if there are any changes detected
         git --no-pager diff --exit-code
 

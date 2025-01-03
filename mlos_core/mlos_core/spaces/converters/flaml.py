@@ -6,7 +6,7 @@
 :py:class:`~mlos_core.optimizers.flaml_optimizer.FlamlOptimizer`
 """
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Dict, TypeAlias
 
 import ConfigSpace
 import flaml.tune
@@ -15,8 +15,6 @@ import numpy as np
 
 if TYPE_CHECKING:
     from ConfigSpace.hyperparameters import Hyperparameter
-
-from typing import TypeAlias
 
 FlamlDomain: TypeAlias = flaml.tune.sample.Domain
 """Flaml domain type alias."""
