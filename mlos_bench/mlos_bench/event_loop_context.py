@@ -21,11 +21,8 @@ else:
 CoroReturnType = TypeVar("CoroReturnType")  # pylint: disable=invalid-name
 """Type variable for the return type of an :external:py:mod:`asyncio` coroutine."""
 
-if sys.version_info >= (3, 9):
-    FutureReturnType: TypeAlias = Future[CoroReturnType]
-    """Type variable for the return type of a :py:class:`~concurrent.futures.Future`."""
-else:
-    FutureReturnType: TypeAlias = Future
+FutureReturnType: TypeAlias = Future[CoroReturnType]
+"""Type variable for the return type of a :py:class:`~concurrent.futures.Future`."""
 
 _LOG = logging.getLogger(__name__)
 

@@ -28,11 +28,11 @@ def test_download_file(
     local_path = f"{local_folder}/{filename}"
 
     config: dict = {}
-    with patch.object(azure_fileshare, "_share_client") as mock_share_client, patch.object(
-        mock_share_client, "get_file_client"
-    ) as mock_get_file_client, patch.object(
-        mock_share_client, "get_directory_client"
-    ) as mock_get_directory_client:
+    with (
+        patch.object(azure_fileshare, "_share_client") as mock_share_client,
+        patch.object(mock_share_client, "get_file_client") as mock_get_file_client,
+        patch.object(mock_share_client, "get_directory_client") as mock_get_directory_client,
+    ):
 
         mock_get_directory_client.return_value = Mock(exists=Mock(return_value=False))
 
@@ -86,11 +86,11 @@ def test_download_folder_non_recursive(
     mock_share_client = azure_fileshare._share_client  # pylint: disable=protected-access
 
     config: dict = {}
-    with patch.object(azure_fileshare, "_share_client") as mock_share_client, patch.object(
-        mock_share_client, "get_directory_client"
-    ) as mock_get_directory_client, patch.object(
-        mock_share_client, "get_file_client"
-    ) as mock_get_file_client:
+    with (
+        patch.object(azure_fileshare, "_share_client") as mock_share_client,
+        patch.object(mock_share_client, "get_directory_client") as mock_get_directory_client,
+        patch.object(mock_share_client, "get_file_client") as mock_get_file_client,
+    ):
 
         mock_get_directory_client.side_effect = lambda x: dir_client_returns[x]
 
@@ -120,11 +120,11 @@ def test_download_folder_recursive(
     dir_client_returns = make_dir_client_returns(remote_folder)
 
     config: dict = {}
-    with patch.object(azure_fileshare, "_share_client") as mock_share_client, patch.object(
-        mock_share_client, "get_directory_client"
-    ) as mock_get_directory_client, patch.object(
-        mock_share_client, "get_file_client"
-    ) as mock_get_file_client:
+    with (
+        patch.object(azure_fileshare, "_share_client") as mock_share_client,
+        patch.object(mock_share_client, "get_directory_client") as mock_get_directory_client,
+        patch.object(mock_share_client, "get_file_client") as mock_get_file_client,
+    ):
         mock_get_directory_client.side_effect = lambda x: dir_client_returns[x]
         azure_fileshare.download(config, remote_folder, local_folder, recursive=True)
 
@@ -162,9 +162,10 @@ def test_upload_file(
     mock_isdir.return_value = False
 
     config: dict = {}
-    with patch.object(azure_fileshare, "_share_client") as mock_share_client, patch.object(
-        mock_share_client, "get_file_client"
-    ) as mock_get_file_client:
+    with (
+        patch.object(azure_fileshare, "_share_client") as mock_share_client,
+        patch.object(mock_share_client, "get_file_client") as mock_get_file_client,
+    ):
         azure_fileshare.upload(config, local_path, remote_path)
 
     mock_get_file_client.assert_called_with(remote_path)
@@ -235,9 +236,10 @@ def test_upload_directory_non_recursive(
     mock_share_client = azure_fileshare._share_client  # pylint: disable=protected-access
 
     config: dict = {}
-    with patch.object(azure_fileshare, "_share_client") as mock_share_client, patch.object(
-        mock_share_client, "get_file_client"
-    ) as mock_get_file_client:
+    with (
+        patch.object(azure_fileshare, "_share_client") as mock_share_client,
+        patch.object(mock_share_client, "get_file_client") as mock_get_file_client,
+    ):
         azure_fileshare.upload(config, local_folder, remote_folder, recursive=False)
 
     mock_get_file_client.assert_called_with(f"{remote_folder}/a_file_1.csv")
@@ -261,9 +263,10 @@ def test_upload_directory_recursive(
     mock_share_client = azure_fileshare._share_client  # pylint: disable=protected-access
 
     config: dict = {}
-    with patch.object(azure_fileshare, "_share_client") as mock_share_client, patch.object(
-        mock_share_client, "get_file_client"
-    ) as mock_get_file_client:
+    with (
+        patch.object(azure_fileshare, "_share_client") as mock_share_client,
+        patch.object(mock_share_client, "get_file_client") as mock_get_file_client,
+    ):
         azure_fileshare.upload(config, local_folder, remote_folder, recursive=True)
 
     mock_get_file_client.assert_has_calls(
