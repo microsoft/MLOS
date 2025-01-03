@@ -22,7 +22,6 @@ import json
 import os
 import sys
 from logging import warning
-from typing import Dict, Optional, Tuple
 
 from docutils.nodes import Element
 from intersphinx_registry import get_intersphinx_mapping
