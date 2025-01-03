@@ -126,7 +126,7 @@ class Launcher:
 
         self.storage = self._load_storage(
             args.storage or config.get("storage"),
-            lazy_schema_create=args.create_update_storage_schema_only or None,
+            lazy_schema_create=False if args.create_update_storage_schema_only else None,
         )
         _LOG.info("Init storage: %s", self.storage)
 
@@ -524,7 +524,7 @@ class Launcher:
             )
         class_config = self._config_loader.load_config(args_storage, ConfigSchema.STORAGE)
         assert isinstance(class_config, Dict)
-        if lazy_schema_create:
+        if lazy_schema_create is not None:
             class_config["lazy_schema_create"] = lazy_schema_create
         storage = self._config_loader.build_storage(
             service=self._parent_service,
