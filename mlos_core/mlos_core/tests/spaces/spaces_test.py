@@ -26,7 +26,7 @@ from mlos_core.spaces.converters.flaml import (
 OptimizerSpace = Union[FlamlSpace, CS.ConfigurationSpace]
 OptimizerParam = Union[FlamlDomain, Hyperparameter]
 
-NP_E: float = np.e  # type: ignore[misc]    # false positive (read deleted variable)
+NP_E: float = np.e  # type: ignore[misc,unused-ignore]    # false positive (read deleted variable)
 
 
 def assert_is_uniform(arr: npt.NDArray) -> None:

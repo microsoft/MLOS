@@ -35,8 +35,6 @@ jobs:
           # Empty string is the floating most recent version of python
           # (useful to catch new compatibility issues in nightly builds)
           - ""
-          - "3.8"
-          - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"

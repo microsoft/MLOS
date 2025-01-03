@@ -18,17 +18,13 @@ Example
 
 import os
 import sys
-
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
+from typing import TypeAlias
 
 if sys.version_info >= (3, 9):
     # pylint: disable=protected-access,disable=unsubscriptable-object
     EnvironType: TypeAlias = os._Environ[str]
 else:
-    EnvironType: TypeAlias = os._Environ  # pylint: disable=protected-access
+    assert False, "Unsupported Python version."
 
 # Handle case sensitivity differences between platforms.
 # https://stackoverflow.com/a/19023293

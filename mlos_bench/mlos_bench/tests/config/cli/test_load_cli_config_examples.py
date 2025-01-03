@@ -5,7 +5,7 @@
 """Tests for loading storage config examples."""
 
 import logging
-import sys
+from importlib.resources import files
 from typing import List
 
 import pytest
@@ -20,12 +20,6 @@ from mlos_bench.storage import Storage
 from mlos_bench.tests import check_class_name
 from mlos_bench.tests.config import BUILTIN_TEST_CONFIG_PATH, locate_config_examples
 from mlos_bench.util import path_join
-
-if sys.version_info < (3, 10):
-    from importlib_resources import files
-else:
-    from importlib.resources import files
-
 
 _LOG = logging.getLogger(__name__)
 _LOG.setLevel(logging.DEBUG)
@@ -146,8 +140,8 @@ def test_load_cli_config_examples_via_launcher(
         assert launcher.global_config["trial_id"] == config["trial_id"]
 
     expected_log_level = logging.getLevelName(config.get("log_level", "INFO"))
-    if isinstance(expected_log_level, int):
-        expected_log_level = logging.getLevelName(expected_log_level)
+    if isinstance(expected_log_level, int):  # type: ignore[unreachable]
+        expected_log_level = logging.getLevelName(expected_log_level)  # type: ignore[unreachable]
     current_log_level = logging.getLevelName(logging.root.getEffectiveLevel())
     assert current_log_level == expected_log_level
 

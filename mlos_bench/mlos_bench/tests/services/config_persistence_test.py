@@ -5,19 +5,13 @@
 """Unit tests for configuration persistence service."""
 
 import os
-import sys
+from importlib.resources import files
 
 import pytest
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.util import path_join
-
-if sys.version_info < (3, 9):
-    from importlib_resources import files
-else:
-    from importlib.resources import files
-
 
 # pylint: disable=redefined-outer-name
 
