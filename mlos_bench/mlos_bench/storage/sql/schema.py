@@ -15,8 +15,10 @@ The ``mlos_bench`` CLI will do this automatically if the logging level is set to
 """
 
 import logging
+import sys
 from typing import Any, List, Optional
 
+from alembic import command, config
 from sqlalchemy import (
     Column,
     DateTime,
@@ -33,6 +35,13 @@ from sqlalchemy import (
     create_mock_engine,
 )
 from sqlalchemy.engine import Engine
+
+from mlos_bench.util import path_join
+
+if sys.version_info < (3, 10):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
 
 _LOG = logging.getLogger(__name__)
 
@@ -240,7 +249,14 @@ class DbSchema:
 
     def update(self) -> "DbSchema":
         """Updates the DB schema to the latest version."""
-        raise NotImplementedError("TODO: Schema updates are not supported yet.")
+        assert self._engine
+        alembic_cfg = config.Config(
+            path_join(str(files("mlos_bench.storage.sql")), "alembic.ini", abs_path=True)
+        )
+        with self._engine.connect() as conn:
+            alembic_cfg.attributes["connection"] = conn
+            command.upgrade(alembic_cfg, "head")
+        return self
 
     def __repr__(self) -> str:
         """

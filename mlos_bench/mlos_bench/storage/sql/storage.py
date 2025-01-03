@@ -40,8 +40,10 @@ class SqlStorage(Storage):
         self._engine = create_engine(self._url, echo=self._log_sql)
         self._db_schema = DbSchema(self._engine)
         self._schema_created = False
+        self._schema_updated = False
         if not lazy_schema_create:
             assert self._schema
+            self.update_schema()
         else:
             _LOG.info("Using lazy schema create for database: %s", self)
 
@@ -52,11 +54,14 @@ class SqlStorage(Storage):
             self._db_schema.create()
             if _LOG.isEnabledFor(logging.DEBUG):
                 _LOG.debug("DDL statements:\n%s", self._schema)
+            self._schema_created = True
         return self._db_schema
 
     def update_schema(self) -> None:
         """Update the database schema."""
-        self._db_schema.update()
+        if not self._schema_updated:
+            self._schema.update()
+            self._schema_updated = True
 
     def __repr__(self) -> str:
         return self._repr
