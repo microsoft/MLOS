@@ -13,7 +13,7 @@ repos:
     rev: v5.0.0
     hooks:
     -   id: check-added-large-files
-    -   id: check-executables-have-shebangs
+#   -   id: check-executables-have-shebangs (issues in devcontainer)
     -   id: check-merge-conflict
     -   id: check-toml
     -   id: check-yaml
