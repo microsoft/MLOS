@@ -19,7 +19,7 @@ other libraries for automatic data correlation and visualization like
 """
 
 from enum import Enum
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Literal
 
 import pandas
 
@@ -58,10 +58,10 @@ def ignore_plotter_warnings(plotter_method: MlosVizMethod = MlosVizMethod.AUTO) 
 
 
 def plot(
-    exp_data: Optional[ExperimentData] = None,
+    exp_data: ExperimentData | None = None,
     *,
-    results_df: Optional[pandas.DataFrame] = None,
-    objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
+    results_df: pandas.DataFrame | None = None,
+    objectives: dict[str, Literal["min", "max"]] | None = None,
     plotter_method: MlosVizMethod = MlosVizMethod.AUTO,
     filter_warnings: bool = True,
     **kwargs: Any,
@@ -75,10 +75,10 @@ def plot(
     ----------
     exp_data: ExperimentData
         The experiment data to plot.
-    results_df : Optional[pandas.DataFrame]
+    results_df : pandas.DataFrame | None
         Optional `results_df` to plot.
         If not provided, defaults to :py:attr:`.ExperimentData.results_df` property.
-    objectives : Optional[Dict[str, Literal["min", "max"]]]
+    objectives : Optional[dict[str, Literal["min", "max"]]]
         Optional objectives to plot.
         If not provided, defaults to :py:attr:`.ExperimentData.objectives` property.
     plotter_method: MlosVizMethod

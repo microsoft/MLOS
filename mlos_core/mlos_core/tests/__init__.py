@@ -4,25 +4,18 @@
 #
 """Common functions for mlos_core Optimizer tests."""
 
-import sys
 from importlib import import_module
 from pkgutil import walk_packages
-from typing import List, Optional, Set, Type, TypeVar
+from typing import TypeAlias, TypeVar
 
 # A common seed to use to avoid tracking down race conditions and intermingling
 # issues of seeds across tests that run in non-deterministic parallel orders.
 SEED = 42
 
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
-
-
 T = TypeVar("T")
 
 
-def get_all_submodules(pkg: TypeAlias) -> List[str]:
+def get_all_submodules(pkg: TypeAlias) -> list[str]:
     """
     Imports all submodules for a package and returns their names.
 
@@ -36,7 +29,7 @@ def get_all_submodules(pkg: TypeAlias) -> List[str]:
     return submodules
 
 
-def _get_all_subclasses(cls: Type[T]) -> Set[Type[T]]:
+def _get_all_subclasses(cls: type[T]) -> set[type[T]]:
     """
     Gets the set of all of the subclasses of the given class.
 
@@ -47,7 +40,7 @@ def _get_all_subclasses(cls: Type[T]) -> Set[Type[T]]:
     )
 
 
-def get_all_concrete_subclasses(cls: Type[T], pkg_name: Optional[str] = None) -> List[Type[T]]:
+def get_all_concrete_subclasses(cls: type[T], pkg_name: str | None = None) -> list[type[T]]:
     """
     Gets a sorted list of all of the concrete subclasses of the given class. Useful for
     dynamically enumerating expected test cases.

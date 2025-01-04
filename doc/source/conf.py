@@ -21,15 +21,13 @@
 import json
 import os
 import sys
-from typing import Dict, Optional, Tuple
-
 from logging import warning
 
 from docutils.nodes import Element
 from intersphinx_registry import get_intersphinx_mapping
+from sphinx.addnodes import pending_xref
 from sphinx.application import Sphinx as SphinxApp
 from sphinx.environment import BuildEnvironment
-from sphinx.addnodes import pending_xref
 
 sys.path.insert(0, os.path.abspath("../../mlos_core/mlos_core"))
 sys.path.insert(1, os.path.abspath("../../mlos_bench/mlos_bench"))
@@ -93,7 +91,7 @@ napoleon_use_keyword = True
 napoleon_custom_sections = None
 
 _base_path = os.path.abspath(os.path.join(__file__, "../../.."))
-_path_cache: Dict[str, bool] = {}
+_path_cache: dict[str, bool] = {}
 
 
 def _check_path(path: str) -> bool:
@@ -106,8 +104,8 @@ def _check_path(path: str) -> bool:
     return result
 
 
-def linkcode_resolve(domain: str, info: Dict[str, str]):
-    """linkcode extension override to link to the source code on GitHub."""
+def linkcode_resolve(domain: str, info: dict[str, str]):
+    """Linkcode extension override to link to the source code on GitHub."""
     if domain != "py":
         return None
     if not info["module"]:
@@ -157,7 +155,7 @@ intersphinx_mapping.update(
 
 # Type alias resolution map
 # (original, refname) -> new
-CUSTOM_REF_TYPE_MAP: Dict[Tuple[str, str], str] = {
+CUSTOM_REF_TYPE_MAP: dict[tuple[str, str], str] = {
     # Internal typevars and aliases:
     ("BaseTypeVar", "class"): "data",
     ("ConcreteOptimizer", "class"): "data",
@@ -181,7 +179,7 @@ def resolve_type_aliases(
     env: BuildEnvironment,
     node: pending_xref,
     contnode: Element,
-) -> Optional[Element]:
+) -> Element | None:
     """Resolve :class: references to our type aliases as :attr: instead."""
     if node["refdomain"] != "py":
         return None

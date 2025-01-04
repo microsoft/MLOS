@@ -8,7 +8,8 @@ Basic MockService for testing.
 See Also: test_service_method_registering.py
 """
 
-from typing import Callable, Dict, List, Optional, Protocol, Union, runtime_checkable
+from collections.abc import Callable
+from typing import Protocol, runtime_checkable
 
 from mlos_bench.services.base_service import Service
 
@@ -29,10 +30,10 @@ class MockServiceBase(Service, SupportsSomeMethod):
 
     def __init__(
         self,
-        config: Optional[dict] = None,
-        global_config: Optional[dict] = None,
-        parent: Optional[Service] = None,
-        methods: Optional[Union[Dict[str, Callable], List[Callable]]] = None,
+        config: dict | None = None,
+        global_config: dict | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ) -> None:
         super().__init__(
             config,

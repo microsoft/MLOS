@@ -5,8 +5,7 @@
 """Tests for loading storage config examples."""
 
 import logging
-import sys
-from typing import List
+from importlib.resources import files
 
 import pytest
 
@@ -21,12 +20,6 @@ from mlos_bench.tests import check_class_name
 from mlos_bench.tests.config import BUILTIN_TEST_CONFIG_PATH, locate_config_examples
 from mlos_bench.util import path_join
 
-if sys.version_info < (3, 10):
-    from importlib_resources import files
-else:
-    from importlib.resources import files
-
-
 _LOG = logging.getLogger(__name__)
 _LOG.setLevel(logging.DEBUG)
 
@@ -35,7 +28,7 @@ _LOG.setLevel(logging.DEBUG)
 CONFIG_TYPE = "cli"
 
 
-def filter_configs(configs_to_filter: List[str]) -> List[str]:
+def filter_configs(configs_to_filter: list[str]) -> list[str]:
     """If necessary, filter out json files that aren't for the module we're testing."""
     return configs_to_filter
 

@@ -8,24 +8,17 @@ import asyncio
 import logging
 import sys
 from asyncio import AbstractEventLoop
+from collections.abc import Coroutine
 from concurrent.futures import Future
 from threading import Lock as ThreadLock
 from threading import Thread
-from typing import Any, Coroutine, Optional, TypeVar
-
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
+from typing import Any, TypeAlias, TypeVar
 
 CoroReturnType = TypeVar("CoroReturnType")  # pylint: disable=invalid-name
 """Type variable for the return type of an :external:py:mod:`asyncio` coroutine."""
 
-if sys.version_info >= (3, 9):
-    FutureReturnType: TypeAlias = Future[CoroReturnType]
-    """Type variable for the return type of a :py:class:`~concurrent.futures.Future`."""
-else:
-    FutureReturnType: TypeAlias = Future
+FutureReturnType: TypeAlias = Future[CoroReturnType]
+"""Type variable for the return type of a :py:class:`~concurrent.futures.Future`."""
 
 _LOG = logging.getLogger(__name__)
 
@@ -44,8 +37,8 @@ class EventLoopContext:
     """
 
     def __init__(self) -> None:
-        self._event_loop: Optional[AbstractEventLoop] = None
-        self._event_loop_thread: Optional[Thread] = None
+        self._event_loop: AbstractEventLoop | None = None
+        self._event_loop_thread: Thread | None = None
         self._event_loop_thread_lock = ThreadLock()
         self._event_loop_thread_refcnt: int = 0
 

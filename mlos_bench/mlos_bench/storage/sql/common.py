@@ -3,7 +3,6 @@
 # Licensed under the MIT License.
 #
 """Common SQL methods for accessing the stored benchmark data."""
-from typing import Any, Dict, Optional
 
 import pandas
 from sqlalchemy import Integer, and_, func, select
@@ -20,7 +19,7 @@ from mlos_bench.util import nullable, utcify_nullable_timestamp, utcify_timestam
 def save_params(
     conn: Connection,
     table: Table,
-    params: Dict[str, Any],
+    params: dict[str, Any],
     **kwargs: Any,
 ) -> None:
     """
@@ -32,9 +31,9 @@ def save_params(
         A connection to the backend database.
     table : sqlalchemy.schema.Table
         The table to update.
-    params : Dict[str, Any]
+    params : dict[str, Any]
         The new (param_id, param_value) tuples to upsert to the Table.
-    **kwargs : Dict[str, Any]
+    **kwargs : dict[str, Any]
         Primary key info for the given table.
     """
     if not params:
@@ -52,8 +51,8 @@ def get_trials(
     engine: Engine,
     schema: DbSchema,
     experiment_id: str,
-    tunable_config_id: Optional[int] = None,
-) -> Dict[int, TrialData]:
+    tunable_config_id: int | None = None,
+) -> dict[int, TrialData]:
     """
     Gets :py:class:`~.TrialData` for the given ``experiment_id`` and optionally
     additionally restricted by ``tunable_config_id``.
@@ -111,7 +110,7 @@ def get_results_df(
     engine: Engine,
     schema: DbSchema,
     experiment_id: str,
-    tunable_config_id: Optional[int] = None,
+    tunable_config_id: int | None = None,
 ) -> pandas.DataFrame:
     """
     Gets TrialData for the given experiment_id and optionally additionally restricted by

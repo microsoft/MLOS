@@ -43,3 +43,9 @@ updates:
 #    directory: "/conda-envs/"
 #    schedule:
 #      interval: "daily"
+# TODO: Add pre-commit support.
+# https://github.com/dependabot/dependabot-core/issues/1524
+#  - package-ecosystem: "pre-commit"
+#    directory: "/"
+#    schedule:
+#      interval: "daily"

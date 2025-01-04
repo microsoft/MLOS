@@ -6,7 +6,7 @@
 :py:class:`.TrialData` interface.
 """
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pandas
 from sqlalchemy.engine import Engine
@@ -36,7 +36,7 @@ class TrialSqlData(TrialData):
         trial_id: int,
         config_id: int,
         ts_start: datetime,
-        ts_end: Optional[datetime],
+        ts_end: datetime | None,
         status: Status,
         trial_runner_id: Optional[int] = None,
     ):

@@ -12,7 +12,7 @@ See Also
 mlos_bench.storage : For example usage.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.config_persistence import ConfigPersistenceService
@@ -21,7 +21,7 @@ from mlos_bench.storage.base_storage import Storage
 
 def from_config(
     config: str,
-    global_configs: Optional[List[str]] = None,
+    global_configs: list[str] | None = None,
     **kwargs: Any,
 ) -> Storage:
     """
@@ -31,7 +31,7 @@ def from_config(
     ----------
     config : str
         JSON5 config file or string to load.
-    global_configs : Optional[List[str]]
+    global_configs : Optional[list[str]]
         An optional list of config files with global parameters.
     kwargs : dict
         Additional configuration parameters.
@@ -41,7 +41,7 @@ def from_config(
     storage : Storage
         A new storage object.
     """
-    config_path: List[str] = kwargs.get("config_path", [])
+    config_path: list[str] = kwargs.get("config_path", [])
     config_loader = ConfigPersistenceService({"config_path": config_path})
     global_config = {}
     for fname in global_configs or []:
@@ -52,7 +52,7 @@ def from_config(
     global_config.update(kwargs)
 
     class_config = config_loader.load_config(config, ConfigSchema.STORAGE)
-    assert isinstance(class_config, Dict)
+    assert isinstance(class_config, dict)
 
     ret = config_loader.build_storage(
         service=config_loader,

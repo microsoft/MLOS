@@ -8,11 +8,6 @@ dependencies:
   # Basic dev environment packages.
   # All other dependencies for the mlos modules come from pip.
   - pip
-  - pylint
-  - black
-  - pycodestyle
-  - pydocstyle
-  - flake8
   - python-build
   - jupyter
   - ipykernel
@@ -30,10 +25,12 @@ dependencies:
   - pip:
     - bump2version
     - check-jsonschema
-    - isort
-    - docformatter
-    - licenseheaders
-    - mypy
+    # Fixed versions for easier maintainability.
+    # Dependabot can update explicitly as necessary.
+    - pre-commit==4.0.1
+    - pycodestyle==2.12.1
+    - pylint==3.3.3
+    - mypy==1.14.1
     - pandas-stubs
     - types-beautifulsoup4
     - types-colorama

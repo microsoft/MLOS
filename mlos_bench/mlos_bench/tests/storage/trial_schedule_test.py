@@ -3,8 +3,8 @@
 # Licensed under the MIT License.
 #
 """Unit tests for scheduling trials for some future time."""
+from collections.abc import Iterator
 from datetime import datetime, timedelta
-from typing import Iterator, Set
 
 from pytz import UTC
 
@@ -13,9 +13,9 @@ from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
-def _trial_ids(trials: Iterator[Storage.Trial]) -> Set[int]:
+def _trial_ids(trials: Iterator[Storage.Trial]) -> set[int]:
     """Extract trial IDs from a list of trials."""
-    return set(t.trial_id for t in trials)
+    return {t.trial_id for t in trials}
 
 
 def test_schedule_trial(exp_storage: Storage.Experiment, tunable_groups: TunableGroups) -> None:

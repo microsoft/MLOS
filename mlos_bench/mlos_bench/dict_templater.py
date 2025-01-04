@@ -8,7 +8,7 @@ expansions.
 
 from copy import deepcopy
 from string import Template
-from typing import Any, Dict, Optional
+from typing import Any
 
 from mlos_bench.os_environ import environ
 
@@ -16,39 +16,39 @@ from mlos_bench.os_environ import environ
 class DictTemplater:  # pylint: disable=too-few-public-methods
     """Simple class to help with nested dictionary ``$var`` templating."""
 
-    def __init__(self, source_dict: Dict[str, Any]):
+    def __init__(self, source_dict: dict[str, Any]):
         """
         Initialize the templater.
 
         Parameters
         ----------
-        source_dict : Dict[str, Any]
+        source_dict : dict[str, Any]
             The template dict to use for source variables.
         """
         # A copy of the initial data structure we were given with templates intact.
         self._template_dict = deepcopy(source_dict)
         # The source/target dictionary to expand.
-        self._dict: Dict[str, Any] = {}
+        self._dict: dict[str, Any] = {}
 
     def expand_vars(
         self,
         *,
-        extra_source_dict: Optional[Dict[str, Any]] = None,
+        extra_source_dict: dict[str, Any] | None = None,
         use_os_env: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Expand the template variables in the destination dictionary.
 
         Parameters
         ----------
-        extra_source_dict : Dict[str, Any]
+        extra_source_dict : dict[str, Any]
             An optional extra source dictionary to use for expansion.
         use_os_env : bool
             Whether to use the os environment variables a final fallback for expansion.
 
         Returns
         -------
-        Dict[str, Any]
+        dict[str, Any]
             The expanded dictionary.
 
         Raises
@@ -64,7 +64,7 @@ class DictTemplater:  # pylint: disable=too-few-public-methods
     def _expand_vars(
         self,
         value: Any,
-        extra_source_dict: Optional[Dict[str, Any]],
+        extra_source_dict: dict[str, Any] | None,
         use_os_env: bool,
     ) -> Any:
         """Recursively expand ``$var`` strings in the currently operating dictionary."""

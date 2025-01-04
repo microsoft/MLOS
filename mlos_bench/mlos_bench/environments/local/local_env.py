@@ -11,22 +11,12 @@ TODO: Reference the script_env.py file for the base class.
 import json
 import logging
 import sys
+from collections.abc import Iterable, Mapping
 from contextlib import nullcontext
 from datetime import datetime
 from tempfile import TemporaryDirectory
 from types import TracebackType
-from typing import (
-    Any,
-    Dict,
-    Iterable,
-    List,
-    Literal,
-    Mapping,
-    Optional,
-    Tuple,
-    Type,
-    Union,
-)
+from typing import Any, Literal
 
 import pandas
 
@@ -51,9 +41,9 @@ class LocalEnv(ScriptEnv):
         *,
         name: str,
         config: dict,
-        global_config: Optional[dict] = None,
-        tunables: Optional[TunableGroups] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        tunables: TunableGroups | None = None,
+        service: Service | None = None,
     ):
         """
         Create a new environment for local execution.
@@ -90,14 +80,14 @@ class LocalEnv(ScriptEnv):
         ), "LocalEnv requires a service that supports local execution"
         self._local_exec_service: SupportsLocalExec = self._service
 
-        self._temp_dir: Optional[str] = None
-        self._temp_dir_context: Union[TemporaryDirectory, nullcontext, None] = None
+        self._temp_dir: str | None = None
+        self._temp_dir_context: TemporaryDirectory | nullcontext | None = None
 
-        self._dump_params_file: Optional[str] = self.config.get("dump_params_file")
-        self._dump_meta_file: Optional[str] = self.config.get("dump_meta_file")
+        self._dump_params_file: str | None = self.config.get("dump_params_file")
+        self._dump_meta_file: str | None = self.config.get("dump_meta_file")
 
-        self._read_results_file: Optional[str] = self.config.get("read_results_file")
-        self._read_telemetry_file: Optional[str] = self.config.get("read_telemetry_file")
+        self._read_results_file: str | None = self.config.get("read_results_file")
+        self._read_telemetry_file: str | None = self.config.get("read_telemetry_file")
 
     def __enter__(self) -> Environment:
         assert self._temp_dir is None and self._temp_dir_context is None
@@ -109,9 +99,9 @@ class LocalEnv(ScriptEnv):
 
     def __exit__(
         self,
-        ex_type: Optional[Type[BaseException]],
-        ex_val: Optional[BaseException],
-        ex_tb: Optional[TracebackType],
+        ex_type: type[BaseException] | None,
+        ex_val: BaseException | None,
+        ex_tb: TracebackType | None,
     ) -> Literal[False]:
         """Exit the context of the benchmarking environment."""
         assert not (self._temp_dir is None or self._temp_dir_context is None)
@@ -120,7 +110,7 @@ class LocalEnv(ScriptEnv):
         self._temp_dir_context = None
         return super().__exit__(ex_type, ex_val, ex_tb)
 
-    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict | None = None) -> bool:
         """
         Check if the environment is ready and set up the application and benchmarks, if
         necessary.
@@ -150,14 +140,14 @@ class LocalEnv(ScriptEnv):
         if self._dump_params_file:
             fname = path_join(self._temp_dir, self._dump_params_file)
             _LOG.debug("Dump tunables to file: %s", fname)
-            with open(fname, "wt", encoding="utf-8") as fh_tunables:
+            with open(fname, "w", encoding="utf-8") as fh_tunables:
                 # json.dump(self._params, fh_tunables)  # Tunables *and* const_args
                 json.dump(self._tunable_params.get_param_values(), fh_tunables)
 
         if self._dump_meta_file:
             fname = path_join(self._temp_dir, self._dump_meta_file)
             _LOG.debug("Dump tunables metadata to file: %s", fname)
-            with open(fname, "wt", encoding="utf-8") as fh_meta:
+            with open(fname, "w", encoding="utf-8") as fh_meta:
                 json.dump(
                     {
                         tunable.name: tunable.meta
@@ -175,7 +165,7 @@ class LocalEnv(ScriptEnv):
 
         return self._is_ready
 
-    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> tuple[Status, datetime, dict[str, TunableValue] | None]:
         """
         Run a script in the local scheduler environment.
 
@@ -193,7 +183,7 @@ class LocalEnv(ScriptEnv):
 
         assert self._temp_dir is not None
 
-        stdout_data: Dict[str, TunableValue] = {}
+        stdout_data: dict[str, TunableValue] = {}
         if self._script_run:
             (return_code, output) = self._local_exec(self._script_run, self._temp_dir)
             if return_code != 0:
@@ -246,7 +236,7 @@ class LocalEnv(ScriptEnv):
             data.rename(str.rstrip, axis="columns", inplace=True)
         return data
 
-    def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
+    def status(self) -> tuple[Status, datetime, list[tuple[datetime, str, Any]]]:
 
         (status, timestamp, _) = super().status()
         if not (self._is_ready and self._read_telemetry_file):
@@ -280,7 +270,7 @@ class LocalEnv(ScriptEnv):
             return (status, timestamp, [])
 
         _LOG.debug("Read telemetry data:\n%s", data)
-        col_dtypes: Mapping[int, Type] = {0: datetime}
+        col_dtypes: Mapping[int, type] = {0: datetime}
         return (
             status,
             timestamp,
@@ -298,7 +288,7 @@ class LocalEnv(ScriptEnv):
             _LOG.info("Local teardown complete: %s :: %s", self, return_code)
         super().teardown()
 
-    def _local_exec(self, script: Iterable[str], cwd: Optional[str] = None) -> Tuple[int, dict]:
+    def _local_exec(self, script: Iterable[str], cwd: str | None = None) -> tuple[int, dict]:
         """
         Execute a script locally in the scheduler environment.
 
@@ -307,7 +297,7 @@ class LocalEnv(ScriptEnv):
         script : Iterable[str]
             Lines of the script to run locally.
             Treat every line as a separate command to run.
-        cwd : Optional[str]
+        cwd : str | None
             Work directory to run the script at.
 
         Returns

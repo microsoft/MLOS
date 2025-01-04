@@ -7,7 +7,7 @@
 import os
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any, Dict, Set
+from typing import Any
 
 import json5
 import jsonschema
@@ -23,7 +23,7 @@ class SchemaTestType:
     """The different type of schema test cases we expect to have."""
 
     test_case_type: str
-    test_case_subtypes: Set[str]
+    test_case_subtypes: set[str]
 
     def __hash__(self) -> int:
         return hash(self.test_case_type)
@@ -43,7 +43,7 @@ _SCHEMA_TEST_TYPES = {
 class SchemaTestCaseInfo:
     """Some basic info about a schema test case."""
 
-    config: Dict[str, Any]
+    config: dict[str, Any]
     test_case_file: str
     test_case_type: str
     test_case_subtype: str
@@ -75,9 +75,9 @@ def check_schema_dir_layout(test_cases_root: str) -> None:
 class TestCases:
     """A container for test cases by type."""
 
-    by_path: Dict[str, SchemaTestCaseInfo]
-    by_type: Dict[str, Dict[str, SchemaTestCaseInfo]]
-    by_subtype: Dict[str, Dict[str, SchemaTestCaseInfo]]
+    by_path: dict[str, SchemaTestCaseInfo]
+    by_type: dict[str, dict[str, SchemaTestCaseInfo]]
+    by_subtype: dict[str, dict[str, SchemaTestCaseInfo]]
 
 
 def get_schema_test_cases(test_cases_root: str) -> TestCases:
@@ -96,7 +96,7 @@ def get_schema_test_cases(test_cases_root: str) -> TestCases:
             for test_case_file in locate_config_examples(
                 test_cases_root, os.path.join(test_case_type, test_case_subtype)
             ):
-                with open(test_case_file, mode="r", encoding="utf-8") as test_case_fh:
+                with open(test_case_file, encoding="utf-8") as test_case_fh:
                     try:
                         test_case_info = SchemaTestCaseInfo(
                             config=json5.load(test_case_fh),

@@ -14,9 +14,10 @@ import json
 
 
 def _main(fname_input: str, fname_output: str) -> None:
-    with open(fname_input, "rt", encoding="utf-8") as fh_tunables, open(
-        fname_output, "wt", encoding="utf-8", newline=""
-    ) as fh_config:
+    with (
+        open(fname_input, encoding="utf-8") as fh_tunables,
+        open(fname_output, "w", encoding="utf-8", newline="") as fh_config,
+    ):
         for key, val in json.load(fh_tunables).items():
             line = f"{key} {val}"
             fh_config.write(line + "\n")

@@ -15,7 +15,7 @@ See Also
 """
 
 from abc import ABCMeta, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any
 
 import pandas
 
@@ -40,12 +40,12 @@ class TunableConfigTrialGroupData(metaclass=ABCMeta):
         *,
         experiment_id: str,
         tunable_config_id: int,
-        tunable_config_trial_group_id: Optional[int] = None,
+        tunable_config_trial_group_id: int | None = None,
     ):
         self._experiment_id = experiment_id
         self._tunable_config_id = tunable_config_id
         # can be lazily initialized as necessary:
-        self._tunable_config_trial_group_id: Optional[int] = tunable_config_trial_group_id
+        self._tunable_config_trial_group_id: int | None = tunable_config_trial_group_id
 
     @property
     def experiment_id(self) -> str:
@@ -101,14 +101,14 @@ class TunableConfigTrialGroupData(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def trials(self) -> Dict[int, "TrialData"]:
+    def trials(self) -> dict[int, "TrialData"]:
         """
         Retrieve the trials' data for this (tunable) config trial group from the
         storage.
 
         Returns
         -------
-        trials : Dict[int, TrialData]
+        trials : dict[int, TrialData]
             A dictionary of the trials' data, keyed by trial id.
         """
 

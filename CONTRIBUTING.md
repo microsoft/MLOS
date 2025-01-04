@@ -86,6 +86,10 @@ We expect development to follow a typical "forking" style workflow:
     make doc-test
     ```
 
+    > Note: `make format` and `make check` use [`pre-commit`](https://pre-commit.com/) to run checks and auto-formatting.
+    > See the [`.pre-commit-config.yaml`](./.pre-commit-config.yaml) file for more details.
+    > You can also run `pre-commit install` to enable the checks in your local git hooks.
+    >
     > See the [documentation README](./doc/README.md) for more information on documentation and its testing.
 
 1. Submit changes for inclusion as a [Pull Request on Github](https://github.com/microsoft/MLOS/pulls).

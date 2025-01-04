@@ -4,7 +4,6 @@
 #
 """RandomOptimizer class."""
 
-from typing import Optional
 from warnings import warn
 
 import pandas as pd
@@ -51,7 +50,7 @@ class RandomOptimizer(BaseOptimizer):
     def _suggest(
         self,
         *,
-        context: Optional[pd.Series] = None,
+        context: pd.Series | None = None,
     ) -> Suggestion:
         """
         Suggests a new configuration.

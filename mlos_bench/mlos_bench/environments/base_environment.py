@@ -7,21 +7,10 @@
 import abc
 import json
 import logging
+from collections.abc import Iterable, Sequence
 from datetime import datetime
 from types import TracebackType
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Iterable,
-    List,
-    Literal,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Literal
 
 from pytz import UTC
 
@@ -59,9 +48,9 @@ class Environment(metaclass=abc.ABCMeta):
         env_name: str,
         class_name: str,
         config: dict,
-        global_config: Optional[dict] = None,
-        tunables: Optional[TunableGroups] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        tunables: TunableGroups | None = None,
+        service: Service | None = None,
     ) -> "Environment":
         """
         Factory method for a new environment with a given config.
@@ -108,9 +97,9 @@ class Environment(metaclass=abc.ABCMeta):
         *,
         name: str,
         config: dict,
-        global_config: Optional[dict] = None,
-        tunables: Optional[TunableGroups] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        tunables: TunableGroups | None = None,
+        service: Service | None = None,
     ):
         """
         Create a new environment with a given config.
@@ -142,10 +131,10 @@ class Environment(metaclass=abc.ABCMeta):
         self.name = name
         self.config = config
         self._service = service
-        self._service_context: Optional[Service] = None
+        self._service_context: Service | None = None
         self._is_ready = False
         self._in_context = False
-        self._const_args: Dict[str, TunableValue] = config.get("const_args", {})
+        self._const_args: dict[str, TunableValue] = config.get("const_args", {})
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug(
@@ -204,14 +193,14 @@ class Environment(metaclass=abc.ABCMeta):
     @staticmethod
     def _expand_groups(
         groups: Iterable[str],
-        groups_exp: Dict[str, Union[str, Sequence[str]]],
-    ) -> List[str]:
+        groups_exp: dict[str, str | Sequence[str]],
+    ) -> list[str]:
         """
         Expand `$tunable_group` into actual names of the tunable groups.
 
         Parameters
         ----------
-        groups : List[str]
+        groups : list[str]
             Names of the groups of tunables, maybe with `$` prefix (subject to expansion).
         groups_exp : dict
             A dictionary that maps dollar variables for tunable groups to the lists
@@ -219,19 +208,17 @@ class Environment(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        groups : List[str]
+        groups : list[str]
             A flat list of tunable groups IDs for the environment.
         """
-        res: List[str] = []
+        res: list[str] = []
         for grp in groups:
             if grp[:1] == "$":
                 tunable_group_name = grp[1:]
                 if tunable_group_name not in groups_exp:
                     raise KeyError(
-                        (
-                            f"Expected tunable group name ${tunable_group_name} "
-                            "undefined in {groups_exp}"
-                        )
+                        f"Expected tunable group name ${tunable_group_name} "
+                        "undefined in {groups_exp}"
                     )
                 add_groups = groups_exp[tunable_group_name]
                 res += [add_groups] if isinstance(add_groups, str) else add_groups
@@ -241,8 +228,8 @@ class Environment(metaclass=abc.ABCMeta):
 
     @staticmethod
     def _expand_vars(
-        params: Dict[str, TunableValue],
-        global_config: Dict[str, TunableValue],
+        params: dict[str, TunableValue],
+        global_config: dict[str, TunableValue],
     ) -> dict:
         """Expand `$var` into actual values of the variables."""
         return DictTemplater(params).expand_vars(extra_source_dict=global_config)
@@ -263,9 +250,9 @@ class Environment(metaclass=abc.ABCMeta):
 
     def __exit__(
         self,
-        ex_type: Optional[Type[BaseException]],
-        ex_val: Optional[BaseException],
-        ex_tb: Optional[TracebackType],
+        ex_type: type[BaseException] | None,
+        ex_val: BaseException | None,
+        ex_tb: TracebackType | None,
     ) -> Literal[False]:
         """Exit the context of the benchmarking environment."""
         ex_throw = None
@@ -315,7 +302,7 @@ class Environment(metaclass=abc.ABCMeta):
         """
         return f'{" " * indent * level}{repr(self)}'
 
-    def _combine_tunables(self, tunables: TunableGroups) -> Dict[str, TunableValue]:
+    def _combine_tunables(self, tunables: TunableGroups) -> dict[str, TunableValue]:
         """
         Plug tunable values into the base config. If the tunable group is unknown,
         ignore it (it might belong to another environment). This method should never
@@ -329,7 +316,7 @@ class Environment(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        params : Dict[str, Union[int, float, str]]
+        params : dict[str, Union[int, float, str]]
             Free-format dictionary that contains the new environment configuration.
         """
         return tunables.get_param_values(
@@ -350,7 +337,7 @@ class Environment(metaclass=abc.ABCMeta):
         return self._tunable_params
 
     @property
-    def const_args(self) -> Dict[str, TunableValue]:
+    def const_args(self) -> dict[str, TunableValue]:
         """
         Get the constant arguments for this Environment.
 
@@ -361,8 +348,7 @@ class Environment(metaclass=abc.ABCMeta):
         """
         return self._const_args.copy()
 
-    @property
-    def parameters(self) -> Dict[str, TunableValue]:
+    def parameters(self) -> dict[str, TunableValue]:
         """
         Key/value pairs of all environment parameters (i.e., `const_args` and
         `tunable_params`). Note that before `.setup()` is called, all tunables will be
@@ -370,13 +356,13 @@ class Environment(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        parameters : Dict[str, TunableValue]
+        parameters : dict[str, TunableValue]
             Key/value pairs of all environment parameters
             (i.e., `const_args` and `tunable_params`).
         """
         return self._params.copy()
 
-    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict | None = None) -> bool:
         """
         Set up a new benchmark environment, if necessary. This method must be
         idempotent, i.e., calling it several times in a row should be equivalent to a
@@ -442,7 +428,7 @@ class Environment(metaclass=abc.ABCMeta):
         assert self._in_context
         self._is_ready = False
 
-    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> tuple[Status, datetime, dict[str, TunableValue] | None]:
         """
         Execute the run script for this environment.
 
@@ -462,7 +448,7 @@ class Environment(metaclass=abc.ABCMeta):
         (status, timestamp, _) = self.status()
         return (status, timestamp, None)
 
-    def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
+    def status(self) -> tuple[Status, datetime, list[tuple[datetime, str, Any]]]:
         """
         Check the status of the benchmark environment.
 

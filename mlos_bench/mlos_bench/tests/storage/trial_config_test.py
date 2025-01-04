@@ -4,7 +4,7 @@
 #
 """Unit tests for saving and retrieving additional parameters of pending trials."""
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 from pytz import UTC
@@ -93,7 +93,7 @@ def test_exp_trial_no_config(exp_no_tunables_storage: Storage.Experiment) -> Non
 )
 def test_exp_trial_non_serializable_config(
     exp_no_tunables_storage: Storage.Experiment,
-    bad_config: Dict[str, Any],
+    bad_config: dict[str, Any],
 ) -> None:
     """Tests that a trial with a non-serializable config is rejected."""
     empty_config: dict = {}
