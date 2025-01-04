@@ -30,6 +30,7 @@ dependencies:
     - pre-commit==4.0.1
     - pycodestyle==2.12.1
     - pylint==3.3.3
+    - tomlkit
     - mypy==1.14.1
     - pandas-stubs
     - types-beautifulsoup4
