@@ -524,7 +524,7 @@ class Launcher:
                 },
             )
         class_config = self._config_loader.load_config(args_storage, ConfigSchema.STORAGE)
-        assert isinstance(class_config, Dict)
+        assert isinstance(class_config, dict)
         if lazy_schema_create is not None:
             class_config["lazy_schema_create"] = lazy_schema_create
         storage = self._config_loader.build_storage(
