@@ -2,14 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Add alembic
+"""
+Add alembic.
 
 Revision ID: d2a708351ba8
 Revises:
 Create Date: 2025-01-03 21:21:13.978672+00:00
-
 """
-from typing import Sequence
+from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import op
