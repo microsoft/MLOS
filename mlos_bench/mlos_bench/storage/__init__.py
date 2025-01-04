@@ -129,7 +129,7 @@ sqlite::memory:
 >>> # Access ExperimentData by experiment id.
 >>> experiment_data = storage.experiments["my_experiment_id"]
 >>> experiment_data.trials
-{1: Trial :: my_experiment_id:1 cid:1 SUCCEEDED}
+{1: Trial :: my_experiment_id:1 cid:1 rid:None SUCCEEDED}
 >>> # Access TrialData for an Experiment by trial id.
 >>> trial_data = experiment_data.trials[1]
 >>> assert trial_data.status == Status.SUCCEEDED
@@ -142,13 +142,13 @@ sqlite::memory:
 {'objective_metric': 42}
 >>> # Retrieve the results of all Trials in the Experiment as a DataFrame.
 >>> experiment_data.results_df.columns.tolist()
-['trial_id', 'ts_start', 'ts_end', 'tunable_config_id', 'tunable_config_trial_group_id', 'status', 'config.param1', 'result.objective_metric']
+['trial_id', 'ts_start', 'ts_end', 'tunable_config_id', 'tunable_config_trial_group_id', 'status', 'trial_runner_id', 'config.param1', 'result.objective_metric']
 >>> # Drop the timestamp columns to make it a repeatable test.
 >>> experiment_data.results_df.drop(columns=["ts_start", "ts_end"])
-   trial_id  tunable_config_id  tunable_config_trial_group_id     status  config.param1  result.objective_metric
-0         1                  1                              1  SUCCEEDED             50                       42
+   trial_id  tunable_config_id  tunable_config_trial_group_id     status trial_runner_id  config.param1  result.objective_metric
+0         1                  1                              1  SUCCEEDED            None             50                       42
 
-[1 rows x 6 columns]
+[1 rows x 7 columns]
 
 See Also
 --------

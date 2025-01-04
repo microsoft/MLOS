@@ -216,7 +216,9 @@ nitpick_ignore = [
     ("py:class", "numpy.typing.NDArray"),
     # External classes that refuse to resolve:
     ("py:class", "contextlib.nullcontext"),
+    ("py:class", "sqlalchemy.engine.Connection"),
     ("py:class", "sqlalchemy.engine.Engine"),
+    ("py:class", "sqlalchemy.schema.Table"),
     ("py:class", "sqlalchemy.MetaData"),
     ("py:exc", "jsonschema.exceptions.SchemaError"),
     ("py:exc", "jsonschema.exceptions.ValidationError"),
