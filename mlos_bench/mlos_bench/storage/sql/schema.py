@@ -289,9 +289,13 @@ class DbSchema:
         self._meta.create_all(self._engine)
         with self._engine.connect() as conn:
             # If the trial table has the trial_runner_id column but no
-            # "alembic_version" table, then the schema is up to date and we should
-            # mark it as such to avoid trying to run the (non-idempotent) upgrade
-            # scripts.
+            # "alembic_version" table, then the schema is up to date as of initial
+            # create and we should mark it as such to avoid trying to run the
+            # (non-idempotent) upgrade scripts.
+            # Otherwise, either we already have an alembic_version table and can
+            # safely run the necessary upgrades or we are missing the
+            # trial_runner_id column (the first to introduce schema updates) and
+            # should run the upgrades.
             if any(
                 column["name"] == "trial_runner_id"
                 for column in inspect(conn).get_columns(self.trial.name)
