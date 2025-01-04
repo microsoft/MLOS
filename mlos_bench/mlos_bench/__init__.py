@@ -125,7 +125,7 @@ critically, non-reusable scripts to setup and later parse results and are hence
 harder to scale to many users.
 
 With these features as a part of the MLOS ecosystem, benchmarking can become a
-*service* that any developer, admin, research, etc. can use and adapt.
+*service* that any developer, admin, researcher, etc. can use and adapt.
 
 See below for more information on the classes in this package.
 
