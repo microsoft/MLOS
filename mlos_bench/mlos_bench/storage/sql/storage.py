@@ -52,9 +52,9 @@ class SqlStorage(Storage):
         """Lazily create schema upon first access."""
         if not self._schema_created:
             self._db_schema.create()
-            if _LOG.isEnabledFor(logging.DEBUG):
-                _LOG.debug("DDL statements:\n%s", self._schema)
             self._schema_created = True
+            if _LOG.isEnabledFor(logging.DEBUG):
+                _LOG.debug("DDL statements:\n%s", self._db_schema)
         return self._db_schema
 
     def update_schema(self) -> None:

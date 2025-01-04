@@ -71,9 +71,9 @@ FORMAT_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
 FORMAT_COMMON_PREREQS += .pre-commit-config.yaml
 FORMAT_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 
-# Formatting pre-commit hooks are marked with the "manual" stage.
-FORMATTERS := $(shell cat .pre-commit-config.yaml | yq -r '.repos[].hooks[] | select((.stages // []) | contains(["manual"])) | .id')
-CHECKERS := $(shell cat .pre-commit-config.yaml | yq -r '.repos[].hooks[] | select((.stages // []) | contains(["manual"]) | not) | .id')
+# Formatting pre-commit hooks are marked with the "manual" stage in .pre-commit-config.yaml
+# Since yq is not installed everywhere we need to sync the list here as well.
+FORMATTERS := end-of-file-fixer pretty-format-json trailingwhitespace licenseheaders pyupgrade isort black docformatter
 
 # Provide convenience methods to call individual formatters and checkers via `make` as well.
 # e.g., `make black` or `make pylint`
@@ -253,6 +253,10 @@ mlos_viz/dist/tmp/mlos_viz-latest.tar.gz: PACKAGE_NAME := mlos_viz
 	! ( tar tzf $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar.gz | grep -m1 tests/ )
 	# Make sure the py.typed marker file exists.
 	tar tzf $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar.gz | grep -m1 /py.typed
+	# Make sure the alembic scripts are included
+	[ "$(MODULE_NAME)" != "mlos_bench" ] || tar tzf $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar.gz | grep -m1 /storage/sql/alembic.ini
+	[ "$(MODULE_NAME)" != "mlos_bench" ] || tar tzf $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar.gz | grep -m1 /storage/sql/alembic/env.py
+	[ "$(MODULE_NAME)" != "mlos_bench" ] || tar tzf $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar.gz | grep -m1 /storage/sql/alembic/versions/.*py
 	# Check to make sure the mlos_bench module has the config directory.
 	[ "$(MODULE_NAME)" != "mlos_bench" ] || tar tzf $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar.gz | grep -m1 mlos_bench/config/
 	cd $(MODULE_NAME)/dist/tmp && ln -s ../$(PACKAGE_NAME)-*.tar.gz $(PACKAGE_NAME)-latest.tar.gz
