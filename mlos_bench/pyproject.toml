@@ -60,6 +60,9 @@ exclude = ["*.tests", "*.tests.*"]
 [tool.setuptools.package-data]
 mlos_bench = [
     "py.typed", "**/*.pyi",
+    "storage/sql/alembic.ini",
+    "storage/sql/alembic/env.py",
+    "storage/sql/alembic/versions/*.py",
     "config/**/*.md",
     "config/**/*.jsonc",
     "config/**/*.json",
