@@ -146,6 +146,7 @@ intersphinx_mapping = get_intersphinx_mapping(
 )
 intersphinx_mapping.update(
     {
+        "alembic": ("https://alembic.sqlalchemy.org/en/latest/", None),
         "dabl": ("https://dabl.github.io/stable/", None),
     }
 )
@@ -216,6 +217,7 @@ nitpick_ignore = [
     # External classes that refuse to resolve:
     ("py:class", "contextlib.nullcontext"),
     ("py:class", "sqlalchemy.engine.Engine"),
+    ("py:class", "sqlalchemy.MetaData"),
     ("py:exc", "jsonschema.exceptions.SchemaError"),
     ("py:exc", "jsonschema.exceptions.ValidationError"),
 ]
@@ -253,6 +255,9 @@ autoapi_ignore = [
     # Don't document internal environment scripts that aren't part of a module.
     "*/mlos_bench/config/environments/*/*.py",
     "*/mlos_bench/config/services/*/*.py",
+    # Don't document schema evolution scripts.
+    "*/mlos_bench/storage/sql/alembic/*.py",
+    "*/mlos_bench/storage/sql/alembic/versions/*.py",
 ]
 autoapi_options = [
     "members",
