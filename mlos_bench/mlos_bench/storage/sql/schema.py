@@ -303,7 +303,7 @@ class DbSchema:
                 # Mark the schema as up to date.
                 alembic_cfg = self._get_alembic_cfg(conn)
                 command.stamp(alembic_cfg, "heads")
-                #command.current(alembic_cfg)
+                # command.current(alembic_cfg)
                 conn.commit()
         return self
 
