@@ -81,8 +81,10 @@ class DbSchema:
         ----------
         engine : sqlalchemy.engine.Engine | None
             The SQLAlchemy engine to use for the DB schema.
-            Listed as optional for :external:mod:`alembic` schema migration
-            purposes, but won't be functional without one.
+            Listed as optional for `alembic <https://alembic.sqlalchemy.org>`_
+            schema migration purposes so we can reference it inside it's ``env.py``
+            config file for :attr:`~meta` data inspection, but won't generally be
+            functional without one.
         """
         _LOG.info("Create the DB schema for: %s", engine)
         self._engine = engine
