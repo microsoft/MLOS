@@ -62,7 +62,6 @@ mlos_bench = [
     "py.typed", "**/*.pyi",
     "storage/sql/alembic.ini",
     "storage/sql/alembic/env.py",
-    "storage/sql/alembic/script.py.mako",
     "storage/sql/alembic/revisions/*.py",
     "config/**/*.md",
     "config/**/*.jsonc",
