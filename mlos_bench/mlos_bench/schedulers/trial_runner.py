@@ -7,7 +7,7 @@
 import logging
 from datetime import datetime
 from types import TracebackType
-from typing import Any, Dict, Literal, Optional, Type
+from typing import Any, Literal
 
 from pytz import UTC
 
@@ -58,9 +58,9 @@ class TrialRunner:
 
     def __exit__(
         self,
-        ex_type: Optional[Type[BaseException]],
-        ex_val: Optional[BaseException],
-        ex_tb: Optional[TracebackType],
+        ex_type: type[BaseException] | None,
+        ex_val: BaseException | None,
+        ex_tb: TracebackType | None,
     ) -> Literal[False]:
         assert self._in_context
         _LOG.debug("TrialRunner END :: %s", self)
@@ -77,7 +77,7 @@ class TrialRunner:
     def run_trial(
         self,
         trial: Storage.Trial,
-        global_config: Optional[Dict[str, Any]] = None,
+        global_config: dict[str, Any] | None = None,
     ) -> None:
         """
         Run a single trial on this TrialRunner's Environment and stores the results in

@@ -67,14 +67,13 @@ def _get_launcher(desc: str, cli_args: str) -> Launcher:
     assert isinstance(launcher.service, SupportsLocalExec)  # built-in
     # All trial runners should have the same Environment class.
     assert (
-        len(set(trial_runner.environment.__class__ for trial_runner in launcher.trial_runners))
-        == 1
+        len({trial_runner.environment.__class__ for trial_runner in launcher.trial_runners}) == 1
     )
     # Make sure that each trial runner has a unique ID.
-    assert set(
+    assert {
         trial_runner.environment.const_args["trial_runner_id"]
         for trial_runner in launcher.trial_runners
-    ) == set(range(0, len(launcher.trial_runners)))
+    } == set(range(0, len(launcher.trial_runners)))
     return launcher
 
 
