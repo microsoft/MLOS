@@ -71,9 +71,9 @@ FORMAT_COMMON_PREREQS := build/conda-env.${CONDA_ENV_NAME}.build-stamp
 FORMAT_COMMON_PREREQS += .pre-commit-config.yaml
 FORMAT_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 
-# Formatting pre-commit hooks are marked with the "manual" stage.
-FORMATTERS := $(shell cat .pre-commit-config.yaml | yq -r '.repos[].hooks[] | select((.stages // []) | contains(["manual"])) | .id')
-CHECKERS := $(shell cat .pre-commit-config.yaml | yq -r '.repos[].hooks[] | select((.stages // []) | contains(["manual"]) | not) | .id')
+# Formatting pre-commit hooks are marked with the "manual" stage in .pre-commit-config.yaml
+# Since yq is not installed everywhere we need to sync the list here as well.
+FORMATTERS := end-of-file-fixer pretty-format-json trailingwhitespace licenseheaders pyupgrade isort black docformatter
 
 # Provide convenience methods to call individual formatters and checkers via `make` as well.
 # e.g., `make black` or `make pylint`
