@@ -2,14 +2,16 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Add trial_runner_id column
+"""
+Add trial_runner_id column.
 
 Revision ID: f83fb8ae7fc4
 Revises: d2a708351ba8
 Create Date: 2025-01-03 21:25:48.848196+00:00
-
 """
-from typing import Sequence
+# pylint: disable=no-member
+
+from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import op
