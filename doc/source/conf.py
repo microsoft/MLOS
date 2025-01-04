@@ -289,6 +289,11 @@ autoapi_keep_files = not is_on_github_actions()  # for local testing
 #
 html_theme = "sphinx_rtd_theme"
 
+html_theme_options = {
+    "canonical_url": "https://microsoft.github.io/MLOS/",
+    "navigation_depth": -1,
+}
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
