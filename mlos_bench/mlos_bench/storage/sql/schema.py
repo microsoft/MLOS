@@ -24,6 +24,7 @@ from typing import Any
 from alembic import command, config
 from sqlalchemy import (
     Column,
+    Connection,
     DateTime,
     Dialect,
     Float,
@@ -36,6 +37,7 @@ from sqlalchemy import (
     Table,
     UniqueConstraint,
     create_mock_engine,
+    inspect,
 )
 from sqlalchemy.engine import Engine
 
@@ -273,11 +275,30 @@ class DbSchema:
         """Return the SQLAlchemy MetaData object."""
         return self._meta
 
+    def _get_alembic_cfg(self, conn: Connection) -> config.Config:  # pylint: disable=no-self-use
+        alembic_cfg = config.Config(
+            path_join(str(files("mlos_bench.storage.sql")), "alembic.ini", abs_path=True)
+        )
+        alembic_cfg.attributes["connection"] = conn
+        return alembic_cfg
+
     def create(self) -> "DbSchema":
         """Create the DB schema."""
         _LOG.info("Create the DB schema")
         assert self._engine
         self._meta.create_all(self._engine)
+        with self._engine.connect() as conn:
+            # If the trial table has the trial_runner_id column but no
+            # "alembic_version" table, then the schema is up to date and we should
+            # mark it as such to avoid trying to run the (non-idempotent) upgrade
+            # scripts.
+            if any(
+                column["name"] == "trial_runner_id"
+                for column in inspect(conn).get_columns(self.trial.name)
+            ) and not inspect(conn).has_table("alembic_version"):
+                # Mark the schema as up to date.
+                alembic_cfg = self._get_alembic_cfg(conn)
+                command.stamp(alembic_cfg, "head")
         return self
 
     def update(self) -> "DbSchema":
@@ -290,11 +311,8 @@ class DbSchema:
         for details on how to invoke only the schema creation/update routines.
         """
         assert self._engine
-        alembic_cfg = config.Config(
-            path_join(str(files("mlos_bench.storage.sql")), "alembic.ini", abs_path=True)
-        )
         with self._engine.connect() as conn:
-            alembic_cfg.attributes["connection"] = conn
+            alembic_cfg = self._get_alembic_cfg(conn)
             command.upgrade(alembic_cfg, "head")
         return self
 
