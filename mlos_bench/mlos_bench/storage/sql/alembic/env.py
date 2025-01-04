@@ -6,6 +6,7 @@
 # pylint: disable=no-member
 
 from logging.config import fileConfig
+import sys
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
@@ -18,7 +19,8 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-if config.config_file_name is not None:
+# Don't override the mlos_bench or pytest loggers though.
+if config.config_file_name is not None and "alembic" in sys.argv[0]:
     fileConfig(config.config_file_name)
 
 # add your model's MetaData object here
