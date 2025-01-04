@@ -380,7 +380,10 @@ class Launcher:
             default=False,
             dest="create_update_storage_schema_only",
             action="store_true",
-            help="Makes sure that the storage schema is update to date for the current version of mlos_bench.",
+            help=(
+                "Makes sure that the storage schema is up to date "
+                "for the current version of mlos_bench."
+            ),
         )
 
         # By default we use the command line arguments, but allow the caller to
