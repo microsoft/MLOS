@@ -103,8 +103,8 @@ class DbSchema:
             Column("git_commit", String(40), nullable=False),
             PrimaryKeyConstraint("exp_id"),
         )
-        """Table storing
-        :py:mod:`~mlos_bench.storage.base_experiment_data.ExperimentData` info.
+        """The Table storing
+        :py:class:`~mlos_bench.storage.base_experiment_data.ExperimentData` info.
         """
 
         self.objectives = Table(
@@ -121,8 +121,9 @@ class DbSchema:
             PrimaryKeyConstraint("exp_id", "optimization_target"),
             ForeignKeyConstraint(["exp_id"], [self.experiment.c.exp_id]),
         )
-        """Table storing :py:mod:`~mlos_bench.storage.base_storage.Storage.Experiment`
-        optimization objectives info.
+        """The Table storing
+        :py:class:`~mlos_bench.storage.base_storage.Storage.Experiment` optimization
+        objectives info.
         """
 
         # A workaround for SQLAlchemy issue with autoincrement in DuckDB:
@@ -151,8 +152,8 @@ class DbSchema:
             col_config_id,
             Column("config_hash", String(64), nullable=False, unique=True),
         )
-        """Table storing
-        :py:mod:`~mlos_bench.storage.base_tunable_config_data.TunableConfigData`
+        """The Table storing
+        :py:class:`~mlos_bench.storage.base_tunable_config_data.TunableConfigData`
         info.
         """
 
@@ -170,7 +171,7 @@ class DbSchema:
             ForeignKeyConstraint(["exp_id"], [self.experiment.c.exp_id]),
             ForeignKeyConstraint(["config_id"], [self.config.c.config_id]),
         )
-        """Table storing :py:mod:`~mlos_bench.storage.base_trial_data.TrialData`
+        """The Table storing :py:class:`~mlos_bench.storage.base_trial_data.TrialData`
         info.
         """
 
@@ -185,8 +186,8 @@ class DbSchema:
             PrimaryKeyConstraint("config_id", "param_id"),
             ForeignKeyConstraint(["config_id"], [self.config.c.config_id]),
         )
-        """Table storing
-        :py:mod:`~mlos_bench.storage.base_tunable_config_data.TunableConfigData`
+        """The Table storing
+        :py:class:`~mlos_bench.storage.base_tunable_config_data.TunableConfigData`
         info.
         """
 
@@ -205,8 +206,9 @@ class DbSchema:
                 [self.trial.c.exp_id, self.trial.c.trial_id],
             ),
         )
-        """Table storing :py:mod:`~mlos_bench.storage.base_trial_data.TrialData`
-        metadata info.
+        """The Table storing :py:class:`~mlos_bench.storage.base_trial_data.TrialData`
+        :py:attr:`metadata <mlos_bench.storage.base_trial_data.TrialData.metadata_dict>`
+        info.
         """
 
         self.trial_status = Table(
@@ -222,8 +224,8 @@ class DbSchema:
                 [self.trial.c.exp_id, self.trial.c.trial_id],
             ),
         )
-        """Table storing :py:mod:`~mlos_bench.storage.base_trial_data.TrialData` status
-        info.
+        """The Table storing :py:class:`~mlos_bench.storage.base_trial_data.TrialData`
+        :py:class:`~mlos_bench.environments.status.Status` info.
         """
 
         self.trial_result = Table(
@@ -239,7 +241,8 @@ class DbSchema:
                 [self.trial.c.exp_id, self.trial.c.trial_id],
             ),
         )
-        """Table storing :py:mod:`~mlos_bench.storage.base_trial_data.TrialData` result
+        """The Table storing :py:class:`~mlos_bench.storage.base_trial_data.TrialData`
+        :py:attr:`results <mlos_bench.storage.base_trial_data.TrialData.results_dict>`
         info.
         """
 
@@ -257,8 +260,9 @@ class DbSchema:
                 [self.trial.c.exp_id, self.trial.c.trial_id],
             ),
         )
-        """Table storing :py:mod:`~mlos_bench.storage.base_trial_data.TrialData`
-        telemetry info.
+        """The Table storing :py:class:`~mlos_bench.storage.base_trial_data.TrialData`
+        :py:attr:`telemetry <mlos_bench.storage.base_trial_data.TrialData.telemetry_df>`
+        info.
         """
 
         _LOG.debug("Schema: %s", self._meta)
