@@ -1,2 +1,4 @@
 # Reformat with black, isort, docformatter, etc.
 e40ac28317c61ea90345d3499986957b0e1c9134
+# Reformat with pyupgrade
+795d1b03c6d7a9272018413564a8f02eef6fdec6
