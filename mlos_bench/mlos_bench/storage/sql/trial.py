@@ -50,7 +50,7 @@ class Trial(Storage.Trial):
         self._engine = engine
         self._schema = schema
 
-    def _save_new_config_data(self, new_config_data: Dict[str, Union[int, float, str]]) -> None:
+    def _save_new_config_data(self, new_config_data: dict[str, int | float | str]) -> None:
         with self._engine.begin() as conn:
             save_params(
                 conn,

@@ -82,10 +82,8 @@ class TrialData(metaclass=ABCMeta):
         return self._trial_id
 
     @property
-    def trial_runner_id(self) -> Optional[int]:
+    def trial_runner_id(self) -> int | None:
         """ID of the TrialRunner."""
-        if not self._trial_runner_id:
-            self._trial_runner_id = self.metadata_dict.get("trial_runner_id")
         return self._trial_runner_id
 
     @property

@@ -38,7 +38,7 @@ class TrialSqlData(TrialData):
         ts_start: datetime,
         ts_end: datetime | None,
         status: Status,
-        trial_runner_id: Optional[int] = None,
+        trial_runner_id: int | None = None,
     ):
         super().__init__(
             experiment_id=experiment_id,

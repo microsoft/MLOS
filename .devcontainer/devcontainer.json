@@ -70,7 +70,7 @@
                 "lextudio.restructuredtext",
                 "matangover.mypy",
                 "ms-azuretools.vscode-docker",
-                "elagil.pre-commit-helper",
+                "ms-python.black-formatter",
                 "ms-python.pylint",
                 "ms-python.python",
                 "ms-python.vscode-pylance",

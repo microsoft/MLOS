@@ -35,7 +35,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import get_git_info, nullable
+from mlos_bench.util import get_git_info
 
 _LOG = logging.getLogger(__name__)
 
@@ -408,6 +408,7 @@ class Storage(metaclass=ABCMeta):
             experiment_id: str,
             trial_id: int,
             tunable_config_id: int,
+            trial_runner_id: int | None = None,
             opt_targets: dict[str, Literal["min", "max"]],
             config: dict[str, Any] | None = None,
         ):
@@ -415,6 +416,7 @@ class Storage(metaclass=ABCMeta):
             self._experiment_id = experiment_id
             self._trial_id = trial_id
             self._tunable_config_id = tunable_config_id
+            self._trial_runner_id = trial_runner_id
             self._opt_targets = opt_targets
             self._config = config or {}
             self._status = Status.UNKNOWN
@@ -438,7 +440,7 @@ class Storage(metaclass=ABCMeta):
         @property
         def trial_runner_id(self) -> int | None:
             """ID of the TrialRunner this trial is assigned to."""
-            return nullable(int, self._config.get("trial_runner_id"))
+            return self._trial_runner_id
 
         def opt_targets(self) -> dict[str, Literal["min", "max"]]:
             """Get the Trial's optimization targets and directions."""
@@ -452,6 +454,17 @@ class Storage(metaclass=ABCMeta):
             (e.g., application Environment's "config")
             """
             return self._tunables
+
+        def assign_trial_runner(self, trial_runner_id: int) -> int:
+            """Assign the trial to a specific TrialRunner."""
+            if self._trial_runner_id is None or self._status.is_pending():
+                _LOG.debug("%sAssigning trial %s to trial runner %d", "Re-" if self._trial_runner_id else "", self, trial_runner_id,)
+                self._trial_runner_id = trial_runner_id
+            else:
+                _LOG.warning(
+                    "Trial %s already assigned to a runner, cannot switch to trial runner %d", self, self._trial_runner_id,
+                )
+            return self._trial_runner_id
 
         def config(self, global_config: dict[str, Any] | None = None) -> dict[str, Any]:
             """
