@@ -153,8 +153,6 @@
         "editor.formatOnSave": true,
         "editor.formatOnSaveMode": "modifications",
         "editor.rulers": [
-            // docstring formatting limit
-            80,
             // python code formatting limit
             99
         ]
