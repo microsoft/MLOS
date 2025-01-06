@@ -209,6 +209,21 @@ class Launcher:
         return self._config_loader
 
     @property
+    def root_environment(self) -> Environment:
+        """
+        Gets the root (prototypical) Environment from the first TrialRunner.
+
+        Note: All TrialRunners have the same Environment config and are made
+        unique by their use of the unique trial_runner_id assigned to each
+        TrialRunner's Environment's global_config.
+
+        Notes
+        -----
+        This is mostly for convenience and backwards compatibility.
+        """
+        return self.trial_runners[0].environment
+
+    @property
     def service(self) -> Service:
         """Get the parent service."""
         return self._parent_service
