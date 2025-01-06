@@ -7,9 +7,7 @@
 import logging
 from datetime import datetime
 from types import TracebackType
-from typing import Any, Dict, List, Optional, Tuple, Type
-
-from typing_extensions import Literal
+from typing import Any, Literal
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.status import Status
@@ -28,9 +26,9 @@ class CompositeEnv(Environment):
         *,
         name: str,
         config: dict,
-        global_config: Optional[dict] = None,
-        tunables: Optional[TunableGroups] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        tunables: TunableGroups | None = None,
+        service: Service | None = None,
     ):
         """
         Create a new environment with a given config.
@@ -66,8 +64,8 @@ class CompositeEnv(Environment):
         tunables = tunables.copy() if tunables else TunableGroups()
 
         _LOG.debug("Build composite environment '%s' START: %s", self, tunables)
-        self._children: List[Environment] = []
-        self._child_contexts: List[Environment] = []
+        self._children: list[Environment] = []
+        self._child_contexts: list[Environment] = []
 
         # To support trees of composite environments (e.g. for multiple VM experiments),
         # each CompositeEnv gets a copy of the original global config and adjusts it with
@@ -107,9 +105,9 @@ class CompositeEnv(Environment):
 
     def __exit__(
         self,
-        ex_type: Optional[Type[BaseException]],
-        ex_val: Optional[BaseException],
-        ex_tb: Optional[TracebackType],
+        ex_type: type[BaseException] | None,
+        ex_val: BaseException | None,
+        ex_tb: TracebackType | None,
     ) -> Literal[False]:
         ex_throw = None
         for env in reversed(self._children):
@@ -126,7 +124,7 @@ class CompositeEnv(Environment):
         return False
 
     @property
-    def children(self) -> List[Environment]:
+    def children(self) -> list[Environment]:
         """Return the list of child environments."""
         return self._children
 
@@ -163,7 +161,7 @@ class CompositeEnv(Environment):
         self._tunable_params.merge(env.tunable_params)
         tunables.merge(env.tunable_params)
 
-    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict | None = None) -> bool:
         """
         Set up the children environments.
 
@@ -199,7 +197,7 @@ class CompositeEnv(Environment):
             env_context.teardown()
         super().teardown()
 
-    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> tuple[Status, datetime, dict[str, TunableValue] | None]:
         """
         Submit a new experiment to the environment. Return the result of the *last*
         child environment if successful, or the status of the last failed environment
@@ -207,7 +205,7 @@ class CompositeEnv(Environment):
 
         Returns
         -------
-        (status, timestamp, output) : (Status, datetime, dict)
+        (status, timestamp, output) : (Status, datetime.datetime, dict)
             3-tuple of (Status, timestamp, output) values, where `output` is a dict
             with the results or None if the status is not COMPLETED.
             If run script is a benchmark, then the score is usually expected to
@@ -232,13 +230,13 @@ class CompositeEnv(Environment):
         # Return the status and the timestamp of the last child environment.
         return (status, timestamp, joint_metrics)
 
-    def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
+    def status(self) -> tuple[Status, datetime, list[tuple[datetime, str, Any]]]:
         """
         Check the status of the benchmark environment.
 
         Returns
         -------
-        (benchmark_status, timestamp, telemetry) : (Status, datetime, list)
+        (benchmark_status, timestamp, telemetry) : (Status, datetime.datetime, list)
             3-tuple of (benchmark status, timestamp, telemetry) values.
             `timestamp` is UTC time stamp of the status; it's current time by default.
             `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.

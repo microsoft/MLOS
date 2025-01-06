@@ -5,7 +5,7 @@
 """Unit tests for DictTemplater class."""
 
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
@@ -14,7 +14,7 @@ from mlos_bench.os_environ import environ
 
 
 @pytest.fixture
-def source_template_dict() -> Dict[str, Any]:
+def source_template_dict() -> dict[str, Any]:
     """A source dictionary with template variables."""
     return {
         "extra_str-ref": "$extra_str-ref",
@@ -43,7 +43,7 @@ def source_template_dict() -> Dict[str, Any]:
 # pylint: disable=redefined-outer-name
 
 
-def test_no_side_effects(source_template_dict: Dict[str, Any]) -> None:
+def test_no_side_effects(source_template_dict: dict[str, Any]) -> None:
     """Test that the templater does not modify the source dictionary."""
     source_template_dict_copy = deepcopy(source_template_dict)
     results = DictTemplater(source_template_dict_copy).expand_vars()
@@ -51,7 +51,7 @@ def test_no_side_effects(source_template_dict: Dict[str, Any]) -> None:
     assert source_template_dict_copy == source_template_dict
 
 
-def test_secondary_expansion(source_template_dict: Dict[str, Any]) -> None:
+def test_secondary_expansion(source_template_dict: dict[str, Any]) -> None:
     """Test that internal expansions work as expected."""
     results = DictTemplater(source_template_dict).expand_vars()
     assert results == {
@@ -78,14 +78,14 @@ def test_secondary_expansion(source_template_dict: Dict[str, Any]) -> None:
     }
 
 
-def test_os_env_expansion(source_template_dict: Dict[str, Any]) -> None:
+def test_os_env_expansion(source_template_dict: dict[str, Any]) -> None:
     """Test that expansions from OS env work as expected."""
     environ["extra_str"] = "os-env-extra_str"
     environ["string"] = "shouldn't be used"
 
     results = DictTemplater(source_template_dict).expand_vars(use_os_env=True)
     assert results == {
-        "extra_str-ref": f"{environ['extra_str']}-ref",
+        "extra_str-ref": f"""{environ["extra_str"]}-ref""",
         "str": "string",
         "str_ref": "string-ref",
         "secondary_expansion": "string-ref",
@@ -103,12 +103,12 @@ def test_os_env_expansion(source_template_dict: Dict[str, Any]) -> None:
         ],
         "dict": {
             "nested-str-ref": "nested-string-ref",
-            "nested-extra-str-ref": f"nested-{environ['extra_str']}-ref",
+            "nested-extra-str-ref": f"""nested-{environ["extra_str"]}-ref""",
         },
     }
 
 
-def test_from_extras_expansion(source_template_dict: Dict[str, Any]) -> None:
+def test_from_extras_expansion(source_template_dict: dict[str, Any]) -> None:
     """Test that."""
     extra_source_dict = {
         "extra_str": "str-from-extras",
@@ -116,7 +116,7 @@ def test_from_extras_expansion(source_template_dict: Dict[str, Any]) -> None:
     }
     results = DictTemplater(source_template_dict).expand_vars(extra_source_dict=extra_source_dict)
     assert results == {
-        "extra_str-ref": f"{extra_source_dict['extra_str']}-ref",
+        "extra_str-ref": f"""{extra_source_dict["extra_str"]}-ref""",
         "str": "string",
         "str_ref": "string-ref",
         "secondary_expansion": "string-ref",
@@ -134,6 +134,6 @@ def test_from_extras_expansion(source_template_dict: Dict[str, Any]) -> None:
         ],
         "dict": {
             "nested-str-ref": "nested-string-ref",
-            "nested-extra-str-ref": f"nested-{extra_source_dict['extra_str']}-ref",
+            "nested-extra-str-ref": f"""nested-{extra_source_dict["extra_str"]}-ref""",
         },
     }

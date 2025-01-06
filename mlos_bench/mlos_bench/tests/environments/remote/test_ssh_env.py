@@ -5,8 +5,7 @@
 """Unit tests for RemoveEnv benchmark environment via local SSH test services."""
 
 import os
-import sys
-from typing import Dict
+from importlib.resources import files
 
 import numpy as np
 import pytest
@@ -18,16 +17,11 @@ from mlos_bench.tests.services.remote.ssh import SshTestServerInfo
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
-if sys.version_info < (3, 10):
-    from importlib_resources import files
-else:
-    from importlib.resources import files
-
 
 @requires_docker
 def test_remote_ssh_env(ssh_test_server: SshTestServerInfo) -> None:
     """Produce benchmark and telemetry data in a local script and read it."""
-    global_config: Dict[str, TunableValue] = {
+    global_config: dict[str, TunableValue] = {
         "ssh_hostname": ssh_test_server.hostname,
         "ssh_port": ssh_test_server.get_port(),
         "ssh_username": ssh_test_server.username,

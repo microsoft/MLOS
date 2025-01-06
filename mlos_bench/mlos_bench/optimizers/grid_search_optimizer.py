@@ -5,7 +5,7 @@
 """Grid search optimizer for mlos_bench."""
 
 import logging
-from typing import Dict, Iterable, Optional, Sequence, Set, Tuple
+from collections.abc import Iterable, Sequence
 
 import ConfigSpace
 import numpy as np
@@ -28,8 +28,8 @@ class GridSearchOptimizer(TrackBestOptimizer):
         self,
         tunables: TunableGroups,
         config: dict,
-        global_config: Optional[dict] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        service: Service | None = None,
     ):
         super().__init__(tunables, config, global_config, service)
 
@@ -44,10 +44,10 @@ class GridSearchOptimizer(TrackBestOptimizer):
         self._config_keys, self._pending_configs = self._get_grid()
         assert self._pending_configs
         # A set of suggested configs that have not yet been registered.
-        self._suggested_configs: Set[Tuple[TunableValue, ...]] = set()
+        self._suggested_configs: set[tuple[TunableValue, ...]] = set()
 
     def _sanity_check(self) -> None:
-        size = np.prod([tunable.cardinality for (tunable, _group) in self._tunables])
+        size = np.prod([tunable.cardinality or np.inf for (tunable, _group) in self._tunables])
         if size == np.inf:
             raise ValueError(
                 f"Unquantized tunables are not supported for grid search: {self._tunables}"
@@ -58,14 +58,14 @@ class GridSearchOptimizer(TrackBestOptimizer):
                 size,
                 self._tunables,
             )
-        if size > self._max_iter:
+        if size > self._max_suggestions:
             _LOG.warning(
                 "Grid search size %d, is greater than max iterations %d",
                 size,
-                self._max_iter,
+                self._max_suggestions,
             )
 
-    def _get_grid(self) -> Tuple[Tuple[str, ...], Dict[Tuple[TunableValue, ...], None]]:
+    def _get_grid(self) -> tuple[tuple[str, ...], dict[tuple[TunableValue, ...], None]]:
         """
         Gets a grid of configs to try.
 
@@ -79,36 +79,36 @@ class GridSearchOptimizer(TrackBestOptimizer):
             for config in generate_grid(
                 self.config_space,
                 {
-                    tunable.name: int(tunable.cardinality)
+                    tunable.name: tunable.cardinality or 0  # mypy wants an int
                     for (tunable, _group) in self._tunables
-                    if tunable.quantization or tunable.type == "int"
+                    if tunable.is_numerical and tunable.cardinality
                 },
             )
         ]
-        names = set(tuple(configs.keys()) for configs in configs)
+        names = {tuple(configs.keys()) for configs in configs}
         assert len(names) == 1
         return names.pop(), {tuple(configs.values()): None for configs in configs}
 
     @property
-    def pending_configs(self) -> Iterable[Dict[str, TunableValue]]:
+    def pending_configs(self) -> Iterable[dict[str, TunableValue]]:
         """
         Gets the set of pending configs in this grid search optimizer.
 
         Returns
         -------
-        Iterable[Dict[str, TunableValue]]
+        Iterable[dict[str, TunableValue]]
         """
         # See NOTEs above.
         return (dict(zip(self._config_keys, config)) for config in self._pending_configs.keys())
 
     @property
-    def suggested_configs(self) -> Iterable[Dict[str, TunableValue]]:
+    def suggested_configs(self) -> Iterable[dict[str, TunableValue]]:
         """
         Gets the set of configs that have been suggested but not yet registered.
 
         Returns
         -------
-        Iterable[Dict[str, TunableValue]]
+        Iterable[dict[str, TunableValue]]
         """
         # See NOTEs above.
         return (dict(zip(self._config_keys, config)) for config in self._suggested_configs)
@@ -116,8 +116,8 @@ class GridSearchOptimizer(TrackBestOptimizer):
     def bulk_register(
         self,
         configs: Sequence[dict],
-        scores: Sequence[Optional[Dict[str, TunableValue]]],
-        status: Optional[Sequence[Status]] = None,
+        scores: Sequence[dict[str, TunableValue] | None],
+        status: Sequence[Status] | None = None,
     ) -> bool:
         if not super().bulk_register(configs, scores, status):
             return False
@@ -147,7 +147,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
             self._suggested_configs.add(default_config_values)
         else:
             # Select the first item from the pending configs.
-            if not self._pending_configs and self._iter <= self._max_iter:
+            if not self._pending_configs and self._iter <= self._max_suggestions:
                 _LOG.info("No more pending configs to suggest. Restarting grid.")
                 self._config_keys, self._pending_configs = self._get_grid()
             try:
@@ -166,8 +166,8 @@ class GridSearchOptimizer(TrackBestOptimizer):
         self,
         tunables: TunableGroups,
         status: Status,
-        score: Optional[Dict[str, TunableValue]] = None,
-    ) -> Optional[Dict[str, float]]:
+        score: dict[str, TunableValue] | None = None,
+    ) -> dict[str, float] | None:
         registered_score = super().register(tunables, status, score)
         try:
             config = dict(
@@ -185,7 +185,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
         return registered_score
 
     def not_converged(self) -> bool:
-        if self._iter > self._max_iter:
+        if self._iter > self._max_suggestions:
             if bool(self._pending_configs):
                 _LOG.warning(
                     "Exceeded max iterations, but still have %d pending configs: %s",

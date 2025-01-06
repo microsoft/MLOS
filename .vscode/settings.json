@@ -1,6 +1,18 @@
 // vim: set ft=jsonc:
 {
     "makefile.extensionOutputFolder": "./.vscode",
+    "files.exclude": {
+        ".git/": true,
+        ".mypy_cache/": true,
+        ".pytest_cache/": true,
+        "**/__pycache__/": true,
+        "**/node_modules/": true,
+        "**/*.egg-info": true,
+        "doc/source/autoapi/": true,
+        "doc/build/doctrees/": true,
+        "doc/build/html/": true,
+        "htmlcov/": true,
+    },
     // Note: this only works in WSL/Linux currently.
     "python.defaultInterpreterPath": "${env:HOME}/.conda/envs/mlos/bin/python",
     // For Windows it should be this instead:
@@ -26,6 +38,8 @@
                 "mlos_bench/mlos_bench/tests/config/environments/**/*.json",
                 "mlos_bench/mlos_bench/config/environments/**/*.jsonc",
                 "mlos_bench/mlos_bench/config/environments/**/*.json",
+                "!mlos_bench/mlos_bench/tests/config/environments/**/*-tunables.jsonc",
+                "!mlos_bench/mlos_bench/tests/config/environments/**/*-tunables.json",
                 "!mlos_bench/mlos_bench/config/environments/**/*-tunables.jsonc",
                 "!mlos_bench/mlos_bench/config/environments/**/*-tunables.json"
             ],
@@ -123,7 +137,7 @@
     "restructuredtext.linter.doc8.extraArgs": [
         "--ignore D001"
     ],
-    "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source",
+    "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source/",
     "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/",
     "editor.rulers": [
         // editorconfig default

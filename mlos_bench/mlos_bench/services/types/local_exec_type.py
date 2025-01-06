@@ -8,15 +8,8 @@ commands locally on the scheduler side.
 
 import contextlib
 import tempfile
-from typing import (
-    Iterable,
-    Mapping,
-    Optional,
-    Protocol,
-    Tuple,
-    Union,
-    runtime_checkable,
-)
+from collections.abc import Iterable, Mapping
+from typing import Protocol, runtime_checkable
 
 from mlos_bench.tunables.tunable import TunableValue
 
@@ -34,9 +27,9 @@ class SupportsLocalExec(Protocol):
     def local_exec(
         self,
         script_lines: Iterable[str],
-        env: Optional[Mapping[str, TunableValue]] = None,
-        cwd: Optional[str] = None,
-    ) -> Tuple[int, str, str]:
+        env: Mapping[str, TunableValue] | None = None,
+        cwd: str | None = None,
+    ) -> tuple[int, str, str]:
         """
         Execute the script lines from `script_lines` in a local process.
 
@@ -59,8 +52,8 @@ class SupportsLocalExec(Protocol):
 
     def temp_dir_context(
         self,
-        path: Optional[str] = None,
-    ) -> Union[tempfile.TemporaryDirectory, contextlib.nullcontext]:
+        path: str | None = None,
+    ) -> tempfile.TemporaryDirectory | contextlib.nullcontext:
         """
         Create a temp directory or use the provided path.
 
@@ -71,6 +64,6 @@ class SupportsLocalExec(Protocol):
 
         Returns
         -------
-        temp_dir_context : TemporaryDirectory
+        temp_dir_context : tempfile.TemporaryDirectory
             Temporary directory context to use in the `with` clause.
         """

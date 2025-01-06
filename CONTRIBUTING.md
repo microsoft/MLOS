@@ -75,19 +75,30 @@ We expect development to follow a typical "forking" style workflow:
     The easiest way to do this is to run the `make` commands that are also used in the CI pipeline:
 
     ```shell
-    # All at once.
+    # All at once in parallel.
     make all
 
     # Or individually (for easier debugging)
+    make format
     make check
     make test
     make dist-test
     make doc-test
     ```
 
+    > Note: `make format` and `make check` use [`pre-commit`](https://pre-commit.com/) to run checks and auto-formatting.
+    > See the [`.pre-commit-config.yaml`](./.pre-commit-config.yaml) file for more details.
+    > You can also run `pre-commit install` to enable the checks in your local git hooks.
+    >
+    > See the [documentation README](./doc/README.md) for more information on documentation and its testing.
+
 1. Submit changes for inclusion as a [Pull Request on Github](https://github.com/microsoft/MLOS/pulls).
 
-    > Please try to keep PRs small whenver possible and don't include unnecessaary formatting changes.
+    Some notes on organizing changes to help reviewers:
+
+    1. Please try to keep PRs small whenver possible and don't include unnecessaary formatting changes.
+    1. Larger changes can be planned in [Issues](https://github.com/microsoft/MLOS/issues), prototyped in a large draft PR for early feedback, and split into smaller PRs via discussion.
+    1. All changes should include test coverage (either new or existing).
 
 1. PRs are associated with [Github Issues](https://github.com/microsoft/MLOS/issues) and need [MLOS-committers](https://github.com/orgs/microsoft/teams/MLOS-committers) to sign-off (in addition to other CI pipeline checks like tests and lint checks to pass).
 1. Once approved, the PR can be completed using a squash merge in order to keep a nice linear history.

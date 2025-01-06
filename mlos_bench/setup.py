@@ -10,14 +10,13 @@ import os
 import re
 from itertools import chain
 from logging import warning
-from typing import Dict, List
 
 from setuptools import setup
 
 PKG_NAME = "mlos_bench"
 
 try:
-    ns: Dict[str, str] = {}
+    ns: dict[str, str] = {}
     with open(f"{PKG_NAME}/version.py", encoding="utf-8") as version_file:
         exec(version_file.read(), ns)  # pylint: disable=exec-used
     VERSION = ns["VERSION"]
@@ -53,7 +52,7 @@ def _get_long_desc_from_readme(base_url: str) -> dict:
         }
     jsonc_re = re.compile(r"```jsonc")
     link_re = re.compile(r"\]\(([^:#)]+)(#[a-zA-Z0-9_-]+)?\)")
-    with open(readme_path, mode="r", encoding="utf-8") as readme_fh:
+    with open(readme_path, encoding="utf-8") as readme_fh:
         lines = readme_fh.readlines()
         # Tweak the lexers for local expansion by pygments instead of github's.
         lines = [link_re.sub(f"]({base_url}" + r"/\1\2)", line) for line in lines]
@@ -65,15 +64,15 @@ def _get_long_desc_from_readme(base_url: str) -> dict:
         }
 
 
-extra_requires: Dict[str, List[str]] = {  # pylint: disable=consider-using-namedtuple-or-dataclass
+extra_requires: dict[str, list[str]] = {  # pylint: disable=consider-using-namedtuple-or-dataclass
     # Additional tools for extra functionality.
     "azure": ["azure-storage-file-share", "azure-identity", "azure-keyvault"],
     "ssh": ["asyncssh<2.15.0"],  # FIXME: asyncssh 2.15.0 has a bug that breaks the tests
-    "storage-sql-duckdb": ["sqlalchemy", "duckdb_engine"],
-    "storage-sql-mysql": ["sqlalchemy", "mysql-connector-python"],
-    "storage-sql-postgres": ["sqlalchemy", "psycopg2"],
+    "storage-sql-duckdb": ["sqlalchemy", "alembic", "duckdb_engine"],
+    "storage-sql-mysql": ["sqlalchemy", "alembic", "mysql-connector-python"],
+    "storage-sql-postgres": ["sqlalchemy", "alembic", "psycopg2"],
     # sqlite3 comes with python, so we don't need to install it.
-    "storage-sql-sqlite": ["sqlalchemy"],
+    "storage-sql-sqlite": ["sqlalchemy", "alembic"],
     # Transitive extra_requires from mlos-core.
     "flaml": ["flaml[blendsearch]"],
     "smac": ["smac"],

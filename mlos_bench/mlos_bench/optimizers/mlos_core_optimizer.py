@@ -6,11 +6,11 @@
 
 import logging
 import os
+from collections.abc import Sequence
 from types import TracebackType
-from typing import Dict, Optional, Sequence, Tuple, Type, Union
+from typing import Literal
 
 import pandas as pd
-from typing_extensions import Literal
 
 from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.base_optimizer import Optimizer
@@ -22,6 +22,7 @@ from mlos_bench.optimizers.convert_configspace import (
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_core.data_classes import Observations
 from mlos_core.optimizers import (
     DEFAULT_OPTIMIZER_TYPE,
     BaseOptimizer,
@@ -40,8 +41,8 @@ class MlosCoreOptimizer(Optimizer):
         self,
         tunables: TunableGroups,
         config: dict,
-        global_config: Optional[dict] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        service: Service | None = None,
     ):
         super().__init__(tunables, config, global_config, service)
 
@@ -56,18 +57,17 @@ class MlosCoreOptimizer(Optimizer):
                 self._config["output_directory"] = os.path.abspath(output_directory)
             else:
                 _LOG.warning(
-                    (
-                        "SMAC optimizer output_directory was null. "
-                        "SMAC will use a temporary directory."
-                    )
+                    "SMAC optimizer output_directory was null. "
+                    "SMAC will use a temporary directory."
                 )
 
-            # Make sure max_trials >= max_iterations.
+            # Make sure max_trials >= max_suggestions.
             if "max_trials" not in self._config:
-                self._config["max_trials"] = self._max_iter
-            assert (
-                int(self._config["max_trials"]) >= self._max_iter
-            ), f"max_trials {self._config.get('max_trials')} <= max_iterations {self._max_iter}"
+                self._config["max_trials"] = self._max_suggestions
+            assert int(self._config["max_trials"]) >= self._max_suggestions, (
+                f"""max_trials {self._config.get("max_trials")} """
+                f"<= max_suggestions{self._max_suggestions}"
+            )
 
             if "run_name" not in self._config and self.experiment_id:
                 self._config["run_name"] = self.experiment_id
@@ -89,9 +89,9 @@ class MlosCoreOptimizer(Optimizer):
 
     def __exit__(
         self,
-        ex_type: Optional[Type[BaseException]],
-        ex_val: Optional[BaseException],
-        ex_tb: Optional[TracebackType],
+        ex_type: type[BaseException] | None,
+        ex_val: BaseException | None,
+        ex_tb: TracebackType | None,
     ) -> Literal[False]:
         self._opt.cleanup()
         return super().__exit__(ex_type, ex_val, ex_tb)
@@ -103,8 +103,8 @@ class MlosCoreOptimizer(Optimizer):
     def bulk_register(
         self,
         configs: Sequence[dict],
-        scores: Sequence[Optional[Dict[str, TunableValue]]],
-        status: Optional[Sequence[Status]] = None,
+        scores: Sequence[dict[str, TunableValue] | None],
+        status: Sequence[Status] | None = None,
     ) -> bool:
 
         if not super().bulk_register(configs, scores, status):
@@ -116,20 +116,19 @@ class MlosCoreOptimizer(Optimizer):
             pd.DataFrame([{} if score is None else score for score in scores])
         )
 
-        opt_targets = list(self._opt_targets)
         if status is not None:
             # Select only the completed trials, set scores for failed trials to +inf.
             df_status = pd.Series(status)
             # TODO: Be more flexible with values used for failed trials (not just +inf).
             # Issue: https://github.com/microsoft/MLOS/issues/523
-            df_scores.loc[df_status != Status.SUCCEEDED, opt_targets] = float("inf")
+            df_scores[df_status != Status.SUCCEEDED] = float("inf")
             df_status_completed = df_status.apply(Status.is_completed)
             df_configs = df_configs[df_status_completed]
             df_scores = df_scores[df_status_completed]
 
         # TODO: Specify (in the config) which metrics to pass to the optimizer.
         # Issue: https://github.com/microsoft/MLOS/issues/745
-        self._opt.register(configs=df_configs, scores=df_scores[opt_targets].astype(float))
+        self._opt.register(observations=Observations(configs=df_configs, scores=df_scores))
 
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
@@ -138,12 +137,21 @@ class MlosCoreOptimizer(Optimizer):
         return True
 
     def _adjust_signs_df(self, df_scores: pd.DataFrame) -> pd.DataFrame:
-        """In-place adjust the signs of the scores for MINIMIZATION problem."""
-        for opt_target, opt_dir in self._opt_targets.items():
-            df_scores[opt_target] *= opt_dir
-        return df_scores
+        """Coerce optimization target scores to floats and adjust the signs for
+        MINIMIZATION problem.
+        """
+        df_targets = df_scores[list(self._opt_targets)]
+        try:
+            return df_targets.astype(float) * self._opt_targets.values()
+        except ValueError as ex:
+            _LOG.error(
+                "Some score values cannot be converted to float - check the data ::\n%s",
+                df_targets,
+                exc_info=True,
+            )
+            raise ValueError("Some score values cannot be converted to float") from ex
 
-    def _to_df(self, configs: Sequence[Dict[str, TunableValue]]) -> pd.DataFrame:
+    def _to_df(self, configs: Sequence[dict[str, TunableValue]]) -> pd.DataFrame:
         """
         Select from past trials only the columns required in this experiment and impute
         default values for the tunables that are missing in the dataframe.
@@ -190,17 +198,17 @@ class MlosCoreOptimizer(Optimizer):
         tunables = super().suggest()
         if self._start_with_defaults:
             _LOG.info("Use default values for the first trial")
-        df_config, _metadata = self._opt.suggest(defaults=self._start_with_defaults)
+        suggestion = self._opt.suggest(defaults=self._start_with_defaults)
         self._start_with_defaults = False
-        _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, df_config)
-        return tunables.assign(configspace_data_to_tunable_values(df_config.loc[0].to_dict()))
+        _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, suggestion.config)
+        return tunables.assign(configspace_data_to_tunable_values(suggestion.config.to_dict()))
 
     def register(
         self,
         tunables: TunableGroups,
         status: Status,
-        score: Optional[Dict[str, TunableValue]] = None,
-    ) -> Optional[Dict[str, float]]:
+        score: dict[str, TunableValue] | None = None,
+    ) -> dict[str, float] | None:
         registered_score = super().register(
             tunables,
             status,
@@ -213,18 +221,20 @@ class MlosCoreOptimizer(Optimizer):
             # TODO: Specify (in the config) which metrics to pass to the optimizer.
             # Issue: https://github.com/microsoft/MLOS/issues/745
             self._opt.register(
-                configs=df_config,
-                scores=pd.DataFrame([registered_score], dtype=float),
+                observations=Observations(
+                    configs=df_config,
+                    scores=pd.DataFrame([registered_score], dtype=float),
+                )
             )
         return registered_score
 
     def get_best_observation(
         self,
-    ) -> Union[Tuple[Dict[str, float], TunableGroups], Tuple[None, None]]:
-        (df_config, df_score, _df_context) = self._opt.get_best_observations()
-        if len(df_config) == 0:
+    ) -> tuple[dict[str, float], TunableGroups] | tuple[None, None]:
+        best_observations = self._opt.get_best_observations()
+        if len(best_observations) == 0:
             return (None, None)
-        params = configspace_data_to_tunable_values(df_config.iloc[0].to_dict())
-        scores = self._adjust_signs_df(df_score).iloc[0].to_dict()
+        params = configspace_data_to_tunable_values(best_observations.configs.iloc[0].to_dict())
+        scores = self._adjust_signs_df(best_observations.scores).iloc[0].to_dict()
         _LOG.debug("Best observation: %s score: %s", params, scores)
         return (scores, self._tunables.copy().assign(params))

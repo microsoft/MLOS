@@ -5,18 +5,8 @@
 """A collection Service functions for mocking local exec."""
 
 import logging
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    Mapping,
-    Optional,
-    Tuple,
-    Union,
-)
+from collections.abc import Callable, Iterable, Mapping
+from typing import TYPE_CHECKING, Any
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.local.temp_dir_context import TempDirContextService
@@ -33,10 +23,10 @@ class MockLocalExecService(TempDirContextService, SupportsLocalExec):
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         super().__init__(
             config, global_config, parent, self.merge_methods(methods, [self.local_exec])
@@ -45,7 +35,7 @@ class MockLocalExecService(TempDirContextService, SupportsLocalExec):
     def local_exec(
         self,
         script_lines: Iterable[str],
-        env: Optional[Mapping[str, "TunableValue"]] = None,
-        cwd: Optional[str] = None,
-    ) -> Tuple[int, str, str]:
+        env: Mapping[str, "TunableValue"] | None = None,
+        cwd: str | None = None,
+    ) -> tuple[int, str, str]:
         return (0, "", "")

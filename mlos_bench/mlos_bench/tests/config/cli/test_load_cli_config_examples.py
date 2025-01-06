@@ -5,8 +5,7 @@
 """Tests for loading storage config examples."""
 
 import logging
-import sys
-from typing import List
+from importlib.resources import files
 
 import pytest
 
@@ -21,12 +20,6 @@ from mlos_bench.tests import check_class_name
 from mlos_bench.tests.config import BUILTIN_TEST_CONFIG_PATH, locate_config_examples
 from mlos_bench.util import path_join
 
-if sys.version_info < (3, 10):
-    from importlib_resources import files
-else:
-    from importlib.resources import files
-
-
 _LOG = logging.getLogger(__name__)
 _LOG.setLevel(logging.DEBUG)
 
@@ -35,7 +28,7 @@ _LOG.setLevel(logging.DEBUG)
 CONFIG_TYPE = "cli"
 
 
-def filter_configs(configs_to_filter: List[str]) -> List[str]:
+def filter_configs(configs_to_filter: list[str]) -> list[str]:
     """If necessary, filter out json files that aren't for the module we're testing."""
     return configs_to_filter
 
@@ -119,6 +112,7 @@ def test_load_cli_config_examples_via_launcher(
     # To do this we need to make sure to give it a few extra paths and globals
     # to look for for our examples.
     cli_args = (
+        # pylint: disable=inconsistent-quotes
         f"--config {config_path}"
         f" --config-path {files('mlos_bench.config')} "
         f" --config-path {files('mlos_bench.tests.config')}"
@@ -145,8 +139,8 @@ def test_load_cli_config_examples_via_launcher(
         assert launcher.global_config["trial_id"] == config["trial_id"]
 
     expected_log_level = logging.getLevelName(config.get("log_level", "INFO"))
-    if isinstance(expected_log_level, int):
-        expected_log_level = logging.getLevelName(expected_log_level)
+    if isinstance(expected_log_level, int):  # type: ignore[unreachable]
+        expected_log_level = logging.getLevelName(expected_log_level)  # type: ignore[unreachable]
     current_log_level = logging.getLevelName(logging.root.getEffectiveLevel())
     assert current_log_level == expected_log_level
 

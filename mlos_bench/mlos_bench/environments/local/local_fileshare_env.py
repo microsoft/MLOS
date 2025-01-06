@@ -7,9 +7,10 @@ shared storage.
 """
 
 import logging
+from collections.abc import Generator, Iterable, Mapping
 from datetime import datetime
 from string import Template
-from typing import Any, Dict, Generator, Iterable, List, Mapping, Optional, Tuple
+from typing import Any
 
 from mlos_bench.environments.local.local_env import LocalEnv
 from mlos_bench.environments.status import Status
@@ -32,9 +33,9 @@ class LocalFileShareEnv(LocalEnv):
         *,
         name: str,
         config: dict,
-        global_config: Optional[dict] = None,
-        tunables: Optional[TunableGroups] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        tunables: TunableGroups | None = None,
+        service: Service | None = None,
     ):
         """
         Create a new application environment with a given config.
@@ -80,7 +81,7 @@ class LocalFileShareEnv(LocalEnv):
         self._upload = self._template_from_to("upload")
         self._download = self._template_from_to("download")
 
-    def _template_from_to(self, config_key: str) -> List[Tuple[Template, Template]]:
+    def _template_from_to(self, config_key: str) -> list[tuple[Template, Template]]:
         """Convert a list of {"from": "...", "to": "..."} to a list of pairs of
         string.Template objects so that we can plug in self._params into it later.
         """
@@ -88,9 +89,9 @@ class LocalFileShareEnv(LocalEnv):
 
     @staticmethod
     def _expand(
-        from_to: Iterable[Tuple[Template, Template]],
+        from_to: Iterable[tuple[Template, Template]],
         params: Mapping[str, TunableValue],
-    ) -> Generator[Tuple[str, str], None, None]:
+    ) -> Generator[tuple[str, str], None, None]:
         """
         Substitute $var parameters in from/to path templates.
 
@@ -101,7 +102,7 @@ class LocalFileShareEnv(LocalEnv):
             for (path_from, path_to) in from_to
         )
 
-    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict | None = None) -> bool:
         """
         Run setup scripts locally and upload the scripts and data to the shared storage.
 
@@ -168,14 +169,14 @@ class LocalFileShareEnv(LocalEnv):
                 _LOG.exception("Cannot download %s to %s", path_from, path_to)
                 raise ex
 
-    def run(self) -> Tuple[Status, datetime, Optional[Dict[str, TunableValue]]]:
+    def run(self) -> tuple[Status, datetime, dict[str, TunableValue] | None]:
         """
         Download benchmark results from the shared storage and run post-processing
         scripts locally.
 
         Returns
         -------
-        (status, timestamp, output) : (Status, datetime, dict)
+        (status, timestamp, output) : (Status, datetime.datetime, dict)
             3-tuple of (Status, timestamp, output) values, where `output` is a dict
             with the results or None if the status is not COMPLETED.
             If run script is a benchmark, then the score is usually expected to
@@ -184,6 +185,6 @@ class LocalFileShareEnv(LocalEnv):
         self._download_files()
         return super().run()
 
-    def status(self) -> Tuple[Status, datetime, List[Tuple[datetime, str, Any]]]:
+    def status(self) -> tuple[Status, datetime, list[tuple[datetime, str, Any]]]:
         self._download_files(ignore_missing=True)
         return super().status()

@@ -2,18 +2,33 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""mlos_viz is a framework to help visualizing, explain, and gain insights from results
-from the mlos_bench framework for benchmarking and optimization automation.
+"""
+mlos_viz is a framework to help visualizing, explain, and gain insights from results
+from the :py:mod:`mlos_bench` framework for benchmarking and optimization automation.
+
+It can be installed from `pypi <https://pypi.org/project/mlos-viz>`_ via ``pip
+install mlos-viz``.
+
+Overview
+++++++++
+
+Its main entrypoint is the :py:func:`plot` function, which can be used to
+automatically visualize :py:class:`~.ExperimentData` from :py:mod:`mlos_bench` using
+other libraries for automatic data correlation and visualization like
+:external:py:func:`dabl <dabl.plot>`.
 """
 
 from enum import Enum
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Literal
 
 import pandas
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_viz import base
 from mlos_viz.util import expand_results_data_args
+from mlos_viz.version import VERSION
+
+__version__ = VERSION
 
 
 class MlosVizMethod(Enum):
@@ -43,10 +58,10 @@ def ignore_plotter_warnings(plotter_method: MlosVizMethod = MlosVizMethod.AUTO) 
 
 
 def plot(
-    exp_data: Optional[ExperimentData] = None,
+    exp_data: ExperimentData | None = None,
     *,
-    results_df: Optional[pandas.DataFrame] = None,
-    objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
+    results_df: pandas.DataFrame | None = None,
+    objectives: dict[str, Literal["min", "max"]] | None = None,
     plotter_method: MlosVizMethod = MlosVizMethod.AUTO,
     filter_warnings: bool = True,
     **kwargs: Any,
@@ -60,12 +75,12 @@ def plot(
     ----------
     exp_data: ExperimentData
         The experiment data to plot.
-    results_df : Optional["pandas.DataFrame"]
-        Optional results_df to plot.
-        If not provided, defaults to exp_data.results_df property.
-    objectives : Optional[Dict[str, Literal["min", "max"]]]
+    results_df : pandas.DataFrame | None
+        Optional `results_df` to plot.
+        If not provided, defaults to :py:attr:`.ExperimentData.results_df` property.
+    objectives : Optional[dict[str, Literal["min", "max"]]]
         Optional objectives to plot.
-        If not provided, defaults to exp_data.objectives property.
+        If not provided, defaults to :py:attr:`.ExperimentData.objectives` property.
     plotter_method: MlosVizMethod
         The method to use for visualizing the experiment results.
     filter_warnings: bool

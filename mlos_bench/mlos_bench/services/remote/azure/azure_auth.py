@@ -6,10 +6,12 @@
 
 import logging
 from base64 import b64decode
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any
 
-import azure.identity as azure_id
+from azure.core.credentials import TokenCredential
+from azure.identity import CertificateCredential, DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from pytz import UTC
 
@@ -20,17 +22,17 @@ from mlos_bench.util import check_required_params
 _LOG = logging.getLogger(__name__)
 
 
-class AzureAuthService(Service, SupportsAuth):
+class AzureAuthService(Service, SupportsAuth[TokenCredential]):
     """Helper methods to get access to Azure services."""
 
     _REQ_INTERVAL = 300  # = 5 min
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """
         Create a new instance of Azure authentication services proxy.
@@ -44,7 +46,7 @@ class AzureAuthService(Service, SupportsAuth):
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
-        methods : Union[Dict[str, Callable], List[Callable], None]
+        methods : Union[dict[str, Callable], list[Callable], None]
             New methods to register with the service.
         """
         super().__init__(
@@ -56,6 +58,7 @@ class AzureAuthService(Service, SupportsAuth):
                 [
                     self.get_access_token,
                     self.get_auth_headers,
+                    self.get_credential,
                 ],
             ),
         )
@@ -65,10 +68,7 @@ class AzureAuthService(Service, SupportsAuth):
 
         self._access_token = "RENEW *NOW*"
         self._token_expiration_ts = datetime.now(UTC)  # Typically, some future timestamp.
-
-        # Login as ourselves
-        self._cred: Union[azure_id.AzureCliCredential, azure_id.CertificateCredential]
-        self._cred = azure_id.AzureCliCredential()
+        self._cred: TokenCredential | None = None
 
         # Verify info required for SP auth early
         if "spClientId" in self.config:
@@ -82,18 +82,22 @@ class AzureAuthService(Service, SupportsAuth):
                 },
             )
 
-    def _init_sp(self) -> None:
+    def get_credential(self) -> TokenCredential:
+        """Return the Azure SDK credential object."""
         # Perform this initialization outside of __init__ so that environment loading tests
         # don't need to specifically mock keyvault interactions out
+        if self._cred is not None:
+            return self._cred
 
-        # Already logged in as SP
-        if isinstance(self._cred, azure_id.CertificateCredential):
-            return
+        self._cred = DefaultAzureCredential()
+        if "spClientId" not in self.config:
+            return self._cred
 
         sp_client_id = self.config["spClientId"]
         keyvault_name = self.config["keyVaultName"]
         cert_name = self.config["certName"]
         tenant_id = self.config["tenant"]
+        _LOG.debug("Log in with Azure Service Principal %s", sp_client_id)
 
         # Get a client for fetching cert info
         keyvault_secrets_client = SecretClient(
@@ -108,23 +112,20 @@ class AzureAuthService(Service, SupportsAuth):
         cert_bytes = b64decode(secret.value)
 
         # Reauthenticate as the service principal.
-        self._cred = azure_id.CertificateCredential(
+        self._cred = CertificateCredential(  # pylint: disable=redefined-variable-type
             tenant_id=tenant_id,
             client_id=sp_client_id,
             certificate_data=cert_bytes,
         )
+        return self._cred
 
     def get_access_token(self) -> str:
         """Get the access token from Azure CLI, if expired."""
-        # Ensure we are logged as the Service Principal, if provided
-        if "spClientId" in self.config:
-            self._init_sp()
-
         ts_diff = (self._token_expiration_ts - datetime.now(UTC)).total_seconds()
         _LOG.debug("Time to renew the token: %.2f sec.", ts_diff)
         if ts_diff < self._req_interval:
             _LOG.debug("Request new accessToken")
-            res = self._cred.get_token("https://management.azure.com/.default")
+            res = self.get_credential().get_token("https://management.azure.com/.default")
             self._token_expiration_ts = datetime.fromtimestamp(res.expires_on, tz=UTC)
             self._access_token = res.token
             _LOG.info("Got new accessToken. Expiration time: %s", self._token_expiration_ts)

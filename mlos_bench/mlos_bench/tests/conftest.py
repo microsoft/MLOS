@@ -5,7 +5,9 @@
 """Common fixtures for mock TunableGroups and Environment objects."""
 
 import os
-from typing import Any, Generator, List
+import sys
+from collections.abc import Generator
+from typing import Any
 
 import pytest
 from fasteners import InterProcessLock, InterProcessReaderWriterLock
@@ -58,10 +60,21 @@ def mock_env_no_noise(tunable_groups: TunableGroups) -> MockEnv:
 
 
 # Fixtures to configure the pytest-docker plugin.
+@pytest.fixture(scope="session")
+def docker_setup() -> list[str] | str:
+    """Setup for docker services."""
+    if sys.platform == "darwin" or os.environ.get("HOST_OSTYPE", "").lower().startswith("darwin"):
+        # Workaround an oddity on macOS where the "docker-compose up"
+        # command always recreates the containers.
+        # That leads to races when multiple workers are trying to
+        # start and use the same services.
+        return ["up --build -d --no-recreate"]
+    else:
+        return ["up --build -d"]
 
 
 @pytest.fixture(scope="session")
-def docker_compose_file(pytestconfig: pytest.Config) -> List[str]:
+def docker_compose_file(pytestconfig: pytest.Config) -> list[str]:
     """
     Returns the path to the docker-compose file.
 
@@ -143,7 +156,7 @@ def locked_docker_services(
     """A locked version of the docker_services fixture to implement xdist single
     instance locking.
     """
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     # Mark the services as in use with the reader lock.
     docker_services_lock.acquire_read_lock()
     # Acquire the setup lock to prevent multiple setup operations at once.

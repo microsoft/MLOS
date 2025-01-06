@@ -70,11 +70,11 @@
                 "lextudio.restructuredtext",
                 "matangover.mypy",
                 "ms-azuretools.vscode-docker",
-                "ms-python.black-formatter",
-                "ms-python.isort",
+                "elagil.pre-commit-helper",
                 "ms-python.pylint",
                 "ms-python.python",
                 "ms-python.vscode-pylance",
+                "ms-python.debugpy",
                 "ms-vsliveshare.vsliveshare",
                 "njpwerner.autodocstring",
                 "redhat.vscode-yaml",
@@ -82,7 +82,8 @@
                 "streetsidesoftware.code-spell-checker",
                 "tamasfe.even-better-toml",
                 "trond-snekvik.simple-rst",
-                "tyriar.sort-lines"
+                "tyriar.sort-lines",
+                "ms-toolsai.jupyter"
             ]
         }
     }

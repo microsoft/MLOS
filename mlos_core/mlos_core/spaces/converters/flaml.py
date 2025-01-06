@@ -2,10 +2,11 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Contains space converters for FLAML."""
+"""Contains space converters for
+:py:class:`~mlos_core.optimizers.flaml_optimizer.FlamlOptimizer`
+"""
 
-import sys
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, TypeAlias
 
 import ConfigSpace
 import flaml.tune
@@ -15,19 +16,16 @@ import numpy as np
 if TYPE_CHECKING:
     from ConfigSpace.hyperparameters import Hyperparameter
 
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
-
-
 FlamlDomain: TypeAlias = flaml.tune.sample.Domain
-FlamlSpace: TypeAlias = Dict[str, flaml.tune.sample.Domain]
+"""Flaml domain type alias."""
+
+FlamlSpace: TypeAlias = dict[str, flaml.tune.sample.Domain]
+"""Flaml space type alias - a `dict[str, FlamlDomain]`"""
 
 
 def configspace_to_flaml_space(
     config_space: ConfigSpace.ConfigurationSpace,
-) -> Dict[str, FlamlDomain]:
+) -> dict[str, FlamlDomain]:
     """
     Converts a ConfigSpace.ConfigurationSpace to dict.
 

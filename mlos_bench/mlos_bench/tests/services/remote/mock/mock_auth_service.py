@@ -5,7 +5,8 @@
 """A collection Service functions for mocking authentication."""
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Union
+from collections.abc import Callable
+from typing import Any
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.authenticator_type import SupportsAuth
@@ -13,15 +14,15 @@ from mlos_bench.services.types.authenticator_type import SupportsAuth
 _LOG = logging.getLogger(__name__)
 
 
-class MockAuthService(Service, SupportsAuth):
+class MockAuthService(Service, SupportsAuth[str]):
     """A collection Service functions for mocking authentication ops."""
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         super().__init__(
             config,
@@ -32,6 +33,7 @@ class MockAuthService(Service, SupportsAuth):
                 [
                     self.get_access_token,
                     self.get_auth_headers,
+                    self.get_credential,
                 ],
             ),
         )
@@ -41,3 +43,6 @@ class MockAuthService(Service, SupportsAuth):
 
     def get_auth_headers(self) -> dict:
         return {"Authorization": "Bearer " + self.get_access_token()}
+
+    def get_credential(self) -> str:
+        return "MOCK CREDENTIAL"

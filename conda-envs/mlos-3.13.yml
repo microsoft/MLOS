@@ -1,36 +1,37 @@
-name: mlos-3.9
+name: mlos-3.13
 channels:
-  - defaults
+  # Use conda-forge to allow other packages to install with python 3.12.
+  # See Also: https://github.com/microsoft/MLOS/issues/832
   - conda-forge
+  - defaults
 dependencies:
   # Basic dev environment packages.
   # All other dependencies for the mlos modules come from pip.
   - pip
-  - pylint
-  - black
-  - pycodestyle
-  - pydocstyle
-  - flake8
-  - build
+  - python-build
   - jupyter
   - ipykernel
   - nb_conda_kernels
-  - matplotlib
+  - matplotlib-base
   - seaborn
   - pandas
   - pyarrow
   - swig
-  - libpq
-  - python=3.9
+  # FIXME: Temporarily avoid broken libpq that's missing client headers.
+  - libpq<17.0
+  - python=3.13
   # See comments in mlos.yml.
   #- gcc_linux-64
   - pip:
     - bump2version
     - check-jsonschema
-    - isort
-    - docformatter
-    - licenseheaders
-    - mypy
+    # Fixed versions for easier maintainability.
+    # Dependabot can update explicitly as necessary.
+    - pre-commit==4.0.1
+    - pycodestyle==2.12.1
+    - pylint==3.3.3
+    - tomlkit
+    - mypy==1.14.1
     - pandas-stubs
     - types-beautifulsoup4
     - types-colorama

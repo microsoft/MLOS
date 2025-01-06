@@ -2,15 +2,40 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base interface for accessing the stored benchmark experiment data."""
+"""
+Base interface for accessing the stored benchmark experiment data.
+
+An experiment is a collection of trials that are run with a given set of scripts and
+target system.
+
+Each trial is associated with a configuration (e.g., set of tunable parameters), but
+multiple trials may use the same config (e.g., for repeat run variability analysis).
+
+See Also
+--------
+mlos_bench.storage :
+    The base storage module for mlos_bench, which includes some basic examples
+    in the documentation.
+ExperimentData.results_df :
+    Retrieves a pandas DataFrame of the Experiment's trials' results data.
+ExperimentData.trials :
+    Retrieves a dictionary of the Experiment's trials' data.
+ExperimentData.tunable_configs :
+    Retrieves a dictionary of the Experiment's sampled configs data.
+ExperimentData.tunable_config_trial_groups :
+    Retrieves a dictionary of the Experiment's trials' data, grouped by shared
+    tunable config.
+mlos_bench.storage.base_trial_data.TrialData :
+    Base interface for accessing the stored benchmark trial data.
+"""
 
 from abc import ABCMeta, abstractmethod
-from distutils.util import strtobool  # pylint: disable=deprecated-module
-from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple
+from typing import TYPE_CHECKING, Literal
 
 import pandas
 
 from mlos_bench.storage.base_tunable_config_data import TunableConfigData
+from mlos_bench.util import strtobool
 
 if TYPE_CHECKING:
     from mlos_bench.storage.base_trial_data import TrialData
@@ -28,7 +53,21 @@ class ExperimentData(metaclass=ABCMeta):
     """
 
     RESULT_COLUMN_PREFIX = "result."
+    """
+    Prefix given to columns in :py:attr:`.ExperimentData.results_df` that contain trial
+    results metrics.
+
+    For example, if the result metric is "time", the column name will be "result.time".
+    """
+
     CONFIG_COLUMN_PREFIX = "config."
+    """
+    Prefix given to columns in :py:attr:`.ExperimentData.results_df` that contain trial
+    config parameters.
+
+    For example, if the config parameter name is "param1", the column name will be
+    "config.param1".
+    """
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -56,13 +95,13 @@ class ExperimentData(metaclass=ABCMeta):
         return self._description
 
     @property
-    def root_env_config(self) -> Tuple[str, str, str]:
+    def root_env_config(self) -> tuple[str, str, str]:
         """
         Root environment configuration.
 
         Returns
         -------
-        root_env_config : Tuple[str, str, str]
+        (root_env_config, git_repo, git_commit) : tuple[str, str, str]
             A tuple of (root_env_config, git_repo, git_commit) for the root environment.
         """
         return (self._root_env_config, self._git_repo, self._git_commit)
@@ -72,55 +111,55 @@ class ExperimentData(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def objectives(self) -> Dict[str, Literal["min", "max"]]:
+    def objectives(self) -> dict[str, Literal["min", "max"]]:
         """
         Retrieve the experiment's objectives data from the storage.
 
         Returns
         -------
-        objectives : Dict[str, objective]
+        objectives : dict[str, Literal["min", "max"]]
             A dictionary of the experiment's objective names (optimization_targets)
             and their directions (e.g., min or max).
         """
 
     @property
     @abstractmethod
-    def trials(self) -> Dict[int, "TrialData"]:
+    def trials(self) -> dict[int, "TrialData"]:
         """
         Retrieve the experiment's trials' data from the storage.
 
         Returns
         -------
-        trials : Dict[int, TrialData]
+        trials : dict[int, TrialData]
             A dictionary of the trials' data, keyed by trial id.
         """
 
     @property
     @abstractmethod
-    def tunable_configs(self) -> Dict[int, TunableConfigData]:
+    def tunable_configs(self) -> dict[int, TunableConfigData]:
         """
         Retrieve the experiment's (tunable) configs' data from the storage.
 
         Returns
         -------
-        trials : Dict[int, TunableConfigData]
+        trials : dict[int, TunableConfigData]
             A dictionary of the configs' data, keyed by (tunable) config id.
         """
 
     @property
     @abstractmethod
-    def tunable_config_trial_groups(self) -> Dict[int, "TunableConfigTrialGroupData"]:
+    def tunable_config_trial_groups(self) -> dict[int, "TunableConfigTrialGroupData"]:
         """
         Retrieve the Experiment's (Tunable) Config Trial Group data from the storage.
 
         Returns
         -------
-        trials : Dict[int, TunableConfigTrialGroupData]
+        trials : dict[int, TunableConfigTrialGroupData]
             A dictionary of the trials' data, keyed by (tunable) by config id.
         """
 
     @property
-    def default_tunable_config_id(self) -> Optional[int]:
+    def default_tunable_config_id(self) -> int | None:
         """
         Retrieves the (tunable) config id for the default tunable values for this
         experiment.
@@ -162,4 +201,9 @@ class ExperimentData(metaclass=ABCMeta):
             followed by tunable config parameters (prefixed with "config.") and
             trial results (prefixed with "result."). The latter can be NULLs if the
             trial was not successful.
+
+        See Also
+        --------
+        :py:attr:`.ExperimentData.CONFIG_COLUMN_PREFIX`
+        :py:attr:`.ExperimentData.RESULT_COLUMN_PREFIX`
         """

@@ -4,18 +4,20 @@
 #
 """Test fixtures for mlos_bench optimizers."""
 
-from typing import List
 
 import pytest
 
+from mlos_bench.optimizers.manual_optimizer import ManualOptimizer
 from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.tests import SEED
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
+# pylint: disable=redefined-outer-name
+
 
 @pytest.fixture
-def mock_configs() -> List[dict]:
+def mock_configs() -> list[dict]:
     """Mock configurations of earlier experiments."""
     return [
         {
@@ -111,7 +113,7 @@ def flaml_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
 
 
 # FIXME: SMAC's RF model can be non-deterministic at low iterations, which are
-# normally calculated as a percentage of the max_iterations and number of
+# normally calculated as a percentage of the max_suggestions and number of
 # tunable dimensions, so for now we set the initial random samples equal to the
 # number of iterations and control them with a seed.
 
@@ -152,5 +154,18 @@ def smac_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
             # See Above
             "n_random_init": SMAC_ITERATIONS,
             "max_ratio": 1.0,
+        },
+    )
+
+
+@pytest.fixture
+def manual_opt(tunable_groups: TunableGroups, mock_configs: list[dict]) -> ManualOptimizer:
+    """Test fixture for ManualOptimizer."""
+    return ManualOptimizer(
+        tunables=tunable_groups,
+        service=None,
+        config={
+            "max_cycles": 2,
+            "tunable_values_cycle": mock_configs,
         },
     )

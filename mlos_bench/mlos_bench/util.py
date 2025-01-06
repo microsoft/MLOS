@@ -11,21 +11,9 @@ import json
 import logging
 import os
 import subprocess
+from collections.abc import Callable, Iterable, Mapping
 from datetime import datetime
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    Literal,
-    Mapping,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Literal, TypeVar, Union
 
 import pandas
 import pytz
@@ -39,21 +27,57 @@ if TYPE_CHECKING:
     from mlos_bench.services.base_service import Service
     from mlos_bench.storage.base_storage import Storage
 
-# BaseTypeVar is a generic with a constraint of the three base classes.
 BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Scheduler", "Service", "Storage")
-BaseTypes = Union["Environment", "Optimizer", "Scheduler", "Service", "Storage"]
+"""BaseTypeVar is a generic with a constraint of the main base classes (e.g.,
+:py:class:`~mlos_bench.environments.base_environment.Environment`,
+:py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer`,
+:py:class:`~mlos_bench.schedulers.base_scheduler.Scheduler`,
+:py:class:`~mlos_bench.services.base_service.Service`,
+:py:class:`~mlos_bench.storage.base_storage.Storage`, etc.).
+"""
+
+BaseTypes = Union[  # pylint: disable=consider-alternative-union-syntax
+    "Environment", "Optimizer", "Scheduler", "Service", "Storage"
+]
+"""Similar to :py:data:`.BaseTypeVar`, BaseTypes is a Union of the main base classes."""
 
 
-def preprocess_dynamic_configs(*, dest: dict, source: Optional[dict] = None) -> dict:
+# Adjusted from https://github.com/python/cpython/blob/v3.11.10/Lib/distutils/util.py#L308
+# See Also: https://github.com/microsoft/MLOS/issues/865
+def strtobool(val: str) -> bool:
     """
-    Replaces all $name values in the destination config with the corresponding value
+    Convert a string representation of truth to true (1) or false (0).
+
+    Parameters
+    ----------
+    val : str
+        True values are 'y', 'yes', 't', 'true', 'on', and '1';
+        False values are 'n', 'no', 'f', 'false', 'off', and '0'.
+
+    Raises
+    ------
+    ValueError
+        If 'val' is anything else.
+    """
+    val = val.lower()
+    if val in {"y", "yes", "t", "true", "on", "1"}:
+        return True
+    elif val in {"n", "no", "f", "false", "off", "0"}:
+        return False
+    else:
+        raise ValueError(f"Invalid Boolean value: '{val}'")
+
+
+def preprocess_dynamic_configs(*, dest: dict, source: dict | None = None) -> dict:
+    """
+    Replaces all ``$name`` values in the destination config with the corresponding value
     from the source config.
 
     Parameters
     ----------
     dest : dict
         Destination config.
-    source : Optional[dict]
+    source : dict | None
         Source config.
 
     Returns
@@ -72,8 +96,8 @@ def preprocess_dynamic_configs(*, dest: dict, source: Optional[dict] = None) -> 
 def merge_parameters(
     *,
     dest: dict,
-    source: Optional[dict] = None,
-    required_keys: Optional[Iterable[str]] = None,
+    source: dict | None = None,
+    required_keys: Iterable[str] | None = None,
 ) -> dict:
     """
     Merge the source config dict into the destination config. Pick from the source
@@ -83,7 +107,7 @@ def merge_parameters(
     ----------
     dest : dict
         Destination config.
-    source : Optional[dict]
+    source : dict | None
         Source config.
     required_keys : Optional[Iterable[str]]
         An optional list of keys that must be present in the destination config.
@@ -135,8 +159,8 @@ def path_join(*args: str, abs_path: bool = False) -> str:
 
 def prepare_class_load(
     config: dict,
-    global_config: Optional[Dict[str, Any]] = None,
-) -> Tuple[str, Dict[str, Any]]:
+    global_config: dict[str, Any] | None = None,
+) -> tuple[str, dict[str, Any]]:
     """
     Extract the class instantiation parameters from the configuration.
 
@@ -192,7 +216,7 @@ def get_class_from_name(class_name: str) -> type:
 
 # FIXME: Technically, this should return a type "class_name" derived from "base_class".
 def instantiate_from_config(
-    base_class: Type[BaseTypeVar],
+    base_class: type[BaseTypeVar],
     class_name: str,
     *args: Any,
     **kwargs: Any,
@@ -250,7 +274,7 @@ def check_required_params(config: Mapping[str, Any], required_params: Iterable[s
         )
 
 
-def get_git_info(path: str = __file__) -> Tuple[str, str, str]:
+def get_git_info(path: str = __file__) -> tuple[str, str, str]:
     """
     Get the git repository, commit hash, and local path of the given file.
 
@@ -261,7 +285,7 @@ def get_git_info(path: str = __file__) -> Tuple[str, str, str]:
 
     Returns
     -------
-    (git_repo, git_commit, git_path) : Tuple[str, str, str]
+    (git_repo, git_commit, git_path) : tuple[str, str, str]
         Git repository URL, last commit hash, and relative file path.
     """
     dirname = os.path.dirname(path)
@@ -280,7 +304,7 @@ def get_git_info(path: str = __file__) -> Tuple[str, str, str]:
 
 
 # Note: to avoid circular imports, we don't specify TunableValue here.
-def try_parse_val(val: Optional[str]) -> Optional[Union[int, float, str]]:
+def try_parse_val(val: str | None) -> int | float | str | None:
     """
     Try to parse the value as an int or float, otherwise return the string.
 
@@ -310,7 +334,11 @@ def try_parse_val(val: Optional[str]) -> Optional[Union[int, float, str]]:
         return str(val)
 
 
-def nullable(func: Callable, value: Optional[Any]) -> Optional[Any]:
+NullableT = TypeVar("NullableT")
+"""A generic type variable for :py:func:`nullable` return types."""
+
+
+def nullable(func: Callable[..., NullableT], value: Any | None) -> NullableT | None:
     """
     Poor man's Maybe monad: apply the function to the value if it's not None.
 
@@ -318,13 +346,22 @@ def nullable(func: Callable, value: Optional[Any]) -> Optional[Any]:
     ----------
     func : Callable
         Function to apply to the value.
-    value : Optional[Any]
+    value : Any | None
         Value to apply the function to.
 
     Returns
     -------
-    value : Optional[Any]
+    value : NullableT | None
         The result of the function application or None if the value is None.
+
+    Examples
+    --------
+    >>> nullable(int, "1")
+    1
+    >>> nullable(int, None)
+    ...
+    >>> nullable(str, 1)
+    '1'
     """
     return None if value is None else func(value)
 
@@ -335,7 +372,7 @@ def utcify_timestamp(timestamp: datetime, *, origin: Literal["utc", "local"]) ->
 
     Parameters
     ----------
-    timestamp : datetime
+    timestamp : datetime.datetime
         A timestamp to convert to UTC.
         Note: The original datetime may or may not have tzinfo associated with it.
 
@@ -349,7 +386,7 @@ def utcify_timestamp(timestamp: datetime, *, origin: Literal["utc", "local"]) ->
 
     Returns
     -------
-    datetime
+    datetime.datetime
         A datetime with zoneinfo in UTC.
     """
     if timestamp.tzinfo is not None or origin == "local":
@@ -368,10 +405,10 @@ def utcify_timestamp(timestamp: datetime, *, origin: Literal["utc", "local"]) ->
 
 
 def utcify_nullable_timestamp(
-    timestamp: Optional[datetime],
+    timestamp: datetime | None,
     *,
     origin: Literal["utc", "local"],
-) -> Optional[datetime]:
+) -> datetime | None:
     """A nullable version of utcify_timestamp."""
     return utcify_timestamp(timestamp, origin=origin) if timestamp is not None else None
 

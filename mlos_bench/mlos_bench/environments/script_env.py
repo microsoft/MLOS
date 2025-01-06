@@ -2,12 +2,17 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base scriptable benchmark environment."""
+"""
+Base scriptable benchmark environment.
+
+TODO: Document how variable propogation works in the script environments using
+shell_env_params, required_args, const_args, etc.
+"""
 
 import abc
 import logging
 import re
-from typing import Dict, Iterable, Optional
+from collections.abc import Iterable
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
@@ -19,7 +24,10 @@ _LOG = logging.getLogger(__name__)
 
 
 class ScriptEnv(Environment, metaclass=abc.ABCMeta):
-    """Base Environment that runs scripts for setup/run/teardown."""
+    """Base Environment that runs scripts for the different phases (e.g.,
+    :py:meth:`.Environment.setup`, :py:meth:`.Environment.run`,
+    :py:meth:`.Environment.teardown`, etc.)
+    """
 
     _RE_INVALID = re.compile(r"[^a-zA-Z0-9_]")
 
@@ -28,16 +36,16 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
         *,
         name: str,
         config: dict,
-        global_config: Optional[dict] = None,
-        tunables: Optional[TunableGroups] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        tunables: TunableGroups | None = None,
+        service: Service | None = None,
     ):
         """
         Create a new environment for script execution.
 
         Parameters
         ----------
-        name: str
+        name : str
             Human-readable name of the environment.
         config : dict
             Free-format dictionary that contains the benchmark environment
@@ -45,11 +53,13 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
             and the `const_args` sections. It must also have at least one of
             the following parameters: {`setup`, `run`, `teardown`}.
             Additional parameters:
-                * `shell_env_params` - an array of parameters to pass to the script
-                  as shell environment variables, and
-                * `shell_env_params_rename` - a dictionary of {to: from} mappings
-                  of the script parameters. If not specified, replace all
-                  non-alphanumeric characters with underscores.
+
+            - `shell_env_params` - an array of parameters to pass to the script
+               as shell environment variables, and
+            - `shell_env_params_rename` - a dictionary of {to: from} mappings
+               of the script parameters. If not specified, replace all
+               non-alphanumeric characters with underscores.
+
             If neither `shell_env_params` nor `shell_env_params_rename` are specified,
             *no* additional shell parameters will be passed to the script.
         global_config : dict
@@ -57,7 +67,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
             to be mixed in into the "const_args" section of the local config.
         tunables : TunableGroups
             A collection of tunable parameters for *all* environments.
-        service: Service
+        service : Service
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
@@ -74,18 +84,18 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
         self._script_teardown = self.config.get("teardown")
 
         self._shell_env_params: Iterable[str] = self.config.get("shell_env_params", [])
-        self._shell_env_params_rename: Dict[str, str] = self.config.get(
+        self._shell_env_params_rename: dict[str, str] = self.config.get(
             "shell_env_params_rename", {}
         )
 
         results_stdout_pattern = self.config.get("results_stdout_pattern")
-        self._results_stdout_pattern: Optional[re.Pattern[str]] = (
+        self._results_stdout_pattern: re.Pattern[str] | None = (
             re.compile(results_stdout_pattern, flags=re.MULTILINE)
             if results_stdout_pattern
             else None
         )
 
-    def _get_env_params(self, restrict: bool = True) -> Dict[str, str]:
+    def _get_env_params(self, restrict: bool = True) -> dict[str, str]:
         """
         Get the *shell* environment parameters to be passed to the script.
 
@@ -98,7 +108,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        env_params : Dict[str, str]
+        env_params : dict[str, str]
             Parameters to pass as *shell* environment variables into the script.
             This is usually a subset of `_params` with some possible conversions.
         """
@@ -107,7 +117,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
         rename.update(self._shell_env_params_rename)
         return {key_sub: str(self._params[key]) for (key_sub, key) in rename.items()}
 
-    def _extract_stdout_results(self, stdout: str) -> Dict[str, TunableValue]:
+    def _extract_stdout_results(self, stdout: str) -> dict[str, TunableValue]:
         """
         Extract the results from the stdout of the script.
 
@@ -118,7 +128,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        results : Dict[str, TunableValue]
+        results : dict[str, TunableValue]
             A dictionary of results extracted from the stdout.
         """
         if not self._results_stdout_pattern:

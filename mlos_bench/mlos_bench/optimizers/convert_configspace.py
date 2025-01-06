@@ -7,7 +7,7 @@ optimizers.
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple, Union
+from collections.abc import Hashable
 
 from ConfigSpace import (
     Beta,
@@ -20,10 +20,16 @@ from ConfigSpace import (
     Normal,
     Uniform,
 )
+from ConfigSpace.hyperparameters import NumericalHyperparameter
+from ConfigSpace.types import NotSet
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import nullable, try_parse_val
+from mlos_bench.util import try_parse_val
+from mlos_core.spaces.converters.util import (
+    QUANTIZATION_BINS_META_KEY,
+    monkey_patch_hp_quantization,
+)
 
 _LOG = logging.getLogger(__name__)
 
@@ -40,7 +46,7 @@ class TunableValueKind:
     RANGE = "range"
 
 
-def _normalize_weights(weights: List[float]) -> List[float]:
+def _normalize_weights(weights: list[float]) -> list[float]:
     """Helper function for normalizing weights to probabilities."""
     total = sum(weights)
     return [w / total for w in weights]
@@ -48,7 +54,7 @@ def _normalize_weights(weights: List[float]) -> List[float]:
 
 def _tunable_to_configspace(
     tunable: Tunable,
-    group_name: Optional[str] = None,
+    group_name: str | None = None,
     cost: int = 0,
 ) -> ConfigurationSpace:
     """
@@ -67,10 +73,17 @@ def _tunable_to_configspace(
 
     Returns
     -------
-    cs : ConfigurationSpace
+    cs : ConfigSpace.ConfigurationSpace
         A ConfigurationSpace object that corresponds to the Tunable.
     """
-    meta = {"group": group_name, "cost": cost}  # {"scaling": ""}
+    # pylint: disable=too-complex
+    meta: dict[Hashable, TunableValue] = {"cost": cost}
+    if group_name is not None:
+        meta["group"] = group_name
+    if tunable.is_numerical and tunable.quantization_bins:
+        # Temporary workaround to dropped quantization support in ConfigSpace 1.0
+        # See Also: https://github.com/automl/ConfigSpace/issues/390
+        meta[QUANTIZATION_BINS_META_KEY] = tunable.quantization_bins
 
     if tunable.type == "categorical":
         return ConfigurationSpace(
@@ -85,7 +98,7 @@ def _tunable_to_configspace(
             }
         )
 
-    distribution: Union[Uniform, Normal, Beta, None] = None
+    distribution: Uniform | Normal | Beta | None = None
     if tunable.distribution == "uniform":
         distribution = Uniform()
     elif tunable.distribution == "normal":
@@ -101,12 +114,12 @@ def _tunable_to_configspace(
     elif tunable.distribution is not None:
         raise TypeError(f"Invalid Distribution Type: {tunable.distribution}")
 
+    range_hp: NumericalHyperparameter
     if tunable.type == "int":
         range_hp = Integer(
             name=tunable.name,
             bounds=(int(tunable.range[0]), int(tunable.range[1])),
             log=bool(tunable.is_log),
-            q=nullable(int, tunable.quantization),
             distribution=distribution,
             default=(
                 int(tunable.default)
@@ -120,8 +133,7 @@ def _tunable_to_configspace(
             name=tunable.name,
             bounds=tunable.range,
             log=bool(tunable.is_log),
-            q=tunable.quantization,  # type: ignore[arg-type]
-            distribution=distribution,  # type: ignore[arg-type]
+            distribution=distribution,
             default=(
                 float(tunable.default)
                 if tunable.in_range(tunable.default) and tunable.default is not None
@@ -132,11 +144,12 @@ def _tunable_to_configspace(
     else:
         raise TypeError(f"Invalid Parameter Type: {tunable.type}")
 
+    monkey_patch_hp_quantization(range_hp)
     if not tunable.special:
-        return ConfigurationSpace({tunable.name: range_hp})
+        return ConfigurationSpace(space=[range_hp])
 
     # Compute the probabilities of switching between regular and special values.
-    special_weights: Optional[List[float]] = None
+    special_weights: list[float] | None = None
     switch_weights = [0.5, 0.5]  # FLAML requires uniform weights.
     if tunable.weights and tunable.range_weight is not None:
         special_weights = _normalize_weights(tunable.weights)
@@ -146,36 +159,39 @@ def _tunable_to_configspace(
     # one for special values, and one to choose between the two.
     (special_name, type_name) = special_param_names(tunable.name)
     conf_space = ConfigurationSpace(
-        {
-            tunable.name: range_hp,
-            special_name: CategoricalHyperparameter(
+        space=[
+            range_hp,
+            CategoricalHyperparameter(
                 name=special_name,
                 choices=tunable.special,
                 weights=special_weights,
-                default_value=tunable.default if tunable.default in tunable.special else None,
+                default_value=tunable.default if tunable.default in tunable.special else NotSet,
                 meta=meta,
             ),
-            type_name: CategoricalHyperparameter(
+            CategoricalHyperparameter(
                 name=type_name,
                 choices=[TunableValueKind.SPECIAL, TunableValueKind.RANGE],
                 weights=switch_weights,
                 default_value=TunableValueKind.SPECIAL,
             ),
-        }
+        ]
     )
-    conf_space.add_condition(
-        EqualsCondition(conf_space[special_name], conf_space[type_name], TunableValueKind.SPECIAL)
+    conf_space.add(
+        [
+            EqualsCondition(
+                conf_space[special_name], conf_space[type_name], TunableValueKind.SPECIAL
+            ),
+            EqualsCondition(
+                conf_space[tunable.name], conf_space[type_name], TunableValueKind.RANGE
+            ),
+        ]
     )
-    conf_space.add_condition(
-        EqualsCondition(conf_space[tunable.name], conf_space[type_name], TunableValueKind.RANGE)
-    )
-
     return conf_space
 
 
 def tunable_groups_to_configspace(
     tunables: TunableGroups,
-    seed: Optional[int] = None,
+    seed: int | None = None,
 ) -> ConfigurationSpace:
     """
     Convert TunableGroups to  hyperparameters in ConfigurationSpace.
@@ -185,12 +201,12 @@ def tunable_groups_to_configspace(
     tunables : TunableGroups
         A collection of tunable parameters.
 
-    seed : Optional[int]
+    seed : int | None
         Random seed to use.
 
     Returns
     -------
-    configspace : ConfigurationSpace
+    configspace : ConfigSpace.ConfigurationSpace
         A new ConfigurationSpace instance that corresponds to the input TunableGroups.
     """
     space = ConfigurationSpace(seed=seed)
@@ -218,10 +234,10 @@ def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
 
     Returns
     -------
-    Configuration
+    ConfigSpace.Configuration
         A ConfigSpace Configuration.
     """
-    values: Dict[str, TunableValue] = {}
+    values: dict[str, TunableValue] = {}
     for tunable, _group in tunables:
         if tunable.special:
             (special_name, type_name) = special_param_names(tunable.name)
@@ -237,7 +253,7 @@ def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
     return Configuration(configspace, values=values)
 
 
-def configspace_data_to_tunable_values(data: dict) -> Dict[str, TunableValue]:
+def configspace_data_to_tunable_values(data: dict) -> dict[str, TunableValue]:
     """
     Remove the fields that correspond to special values in ConfigSpace.
 
@@ -257,7 +273,7 @@ def configspace_data_to_tunable_values(data: dict) -> Dict[str, TunableValue]:
     return data
 
 
-def special_param_names(name: str) -> Tuple[str, str]:
+def special_param_names(name: str) -> tuple[str, str]:
     """
     Generate the names of the auxiliary hyperparameters that correspond to a tunable
     that can have special values.

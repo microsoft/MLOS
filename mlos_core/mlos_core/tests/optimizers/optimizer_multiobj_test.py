@@ -5,13 +5,12 @@
 """Test multi-target optimization."""
 
 import logging
-from typing import List, Optional, Type
 
 import ConfigSpace as CS
-import numpy as np
 import pandas as pd
 import pytest
 
+from mlos_core.data_classes import Observations, Suggestion
 from mlos_core.optimizers import BaseOptimizer, OptimizerType
 from mlos_core.tests import SEED
 
@@ -25,7 +24,7 @@ _LOG = logging.getLogger(__name__)
     ],
 )
 def test_multi_target_opt_wrong_weights(
-    optimizer_class: Type[BaseOptimizer],
+    optimizer_class: type[BaseOptimizer],
     kwargs: dict,
 ) -> None:
     """Make sure that the optimizer raises an error if the number of objective weights
@@ -55,8 +54,8 @@ def test_multi_target_opt_wrong_weights(
     ],
 )
 def test_multi_target_opt(
-    objective_weights: Optional[List[float]],
-    optimizer_class: Type[BaseOptimizer],
+    objective_weights: list[float] | None,
+    optimizer_class: type[BaseOptimizer],
     kwargs: dict,
 ) -> None:
     """Toy multi-target optimization problem to test the optimizers with mixed numeric
@@ -65,19 +64,20 @@ def test_multi_target_opt(
     # pylint: disable=too-many-locals
     max_iterations = 10
 
-    def objective(point: pd.DataFrame) -> pd.DataFrame:
+    def objective(point: pd.Series) -> pd.Series:
         # mix of hyperparameters, optimal is to select the highest possible
-        return pd.DataFrame(
+        ret: pd.Series = pd.Series(
             {
                 "main_score": point.x + point.y,
                 "other_score": point.x**2 + point.y**2,
             }
         )
+        return ret
 
     input_space = CS.ConfigurationSpace(seed=SEED)
     # add a mix of numeric datatypes
-    input_space.add_hyperparameter(CS.UniformIntegerHyperparameter(name="x", lower=0, upper=5))
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="y", lower=0.0, upper=5.0))
+    input_space.add(CS.UniformIntegerHyperparameter(name="x", lower=0, upper=5))
+    input_space.add(CS.UniformFloatHyperparameter(name="y", lower=0.0, upper=5.0))
 
     optimizer = optimizer_class(
         parameter_space=input_space,
@@ -93,39 +93,41 @@ def test_multi_target_opt(
         optimizer.get_observations()
 
     for _ in range(max_iterations):
-        suggestion, metadata = optimizer.suggest()
-        assert isinstance(suggestion, pd.DataFrame)
-        assert metadata is None or isinstance(metadata, pd.DataFrame)
-        assert set(suggestion.columns) == {"x", "y"}
+        suggestion = optimizer.suggest()
+        assert isinstance(suggestion, Suggestion)
+        assert isinstance(suggestion.config, pd.Series)
+        assert suggestion.metadata is None or isinstance(suggestion.metadata, pd.Series)
+        assert set(suggestion.config.index) == {"x", "y"}
         # Check suggestion values are the expected dtype
-        assert isinstance(suggestion.x.iloc[0], np.integer)
-        assert isinstance(suggestion.y.iloc[0], np.floating)
+        assert isinstance(suggestion.config["x"], int)
+        assert isinstance(suggestion.config["y"], float)
         # Check that suggestion is in the space
-        test_configuration = CS.Configuration(
-            optimizer.parameter_space, suggestion.astype("O").iloc[0].to_dict()
-        )
+        config_dict: dict = suggestion.config.to_dict()
+        test_configuration = CS.Configuration(optimizer.parameter_space, config_dict)
         # Raises an error if outside of configuration space
-        test_configuration.is_valid_configuration()
+        test_configuration.check_valid_configuration()
         # Test registering the suggested configuration with a score.
-        observation = objective(suggestion)
-        assert isinstance(observation, pd.DataFrame)
-        assert set(observation.columns) == {"main_score", "other_score"}
-        optimizer.register(configs=suggestion, scores=observation)
+        observation = objective(suggestion.config)
+        assert isinstance(observation, pd.Series)
+        assert set(observation.index) == {"main_score", "other_score"}
+        optimizer.register(observations=suggestion.complete(observation))
 
-    (best_config, best_score, best_context) = optimizer.get_best_observations()
-    assert isinstance(best_config, pd.DataFrame)
-    assert isinstance(best_score, pd.DataFrame)
-    assert best_context is None
-    assert set(best_config.columns) == {"x", "y"}
-    assert set(best_score.columns) == {"main_score", "other_score"}
-    assert best_config.shape == (1, 2)
-    assert best_score.shape == (1, 2)
+    best_observations = optimizer.get_best_observations()
+    assert isinstance(best_observations, Observations)
+    assert isinstance(best_observations.configs, pd.DataFrame)
+    assert isinstance(best_observations.scores, pd.DataFrame)
+    assert best_observations.contexts is None
+    assert set(best_observations.configs.columns) == {"x", "y"}
+    assert set(best_observations.scores.columns) == {"main_score", "other_score"}
+    assert best_observations.configs.shape == (1, 2)
+    assert best_observations.scores.shape == (1, 2)
 
-    (all_configs, all_scores, all_contexts) = optimizer.get_observations()
-    assert isinstance(all_configs, pd.DataFrame)
-    assert isinstance(all_scores, pd.DataFrame)
-    assert all_contexts is None
-    assert set(all_configs.columns) == {"x", "y"}
-    assert set(all_scores.columns) == {"main_score", "other_score"}
-    assert all_configs.shape == (max_iterations, 2)
-    assert all_scores.shape == (max_iterations, 2)
+    all_observations = optimizer.get_observations()
+    assert isinstance(all_observations, Observations)
+    assert isinstance(all_observations.configs, pd.DataFrame)
+    assert isinstance(all_observations.scores, pd.DataFrame)
+    assert all_observations.contexts is None
+    assert set(all_observations.configs.columns) == {"x", "y"}
+    assert set(all_observations.scores.columns) == {"main_score", "other_score"}
+    assert all_observations.configs.shape == (max_iterations, 2)
+    assert all_observations.scores.shape == (max_iterations, 2)

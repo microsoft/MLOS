@@ -5,7 +5,6 @@
 """No-op optimizer for mlos_bench that proposes a single configuration."""
 
 import logging
-from typing import Optional
 
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.services.base_service import Service
@@ -21,18 +20,16 @@ class OneShotOptimizer(MockOptimizer):
     Explicit configs (partial or full) are possible using configuration files.
     """
 
-    # TODO: Add support for multiple explicit configs (i.e., FewShot or Manual Optimizer) - #344
-
     def __init__(
         self,
         tunables: TunableGroups,
         config: dict,
-        global_config: Optional[dict] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        service: Service | None = None,
     ):
         super().__init__(tunables, config, global_config, service)
         _LOG.info("Run a single iteration for: %s", self._tunables)
-        self._max_iter = 1  # Always run for just one iteration.
+        self._max_suggestions = 1  # Always run for just one iteration.
 
     def suggest(self) -> TunableGroups:
         """Always produce the same (initial) suggestion."""

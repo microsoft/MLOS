@@ -2,12 +2,15 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""An interface to access the experiment benchmark data stored in SQL DB."""
+"""An interface to access the benchmark experiment data stored in SQL DB using the
+:py:class:`.ExperimentData` interface.
+"""
 import logging
-from typing import Dict, Literal, Optional
+from typing import Literal
 
 import pandas
-from sqlalchemy import Engine, Integer, String, func
+from sqlalchemy import Integer, String, func
+from sqlalchemy.engine import Engine
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.base_trial_data import TrialData
@@ -55,7 +58,7 @@ class ExperimentSqlData(ExperimentData):
         self._schema = schema
 
     @property
-    def objectives(self) -> Dict[str, Literal["min", "max"]]:
+    def objectives(self) -> dict[str, Literal["min", "max"]]:
         with self._engine.connect() as conn:
             objectives_db_data = conn.execute(
                 self._schema.objectives.select()
@@ -77,11 +80,11 @@ class ExperimentSqlData(ExperimentData):
     # Or else make the TrialData object lazily populate.
 
     @property
-    def trials(self) -> Dict[int, TrialData]:
+    def trials(self) -> dict[int, TrialData]:
         return common.get_trials(self._engine, self._schema, self._experiment_id)
 
     @property
-    def tunable_config_trial_groups(self) -> Dict[int, TunableConfigTrialGroupData]:
+    def tunable_config_trial_groups(self) -> dict[int, TunableConfigTrialGroupData]:
         with self._engine.connect() as conn:
             tunable_config_trial_groups = conn.execute(
                 self._schema.trial.select()
@@ -111,7 +114,7 @@ class ExperimentSqlData(ExperimentData):
             }
 
     @property
-    def tunable_configs(self) -> Dict[int, TunableConfigData]:
+    def tunable_configs(self) -> dict[int, TunableConfigData]:
         with self._engine.connect() as conn:
             tunable_configs = conn.execute(
                 self._schema.trial.select()
@@ -136,7 +139,7 @@ class ExperimentSqlData(ExperimentData):
             }
 
     @property
-    def default_tunable_config_id(self) -> Optional[int]:
+    def default_tunable_config_id(self) -> int | None:
         """
         Retrieves the (tunable) config id for the default tunable values for this
         experiment.

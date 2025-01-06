@@ -6,7 +6,6 @@
 
 import logging
 from enum import Enum
-from typing import Tuple, Union
 
 from asyncssh import SFTPError, SFTPFailure, SFTPNoSuchFile, SSHClientConnection, scp
 
@@ -35,7 +34,7 @@ class SshFileShareService(FileShareService, SshService):
         remote_path: str,
         recursive: bool = True,
     ) -> None:
-        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
         Starts a file copy operation.
 
@@ -50,8 +49,8 @@ class SshFileShareService(FileShareService, SshService):
             Local path to the file/dir.
         remote_path : str
             Remote path to the file/dir.
-        recursive : bool, optional
-            _description_, by default True
+        recursive : bool
+            Whether to copy recursively. By default True.
 
         Raises
         ------
@@ -63,8 +62,8 @@ class SshFileShareService(FileShareService, SshService):
             If the remote file does not exist, the SFTPError is converted to a FileNotFoundError.
         """
         connection, _ = await self._get_client_connection(params)
-        srcpaths: Union[str, Tuple[SSHClientConnection, str]]
-        dstpath: Union[str, Tuple[SSHClientConnection, str]]
+        srcpaths: str | tuple[SSHClientConnection, str]
+        dstpath: str | tuple[SSHClientConnection, str]
         if mode == CopyMode.DOWNLOAD:
             srcpaths = (connection, remote_path)
             dstpath = local_path

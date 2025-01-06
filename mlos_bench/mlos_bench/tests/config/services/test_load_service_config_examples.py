@@ -4,7 +4,6 @@
 #
 """Tests for loading service config examples."""
 import logging
-from typing import List
 
 import pytest
 
@@ -21,7 +20,7 @@ _LOG.setLevel(logging.DEBUG)
 CONFIG_TYPE = "services"
 
 
-def filter_configs(configs_to_filter: List[str]) -> List[str]:
+def filter_configs(configs_to_filter: list[str]) -> list[str]:
     """If necessary, filter out json files that aren't for the module we're testing."""
 
     def predicate(config_path: str) -> bool:
@@ -48,11 +47,28 @@ def test_load_service_config_examples(
     config_path: str,
 ) -> None:
     """Tests loading a config example."""
+    parent: Service = config_loader_service
     config = config_loader_service.load_config(config_path, ConfigSchema.SERVICE)
+    # Add other services that require a SupportsAuth parent service as necessary.
+    requires_auth_service_parent = {
+        "AzureFileShareService",
+    }
+    config_class_name = str(config.get("class", "MISSING CLASS")).rsplit(".", maxsplit=1)[-1]
+    if config_class_name in requires_auth_service_parent:
+        # AzureFileShareService requires an auth service to be loaded as well.
+        auth_service_config = config_loader_service.load_config(
+            "services/remote/mock/mock_auth_service.jsonc",
+            ConfigSchema.SERVICE,
+        )
+        auth_service = config_loader_service.build_service(
+            config=auth_service_config,
+            parent=config_loader_service,
+        )
+        parent = auth_service
     # Make an instance of the class based on the config.
     service_inst = config_loader_service.build_service(
         config=config,
-        parent=config_loader_service,
+        parent=parent,
     )
     assert service_inst is not None
     assert isinstance(service_inst, Service)

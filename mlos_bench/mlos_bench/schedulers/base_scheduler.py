@@ -9,11 +9,11 @@ import logging
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 from types import TracebackType
-from typing import Any, Dict, Optional, Tuple, Type
+from typing import Any, Literal
 
 from pytz import UTC
-from typing_extensions import Literal
 
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.storage.base_storage import Storage
@@ -30,8 +30,8 @@ class Scheduler(metaclass=ABCMeta):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
-        config: Dict[str, Any],
-        global_config: Dict[str, Any],
+        config: dict[str, Any],
+        global_config: dict[str, Any],
         environment: Environment,
         optimizer: Optimizer,
         storage: Storage,
@@ -64,6 +64,7 @@ class Scheduler(metaclass=ABCMeta):
             source=global_config,
             required_keys=["experiment_id", "trial_id"],
         )
+        self._validate_json_config(config)
 
         self._experiment_id = config["experiment_id"].strip()
         self._trial_id = int(config["trial_id"])
@@ -79,14 +80,50 @@ class Scheduler(metaclass=ABCMeta):
 
         self._do_teardown = bool(config.get("teardown", True))
 
-        self.experiment: Optional[Storage.Experiment] = None
+        self.experiment: Storage.Experiment | None = None
         self.environment = environment
         self.optimizer = optimizer
         self.storage = storage
         self._root_env_config = root_env_config
         self._last_trial_id = -1
+        self._ran_trials: list[Storage.Trial] = []
 
         _LOG.debug("Scheduler instantiated: %s :: %s", self, config)
+
+    def _validate_json_config(self, config: dict) -> None:
+        """Reconstructs a basic json config that this class might have been instantiated
+        from in order to validate configs provided outside the file loading
+        mechanism.
+        """
+        json_config: dict = {
+            "class": self.__class__.__module__ + "." + self.__class__.__name__,
+        }
+        if config:
+            json_config["config"] = config.copy()
+            # The json schema does not allow for -1 as a valid value for config_id.
+            # As it is just a default placeholder value, and not required, we can
+            # remove it from the config copy prior to validation safely.
+            config_id = json_config["config"].get("config_id")
+            if config_id is not None and isinstance(config_id, int) and config_id < 0:
+                json_config["config"].pop("config_id")
+        ConfigSchema.SCHEDULER.validate(json_config)
+
+    @property
+    def trial_config_repeat_count(self) -> int:
+        """Gets the number of trials to run for a given config."""
+        return self._trial_config_repeat_count
+
+    @property
+    def trial_count(self) -> int:
+        """Gets the current number of trials run for the experiment."""
+        return self._trial_count
+
+    @property
+    def max_trials(self) -> int:
+        """Gets the maximum number of trials to run for a given experiment, or -1 for no
+        limit.
+        """
+        return self._max_trials
 
     def __repr__(self) -> str:
         """
@@ -121,9 +158,9 @@ class Scheduler(metaclass=ABCMeta):
 
     def __exit__(
         self,
-        ex_type: Optional[Type[BaseException]],
-        ex_val: Optional[BaseException],
-        ex_tb: Optional[TracebackType],
+        ex_type: type[BaseException] | None,
+        ex_val: BaseException | None,
+        ex_tb: TracebackType | None,
     ) -> Literal[False]:
         """Exit the context of the scheduler."""
         if ex_val is None:
@@ -165,7 +202,7 @@ class Scheduler(metaclass=ABCMeta):
         if self._do_teardown:
             self.environment.teardown()
 
-    def get_best_observation(self) -> Tuple[Optional[Dict[str, float]], Optional[TunableGroups]]:
+    def get_best_observation(self) -> tuple[dict[str, float] | None, TunableGroups | None]:
         """Get the best observation from the optimizer."""
         (best_score, best_config) = self.optimizer.get_best_observation()
         _LOG.info("Env: %s best score: %s", self.environment, best_score)
@@ -229,8 +266,8 @@ class Scheduler(metaclass=ABCMeta):
     def _add_trial_to_queue(
         self,
         tunables: TunableGroups,
-        ts_start: Optional[datetime] = None,
-        config: Optional[Dict[str, Any]] = None,
+        ts_start: datetime | None = None,
+        config: dict[str, Any] | None = None,
     ) -> None:
         """
         Add a configuration to the queue of trials.
@@ -270,4 +307,10 @@ class Scheduler(metaclass=ABCMeta):
         """
         assert self.experiment is not None
         self._trial_count += 1
+        self._ran_trials.append(trial)
         _LOG.info("QUEUE: Execute trial # %d/%d :: %s", self._trial_count, self._max_trials, trial)
+
+    @property
+    def ran_trials(self) -> list[Storage.Trial]:
+        """Get the list of trials that were run."""
+        return self._ran_trials

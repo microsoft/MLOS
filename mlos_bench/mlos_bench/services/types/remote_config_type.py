@@ -4,7 +4,7 @@
 #
 """Protocol interface for configuring cloud services."""
 
-from typing import TYPE_CHECKING, Any, Dict, Protocol, Tuple, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from mlos_bench.environments.status import Status
@@ -14,31 +14,31 @@ if TYPE_CHECKING:
 class SupportsRemoteConfig(Protocol):
     """Protocol interface for configuring cloud services."""
 
-    def configure(self, config: Dict[str, Any], params: Dict[str, Any]) -> Tuple["Status", dict]:
+    def configure(self, config: dict[str, Any], params: dict[str, Any]) -> tuple["Status", dict]:
         """
         Update the parameters of a SaaS service in the cloud.
 
         Parameters
         ----------
-        config : Dict[str, Any]
+        config : dict[str, Any]
             Key/value pairs of configuration parameters (e.g., vmName).
-        params : Dict[str, Any]
+        params : dict[str, Any]
             Key/value pairs of the service parameters to update.
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def is_config_pending(self, config: Dict[str, Any]) -> Tuple["Status", dict]:
+    def is_config_pending(self, config: dict[str, Any]) -> tuple["Status", dict]:
         """
         Check if the configuration of a service requires reboot or restart.
 
         Parameters
         ----------
-        config : Dict[str, Any]
+        config : dict[str, Any]
             Key/value pairs of configuration parameters (e.g., vmName).
 
         Returns

@@ -5,7 +5,8 @@
 """A collection Service functions for managing virtual networks on Azure."""
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from collections.abc import Callable
+from typing import Any
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
@@ -39,10 +40,10 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """
         Create a new instance of Azure Network services proxy.
@@ -56,7 +57,7 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
-        methods : Union[Dict[str, Callable], List[Callable], None]
+        methods : Union[dict[str, Callable], list[Callable], None]
             New methods to register with the service.
         """
         super().__init__(
@@ -84,14 +85,14 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
         # since this is a common way to set the deploymentName and can same some
         # config work for the caller.
         if "vnetName" in params and "deploymentName" not in params:
-            params["deploymentName"] = f"{params['vnetName']}-deployment"
+            params["deploymentName"] = f"""{params["vnetName"]}-deployment"""
             _LOG.info(
                 "deploymentName missing from params. Defaulting to '%s'.",
                 params["deploymentName"],
             )
         return params
 
-    def wait_network_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
+    def wait_network_deployment(self, params: dict, *, is_setup: bool) -> tuple[Status, dict]:
         """
         Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
@@ -112,7 +113,7 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
         """
         return self._wait_deployment(params, is_setup=is_setup)
 
-    def provision_network(self, params: dict) -> Tuple[Status, dict]:
+    def provision_network(self, params: dict) -> tuple[Status, dict]:
         """
         Deploy a virtual network, if necessary.
 
@@ -125,14 +126,14 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is the input `params` plus the
             parameters extracted from the response JSON, or {} if the status is FAILED.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
         return self._provision_resource(params)
 
-    def deprovision_network(self, params: dict, ignore_errors: bool = True) -> Tuple[Status, dict]:
+    def deprovision_network(self, params: dict, ignore_errors: bool = True) -> tuple[Status, dict]:
         """
         Deprovisions the virtual network on Azure by deleting it.
 
@@ -140,13 +141,13 @@ class AzureNetworkService(AzureDeploymentService, SupportsNetworkProvisioning):
         ----------
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
-        ignore_errors : boolean
+        ignore_errors : bool
             Whether to ignore errors (default) encountered during the operation
             (e.g., due to dependent resources still in use).
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """

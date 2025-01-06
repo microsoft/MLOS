@@ -4,7 +4,6 @@
 #
 """Utility functions for the storage subsystem."""
 
-from typing import Dict, Optional
 
 import pandas
 
@@ -12,7 +11,7 @@ from mlos_bench.tunables.tunable import TunableValue, TunableValueTypeTuple
 from mlos_bench.util import try_parse_val
 
 
-def kv_df_to_dict(dataframe: pandas.DataFrame) -> Dict[str, Optional[TunableValue]]:
+def kv_df_to_dict(dataframe: pandas.DataFrame) -> dict[str, TunableValue | None]:
     """
     Utility function to convert certain flat key-value dataframe formats used by the
     mlos_bench.storage modules to a dict.
@@ -30,10 +29,10 @@ def kv_df_to_dict(dataframe: pandas.DataFrame) -> Dict[str, Optional[TunableValu
     data = {}
     for _, row in dataframe.astype("O").iterrows():
         if not isinstance(row["value"], TunableValueTypeTuple):
-            raise TypeError(f"Invalid column type: {type(row['value'])} value: {row['value']}")
+            raise TypeError(f"""Invalid column type: {type(row["value"])} value: {row["value"]}""")
         assert isinstance(row["parameter"], str)
         if row["parameter"] in data:
-            raise ValueError(f"Duplicate parameter '{row['parameter']}' in dataframe")
+            raise ValueError(f"""Duplicate parameter '{row["parameter"]}' in dataframe""")
         data[row["parameter"]] = (
             try_parse_val(row["value"]) if isinstance(row["value"], str) else row["value"]
         )

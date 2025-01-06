@@ -6,13 +6,14 @@
 
 import logging
 from copy import deepcopy
-from typing import List, Optional, Type
+from typing import Any
 
 import ConfigSpace as CS
 import numpy as np
 import pandas as pd
 import pytest
 
+from mlos_core.data_classes import Observations, Suggestion
 from mlos_core.optimizers import (
     BaseOptimizer,
     ConcreteOptimizer,
@@ -38,8 +39,8 @@ _LOG.setLevel(logging.DEBUG)
 )
 def test_create_optimizer_and_suggest(
     configuration_space: CS.ConfigurationSpace,
-    optimizer_class: Type[BaseOptimizer],
-    kwargs: Optional[dict],
+    optimizer_class: type[BaseOptimizer],
+    kwargs: dict | None,
 ) -> None:
     """Test that we can create an optimizer and get a suggestion from it."""
     if kwargs is None:
@@ -53,7 +54,7 @@ def test_create_optimizer_and_suggest(
 
     assert optimizer.parameter_space is not None
 
-    suggestion, metadata = optimizer.suggest()
+    suggestion = optimizer.suggest()
     assert suggestion is not None
 
     myrepr = repr(optimizer)
@@ -61,7 +62,7 @@ def test_create_optimizer_and_suggest(
 
     # pending not implemented
     with pytest.raises(NotImplementedError):
-        optimizer.register_pending(configs=suggestion, metadata=metadata)
+        optimizer.register_pending(pending=suggestion)
 
 
 @pytest.mark.parametrize(
@@ -72,8 +73,8 @@ def test_create_optimizer_and_suggest(
 )
 def test_basic_interface_toy_problem(
     configuration_space: CS.ConfigurationSpace,
-    optimizer_class: Type[BaseOptimizer],
-    kwargs: Optional[dict],
+    optimizer_class: type[BaseOptimizer],
+    kwargs: dict | None,
 ) -> None:
     """Toy problem to test the optimizers."""
     # pylint: disable=too-many-locals
@@ -87,8 +88,11 @@ def test_basic_interface_toy_problem(
         # number of max iterations.
         kwargs["max_trials"] = max_iterations * 2
 
-    def objective(x: pd.Series) -> pd.DataFrame:
-        return pd.DataFrame({"score": (6 * x - 2) ** 2 * np.sin(12 * x - 4)})
+    def objective(inp: float) -> pd.Series:
+        series: pd.Series = pd.Series(
+            {"score": (6 * inp - 2) ** 2 * np.sin(12 * inp - 4)}
+        )  # needed for type hinting
+        return series
 
     # Emukit doesn't allow specifying a random state, so we set the global seed.
     np.random.seed(SEED)
@@ -105,45 +109,57 @@ def test_basic_interface_toy_problem(
         optimizer.get_observations()
 
     for _ in range(max_iterations):
-        suggestion, metadata = optimizer.suggest()
-        assert isinstance(suggestion, pd.DataFrame)
-        assert metadata is None or isinstance(metadata, pd.DataFrame)
-        assert set(suggestion.columns) == {"x", "y", "z"}
+        suggestion = optimizer.suggest()
+        assert isinstance(suggestion, Suggestion)
+        assert isinstance(suggestion.config, pd.Series)
+        assert suggestion.metadata is None or isinstance(suggestion.metadata, pd.Series)
+        assert set(suggestion.config.index) == {"x", "y", "z"}
         # check that suggestion is in the space
-        configuration = CS.Configuration(optimizer.parameter_space, suggestion.iloc[0].to_dict())
+        dict_config: dict = suggestion.config.to_dict()
+        configuration = CS.Configuration(optimizer.parameter_space, dict_config)
         # Raises an error if outside of configuration space
-        configuration.is_valid_configuration()
-        observation = objective(suggestion["x"])
-        assert isinstance(observation, pd.DataFrame)
-        optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
+        configuration.check_valid_configuration()
+        inp: Any = suggestion.config["x"]
+        assert isinstance(inp, (int, float))
+        observation = objective(inp)
+        assert isinstance(observation, pd.Series)
+        optimizer.register(observations=suggestion.complete(observation))
 
-    (best_config, best_score, best_context) = optimizer.get_best_observations()
-    assert isinstance(best_config, pd.DataFrame)
-    assert isinstance(best_score, pd.DataFrame)
-    assert best_context is None
-    assert set(best_config.columns) == {"x", "y", "z"}
-    assert set(best_score.columns) == {"score"}
-    assert best_config.shape == (1, 3)
-    assert best_score.shape == (1, 1)
-    assert best_score.score.iloc[0] < -5
+    best_observation = optimizer.get_best_observations()
+    assert isinstance(best_observation, Observations)
+    assert isinstance(best_observation.configs, pd.DataFrame)
+    assert isinstance(best_observation.scores, pd.DataFrame)
+    assert best_observation.contexts is None
+    assert set(best_observation.configs.columns) == {"x", "y", "z"}
+    assert set(best_observation.scores.columns) == {"score"}
+    assert best_observation.configs.shape == (1, 3)
+    assert best_observation.scores.shape == (1, 1)
+    assert best_observation.scores.score.iloc[0] < -4
 
-    (all_configs, all_scores, all_contexts) = optimizer.get_observations()
-    assert isinstance(all_configs, pd.DataFrame)
-    assert isinstance(all_scores, pd.DataFrame)
-    assert all_contexts is None
-    assert set(all_configs.columns) == {"x", "y", "z"}
-    assert set(all_scores.columns) == {"score"}
-    assert all_configs.shape == (20, 3)
-    assert all_scores.shape == (20, 1)
+    all_observations = optimizer.get_observations()
+    assert isinstance(all_observations, Observations)
+    assert isinstance(all_observations.configs, pd.DataFrame)
+    assert isinstance(all_observations.scores, pd.DataFrame)
+    assert all_observations.contexts is None
+    assert set(all_observations.configs.columns) == {"x", "y", "z"}
+    assert set(all_observations.scores.columns) == {"score"}
+    assert all_observations.configs.shape == (20, 3)
+    assert all_observations.scores.shape == (20, 1)
 
     # It would be better to put this into bayesian_optimizer_test but then we'd have
     # to refit the model
     if isinstance(optimizer, BaseBayesianOptimizer):
-        pred_best = optimizer.surrogate_predict(configs=best_config)
-        assert pred_best.shape == (1,)
+        pred_best = [
+            optimizer.surrogate_predict(suggestion=observation.to_suggestion())
+            for observation in best_observation
+        ]
+        assert len(pred_best) == 1
 
-        pred_all = optimizer.surrogate_predict(configs=all_configs)
-        assert pred_all.shape == (20,)
+        pred_all = [
+            optimizer.surrogate_predict(suggestion=observation.to_suggestion())
+            for observation in all_observations
+        ]
+        assert len(pred_all) == 20
 
 
 @pytest.mark.parametrize(
@@ -157,7 +173,7 @@ def test_basic_interface_toy_problem(
 def test_concrete_optimizer_type(optimizer_type: OptimizerType) -> None:
     """Test that all optimizer types are listed in the ConcreteOptimizer constraints."""
     # pylint: disable=no-member
-    assert optimizer_type.value in ConcreteOptimizer.__constraints__  # type: ignore[attr-defined]
+    assert optimizer_type.value in ConcreteOptimizer.__constraints__
 
 
 @pytest.mark.parametrize(
@@ -172,8 +188,8 @@ def test_concrete_optimizer_type(optimizer_type: OptimizerType) -> None:
 )
 def test_create_optimizer_with_factory_method(
     configuration_space: CS.ConfigurationSpace,
-    optimizer_type: Optional[OptimizerType],
-    kwargs: Optional[dict],
+    optimizer_type: OptimizerType | None,
+    kwargs: dict | None,
 ) -> None:
     """Test that we can create an optimizer via a factory."""
     if kwargs is None:
@@ -219,23 +235,23 @@ def test_create_optimizer_with_factory_method(
         ),
     ],
 )
-def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optional[dict]) -> None:
+def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: dict | None) -> None:
     """Toy problem to test the optimizers with llamatune space adapter."""
     # pylint: disable=too-complex,disable=too-many-statements,disable=too-many-locals
     num_iters = 50
     if kwargs is None:
         kwargs = {}
 
-    def objective(point: pd.DataFrame) -> pd.DataFrame:
+    def objective(point: pd.Series) -> pd.Series:
         # Best value can be reached by tuning an 1-dimensional search space
-        ret = pd.DataFrame({"score": np.sin(point.x * point.y)})
-        assert ret.score.hasnans is False
+        ret: pd.Series = pd.Series({"score": np.sin(point.x * point.y)})
+        assert pd.notna(ret.score)
         return ret
 
     input_space = CS.ConfigurationSpace(seed=1234)
     # Add two continuous inputs
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="x", lower=0, upper=3))
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="y", lower=0, upper=3))
+    input_space.add(CS.UniformFloatHyperparameter(name="x", lower=0, upper=3))
+    input_space.add(CS.UniformFloatHyperparameter(name="y", lower=0, upper=3))
 
     # Initialize an optimizer that uses LlamaTune space adapter
     space_adapter_kwargs = {
@@ -291,61 +307,63 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
             _LOG.debug("Optimizer is done with random init.")
 
         # loop for optimizer
-        suggestion, metadata = optimizer.suggest()
-        observation = objective(suggestion)
-        optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
+        suggestion = optimizer.suggest()
+        observation = objective(suggestion.config)
+        optimizer.register(observations=suggestion.complete(observation))
 
         # loop for llamatune-optimizer
-        suggestion, metadata = llamatune_optimizer.suggest()
-        _x, _y = suggestion["x"].iloc[0], suggestion["y"].iloc[0]
+        suggestion = llamatune_optimizer.suggest()
+        _x, _y = suggestion.config["x"], suggestion.config["y"]
         # optimizer explores 1-dimensional space
         assert _x == pytest.approx(_y, rel=1e-3) or _x + _y == pytest.approx(3.0, rel=1e-3)
-        observation = objective(suggestion)
-        llamatune_optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
+        observation = objective(suggestion.config)
+        llamatune_optimizer.register(observations=suggestion.complete(observation))
 
     # Retrieve best observations
-    best_observation = optimizer.get_best_observations()
-    llamatune_best_observation = llamatune_optimizer.get_best_observations()
+    best_observation: Observations = optimizer.get_best_observations()
+    assert isinstance(best_observation, Observations)
+    llamatune_best_observations: Observations = llamatune_optimizer.get_best_observations()
+    assert isinstance(llamatune_best_observations, Observations)
 
-    for best_config, best_score, best_context in (best_observation, llamatune_best_observation):
-        assert isinstance(best_config, pd.DataFrame)
-        assert isinstance(best_score, pd.DataFrame)
-        assert best_context is None
-        assert set(best_config.columns) == {"x", "y"}
-        assert set(best_score.columns) == {"score"}
-
-    (best_config, best_score, _context) = best_observation
-    (llamatune_best_config, llamatune_best_score, _context) = llamatune_best_observation
+    for observations in (best_observation, llamatune_best_observations):
+        assert isinstance(observations.configs, pd.DataFrame)
+        assert isinstance(observations.scores, pd.DataFrame)
+        assert observations.contexts is None
+        assert set(observations.configs.columns) == {"x", "y"}
+        assert set(observations.scores.columns) == {"score"}
 
     # LlamaTune's optimizer score should better (i.e., lower) than plain optimizer's
     # one, or close to that
     assert (
-        best_score.score.iloc[0] > llamatune_best_score.score.iloc[0]
-        or best_score.score.iloc[0] + 1e-3 > llamatune_best_score.score.iloc[0]
+        best_observation.scores.score.iloc[0] > llamatune_best_observations.scores.score.iloc[0]
+        or best_observation.scores.score.iloc[0] + 1e-3
+        > llamatune_best_observations.scores.score.iloc[0]
     )
 
     # Retrieve and check all observations
-    for all_configs, all_scores, all_contexts in (
+    for all_observations in (
         optimizer.get_observations(),
         llamatune_optimizer.get_observations(),
     ):
-        assert isinstance(all_configs, pd.DataFrame)
-        assert isinstance(all_scores, pd.DataFrame)
-        assert all_contexts is None
-        assert set(all_configs.columns) == {"x", "y"}
-        assert set(all_scores.columns) == {"score"}
-        assert len(all_configs) == num_iters
-        assert len(all_scores) == num_iters
+        assert isinstance(all_observations.configs, pd.DataFrame)
+        assert isinstance(all_observations.scores, pd.DataFrame)
+        assert all_observations.contexts is None
+        assert set(all_observations.configs.columns) == {"x", "y"}
+        assert set(all_observations.scores.columns) == {"score"}
+        assert len(all_observations.configs) == num_iters
+        assert len(all_observations.scores) == num_iters
+        assert len(all_observations) == num_iters
 
     # .surrogate_predict method not currently implemented if space adapter is employed
     if isinstance(llamatune_optimizer, BaseBayesianOptimizer):
         with pytest.raises(NotImplementedError):
-            llamatune_optimizer.surrogate_predict(configs=llamatune_best_config)
+            for obs in llamatune_best_observations:
+                llamatune_optimizer.surrogate_predict(suggestion=obs.to_suggestion())
 
 
 # Dynamically determine all of the optimizers we have implemented.
 # Note: these must be sorted.
-optimizer_subclasses: List[Type[BaseOptimizer]] = get_all_concrete_subclasses(
+optimizer_subclasses: list[type[BaseOptimizer]] = get_all_concrete_subclasses(
     BaseOptimizer,  # type: ignore[type-abstract]
     pkg_name="mlos_core",
 )
@@ -353,7 +371,7 @@ assert optimizer_subclasses
 
 
 @pytest.mark.parametrize(("optimizer_class"), optimizer_subclasses)
-def test_optimizer_type_defs(optimizer_class: Type[BaseOptimizer]) -> None:
+def test_optimizer_type_defs(optimizer_class: type[BaseOptimizer]) -> None:
     """Test that all optimizer classes are listed in the OptimizerType enum."""
     optimizer_type_classes = {member.value for member in OptimizerType}
     assert optimizer_class in optimizer_type_classes
@@ -370,8 +388,8 @@ def test_optimizer_type_defs(optimizer_class: Type[BaseOptimizer]) -> None:
     ],
 )
 def test_mixed_numerics_type_input_space_types(
-    optimizer_type: Optional[OptimizerType],
-    kwargs: Optional[dict],
+    optimizer_type: OptimizerType | None,
+    kwargs: dict | None,
 ) -> None:
     """Toy problem to test the optimizers with mixed numeric types to ensure that
     original dtypes are retained.
@@ -381,14 +399,15 @@ def test_mixed_numerics_type_input_space_types(
     if kwargs is None:
         kwargs = {}
 
-    def objective(point: pd.DataFrame) -> pd.DataFrame:
+    def objective(point: pd.Series) -> pd.Series:
         # mix of hyperparameters, optimal is to select the highest possible
-        return pd.DataFrame({"score": point["x"] + point["y"]})
+        ret: pd.Series = pd.Series({"score": point["x"] + point["y"]})
+        return ret
 
     input_space = CS.ConfigurationSpace(seed=SEED)
     # add a mix of numeric datatypes
-    input_space.add_hyperparameter(CS.UniformIntegerHyperparameter(name="x", lower=0, upper=5))
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="y", lower=0.0, upper=5.0))
+    input_space.add(CS.UniformIntegerHyperparameter(name="x", lower=0, upper=5))
+    input_space.add(CS.UniformFloatHyperparameter(name="y", lower=0.0, upper=5.0))
 
     if optimizer_type is None:
         optimizer = OptimizerFactory.create(
@@ -404,6 +423,8 @@ def test_mixed_numerics_type_input_space_types(
             optimizer_kwargs=kwargs,
         )
 
+    assert isinstance(optimizer, BaseOptimizer)
+
     with pytest.raises(ValueError, match="No observations"):
         optimizer.get_best_observations()
 
@@ -411,29 +432,30 @@ def test_mixed_numerics_type_input_space_types(
         optimizer.get_observations()
 
     for _ in range(max_iterations):
-        suggestion, metadata = optimizer.suggest()
-        assert isinstance(suggestion, pd.DataFrame)
-        assert (suggestion.columns == ["x", "y"]).all()
+        suggestion = optimizer.suggest()
+        assert isinstance(suggestion, Suggestion)
+        assert isinstance(suggestion.config, pd.Series)
+        assert set(suggestion.config.index) == {"x", "y"}
         # Check suggestion values are the expected dtype
-        assert isinstance(suggestion["x"].iloc[0], np.integer)
-        assert isinstance(suggestion["y"].iloc[0], np.floating)
+        assert isinstance(suggestion.config["x"], int)
+        assert isinstance(suggestion.config["y"], float)
         # Check that suggestion is in the space
         test_configuration = CS.Configuration(
-            optimizer.parameter_space, suggestion.astype("O").iloc[0].to_dict()
+            optimizer.parameter_space, suggestion.config.to_dict()
         )
         # Raises an error if outside of configuration space
-        test_configuration.is_valid_configuration()
+        test_configuration.check_valid_configuration()
         # Test registering the suggested configuration with a score.
-        observation = objective(suggestion)
-        assert isinstance(observation, pd.DataFrame)
-        optimizer.register(configs=suggestion, scores=observation, metadata=metadata)
+        observation = objective(suggestion.config)
+        assert isinstance(observation, pd.Series)
+        optimizer.register(observations=suggestion.complete(observation))
 
-    (best_config, best_score, best_context) = optimizer.get_best_observations()
-    assert isinstance(best_config, pd.DataFrame)
-    assert isinstance(best_score, pd.DataFrame)
-    assert best_context is None
+    best_observations = optimizer.get_best_observations()
+    assert isinstance(best_observations.configs, pd.DataFrame)
+    assert isinstance(best_observations.scores, pd.DataFrame)
+    assert best_observations.contexts is None
 
-    (all_configs, all_scores, all_contexts) = optimizer.get_observations()
-    assert isinstance(all_configs, pd.DataFrame)
-    assert isinstance(all_scores, pd.DataFrame)
-    assert all_contexts is None
+    all_observations = optimizer.get_observations()
+    assert isinstance(all_observations.configs, pd.DataFrame)
+    assert isinstance(all_observations.scores, pd.DataFrame)
+    assert all_observations.contexts is None

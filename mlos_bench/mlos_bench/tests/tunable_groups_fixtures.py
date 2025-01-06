@@ -4,7 +4,7 @@
 #
 """Common fixtures for mock TunableGroups."""
 
-from typing import Any, Dict
+from typing import Any
 
 import json5 as json
 import pytest
@@ -14,6 +14,8 @@ from mlos_bench.tunables.covariant_group import CovariantTunableGroup
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
+
+# TODO: Add quantized tunables here for better test coverage.
 
 TUNABLE_GROUPS_JSON = """
 {
@@ -60,6 +62,7 @@ TUNABLE_GROUPS_JSON = """
                 "type": "int",
                 "default": 2000000,
                 "range": [0, 1000000000],
+                "quantization_bins": 11,
                 "log": false
             }
         }
@@ -69,7 +72,7 @@ TUNABLE_GROUPS_JSON = """
 
 
 @pytest.fixture
-def tunable_groups_config() -> Dict[str, Any]:
+def tunable_groups_config() -> dict[str, Any]:
     """Fixture to get the JSON string for the tunable groups."""
     conf = json.loads(TUNABLE_GROUPS_JSON)
     assert isinstance(conf, dict)

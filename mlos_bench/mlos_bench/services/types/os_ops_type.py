@@ -4,7 +4,7 @@
 #
 """Protocol interface for Host/OS operations."""
 
-from typing import TYPE_CHECKING, Protocol, Tuple, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from mlos_bench.environments.status import Status
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class SupportsOSOps(Protocol):
     """Protocol interface for Host/OS operations."""
 
-    def shutdown(self, params: dict, force: bool = False) -> Tuple["Status", dict]:
+    def shutdown(self, params: dict, force: bool = False) -> tuple["Status", dict]:
         """
         Initiates a (graceful) shutdown of the Host/VM OS.
 
@@ -27,12 +27,12 @@ class SupportsOSOps(Protocol):
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def reboot(self, params: dict, force: bool = False) -> Tuple["Status", dict]:
+    def reboot(self, params: dict, force: bool = False) -> tuple["Status", dict]:
         """
         Initiates a (graceful) shutdown of the Host/VM OS.
 
@@ -45,12 +45,12 @@ class SupportsOSOps(Protocol):
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def wait_os_operation(self, params: dict) -> Tuple["Status", dict]:
+    def wait_os_operation(self, params: dict) -> tuple["Status", dict]:
         """
         Waits for a pending operation on an OS to resolve to SUCCEEDED or FAILED. Return
         TIMED_OUT when timing out.

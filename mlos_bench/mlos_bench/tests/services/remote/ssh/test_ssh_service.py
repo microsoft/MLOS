@@ -132,4 +132,4 @@ def test_ssh_service_context_handler() -> None:
 
 if __name__ == "__main__":
     # For debugging in Windows which has issues with pytest detection in vscode.
-    pytest.main(["-n1", "--dist=no", "-k", "test_ssh_service_background_thread"])
+    pytest.main(["-n0", "--dist=no", "-k", "test_ssh_service_context_handler"])

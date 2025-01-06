@@ -2,9 +2,16 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Small wrapper functions for dabl plotting functions via mlos_bench data."""
+"""
+Small wrapper functions for plotting :py:mod:`mlos_bench` data via
+:external:py:func:`dabl.plot`.
+
+Notes
+-----
+See `dabl <https://dabl.github.io/stable/>`_ for more information on the dabl library.
+"""
 import warnings
-from typing import Dict, Literal, Optional
+from typing import Literal
 
 import dabl
 import pandas
@@ -14,22 +21,23 @@ from mlos_viz.util import expand_results_data_args
 
 
 def plot(
-    exp_data: Optional[ExperimentData] = None,
+    exp_data: ExperimentData | None = None,
     *,
-    results_df: Optional[pandas.DataFrame] = None,
-    objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
+    results_df: pandas.DataFrame | None = None,
+    objectives: dict[str, Literal["min", "max"]] | None = None,
 ) -> None:
     """
-    Plots the Experiment results data using dabl.
+    Plots the :py:class:`~mlos_bench.storage.base_storage.Storage.Experiment` results
+    data using :external:py:func:`dabl.plot`.
 
     Parameters
     ----------
     exp_data : ExperimentData
         The ExperimentData (e.g., obtained from the storage layer) to plot.
-    results_df : Optional["pandas.DataFrame"]
+    results_df : pandas.DataFrame | None
         Optional results_df to plot.
         If not provided, defaults to exp_data.results_df property.
-    objectives : Optional[Dict[str, Literal["min", "max"]]]
+    objectives : Optional[dict[str, Literal["min", "max"]]]
         Optional objectives to plot.
         If not provided, defaults to exp_data.objectives property.
     """

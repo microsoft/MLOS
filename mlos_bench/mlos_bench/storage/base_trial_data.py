@@ -2,10 +2,20 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base interface for accessing the stored benchmark trial data."""
+"""
+Base interface for accessing the stored benchmark trial data.
+
+A single trial is a single run of an experiment with a given configuration (e.g., set of
+tunable parameters).
+
+See Also
+--------
+:py:mod:`mlos_bench.storage` : The base storage module for mlos_bench, which
+    includes some basic examples in the documentation.
+"""
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any
 
 import pandas
 from pytz import UTC
@@ -36,7 +46,7 @@ class TrialData(metaclass=ABCMeta):
         trial_id: int,
         tunable_config_id: int,
         ts_start: datetime,
-        ts_end: Optional[datetime],
+        ts_end: datetime | None,
         status: Status,
     ):
         self._experiment_id = experiment_id
@@ -75,7 +85,7 @@ class TrialData(metaclass=ABCMeta):
         return self._ts_start
 
     @property
-    def ts_end(self) -> Optional[datetime]:
+    def ts_end(self) -> datetime | None:
         """End timestamp of the trial (UTC)."""
         return self._ts_end
 
@@ -123,7 +133,7 @@ class TrialData(metaclass=ABCMeta):
         """
 
     @property
-    def results_dict(self) -> Dict[str, Optional[TunableValue]]:
+    def results_dict(self) -> dict[str, TunableValue | None]:
         """
         Retrieve the trials' results from the storage as a dict.
 

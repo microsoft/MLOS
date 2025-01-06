@@ -2,9 +2,19 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base interface for accessing the stored benchmark (tunable) config data."""
+"""
+Base interface for accessing the stored benchmark (tunable) config data.
+
+Note: a configuration in this context is the set of tunable parameter values and can
+be used by one or more trials.
+
+See Also
+--------
+:py:mod:`mlos_bench.storage` : The base storage module for mlos_bench, which
+    includes some basic examples in the documentation.
+"""
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any
 
 import pandas
 
@@ -51,7 +61,7 @@ class TunableConfigData(metaclass=ABCMeta):
         """
 
     @property
-    def config_dict(self) -> Dict[str, Optional[TunableValue]]:
+    def config_dict(self) -> dict[str, TunableValue | None]:
         """
         Retrieve the trials' tunable configuration from the storage as a dict.
 

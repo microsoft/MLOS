@@ -5,7 +5,6 @@
 """Network Environment."""
 
 import logging
-from typing import Optional
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
@@ -30,9 +29,9 @@ class NetworkEnv(Environment):
         *,
         name: str,
         config: dict,
-        global_config: Optional[dict] = None,
-        tunables: Optional[TunableGroups] = None,
-        service: Optional[Service] = None,
+        global_config: dict | None = None,
+        tunables: TunableGroups | None = None,
+        service: Service | None = None,
     ):
         """
         Create a new environment for network operations.
@@ -71,7 +70,7 @@ class NetworkEnv(Environment):
         ), "NetworkEnv requires a service that supports network provisioning"
         self._network_service: SupportsNetworkProvisioning = self._service
 
-    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict | None = None) -> bool:
         """
         Check if network is ready. Provision, if necessary.
 

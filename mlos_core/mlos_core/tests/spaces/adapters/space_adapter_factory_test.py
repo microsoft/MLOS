@@ -6,7 +6,6 @@
 
 # pylint: disable=missing-function-docstring
 
-from typing import List, Optional, Type
 
 import ConfigSpace as CS
 import pytest
@@ -32,10 +31,7 @@ from mlos_core.tests import get_all_concrete_subclasses
 def test_concrete_optimizer_type(space_adapter_type: SpaceAdapterType) -> None:
     """Test that all optimizer types are listed in the ConcreteOptimizer constraints."""
     # pylint: disable=no-member
-    assert (
-        space_adapter_type.value
-        in ConcreteSpaceAdapter.__constraints__  # type: ignore[attr-defined]
-    )
+    assert space_adapter_type.value in ConcreteSpaceAdapter.__constraints__
 
 
 @pytest.mark.parametrize(
@@ -48,16 +44,16 @@ def test_concrete_optimizer_type(space_adapter_type: SpaceAdapterType) -> None:
     ],
 )
 def test_create_space_adapter_with_factory_method(
-    space_adapter_type: Optional[SpaceAdapterType],
-    kwargs: Optional[dict],
+    space_adapter_type: SpaceAdapterType | None,
+    kwargs: dict | None,
 ) -> None:
     # Start defining a ConfigurationSpace for the Optimizer to search.
     input_space = CS.ConfigurationSpace(seed=1234)
 
     # Add a single continuous input dimension between 0 and 1.
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="x", lower=0, upper=1))
+    input_space.add(CS.UniformFloatHyperparameter(name="x", lower=0, upper=1))
     # Add a single continuous input dimension between 0 and 1.
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name="y", lower=0, upper=1))
+    input_space.add(CS.UniformFloatHyperparameter(name="y", lower=0, upper=1))
 
     # Adjust some kwargs for specific space adapters
     if space_adapter_type is SpaceAdapterType.LLAMATUNE:
@@ -88,7 +84,7 @@ def test_create_space_adapter_with_factory_method(
 
 # Dynamically determine all of the optimizers we have implemented.
 # Note: these must be sorted.
-space_adapter_subclasses: List[Type[BaseSpaceAdapter]] = get_all_concrete_subclasses(
+space_adapter_subclasses: list[type[BaseSpaceAdapter]] = get_all_concrete_subclasses(
     BaseSpaceAdapter,  # type: ignore[type-abstract]
     pkg_name="mlos_core",
 )
@@ -96,7 +92,7 @@ assert space_adapter_subclasses
 
 
 @pytest.mark.parametrize(("space_adapter_class"), space_adapter_subclasses)
-def test_space_adapter_type_defs(space_adapter_class: Type[BaseSpaceAdapter]) -> None:
+def test_space_adapter_type_defs(space_adapter_class: type[BaseSpaceAdapter]) -> None:
     """Test that all space adapter classes are listed in the SpaceAdapterType enum."""
     space_adapter_type_classes = {
         space_adapter_type.value for space_adapter_type in SpaceAdapterType

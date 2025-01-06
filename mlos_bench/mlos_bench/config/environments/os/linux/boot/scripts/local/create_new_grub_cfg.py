@@ -14,10 +14,17 @@ import json
 JSON_CONFIG_FILE = "config-boot-time.json"
 NEW_CFG = "zz-mlos-boot-params.cfg"
 
-with open(JSON_CONFIG_FILE, "r", encoding="UTF-8") as fh_json, open(
-    NEW_CFG, "w", encoding="UTF-8"
-) as fh_config:
-    for key, val in json.load(fh_json).items():
-        fh_config.write(
-            'GRUB_CMDLINE_LINUX_DEFAULT="$' f'{{GRUB_CMDLINE_LINUX_DEFAULT}} {key}={val}"\n'
-        )
+
+def _write_config() -> None:
+    with (
+        open(JSON_CONFIG_FILE, encoding="UTF-8") as fh_json,
+        open(NEW_CFG, "w", encoding="UTF-8") as fh_config,
+    ):
+        for key, val in json.load(fh_json).items():
+            fh_config.write(
+                'GRUB_CMDLINE_LINUX_DEFAULT="$' f'{{GRUB_CMDLINE_LINUX_DEFAULT}} {key}={val}"\n'
+            )
+
+
+if __name__ == "__main__":
+    _write_config()

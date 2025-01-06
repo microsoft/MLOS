@@ -7,8 +7,8 @@
 import itertools
 import math
 import random
-from typing import Dict, List
 
+import numpy as np
 import pytest
 
 from mlos_bench.environments.status import Status
@@ -40,7 +40,7 @@ def grid_search_tunables_config() -> dict:
                     "type": "float",
                     "range": [0, 1],
                     "default": 0.5,
-                    "quantization": 0.25,
+                    "quantization_bins": 5,
                 },
             },
         },
@@ -50,7 +50,7 @@ def grid_search_tunables_config() -> dict:
 @pytest.fixture
 def grid_search_tunables_grid(
     grid_search_tunables: TunableGroups,
-) -> List[Dict[str, TunableValue]]:
+) -> list[dict[str, TunableValue]]:
     """
     Test fixture for grid from tunable groups.
 
@@ -76,17 +76,17 @@ def grid_search_tunables(grid_search_tunables_config: dict) -> TunableGroups:
 @pytest.fixture
 def grid_search_opt(
     grid_search_tunables: TunableGroups,
-    grid_search_tunables_grid: List[Dict[str, TunableValue]],
+    grid_search_tunables_grid: list[dict[str, TunableValue]],
 ) -> GridSearchOptimizer:
     """Test fixture for grid search optimizer."""
     assert len(grid_search_tunables) == 3
     # Test the convergence logic by controlling the number of iterations to be not a
     # multiple of the number of elements in the grid.
-    max_iterations = len(grid_search_tunables_grid) * 2 - 3
+    max_suggestions = len(grid_search_tunables_grid) * 2 - 3
     return GridSearchOptimizer(
         tunables=grid_search_tunables,
         config={
-            "max_suggestions": max_iterations,
+            "max_suggestions": max_suggestions,
             "optimization_targets": {"score": "max", "other_score": "min"},
         },
     )
@@ -95,15 +95,17 @@ def grid_search_opt(
 def test_grid_search_grid(
     grid_search_opt: GridSearchOptimizer,
     grid_search_tunables: TunableGroups,
-    grid_search_tunables_grid: List[Dict[str, TunableValue]],
+    grid_search_tunables_grid: list[dict[str, TunableValue]],
 ) -> None:
     """Make sure that grid search optimizer initializes and works correctly."""
     # Check the size.
-    expected_grid_size = math.prod(tunable.cardinality for tunable, _group in grid_search_tunables)
+    expected_grid_size = math.prod(
+        tunable.cardinality or np.inf for tunable, _group in grid_search_tunables
+    )
     assert expected_grid_size > len(grid_search_tunables)
     assert len(grid_search_tunables_grid) == expected_grid_size
     # Check for specific example configs inclusion.
-    expected_config_example: Dict[str, TunableValue] = {
+    expected_config_example: dict[str, TunableValue] = {
         "cat": "a",
         "int": 2,
         "float": 0.75,
@@ -124,10 +126,10 @@ def test_grid_search_grid(
 def test_grid_search(
     grid_search_opt: GridSearchOptimizer,
     grid_search_tunables: TunableGroups,
-    grid_search_tunables_grid: List[Dict[str, TunableValue]],
+    grid_search_tunables_grid: list[dict[str, TunableValue]],
 ) -> None:
     """Make sure that grid search optimizer initializes and works correctly."""
-    score: Dict[str, TunableValue] = {"score": 1.0, "other_score": 2.0}
+    score: dict[str, TunableValue] = {"score": 1.0, "other_score": 2.0}
     status = Status.SUCCEEDED
     suggestion = grid_search_opt.suggest()
     suggestion_dict = suggestion.get_param_values()
@@ -184,7 +186,7 @@ def test_grid_search(
 
     # But if we still have iterations left, we should be able to suggest again by
     # refilling the grid.
-    assert grid_search_opt.current_iteration < grid_search_opt.max_iterations
+    assert grid_search_opt.current_iteration < grid_search_opt.max_suggestions
     assert grid_search_opt.suggest()
     assert list(grid_search_opt.pending_configs)
     assert list(grid_search_opt.suggested_configs)
@@ -195,7 +197,7 @@ def test_grid_search(
         suggestion = grid_search_opt.suggest()
         grid_search_opt.register(suggestion, status, score)
     assert not grid_search_opt.not_converged()
-    assert grid_search_opt.current_iteration >= grid_search_opt.max_iterations
+    assert grid_search_opt.current_iteration >= grid_search_opt.max_suggestions
     assert list(grid_search_opt.pending_configs)
     assert list(grid_search_opt.suggested_configs)
 
@@ -205,7 +207,7 @@ def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
     are called out of order.
     """
     # pylint: disable=too-many-locals
-    score: Dict[str, TunableValue] = {"score": 1.0, "other_score": 2.0}
+    score: dict[str, TunableValue] = {"score": 1.0, "other_score": 2.0}
     status = Status.SUCCEEDED
     suggest_count = 10
     suggested = [grid_search_opt.suggest() for _ in range(suggest_count)]
@@ -233,7 +235,7 @@ def test_grid_search_async_order(grid_search_opt: GridSearchOptimizer) -> None:
     assert best_suggestion_dict not in grid_search_opt.pending_configs
     assert best_suggestion_dict not in grid_search_opt.suggested_configs
 
-    best_suggestion_score: Dict[str, TunableValue] = {}
+    best_suggestion_score: dict[str, TunableValue] = {}
     for opt_target, opt_dir in grid_search_opt.targets.items():
         val = score[opt_target]
         assert isinstance(val, (int, float))

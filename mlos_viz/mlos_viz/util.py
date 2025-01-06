@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """Utility functions for manipulating experiment results data."""
-from typing import Dict, Literal, Optional, Tuple
+from typing import Literal
 
 import pandas
 
@@ -11,10 +11,10 @@ from mlos_bench.storage.base_experiment_data import ExperimentData
 
 
 def expand_results_data_args(
-    exp_data: Optional[ExperimentData] = None,
-    results_df: Optional[pandas.DataFrame] = None,
-    objectives: Optional[Dict[str, Literal["min", "max"]]] = None,
-) -> Tuple[pandas.DataFrame, Dict[str, bool]]:
+    exp_data: ExperimentData | None = None,
+    results_df: pandas.DataFrame | None = None,
+    objectives: dict[str, Literal["min", "max"]] | None = None,
+) -> tuple[pandas.DataFrame, dict[str, bool]]:
     """
     Expands some common arguments for working with results data.
 
@@ -22,18 +22,18 @@ def expand_results_data_args(
 
     Parameters
     ----------
-    exp_data : Optional[ExperimentData], optional
+    exp_data : ExperimentData | None
         ExperimentData to operate on.
-    results_df : Optional[pandas.DataFrame], optional
+    results_df : pandas.DataFrame | None
         Optional results_df argument.
-        Defaults to exp_data.results_df property.
-    objectives : Optional[Dict[str, Literal["min", "max"]]], optional
+        If not provided, defaults to :py:attr:`.ExperimentData.results_df` property.
+    objectives : Optional[dict[str, Literal["min", "max"]]]
         Optional objectives set to operate on.
-        Defaults to exp_data.objectives property.
+        If not provided, defaults to :py:attr:`.ExperimentData.objectives` property.
 
     Returns
     -------
-    Tuple[pandas.DataFrame, Dict[str, bool]]
+    tuple[pandas.DataFrame, dict[str, bool]]
         The results dataframe and the objectives columns in the dataframe, plus
         whether or not they are in ascending order.
     """
@@ -47,7 +47,7 @@ def expand_results_data_args(
         if exp_data is None:
             raise ValueError("Must provide either exp_data or both results_df and objectives.")
         objectives = exp_data.objectives
-    objs_cols: Dict[str, bool] = {}
+    objs_cols: dict[str, bool] = {}
     for opt_tgt, opt_dir in objectives.items():
         if opt_dir not in ["min", "max"]:
             raise ValueError(f"Unexpected optimization direction for target {opt_tgt}: {opt_dir}")

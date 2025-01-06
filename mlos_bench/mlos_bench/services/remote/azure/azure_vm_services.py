@@ -6,7 +6,9 @@
 
 import json
 import logging
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
+from collections.abc import Callable, Iterable
+from datetime import datetime
+from typing import Any
 
 import requests
 
@@ -99,23 +101,33 @@ class AzureVMService(
         "?api-version=2022-03-01"
     )
 
-    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/run-command
+    # From:
+    # https://learn.microsoft.com/en-us/rest/api/compute/virtual-machine-run-commands/create-or-update
     _URL_REXEC_RUN = (
         "https://management.azure.com"
         "/subscriptions/{subscription}"
         "/resourceGroups/{resource_group}"
         "/providers/Microsoft.Compute"
         "/virtualMachines/{vm_name}"
-        "/runCommand"
-        "?api-version=2022-03-01"
+        "/runcommands/{command_name}"
+        "?api-version=2024-07-01"
+    )
+    _URL_REXEC_RESULT = (
+        "https://management.azure.com"
+        "/subscriptions/{subscription}"
+        "/resourceGroups/{resource_group}"
+        "/providers/Microsoft.Compute"
+        "/virtualMachines/{vm_name}"
+        "/runcommands/{command_name}"
+        "?$expand=instanceView&api-version=2024-07-01"
     )
 
     def __init__(
         self,
-        config: Optional[Dict[str, Any]] = None,
-        global_config: Optional[Dict[str, Any]] = None,
-        parent: Optional[Service] = None,
-        methods: Union[Dict[str, Callable], List[Callable], None] = None,
+        config: dict[str, Any] | None = None,
+        global_config: dict[str, Any] | None = None,
+        parent: Service | None = None,
+        methods: dict[str, Callable] | list[Callable] | None = None,
     ):
         """
         Create a new instance of Azure VM services proxy.
@@ -129,7 +141,7 @@ class AzureVMService(
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
-        methods : Union[Dict[str, Callable], List[Callable], None]
+        methods : Union[dict[str, Callable], list[Callable], None]
             New methods to register with the service.
         """
         super().__init__(
@@ -171,7 +183,7 @@ class AzureVMService(
             self._custom_data_file = self.config_loader_service.resolve_path(
                 self._custom_data_file
             )
-            with open(self._custom_data_file, "r", encoding="utf-8") as custom_data_fh:
+            with open(self._custom_data_file, encoding="utf-8") as custom_data_fh:
                 self._deploy_params["customData"] = custom_data_fh.read()
 
     def _set_default_params(self, params: dict) -> dict:  # pylint: disable=no-self-use
@@ -179,14 +191,15 @@ class AzureVMService(
         # since this is a common way to set the deploymentName and can same some
         # config work for the caller.
         if "vmName" in params and "deploymentName" not in params:
-            params["deploymentName"] = f"{params['vmName']}-deployment"
+            params["deploymentName"] = f"""{params["vmName"]}-deployment"""
+
             _LOG.info(
                 "deploymentName missing from params. Defaulting to '%s'.",
                 params["deploymentName"],
             )
         return params
 
-    def wait_host_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
+    def wait_host_deployment(self, params: dict, *, is_setup: bool) -> tuple[Status, dict]:
         """
         Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
@@ -207,7 +220,7 @@ class AzureVMService(
         """
         return self._wait_deployment(params, is_setup=is_setup)
 
-    def wait_host_operation(self, params: dict) -> Tuple[Status, dict]:
+    def wait_host_operation(self, params: dict) -> tuple[Status, dict]:
         """
         Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
@@ -228,13 +241,35 @@ class AzureVMService(
         """
         _LOG.info("Wait for operation on VM %s", params["vmName"])
         # Try and provide a semi sane default for the deploymentName
-        params.setdefault(f"{params['vmName']}-deployment")
+        params.setdefault(f"""{params["vmName"]}-deployment""")
         return self._wait_while(self._check_operation_status, Status.RUNNING, params)
 
-    def wait_os_operation(self, params: dict) -> Tuple["Status", dict]:
+    def wait_remote_exec_operation(self, params: dict) -> tuple["Status", dict]:
+        """
+        Waits for a pending remote execution on an Azure VM to resolve to SUCCEEDED or
+        FAILED. Return TIMED_OUT when timing out.
+
+        Parameters
+        ----------
+        params: dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+            Must have the "asyncResultsUrl" key to get the results.
+            If the key is not present, return Status.PENDING.
+
+        Returns
+        -------
+        result : (Status, dict)
+            A pair of Status and result.
+            Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+            Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+        """
+        _LOG.info("Wait for run command %s on VM %s", params["commandName"], params["vmName"])
+        return self._wait_while(self._check_remote_exec_status, Status.RUNNING, params)
+
+    def wait_os_operation(self, params: dict) -> tuple["Status", dict]:
         return self.wait_host_operation(params)
 
-    def provision_host(self, params: dict) -> Tuple[Status, dict]:
+    def provision_host(self, params: dict) -> tuple[Status, dict]:
         """
         Check if Azure VM is ready. Deploy a new VM, if necessary.
 
@@ -247,14 +282,14 @@ class AzureVMService(
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is the input `params` plus the
             parameters extracted from the response JSON, or {} if the status is FAILED.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
         return self._provision_resource(params)
 
-    def deprovision_host(self, params: dict) -> Tuple[Status, dict]:
+    def deprovision_host(self, params: dict) -> tuple[Status, dict]:
         """
         Deprovisions the VM on Azure by deleting it.
 
@@ -265,7 +300,7 @@ class AzureVMService(
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
@@ -292,7 +327,7 @@ class AzureVMService(
             ),
         )
 
-    def deallocate_host(self, params: dict) -> Tuple[Status, dict]:
+    def deallocate_host(self, params: dict) -> tuple[Status, dict]:
         """
         Deallocates the VM on Azure by shutting it down then releasing the compute
         resources.
@@ -307,7 +342,7 @@ class AzureVMService(
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
@@ -331,7 +366,7 @@ class AzureVMService(
             ),
         )
 
-    def start_host(self, params: dict) -> Tuple[Status, dict]:
+    def start_host(self, params: dict) -> tuple[Status, dict]:
         """
         Start the VM on Azure.
 
@@ -342,7 +377,7 @@ class AzureVMService(
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
@@ -366,7 +401,7 @@ class AzureVMService(
             ),
         )
 
-    def stop_host(self, params: dict, force: bool = False) -> Tuple[Status, dict]:
+    def stop_host(self, params: dict, force: bool = False) -> tuple[Status, dict]:
         """
         Stops the VM on Azure by initiating a graceful shutdown.
 
@@ -379,7 +414,7 @@ class AzureVMService(
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
@@ -403,10 +438,10 @@ class AzureVMService(
             ),
         )
 
-    def shutdown(self, params: dict, force: bool = False) -> Tuple["Status", dict]:
+    def shutdown(self, params: dict, force: bool = False) -> tuple["Status", dict]:
         return self.stop_host(params, force)
 
-    def restart_host(self, params: dict, force: bool = False) -> Tuple[Status, dict]:
+    def restart_host(self, params: dict, force: bool = False) -> tuple[Status, dict]:
         """
         Reboot the VM on Azure by initiating a graceful shutdown.
 
@@ -419,7 +454,7 @@ class AzureVMService(
 
         Returns
         -------
-        result : (Status, dict={})
+        result : (Status, dict)
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
@@ -443,7 +478,7 @@ class AzureVMService(
             ),
         )
 
-    def reboot(self, params: dict, force: bool = False) -> Tuple["Status", dict]:
+    def reboot(self, params: dict, force: bool = False) -> tuple["Status", dict]:
         return self.restart_host(params, force)
 
     def remote_exec(
@@ -451,7 +486,7 @@ class AzureVMService(
         script: Iterable[str],
         config: dict,
         env_params: dict,
-    ) -> Tuple[Status, dict]:
+    ) -> tuple[Status, dict]:
         """
         Run a command on Azure VM.
 
@@ -481,6 +516,8 @@ class AzureVMService(
                 "subscription",
                 "resourceGroup",
                 "vmName",
+                "commandName",
+                "location",
             ],
         )
 
@@ -488,21 +525,28 @@ class AzureVMService(
             _LOG.info("Run a script on VM: %s\n  %s", config["vmName"], "\n  ".join(script))
 
         json_req = {
-            "commandId": "RunShellScript",
-            "script": list(script),
-            "parameters": [{"name": key, "value": val} for (key, val) in env_params.items()],
+            "location": config["location"],
+            "properties": {
+                "source": {"script": "; ".join(script)},
+                "protectedParameters": [
+                    {"name": key, "value": val} for (key, val) in env_params.items()
+                ],
+                "timeoutInSeconds": int(self._poll_timeout),
+                "asyncExecution": True,
+            },
         }
 
         url = self._URL_REXEC_RUN.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
+            command_name=config["commandName"],
         )
 
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Request: POST %s\n%s", url, json.dumps(json_req, indent=2))
+            _LOG.debug("Request: PUT %s\n%s", url, json.dumps(json_req, indent=2))
 
-        response = requests.post(
+        response = requests.put(
             url,
             json=json_req,
             headers=self._get_headers(),
@@ -518,20 +562,74 @@ class AzureVMService(
         else:
             _LOG.info("Response: %s", response)
 
-        if response.status_code == 200:
-            # TODO: extract the results from JSON response
-            return (Status.SUCCEEDED, config)
-        elif response.status_code == 202:
+        if response.status_code in {200, 201}:
+            results_url = self._URL_REXEC_RESULT.format(
+                subscription=config["subscription"],
+                resource_group=config["resourceGroup"],
+                vm_name=config["vmName"],
+                command_name=config["commandName"],
+            )
             return (
                 Status.PENDING,
-                {**config, "asyncResultsUrl": response.headers.get("Azure-AsyncOperation")},
+                {**config, "asyncResultsUrl": results_url},
             )
         else:
             _LOG.error("Response: %s :: %s", response, response.text)
-            # _LOG.error("Bad Request:\n%s", response.request.body)
             return (Status.FAILED, {})
 
-    def get_remote_exec_results(self, config: dict) -> Tuple[Status, dict]:
+    def _check_remote_exec_status(self, params: dict) -> tuple[Status, dict]:
+        """
+        Checks the status of a pending remote execution on an Azure VM.
+
+        Parameters
+        ----------
+        params: dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+            Must have the "asyncResultsUrl" key to get the results.
+            If the key is not present, return Status.PENDING.
+
+        Returns
+        -------
+        result : (Status, dict)
+            A pair of Status and result.
+            Status is one of {PENDING, RUNNING, SUCCEEDED, FAILED}
+            Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+        """
+        url = params.get("asyncResultsUrl")
+        if url is None:
+            return Status.PENDING, {}
+
+        session = self._get_session(params)
+        try:
+            response = session.get(url, timeout=self._request_timeout)
+        except requests.exceptions.ReadTimeout:
+            _LOG.warning("Request timed out after %.2f s: %s", self._request_timeout, url)
+            return Status.RUNNING, {}
+        except requests.exceptions.RequestException as ex:
+            _LOG.exception("Error in request checking operation status", exc_info=ex)
+            return (Status.FAILED, {})
+
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug(
+                "Response: %s\n%s",
+                response,
+                json.dumps(response.json(), indent=2) if response.content else "",
+            )
+
+        if response.status_code == 200:
+            output = response.json()
+            execution_state = (
+                output.get("properties", {}).get("instanceView", {}).get("executionState")
+            )
+            if execution_state in {"Running", "Pending"}:
+                return Status.RUNNING, {}
+            elif execution_state == "Succeeded":
+                return Status.SUCCEEDED, output
+
+        _LOG.error("Response: %s :: %s", response, response.text)
+        return Status.FAILED, {}
+
+    def get_remote_exec_results(self, config: dict) -> tuple[Status, dict]:
         """
         Get the results of the asynchronously running command.
 
@@ -547,13 +645,34 @@ class AzureVMService(
         result : (Status, dict)
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
-            A dict can have an "stdout" key with the remote output.
+            A dict can have an "stdout" key with the remote output
+            and an "stderr" key for errors / warnings.
         """
         _LOG.info("Check the results on VM: %s", config.get("vmName"))
-        (status, result) = self.wait_host_operation(config)
+        (status, result) = self.wait_remote_exec_operation(config)
         _LOG.debug("Result: %s :: %s", status, result)
         if not status.is_succeeded():
             # TODO: Extract the telemetry and status from stdout, if available
             return (status, result)
-        val = result.get("properties", {}).get("output", {}).get("value", [])
-        return (status, {"stdout": val[0].get("message", "")} if val else {})
+
+        output = result.get("properties", {}).get("instanceView", {})
+        exit_code = output.get("exitCode")
+        execution_state = output.get("executionState")
+        outputs = output.get("output", "").strip().split("\n")
+        errors = output.get("error", "").strip().split("\n")
+
+        if execution_state == "Succeeded" and exit_code == 0:
+            status = Status.SUCCEEDED
+        else:
+            status = Status.FAILED
+
+        return (
+            status,
+            {
+                "stdout": outputs,
+                "stderr": errors,
+                "exitCode": exit_code,
+                "startTimestamp": datetime.fromisoformat(output["startTime"]),
+                "endTimestamp": datetime.fromisoformat(output["endTime"]),
+            },
+        )

@@ -2,15 +2,19 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Saving and restoring the benchmark data using SQLAlchemy."""
+""":py:class:`.Storage.Experiment` interface implementation for saving and restoring
+the benchmark experiment data using `SQLAlchemy <https://sqlalchemy.org>`_ backend.
+"""
 
 import hashlib
 import logging
+from collections.abc import Iterator
 from datetime import datetime
-from typing import Any, Dict, Iterator, List, Literal, Optional, Tuple
+from typing import Any, Literal
 
 from pytz import UTC
-from sqlalchemy import Connection, CursorResult, Engine, Table, column, func, select
+from sqlalchemy import Connection, CursorResult, Table, column, func, select
+from sqlalchemy.engine import Engine
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_storage import Storage
@@ -35,7 +39,7 @@ class Experiment(Storage.Experiment):
         trial_id: int,
         root_env_config: str,
         description: str,
-        opt_targets: Dict[str, Literal["min", "max"]],
+        opt_targets: dict[str, Literal["min", "max"]],
     ):
         super().__init__(
             tunables=tunables,
@@ -120,15 +124,15 @@ class Experiment(Storage.Experiment):
                         exp_info.git_commit,
                     )
 
-    def merge(self, experiment_ids: List[str]) -> None:
+    def merge(self, experiment_ids: list[str]) -> None:
         _LOG.info("Merge: %s <- %s", self._experiment_id, experiment_ids)
         raise NotImplementedError("TODO")
 
-    def load_tunable_config(self, config_id: int) -> Dict[str, Any]:
+    def load_tunable_config(self, config_id: int) -> dict[str, Any]:
         with self._engine.connect() as conn:
             return self._get_key_val(conn, self._schema.config_param, "param", config_id=config_id)
 
-    def load_telemetry(self, trial_id: int) -> List[Tuple[datetime, str, Any]]:
+    def load_telemetry(self, trial_id: int) -> list[tuple[datetime, str, Any]]:
         with self._engine.connect() as conn:
             cur_telemetry = conn.execute(
                 self._schema.trial_telemetry.select()
@@ -151,7 +155,7 @@ class Experiment(Storage.Experiment):
     def load(
         self,
         last_trial_id: int = -1,
-    ) -> Tuple[List[int], List[dict], List[Optional[Dict[str, Any]]], List[Status]]:
+    ) -> tuple[list[int], list[dict], list[dict[str, Any] | None], list[Status]]:
 
         with self._engine.connect() as conn:
             cur_trials = conn.execute(
@@ -171,10 +175,10 @@ class Experiment(Storage.Experiment):
                 )
             )
 
-            trial_ids: List[int] = []
-            configs: List[Dict[str, Any]] = []
-            scores: List[Optional[Dict[str, Any]]] = []
-            status: List[Status] = []
+            trial_ids: list[int] = []
+            configs: list[dict[str, Any]] = []
+            scores: list[dict[str, Any] | None] = []
+            status: list[Status] = []
 
             for trial in cur_trials.fetchall():
                 stat = Status[trial.status]
@@ -204,13 +208,13 @@ class Experiment(Storage.Experiment):
             return (trial_ids, configs, scores, status)
 
     @staticmethod
-    def _get_key_val(conn: Connection, table: Table, field: str, **kwargs: Any) -> Dict[str, Any]:
+    def _get_key_val(conn: Connection, table: Table, field: str, **kwargs: Any) -> dict[str, Any]:
         """
         Helper method to retrieve key-value pairs from the database.
 
         (E.g., configurations, results, and telemetry).
         """
-        cur_result: CursorResult[Tuple[str, Any]] = conn.execute(
+        cur_result: CursorResult[tuple[str, Any]] = conn.execute(
             select(
                 column(f"{field}_id"),
                 column(f"{field}_value"),
@@ -228,7 +232,7 @@ class Experiment(Storage.Experiment):
     def _save_params(
         conn: Connection,
         table: Table,
-        params: Dict[str, Any],
+        params: dict[str, Any],
         **kwargs: Any,
     ) -> None:
         if not params:
@@ -310,11 +314,11 @@ class Experiment(Storage.Experiment):
         )
         return config_id
 
-    def new_trial(
+    def _new_trial(
         self,
         tunables: TunableGroups,
-        ts_start: Optional[datetime] = None,
-        config: Optional[Dict[str, Any]] = None,
+        ts_start: datetime | None = None,
+        config: dict[str, Any] | None = None,
     ) -> Storage.Trial:
         # MySQL can round microseconds into the future causing scheduler to skip trials.
         # Truncate microseconds to avoid this issue.

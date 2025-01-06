@@ -2,11 +2,22 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Implementation of LlamaTune space adapter."""
-from typing import Dict, Optional
+"""
+Implementation of LlamaTune space adapter.
+
+LlamaTune is a technique that transforms the original parameter space into a
+lower-dimensional space to try and improve the sample efficiency of the underlying
+optimizer by making use of the inherent parameter sensitivity correlations in most
+systems.
+
+See Also: `LlamaTune: Sample-Efficient DBMS Configuration Tuning
+<https://www.microsoft.com/en-us/research/publication/llamatune-sample-efficient-dbms-configuration-tuning>`_.
+"""
+import os
 from warnings import warn
 
 import ConfigSpace
+import ConfigSpace.exceptions
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -40,8 +51,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         *,
         orig_parameter_space: ConfigSpace.ConfigurationSpace,
         num_low_dims: int = DEFAULT_NUM_LOW_DIMS,
-        special_param_values: Optional[dict] = None,
-        max_unique_values_per_param: Optional[int] = DEFAULT_MAX_UNIQUE_VALUES_PER_PARAM,
+        special_param_values: dict | None = None,
+        max_unique_values_per_param: int | None = DEFAULT_MAX_UNIQUE_VALUES_PER_PARAM,
         use_approximate_reverse_mapping: bool = False,
     ):
         """
@@ -51,11 +62,11 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         ----------
         orig_parameter_space : ConfigSpace.ConfigurationSpace
             The original (user-provided) parameter space to optimize.
-        num_low_dims: int
+        num_low_dims : int
             Number of dimensions used in the low-dimensional parameter search space.
-        special_param_values_dict: Optional[dict]
+        special_param_values_dict : dict | None
             Dictionary of special
-        max_unique_values_per_param: Optional[int]:
+        max_unique_values_per_param : int | None
             Number of unique values per parameter. Used to discretize the parameter space.
             If `None` space discretization is disabled.
         """
@@ -77,7 +88,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         # Initialize config values scaler: from (-1, 1) to (0, 1) range
         config_scaler = MinMaxScaler(feature_range=(0, 1))
         ones_vector = np.ones(len(list(self.orig_parameter_space.values())))
-        config_scaler.fit([-ones_vector, ones_vector])
+        config_scaler.fit(np.array([-ones_vector, ones_vector]))
         self._config_scaler = config_scaler
 
         # Generate random mapping from low-dimensional space to original config space
@@ -86,7 +97,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         self._sigma_vector = self._random_state.choice([-1, 1], num_orig_dims)
 
         # Used to retrieve the low-dim point, given the high-dim one
-        self._suggested_configs: Dict[ConfigSpace.Configuration, ConfigSpace.Configuration] = {}
+        self._suggested_configs: dict[ConfigSpace.Configuration, ConfigSpace.Configuration] = {}
         self._pinv_matrix: npt.NDArray
         self._use_approximate_reverse_mapping = use_approximate_reverse_mapping
 
@@ -95,65 +106,140 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         """Get the parameter space, which is explored by the underlying optimizer."""
         return self._target_config_space
 
-    def inverse_transform(self, configurations: pd.DataFrame) -> pd.DataFrame:
-        target_configurations = []
-        for _, config in configurations.astype("O").iterrows():
-            configuration = ConfigSpace.Configuration(
-                self.orig_parameter_space,
-                values=config.to_dict(),
-            )
-
-            target_config = self._suggested_configs.get(configuration, None)
-            # NOTE: HeSBO is a non-linear projection method, and does not inherently
-            # support inverse projection
-            # To (partly) support this operation, we keep track of the suggested
-            # low-dim point(s) along with the respective high-dim point; this way we
-            # can retrieve the low-dim point, from its high-dim counterpart.
-            if target_config is None:
-                # Inherently it is not supported to register points, which were not
-                # suggested by the optimizer.
-                if configuration == self.orig_parameter_space.get_default_configuration():
-                    # Default configuration should always be registerable.
-                    pass
-                elif not self._use_approximate_reverse_mapping:
-                    raise ValueError(
-                        f"{repr(configuration)}\n"
-                        "The above configuration was not suggested by the optimizer. "
-                        "Approximate reverse mapping is currently disabled; "
-                        "thus *only* configurations suggested "
-                        "previously by the optimizer can be registered."
-                    )
-
-                # ...yet, we try to support that by implementing an approximate
-                # reverse mapping using pseudo-inverse matrix.
-                if getattr(self, "_pinv_matrix", None) is None:
-                    self._try_generate_approx_inverse_mapping()
-
-                # Replace NaNs with zeros for inactive hyperparameters
-                config_vector = np.nan_to_num(configuration.get_array(), nan=0.0)
-                # Perform approximate reverse mapping
-                # NOTE: applying special value biasing is not possible
-                vector = self._config_scaler.inverse_transform([config_vector])[0]
-                target_config_vector = self._pinv_matrix.dot(vector)
-                target_config = ConfigSpace.Configuration(
-                    self.target_parameter_space,
-                    vector=target_config_vector,
-                )
-
-            target_configurations.append(target_config)
-
-        return pd.DataFrame(
-            target_configurations, columns=list(self.target_parameter_space.keys())
+    def inverse_transform(self, configuration: pd.Series) -> pd.Series:
+        config = ConfigSpace.Configuration(
+            self.orig_parameter_space,
+            values=configuration.dropna().to_dict(),
         )
 
-    def transform(self, configuration: pd.DataFrame) -> pd.DataFrame:
-        if len(configuration) != 1:
-            raise ValueError(
-                "Configuration dataframe must contain exactly 1 row. "
-                f"Found {len(configuration)} rows."
+        target_config = self._suggested_configs.get(config, None)
+        # NOTE: HeSBO is a non-linear projection method, and does not inherently
+        # support inverse projection
+        # To (partly) support this operation, we keep track of the suggested
+        # low-dim point(s) along with the respective high-dim point; this way we
+        # can retrieve the low-dim point, from its high-dim counterpart.
+        if target_config is None:
+            # Inherently it is not supported to register points, which were not
+            # suggested by the optimizer.
+            if config == self.orig_parameter_space.get_default_configuration():
+                # Default configuration should always be registerable.
+                pass
+            elif not self._use_approximate_reverse_mapping:
+                raise ValueError(
+                    f"{repr(config)}\n"
+                    "The above configuration was not suggested by the optimizer. "
+                    "Approximate reverse mapping is currently disabled; "
+                    "thus *only* configurations suggested "
+                    "previously by the optimizer can be registered."
+                )
+
+            target_config = self._try_inverse_transform_config(config)
+
+        return pd.Series(target_config, index=list(self.target_parameter_space.keys()))
+
+    def _try_inverse_transform_config(
+        self,
+        config: ConfigSpace.Configuration,
+    ) -> ConfigSpace.Configuration:
+        """
+        Attempts to generate an inverse mapping of the given configuration that wasn't
+        previously registered.
+
+        Parameters
+        ----------
+        configuration : ConfigSpace.Configuration
+            Configuration in the original high-dimensional space.
+
+        Returns
+        -------
+        ConfigSpace.Configuration
+            Configuration in the low-dimensional space.
+
+        Raises
+        ------
+        ValueError
+            On conversion errors.
+        """
+        # ...yet, we try to support that by implementing an approximate
+        # reverse mapping using pseudo-inverse matrix.
+        if getattr(self, "_pinv_matrix", None) is None:
+            self._try_generate_approx_inverse_mapping()
+
+        # Replace NaNs with zeros for inactive hyperparameters
+        config_vector = np.nan_to_num(config.get_array(), nan=0.0)
+        # Perform approximate reverse mapping
+        # NOTE: applying special value biasing is not possible
+        vector: npt.NDArray = self._config_scaler.inverse_transform(np.array([config_vector]))[0]
+        target_config_vector: npt.NDArray = self._pinv_matrix.dot(vector)
+        # Clip values to to [-1, 1] range of the low dimensional space.
+        for idx, value in enumerate(target_config_vector):
+            target_config_vector[idx] = np.clip(value, -1, 1)
+        if self._q_scaler is not None:
+            # If the max_unique_values_per_param is set, we need to scale
+            # the low dimension space back to the discretized space as well.
+            target_config_vector = self._q_scaler.inverse_transform(
+                np.array([target_config_vector])
+            )[0]
+            assert isinstance(target_config_vector, np.ndarray)
+            # Clip values to [1, max_value] range (floating point errors may occur).
+            for idx, value in enumerate(target_config_vector):
+                target_config_vector[idx] = int(np.clip(value, 1, self._q_scaler.data_max_[idx]))
+            target_config_vector = target_config_vector.astype(int)
+        # Convert the vector to a dictionary.
+        target_config_dict = dict(
+            zip(
+                self.target_parameter_space.keys(),
+                target_config_vector,
+            )
+        )
+        target_config = ConfigSpace.Configuration(
+            self.target_parameter_space,
+            values=target_config_dict,
+            # This method results in hyperparameter type conversion issues
+            # (e.g., float instead of int), so we use the values dict instead.
+            # vector=target_config_vector,
+        )
+
+        # Check to see if the approximate reverse mapping looks OK.
+        # Note: we know this isn't 100% accurate, so this is just a warning and
+        # mostly meant for internal debugging.
+        configuration_dict = dict(config)
+        double_checked_config = self._transform(dict(target_config))
+        double_checked_config = {
+            # Skip the special values that aren't in the original space.
+            k: v
+            for k, v in double_checked_config.items()
+            if k in configuration_dict
+        }
+        if double_checked_config != configuration_dict and (
+            os.environ.get("MLOS_DEBUG", "false").lower() in {"1", "true", "y", "yes"}
+        ):
+            warn(
+                (
+                    f"Note: Configuration {configuration_dict} was inverse transformed to "
+                    f"{dict(target_config)} and then back to {double_checked_config}. "
+                    "This is an approximate reverse mapping for previously unregistered "
+                    "configurations, so this is just a warning."
+                ),
+                UserWarning,
             )
 
-        target_values_dict = configuration.iloc[0].to_dict()
+        # But the inverse mapping should at least be valid in the target space.
+        try:
+            ConfigSpace.Configuration(
+                self.target_parameter_space,
+                values=target_config,
+            ).check_valid_configuration()
+        except ConfigSpace.exceptions.IllegalValueError as err:
+            raise ValueError(
+                f"Invalid configuration {target_config} generated by "
+                f"inverse mapping of {config}:\n{err}"
+            ) from err
+
+        return target_config
+
+    def transform(self, configuration: pd.Series) -> pd.Series:
+        target_values_dict = configuration.to_dict()
         target_configuration = ConfigSpace.Configuration(
             self.target_parameter_space,
             values=target_values_dict,
@@ -162,17 +248,30 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         orig_values_dict = self._transform(target_values_dict)
         orig_configuration = normalize_config(self.orig_parameter_space, orig_values_dict)
 
+        # Validate that the configuration is in the original space.
+        try:
+            ConfigSpace.Configuration(
+                self.orig_parameter_space,
+                values=orig_configuration,
+            ).check_valid_configuration()
+        except ConfigSpace.exceptions.IllegalValueError as err:
+            raise ValueError(
+                f"Invalid configuration {orig_configuration} generated by "
+                f"transformation of {target_configuration}:\n{err}"
+            ) from err
+
         # Add to inverse dictionary -- needed for registering the performance later
         self._suggested_configs[orig_configuration] = target_configuration
 
-        return pd.DataFrame(
-            [list(orig_configuration.values())], columns=list(orig_configuration.keys())
+        ret: pd.Series = pd.Series(
+            list(orig_configuration.values()), index=list(orig_configuration.keys())
         )
+        return ret
 
     def _construct_low_dim_space(
         self,
         num_low_dims: int,
-        max_unique_values_per_param: Optional[int],
+        max_unique_values_per_param: int | None,
     ) -> None:
         """
         Constructs the low-dimensional parameter (potentially discretized) search space.
@@ -182,12 +281,15 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         num_low_dims : int
             Number of dimensions used in the low-dimensional parameter search space.
 
-        max_unique_values_per_param: Optional[int]:
+        max_unique_values_per_param: int | None:
             Number of unique values per parameter. Used to discretize the parameter space.
             If `None` space discretization is disabled.
         """
         # Define target space parameters
         q_scaler = None
+        hyperparameters: list[
+            ConfigSpace.UniformFloatHyperparameter | ConfigSpace.UniformIntegerHyperparameter
+        ]
         if max_unique_values_per_param is None:
             hyperparameters = [
                 ConfigSpace.UniformFloatHyperparameter(name=f"dim_{idx}", lower=-1, upper=1)
@@ -214,7 +316,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
             q_scaler = MinMaxScaler(feature_range=(-1, 1))
             ones_vector = np.ones(num_low_dims)
             max_value_vector = ones_vector * max_unique_values_per_param
-            q_scaler.fit([ones_vector, max_value_vector])
+            q_scaler.fit(np.array([ones_vector, max_value_vector]))
 
         self._q_scaler = q_scaler
 
@@ -222,7 +324,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
         config_space = ConfigSpace.ConfigurationSpace(name=self.orig_parameter_space.name)
         # use same random state as in original parameter space
         config_space.random = self._random_state
-        config_space.add_hyperparameters(hyperparameters)
+        config_space.add(hyperparameters)
         self._target_config_space = config_space
 
     def _transform(self, configuration: dict) -> dict:
@@ -246,7 +348,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
 
         if self._q_scaler is not None:
             # Scale parameter values from [1, max_value] to [-1, 1]
-            low_dim_config_values = self._q_scaler.transform([low_dim_config_values])[0]
+            low_dim_config_values = self._q_scaler.transform(np.array([low_dim_config_values]))[0]
 
         # Project low-dim point to original parameter space
         original_config_values = [
@@ -254,14 +356,16 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
             for idx in range(len(original_parameters))
         ]
         # Scale parameter values to [0, 1]
-        original_config_values = self._config_scaler.transform([original_config_values])[0]
+        original_config_values = self._config_scaler.transform(np.array([original_config_values]))[
+            0
+        ]
 
         original_config = {}
         for param, norm_value in zip(original_parameters, original_config_values):
             # Clip value to force it to fall in [0, 1]
             # NOTE: HeSBO projection ensures that theoretically but due to
             #       floating point ops nuances this is not always guaranteed
-            value = max(0.0, min(1.0, norm_value))  # pylint: disable=redefined-loop-name
+            value = np.clip(norm_value, 0, 1)
 
             if isinstance(param, ConfigSpace.CategoricalHyperparameter):
                 index = int(value * len(param.choices))  # truncate integer part
@@ -272,8 +376,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
                 if param.name in self._special_param_values_dict:
                     value = self._special_param_value_scaler(param, value)
 
-                orig_value = param._transform(value)  # pylint: disable=protected-access
-                orig_value = max(param.lower, min(param.upper, orig_value))
+                orig_value = param.to_value(value)
+                orig_value = np.clip(orig_value, param.lower, param.upper)
             else:
                 raise NotImplementedError(
                     "Only Categorical, Integer, and Float hyperparameters are currently supported."
@@ -285,7 +389,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
 
     def _special_param_value_scaler(
         self,
-        param: ConfigSpace.UniformIntegerHyperparameter,
+        param: NumericalHyperparameter,
         input_value: float,
     ) -> float:
         """
@@ -294,7 +398,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
 
         Parameters
         ----------
-        param: ConfigSpace.UniformIntegerHyperparameter
+        param: NumericalHyperparameter
             Parameter of the original parameter space.
 
         input_value: float
@@ -309,19 +413,13 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
 
         # Check if input value corresponds to some special value
         perc_sum = 0.0
-        ret: float
         for special_value, biasing_perc in special_values_list:
             perc_sum += biasing_perc
             if input_value < perc_sum:
-                ret = param._inverse_transform(special_value)  # pylint: disable=protected-access
-                return ret
+                return float(param.to_vector(special_value))
 
         # Scale input value uniformly to non-special values
-        # pylint: disable=protected-access
-        ret = param._inverse_transform(
-            param._transform_scalar((input_value - perc_sum) / (1 - perc_sum))
-        )
-        return ret
+        return float(param.to_vector((input_value - perc_sum) / (1 - perc_sum)))
 
     # pylint: disable=too-complex,too-many-branches
     def _validate_special_param_values(self, special_param_values_dict: dict) -> None:
@@ -394,7 +492,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
                     + f"'{param}' value domain."
                 )
             # Are user-provided special values unique?
-            if len(set(v for v, _ in tuple_list)) != len(tuple_list):
+            if len({v for v, _ in tuple_list}) != len(tuple_list):
                 raise ValueError(
                     error_prefix
                     + "One (or more) special values are defined more than once "
@@ -467,7 +565,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
 
         # Compute pseudo-inverse matrix
         try:
-            self._pinv_matrix = pinv(proj_matrix)
+            inv_matrix: npt.NDArray = pinv(proj_matrix)
+            self._pinv_matrix = inv_matrix
         except LinAlgError as err:
             raise RuntimeError(
                 f"Unable to generate reverse mapping using pseudo-inverse matrix: {repr(err)}"

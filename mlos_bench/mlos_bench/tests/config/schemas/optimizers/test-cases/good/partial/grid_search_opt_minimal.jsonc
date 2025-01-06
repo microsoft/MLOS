@@ -1,0 +1,4 @@
+{
+    "class": "mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer"
+    // no config required
+}

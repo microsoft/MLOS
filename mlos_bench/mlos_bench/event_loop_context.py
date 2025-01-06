@@ -8,41 +8,37 @@ import asyncio
 import logging
 import sys
 from asyncio import AbstractEventLoop
+from collections.abc import Coroutine
 from concurrent.futures import Future
 from threading import Lock as ThreadLock
 from threading import Thread
-from typing import Any, Coroutine, Optional, TypeVar
-
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
+from typing import Any, TypeAlias, TypeVar
 
 CoroReturnType = TypeVar("CoroReturnType")  # pylint: disable=invalid-name
-if sys.version_info >= (3, 9):
-    FutureReturnType: TypeAlias = Future[CoroReturnType]
-else:
-    FutureReturnType: TypeAlias = Future
+"""Type variable for the return type of an :external:py:mod:`asyncio` coroutine."""
+
+FutureReturnType: TypeAlias = Future[CoroReturnType]
+"""Type variable for the return type of a :py:class:`~concurrent.futures.Future`."""
 
 _LOG = logging.getLogger(__name__)
 
 
 class EventLoopContext:
     """
-    EventLoopContext encapsulates a background thread for asyncio event loop processing
-    as an aid for context managers.
+    EventLoopContext encapsulates a background thread for :external:py:mod:`asyncio`
+    event loop processing as an aid for context managers.
 
     There is generally only expected to be one of these, either as a base class instance
     if it's specific to that functionality or for the full mlos_bench process to support
     parallel trial runners, for instance.
 
-    It's enter() and exit() routines are expected to be called from the caller's context
-    manager routines (e.g., __enter__ and __exit__).
+    It's :py:meth:`.enter` and :py:meth:`.exit` routines are expected to be called
+    from the caller's context manager routines (e.g., __enter__ and __exit__).
     """
 
     def __init__(self) -> None:
-        self._event_loop: Optional[AbstractEventLoop] = None
-        self._event_loop_thread: Optional[Thread] = None
+        self._event_loop: AbstractEventLoop | None = None
+        self._event_loop_thread: Thread | None = None
         self._event_loop_thread_lock = ThreadLock()
         self._event_loop_thread_refcnt: int = 0
 
@@ -94,7 +90,7 @@ class EventLoopContext:
 
         Returns
         -------
-        Future[CoroReturnType]
+        concurrent.futures.Future[CoroReturnType]
             A future that will be completed when the coroutine completes.
         """
         assert self._event_loop_thread_refcnt > 0

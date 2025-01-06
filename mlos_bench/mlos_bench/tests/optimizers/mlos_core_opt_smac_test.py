@@ -70,9 +70,11 @@ def test_init_mlos_core_smac_relative_output_directory(tunable_groups: TunableGr
     """Test relative path output directory initialization of mlos_core SMAC
     optimizer.
     """
+    uid = os.environ.get("PYTEST_XDIST_WORKER", "")
+    output_dir = _OUTPUT_DIR + "." + uid
     test_opt_config = {
         "optimizer_type": "SMAC",
-        "output_directory": _OUTPUT_DIR,
+        "output_directory": output_dir,
         "seed": SEED,
     }
     opt = MlosCoreOptimizer(tunable_groups, test_opt_config)
@@ -82,7 +84,7 @@ def test_init_mlos_core_smac_relative_output_directory(tunable_groups: TunableGr
     assert path_join(str(opt._opt.base_optimizer.scenario.output_directory)).startswith(
         path_join(os.getcwd(), str(test_opt_config["output_directory"]))
     )
-    shutil.rmtree(_OUTPUT_DIR)
+    shutil.rmtree(output_dir)
 
 
 def test_init_mlos_core_smac_relative_output_directory_with_run_name(
@@ -91,9 +93,11 @@ def test_init_mlos_core_smac_relative_output_directory_with_run_name(
     """Test relative path output directory initialization of mlos_core SMAC
     optimizer.
     """
+    uid = os.environ.get("PYTEST_XDIST_WORKER", "")
+    output_dir = _OUTPUT_DIR + "." + uid
     test_opt_config = {
         "optimizer_type": "SMAC",
-        "output_directory": _OUTPUT_DIR,
+        "output_directory": output_dir,
         "run_name": "test_run",
         "seed": SEED,
     }
@@ -106,7 +110,7 @@ def test_init_mlos_core_smac_relative_output_directory_with_run_name(
             os.getcwd(), str(test_opt_config["output_directory"]), str(test_opt_config["run_name"])
         )
     )
-    shutil.rmtree(_OUTPUT_DIR)
+    shutil.rmtree(output_dir)
 
 
 def test_init_mlos_core_smac_relative_output_directory_with_experiment_id(

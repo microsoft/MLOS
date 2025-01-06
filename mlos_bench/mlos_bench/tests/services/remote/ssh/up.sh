@@ -28,3 +28,5 @@ echo "OK: private key available at '$scriptdir/id_rsa'. Connect to the ssh-serve
 docker compose -p "$PROJECT_NAME" port ssh-server ${PORT:-2254} | cut -d: -f2
 echo "INFO: And this port for the alt-server container:"
 docker compose -p "$PROJECT_NAME" port alt-server ${PORT:-2254} | cut -d: -f2
+echo "INFO: And this port for the reboot-server container:"
+docker compose -p "$PROJECT_NAME" port reboot-server ${PORT:-2254} | cut -d: -f2
