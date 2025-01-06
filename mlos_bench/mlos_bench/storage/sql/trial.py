@@ -70,7 +70,7 @@ class Trial(Storage.Trial):
                 )
                 .values(trial_runner_id=trial_runner_id)
             )
-        # Guard against concurrent updates:
+        # Guard against concurrent updates.
         with self._engine.begin() as conn:
             trial_runner_rs = conn.execute(
                 self._schema.trial.select()
