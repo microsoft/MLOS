@@ -68,6 +68,7 @@ class Scheduler(metaclass=ABCMeta):
         )
         self._validate_json_config(config)
 
+        self._in_context = False
         self._experiment_id = config["experiment_id"].strip()
         self._trial_id = int(config["trial_id"])
         self._config_id = int(config.get("config_id", -1))
@@ -258,6 +259,7 @@ class Scheduler(metaclass=ABCMeta):
         """Enter the scheduler's context."""
         _LOG.debug("Scheduler START :: %s", self)
         assert self.experiment is None
+        assert not self._in_context
         self._optimizer.__enter__()
         # Start new or resume the existing experiment. Verify that the
         # experiment configuration is compatible with the previous runs.
@@ -271,6 +273,9 @@ class Scheduler(metaclass=ABCMeta):
             tunables=self.root_environment.tunable_params,
             opt_targets=self.optimizer.targets,
         ).__enter__()
+        for trial_runner in self.trial_runners:
+            trial_runner.__enter__()
+        self._in_context = True
         return self
 
     def __exit__(
@@ -285,10 +290,14 @@ class Scheduler(metaclass=ABCMeta):
         else:
             assert ex_type and ex_val
             _LOG.warning("Scheduler END :: %s", self, exc_info=(ex_type, ex_val, ex_tb))
+        assert self._in_context
+        for trial_runner in self.trial_runners:
+            trial_runner.__exit__(ex_type, ex_val, ex_tb)
         assert self._experiment is not None
         self._experiment.__exit__(ex_type, ex_val, ex_tb)
         self._optimizer.__exit__(ex_type, ex_val, ex_tb)
         self._experiment = None
+        self._in_context = False
         return False  # Do not suppress exceptions
 
     @abstractmethod
@@ -432,6 +441,7 @@ class Scheduler(metaclass=ABCMeta):
 
         Save the results in the storage.
         """
+        assert self._in_context
         assert self.experiment is not None
         self._trial_count += 1
         self._ran_trials.append(trial)
