@@ -408,7 +408,7 @@ class Storage(metaclass=ABCMeta):
             experiment_id: str,
             trial_id: int,
             tunable_config_id: int,
-            trial_runner_id: int | None,
+            trial_runner_id: int | None = None,
             opt_targets: dict[str, Literal["min", "max"]],
             config: dict[str, Any] | None = None,
         ):
