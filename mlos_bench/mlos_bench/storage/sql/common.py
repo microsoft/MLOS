@@ -4,6 +4,8 @@
 #
 """Common SQL methods for accessing the stored benchmark data."""
 
+from typing import Any
+
 import pandas
 from sqlalchemy import Integer, and_, func, select
 from sqlalchemy.engine import Connection, Engine

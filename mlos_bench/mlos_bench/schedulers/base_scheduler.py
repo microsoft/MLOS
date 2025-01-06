@@ -7,6 +7,7 @@
 import json
 import logging
 from abc import ABCMeta, abstractmethod
+from collections.abc import Iterable
 from datetime import datetime
 from types import TracebackType
 from typing import Any, Literal
@@ -129,7 +130,7 @@ class Scheduler(metaclass=ABCMeta):
         return self._max_trials
 
     @property
-    def experiment(self) -> Optional[Storage.Experiment]:
+    def experiment(self) -> Storage.Experiment | None:
         """Gets the Experiment Storage."""
         return self._experiment
 
@@ -145,7 +146,7 @@ class Scheduler(metaclass=ABCMeta):
         return self._trial_runners[0].environment
 
     @property
-    def trial_runners(self) -> List[TrialRunner]:
+    def trial_runners(self) -> list[TrialRunner]:
         """Gets the list of Trial Runners."""
         return self._trial_runners
 
@@ -167,7 +168,7 @@ class Scheduler(metaclass=ABCMeta):
     def assign_trial_runner(
         self,
         trial: Storage.Trial,
-        trial_runner: Optional[TrialRunner] = None,
+        trial_runner: TrialRunner | None = None,
     ) -> TrialRunner:
         """
         Assigns a TrialRunner to the given Trial.

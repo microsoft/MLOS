@@ -48,7 +48,7 @@ class TrialData(metaclass=ABCMeta):
         ts_start: datetime,
         ts_end: datetime | None,
         status: Status,
-        trial_runner_id: Optional[int] = None,
+        trial_runner_id: int | None = None,
     ):
         self._experiment_id = experiment_id
         self._trial_id = trial_id

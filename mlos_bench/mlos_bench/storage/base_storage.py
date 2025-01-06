@@ -474,14 +474,14 @@ class Storage(metaclass=ABCMeta):
 
         def add_new_config_data(
             self,
-            new_config_data: Dict[str, Union[int, float, str]],
+            new_config_data: dict[str, int | float | str],
         ) -> None:
             """
             Add new config data to the trial.
 
             Parameters
             ----------
-            new_config_data : Dict[str, Union[int, float, str]]
+            new_config_data : dict[str, int | float | str]
                 New data to add (must not already exist for the trial).
 
             Raises
@@ -502,14 +502,14 @@ class Storage(metaclass=ABCMeta):
         @abstractmethod
         def _save_new_config_data(
             self,
-            new_config_data: Dict[str, Union[int, float, str]],
+            new_config_data: dict[str, int | float | str],
         ) -> None:
             """
             Save the new config data to the storage.
 
             Parameters
             ----------
-            new_config_data : Dict[str, Union[int, float, str]]
+            new_config_data : dict[str, int | float | str]]
                 New data to add.
             """
 
