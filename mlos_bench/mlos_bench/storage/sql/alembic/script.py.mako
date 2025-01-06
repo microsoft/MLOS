@@ -1,3 +1,7 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 """${message}
 
 Revision ID: ${up_revision}
@@ -5,7 +9,9 @@ Revises: ${down_revision | comma,n}
 Create Date: ${create_date}
 
 """
-from typing import Sequence
+# pylint: disable=no-member
+
+from collections.abc import Sequence
 
 from alembic import op
 import sqlalchemy as sa
