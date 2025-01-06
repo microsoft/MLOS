@@ -139,11 +139,24 @@
     ],
     "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source/",
     "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/",
-    "pre-commit-helper.excludedHookIds": [
-        "mypy",
-        "pylint"
+    "editor.rulers": [
+        // editorconfig default
+        132
     ],
-    "pre-commit-helper.runOnSave": "fixes",
+    "isort.check": true,
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.unusedImports": "explicit"
+        },
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.formatOnSaveMode": "modifications",
+        "editor.rulers": [
+            // python code formatting limit
+            99
+        ]
+    },
     "pylint.severity": {
         // display refactor warnings as information messages
         "refactor": "Information"
