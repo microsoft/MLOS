@@ -214,10 +214,10 @@ class Scheduler(metaclass=ABCMeta):
             # Basic round-robin trial runner assignment policy:
             # fetch and increment the current TrialRunner index.
             # Override in the subclass for a more sophisticated policy.
-            trial_runner_id = self._current_trial_runner_idx
+            trial_runner_idx = self._current_trial_runner_idx
             self._current_trial_runner_idx += 1
             self._current_trial_runner_idx %= len(self._trial_runners)
-            trial_runner = self._trial_runners[trial_runner_id]
+            trial_runner = self._trial_runners[trial_runner_idx]
             _LOG.info(
                 "Trial %s missing trial_runner_id. Assigning %s via basic round-robin policy.",
                 trial,
@@ -242,7 +242,10 @@ class Scheduler(metaclass=ABCMeta):
         if trial.trial_runner_id is None:
             self.assign_trial_runner(trial, trial_runner=None)
         assert trial.trial_runner_id is not None
-        return self._trial_runners[trial.trial_runner_id]
+        # trial_runner_id is 1-based, but the list is 0-based.
+        trial_runner = self._trial_runners[trial.trial_runner_id - 1]
+        assert trial_runner.trial_runner_id == trial.trial_runner_id
+        return trial_runner
 
     def __repr__(self) -> str:
         """
