@@ -287,7 +287,7 @@ class DbSchema:
         _LOG.info("Create the DB schema")
         assert self._engine
         self._meta.create_all(self._engine)
-        with self._engine.connect() as conn:
+        with self._engine.begin() as conn:
             # If the trial table has the trial_runner_id column but no
             # "alembic_version" table, then the schema is up to date as of initial
             # create and we should mark it as such to avoid trying to run the
@@ -304,7 +304,6 @@ class DbSchema:
                 alembic_cfg = self._get_alembic_cfg(conn)
                 command.stamp(alembic_cfg, "heads")
                 # command.current(alembic_cfg)
-                conn.commit()
         return self
 
     def update(self) -> "DbSchema":
