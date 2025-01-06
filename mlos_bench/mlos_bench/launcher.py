@@ -160,7 +160,7 @@ class Launcher:
             _LOG.error("No environment config specified.")
             parser.error(
                 "At least the Environment config must be specified."
-                + " Run `mlos_bench --help` and consult `README.md` for more info."
+                " Run `mlos_bench --help` and consult `README.md` for more info."
             )
         self.root_env_config = self._config_loader.resolve_path(env_path)
 
