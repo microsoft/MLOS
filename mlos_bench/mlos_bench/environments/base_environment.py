@@ -348,6 +348,7 @@ class Environment(metaclass=abc.ABCMeta):
         """
         return self._const_args.copy()
 
+    @property
     def parameters(self) -> dict[str, TunableValue]:
         """
         Key/value pairs of all environment parameters (i.e., `const_args` and
