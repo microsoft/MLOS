@@ -38,6 +38,12 @@ class TrialRunner:
         self._is_running = False
         self._event_loop_context = EventLoopContext()
 
+    def __repr__(self) -> str:
+        return (
+            f"TrialRunner({self.trial_runner_id}, {self.environment}"
+            f"""[trial_runner_id={self.environment.parameters.get("trial_runner_id")}])"""
+        )
+
     @property
     def trial_runner_id(self) -> int:
         """Get the TrialRunner's id."""
