@@ -145,6 +145,10 @@
     ],
     "isort.check": true,
     "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.unusedImports": "explicit"
+        },
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true,
         "editor.formatOnSaveMode": "modifications",
@@ -154,6 +158,10 @@
             // python code formatting limit
             99
         ]
+    },
+    "pylint.severity": {
+        // display refactor warnings as information messages
+        "refactor": "Information"
     },
     // See Also .vscode/launch.json for environment variable args to pytest during debug sessions.
     // For the rest, see setup.cfg
