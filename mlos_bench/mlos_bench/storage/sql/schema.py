@@ -165,7 +165,7 @@ class DbSchema:
             Column("exp_id", String(self._ID_LEN), nullable=False),
             Column("trial_id", Integer, nullable=False),
             Column("config_id", Integer, nullable=False),
-            Column("trial_runner_id", Integer, nullable=True, default="NULL"),
+            Column("trial_runner_id", Integer, nullable=True, default=None),
             Column("ts_start", DateTime, nullable=False),
             Column("ts_end", DateTime),
             # Should match the text IDs of `mlos_bench.environments.Status` enum:
