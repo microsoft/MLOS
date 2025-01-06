@@ -38,20 +38,30 @@ class SqlStorage(Storage):
         self._repr = f"{self._url.get_backend_name()}:{self._url.database}"
         _LOG.info("Connect to the database: %s", self)
         self._engine = create_engine(self._url, echo=self._log_sql)
-        self._db_schema: DbSchema
+        self._db_schema = DbSchema(self._engine)
+        self._schema_created = False
+        self._schema_updated = False
         if not lazy_schema_create:
             assert self._schema
+            self.update_schema()
         else:
             _LOG.info("Using lazy schema create for database: %s", self)
 
     @property
     def _schema(self) -> DbSchema:
         """Lazily create schema upon first access."""
-        if not hasattr(self, "_db_schema"):
-            self._db_schema = DbSchema(self._engine).create()
+        if not self._schema_created:
+            self._db_schema.create()
+            self._schema_created = True
             if _LOG.isEnabledFor(logging.DEBUG):
-                _LOG.debug("DDL statements:\n%s", self._schema)
+                _LOG.debug("DDL statements:\n%s", self._db_schema)
         return self._db_schema
+
+    def update_schema(self) -> None:
+        """Update the database schema."""
+        if not self._schema_updated:
+            self._schema.update()
+            self._schema_updated = True
 
     def __repr__(self) -> str:
         return self._repr
