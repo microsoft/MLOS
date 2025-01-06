@@ -37,7 +37,7 @@ class Trial(Storage.Trial):
         experiment_id: str,
         trial_id: int,
         config_id: int,
-        trial_runner_id: int | None,
+        trial_runner_id: int | None = None,
         opt_targets: dict[str, Literal["min", "max"]],
         config: dict[str, Any] | None = None,
     ):
