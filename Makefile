@@ -244,9 +244,9 @@ mlos_viz/dist/tmp/mlos_viz-latest.tar.gz: PACKAGE_NAME := mlos_viz
 	rm -f $(MODULE_NAME)/dist/tmp/$(PACKAGE_NAME)-latest.tar{,.gz}
 	rm -rf $(MODULE_NAME)/build/
 	rm -rf $(MODULE_NAME)/$(MODULE_NAME).egg-info/
-	cd $(MODULE_NAME)/ && conda run -n ${CONDA_ENV_NAME} python3 -m build --sdist
+	cd $(MODULE_NAME)/ && conda run -n ${CONDA_ENV_NAME} python -m build --sdist
 	# Do some sanity checks on the sdist tarball output.
-	BASE_VERS=`conda run -n ${CONDA_ENV_NAME} python3 $(MODULE_NAME)/$(MODULE_NAME)/version.py | cut -d. -f-2 | egrep -x '[0-9.]+' || echo err-unknown-base-version` \
+	BASE_VERS=`conda run -n ${CONDA_ENV_NAME} python $(MODULE_NAME)/$(MODULE_NAME)/version.py | cut -d. -f-2 | egrep -x '[0-9.]+' || echo err-unknown-base-version` \
 		&& TAG_VERS=`git tag -l --sort=-version:refname | egrep -x '^v[0-9.]+' | head -n1 | sed 's/^v//' | cut -d. -f-2 | egrep -x '[0-9.]+' || echo err-unknown-tag-version` \
 		&& ls $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar.gz | grep -F -e $$BASE_VERS -e $$TAG_VERS
 	# Make sure tests were excluded.
@@ -267,9 +267,9 @@ mlos_viz/dist/tmp/mlos_viz-latest.tar.gz: PACKAGE_NAME := mlos_viz
 	rm -f $(MODULE_NAME)/dist/tmp/$(MODULE_NAME)-latest-py3-none-any.whl
 	rm -rf $(MODULE_NAME)/build/
 	rm -rf $(MODULE_NAME)/$(MODULE_NAME).egg-info/
-	cd $(MODULE_NAME)/ && conda run -n ${CONDA_ENV_NAME} python3 -m build --wheel
+	cd $(MODULE_NAME)/ && conda run -n ${CONDA_ENV_NAME} python -m build --wheel
 	# Do some sanity checks on the wheel output.
-	BASE_VERS=`conda run -n ${CONDA_ENV_NAME} python3 $(MODULE_NAME)/$(MODULE_NAME)/version.py | cut -d. -f-2 | egrep -o '^[0-9.]+' || echo err-unknown-base-version` \
+	BASE_VERS=`conda run -n ${CONDA_ENV_NAME} python $(MODULE_NAME)/$(MODULE_NAME)/version.py | cut -d. -f-2 | egrep -o '^[0-9.]+' || echo err-unknown-base-version` \
 		&& TAG_VERS=`git tag -l --sort=-version:refname | egrep -x '^v[0-9.]+' | head -n1 | sed 's/^v//' | cut -d. -f-2 | egrep -x '[0-9.]+' || echo err-unknown-tag-version` \
 		&& ls $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl | grep -F -e $$BASE_VERS -e $$TAG_VERS
 	# Check to make sure the tests were excluded from the wheel.
@@ -319,7 +319,7 @@ build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_viz/dist/tmp/mlos_viz-la
 #dist-test: clean-dist
 dist-test: dist-test-env build/dist-test.$(PYTHON_VERSION).build-stamp
 
-# Unnecessary if we invoke it as "python3 -m pytest ..."
+# Unnecessary if we invoke it as "python -m pytest ..."
 build/dist-test.$(PYTHON_VERSION).build-stamp: $(PYTHON_FILES) build/dist-test-env.$(PYTHON_VERSION).build-stamp
 	# Make sure we're using the packages from the wheel.
 	# Note: this will pick up the local directory and change the output if we're using PYTHONPATH=.
@@ -327,14 +327,14 @@ build/dist-test.$(PYTHON_VERSION).build-stamp: $(PYTHON_FILES) build/dist-test-e
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip list --verbose | grep mlos-bench | grep ' pip'
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip list --verbose | grep mlos-viz | grep ' pip'
 	# Run a simple test that uses the mlos_core wheel (full tests can be checked with `make test`).
-	conda run -n mlos-dist-test-$(PYTHON_VERSION) python3 -m pytest mlos_core/mlos_core/tests/spaces/spaces_test.py
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) python -m pytest mlos_core/mlos_core/tests/spaces/spaces_test.py
 	# Run a simple test that uses the mlos_bench wheel (full tests can be checked with `make test`).
-	conda run -n mlos-dist-test-$(PYTHON_VERSION) python3 -m pytest mlos_bench/mlos_bench/tests/environments/mock_env_test.py
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) python -m pytest mlos_bench/mlos_bench/tests/environments/mock_env_test.py
 	# Run a basic cli tool check.
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) mlos_bench --help 2>&1 | grep '^usage: mlos_bench '
 	# Run a simple test that uses the mlos_viz wheel (full tests can be checked with `make test`).
 	# To do that, we need the fixtures from mlos_bench, so make those available too.
-	PYTHONPATH=mlos_bench conda run -n mlos-dist-test-$(PYTHON_VERSION) python3 -m pytest mlos_viz/mlos_viz/tests/test_dabl_plot.py
+	PYTHONPATH=mlos_bench conda run -n mlos-dist-test-$(PYTHON_VERSION) python -m pytest mlos_viz/mlos_viz/tests/test_dabl_plot.py
 	touch $@
 
 clean-dist-test: clean-dist-test-env
@@ -378,7 +378,7 @@ build/publish.${CONDA_ENV_NAME}.%.py.build-stamp: $(PUBLISH_DEPS)
 	test `ls -1 mlos_*/dist/*.whl | wc -l` -eq 3
 	# Publish the files to the specified repository.
 	repo_name=`echo "$@" | sed -r -e 's|build/publish\.[^.]+\.||' -e 's|\.py\.build-stamp||'` \
-		&& conda run -n ${CONDA_ENV_NAME} python3 -m twine upload --repository $$repo_name \
+		&& conda run -n ${CONDA_ENV_NAME} python -m twine upload --repository $$repo_name \
 			mlos_*/dist/mlos*-*.tar.gz mlos_*/dist/mlos*-*.whl
 	touch $@
 
