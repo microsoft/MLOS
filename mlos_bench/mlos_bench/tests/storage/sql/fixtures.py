@@ -134,7 +134,7 @@ def _dummy_run_exp(
 
     rand_seed(SEED)
 
-    trial_runners: List[TrialRunner] = []
+    trial_runners: list[TrialRunner] = []
     global_config: dict = {}
     # TODO: Make a utility function for this?
     for i in range(1, TRIAL_RUNNER_COUNT):
