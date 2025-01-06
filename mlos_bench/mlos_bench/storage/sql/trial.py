@@ -11,6 +11,7 @@ import logging
 from datetime import datetime
 from typing import Any, Literal
 
+from sqlalchemy import or_
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import IntegrityError
 
@@ -36,6 +37,7 @@ class Trial(Storage.Trial):
         experiment_id: str,
         trial_id: int,
         config_id: int,
+        trial_runner_id: int | None,
         opt_targets: dict[str, Literal["min", "max"]],
         config: dict[str, Any] | None = None,
     ):
@@ -44,11 +46,47 @@ class Trial(Storage.Trial):
             experiment_id=experiment_id,
             trial_id=trial_id,
             tunable_config_id=config_id,
+            trial_runner_id=trial_runner_id,
             opt_targets=opt_targets,
             config=config,
         )
         self._engine = engine
         self._schema = schema
+
+    def assign_trial_runner(self, trial_runner_id: int) -> int:
+        trial_runner_id = super().assign_trial_runner(trial_runner_id)
+        with self._engine.begin() as conn:
+            conn.execute(
+                self._schema.trial.update()
+                .where(
+                    self._schema.trial.c.exp_id == self._experiment_id,
+                    self._schema.trial.c.trial_id == self._trial_id,
+                    (
+                        or_(
+                            self._schema.trial.c.trial_runner_id.is_(None),
+                            self._schema.trial.c.status == str(Status.PENDING),
+                        )
+                    ),
+                )
+                .values(trial_runner_id=trial_runner_id)
+            )
+        # Guard against concurrent updates:
+        with self._engine.begin() as conn:
+            trial_runner_rs = conn.execute(
+                self._schema.trial.select()
+                .with_only_columns(
+                    self._schema.trial.c.trial_runner_id,
+                )
+                .where(
+                    self._schema.trial.c.exp_id == self._experiment_id,
+                    self._schema.trial.c.trial_id == self._trial_id,
+                )
+            )
+            trial_runner_row = trial_runner_rs.fetchone()
+            assert trial_runner_row
+            self._trial_runner_id = trial_runner_row[0]
+            assert isinstance(self._trial_runner_id, int)
+        return self._trial_runner_id
 
     def _save_new_config_data(self, new_config_data: dict[str, int | float | str]) -> None:
         with self._engine.begin() as conn:

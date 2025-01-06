@@ -222,7 +222,7 @@ class Scheduler(metaclass=ABCMeta):
                 trial,
                 trial_runner,
             )
-        trial.add_new_config_data({"trial_runner_id": trial_runner.trial_runner_id})
+        trial.assign_trial_runner(trial_runner.trial_runner_id)
         return trial_runner
 
     def get_trial_runner(self, trial: Storage.Trial) -> TrialRunner:

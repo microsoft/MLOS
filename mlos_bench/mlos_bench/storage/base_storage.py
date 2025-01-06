@@ -408,7 +408,7 @@ class Storage(metaclass=ABCMeta):
             experiment_id: str,
             trial_id: int,
             tunable_config_id: int,
-            trial_runner_id: int | None = None,
+            trial_runner_id: int | None,
             opt_targets: dict[str, Literal["min", "max"]],
             config: dict[str, Any] | None = None,
         ):
@@ -455,14 +455,22 @@ class Storage(metaclass=ABCMeta):
             """
             return self._tunables
 
+        @abstractmethod
         def assign_trial_runner(self, trial_runner_id: int) -> int:
             """Assign the trial to a specific TrialRunner."""
             if self._trial_runner_id is None or self._status.is_pending():
-                _LOG.debug("%sAssigning trial %s to trial runner %d", "Re-" if self._trial_runner_id else "", self, trial_runner_id,)
+                _LOG.debug(
+                    "%sAssigning trial %s to trial runner %d",
+                    "Re-" if self._trial_runner_id else "",
+                    self,
+                    trial_runner_id,
+                )
                 self._trial_runner_id = trial_runner_id
             else:
                 _LOG.warning(
-                    "Trial %s already assigned to a runner, cannot switch to trial runner %d", self, self._trial_runner_id,
+                    "Trial %s already assigned to a trial runner, cannot switch to %d",
+                    self,
+                    self._trial_runner_id,
                 )
             return self._trial_runner_id
 
@@ -478,13 +486,15 @@ class Storage(metaclass=ABCMeta):
             """
             config = self._config.copy()
             config.update(global_config or {})
+            # Here we add some built-in variables for the trial to use while it's running.
             config["experiment_id"] = self._experiment_id
             config["trial_id"] = self._trial_id
             trial_runner_id = self.trial_runner_id
             if trial_runner_id is not None:
-                config.setdefault("trial_runner_id", trial_runner_id)
+                config["trial_runner_id"] = trial_runner_id
             return config
 
+        # NOTE: This may no longer be necessary with the new schema.
         def add_new_config_data(
             self,
             new_config_data: dict[str, int | float | str],
@@ -502,7 +512,6 @@ class Storage(metaclass=ABCMeta):
             ValueError
                 If any of the data already exists.
             """
-
             for key, value in new_config_data.items():
                 if key in self._config:
                     raise ValueError(
