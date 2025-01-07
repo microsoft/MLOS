@@ -137,7 +137,7 @@ def _dummy_run_exp(
     trial_runners: list[TrialRunner] = []
     global_config: dict = {}
     # TODO: Make a utility function for this?
-    for i in range(1, TRIAL_RUNNER_COUNT):
+    for i in range(1, TRIAL_RUNNER_COUNT + 1):
         # Create a new global config for each Environment with a unique trial_runner_id for it.
         global_config_copy = global_config.copy()
         global_config_copy["trial_runner_id"] = i
