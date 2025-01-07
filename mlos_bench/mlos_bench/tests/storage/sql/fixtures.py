@@ -136,7 +136,7 @@ def _dummy_run_exp(
 
     trial_runners: list[TrialRunner] = []
     global_config: dict = {}
-    # TODO: Make a utility function for this?
+    # Make a utility function for this?  Rather difficult due to the need for unique copies to avoid parallelism issues.
     for i in range(1, TRIAL_RUNNER_COUNT + 1):
         # Create a new global config for each Environment with a unique trial_runner_id for it.
         global_config_copy = global_config.copy()
@@ -150,7 +150,8 @@ def _dummy_run_exp(
                 "mock_env_metrics": ["score"],
             },
             global_config=global_config_copy,
-            tunables=exp.tunables,
+            tunables=exp.tunables.copy(),
+            service=None,  # Note: each env should have its own copy of a service
         )
         trial_runners.append(TrialRunner(trial_runner_id=i, env=env))
 

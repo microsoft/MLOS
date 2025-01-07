@@ -89,8 +89,6 @@ class Launcher:
             log_handler.setFormatter(logging.Formatter(_LOG_FORMAT))
             logging.root.addHandler(log_handler)
 
-        self._parent_service: Service = LocalExecService(parent=self._config_loader)
-
         # Prepare global_config from a combination of global config files, cli
         # configs, and cli args.
         args_dict = vars(args)
@@ -148,12 +146,6 @@ class Launcher:
 
         # --service cli args should override the config file values.
         service_files: list[str] = config.get("services", []) + (args.service or [])
-        assert isinstance(self._parent_service, SupportsConfigLoading)
-        self._parent_service = self._parent_service.load_services(
-            service_files,
-            self.global_config,
-            self._parent_service,
-        )
 
         env_path = args.environment or config.get("environment")
         if not env_path:
@@ -167,15 +159,26 @@ class Launcher:
         self.trial_runners: list[TrialRunner] = []
         for trial_runner_id in range(self.global_config["num_trial_runners"]):
             # Create a new global config for each Environment with a unique trial_runner_id for it.
-            env_global_config = self.global_config.copy()
-            env_global_config["trial_runner_id"] = trial_runner_id
+            # But let each other part of the Environment Services be a copy.
+            # This is important in case multiple TrialRunners are running in parallel.
+            global_config_copy = self.global_config.copy()
+            global_config_copy["trial_runner_id"] = trial_runner_id
+            # Each parent service starts with at least a LocalExecService in addition to the ConfigLoader.
+            parent_service: Service = LocalExecService(parent=self._config_loader)
+            assert isinstance(parent_service, SupportsConfigLoading)
+            parent_service = parent_service.load_services(
+                service_files,
+                global_config_copy,
+                parent_service,
+            )
             env = self._config_loader.load_environment(
                 self.root_env_config,
                 TunableGroups(),
-                env_global_config,
-                service=self._parent_service,
+                global_config_copy,
+                service=parent_service,
             )
             self.trial_runners.append(TrialRunner(trial_runner_id, env))
+
         _LOG.info(
             "Init %d trial runners for environments: %s",
             len(self.trial_runners),
