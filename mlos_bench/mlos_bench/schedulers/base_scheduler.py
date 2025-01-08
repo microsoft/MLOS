@@ -93,7 +93,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         self._trial_runner_ids = list(self._trial_runners.keys())
         assert len(self._trial_runner_ids) == len(
             self._trial_runners
-        ), "Duplicate TrialRunner ids detected."
+        ), f"Duplicate TrialRunner ids detected: {trial_runners}"
 
         self._optimizer = optimizer
         self._storage = storage
