@@ -10,7 +10,7 @@ import logging
 from collections.abc import Iterable, Sequence
 from datetime import datetime
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ContextManager, Literal
 
 from pytz import UTC
 
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 _LOG = logging.getLogger(__name__)
 
 
-class Environment(metaclass=abc.ABCMeta):
+class Environment(ContextManager, metaclass=abc.ABCMeta):
     # pylint: disable=too-many-instance-attributes
     """An abstract base of all benchmark environments."""
 

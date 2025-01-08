@@ -10,7 +10,7 @@ from abc import ABCMeta, abstractmethod
 from collections.abc import Iterable
 from datetime import datetime
 from types import TracebackType
-from typing import Any, Literal
+from typing import Any, ContextManager, Literal
 
 from pytz import UTC
 
@@ -25,7 +25,7 @@ from mlos_bench.util import merge_parameters
 _LOG = logging.getLogger(__name__)
 
 
-class Scheduler(metaclass=ABCMeta):
+class Scheduler(ContextManager, metaclass=ABCMeta):
     # pylint: disable=too-many-instance-attributes
     """Base class for the optimization loop scheduling policies."""
 
