@@ -126,9 +126,10 @@ def test_schedule_trial(exp_storage: Storage.Experiment, tunable_groups: Tunable
 
 def test_rr_scheduling(exp_data: ExperimentData) -> None:
     """Checks that the scheduler produced basic round-robin scheduling of Trials across
-    Runners.
+    TrialRunners.
     """
     for trial_id in range(1, CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT):
+        # User visible IDs start from 1.
         expected_config_id = trial_id // CONFIG_TRIAL_REPEAT_COUNT + 1
         expected_repeat_num = (trial_id - 1) % CONFIG_TRIAL_REPEAT_COUNT + 1
         expected_runner_id = (trial_id - 1) % TRIAL_RUNNER_COUNT + 1

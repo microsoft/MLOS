@@ -14,7 +14,11 @@ from pytz import UTC
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.status import Status
 from mlos_bench.event_loop_context import EventLoopContext
+from mlos_bench.services.base_service import Service
+from mlos_bench.services.local.local_exec import LocalExecService
+from mlos_bench.services.types import SupportsConfigLoading
 from mlos_bench.storage.base_storage import Storage
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
 
@@ -98,7 +102,7 @@ class TrialRunner:
 
         Returns
         -------
-        (trial_status, trial_score) : (Status, Optional[Dict[str, float]])
+        (trial_status, trial_score) : (Status, dict[str, float] | None)
             Status and results of the trial.
         """
         assert self._in_context

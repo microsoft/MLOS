@@ -34,7 +34,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         *,
         config: dict[str, Any],
         global_config: dict[str, Any],
-        trial_runners: list[TrialRunner],
+        trial_runners: Iterable[TrialRunner],
         optimizer: Optimizer,
         storage: Storage,
         root_env_config: str,
@@ -51,7 +51,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
             The configuration for the Scheduler.
         global_config : dict
             The global configuration for the experiment.
-        trial_runner : List[TrialRunner]
+        trial_runner : Iterable[TrialRunner]
             The set of TrialRunner(s) (and associated Environment(s)) to benchmark/optimize.
         optimizer : Optimizer
             The Optimizer to use.
@@ -84,12 +84,20 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         self._do_teardown = bool(config.get("teardown", True))
 
         self._experiment: Storage.Experiment | None = None
-        self._trial_runners = trial_runners
-        assert self._trial_runners, "At least one TrialRunner is required"
+
+        assert trial_runners, "At least one TrialRunner is required"
+        self._trial_runners = {
+            trial_runner.trial_runner_id: trial_runner for trial_runner in trial_runners
+        }
+        self._current_trial_runner_idx = 0
+        self._trial_runner_ids = list(self._trial_runners.keys())
+        assert len(self._trial_runner_ids) == len(
+            self._trial_runners
+        ), "Duplicate TrialRunner ids detected."
+
         self._optimizer = optimizer
         self._storage = storage
         self._root_env_config = root_env_config
-        self._current_trial_runner_idx = 0
         self._last_trial_id = -1
         self._ran_trials: list[Storage.Trial] = []
 
@@ -140,21 +148,24 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         """
         Gets the root (prototypical) Environment from the first TrialRunner.
 
-        Note: All TrialRunners have the same Environment config and are made
+        Notes
+        -----
+        All TrialRunners have the same Environment config and are made
         unique by their use of the unique trial_runner_id assigned to each
         TrialRunner's Environment's global_config.
         """
-        return self._trial_runners[0].environment
+        # Use the first TrialRunner's Environment as the root Environment.
+        return self._trial_runners[self._trial_runner_ids[0]].environment
 
     @property
-    def trial_runners(self) -> list[TrialRunner]:
-        """Gets the list of Trial Runners."""
+    def trial_runners(self) -> dict[int, TrialRunner]:
+        """Gets the set of Trial Runners."""
         return self._trial_runners
 
     @property
     def environments(self) -> Iterable[Environment]:
         """Gets the Environment from the TrialRunners."""
-        return (trial_runner.environment for trial_runner in self._trial_runners)
+        return (trial_runner.environment for trial_runner in self._trial_runners.values())
 
     @property
     def optimizer(self) -> Optimizer:
@@ -182,7 +193,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
             def assign_trial_runner(
                 self,
                 trial: Storage.Trial,
-                trial_runner: Optional[TrialRunner] = None,
+                trial_runner: TrialRunner | None = None,
             ) -> TrialRunner:
                 if trial_runner is None:
                     # Implement a more sophisticated policy here.
@@ -199,7 +210,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         ----------
         trial : Storage.Trial
             The trial to assign a TrialRunner to.
-        trial_runner : Optional[TrialRunner]
+        trial_runner : TrialRunner | None
             The ID of the TrialRunner to assign to the given Trial.
 
         Returns
@@ -216,8 +227,8 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
             # Override in the subclass for a more sophisticated policy.
             trial_runner_idx = self._current_trial_runner_idx
             self._current_trial_runner_idx += 1
-            self._current_trial_runner_idx %= len(self._trial_runners)
-            trial_runner = self._trial_runners[trial_runner_idx]
+            self._current_trial_runner_idx %= len(self._trial_runner_ids)
+            trial_runner = self._trial_runners[self._trial_runner_ids[trial_runner_idx]]
             _LOG.info(
                 "Trial %s missing trial_runner_id. Assigning %s via basic round-robin policy.",
                 trial,
@@ -242,8 +253,12 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         if trial.trial_runner_id is None:
             self.assign_trial_runner(trial, trial_runner=None)
         assert trial.trial_runner_id is not None
-        # trial_runner_id is 1-based, but the list is 0-based.
-        trial_runner = self._trial_runners[trial.trial_runner_id - 1]
+        trial_runner = self._trial_runners.get(trial.trial_runner_id)
+        if trial_runner is None:
+            raise ValueError(
+                f"TrialRunner {trial.trial_runner_id} for Trial {trial} "
+                f"not found: {self._trial_runners}"
+            )
         assert trial_runner.trial_runner_id == trial.trial_runner_id
         return trial_runner
 
@@ -276,7 +291,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
             tunables=self.root_environment.tunable_params,
             opt_targets=self.optimizer.targets,
         ).__enter__()
-        for trial_runner in self.trial_runners:
+        for trial_runner in self._trial_runners.values():
             trial_runner.__enter__()
         self._in_context = True
         return self
@@ -294,7 +309,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
             assert ex_type and ex_val
             _LOG.warning("Scheduler END :: %s", self, exc_info=(ex_type, ex_val, ex_tb))
         assert self._in_context
-        for trial_runner in self.trial_runners:
+        for trial_runner in self._trial_runners.values():
             trial_runner.__exit__(ex_type, ex_val, ex_tb)
         assert self._experiment is not None
         self._experiment.__exit__(ex_type, ex_val, ex_tb)
@@ -328,7 +343,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         """
         assert self.experiment is not None
         if self._do_teardown:
-            for trial_runner in self.trial_runners:
+            for trial_runner in self._trial_runners.values():
                 assert not trial_runner.is_running
                 trial_runner.teardown()
 
