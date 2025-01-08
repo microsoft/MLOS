@@ -9,8 +9,8 @@ from random import seed as rand_seed
 
 import pytest
 
-from mlos_bench.environments.mock_env import MockEnv
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
+from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.schedulers.sync_scheduler import SyncScheduler
 from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.storage.base_experiment_data import ExperimentData
@@ -136,24 +136,28 @@ def _dummy_run_exp(
 
     trial_runners: list[TrialRunner] = []
     global_config: dict = {}
-    # Make a utility function for this?  Rather difficult due to the need for unique copies to avoid parallelism issues.
-    for i in range(1, TRIAL_RUNNER_COUNT + 1):
-        # Create a new global config for each Environment with a unique trial_runner_id for it.
-        global_config_copy = global_config.copy()
-        global_config_copy["trial_runner_id"] = i
-        env = MockEnv(
-            name="Test Env",
-            config={
-                "tunable_params": list(exp.tunables.get_covariant_group_names()),
-                "mock_env_seed": SEED,
-                "mock_env_range": [60, 120],
-                "mock_env_metrics": ["score"],
-            },
-            global_config=global_config_copy,
-            tunables=exp.tunables.copy(),
-            service=None,  # Note: each env should have its own copy of a service
-        )
-        trial_runners.append(TrialRunner(trial_runner_id=i, env=env))
+    config_loader = ConfigPersistenceService()
+    tunable_params = ",".join(f'"{name}"' for name in exp.tunables.get_covariant_group_names())
+    mock_env_json = f"""
+    {{
+        "class": "mlos_bench.environments.mock_env.MockEnv",
+        "name": "Test Env",
+        "config": {{
+            "tunable_params": [{tunable_params}],
+            "mock_env_seed": {SEED},
+            "mock_env_range": [60, 120],
+            "mock_env_metrics": ["score"]
+        }}
+    }}
+    """
+    trial_runners = TrialRunner.create_from_json(
+        config_loader=config_loader,
+        global_config=global_config,
+        tunable_groups=exp.tunables,
+        env_json=mock_env_json,
+        svcs_json=None,
+        num_trial_runners=TRIAL_RUNNER_COUNT,
+    )
 
     opt = MockOptimizer(
         tunables=exp.tunables,

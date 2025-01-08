@@ -15,6 +15,7 @@ from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.status import Status
 from mlos_bench.event_loop_context import EventLoopContext
 from mlos_bench.services.base_service import Service
+from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.services.types import SupportsConfigLoading
 from mlos_bench.storage.base_storage import Storage
@@ -33,6 +34,81 @@ class TrialRunner:
     Multiple TrialRunners can be used in a multi-processing pool to run multiple trials
     in parallel, for instance.
     """
+
+    @classmethod
+    def create_from_json(
+        cls,
+        *,
+        config_loader: Service,
+        env_json: str,
+        svcs_json: str | list[str] | None = None,
+        num_trial_runners: int = 1,
+        tunable_groups: TunableGroups | None = None,
+        global_config: dict[str, Any] | None = None,
+    ) -> list["TrialRunner"]:  # pylint: disable=too-many-arguments
+        """
+        Create a list of TrialRunner instances, and their associated Environments
+        and Services, from JSON configurations.
+
+        Since each TrialRunner instance is independent, they can be run in parallel,
+        and hence must each get their own copy of the Environment and Services to
+        operate on.
+
+        The global_config is shared across all TrialRunners, but each copy gets its
+        own unique trial_runner_id.
+
+        Parameters
+        ----------
+        config_loader : Service
+            A service instance capable of loading configuration (i.e., SupportsConfigLoading).
+        env_json : str
+            JSON file or string representing the environment configuration.
+        svcs_json : str | list[str] | None
+            JSON file(s) or string(s) representing the Services configuration.
+        num_trial_runners : int
+            Number of TrialRunner instances to create. Default is 1.
+        tunable_groups : TunableGroups | None
+            TunableGroups instance to use as the parent Tunables for the
+            environment. Default is None.
+        global_config : dict[str, Any] | None
+            Global configuration parameters. Default is None.
+
+        Returns
+        -------
+        list[TrialRunner]
+            A list of TrialRunner instances created from the provided configuration.
+        """
+        assert isinstance(config_loader, SupportsConfigLoading)
+        svcs_json = svcs_json or []
+        tunable_groups = tunable_groups or TunableGroups()
+        global_config = global_config or {}
+        trial_runners: list[TrialRunner] = []
+        for trial_runner_id in range(1, num_trial_runners + 1):  # use 1-based indexing
+            # Make a fresh Environment and Services copy for each TrialRunner.
+            # Give each global_config copy its own unique trial_runner_id.
+            # This is important in case multiple TrialRunners are running in parallel.
+            global_config_copy = global_config.copy()
+            global_config_copy["trial_runner_id"] = trial_runner_id
+            # Each Environment's parent service starts with at least a
+            # LocalExecService in addition to the ConfigLoader.
+            parent_service: Service = ConfigPersistenceService(
+                config={"config_path": config_loader.config_paths},
+                global_config=global_config_copy,
+            )
+            parent_service = LocalExecService(parent=parent_service)
+            parent_service = config_loader.load_services(
+                svcs_json,
+                global_config_copy,
+                parent_service,
+            )
+            env = config_loader.load_environment(
+                env_json,
+                tunable_groups.copy(),
+                global_config_copy,
+                service=parent_service,
+            )
+            trial_runners.append(TrialRunner(trial_runner_id, env))
+        return trial_runners
 
     def __init__(self, trial_runner_id: int, env: Environment) -> None:
         self._trial_runner_id = trial_runner_id

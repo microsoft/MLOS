@@ -23,6 +23,16 @@ if TYPE_CHECKING:
 class SupportsConfigLoading(Protocol):
     """Protocol interface for helper functions to lookup and load configs."""
 
+    @property
+    def config_paths(self) -> list[str]:
+        """
+        Gets the list of config paths this service will search for config files.
+
+        Returns
+        -------
+        list[str]
+        """
+
     def resolve_path(self, file_path: str, extra_paths: Iterable[str] | None = None) -> str:
         """
         Prepend the suitable `_config_path` to `path` if the latter is not absolute. If

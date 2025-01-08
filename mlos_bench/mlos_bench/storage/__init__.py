@@ -119,6 +119,7 @@ sqlite::memory:
 ...     # Create a dummy trial.
 ...     trial = experiment.new_trial(tunables=tunables)
 ...     # Pretend something ran with that trial and we have the results now.
+...     # NOTE: Normally this would run through a TrialRunner via a Scheduler.
 ...     _ = trial.update(Status.SUCCEEDED, datetime.now(), {"objective_metric": 42})
 >>> #
 >>> # Now, once there's data to look at, in a Jupyter notebook or similar,

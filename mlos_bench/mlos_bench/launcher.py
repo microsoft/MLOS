@@ -26,8 +26,6 @@ from mlos_bench.schedulers.base_scheduler import Scheduler
 from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.config_persistence import ConfigPersistenceService
-from mlos_bench.services.local.local_exec import LocalExecService
-from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -156,28 +154,14 @@ class Launcher:
             )
         self.root_env_config = self._config_loader.resolve_path(env_path)
 
-        self.trial_runners: list[TrialRunner] = []
-        for trial_runner_id in range(self.global_config["num_trial_runners"]):
-            # Create a new global config for each Environment with a unique trial_runner_id for it.
-            # But let each other part of the Environment Services be a copy.
-            # This is important in case multiple TrialRunners are running in parallel.
-            global_config_copy = self.global_config.copy()
-            global_config_copy["trial_runner_id"] = trial_runner_id
-            # Each parent service starts with at least a LocalExecService in addition to the ConfigLoader.
-            parent_service: Service = LocalExecService(parent=self._config_loader)
-            assert isinstance(parent_service, SupportsConfigLoading)
-            parent_service = parent_service.load_services(
-                service_files,
-                global_config_copy,
-                parent_service,
-            )
-            env = self._config_loader.load_environment(
-                self.root_env_config,
-                TunableGroups(),
-                global_config_copy,
-                service=parent_service,
-            )
-            self.trial_runners.append(TrialRunner(trial_runner_id, env))
+        # Create the TrialRunners and their Environments and Services from the JSON files.
+        self.trial_runners = TrialRunner.create_from_json(
+            config_loader=self._config_loader,
+            global_config=self.global_config,
+            svcs_json=service_files,
+            env_json=self.root_env_config,
+            num_trial_runners=self.global_config["num_trial_runners"],
+        )
 
         _LOG.info(
             "Init %d trial runners for environments: %s",
