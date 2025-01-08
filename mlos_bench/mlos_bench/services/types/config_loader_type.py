@@ -153,7 +153,7 @@ class SupportsConfigLoading(Protocol):
             A (possibly empty) collection of tunables to add to the environment.
         global_config : dict | None
             Global parameters to add to the environment config.
-        parent_args : Optional[dict[str, TunableValue]]
+        parent_args : dict[str, TunableValue] | None
             An optional reference of the parent CompositeEnv's const_args used to
             expand dynamic config parameters from.
         service : Service | None
