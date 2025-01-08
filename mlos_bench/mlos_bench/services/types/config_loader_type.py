@@ -100,6 +100,38 @@ class SupportsConfigLoading(Protocol):
             An instance of the `Environment` class initialized with `config`.
         """
 
+    def load_environment(
+        self,
+        json: str,
+        tunables: TunableGroups,
+        global_config: dict[str, Any] | None = None,
+        parent_args: dict[str, TunableValue] | None = None,
+        service: Service | None = None,
+    ) -> Environment:
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
+        """
+        Load and build new :py:class:`.Environment` from the config file or JSON string.
+
+        Parameters
+        ----------
+        json : str
+            The environment JSON configuration file or JSON string.
+        tunables : TunableGroups
+            A (possibly empty) collection of tunables to add to the environment.
+        global_config : dict
+            Global parameters to add to the environment config.
+        parent_args : dict[str, TunableValue]
+            An optional reference of the parent CompositeEnv's const_args used to
+            expand dynamic config parameters from.
+        service : Service
+            An optional reference of the parent service to mix in.
+
+        Returns
+        -------
+        env : Environment
+            A new benchmarking environment.
+        """
+
     def load_environment_list(
         self,
         json: str,
