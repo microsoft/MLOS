@@ -10,7 +10,7 @@ import json
 import logging
 from collections.abc import Callable
 from types import TracebackType
-from typing import Any, Literal
+from typing import Any, ContextManager, Literal
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
@@ -19,7 +19,7 @@ from mlos_bench.util import instantiate_from_config
 _LOG = logging.getLogger(__name__)
 
 
-class Service:
+class Service(ContextManager):
     """An abstract base of all Environment Services and used to build up mix-ins."""
 
     @classmethod
