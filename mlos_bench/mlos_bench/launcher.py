@@ -150,7 +150,7 @@ class Launcher:
         self._parent_service = self._config_loader.load_services(
             service_files,
             self.global_config,
-            parent=self._config_loader,
+            parent=self._parent_service,
         )
 
         env_path = args.environment or config.get("environment")
