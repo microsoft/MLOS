@@ -51,13 +51,13 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         config : dict
             The configuration for the Scheduler.
         global_config : dict
-            The global configuration for the experiment.
+            The global configuration for the Experiment.
         trial_runner : Iterable[TrialRunner]
             The set of TrialRunner(s) (and associated Environment(s)) to benchmark/optimize.
         optimizer : Optimizer
             The Optimizer to use.
         storage : Storage
-            The storage to use.
+            The Storage to use.
         root_env_config : str
             Path to the root Environment configuration.
         """
@@ -194,6 +194,8 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         _LOG.debug("Scheduler START :: %s", self)
         assert self.experiment is None
         assert not self._in_context
+        for trial_runner in self._trial_runners.values():
+            trial_runner.__enter__()
         self._optimizer.__enter__()
         # Start new or resume the existing experiment. Verify that the
         # experiment configuration is compatible with the previous runs.
@@ -207,8 +209,6 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
             tunables=self.root_environment.tunable_params,
             opt_targets=self.optimizer.targets,
         ).__enter__()
-        for trial_runner in self._trial_runners.values():
-            trial_runner.__enter__()
         self._in_context = True
         return self
 
@@ -225,11 +225,11 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
             assert ex_type and ex_val
             _LOG.warning("Scheduler END :: %s", self, exc_info=(ex_type, ex_val, ex_tb))
         assert self._in_context
-        for trial_runner in self._trial_runners.values():
-            trial_runner.__exit__(ex_type, ex_val, ex_tb)
         assert self._experiment is not None
         self._experiment.__exit__(ex_type, ex_val, ex_tb)
         self._optimizer.__exit__(ex_type, ex_val, ex_tb)
+        for trial_runner in self._trial_runners.values():
+            trial_runner.__exit__(ex_type, ex_val, ex_tb)
         self._experiment = None
         self._in_context = False
         return False  # Do not suppress exceptions
