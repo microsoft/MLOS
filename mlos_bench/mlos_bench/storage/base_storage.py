@@ -25,6 +25,7 @@ mlos_bench.storage.base_trial_data.TrialData :
 import logging
 from abc import ABCMeta, abstractmethod
 from collections.abc import Iterator
+from contextlib import AbstractContextManager as ContextManager
 from datetime import datetime
 from types import TracebackType
 from typing import Any, Literal
@@ -132,7 +133,7 @@ class Storage(metaclass=ABCMeta):
             the results of the experiment and related data.
         """
 
-    class Experiment(metaclass=ABCMeta):
+    class Experiment(ContextManager, metaclass=ABCMeta):
         # pylint: disable=too-many-instance-attributes
         """
         Base interface for storing the results of the experiment.
