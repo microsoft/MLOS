@@ -25,8 +25,8 @@ from mlos_bench.optimizers.one_shot_optimizer import OneShotOptimizer
 from mlos_bench.schedulers.base_scheduler import Scheduler
 from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
