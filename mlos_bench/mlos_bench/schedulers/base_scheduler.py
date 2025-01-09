@@ -47,17 +47,17 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         Parameters
         ----------
         config : dict
-            The configuration for the scheduler.
+            The configuration for the Scheduler.
         global_config : dict
-            he global configuration for the experiment.
+            The global configuration for the Experiment.
         environment : Environment
-            The environment to benchmark/optimize.
+            The Environment to optimize.
         optimizer : Optimizer
-            The optimizer to use.
+            The Optimizer to use.
         storage : Storage
-            The storage to use.
+            The Storage to use.
         root_env_config : str
-            Path to the root environment configuration.
+            Path to the root Environment configuration.
         """
         self.global_config = global_config
         config = merge_parameters(
@@ -67,6 +67,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         )
         self._validate_json_config(config)
 
+        self._in_context = False
         self._experiment_id = config["experiment_id"].strip()
         self._trial_id = int(config["trial_id"])
         self._config_id = int(config.get("config_id", -1))
@@ -81,10 +82,10 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
 
         self._do_teardown = bool(config.get("teardown", True))
 
-        self.experiment: Storage.Experiment | None = None
-        self.environment = environment
-        self.optimizer = optimizer
-        self.storage = storage
+        self._experiment: Storage.Experiment | None = None
+        self._environment = environment
+        self._optimizer = optimizer
+        self._storage = storage
         self._root_env_config = root_env_config
         self._last_trial_id = -1
         self._ran_trials: list[Storage.Trial] = []
@@ -126,6 +127,26 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         """
         return self._max_trials
 
+    @property
+    def experiment(self) -> Storage.Experiment | None:
+        """Gets the Experiment Storage."""
+        return self._experiment
+
+    @property
+    def environment(self) -> Environment:
+        """Gets the Experiment Storage."""
+        return self._environment
+
+    @property
+    def optimizer(self) -> Optimizer:
+        """Gets the Optimizer."""
+        return self._optimizer
+
+    @property
+    def storage(self) -> Storage:
+        """Gets the Storage."""
+        return self._storage
+
     def __repr__(self) -> str:
         """
         Produce a human-readable version of the Scheduler (mostly for logging).
@@ -141,13 +162,14 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         """Enter the scheduler's context."""
         _LOG.debug("Scheduler START :: %s", self)
         assert self.experiment is None
+        assert not self._in_context
         self.environment.__enter__()
         self.optimizer.__enter__()
         # Start new or resume the existing experiment. Verify that the
         # experiment configuration is compatible with the previous runs.
         # If the `merge` config parameter is present, merge in the data
         # from other experiments and check for compatibility.
-        self.experiment = self.storage.experiment(
+        self._experiment = self.storage.experiment(
             experiment_id=self._experiment_id,
             trial_id=self._trial_id,
             root_env_config=self._root_env_config,
@@ -155,6 +177,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
             tunables=self.environment.tunable_params,
             opt_targets=self.optimizer.targets,
         ).__enter__()
+        self._in_context = True
         return self
 
     def __exit__(
@@ -169,16 +192,18 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         else:
             assert ex_type and ex_val
             _LOG.warning("Scheduler END :: %s", self, exc_info=(ex_type, ex_val, ex_tb))
+        assert self._in_context
         assert self.experiment is not None
         self.experiment.__exit__(ex_type, ex_val, ex_tb)
         self.optimizer.__exit__(ex_type, ex_val, ex_tb)
         self.environment.__exit__(ex_type, ex_val, ex_tb)
-        self.experiment = None
+        self._experiment = None
+        self._in_context = False
         return False  # Do not suppress exceptions
 
     @abstractmethod
     def start(self) -> None:
-        """Start the optimization loop."""
+        """Start the scheduling loop."""
         assert self.experiment is not None
         _LOG.info(
             "START: Experiment: %s Env: %s Optimizer: %s",
@@ -190,7 +215,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
             _LOG.info("Root Environment:\n%s", self.environment.pprint())
 
         if self._config_id > 0:
-            tunables = self.load_config(self._config_id)
+            tunables = self.load_tunable_config(self._config_id)
             self.schedule_trial(tunables)
 
     def teardown(self) -> None:
@@ -209,7 +234,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         _LOG.info("Env: %s best score: %s", self.environment, best_score)
         return (best_score, best_config)
 
-    def load_config(self, config_id: int) -> TunableGroups:
+    def load_tunable_config(self, config_id: int) -> TunableGroups:
         """Load the existing tunable configuration from the storage."""
         assert self.experiment is not None
         tunable_values = self.experiment.load_tunable_config(config_id)
@@ -271,13 +296,13 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         config: dict[str, Any] | None = None,
     ) -> None:
         """
-        Add a configuration to the queue of trials.
+        Add a configuration to the queue of trials in the Storage backend.
 
         A wrapper for the `Experiment.new_trial` method.
         """
         assert self.experiment is not None
         trial = self.experiment.new_trial(tunables, ts_start, config)
-        _LOG.info("QUEUE: Add new trial: %s", trial)
+        _LOG.info("QUEUE: Added new trial: %s", trial)
 
     def _run_schedule(self, running: bool = False) -> None:
         """
@@ -306,6 +331,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
 
         Save the results in the storage.
         """
+        assert self._in_context
         assert self.experiment is not None
         self._trial_count += 1
         self._ran_trials.append(trial)
