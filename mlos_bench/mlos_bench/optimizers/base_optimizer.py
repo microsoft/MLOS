@@ -9,6 +9,7 @@ optimizers.
 import logging
 from abc import ABCMeta, abstractmethod
 from collections.abc import Sequence
+from contextlib import AbstractContextManager as ContextManager
 from types import TracebackType
 from typing import Literal
 
@@ -25,7 +26,7 @@ from mlos_bench.util import strtobool
 _LOG = logging.getLogger(__name__)
 
 
-class Optimizer(metaclass=ABCMeta):  # pylint: disable=too-many-instance-attributes
+class Optimizer(ContextManager, metaclass=ABCMeta):  # pylint: disable=too-many-instance-attributes
     """An abstract interface between the benchmarking framework and mlos_core
     optimizers.
     """

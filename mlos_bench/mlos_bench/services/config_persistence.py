@@ -67,7 +67,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             Free-format dictionary of global parameters.
         parent : Service
             An optional parent service that can provide mixin functions.
-        methods : Union[dict[str, Callable], list[Callable], None]
+        methods : dict[str, Callable] | list[Callable] | None
             New methods to register with the service.
         """
         super().__init__(
@@ -166,7 +166,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         Returns
         -------
-        config : Union[dict, list[dict]]
+        config : dict | list[dict]
             Free-format dictionary that contains the configuration.
         """
         assert isinstance(json, str)

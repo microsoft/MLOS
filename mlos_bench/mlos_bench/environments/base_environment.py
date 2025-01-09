@@ -8,6 +8,7 @@ import abc
 import json
 import logging
 from collections.abc import Iterable, Sequence
+from contextlib import AbstractContextManager as ContextManager
 from datetime import datetime
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Literal
@@ -28,7 +29,7 @@ if TYPE_CHECKING:
 _LOG = logging.getLogger(__name__)
 
 
-class Environment(metaclass=abc.ABCMeta):
+class Environment(ContextManager, metaclass=abc.ABCMeta):
     # pylint: disable=too-many-instance-attributes
     """An abstract base of all benchmark environments."""
 
