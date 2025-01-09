@@ -6,7 +6,7 @@
 
 import os
 import sys
-from collections.abc import Generator
+from collections.abc import Iterable
 from typing import Any
 
 import pytest
@@ -152,7 +152,7 @@ def locked_docker_services(
     docker_cleanup: Any,
     docker_setup_teardown_lock: InterProcessLock,
     docker_services_lock: InterProcessReaderWriterLock,
-) -> Generator[DockerServices, Any, None]:
+) -> Iterable[DockerServices]:
     """A locked version of the docker_services fixture to implement xdist single
     instance locking.
     """
