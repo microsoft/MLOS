@@ -70,6 +70,8 @@ repos:
     hooks:
     - id: pydocstyle
       types: [python]
+      additional_dependencies:
+        - tomli
 # Use pylint and mypy from the local (conda) environment so that vscode can reuse them too.
 -   repo: local
     hooks:
