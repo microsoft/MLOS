@@ -93,7 +93,7 @@ class TrialRunner:
             # Each Environment's parent service starts with at least a
             # LocalExecService in addition to the ConfigLoader.
             parent_service: Service = ConfigPersistenceService(
-                config={"config_path": config_loader.config_paths},
+                config={"config_path": config_loader.get_config_paths()},
                 global_config=global_config_copy,
             )
             parent_service = LocalExecService(parent=parent_service)

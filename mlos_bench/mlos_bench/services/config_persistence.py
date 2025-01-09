@@ -78,6 +78,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             self.merge_methods(
                 methods,
                 [
+                    self.get_config_paths,
                     self.resolve_path,
                     self.load_config,
                     self.prepare_class_load,
@@ -114,6 +115,16 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         list[str]
         """
         return list(self._config_path)  # make a copy to avoid modifications
+
+    def get_config_paths(self) -> list[str]:
+        """
+        Gets the list of config paths this service will search for config files.
+
+        Returns
+        -------
+        list[str]
+        """
+        return self.config_paths
 
     def resolve_path(self, file_path: str, extra_paths: Iterable[str] | None = None) -> str:
         """

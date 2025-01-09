@@ -23,8 +23,7 @@ if TYPE_CHECKING:
 class SupportsConfigLoading(Protocol):
     """Protocol interface for helper functions to lookup and load configs."""
 
-    @property
-    def config_paths(self) -> list[str]:
+    def get_config_paths(self) -> list[str]:
         """
         Gets the list of config paths this service will search for config files.
 
