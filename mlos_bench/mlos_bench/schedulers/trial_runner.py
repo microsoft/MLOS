@@ -47,8 +47,8 @@ class TrialRunner:
         global_config: dict[str, Any] | None = None,
     ) -> list["TrialRunner"]:  # pylint: disable=too-many-arguments
         """
-        Create a list of TrialRunner instances, and their associated Environments
-        and Services, from JSON configurations.
+        Create a list of TrialRunner instances, and their associated Environments and
+        Services, from JSON configurations.
 
         Since each TrialRunner instance is independent, they can be run in parallel,
         and hence must each get their own copy of the Environment and Services to

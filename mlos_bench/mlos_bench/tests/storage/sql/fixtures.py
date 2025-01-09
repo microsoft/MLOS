@@ -10,9 +10,9 @@ from random import seed as rand_seed
 import pytest
 
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
-from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.schedulers.sync_scheduler import SyncScheduler
 from mlos_bench.schedulers.trial_runner import TrialRunner
+from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.storage import SqlStorage
 from mlos_bench.tests import SEED
