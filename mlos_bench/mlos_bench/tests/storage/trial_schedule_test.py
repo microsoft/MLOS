@@ -128,13 +128,12 @@ def test_rr_scheduling(exp_data: ExperimentData) -> None:
     """Checks that the scheduler produced basic round-robin scheduling of Trials across
     TrialRunners.
     """
-    for trial_id in range(1, CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT):
+    for trial_id in range(1, CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT + 1):
         # User visible IDs start from 1.
         expected_config_id = (trial_id - 1) // CONFIG_TRIAL_REPEAT_COUNT + 1
         expected_repeat_num = (trial_id - 1) % CONFIG_TRIAL_REPEAT_COUNT + 1
         expected_runner_id = (trial_id - 1) % TRIAL_RUNNER_COUNT + 1
         trial = exp_data.trials[trial_id]
-
         assert trial.trial_id == trial_id, f"Expected trial_id {trial_id} for {trial}"
         assert (
             trial.tunable_config_id == expected_config_id

@@ -69,11 +69,22 @@ def _get_launcher(desc: str, cli_args: str) -> Launcher:
     assert (
         len({trial_runner.environment.__class__ for trial_runner in launcher.trial_runners}) == 1
     )
+    expected_trial_runner_ids = set(range(1, len(launcher.trial_runners) + 1))
     # Make sure that each trial runner has a unique ID.
+    assert {
+        trial_runner.trial_runner_id for trial_runner in launcher.trial_runners
+    } == expected_trial_runner_ids, "Need unique trial_runner_id in TrialRunners"
+    # Make sure that each trial runner environment has a unique ID.
     assert {
         trial_runner.environment.const_args["trial_runner_id"]
         for trial_runner in launcher.trial_runners
-    } == set(range(0, len(launcher.trial_runners)))
+    } == expected_trial_runner_ids, "Need unique trial_runner_id in Environments"
+    # Make sure that each trial runner and environment trial_runner_id match.
+    assert all(
+        trial_runner.trial_runner_id == trial_runner.environment.const_args["trial_runner_id"]
+        for trial_runner in launcher.trial_runners
+    ), "TrialRunner and Environment trial_runner_id mismatch"
+
     return launcher
 
 
