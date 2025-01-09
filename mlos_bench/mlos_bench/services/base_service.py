@@ -9,8 +9,9 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Callable
+from contextlib import AbstractContextManager as ContextManager
 from types import TracebackType
-from typing import Any, ContextManager, Literal
+from typing import Any, Literal
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading

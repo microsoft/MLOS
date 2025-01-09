@@ -8,9 +8,10 @@ import abc
 import json
 import logging
 from collections.abc import Iterable, Sequence
+from contextlib import AbstractContextManager as ContextManager
 from datetime import datetime
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, ContextManager, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from pytz import UTC
 
