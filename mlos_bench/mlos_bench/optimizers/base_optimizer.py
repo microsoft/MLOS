@@ -9,8 +9,9 @@ optimizers.
 import logging
 from abc import ABCMeta, abstractmethod
 from collections.abc import Sequence
+from contextlib import AbstractContextManager as ContextManager
 from types import TracebackType
-from typing import ContextManager, Literal
+from typing import Literal
 
 from ConfigSpace import ConfigurationSpace
 
