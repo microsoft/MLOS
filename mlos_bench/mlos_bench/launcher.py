@@ -27,6 +27,7 @@ from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService
+from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -147,6 +148,7 @@ class Launcher:
         service_files: list[str] = config.get("services", []) + (args.service or [])
         # Add a LocalExecService as the parent service for all other services.
         self._parent_service: Service = LocalExecService(parent=self._config_loader)
+        assert isinstance(self._parent_service, SupportsConfigLoading)
         self._parent_service = self._config_loader.load_services(
             service_files,
             self.global_config,
