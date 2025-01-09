@@ -93,7 +93,7 @@ def test_configspace_quant_repatch() -> None:
     new_meta[QUANTIZATION_BINS_META_KEY] = 21
     hp.meta = new_meta
     monkey_patch_hp_quantization(hp)
-    samples_set = set(hp.sample_value(100, seed=RandomState(SEED)))
+    samples_set: set[int] = set(hp.sample_value(100, seed=RandomState(SEED)))
     quantized_values_new = set(range(5, 96, 10))
     assert samples_set.issubset(set(range(0, 101, 5)))
     assert len(samples_set - quantized_values_new) < len(samples_set)

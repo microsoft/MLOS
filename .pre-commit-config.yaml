@@ -2,12 +2,19 @@
 # See https://pre-commit.com/hooks.html for more hooks
 default_stages: [pre-commit]
 
+# Note "require_serial" actually controls whether that particular hook's files
+# are partitioned and the hook executable called in parallel across them, not
+# whether hooks themselves are parallelized.
+# As such, some hooks (e.g., pylint) which do internal parallelism need it set
+# for effeciency and correctness anyways.
+
 repos:
 #
 # Formatting
 #
-# NOTE: checks that adjust files are marked with the special "manual" stage
-# and "require_serial" so that we can easily call them via `make`
+# NOTE: checks that adjust files are marked with the special "manual" stage so
+# that we can easily call them via `make`.
+#
 #
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -18,15 +25,12 @@ repos:
     -   id: check-toml
     -   id: check-yaml
     -   id: end-of-file-fixer
-        require_serial: true
         stages: [pre-commit, manual]
     # TODO:
     #-   id: pretty-format-json
     #    args: [--autofix, --no-sort-keys]
-    #    require_serial: true
     #    stages: [pre-commit, manual]
     -   id: trailing-whitespace
-        require_serial: true
         stages: [pre-commit, manual]
 -   repo: https://github.com/johann-petrak/licenseheaders
     rev: v0.8.8
@@ -34,32 +38,29 @@ repos:
     -   id: licenseheaders
         files: '\.(sh|cmd|ps1|sql|py)$'
         args: [-t, doc/mit-license.tmpl, -E, .py, .sh, .ps1, .sql, .cmd, -x, mlos_bench/setup.py, mlos_core/setup.py, mlos_viz/setup.py, -f]
-        require_serial: true
         stages: [pre-commit, manual]
 -   repo: https://github.com/asottile/pyupgrade
     rev: v3.19.1
     hooks:
     -   id: pyupgrade
         args: [--py310-plus]
-        require_serial: true
         stages: [pre-commit, manual]
 -   repo: https://github.com/PyCQA/isort
     rev: 5.13.2
     hooks:
     -   id: isort
         require_serial: true
+        args: ["-j", "-1"]
         stages: [pre-commit, manual]
 -   repo: https://github.com/psf/black
     rev: 24.10.0
     hooks:
     -   id: black
-        require_serial: true
         stages: [pre-commit, manual]
 -   repo: https://github.com/PyCQA/docformatter
     rev: 06907d0 # v1.7.5
     hooks:
     -   id: docformatter
-        require_serial: true
         stages: [pre-commit, manual]
 #
 # Linting
@@ -69,6 +70,8 @@ repos:
     hooks:
     - id: pydocstyle
       types: [python]
+      additional_dependencies:
+        - tomli
 # Use pylint and mypy from the local (conda) environment so that vscode can reuse them too.
 -   repo: local
     hooks:
@@ -82,6 +85,7 @@ repos:
         entry: pylint
         language: system
         types: [python]
+        require_serial: true
         args: [
           "-j0",
           "--rcfile=pyproject.toml",
@@ -97,6 +101,7 @@ repos:
         entry: mypy
         language: system
         types: [python]
+        require_serial: true
         exclude: |
             (?x)^(
                 doc/source/conf.py|
