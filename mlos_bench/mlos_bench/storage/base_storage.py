@@ -456,11 +456,11 @@ class Storage(metaclass=ABCMeta):
             return self._tunables
 
         @abstractmethod
-        def assign_trial_runner(self, trial_runner_id: int) -> int:
+        def set_trial_runner(self, trial_runner_id: int) -> int:
             """Assign the trial to a specific TrialRunner."""
             if self._trial_runner_id is None or self._status.is_pending():
                 _LOG.debug(
-                    "%sAssigning trial %s to trial runner %d",
+                    "%sSetting Trial %s to TrialRunner %d",
                     "Re-" if self._trial_runner_id else "",
                     self,
                     trial_runner_id,
@@ -468,7 +468,7 @@ class Storage(metaclass=ABCMeta):
                 self._trial_runner_id = trial_runner_id
             else:
                 _LOG.warning(
-                    "Trial %s already assigned to a trial runner, cannot switch to %d",
+                    "Trial %s already assigned to a TrialRunner, cannot switch to %d",
                     self,
                     self._trial_runner_id,
                 )

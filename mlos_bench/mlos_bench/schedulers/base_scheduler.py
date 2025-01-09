@@ -177,91 +177,6 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         """Gets the Storage."""
         return self._storage
 
-    def assign_trial_runner(
-        self,
-        trial: Storage.Trial,
-        trial_runner: TrialRunner | None = None,
-    ) -> TrialRunner:
-        """
-        Assigns a TrialRunner to the given Trial.
-
-        The base class implements a simple round-robin scheduling algorithm.
-
-        Subclasses can override this method to implement a more sophisticated policy.
-        For instance::
-
-            def assign_trial_runner(
-                self,
-                trial: Storage.Trial,
-                trial_runner: TrialRunner | None = None,
-            ) -> TrialRunner:
-                if trial_runner is None:
-                    # Implement a more sophisticated policy here.
-                    # For example, to assign the Trial to the TrialRunner with the least
-                    # number of running Trials.
-                    # Or assign the Trial to the TrialRunner that hasn't executed this
-                    # TunableValues Config yet.
-                    trial_runner = ...
-                # Call the base class method to assign the TrialRunner in the Trial's metadata.
-                return super().assign_trial_runner(trial, trial_runner)
-                ...
-
-        Parameters
-        ----------
-        trial : Storage.Trial
-            The trial to assign a TrialRunner to.
-        trial_runner : TrialRunner | None
-            The ID of the TrialRunner to assign to the given Trial.
-
-        Returns
-        -------
-        TrialRunner
-            The assigned TrialRunner.
-        """
-        assert (
-            trial.trial_runner_id is None
-        ), f"Trial {trial} already has a TrialRunner assigned: {trial.trial_runner_id}"
-        if trial_runner is None:
-            # Basic round-robin trial runner assignment policy:
-            # fetch and increment the current TrialRunner index.
-            # Override in the subclass for a more sophisticated policy.
-            trial_runner_idx = self._current_trial_runner_idx
-            self._current_trial_runner_idx += 1
-            self._current_trial_runner_idx %= len(self._trial_runner_ids)
-            trial_runner = self._trial_runners[self._trial_runner_ids[trial_runner_idx]]
-            _LOG.info(
-                "Trial %s missing trial_runner_id. Assigning %s via basic round-robin policy.",
-                trial,
-                trial_runner,
-            )
-        trial.assign_trial_runner(trial_runner.trial_runner_id)
-        return trial_runner
-
-    def get_trial_runner(self, trial: Storage.Trial) -> TrialRunner:
-        """
-        Gets the TrialRunner associated with the given Trial.
-
-        Parameters
-        ----------
-        trial : Storage.Trial
-            The trial to get the associated TrialRunner for.
-
-        Returns
-        -------
-        TrialRunner
-        """
-        if trial.trial_runner_id is None:
-            self.assign_trial_runner(trial, trial_runner=None)
-        assert trial.trial_runner_id is not None
-        trial_runner = self._trial_runners.get(trial.trial_runner_id)
-        if trial_runner is None:
-            raise ValueError(
-                f"TrialRunner {trial.trial_runner_id} for Trial {trial} "
-                f"not found: {self._trial_runners}"
-            )
-        assert trial_runner.trial_runner_id == trial.trial_runner_id
-        return trial_runner
-
     def __repr__(self) -> str:
         """
         Produce a human-readable version of the Scheduler (mostly for logging).
@@ -426,11 +341,90 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         """
         assert self.experiment is not None
         trial = self.experiment.new_trial(tunables, ts_start, config)
-        # Select a TrialRunner based on the trial's metadata.
-        # TODO: May want to further split this in the future to support scheduling a
-        # batch of new trials.
-        trial_runner = self.assign_trial_runner(trial, trial_runner=None)
-        _LOG.info("QUEUE: Added new trial: %s (assigned to %s)", trial, trial_runner)
+        _LOG.info("QUEUE: Added new trial: %s", trial)
+
+    def assign_trial_runners(self, trials: Iterable[Storage.Trial]) -> None:
+        """
+        Assigns TrialRunners to the given Trial.
+
+        The base class implements a simple round-robin scheduling algorithm.
+
+        Subclasses can override this method to implement a more sophisticated policy.
+        For instance::
+
+            def assign_trial_runners(
+                self,
+                trials: Iterable[Storage.Trial],
+            ) -> TrialRunner:
+                trial_runners_map = {}
+                # Implement a more sophisticated policy here.
+                # For example, to assign the Trial to the TrialRunner with the least
+                # number of running Trials.
+                # Or assign the Trial to the TrialRunner that hasn't executed this
+                # TunableValues Config yet.
+                for (trial, trial_runner) in trial_runners_map:
+                    # Call the base class method to assign the TrialRunner in the Trial's metadata.
+                    trial.set_trial_runner(trial_runner)
+                ...
+
+        Parameters
+        ----------
+        trials : Iterable[Storage.Trial]
+            The trial to assign a TrialRunner to.
+        """
+        for trial in trials:
+            if trial.trial_runner_id is not None:
+                _LOG.info(
+                    "Trial %s already has a TrialRunner assigned: %s",
+                    trial,
+                    trial.trial_runner_id,
+                )
+                continue
+
+            # Basic round-robin trial runner assignment policy:
+            # fetch and increment the current TrialRunner index.
+            # Override in the subclass for a more sophisticated policy.
+            trial_runner_idx = self._current_trial_runner_idx
+            self._current_trial_runner_idx += 1
+            self._current_trial_runner_idx %= len(self._trial_runner_ids)
+            trial_runner = self._trial_runners[self._trial_runner_ids[trial_runner_idx]]
+            assert trial_runner
+            _LOG.info(
+                "Assigning TrialRunner %s to Trial %s via basic round-robin policy.",
+                trial_runner,
+                trial,
+            )
+            assigned_trial_runner_id = trial.set_trial_runner(trial_runner.trial_runner_id)
+            if assigned_trial_runner_id != trial_runner.trial_runner_id:
+                raise ValueError(
+                    f"Failed to assign TrialRunner {trial_runner} to Trial {trial}: "
+                    f"{assigned_trial_runner_id}"
+                )
+
+    def get_trial_runner(self, trial: Storage.Trial) -> TrialRunner:
+        """
+        Gets the TrialRunner associated with the given Trial.
+
+        Parameters
+        ----------
+        trial : Storage.Trial
+            The trial to get the associated TrialRunner for.
+
+        Returns
+        -------
+        TrialRunner
+        """
+        if trial.trial_runner_id is None:
+            self.assign_trial_runners([trial])
+        assert trial.trial_runner_id is not None
+        trial_runner = self._trial_runners.get(trial.trial_runner_id)
+        if trial_runner is None:
+            raise ValueError(
+                f"TrialRunner {trial.trial_runner_id} for Trial {trial} "
+                f"not found: {self._trial_runners}"
+            )
+        assert trial_runner.trial_runner_id == trial.trial_runner_id
+        return trial_runner
 
     def _run_schedule(self, running: bool = False) -> None:
         """
@@ -439,7 +433,10 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         Check for pending trials in the queue and run them.
         """
         assert self.experiment is not None
-        for trial in self.experiment.pending_trials(datetime.now(UTC), running=running):
+        # Make sure that any pending trials have a TrialRunner assigned.
+        pending_trials = list(self.experiment.pending_trials(datetime.now(UTC), running=running))
+        self.assign_trial_runners(pending_trials)
+        for trial in pending_trials:
             self.run_trial(trial)
 
     def not_done(self) -> bool:

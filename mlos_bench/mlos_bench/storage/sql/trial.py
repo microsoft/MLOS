@@ -53,8 +53,8 @@ class Trial(Storage.Trial):
         self._engine = engine
         self._schema = schema
 
-    def assign_trial_runner(self, trial_runner_id: int) -> int:
-        trial_runner_id = super().assign_trial_runner(trial_runner_id)
+    def set_trial_runner(self, trial_runner_id: int) -> int:
+        trial_runner_id = super().set_trial_runner(trial_runner_id)
         with self._engine.begin() as conn:
             conn.execute(
                 self._schema.trial.update()
@@ -68,7 +68,9 @@ class Trial(Storage.Trial):
                         )
                     ),
                 )
-                .values(trial_runner_id=trial_runner_id)
+                .values(
+                    trial_runner_id=trial_runner_id,
+                )
             )
         # Guard against concurrent updates.
         with self._engine.begin() as conn:
@@ -84,7 +86,7 @@ class Trial(Storage.Trial):
             )
             trial_runner_row = trial_runner_rs.fetchone()
             assert trial_runner_row
-            self._trial_runner_id = trial_runner_row[0]
+            self._trial_runner_id = trial_runner_row.trial_runner_id
             assert isinstance(self._trial_runner_id, int)
         return self._trial_runner_id
 
