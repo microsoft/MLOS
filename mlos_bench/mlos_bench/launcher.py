@@ -144,6 +144,11 @@ class Launcher:
 
         # --service cli args should override the config file values.
         service_files: list[str] = config.get("services", []) + (args.service or [])
+        self._parent_service = self._config_loader.load_services(
+            service_files,
+            self.global_config,
+            parent=self._config_loader,
+        )
 
         env_path = args.environment or config.get("environment")
         if not env_path:
