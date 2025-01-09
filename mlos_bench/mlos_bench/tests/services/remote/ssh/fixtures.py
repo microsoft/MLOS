@@ -11,7 +11,7 @@ Note: these are not in the conftest.py file because they are also used by remote
 import os
 import sys
 import tempfile
-from collections.abc import Iterable
+from collections.abc import Generator
 from subprocess import run
 
 import pytest
@@ -51,7 +51,7 @@ def ssh_test_server(
     ssh_test_server_hostname: str,
     docker_compose_project_name: str,
     locked_docker_services: DockerServices,
-) -> Iterable[SshTestServerInfo]:
+) -> Generator[SshTestServerInfo, None, None]:
     """
     Fixture for getting the ssh test server services setup via docker-compose using
     pytest-docker.

@@ -5,7 +5,7 @@
 """TunableGroups definition."""
 import copy
 import logging
-from collections.abc import Iterable, Mapping
+from collections.abc import Generator, Iterable, Mapping
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
@@ -179,13 +179,13 @@ class TunableGroups:
         self._index[name][name] = value
         return self._index[name][name]
 
-    def __iter__(self) -> Iterable[tuple[Tunable, CovariantTunableGroup]]:
+    def __iter__(self) -> Generator[tuple[Tunable, CovariantTunableGroup], None, None]:
         """
         An iterator over all tunables in the group.
 
         Returns
         -------
-        [(tunable, group), ...] : Iterable[tuple[Tunable, CovariantTunableGroup]]
+        [(tunable, group), ...] : Generator[tuple[Tunable, CovariantTunableGroup], None, None]
             An iterator over all tunables in all groups. Each element is a 2-tuple
             of an instance of the Tunable parameter and covariant group it belongs to.
         """

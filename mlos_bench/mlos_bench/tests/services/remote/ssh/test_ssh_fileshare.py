@@ -6,7 +6,7 @@
 
 import os
 import tempfile
-from collections.abc import Iterable
+from collections.abc import Generator
 from contextlib import contextmanager
 from os.path import basename
 from pathlib import Path
@@ -23,7 +23,7 @@ from mlos_bench.util import path_join
 
 
 @contextmanager
-def closeable_temp_file(**kwargs: Any) -> Iterable[_TemporaryFileWrapper]:
+def closeable_temp_file(**kwargs: Any) -> Generator[_TemporaryFileWrapper, None, None]:
     """
     Provides a context manager for a temporary file that can be closed and still
     unlinked.
