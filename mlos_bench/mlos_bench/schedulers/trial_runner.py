@@ -45,7 +45,8 @@ class TrialRunner:
         num_trial_runners: int = 1,
         tunable_groups: TunableGroups | None = None,
         global_config: dict[str, Any] | None = None,
-    ) -> list["TrialRunner"]:  # pylint: disable=too-many-arguments
+    ) -> list["TrialRunner"]:
+        # pylint: disable=too-many-arguments
         """
         Create a list of TrialRunner instances, and their associated Environments and
         Services, from JSON configurations.
