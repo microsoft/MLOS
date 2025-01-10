@@ -59,9 +59,7 @@ def test_add_bad_new_trial_config_data(
     with pytest.raises(ValueError):
         trial.add_new_config_data(new_config)
     trial_data = storage.experiments[exp_storage.experiment_id].trials[trial.trial_id]
-    assert trial_data.metadata_dict == {
-        **config,
-    }
+    assert trial_data.metadata_dict == config
 
 
 def test_exp_trial_configs(exp_storage: Storage.Experiment, tunable_groups: TunableGroups) -> None:
