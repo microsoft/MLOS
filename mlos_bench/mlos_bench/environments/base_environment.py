@@ -133,9 +133,7 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
         self._const_args: dict[str, TunableValue] = config.get("const_args", {})
 
         # Make some usual runtime arguments available for tests.
-        for arg in self._COMMON_CONST_ARGS:
-            global_config.setdefault(arg, self._const_args.get(arg, None))
-        for arg in self._COMMON_REQ_ARGS:
+        for arg in self._COMMON_CONST_ARGS | self._COMMON_REQ_ARGS:
             global_config.setdefault(arg, self._const_args.get(arg, None))
 
         if _LOG.isEnabledFor(logging.DEBUG):
