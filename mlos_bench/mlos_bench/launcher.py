@@ -149,7 +149,7 @@ class Launcher:
         # Add a LocalExecService as the parent service for all other services.
         self._parent_service: Service = LocalExecService(parent=self._config_loader)
         assert isinstance(self._parent_service, SupportsConfigLoading)
-        self._parent_service = self._config_loader.load_services(
+        self._parent_service = self._parent_service.load_services(
             service_files,
             self.global_config,
             self._parent_service,

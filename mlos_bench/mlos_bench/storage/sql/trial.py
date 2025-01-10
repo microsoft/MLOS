@@ -64,7 +64,7 @@ class Trial(Storage.Trial):
                     (
                         or_(
                             self._schema.trial.c.trial_runner_id.is_(None),
-                            self._schema.trial.c.status == str(Status.PENDING),
+                            self._schema.trial.c.status == Status.PENDING.name,
                         )
                     ),
                 )

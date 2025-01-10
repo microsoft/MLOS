@@ -87,6 +87,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         self._experiment: Storage.Experiment | None = None
 
         assert trial_runners, "At least one TrialRunner is required"
+        trial_runners = list(trial_runners)
         self._trial_runners = {
             trial_runner.trial_runner_id: trial_runner for trial_runner in trial_runners
         }
@@ -145,6 +146,11 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         return self._experiment
 
     @property
+    def _root_trial_runner_id(self) -> int:
+        # Use the first TrialRunner as the root.
+        return self._trial_runner_ids[0]
+
+    @property
     def root_environment(self) -> Environment:
         """
         Gets the root (prototypical) Environment from the first TrialRunner.
@@ -156,7 +162,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         TrialRunner's Environment's global_config.
         """
         # Use the first TrialRunner's Environment as the root Environment.
-        return self._trial_runners[self._trial_runner_ids[0]].environment
+        return self._trial_runners[self._root_trial_runner_id].environment
 
     @property
     def trial_runners(self) -> dict[int, TrialRunner]:

@@ -121,9 +121,12 @@ class TrialRunner:
 
     def __repr__(self) -> str:
         return (
-            f"TrialRunner({self.trial_runner_id}, {self.environment}"
+            f"TrialRunner({self.trial_runner_id}, {repr(self.environment)}"
             f"""[trial_runner_id={self.environment.parameters.get("trial_runner_id")}])"""
         )
+
+    def __str__(self) -> str:
+        return f"TrialRunner({self.trial_runner_id}, {str(self.environment)})"
 
     @property
     def trial_runner_id(self) -> int:
