@@ -50,7 +50,9 @@ def test_add_bad_new_trial_config_data(
     exp_storage: Storage.Experiment,
     tunable_groups: TunableGroups,
 ) -> None:
-    """Create a trial and check that adding repeated data to the config is disallowed."""
+    """Create a trial and check that adding repeated data to the config is
+    disallowed.
+    """
     config = {"location": "westus2", "num_repeats": 100}
     trial = exp_storage.new_trial(tunable_groups, config=config)
     new_config = {"location": "eastus2"}

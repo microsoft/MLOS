@@ -4,7 +4,7 @@
 #
 """Common SQL methods for accessing the stored benchmark data."""
 
-from typing import Any
+from typing import Any, Mapping
 
 import pandas
 from sqlalchemy import Integer, and_, func, select
@@ -21,7 +21,7 @@ from mlos_bench.util import nullable, utcify_nullable_timestamp, utcify_timestam
 def save_params(
     conn: Connection,
     table: Table,
-    params: dict[str, Any],
+    params: Mapping[str, Any],
     **kwargs: Any,
 ) -> None:
     """

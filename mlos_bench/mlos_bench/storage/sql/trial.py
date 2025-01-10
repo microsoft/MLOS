@@ -8,6 +8,7 @@ the benchmark trial data using `SQLAlchemy <https://sqlalchemy.org>`_ backend.
 
 
 import logging
+from collections.abc import Mapping
 from datetime import datetime
 from typing import Any, Literal
 
@@ -90,7 +91,7 @@ class Trial(Storage.Trial):
             assert isinstance(self._trial_runner_id, int)
         return self._trial_runner_id
 
-    def _save_new_config_data(self, new_config_data: dict[str, int | float | str]) -> None:
+    def _save_new_config_data(self, new_config_data: Mapping[str, int | float | str]) -> None:
         with self._engine.begin() as conn:
             save_params(
                 conn,

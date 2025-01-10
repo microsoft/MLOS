@@ -24,7 +24,7 @@ mlos_bench.storage.base_trial_data.TrialData :
 
 import logging
 from abc import ABCMeta, abstractmethod
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from contextlib import AbstractContextManager as ContextManager
 from datetime import datetime
 from types import TracebackType
@@ -497,7 +497,7 @@ class Storage(metaclass=ABCMeta):
 
         def add_new_config_data(
             self,
-            new_config_data: dict[str, int | float | str],
+            new_config_data: Mapping[str, int | float | str],
         ) -> None:
             """
             Add new config data to the trial.
@@ -524,7 +524,7 @@ class Storage(metaclass=ABCMeta):
         @abstractmethod
         def _save_new_config_data(
             self,
-            new_config_data: dict[str, int | float | str],
+            new_config_data: Mapping[str, int | float | str],
         ) -> None:
             """
             Save the new config data to the storage.
