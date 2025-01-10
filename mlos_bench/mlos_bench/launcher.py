@@ -176,7 +176,7 @@ class Launcher:
         _LOG.info(
             "Init %d trial runners for environments: %s",
             len(self.trial_runners),
-            list(trial_runner.environment for trial_runner in self.trial_runners),
+            [trial_runner.environment for trial_runner in self.trial_runners],
         )
 
         # NOTE: Init tunable values *after* the Environment(s), but *before* the Optimizer
