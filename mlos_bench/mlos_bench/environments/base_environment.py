@@ -163,8 +163,8 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
         self._tunable_params = tunables.subgroup(groups)
 
         # If a parameter comes from the tunables, do not require it in the const_args or globals
-        req_args = set(config.get("required_args", [])) - set(
-            self._tunable_params.get_param_values().keys()
+        req_args = (
+            set(config.get("required_args", [])) - self._tunable_params.get_param_values().keys()
         )
         req_args.update(self._COMMON_REQ_ARGS | self._COMMON_CONST_ARGS)
         merge_parameters(dest=self._const_args, source=global_config, required_keys=req_args)
