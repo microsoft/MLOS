@@ -123,11 +123,6 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
             deploy or reboot a VM/Host, etc.).
         """
         global_config = global_config or {}
-        # Make some usual runtime arguments available for tests.
-        for arg in self._COMMON_CONST_ARGS:
-            global_config.setdefault(arg, None)
-        for arg in self._COMMON_REQ_ARGS:
-            global_config.setdefault(arg, None)
         self._validate_json_config(config, name)
         self.name = name
         self.config = config
@@ -136,6 +131,12 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
         self._is_ready = False
         self._in_context = False
         self._const_args: dict[str, TunableValue] = config.get("const_args", {})
+
+        # Make some usual runtime arguments available for tests.
+        for arg in self._COMMON_CONST_ARGS:
+            global_config.setdefault(arg, self._const_args.get(arg, None))
+        for arg in self._COMMON_REQ_ARGS:
+            global_config.setdefault(arg, self._const_args.get(arg, None))
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug(
@@ -167,6 +168,7 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
         req_args = set(config.get("required_args", [])) - set(
             self._tunable_params.get_param_values().keys()
         )
+        req_args.update(self._COMMON_REQ_ARGS)
         req_args.update(self._COMMON_CONST_ARGS)
         merge_parameters(dest=self._const_args, source=global_config, required_keys=req_args)
         self._const_args = self._expand_vars(self._const_args, global_config)
