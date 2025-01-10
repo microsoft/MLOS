@@ -166,8 +166,7 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
         req_args = set(config.get("required_args", [])) - set(
             self._tunable_params.get_param_values().keys()
         )
-        req_args.update(self._COMMON_REQ_ARGS)
-        req_args.update(self._COMMON_CONST_ARGS)
+        req_args.update(self._COMMON_REQ_ARGS | self._COMMON_CONST_ARGS)
         merge_parameters(dest=self._const_args, source=global_config, required_keys=req_args)
         self._const_args = self._expand_vars(self._const_args, global_config)
 
