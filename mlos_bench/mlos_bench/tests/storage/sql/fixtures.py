@@ -17,14 +17,13 @@ from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.storage import SqlStorage
 from mlos_bench.tests import SEED
 from mlos_bench.tests.storage import (
-    CONFIG_COUNT,
     CONFIG_TRIAL_REPEAT_COUNT,
     TRIAL_RUNNER_COUNT,
+    MAX_TRIALS,
 )
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
-
 
 @pytest.fixture
 def storage() -> SqlStorage:
@@ -179,8 +178,7 @@ def _dummy_run_exp(
             "trial_id": exp.trial_id,
             "config_id": -1,
             "trial_config_repeat_count": CONFIG_TRIAL_REPEAT_COUNT,
-            "max_trials": CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT
-            + TRIAL_RUNNER_COUNT * CONFIG_TRIAL_REPEAT_COUNT,
+            "max_trials": MAX_TRIALS,
         },
         global_config=global_config,
         trial_runners=trial_runners,
