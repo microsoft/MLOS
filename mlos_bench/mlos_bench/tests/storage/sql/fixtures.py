@@ -167,6 +167,7 @@ def _dummy_run_exp(
             # But the test logic relies on this (e.g., trial 1 is config 1 is the
             # default values for the tunable params)
             # "start_with_defaults": True,
+            "max_suggestions": MAX_TRIALS,
         },
         global_config=global_config,
     )
