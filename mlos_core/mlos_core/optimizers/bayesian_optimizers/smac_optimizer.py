@@ -42,7 +42,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         seed: int | None = 0,
         run_name: str | None = None,
         output_directory: str | None = None,
-        max_trials: int = 100,
+        max_trials: int = 1000,
         n_random_init: int | None = None,
         max_ratio: float | None = None,
         use_default_config: bool = False,
