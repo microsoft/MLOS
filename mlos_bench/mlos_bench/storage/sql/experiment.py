@@ -126,7 +126,7 @@ class Experiment(Storage.Experiment):
 
     def merge(self, experiment_ids: list[str]) -> None:
         _LOG.info("Merge: %s <- %s", self._experiment_id, experiment_ids)
-        raise NotImplementedError("TODO")
+        raise NotImplementedError("TODO: Merging experiments not implemented yet.")
 
     def load_tunable_config(self, config_id: int) -> dict[str, Any]:
         with self._engine.connect() as conn:
@@ -168,7 +168,13 @@ class Experiment(Storage.Experiment):
                 .where(
                     self._schema.trial.c.exp_id == self._experiment_id,
                     self._schema.trial.c.trial_id > last_trial_id,
-                    self._schema.trial.c.status.in_(["SUCCEEDED", "FAILED", "TIMED_OUT"]),
+                    self._schema.trial.c.status.in_(
+                        [
+                            Status.SUCCEEDED.name,
+                            Status.FAILED.name,
+                            Status.TIMED_OUT.name,
+                        ]
+                    ),
                 )
                 .order_by(
                     self._schema.trial.c.trial_id.asc(),
@@ -249,9 +255,9 @@ class Experiment(Storage.Experiment):
         timestamp = utcify_timestamp(timestamp, origin="local")
         _LOG.info("Retrieve pending trials for: %s @ %s", self._experiment_id, timestamp)
         if running:
-            pending_status = ["PENDING", "READY", "RUNNING"]
+            pending_status = [Status.PENDING.name, Status.READY.name, Status.RUNNING.name]
         else:
-            pending_status = ["PENDING"]
+            pending_status = [Status.PENDING.name]
         with self._engine.connect() as conn:
             cur_trials = conn.execute(
                 self._schema.trial.select().where(
@@ -335,7 +341,7 @@ class Experiment(Storage.Experiment):
                         trial_id=self._trial_id,
                         config_id=config_id,
                         ts_start=ts_start,
-                        status="PENDING",
+                        status=Status.PENDING.name,
                     )
                 )
 
