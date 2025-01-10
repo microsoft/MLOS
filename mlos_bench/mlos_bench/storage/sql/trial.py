@@ -122,7 +122,12 @@ class Trial(Storage.Trial):
                             self._schema.trial.c.trial_id == self._trial_id,
                             self._schema.trial.c.ts_end.is_(None),
                             self._schema.trial.c.status.notin_(
-                                ["SUCCEEDED", "CANCELED", "FAILED", "TIMED_OUT"]
+                                [
+                                    Status.SUCCEEDED.name,
+                                    Status.CANCELED.name,
+                                    Status.FAILED.name,
+                                    Status.TIMED_OUT.name,
+                                ]
                             ),
                         )
                         .values(
@@ -160,7 +165,13 @@ class Trial(Storage.Trial):
                             self._schema.trial.c.trial_id == self._trial_id,
                             self._schema.trial.c.ts_end.is_(None),
                             self._schema.trial.c.status.notin_(
-                                ["RUNNING", "SUCCEEDED", "CANCELED", "FAILED", "TIMED_OUT"]
+                                [
+                                    Status.RUNNING.name,
+                                    Status.SUCCEEDED.name,
+                                    Status.CANCELED.name,
+                                    Status.FAILED.name,
+                                    Status.TIMED_OUT.name,
+                                ]
                             ),
                         )
                         .values(
