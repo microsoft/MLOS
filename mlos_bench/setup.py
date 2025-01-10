@@ -67,7 +67,7 @@ def _get_long_desc_from_readme(base_url: str) -> dict:
 extra_requires: dict[str, list[str]] = {  # pylint: disable=consider-using-namedtuple-or-dataclass
     # Additional tools for extra functionality.
     "azure": ["azure-storage-file-share", "azure-identity", "azure-keyvault"],
-    "ssh": ["asyncssh"],
+    "ssh": ["asyncssh>=2.19.0"],
     "storage-sql-duckdb": ["sqlalchemy", "alembic", "duckdb_engine"],
     "storage-sql-mysql": ["sqlalchemy", "alembic", "mysql-connector-python"],
     "storage-sql-postgres": ["sqlalchemy", "alembic", "psycopg2"],
