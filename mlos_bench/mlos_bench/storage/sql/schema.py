@@ -275,7 +275,8 @@ class DbSchema:
         """Return the SQLAlchemy MetaData object."""
         return self._meta
 
-    def _get_alembic_cfg(self, conn: Connection) -> config.Config:  # pylint: disable=no-self-use
+    @staticmethod
+    def _get_alembic_cfg(conn: Connection) -> config.Config:
         alembic_cfg = config.Config(
             path_join(str(files("mlos_bench.storage.sql")), "alembic.ini", abs_path=True)
         )

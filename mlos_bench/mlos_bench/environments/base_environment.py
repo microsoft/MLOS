@@ -33,6 +33,15 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
     # pylint: disable=too-many-instance-attributes
     """An abstract base of all benchmark environments."""
 
+    # Should be provided by the runtime.
+    _COMMON_CONST_ARGS = {
+        "trial_runner_id",
+    }
+    _COMMON_REQ_ARGS = {
+        "experiment_id",
+        "trial_id",
+    }
+
     @classmethod
     def new(  # pylint: disable=too-many-arguments
         cls,
@@ -113,6 +122,7 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM/Host, etc.).
         """
+        global_config = global_config or {}
         self._validate_json_config(config, name)
         self.name = name
         self.config = config
@@ -121,6 +131,10 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
         self._is_ready = False
         self._in_context = False
         self._const_args: dict[str, TunableValue] = config.get("const_args", {})
+
+        # Make some usual runtime arguments available for tests.
+        for arg in self._COMMON_CONST_ARGS | self._COMMON_REQ_ARGS:
+            global_config.setdefault(arg, self._const_args.get(arg, None))
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug(
@@ -149,11 +163,12 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
         self._tunable_params = tunables.subgroup(groups)
 
         # If a parameter comes from the tunables, do not require it in the const_args or globals
-        req_args = set(config.get("required_args", [])) - set(
-            self._tunable_params.get_param_values().keys()
+        req_args = (
+            set(config.get("required_args", [])) - self._tunable_params.get_param_values().keys()
         )
+        req_args.update(self._COMMON_REQ_ARGS | self._COMMON_CONST_ARGS)
         merge_parameters(dest=self._const_args, source=global_config, required_keys=req_args)
-        self._const_args = self._expand_vars(self._const_args, global_config or {})
+        self._const_args = self._expand_vars(self._const_args, global_config)
 
         self._params = self._combine_tunables(self._tunable_params)
         _LOG.debug("Parameters for '%s' :: %s", name, self._params)
@@ -322,6 +337,18 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
         return self._tunable_params
 
     @property
+    def const_args(self) -> dict[str, TunableValue]:
+        """
+        Get the constant arguments for this Environment.
+
+        Returns
+        -------
+        parameters : Dict[str, TunableValue]
+            Key/value pairs of all environment const_args parameters.
+        """
+        return self._const_args.copy()
+
+    @property
     def parameters(self) -> dict[str, TunableValue]:
         """
         Key/value pairs of all environment parameters (i.e., `const_args` and
@@ -334,7 +361,7 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
             Key/value pairs of all environment parameters
             (i.e., `const_args` and `tunable_params`).
         """
-        return self._params
+        return self._params.copy()
 
     def setup(self, tunables: TunableGroups, global_config: dict | None = None) -> bool:
         """

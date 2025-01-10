@@ -154,12 +154,12 @@ def test_load_cli_config_examples_via_launcher(
     # Instead of just checking that the config is loaded, check that the
     # Launcher loaded the expected types as well.
 
-    assert isinstance(launcher.environment, Environment)
+    assert isinstance(launcher.root_environment, Environment)
     env_config = launcher.config_loader.load_config(
         config["environment"],
         ConfigSchema.ENVIRONMENT,
     )
-    assert check_class_name(launcher.environment, env_config["class"])
+    assert check_class_name(launcher.root_environment, env_config["class"])
 
     assert isinstance(launcher.optimizer, Optimizer)
     if "optimizer" in config:

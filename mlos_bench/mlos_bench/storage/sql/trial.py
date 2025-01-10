@@ -8,14 +8,17 @@ the benchmark trial data using `SQLAlchemy <https://sqlalchemy.org>`_ backend.
 
 
 import logging
+from collections.abc import Mapping
 from datetime import datetime
 from typing import Any, Literal
 
+from sqlalchemy import or_
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import IntegrityError
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_storage import Storage
+from mlos_bench.storage.sql.common import save_params
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import nullable, utcify_timestamp
@@ -35,6 +38,7 @@ class Trial(Storage.Trial):
         experiment_id: str,
         trial_id: int,
         config_id: int,
+        trial_runner_id: int | None = None,
         opt_targets: dict[str, Literal["min", "max"]],
         config: dict[str, Any] | None = None,
     ):
@@ -43,11 +47,59 @@ class Trial(Storage.Trial):
             experiment_id=experiment_id,
             trial_id=trial_id,
             tunable_config_id=config_id,
+            trial_runner_id=trial_runner_id,
             opt_targets=opt_targets,
             config=config,
         )
         self._engine = engine
         self._schema = schema
+
+    def set_trial_runner(self, trial_runner_id: int) -> int:
+        trial_runner_id = super().set_trial_runner(trial_runner_id)
+        with self._engine.begin() as conn:
+            conn.execute(
+                self._schema.trial.update()
+                .where(
+                    self._schema.trial.c.exp_id == self._experiment_id,
+                    self._schema.trial.c.trial_id == self._trial_id,
+                    (
+                        or_(
+                            self._schema.trial.c.trial_runner_id.is_(None),
+                            self._schema.trial.c.status == Status.PENDING.name,
+                        )
+                    ),
+                )
+                .values(
+                    trial_runner_id=trial_runner_id,
+                )
+            )
+        # Guard against concurrent updates.
+        with self._engine.begin() as conn:
+            trial_runner_rs = conn.execute(
+                self._schema.trial.select()
+                .with_only_columns(
+                    self._schema.trial.c.trial_runner_id,
+                )
+                .where(
+                    self._schema.trial.c.exp_id == self._experiment_id,
+                    self._schema.trial.c.trial_id == self._trial_id,
+                )
+            )
+            trial_runner_row = trial_runner_rs.fetchone()
+            assert trial_runner_row
+            self._trial_runner_id = trial_runner_row.trial_runner_id
+            assert isinstance(self._trial_runner_id, int)
+        return self._trial_runner_id
+
+    def _save_new_config_data(self, new_config_data: Mapping[str, int | float | str]) -> None:
+        with self._engine.begin() as conn:
+            save_params(
+                conn,
+                self._schema.trial_param,
+                new_config_data,
+                exp_id=self._experiment_id,
+                trial_id=self._trial_id,
+            )
 
     def update(
         self,

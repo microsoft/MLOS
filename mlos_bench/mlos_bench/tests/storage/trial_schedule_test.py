@@ -9,7 +9,13 @@ from datetime import datetime, timedelta
 from pytz import UTC
 
 from mlos_bench.environments.status import Status
+from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.base_storage import Storage
+from mlos_bench.tests.storage import (
+    CONFIG_COUNT,
+    CONFIG_TRIAL_REPEAT_COUNT,
+    TRIAL_RUNNER_COUNT,
+)
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
@@ -18,7 +24,12 @@ def _trial_ids(trials: Iterator[Storage.Trial]) -> set[int]:
     return {t.trial_id for t in trials}
 
 
-def test_schedule_trial(exp_storage: Storage.Experiment, tunable_groups: TunableGroups) -> None:
+def test_schedule_trial(
+    storage: Storage,
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+) -> None:
+    # pylint: disable=too-many-locals
     """Schedule several trials for future execution and retrieve them later at certain
     timestamps.
     """
@@ -35,6 +46,13 @@ def test_schedule_trial(exp_storage: Storage.Experiment, tunable_groups: Tunable
     trial_1h = exp_storage.new_trial(tunable_groups, timestamp + timedelta_1hr, config)
     # Schedule 2 hours in the future:
     trial_2h = exp_storage.new_trial(tunable_groups, timestamp + timedelta_1hr * 2, config)
+
+    exp_data = storage.experiments[exp_storage.experiment_id]
+    trial_now1_data = exp_data.trials[trial_now1.trial_id]
+    assert trial_now1_data.trial_runner_id is None
+    assert trial_now1_data.status == Status.PENDING
+    # FIXME: Status mismatch in object vs. backend storage.
+    # assert trial_now1.status == Status.PENDING
 
     # Scheduler side: get trials ready to run at certain timestamps:
 
@@ -116,3 +134,25 @@ def test_schedule_trial(exp_storage: Storage.Experiment, tunable_groups: Tunable
     assert trial_ids == [trial_1h.trial_id]
     assert len(trial_configs) == len(trial_scores) == 1
     assert trial_status == [Status.SUCCEEDED]
+
+
+def test_rr_scheduling(exp_data: ExperimentData) -> None:
+    """Checks that the scheduler produced basic round-robin scheduling of Trials across
+    TrialRunners.
+    """
+    for trial_id in range(1, CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT + 1):
+        # User visible IDs start from 1.
+        expected_config_id = (trial_id - 1) // CONFIG_TRIAL_REPEAT_COUNT + 1
+        expected_repeat_num = (trial_id - 1) % CONFIG_TRIAL_REPEAT_COUNT + 1
+        expected_runner_id = (trial_id - 1) % TRIAL_RUNNER_COUNT + 1
+        trial = exp_data.trials[trial_id]
+        assert trial.trial_id == trial_id, f"Expected trial_id {trial_id} for {trial}"
+        assert (
+            trial.tunable_config_id == expected_config_id
+        ), f"Expected tunable_config_id {expected_config_id} for {trial}"
+        assert (
+            trial.metadata_dict["repeat_i"] == expected_repeat_num
+        ), f"Expected repeat_i {expected_repeat_num} for {trial}"
+        assert (
+            trial.trial_runner_id == expected_runner_id
+        ), f"Expected trial_runner_id {expected_runner_id} for {trial}"
