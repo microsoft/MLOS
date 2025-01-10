@@ -107,6 +107,7 @@ def test_exp_trial_update_categ(
                 "kernel_sched_latency_ns": "2000000",
                 "kernel_sched_migration_cost_ns": "-1",
                 "vmSize": "Standard_B4ms",
+                "123": 2,
             }
         ],
         [{"score": "99.9", "benchmark": "test"}],
