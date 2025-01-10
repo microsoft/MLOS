@@ -334,6 +334,7 @@ class Experiment(Storage.Experiment):
                         trial_id=self._trial_id,
                     )
 
+                # FIXME: Status mismatch in object vs. backend storage.
                 trial = Trial(
                     engine=self._engine,
                     schema=self._schema,

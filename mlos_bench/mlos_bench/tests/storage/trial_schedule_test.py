@@ -24,7 +24,12 @@ def _trial_ids(trials: Iterator[Storage.Trial]) -> set[int]:
     return {t.trial_id for t in trials}
 
 
-def test_schedule_trial(exp_storage: Storage.Experiment, tunable_groups: TunableGroups) -> None:
+def test_schedule_trial(
+    storage: Storage,
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+) -> None:
+    # pylint: disable=too-many-locals
     """Schedule several trials for future execution and retrieve them later at certain
     timestamps.
     """
@@ -41,6 +46,13 @@ def test_schedule_trial(exp_storage: Storage.Experiment, tunable_groups: Tunable
     trial_1h = exp_storage.new_trial(tunable_groups, timestamp + timedelta_1hr, config)
     # Schedule 2 hours in the future:
     trial_2h = exp_storage.new_trial(tunable_groups, timestamp + timedelta_1hr * 2, config)
+
+    exp_data = storage.experiments[exp_storage.experiment_id]
+    trial_now1_data = exp_data.trials[trial_now1.trial_id]
+    assert trial_now1_data.trial_runner_id is None
+    assert trial_now1_data.status == Status.PENDING
+    # FIXME: Status mismatch in object vs. backend storage.
+    # assert trial_now1.status == Status.PENDING
 
     # Scheduler side: get trials ready to run at certain timestamps:
 
