@@ -179,7 +179,8 @@ def _dummy_run_exp(
             "trial_id": exp.trial_id,
             "config_id": -1,
             "trial_config_repeat_count": CONFIG_TRIAL_REPEAT_COUNT,
-            "max_trials": CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT,
+            "max_trials": CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT
+            + TRIAL_RUNNER_COUNT * CONFIG_TRIAL_REPEAT_COUNT,
         },
         global_config=global_config,
         trial_runners=trial_runners,
