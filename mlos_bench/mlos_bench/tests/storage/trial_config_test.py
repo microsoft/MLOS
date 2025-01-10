@@ -28,6 +28,40 @@ def test_exp_trial_pending(exp_storage: Storage.Experiment, tunable_groups: Tuna
     }
 
 
+def test_add_new_trial_config_data(
+    storage: Storage,
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+) -> None:
+    """Create a trial and check that adding new data to the config is allowed."""
+    config = {"location": "westus2", "num_repeats": 100}
+    trial = exp_storage.new_trial(tunable_groups, config=config)
+    new_config = {"new_key": "new_value"}
+    trial.add_new_config_data(new_config)
+    trial_data = storage.experiments[exp_storage.experiment_id].trials[trial.trial_id]
+    assert trial_data.metadata_dict == {
+        **config,
+        **new_config,
+    }
+
+
+def test_add_bad_new_trial_config_data(
+    storage: Storage,
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+) -> None:
+    """Create a trial and check that adding repeated data to the config is
+    disallowed.
+    """
+    config = {"location": "westus2", "num_repeats": 100}
+    trial = exp_storage.new_trial(tunable_groups, config=config)
+    new_config = {"location": "eastus2"}
+    with pytest.raises(ValueError):
+        trial.add_new_config_data(new_config)
+    trial_data = storage.experiments[exp_storage.experiment_id].trials[trial.trial_id]
+    assert trial_data.metadata_dict == config
+
+
 def test_exp_trial_configs(exp_storage: Storage.Experiment, tunable_groups: TunableGroups) -> None:
     """Start multiple trials with two different configs and check that we store only two
     config objects in the DB.

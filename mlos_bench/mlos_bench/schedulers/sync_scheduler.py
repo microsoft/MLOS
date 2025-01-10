@@ -5,11 +5,7 @@
 """A simple single-threaded synchronous optimization loop implementation."""
 
 import logging
-from datetime import datetime
 
-from pytz import UTC
-
-from mlos_bench.environments.status import Status
 from mlos_bench.schedulers.base_scheduler import Scheduler
 from mlos_bench.storage.base_storage import Storage
 
@@ -41,25 +37,7 @@ class SyncScheduler(Scheduler):
         Save the results in the storage.
         """
         super().run_trial(trial)
-
-        if not self.environment.setup(trial.tunables, trial.config(self.global_config)):
-            _LOG.warning("Setup failed: %s :: %s", self.environment, trial.tunables)
-            # FIXME: Use the actual timestamp from the environment.
-            _LOG.info("QUEUE: Update trial results: %s :: %s", trial, Status.FAILED)
-            trial.update(Status.FAILED, datetime.now(UTC))
-            return
-
-        # Block and wait for the final result.
-        (status, timestamp, results) = self.environment.run()
-        _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
-
-        # In async mode (TODO), poll the environment for status and telemetry
-        # and update the storage with the intermediate results.
-        (_status, _timestamp, telemetry) = self.environment.status()
-
-        # Use the status and timestamp from `.run()` as it is the final status of the experiment.
-        # TODO: Use the `.status()` output in async mode.
-        trial.update_telemetry(status, timestamp, telemetry)
-
-        trial.update(status, timestamp, results)
-        _LOG.info("QUEUE: Update trial results: %s :: %s %s", trial, status, results)
+        # In the sync scheduler we run each trial on its own TrialRunner in sequence.
+        trial_runner = self.get_trial_runner(trial)
+        trial_runner.run_trial(trial, self.global_config)
+        _LOG.info("QUEUE: Finished trial: %s on %s", trial, trial_runner)
