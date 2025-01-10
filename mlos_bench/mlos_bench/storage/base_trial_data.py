@@ -48,6 +48,7 @@ class TrialData(metaclass=ABCMeta):
         ts_start: datetime,
         ts_end: datetime | None,
         status: Status,
+        trial_runner_id: int | None = None,
     ):
         self._experiment_id = experiment_id
         self._trial_id = trial_id
@@ -57,11 +58,12 @@ class TrialData(metaclass=ABCMeta):
         self._ts_start = ts_start
         self._ts_end = ts_end
         self._status = status
+        self._trial_runner_id = trial_runner_id
 
     def __repr__(self) -> str:
         return (
             f"Trial :: {self._experiment_id}:{self._trial_id} "
-            f"cid:{self._tunable_config_id} {self._status.name}"
+            f"cid:{self._tunable_config_id} rid:{self._trial_runner_id} {self._status.name}"
         )
 
     def __eq__(self, other: Any) -> bool:
@@ -78,6 +80,11 @@ class TrialData(metaclass=ABCMeta):
     def trial_id(self) -> int:
         """ID of the trial."""
         return self._trial_id
+
+    @property
+    def trial_runner_id(self) -> int | None:
+        """ID of the TrialRunner."""
+        return self._trial_runner_id
 
     @property
     def ts_start(self) -> datetime:

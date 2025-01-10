@@ -8,6 +8,7 @@ import pytest
 
 from mlos_bench.environments.composite_env import CompositeEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+from mlos_bench.tests import BUILT_IN_ENV_VAR_DEFAULTS
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
@@ -91,6 +92,7 @@ def test_composite_env_params(composite_env: CompositeEnv) -> None:
         "vmSize": "Standard_B4ms",  # tunable_params from the parent
         "someConst": "root",  # pulled in from parent via required_args
         "global_param": "global_value",  # pulled in from the global_config
+        **BUILT_IN_ENV_VAR_DEFAULTS,
     }
     assert composite_env.children[1].parameters == {
         "vmName": "Mock Server VM",  # const_args from the parent
@@ -98,6 +100,7 @@ def test_composite_env_params(composite_env: CompositeEnv) -> None:
         "idle": "halt",  # tunable_params from the parent
         # "someConst": "root"           # not required, so not passed from the parent
         "global_param": "global_value",  # pulled in from the global_config
+        **BUILT_IN_ENV_VAR_DEFAULTS,
     }
     assert composite_env.children[2].parameters == {
         "vmName": "Mock Control VM",  # const_args from the parent
@@ -107,6 +110,7 @@ def test_composite_env_params(composite_env: CompositeEnv) -> None:
         "vm_client_name": "Mock Client VM",
         "vm_server_name": "Mock Server VM",
         # "global_param": "global_value"  # not required, so not picked from the global_config
+        **BUILT_IN_ENV_VAR_DEFAULTS,
     }
 
 
@@ -129,6 +133,7 @@ def test_composite_env_setup(composite_env: CompositeEnv, tunable_groups: Tunabl
         "vmSize": "Standard_B2s",  # tunable_params from the parent
         "someConst": "root",  # pulled in from parent via required_args
         "global_param": "global_value",  # pulled in from the global_config
+        **BUILT_IN_ENV_VAR_DEFAULTS,
     }
     assert composite_env.children[1].parameters == {
         "vmName": "Mock Server VM",  # const_args from the parent
@@ -136,6 +141,7 @@ def test_composite_env_setup(composite_env: CompositeEnv, tunable_groups: Tunabl
         "idle": "mwait",  # tunable_params from the parent
         # "someConst": "root"           # not required, so not passed from the parent
         "global_param": "global_value",  # pulled in from the global_config
+        **BUILT_IN_ENV_VAR_DEFAULTS,
     }
     assert composite_env.children[2].parameters == {
         "vmName": "Mock Control VM",  # const_args from the parent
@@ -144,6 +150,7 @@ def test_composite_env_setup(composite_env: CompositeEnv, tunable_groups: Tunabl
         "vm_client_name": "Mock Client VM",
         "vm_server_name": "Mock Server VM",
         # "global_param": "global_value"  # not required, so not picked from the global_config
+        **BUILT_IN_ENV_VAR_DEFAULTS,
     }
 
 
@@ -243,6 +250,7 @@ def test_nested_composite_env_params(nested_composite_env: CompositeEnv) -> None
         "someConst": "root",  # pulled in from parent via required_args
         "vm_server_name": "Mock Server VM",
         "global_param": "global_value",  # pulled in from the global_config
+        **BUILT_IN_ENV_VAR_DEFAULTS,
     }
     assert isinstance(nested_composite_env.children[1], CompositeEnv)
     assert nested_composite_env.children[1].children[0].parameters == {
@@ -252,6 +260,7 @@ def test_nested_composite_env_params(nested_composite_env: CompositeEnv) -> None
         # "someConst": "root"           # not required, so not passed from the parent
         "vm_client_name": "Mock Client VM",
         # "global_param": "global_value"  # not required, so not picked from the global_config
+        **BUILT_IN_ENV_VAR_DEFAULTS,
     }
 
 
@@ -279,6 +288,7 @@ def test_nested_composite_env_setup(
         "someConst": "root",  # pulled in from parent via required_args
         "vm_server_name": "Mock Server VM",
         "global_param": "global_value",  # pulled in from the global_config
+        **BUILT_IN_ENV_VAR_DEFAULTS,
     }
 
     assert isinstance(nested_composite_env.children[1], CompositeEnv)
@@ -288,4 +298,5 @@ def test_nested_composite_env_setup(
         "idle": "mwait",  # tunable_params from the parent
         # "someConst": "root"           # not required, so not passed from the parent
         "vm_client_name": "Mock Client VM",
+        **BUILT_IN_ENV_VAR_DEFAULTS,
     }
