@@ -9,8 +9,8 @@ from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tests.storage import (
     CONFIG_COUNT,
     CONFIG_TRIAL_REPEAT_COUNT,
-    TRIAL_RUNNER_COUNT,
     MAX_TRIALS,
+    TRIAL_RUNNER_COUNT,
 )
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
