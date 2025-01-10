@@ -133,17 +133,6 @@ class Launcher:
         self.global_config = DictTemplater(self.global_config).expand_vars(use_os_env=True)
         assert isinstance(self.global_config, dict)
 
-        self.storage = self._load_storage(
-            args.storage or config.get("storage"),
-            lazy_schema_create=False if args.create_update_storage_schema_only else None,
-        )
-        _LOG.info("Init storage: %s", self.storage)
-
-        if args.create_update_storage_schema_only:
-            _LOG.info("Create/update storage schema only.")
-            self.storage.update_schema()
-            sys.exit(0)
-
         # --service cli args should override the config file values.
         service_files: list[str] = config.get("services", []) + (args.service or [])
         # Add a LocalExecService as the parent service for all other services.
@@ -154,6 +143,17 @@ class Launcher:
             self.global_config,
             self._parent_service,
         )
+
+        self.storage = self._load_storage(
+            args.storage or config.get("storage"),
+            lazy_schema_create=False if args.create_update_storage_schema_only else None,
+        )
+        _LOG.info("Init storage: %s", self.storage)
+
+        if args.create_update_storage_schema_only:
+            _LOG.info("Create/update storage schema only.")
+            self.storage.update_schema()
+            sys.exit(0)
 
         env_path = args.environment or config.get("environment")
         if not env_path:
