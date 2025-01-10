@@ -6,7 +6,7 @@
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.base_storage import Storage
-from mlos_bench.tests.storage import CONFIG_COUNT, CONFIG_TRIAL_REPEAT_COUNT
+from mlos_bench.tests.storage import CONFIG_COUNT, CONFIG_TRIAL_REPEAT_COUNT, TRIAL_RUNNER_COUNT
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
@@ -167,3 +167,14 @@ def test_exp_data_tunable_configs(exp_data: ExperimentData) -> None:
 def test_exp_data_default_config_id(exp_data: ExperimentData) -> None:
     """Tests the default_tunable_config_id property of ExperimentData."""
     assert exp_data.default_tunable_config_id == 1
+
+
+def test_trial_runner_id_results_df_column(exp_data: ExperimentData) -> None:
+    """Ensure the results_df has the expected trial_runner_columns as well."""
+    assert (
+        len(exp_data.results_df["trial_runner_id"].notna())
+        == CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT
+    )
+    assert set(exp_data.results_df["trial_runner_id"].unique()) == set(
+        range(1, TRIAL_RUNNER_COUNT + 1)
+    )
