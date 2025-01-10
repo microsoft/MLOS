@@ -495,7 +495,6 @@ class Storage(metaclass=ABCMeta):
                 config["trial_runner_id"] = trial_runner_id
             return config
 
-        # NOTE: This may no longer be necessary with the new schema.
         def add_new_config_data(
             self,
             new_config_data: dict[str, int | float | str],
