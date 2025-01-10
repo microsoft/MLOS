@@ -6,6 +6,7 @@
 
 from mlos_bench.environments.mock_env import MockEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+from mlos_bench.tests import BUILT_IN_ENV_VAR_DEFAULTS
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
@@ -66,6 +67,7 @@ def test_two_groups_setup(tunable_groups: TunableGroups) -> None:
         **expected_params,
         "const_param1": 10,
         "const_param2": "foo",
+        **BUILT_IN_ENV_VAR_DEFAULTS,
     }
 
 
@@ -107,6 +109,7 @@ def test_zero_groups_implicit_setup(tunable_groups: TunableGroups) -> None:
     assert env.parameters == {
         "const_param1": 10,
         "const_param2": "foo",
+        **BUILT_IN_ENV_VAR_DEFAULTS,
     }
 
 
@@ -159,5 +162,6 @@ def test_loader_level_include() -> None:
         **expected_params,
         "const_param1": 10,
         "const_param2": "foo",
+        **BUILT_IN_ENV_VAR_DEFAULTS,
     }
     assert env.tunable_params.get_param_values() == expected_params
