@@ -144,11 +144,11 @@ def test_launcher_args_parse_1(config_paths: list[str]) -> None:
         + " ".join(config_paths)
         + " --num-trial-runners 5"
         + " --service services/remote/mock/mock_auth_service.jsonc"
-        + " services/remote/mock/mock_remote_exec_service.jsonc"
-        + " --scheduler schedulers/sync_scheduler.jsonc"
-        + f" --environment {ENV_CONF_PATH}"
-        + " --globals globals/global_test_config.jsonc"
-        + " --globals globals/global_test_extra_config.jsonc"
+        " services/remote/mock/mock_remote_exec_service.jsonc"
+        " --scheduler schedulers/sync_scheduler.jsonc"
+        f" --environment {ENV_CONF_PATH}"
+        " --globals globals/global_test_config.jsonc"
+        " --globals globals/global_test_extra_config.jsonc"
         " --test_global_value_2 from-args"
     )
     launcher = _get_launcher(__name__, cli_args)
@@ -203,15 +203,15 @@ def test_launcher_args_parse_2(config_paths: list[str]) -> None:
     cli_args = (
         " ".join([f"--config-path {config_path}" for config_path in config_paths])
         + f" --config {config_file}"
-        + " --service services/remote/mock/mock_auth_service.jsonc"
-        + " --service services/remote/mock/mock_remote_exec_service.jsonc"
-        + f" --globals {globals_file}"
-        + " --experiment_id MockeryExperiment"
-        + " --no-teardown"
-        + " --random-init"
-        + " --random-seed 1234"
-        + " --trial-config-repeat-count 5"
-        + " --max_trials 200"
+        " --service services/remote/mock/mock_auth_service.jsonc"
+        " --service services/remote/mock/mock_remote_exec_service.jsonc"
+        f" --globals {globals_file}"
+        " --experiment_id MockeryExperiment"
+        " --no-teardown"
+        " --random-init"
+        " --random-seed 1234"
+        " --trial-config-repeat-count 5"
+        " --max_trials 200"
     )
     launcher = _get_launcher(__name__, cli_args)
     # Check some additional features of the the parent service
@@ -294,8 +294,8 @@ def test_launcher_args_parse_3(config_paths: list[str]) -> None:
     cli_args = (
         " ".join([f"--config-path {config_path}" for config_path in config_paths])
         + f" --config {config_file}"
-        + f" --globals {globals_file}"
-        + " --max-suggestions 10"  # check for - to _ conversion too
+        f" --globals {globals_file}"
+        " --max-suggestions 10"  # check for - to _ conversion too
     )
     launcher = _get_launcher(__name__, cli_args)
 
