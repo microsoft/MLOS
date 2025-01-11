@@ -412,7 +412,10 @@ class Storage(metaclass=ABCMeta):
             trial_runner_id: int | None = None,
             opt_targets: dict[str, Literal["min", "max"]],
             config: dict[str, Any] | None = None,
+            status: Status = Status.UNKNOWN,
         ):
+            if status not in (Status.UNKNOWN, Status.PENDING):
+                raise ValueError(f"Invalid status for a new trial: {status}")
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
@@ -420,7 +423,7 @@ class Storage(metaclass=ABCMeta):
             self._trial_runner_id = trial_runner_id
             self._opt_targets = opt_targets
             self._config = config or {}
-            self._status = Status.UNKNOWN
+            self._status = status
 
         def __repr__(self) -> str:
             return (
