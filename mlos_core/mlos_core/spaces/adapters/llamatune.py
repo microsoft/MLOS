@@ -64,11 +64,17 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
             The original (user-provided) parameter space to optimize.
         num_low_dims : int
             Number of dimensions used in the low-dimensional parameter search space.
-        special_param_values_dict : dict | None
-            Dictionary of special
+        special_param_values : dict | None
+            Dictionary of special parameter values.
+            Each key is the name of a parameter, and the value is either:
+            - an integer (special value), or
+            - a tuple of an integer and a float (special integer value and biasing percentage)
         max_unique_values_per_param : int | None
             Number of unique values per parameter. Used to discretize the parameter space.
             If `None` space discretization is disabled.
+        use_approximate_reverse_mapping : bool
+            Whether to use an approximate reverse mapping to help register
+            configurations during resume.
         """
         super().__init__(orig_parameter_space=orig_parameter_space)
 
