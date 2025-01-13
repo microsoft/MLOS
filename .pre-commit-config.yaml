@@ -28,7 +28,7 @@ default_stages: [pre-commit]
 # are partitioned and the hook executable called in parallel across them, not
 # whether hooks themselves are parallelized.
 # As such, some hooks (e.g., pylint) which do internal parallelism need it set
-# for effeciency and correctness anyways.
+# for efficiency and correctness anyways.
 
 repos:
 #
