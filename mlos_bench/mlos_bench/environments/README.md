@@ -10,6 +10,7 @@ Each `Environment` object also keeps track of the current state of the system, a
 
 Environments can have [`Tunable`](../tunables/tunable.py) parameters and [`TunableGroups`](../tunables/tunable_groups.py) for controlling their configuration.
 It is generally expected that all [`Tunable`](../tunables/tunable.py) parameters within an `Environment` will have the same cost to change.
+
 > It may therefore make sense to split a portion of the system logically across `Environments` (e.g., boot-time vs. runtime settings).
 
 Common and platform-specific functionality of the environments is implemented in [`Service`](../services/) classes.

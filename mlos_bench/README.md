@@ -13,25 +13,24 @@ It's available for `pip install` via the pypi repository at [mlos-bench](https:/
 <!-- TOC -->
 
 - [mlos-bench](#mlos-bench)
-    - [Table of Contents](#table-of-contents)
-    - [Description](#description)
-    - [Features](#features)
-    - [Quickstart](#quickstart)
-        - [Install and activate the conda environment](#install-and-activate-the-conda-environment)
-        - [Make sure that you have Azure CLI tool installed and working](#make-sure-that-you-have-azure-cli-tool-installed-and-working)
-        - [Generate access tokens to interact with Azure resources](#generate-access-tokens-to-interact-with-azure-resources)
-        - [Create a JSON config with DB credentials Optional](#create-a-json-config-with-db-credentials-optional)
-        - [Create a top-level configuration file for your MLOS setup](#create-a-top-level-configuration-file-for-your-mlos-setup)
-        - [Create another config file for the parameters specific to your experiment](#create-another-config-file-for-the-parameters-specific-to-your-experiment)
-            - [Importance of the Experiment ID config](#importance-of-the-experiment-id-config)
-        - [Run the benchmark](#run-the-benchmark)
-    - [Optimization](#optimization)
-        - [Resuming interrupted experiments](#resuming-interrupted-experiments)
-    - [Analyzing Results](#analyzing-results)
-    - [Debugging](#debugging)
-    - [See Also](#see-also)
+  - [Table of Contents](#table-of-contents)
+  - [Description](#description)
+  - [Features](#features)
+  - [Quickstart](#quickstart)
+    - [Install and activate the conda environment](#install-and-activate-the-conda-environment)
+    - [Make sure that you have Azure CLI tool installed and working](#make-sure-that-you-have-azure-cli-tool-installed-and-working)
+    - [Generate access tokens to interact with Azure resources](#generate-access-tokens-to-interact-with-azure-resources)
+    - [Create a JSON config with DB credentials Optional](#create-a-json-config-with-db-credentials-optional)
+    - [Create a top-level configuration file for your MLOS setup](#create-a-top-level-configuration-file-for-your-mlos-setup)
+    - [Create another config file for the parameters specific to your experiment](#create-another-config-file-for-the-parameters-specific-to-your-experiment)
+      - [Importance of the Experiment ID config](#importance-of-the-experiment-id-config)
+    - [Run the benchmark](#run-the-benchmark)
+  - [Optimization](#optimization)
+    - [Resuming interrupted experiments](#resuming-interrupted-experiments)
+  - [Analyzing Results](#analyzing-results)
+  - [Debugging](#debugging)
+  - [See Also](#see-also)
 
-<!-- /TOC -->
 <!-- /TOC -->
 
 <!-- markdownlint-enable MD007 -->
@@ -39,23 +38,23 @@ It's available for `pip install` via the pypi repository at [mlos-bench](https:/
 ## Description
 
 `mlos-bench` is an end-to-end benchmarking service that can be independently launched for experimentation but is also integrated with `mlos-core` as its optimizer for OS tuning.
- Given a user-provided VM configuration, `mlos-bench` provisions a configured environment and remotely executes benchmarks on the cloud.
- Experiment results (benchmark results & telemetry) are stored as input to the `mlos-core` optimization engine loop to evaluate proposed configuration parameters and produce new results.
+Given a user-provided VM configuration, `mlos-bench` provisions a configured environment and remotely executes benchmarks on the cloud.
+Experiment results (benchmark results & telemetry) are stored as input to the `mlos-core` optimization engine loop to evaluate proposed configuration parameters and produce new results.
 
 ## Features
 
 With a [JSON5](https://spec.json5.org) [config file](./mlos_bench/config/) and command line parameters as input, `mlos-bench` streamlines workload performance measurement by automating the following benchmarking steps:
 
 1. Set up & clean up benchmark and application configuration
-    - **Ease of use:** Mlos-bench abstracts away controls for managing VMs in Azure, e.g., setup, teardown, stop, deprovision, and reboot. Get visibility into VM status through Azure Portal, ensuring that a VM is provisioned & running before issuing commands to it.
-    - **Versatility:** Mlos-bench provides a common interface to control a collection of environments (application, OS, VM), regardless of where or which cloud they come from. This allows changes to easily propagate to all environment layers when a new set of kernel parameters are applied.
-    - **Efficiency:** In adapting an environment to new parameters, mlos-bench optimizes for low re-configuration costs during optimization. For example, considering that not all OS kernel parameter adjustments require a full reboot, as some can be changed during run-time.
-2. Run benchmarks in the provisioned environment & standardize results for the optimizer
-    - Through Azure File Share, access docker scripts to run benchmarks & store results as input for optimization. For example, execute Redis benchmark uploaded to the file share, running a benchmark docker container with specified parameters. The file share is mounted to VMs via remote execution, instead of ARM templates.
-    - **Configurable:** Specify a python script in the initial config to post-process & standardize benchmark results. An example post-processing script for Redis benchmarks is included.
-    - **Local & remote benchmark execution:** Benchmarks can be run both locally in Hyper-V and remotely on Azure. Local execution allows better accuracy, while Azure runs are required to estimate the benchmark noise and understand the VM behavior when using cloud storage.
-    - **Cloud agnostic:** Mlos-bench can remotely execute benchmarks on other clouds, outside of Azure - e.g., controls for EC2 instances and ability to provision environments on AWS with Terraform.
-    - **Persistence:** Storage integration is available to persist experiment parameters and track results for re-use, either for analysis during & after trials, or warm-starting future experiments.
+   - **Ease of use:** Mlos-bench abstracts away controls for managing VMs in Azure, e.g., setup, teardown, stop, deprovision, and reboot. Get visibility into VM status through Azure Portal, ensuring that a VM is provisioned & running before issuing commands to it.
+   - **Versatility:** Mlos-bench provides a common interface to control a collection of environments (application, OS, VM), regardless of where or which cloud they come from. This allows changes to easily propagate to all environment layers when a new set of kernel parameters are applied.
+   - **Efficiency:** In adapting an environment to new parameters, mlos-bench optimizes for low re-configuration costs during optimization. For example, considering that not all OS kernel parameter adjustments require a full reboot, as some can be changed during run-time.
+1. Run benchmarks in the provisioned environment & standardize results for the optimizer
+   - Through Azure File Share, access docker scripts to run benchmarks & store results as input for optimization. For example, execute Redis benchmark uploaded to the file share, running a benchmark docker container with specified parameters. The file share is mounted to VMs via remote execution, instead of ARM templates.
+   - **Configurable:** Specify a python script in the initial config to post-process & standardize benchmark results. An example post-processing script for Redis benchmarks is included.
+   - **Local & remote benchmark execution:** Benchmarks can be run both locally in Hyper-V and remotely on Azure. Local execution allows better accuracy, while Azure runs are required to estimate the benchmark noise and understand the VM behavior when using cloud storage.
+   - **Cloud agnostic:** Mlos-bench can remotely execute benchmarks on other clouds, outside of Azure - e.g., controls for EC2 instances and ability to provision environments on AWS with Terraform.
+   - **Persistence:** Storage integration is available to persist experiment parameters and track results for re-use, either for analysis during & after trials, or warm-starting future experiments.
 
 ## Quickstart
 
@@ -230,6 +229,7 @@ For example:
 
 ```python
 from mlos_bench.storage import from_config
+
 # Specify the experiment_id used for your experiment.
 experiment_id = "YourExperimentId"
 trial_id = 1

@@ -63,6 +63,7 @@ class MyClass:
     Expected output
 
     """
+
     ...
 ```
 
