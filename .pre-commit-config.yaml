@@ -7,7 +7,7 @@ ci:
     # automatically fixup formatting in PRs.
     autofix_prs: false
     # skip local hooks - they should be managed manually via conda-envs/*.yml
-    skip: [mypy, pylint]
+    skip: [mypy, pylint, pycodestyle]
     autoupdate_schedule: monthly
     autoupdate_commit_msg: |
         [pre-commit.ci] pre-commit autoupdate
@@ -19,6 +19,7 @@ ci:
         - https://github.com/microsoft/MLOS/blob/main/conda-envs/mlos.yml
         - https://pypi.org/project/mypy/
         - https://pypi.org/project/pylint/
+        - https://pypi.org/project/pycodestyle/
 
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
