@@ -46,12 +46,20 @@ repos:
     -   id: check-yaml
     -   id: end-of-file-fixer
         stages: [pre-commit, manual]
-    # TODO: Replace with something that is json5 compatible.
-    #-   id: pretty-format-json
-    #    args: [--autofix, --no-sort-keys]
-    #    stages: [pre-commit, manual]
     -   id: trailing-whitespace
         stages: [pre-commit, manual]
+-   repo: https://gitlab.com/bmares/check-json5
+    rev: v1.0.0
+    hooks:
+    -   id: check-json5
+        include: '\.json[c]?$'
+-   repo: https://github.com/whtsky/pre-commit-pretty-format-json5
+    rev: "1.0.0"
+    hooks:
+    -   id: pretty-format-json5
+        args: [--autofix, --no-sort-keys]
+        stages: [pre-commit, manual]
+        include: '\.json[c]?$'
 -   repo: https://github.com/johann-petrak/licenseheaders
     rev: v0.8.8
     hooks:
