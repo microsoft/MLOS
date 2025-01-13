@@ -5,7 +5,7 @@ ci:
     # hook versions.
     # In the future we may consider to integrate it into the usual CI jobs to
     # automatically fixup formatting in PRs.
-    autofix_prs: false
+    autofix_prs: true
     # skip local hooks - they should be managed manually via conda-envs/*.yml
     skip: [mypy, pylint, pycodestyle]
     autoupdate_schedule: monthly
