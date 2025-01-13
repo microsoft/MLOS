@@ -46,10 +46,9 @@ repos:
     -   id: check-yaml
     -   id: end-of-file-fixer
         stages: [pre-commit, manual]
-    # TODO:
-    #-   id: pretty-format-json
-    #    args: [--autofix, --no-sort-keys]
-    #    stages: [pre-commit, manual]
+    -   id: pretty-format-json
+        args: [--autofix, --no-sort-keys]
+        stages: [pre-commit, manual]
     -   id: trailing-whitespace
         stages: [pre-commit, manual]
 -   repo: https://github.com/johann-petrak/licenseheaders
