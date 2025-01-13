@@ -44,7 +44,9 @@ llamatune_optimizer = OptimizerFactory.create(
         # llamatune kwargs
         # e.g.,
         num_low_dims=16,
-        special_param_values
+        special_param_values={
+            "special_param": [-1, 0],
+        },
     },
 )
 ```
