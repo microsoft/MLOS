@@ -1,3 +1,25 @@
+# Enable automatic updates via Github Actions as well.
+# See https://pre-commit.ci
+ci:
+    # For now we only use pre-commit.ci to do automatic updates of the pre-commit
+    # hook versions.
+    # In the future we may consider to integrate it into the usual CI jobs to
+    # automatically fixup formatting in PRs.
+    autofix_prs: false
+    # skip local hooks - they should be managed manually via conda-envs/*.yml
+    skip: [mypy, pylint]
+    autoupdate_schedule: monthly
+    autoupdate_commit_msg: |
+        [pre-commit.ci] pre-commit autoupdate
+
+        for more information, see https://pre-commit.ci
+
+        NOTE: Be sure to also check for other possible hook updates in the conda-envs/*.yml files (e.g., mypy, pylint, etc.).
+        See Also:
+        - https://github.com/microsoft/MLOS/blob/main/conda-envs/mlos.yml
+        - https://pypi.org/project/mypy/
+        - https://pypi.org/project/pylint/
+
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 default_stages: [pre-commit]
