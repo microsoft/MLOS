@@ -46,7 +46,7 @@ repos:
     -   id: check-yaml
     -   id: end-of-file-fixer
         stages: [pre-commit, manual]
-    # TODO:
+    # TODO: Replace with something that is json5 compatible.
     #-   id: pretty-format-json
     #    args: [--autofix, --no-sort-keys]
     #    stages: [pre-commit, manual]
