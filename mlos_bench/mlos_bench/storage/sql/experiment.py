@@ -318,6 +318,7 @@ class Experiment(Storage.Experiment):
         _LOG.debug("Create trial: %s:%d @ %s", self._experiment_id, self._trial_id, ts_start)
         with self._engine.begin() as conn:
             try:
+                new_trial_status = Status.PENDING
                 config_id = self._get_config_id(conn, tunables)
                 conn.execute(
                     self._schema.trial.insert().values(
@@ -325,7 +326,7 @@ class Experiment(Storage.Experiment):
                         trial_id=self._trial_id,
                         config_id=config_id,
                         ts_start=ts_start,
-                        status=Status.PENDING.name,
+                        status=new_trial_status.name,
                     )
                 )
 
@@ -340,7 +341,6 @@ class Experiment(Storage.Experiment):
                         trial_id=self._trial_id,
                     )
 
-                # FIXME: Status mismatch in object vs. backend storage.
                 trial = Trial(
                     engine=self._engine,
                     schema=self._schema,
@@ -350,6 +350,7 @@ class Experiment(Storage.Experiment):
                     config_id=config_id,
                     opt_targets=self._opt_targets,
                     config=config,
+                    status=new_trial_status,
                 )
                 self._trial_id += 1
                 return trial

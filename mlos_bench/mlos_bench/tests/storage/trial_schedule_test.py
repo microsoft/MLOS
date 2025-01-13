@@ -51,8 +51,8 @@ def test_schedule_trial(
     trial_now1_data = exp_data.trials[trial_now1.trial_id]
     assert trial_now1_data.trial_runner_id is None
     assert trial_now1_data.status == Status.PENDING
-    # FIXME: Status mismatch in object vs. backend storage.
-    # assert trial_now1.status == Status.PENDING
+    # Check that Status matches in object vs. backend storage.
+    assert trial_now1.status == trial_now1_data.status
 
     # Scheduler side: get trials ready to run at certain timestamps:
 
