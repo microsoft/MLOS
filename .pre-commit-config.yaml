@@ -1,10 +1,7 @@
 # Enable automatic updates via Github Actions as well.
 # See https://pre-commit.ci
 ci:
-    # For now we only use pre-commit.ci to do automatic updates of the pre-commit
-    # hook versions.
-    # In the future we may consider to integrate it into the usual CI jobs to
-    # automatically fixup formatting in PRs.
+    # Let pre-commit.ci automatically update PRs with formatting fixes.
     autofix_prs: true
     # skip local hooks - they should be managed manually via conda-envs/*.yml
     skip: [mypy, pylint, pycodestyle]
