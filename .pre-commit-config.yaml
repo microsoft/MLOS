@@ -54,7 +54,6 @@ repos:
     -   id: check-json5
         alias: check-json
         types_or: [file, json]
-        verbose: true
         files: '\.json[c]?$'
 # FIXME: This removes comments.
 # See Also: https://github.com/dpranke/pyjson5/issues/28
