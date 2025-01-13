@@ -40,7 +40,12 @@ The user can employ `LlamaTuneSpaceAdapter` when initializing the `mlos_core` op
 llamatune_optimizer = OptimizerFactory.create(
     ...
     space_adapter_type=SpaceAdapterType.LLAMATUNE,
-    space_adapter_kwargs=<llamatune_kwargs>,
+    space_adapter_kwargs={
+        # llamatune kwargs
+        # e.g.,
+        num_low_dims=16,
+        special_param_values
+    },
 )
 ```
 
