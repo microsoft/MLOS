@@ -57,6 +57,7 @@ repos:
         verbose: true
         files: '\.json[c]?$'
 # FIXME: This removes comments.
+# See Also: https://github.com/dpranke/pyjson5/issues/28
 -   repo: https://github.com/whtsky/pre-commit-pretty-format-json5
     rev: "1.0.0"
     hooks:
