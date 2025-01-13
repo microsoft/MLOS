@@ -43,8 +43,11 @@ To accomplish this, the general flow involves
 - Apply that configuration to the target system.
 - Repeat until either the exploration budget is consumed or the configurations' performance appear to have converged.
 
-<!-- markdownlint-disable-next-line MD033 -->
+<!-- markdownlint-disable MD033 -->
+
 <img src="./doc/source/_static/llamatune-loop.png" style="width:700px" alt="optimization loop" />
+
+<!-- markdownlint-enable MD033 -->
 
 > Source: [LlamaTune: VLDB 2022](https://arxiv.org/abs/2203.05128)
 
