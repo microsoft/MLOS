@@ -10,28 +10,27 @@ It's available for `pip install` via the pypi repository at [mlos-bench](https:/
 
 <!-- markdownlint-disable MD007 -->
 
-<!-- TOC -->
+<!-- mdformat-toc start --slug=github --no-anchors --maxlevel=4 --minlevel=2 -->
 
-- [mlos-bench](#mlos-bench)
-  - [Table of Contents](#table-of-contents)
-  - [Description](#description)
-  - [Features](#features)
-  - [Quickstart](#quickstart)
-    - [Install and activate the conda environment](#install-and-activate-the-conda-environment)
-    - [Make sure that you have Azure CLI tool installed and working](#make-sure-that-you-have-azure-cli-tool-installed-and-working)
-    - [Generate access tokens to interact with Azure resources](#generate-access-tokens-to-interact-with-azure-resources)
-    - [Create a JSON config with DB credentials Optional](#create-a-json-config-with-db-credentials-optional)
-    - [Create a top-level configuration file for your MLOS setup](#create-a-top-level-configuration-file-for-your-mlos-setup)
-    - [Create another config file for the parameters specific to your experiment](#create-another-config-file-for-the-parameters-specific-to-your-experiment)
-      - [Importance of the Experiment ID config](#importance-of-the-experiment-id-config)
-    - [Run the benchmark](#run-the-benchmark)
-  - [Optimization](#optimization)
-    - [Resuming interrupted experiments](#resuming-interrupted-experiments)
-  - [Analyzing Results](#analyzing-results)
-  - [Debugging](#debugging)
-  - [See Also](#see-also)
+- [Table of Contents](#table-of-contents)
+- [Description](#description)
+- [Features](#features)
+- [Quickstart](#quickstart)
+  - [1. Install and activate the conda environment](#1-install-and-activate-the-conda-environment)
+  - [2. Make sure that you have Azure CLI tool installed and working](#2-make-sure-that-you-have-azure-cli-tool-installed-and-working)
+  - [3. Generate access tokens to interact with Azure resources](#3-generate-access-tokens-to-interact-with-azure-resources)
+  - [4. Create a JSON config with DB credentials (Optional)](#4-create-a-json-config-with-db-credentials-optional)
+  - [5. Create a top-level configuration file for your MLOS setup](#5-create-a-top-level-configuration-file-for-your-mlos-setup)
+  - [5. Create another config file for the parameters specific to your experiment](#5-create-another-config-file-for-the-parameters-specific-to-your-experiment)
+    - [Importance of the Experiment ID config](#importance-of-the-experiment-id-config)
+  - [6. Run the benchmark](#6-run-the-benchmark)
+- [Optimization](#optimization)
+  - [Resuming interrupted experiments](#resuming-interrupted-experiments)
+- [Analyzing Results](#analyzing-results)
+- [Debugging](#debugging)
+- [See Also](#see-also)
 
-<!-- /TOC -->
+<!-- mdformat-toc end -->
 
 <!-- markdownlint-enable MD007 -->
 

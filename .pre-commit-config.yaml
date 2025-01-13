@@ -70,6 +70,7 @@ repos:
           - mdformat-gfm
           - mdformat-black
           - mdformat_frontmatter
+          - mdformat-toc
 
 #
 # Linting
