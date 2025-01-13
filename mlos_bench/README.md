@@ -16,14 +16,14 @@ It's available for `pip install` via the pypi repository at [mlos-bench](https:/
 - [Description](#description)
 - [Features](#features)
 - [Quickstart](#quickstart)
-  - [1. Install and activate the conda environment](#1-install-and-activate-the-conda-environment)
-  - [2. Make sure that you have Azure CLI tool installed and working](#2-make-sure-that-you-have-azure-cli-tool-installed-and-working)
-  - [3. Generate access tokens to interact with Azure resources](#3-generate-access-tokens-to-interact-with-azure-resources)
-  - [4. Create a JSON config with DB credentials (Optional)](#4-create-a-json-config-with-db-credentials-optional)
-  - [5. Create a top-level configuration file for your MLOS setup](#5-create-a-top-level-configuration-file-for-your-mlos-setup)
-  - [5. Create another config file for the parameters specific to your experiment](#5-create-another-config-file-for-the-parameters-specific-to-your-experiment)
+  - [Install and activate the conda environment](#install-and-activate-the-conda-environment)
+  - [Make sure that you have Azure CLI tool installed and working](#make-sure-that-you-have-azure-cli-tool-installed-and-working)
+  - [Generate access tokens to interact with Azure resources](#generate-access-tokens-to-interact-with-azure-resources)
+  - [Create a JSON config with DB credentials (Optional)](#create-a-json-config-with-db-credentials-optional)
+  - [Create a top-level configuration file for your MLOS setup](#create-a-top-level-configuration-file-for-your-mlos-setup)
+  - [Create another config file for the parameters specific to your experiment](#create-another-config-file-for-the-parameters-specific-to-your-experiment)
     - [Importance of the Experiment ID config](#importance-of-the-experiment-id-config)
-  - [6. Run the benchmark](#6-run-the-benchmark)
+  - [Run the benchmark](#run-the-benchmark)
 - [Optimization](#optimization)
   - [Resuming interrupted experiments](#resuming-interrupted-experiments)
 - [Analyzing Results](#analyzing-results)
@@ -60,7 +60,7 @@ With a [JSON5](https://spec.json5.org) [config file](./mlos_bench/config/) and c
 To get started, we can adapt an example configuration to test out running `mlos-bench`.
 For these instructions, we will be using Azure for our resources.
 
-### 1. Install and activate the conda environment
+### Install and activate the conda environment
 
 From here onwards we assume we are in the project root directory.
 Ensure you have a conda environment (`mlos`) set up for executing `mlos_bench`.
@@ -73,7 +73,7 @@ conda activate mlos
 
 > Note: if you are running inside the devcontainer, this should be done automatically.
 
-### 2. Make sure that you have Azure CLI tool installed and working
+### Make sure that you have Azure CLI tool installed and working
 
 > Installation instructions for `az` (Azure CLI) [can be found here](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
 >
@@ -92,7 +92,7 @@ az config set storage.account=MyStorageAccount --local
 az account set --subscription "..."
 ```
 
-### 3. Generate access tokens to interact with Azure resources
+### Generate access tokens to interact with Azure resources
 
 A script at `./scripts/generate-azure-credentials-config` produces a JSON config snippet with necessary Azure credentials.
 
@@ -112,7 +112,7 @@ This data produced in the `global_config_azure.jsonc` file is in the format that
 
 > Note: On Linux, this script also requires `jq` to also be installed (comes preinstalled in the devcontainer).
 
-### 4. Create a JSON config with DB credentials (Optional)
+### Create a JSON config with DB credentials (Optional)
 
 If you plan to store the information about experiments and benchmarks in a (remote) database like PostgreSQL or MySQL, create a JSON/JSONC file with the DB hostname and password.
 See [`mysql.jsonc`](./mlos_bench/config/storage/mysql.jsonc) or [`postgresql.jsonc`](./mlos_bench/config/storage/postgresql.jsonc) configuration files for examples with a more complete list of DB parameters supported by underlying the [SqlAlchemy](https://www.sqlalchemy.org/library.html#reference) library.
@@ -134,7 +134,7 @@ See [`sqlite.jsonc`](./mlos_bench/config/storage/sqlite.jsonc) or [`duckdb.jsonc
 
 > Note: if no storage is specified, a basic sqlite config will be used by default.
 
-### 5. Create a top-level configuration file for your MLOS setup
+### Create a top-level configuration file for your MLOS setup
 
 We provide a few examples of such files in [`./mlos_bench/config/cli/`](./mlos_bench/config/cli).
 For example, [`azure-redis-opt.jsonc`](./mlos_bench/config/cli/azure-redis-opt.jsonc) is a configuration for optimizing Redis VM on Azure and saving the results in a local SQLite database.
@@ -157,7 +157,7 @@ For the purpose of this tutorial, we will assume that we reuse the existing [`az
 In a more realistic scenario, however, you might need to change and/or create new config files for some parts of your benchmarking environment.
 We'll give more details on that below.
 
-### 5. Create another config file for the parameters specific to your experiment
+### Create another config file for the parameters specific to your experiment
 
 Copy one of our examples, e.g., [`experiment_RedisBench.jsonc`](./mlos_bench/config/experiments/experiment_RedisBench.jsonc) and name it after your experiment, e.g. `experiment_MyBenchmark.jsonc`.
 
@@ -175,7 +175,7 @@ As such this value should be unique for each experiment.
 Be sure to change it whenever *"incompatible"* changes are made to the experiment configuration or scripts.
 Unfortunately, determining what constitutes and *"incompatible"* change for any given system is not always possible, so `mlos_bench` largely leaves this up to the user.
 
-### 6. Run the benchmark
+### Run the benchmark
 
 Now we can run our configuration with `mlos_bench`:
 
