@@ -48,6 +48,8 @@ repos:
         stages: [pre-commit, manual]
     -   id: trailing-whitespace
         stages: [pre-commit, manual]
+# FIXME: Neither of these pickup jsonc files.
+# May have to provide our own hook scripts if we want to do that.
 -   repo: https://gitlab.com/bmares/check-json5
     rev: v1.0.0
     hooks:
