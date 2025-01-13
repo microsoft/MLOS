@@ -26,6 +26,7 @@ For example:
 
 ```python
 from mlos_bench.storage import from_config
+
 # Specify the experiment_id used for your experiment.
 experiment_id = "YourExperimentId"
 trial_id = 1
