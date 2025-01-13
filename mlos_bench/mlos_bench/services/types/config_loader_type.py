@@ -23,6 +23,15 @@ if TYPE_CHECKING:
 class SupportsConfigLoading(Protocol):
     """Protocol interface for helper functions to lookup and load configs."""
 
+    def get_config_paths(self) -> list[str]:
+        """
+        Gets the list of config paths this service will search for config files.
+
+        Returns
+        -------
+        list[str]
+        """
+
     def resolve_path(self, file_path: str, extra_paths: Iterable[str] | None = None) -> str:
         """
         Prepend the suitable `_config_path` to `path` if the latter is not absolute. If
@@ -87,7 +96,7 @@ class SupportsConfigLoading(Protocol):
             all environments.
         global_config : dict | None
             Global parameters to add to the environment config.
-        parent_args : Optional[dict[str, TunableValue]]
+        parent_args : dict[str, TunableValue] | None
             An optional reference of the parent CompositeEnv's const_args used to
             expand dynamic config parameters from.
         service: Service | None
@@ -98,6 +107,38 @@ class SupportsConfigLoading(Protocol):
         -------
         env : Environment
             An instance of the `Environment` class initialized with `config`.
+        """
+
+    def load_environment(
+        self,
+        json: str,
+        tunables: TunableGroups,
+        global_config: dict[str, Any] | None = None,
+        parent_args: dict[str, TunableValue] | None = None,
+        service: Service | None = None,
+    ) -> Environment:
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
+        """
+        Load and build new :py:class:`.Environment` from the config file or JSON string.
+
+        Parameters
+        ----------
+        json : str
+            The environment JSON configuration file or JSON string.
+        tunables : TunableGroups
+            A (possibly empty) collection of tunables to add to the environment.
+        global_config : dict
+            Global parameters to add to the environment config.
+        parent_args : dict[str, TunableValue]
+            An optional reference of the parent CompositeEnv's const_args used to
+            expand dynamic config parameters from.
+        service : Service
+            An optional reference of the parent service to mix in.
+
+        Returns
+        -------
+        env : Environment
+            A new benchmarking environment.
         """
 
     def load_environment_list(
@@ -121,7 +162,7 @@ class SupportsConfigLoading(Protocol):
             A (possibly empty) collection of tunables to add to the environment.
         global_config : dict | None
             Global parameters to add to the environment config.
-        parent_args : Optional[dict[str, TunableValue]]
+        parent_args : dict[str, TunableValue] | None
             An optional reference of the parent CompositeEnv's const_args used to
             expand dynamic config parameters from.
         service : Service | None

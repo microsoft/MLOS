@@ -32,6 +32,7 @@ from mlos_bench.util import (
 
 if TYPE_CHECKING:
     from mlos_bench.schedulers.base_scheduler import Scheduler
+    from mlos_bench.schedulers.trial_runner import TrialRunner
     from mlos_bench.storage.base_storage import Storage
 
 
@@ -67,7 +68,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             Free-format dictionary of global parameters.
         parent : Service
             An optional parent service that can provide mixin functions.
-        methods : Union[dict[str, Callable], list[Callable], None]
+        methods : dict[str, Callable] | list[Callable] | None
             New methods to register with the service.
         """
         super().__init__(
@@ -77,6 +78,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             self.merge_methods(
                 methods,
                 [
+                    self.get_config_paths,
                     self.resolve_path,
                     self.load_config,
                     self.prepare_class_load,
@@ -113,6 +115,16 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         list[str]
         """
         return list(self._config_path)  # make a copy to avoid modifications
+
+    def get_config_paths(self) -> list[str]:
+        """
+        Gets the list of config paths this service will search for config files.
+
+        Returns
+        -------
+        list[str]
+        """
+        return self.config_paths
 
     def resolve_path(self, file_path: str, extra_paths: Iterable[str] | None = None) -> str:
         """
@@ -166,7 +178,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         Returns
         -------
-        config : Union[dict, list[dict]]
+        config : dict | list[dict]
             Free-format dictionary that contains the configuration.
         """
         assert isinstance(json, str)
@@ -352,7 +364,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         *,
         config: dict[str, Any],
         global_config: dict[str, Any],
-        environment: Environment,
+        trial_runners: list["TrialRunner"],
         optimizer: Optimizer,
         storage: "Storage",
         root_env_config: str,
@@ -366,8 +378,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             Configuration of the class to instantiate, as loaded from JSON.
         global_config : dict
             Global configuration parameters.
-        environment : Environment
-            The environment to benchmark/optimize.
+        trial_runners : List[TrialRunner]
+            The TrialRunners (Environments) to use.
         optimizer : Optimizer
             The optimizer to use.
         storage : Storage
@@ -389,7 +401,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             class_name,
             config=class_config,
             global_config=global_config,
-            environment=environment,
+            trial_runners=trial_runners,
             optimizer=optimizer,
             storage=storage,
             root_env_config=root_env_config,

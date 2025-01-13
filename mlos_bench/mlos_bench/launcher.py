@@ -23,6 +23,7 @@ from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.optimizers.one_shot_optimizer import OneShotOptimizer
 from mlos_bench.schedulers.base_scheduler import Scheduler
+from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService
@@ -45,6 +46,7 @@ class Launcher:
 
     def __init__(self, description: str, long_text: str = "", argv: list[str] | None = None):
         # pylint: disable=too-many-statements
+        # pylint: disable=too-complex
         # pylint: disable=too-many-locals
         _LOG.info("Launch: %s", description)
         epilog = """
@@ -87,8 +89,6 @@ class Launcher:
             log_handler.setFormatter(logging.Formatter(_LOG_FORMAT))
             logging.root.addHandler(log_handler)
 
-        self._parent_service: Service = LocalExecService(parent=self._config_loader)
-
         # Prepare global_config from a combination of global config files, cli
         # configs, and cli args.
         args_dict = vars(args)
@@ -109,6 +109,7 @@ class Launcher:
             args_rest=args_rest,
             global_config=cli_config_args,
         )
+        # TODO: Can we generalize these two rules using excluded_cli_args?
         # experiment_id is generally taken from --globals files, but we also allow
         # overriding it on the CLI.
         # It's useful to keep it there explicitly mostly for the --help output.
@@ -118,12 +119,30 @@ class Launcher:
         # set it via command line
         if args.trial_config_repeat_count:
             self.global_config["trial_config_repeat_count"] = args.trial_config_repeat_count
+        self.global_config.setdefault("num_trial_runners", 1)
+        if args.num_trial_runners:
+            self.global_config["num_trial_runners"] = args.num_trial_runners
+        if self.global_config["num_trial_runners"] <= 0:
+            raise ValueError(
+                f"""Invalid num_trial_runners: {self.global_config["num_trial_runners"]}"""
+            )
         # Ensure that the trial_id is present since it gets used by some other
         # configs but is typically controlled by the run optimize loop.
         self.global_config.setdefault("trial_id", 1)
 
         self.global_config = DictTemplater(self.global_config).expand_vars(use_os_env=True)
         assert isinstance(self.global_config, dict)
+
+        # --service cli args should override the config file values.
+        service_files: list[str] = config.get("services", []) + (args.service or [])
+        # Add a LocalExecService as the parent service for all other services.
+        self._parent_service: Service = LocalExecService(parent=self._config_loader)
+        assert isinstance(self._parent_service, SupportsConfigLoading)
+        self._parent_service = self._parent_service.load_services(
+            service_files,
+            self.global_config,
+            self._parent_service,
+        )
 
         self.storage = self._load_storage(
             args.storage or config.get("storage"),
@@ -136,31 +155,34 @@ class Launcher:
             self.storage.update_schema()
             sys.exit(0)
 
-        # --service cli args should override the config file values.
-        service_files: list[str] = config.get("services", []) + (args.service or [])
-        assert isinstance(self._parent_service, SupportsConfigLoading)
-        self._parent_service = self._parent_service.load_services(
-            service_files,
-            self.global_config,
-            self._parent_service,
-        )
-
         env_path = args.environment or config.get("environment")
         if not env_path:
             _LOG.error("No environment config specified.")
             parser.error(
                 "At least the Environment config must be specified."
-                + " Run `mlos_bench --help` and consult `README.md` for more info."
+                " Run `mlos_bench --help` and consult `README.md` for more info."
             )
         self.root_env_config = self._config_loader.resolve_path(env_path)
 
-        self.environment: Environment = self._config_loader.load_environment(
-            self.root_env_config, TunableGroups(), self.global_config, service=self._parent_service
+        # Create the TrialRunners and their Environments and Services from the JSON files.
+        self.trial_runners = TrialRunner.create_from_json(
+            config_loader=self._config_loader,
+            global_config=self.global_config,
+            svcs_json=service_files,
+            env_json=self.root_env_config,
+            num_trial_runners=self.global_config["num_trial_runners"],
         )
-        _LOG.info("Init environment: %s", self.environment)
 
-        # NOTE: Init tunable values *after* the Environment, but *before* the Optimizer
+        _LOG.info(
+            "Init %d trial runners for environments: %s",
+            len(self.trial_runners),
+            [trial_runner.environment for trial_runner in self.trial_runners],
+        )
+
+        # NOTE: Init tunable values *after* the Environment(s), but *before* the Optimizer
+        # TODO: should we assign the same or different tunables for all TrialRunner Environments?
         self.tunables = self._init_tunable_values(
+            self.trial_runners[0].environment,
             args.random_init or config.get("random_init", False),
             config.get("random_seed") if args.random_seed is None else args.random_seed,
             config.get("tunable_values", []) + (args.tunable_values or []),
@@ -182,6 +204,21 @@ class Launcher:
     def config_loader(self) -> ConfigPersistenceService:
         """Get the config loader service."""
         return self._config_loader
+
+    @property
+    def root_environment(self) -> Environment:
+        """
+        Gets the root (prototypical) Environment from the first TrialRunner.
+
+        Note: All TrialRunners have the same Environment config and are made
+        unique by their use of the unique trial_runner_id assigned to each
+        TrialRunner's Environment's global_config.
+
+        Notes
+        -----
+        This is mostly for convenience and backwards compatibility.
+        """
+        return self.trial_runners[0].environment
 
     @property
     def service(self) -> Service:
@@ -284,6 +321,18 @@ class Launcher:
             help=(
                 "Number of times to repeat each config. "
                 "Default is 1 trial per config, though more may be advised."
+            ),
+        )
+
+        parser.add_argument(
+            "--num_trial_runners",
+            "--num-trial-runners",
+            required=False,
+            type=int,
+            help=(
+                "Number of TrialRunners to use for executing benchmark Environments. "
+                "Individual TrialRunners can be identified in configs with $trial_runner_id "
+                "and optionally run in parallel."
             ),
         )
 
@@ -449,6 +498,7 @@ class Launcher:
 
     def _init_tunable_values(
         self,
+        env: Environment,
         random_init: bool,
         seed: int | None,
         args_tunables: str | None,
@@ -456,7 +506,7 @@ class Launcher:
         """Initialize the tunables and load key/value pairs of the tunable values from
         given JSON files, if specified.
         """
-        tunables = self.environment.tunable_params
+        tunables = env.tunable_params
         _LOG.debug("Init tunables: default = %s", tunables)
 
         if random_init:
@@ -561,7 +611,7 @@ class Launcher:
                     "teardown": self.teardown,
                 },
                 global_config=self.global_config,
-                environment=self.environment,
+                trial_runners=self.trial_runners,
                 optimizer=self.optimizer,
                 storage=self.storage,
                 root_env_config=self.root_env_config,
@@ -571,7 +621,7 @@ class Launcher:
         return self._config_loader.build_scheduler(
             config=class_config,
             global_config=self.global_config,
-            environment=self.environment,
+            trial_runners=self.trial_runners,
             optimizer=self.optimizer,
             storage=self.storage,
             root_env_config=self.root_env_config,

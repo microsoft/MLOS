@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Callable
+from contextlib import AbstractContextManager as ContextManager
 from types import TracebackType
 from typing import Any, Literal
 
@@ -19,7 +20,7 @@ from mlos_bench.util import instantiate_from_config
 _LOG = logging.getLogger(__name__)
 
 
-class Service:
+class Service(ContextManager):
     """An abstract base of all Environment Services and used to build up mix-ins."""
 
     @classmethod

@@ -18,10 +18,11 @@ from sqlalchemy.engine import Engine
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_storage import Storage
+from mlos_bench.storage.sql.common import save_params
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.sql.trial import Trial
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import nullable, utcify_timestamp
+from mlos_bench.util import utcify_timestamp
 
 _LOG = logging.getLogger(__name__)
 
@@ -126,7 +127,7 @@ class Experiment(Storage.Experiment):
 
     def merge(self, experiment_ids: list[str]) -> None:
         _LOG.info("Merge: %s <- %s", self._experiment_id, experiment_ids)
-        raise NotImplementedError("TODO")
+        raise NotImplementedError("TODO: Merging experiments not implemented yet.")
 
     def load_tunable_config(self, config_id: int) -> dict[str, Any]:
         with self._engine.connect() as conn:
@@ -168,7 +169,13 @@ class Experiment(Storage.Experiment):
                 .where(
                     self._schema.trial.c.exp_id == self._experiment_id,
                     self._schema.trial.c.trial_id > last_trial_id,
-                    self._schema.trial.c.status.in_(["SUCCEEDED", "FAILED", "TIMED_OUT"]),
+                    self._schema.trial.c.status.in_(
+                        [
+                            Status.SUCCEEDED.name,
+                            Status.FAILED.name,
+                            Status.TIMED_OUT.name,
+                        ]
+                    ),
                 )
                 .order_by(
                     self._schema.trial.c.trial_id.asc(),
@@ -228,30 +235,13 @@ class Experiment(Storage.Experiment):
             row._tuple() for row in cur_result.fetchall()  # pylint: disable=protected-access
         )
 
-    @staticmethod
-    def _save_params(
-        conn: Connection,
-        table: Table,
-        params: dict[str, Any],
-        **kwargs: Any,
-    ) -> None:
-        if not params:
-            return
-        conn.execute(
-            table.insert(),
-            [
-                {**kwargs, "param_id": key, "param_value": nullable(str, val)}
-                for (key, val) in params.items()
-            ],
-        )
-
     def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator[Storage.Trial]:
         timestamp = utcify_timestamp(timestamp, origin="local")
         _LOG.info("Retrieve pending trials for: %s @ %s", self._experiment_id, timestamp)
         if running:
-            pending_status = ["PENDING", "READY", "RUNNING"]
+            pending_status = [Status.PENDING.name, Status.READY.name, Status.RUNNING.name]
         else:
-            pending_status = ["PENDING"]
+            pending_status = [Status.PENDING.name]
         with self._engine.connect() as conn:
             cur_trials = conn.execute(
                 self._schema.trial.select().where(
@@ -306,7 +296,7 @@ class Experiment(Storage.Experiment):
         config_id: int = conn.execute(
             self._schema.config.insert().values(config_hash=config_hash)
         ).inserted_primary_key[0]
-        self._save_params(
+        save_params(
             conn,
             self._schema.config_param,
             {tunable.name: tunable.value for (tunable, _group) in tunables},
@@ -328,6 +318,7 @@ class Experiment(Storage.Experiment):
         _LOG.debug("Create trial: %s:%d @ %s", self._experiment_id, self._trial_id, ts_start)
         with self._engine.begin() as conn:
             try:
+                new_trial_status = Status.PENDING
                 config_id = self._get_config_id(conn, tunables)
                 conn.execute(
                     self._schema.trial.insert().values(
@@ -335,14 +326,14 @@ class Experiment(Storage.Experiment):
                         trial_id=self._trial_id,
                         config_id=config_id,
                         ts_start=ts_start,
-                        status="PENDING",
+                        status=new_trial_status.name,
                     )
                 )
 
                 # Note: config here is the framework config, not the target
                 # environment config (i.e., tunables).
                 if config is not None:
-                    self._save_params(
+                    save_params(
                         conn,
                         self._schema.trial_param,
                         config,
@@ -359,6 +350,7 @@ class Experiment(Storage.Experiment):
                     config_id=config_id,
                     opt_targets=self._opt_targets,
                     config=config,
+                    status=new_trial_status,
                 )
                 self._trial_id += 1
                 return trial

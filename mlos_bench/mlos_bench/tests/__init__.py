@@ -30,6 +30,11 @@ ZONE_NAMES = [
 ]
 ZONE_INFO: list[tzinfo | None] = [nullable(pytz.timezone, zone_name) for zone_name in ZONE_NAMES]
 
+BUILT_IN_ENV_VAR_DEFAULTS = {
+    "experiment_id": None,
+    "trial_id": None,
+    "trial_runner_id": None,
+}
 
 # A decorator for tests that require docker.
 # Use with @requires_docker above a test_...() function.

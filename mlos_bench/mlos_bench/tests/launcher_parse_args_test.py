@@ -65,6 +65,26 @@ def _get_launcher(desc: str, cli_args: str) -> Launcher:
     # Check the basic parent service
     assert isinstance(launcher.service, SupportsConfigLoading)  # built-in
     assert isinstance(launcher.service, SupportsLocalExec)  # built-in
+    # All trial runners should have the same Environment class.
+    assert (
+        len({trial_runner.environment.__class__ for trial_runner in launcher.trial_runners}) == 1
+    )
+    expected_trial_runner_ids = set(range(1, len(launcher.trial_runners) + 1))
+    # Make sure that each trial runner has a unique ID.
+    assert {
+        trial_runner.trial_runner_id for trial_runner in launcher.trial_runners
+    } == expected_trial_runner_ids, "Need unique trial_runner_id in TrialRunners"
+    # Make sure that each trial runner environment has a unique ID.
+    assert {
+        trial_runner.environment.const_args["trial_runner_id"]
+        for trial_runner in launcher.trial_runners
+    } == expected_trial_runner_ids, "Need unique trial_runner_id in Environments"
+    # Make sure that each trial runner and environment trial_runner_id match.
+    assert all(
+        trial_runner.trial_runner_id == trial_runner.environment.const_args["trial_runner_id"]
+        for trial_runner in launcher.trial_runners
+    ), "TrialRunner and Environment trial_runner_id mismatch"
+
     return launcher
 
 
@@ -90,10 +110,16 @@ def test_launcher_args_parse_defaults(config_paths: list[str]) -> None:
     )
     assert launcher.global_config["varWithEnvVarRef"] == f"user:{getuser()}"
     assert launcher.teardown  # defaults
+    # Make sure we have the right number of trial runners.
+    assert len(launcher.trial_runners) == 1  # defaults
     # Check that the environment that got loaded looks to be of the right type.
     env_config = launcher.config_loader.load_config(ENV_CONF_PATH, ConfigSchema.ENVIRONMENT)
     assert env_config["class"] == "mlos_bench.environments.mock_env.MockEnv"
-    assert check_class_name(launcher.environment, env_config["class"])
+    # All TrialRunners should get the same Environment.
+    assert all(
+        check_class_name(trial_runner.environment, env_config["class"])
+        for trial_runner in launcher.trial_runners
+    )
     # Check that the optimizer looks right.
     assert isinstance(launcher.optimizer, OneShotOptimizer)
     # Check that the optimizer got initialized with defaults.
@@ -116,12 +142,13 @@ def test_launcher_args_parse_1(config_paths: list[str]) -> None:
     cli_args = (
         "--config-paths "
         + " ".join(config_paths)
+        + " --num-trial-runners 5"
         + " --service services/remote/mock/mock_auth_service.jsonc"
-        + " services/remote/mock/mock_remote_exec_service.jsonc"
-        + " --scheduler schedulers/sync_scheduler.jsonc"
-        + f" --environment {ENV_CONF_PATH}"
-        + " --globals globals/global_test_config.jsonc"
-        + " --globals globals/global_test_extra_config.jsonc"
+        " services/remote/mock/mock_remote_exec_service.jsonc"
+        " --scheduler schedulers/sync_scheduler.jsonc"
+        f" --environment {ENV_CONF_PATH}"
+        " --globals globals/global_test_config.jsonc"
+        " --globals globals/global_test_extra_config.jsonc"
         " --test_global_value_2 from-args"
     )
     launcher = _get_launcher(__name__, cli_args)
@@ -143,9 +170,16 @@ def test_launcher_args_parse_1(config_paths: list[str]) -> None:
     )
     assert launcher.global_config["varWithEnvVarRef"] == f"user:{getuser()}"
     assert launcher.teardown
+    # Make sure we have the right number of trial runners.
+    assert len(launcher.trial_runners) == 5  # from cli args
     # Check that the environment that got loaded looks to be of the right type.
     env_config = launcher.config_loader.load_config(ENV_CONF_PATH, ConfigSchema.ENVIRONMENT)
     assert env_config["class"] == "mlos_bench.environments.mock_env.MockEnv"
+    # All TrialRunners should get the same Environment.
+    assert all(
+        check_class_name(trial_runner.environment, env_config["class"])
+        for trial_runner in launcher.trial_runners
+    )
     # Check that the optimizer looks right.
     assert isinstance(launcher.optimizer, OneShotOptimizer)
     # Check that the optimizer got initialized with defaults.
@@ -169,15 +203,15 @@ def test_launcher_args_parse_2(config_paths: list[str]) -> None:
     cli_args = (
         " ".join([f"--config-path {config_path}" for config_path in config_paths])
         + f" --config {config_file}"
-        + " --service services/remote/mock/mock_auth_service.jsonc"
-        + " --service services/remote/mock/mock_remote_exec_service.jsonc"
-        + f" --globals {globals_file}"
-        + " --experiment_id MockeryExperiment"
-        + " --no-teardown"
-        + " --random-init"
-        + " --random-seed 1234"
-        + " --trial-config-repeat-count 5"
-        + " --max_trials 200"
+        " --service services/remote/mock/mock_auth_service.jsonc"
+        " --service services/remote/mock/mock_remote_exec_service.jsonc"
+        f" --globals {globals_file}"
+        " --experiment_id MockeryExperiment"
+        " --no-teardown"
+        " --random-init"
+        " --random-seed 1234"
+        " --trial-config-repeat-count 5"
+        " --max_trials 200"
     )
     launcher = _get_launcher(__name__, cli_args)
     # Check some additional features of the the parent service
@@ -202,10 +236,16 @@ def test_launcher_args_parse_2(config_paths: list[str]) -> None:
         path_join(path, abs_path=True) for path in config_paths + config["config_path"]
     ]
 
+    # Make sure we have the right number of trial runners.
+    assert len(launcher.trial_runners) == 3  # from test-cli-config.jsonc
     # Check that the environment that got loaded looks to be of the right type.
     env_config_file = config["environment"]
     env_config = launcher.config_loader.load_config(env_config_file, ConfigSchema.ENVIRONMENT)
-    assert check_class_name(launcher.environment, env_config["class"])
+    # All TrialRunners should get the same Environment.
+    assert all(
+        check_class_name(trial_runner.environment, env_config["class"])
+        for trial_runner in launcher.trial_runners
+    )
 
     # Check that the optimizer looks right.
     assert isinstance(launcher.optimizer, MlosCoreOptimizer)
@@ -254,8 +294,8 @@ def test_launcher_args_parse_3(config_paths: list[str]) -> None:
     cli_args = (
         " ".join([f"--config-path {config_path}" for config_path in config_paths])
         + f" --config {config_file}"
-        + f" --globals {globals_file}"
-        + " --max-suggestions 10"  # check for - to _ conversion too
+        f" --globals {globals_file}"
+        " --max-suggestions 10"  # check for - to _ conversion too
     )
     launcher = _get_launcher(__name__, cli_args)
 

@@ -9,13 +9,18 @@ from random import seed as rand_seed
 
 import pytest
 
-from mlos_bench.environments.mock_env import MockEnv
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.schedulers.sync_scheduler import SyncScheduler
+from mlos_bench.schedulers.trial_runner import TrialRunner
+from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.storage import SqlStorage
 from mlos_bench.tests import SEED
-from mlos_bench.tests.storage import CONFIG_COUNT, CONFIG_TRIAL_REPEAT_COUNT
+from mlos_bench.tests.storage import (
+    CONFIG_TRIAL_REPEAT_COUNT,
+    MAX_TRIALS,
+    TRIAL_RUNNER_COUNT,
+)
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
@@ -38,7 +43,7 @@ def storage() -> SqlStorage:
 def exp_storage(
     storage: SqlStorage,
     tunable_groups: TunableGroups,
-) -> Generator[SqlStorage.Experiment, None, None]:
+) -> Generator[SqlStorage.Experiment]:
     """
     Test fixture for Experiment using in-memory SQLite3 storage.
 
@@ -60,7 +65,7 @@ def exp_storage(
 @pytest.fixture
 def exp_no_tunables_storage(
     storage: SqlStorage,
-) -> Generator[SqlStorage.Experiment, None, None]:
+) -> Generator[SqlStorage.Experiment]:
     """
     Test fixture for Experiment using in-memory SQLite3 storage.
 
@@ -84,7 +89,7 @@ def exp_no_tunables_storage(
 def mixed_numerics_exp_storage(
     storage: SqlStorage,
     mixed_numerics_tunable_groups: TunableGroups,
-) -> Generator[SqlStorage.Experiment, None, None]:
+) -> Generator[SqlStorage.Experiment]:
     """
     Test fixture for an Experiment with mixed numerics tunables using in-memory SQLite3
     storage.
@@ -129,15 +134,29 @@ def _dummy_run_exp(
 
     rand_seed(SEED)
 
-    env = MockEnv(
-        name="Test Env",
-        config={
-            "tunable_params": list(exp.tunables.get_covariant_group_names()),
-            "mock_env_seed": SEED,
+    trial_runners: list[TrialRunner] = []
+    global_config: dict = {}
+    config_loader = ConfigPersistenceService()
+    tunable_params = ",".join(f'"{name}"' for name in exp.tunables.get_covariant_group_names())
+    mock_env_json = f"""
+    {{
+        "class": "mlos_bench.environments.mock_env.MockEnv",
+        "name": "Test Env",
+        "config": {{
+            "tunable_params": [{tunable_params}],
+            "mock_env_seed": {SEED},
             "mock_env_range": [60, 120],
-            "mock_env_metrics": ["score"],
-        },
-        tunables=exp.tunables,
+            "mock_env_metrics": ["score"]
+        }}
+    }}
+    """
+    trial_runners = TrialRunner.create_from_json(
+        config_loader=config_loader,
+        global_config=global_config,
+        tunable_groups=exp.tunables,
+        env_json=mock_env_json,
+        svcs_json=None,
+        num_trial_runners=TRIAL_RUNNER_COUNT,
     )
 
     opt = MockOptimizer(
@@ -149,7 +168,9 @@ def _dummy_run_exp(
             # But the test logic relies on this (e.g., trial 1 is config 1 is the
             # default values for the tunable params)
             # "start_with_defaults": True,
+            "max_suggestions": MAX_TRIALS,
         },
+        global_config=global_config,
     )
 
     scheduler = SyncScheduler(
@@ -159,10 +180,10 @@ def _dummy_run_exp(
             "trial_id": exp.trial_id,
             "config_id": -1,
             "trial_config_repeat_count": CONFIG_TRIAL_REPEAT_COUNT,
-            "max_trials": CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT,
+            "max_trials": MAX_TRIALS,
         },
-        global_config={},
-        environment=env,
+        global_config=global_config,
+        trial_runners=trial_runners,
         optimizer=opt,
         storage=storage,
         root_env_config=exp.root_env_config,

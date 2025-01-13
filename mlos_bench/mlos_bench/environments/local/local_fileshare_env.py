@@ -91,7 +91,7 @@ class LocalFileShareEnv(LocalEnv):
     def _expand(
         from_to: Iterable[tuple[Template, Template]],
         params: Mapping[str, TunableValue],
-    ) -> Generator[tuple[str, str], None, None]:
+    ) -> Generator[tuple[str, str]]:
         """
         Substitute $var parameters in from/to path templates.
 
