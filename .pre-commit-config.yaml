@@ -57,15 +57,15 @@ repos:
         files: '\.json[c]?$'
 # FIXME: This removes comments.
 # See Also: https://github.com/dpranke/pyjson5/issues/28
--   repo: https://github.com/whtsky/pre-commit-pretty-format-json5
-    rev: "1.0.0"
-    hooks:
-    -   id: pretty-format-json5
-        alias: pretty-format-json
-        args: [--no-sort-keys]
-        stages: [pre-commit, manual]
-        types_or: [file, json]
-        files: '\.json[c]?$'
+#-   repo: https://github.com/whtsky/pre-commit-pretty-format-json5
+#    rev: "1.0.0"
+#    hooks:
+#    -   id: pretty-format-json5
+#        alias: pretty-format-json
+#        args: [--no-sort-keys]
+#        stages: [pre-commit, manual]
+#        types_or: [file, json]
+#        files: '\.json[c]?$'
 -   repo: https://github.com/johann-petrak/licenseheaders
     rev: v0.8.8
     hooks:
