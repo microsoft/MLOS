@@ -56,6 +56,7 @@ repos:
         types_or: [file, json]
         verbose: true
         files: '\.json[c]?$'
+# FIXME: This removes comments.
 -   repo: https://github.com/whtsky/pre-commit-pretty-format-json5
     rev: "1.0.0"
     hooks:
