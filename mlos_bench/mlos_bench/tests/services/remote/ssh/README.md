@@ -7,7 +7,7 @@ To do this, we make use of the `pytest-docker` plugin to bring up the services d
 There are two services defined in that config:
 
 1. `ssh-server`
-2. `alt-server`
+1. `alt-server`
 
 We rely on `docker compose` to map their internal container service ports to random ports on the host.
 Hence, when connecting, we need to look up these ports on demand using something akin to `docker compose port`.
