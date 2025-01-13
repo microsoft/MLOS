@@ -33,8 +33,8 @@ The requirements of this method are:
 Once the SP is setup, the flow of authentication within `mlos_bench` is as follows:
 
 1. On initialization, retrieve the SP's certificate from the key vault as the current user and keep it in memory.
-2. Log in as the SP using the certificate retrieved from the key vault.
-3. During runtime when tokens are requested, we request them as the SP, reauthenticating as necessary using the certificate which is stored only in memory.
+1. Log in as the SP using the certificate retrieved from the key vault.
+1. During runtime when tokens are requested, we request them as the SP, reauthenticating as necessary using the certificate which is stored only in memory.
 
 In the associated JSON config, these requirements translate into providing the following parameters:
 
