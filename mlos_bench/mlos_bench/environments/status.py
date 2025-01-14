@@ -2,13 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Enum for the status of the benchmark/environment."""
+"""Enum for the status of the benchmark/environment Trial or Experiment.
+"""
 
 import enum
 
 
 class Status(enum.Enum):
-    """Enum for the status of the benchmark/environment."""
+    """Enum for the status of the benchmark/environment Trial or Experiment."""
 
     UNKNOWN = 0
     PENDING = 1
@@ -29,7 +30,7 @@ class Status(enum.Enum):
         }
 
     def is_completed(self) -> bool:
-        """Check if the status of the benchmark/environment is one of {SUCCEEDED,
+        """Check if the status of the benchmark/environment Trial or Experiment is one of {SUCCEEDED,
         CANCELED, FAILED, TIMED_OUT}.
         """
         return self in {
@@ -40,25 +41,25 @@ class Status(enum.Enum):
         }
 
     def is_pending(self) -> bool:
-        """Check if the status of the benchmark/environment is PENDING."""
+        """Check if the status of the benchmark/environment Trial or Experiment is PENDING."""
         return self == Status.PENDING
 
     def is_ready(self) -> bool:
-        """Check if the status of the benchmark/environment is READY."""
+        """Check if the status of the benchmark/environment Trial or Experiment is READY."""
         return self == Status.READY
 
     def is_succeeded(self) -> bool:
-        """Check if the status of the benchmark/environment is SUCCEEDED."""
+        """Check if the status of the benchmark/environment Trial or Experiment is SUCCEEDED."""
         return self == Status.SUCCEEDED
 
     def is_failed(self) -> bool:
-        """Check if the status of the benchmark/environment is FAILED."""
+        """Check if the status of the benchmark/environment Trial or Experiment is FAILED."""
         return self == Status.FAILED
 
     def is_canceled(self) -> bool:
-        """Check if the status of the benchmark/environment is CANCELED."""
+        """Check if the status of the benchmark/environment Trial or Experiment is CANCELED."""
         return self == Status.CANCELED
 
     def is_timed_out(self) -> bool:
-        """Check if the status of the benchmark/environment is TIMED_OUT."""
+        """Check if the status of the benchmark/environment Trial or Experiment is TIMED_OUT."""
         return self == Status.FAILED
