@@ -12,7 +12,7 @@ from mlos_bench.storage.sql.storage import SqlStorage
 # NOTE: This value is hardcoded to the latest revision in the alembic versions directory.
 # It could also be obtained programmatically using the "alembic heads" command or heads() API.
 # See Also: schema.py for an example of programmatic alembic config access.
-CURRENT_ALEMBIC_HEAD = "f83fb8ae7fc4"
+CURRENT_ALEMBIC_HEAD = "8928a401115b"
 
 
 def test_storage_schemas(storage: SqlStorage) -> None:
