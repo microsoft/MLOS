@@ -103,6 +103,16 @@ class DbSchema:
             Column("root_env_config", String(1024), nullable=False),
             Column("git_repo", String(1024), nullable=False),
             Column("git_commit", String(40), nullable=False),
+            Column("ts_start", DateTime, nullable=False),
+            Column("ts_end", DateTime),
+            # Should match the text IDs of `mlos_bench.environments.Status` enum:
+            Column("status", String(self._STATUS_LEN), nullable=False),
+            # There may be more than one mlos_benchd_service running on different hosts.
+            # This column stores the hostname of the worker that picked up the experiment.
+            # They should use a transaction to update it to their own hostname when
+            # they start if and only if its NULL.
+            Column("experiment_worker_name", String(40), nullable=True, comment="Worker Hostname"),
+            Column("experiment_worker_id", Integer, nullable=True, comment="Worker Process ID"),
             PrimaryKeyConstraint("exp_id"),
         )
         """The Table storing
