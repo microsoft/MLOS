@@ -31,18 +31,11 @@ def upgrade() -> None:
     op.add_column("experiment", sa.Column("status", sa.String(length=16), nullable=False))
     op.add_column(
         "experiment",
-        sa.Column(
-            "experiment_worker_name",
-            sa.String(length=40),
-            nullable=True,
-            comment="Worker Hostname",
-        ),
+        sa.Column("worker_name", sa.String(length=40), nullable=True, comment="Worker Hostname"),
     )
     op.add_column(
         "experiment",
-        sa.Column(
-            "experiment_worker_id", sa.Integer(), nullable=True, comment="Worker Process ID"
-        ),
+        sa.Column("worker_pid", sa.Integer(), nullable=True, comment="Worker Process ID"),
     )
     # ### end Alembic commands ###
 

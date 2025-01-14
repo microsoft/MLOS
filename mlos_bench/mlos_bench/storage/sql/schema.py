@@ -111,8 +111,8 @@ class DbSchema:
             # This column stores the hostname of the worker that picked up the experiment.
             # They should use a transaction to update it to their own hostname when
             # they start if and only if its NULL.
-            Column("experiment_worker_name", String(40), nullable=True, comment="Worker Hostname"),
-            Column("experiment_worker_id", Integer, nullable=True, comment="Worker Process ID"),
+            Column("worker_name", String(40), nullable=True, comment="Worker Hostname"),
+            Column("worker_pid", Integer, nullable=True, comment="Worker Process ID"),
             PrimaryKeyConstraint("exp_id"),
         )
         """The Table storing
