@@ -11,15 +11,16 @@ from typing import TYPE_CHECKING, TypeAlias
 import ConfigSpace
 import flaml.tune
 import flaml.tune.sample
+from flaml.tune.sample import Domain
 import numpy as np
 
 if TYPE_CHECKING:
     from ConfigSpace.hyperparameters import Hyperparameter
 
-FlamlDomain: TypeAlias = flaml.tune.sample.Domain
+FlamlDomain: TypeAlias = Domain
 """Flaml domain type alias."""
 
-FlamlSpace: TypeAlias = dict[str, flaml.tune.sample.Domain]
+FlamlSpace: TypeAlias = dict[str, Domain]
 """Flaml space type alias - a `dict[str, FlamlDomain]`"""
 
 
