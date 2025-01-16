@@ -23,6 +23,7 @@ class SupportsLocalExec(Protocol):
     Can be useful for data processing due to reduced dependency management complications
     vs the target environment. Used in LocalEnv and provided by LocalExecService.
     """
+
     # pylint: disable=unnecessary-ellipsis
 
     def local_exec(

@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 @runtime_checkable
 class SupportsConfigLoading(Protocol):
     """Protocol interface for helper functions to lookup and load configs."""
+
     # pylint: disable=unnecessary-ellipsis
 
     def get_config_paths(self) -> list[str]:

@@ -11,8 +11,8 @@ from typing import TYPE_CHECKING, TypeAlias
 import ConfigSpace
 import flaml.tune
 import flaml.tune.sample
-from flaml.tune.sample import Domain
 import numpy as np
+from flaml.tune.sample import Domain
 
 if TYPE_CHECKING:
     from ConfigSpace.hyperparameters import Hyperparameter

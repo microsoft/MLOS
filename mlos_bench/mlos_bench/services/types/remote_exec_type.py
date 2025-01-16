@@ -18,6 +18,7 @@ class SupportsRemoteExec(Protocol):
     """Protocol interface for Service types that provide helper functions to run scripts
     on a remote host OS.
     """
+
     # pylint: disable=unnecessary-ellipsis
 
     def remote_exec(

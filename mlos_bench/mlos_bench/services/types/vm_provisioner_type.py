@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 @runtime_checkable
 class SupportsVMOps(Protocol):
     """Protocol interface for VM provisioning operations."""
+
     # pylint: disable=unnecessary-ellipsis
 
     def vm_provision(self, params: dict) -> tuple["Status", dict]:

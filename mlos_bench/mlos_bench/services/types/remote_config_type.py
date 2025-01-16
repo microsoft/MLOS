@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 @runtime_checkable
 class SupportsRemoteConfig(Protocol):
     """Protocol interface for configuring cloud services."""
+
     # pylint: disable=unnecessary-ellipsis
 
     def configure(self, config: dict[str, Any], params: dict[str, Any]) -> tuple["Status", dict]:

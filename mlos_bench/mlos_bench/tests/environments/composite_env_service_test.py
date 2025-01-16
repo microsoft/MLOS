@@ -5,12 +5,12 @@
 """Check how the services get inherited and overridden in child environments."""
 import os
 
-from mlos_bench.services.local.temp_dir_context import TempDirContextService
 import pytest
 
 from mlos_bench.environments.composite_env import CompositeEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService
+from mlos_bench.services.local.temp_dir_context import TempDirContextService
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import path_join
 

@@ -29,7 +29,9 @@ from mlos_core.tests import get_all_concrete_subclasses
     ],
 )
 def test_concrete_space_adapter_type(space_adapter_type: SpaceAdapterType) -> None:
-    """Test that all spaceadapter types are listed in the ConcreteSpaceAdapter constraints."""
+    """Test that all spaceadapter types are listed in the ConcreteSpaceAdapter
+    constraints.
+    """
     assert space_adapter_type.value in ConcreteSpaceAdapter.__args__
 
 

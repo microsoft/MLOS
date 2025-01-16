@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 @runtime_checkable
 class SupportsHostProvisioning(Protocol):
     """Protocol interface for Host/VM provisioning operations."""
+
     # pylint: disable=unnecessary-ellipsis
 
     def provision_host(self, params: dict) -> tuple["Status", dict]:

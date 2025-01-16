@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 @runtime_checkable
 class SupportsNetworkProvisioning(Protocol):
     """Protocol interface for Network provisioning operations."""
+
     # pylint: disable=unnecessary-ellipsis
 
     def provision_network(self, params: dict) -> tuple["Status", dict]:

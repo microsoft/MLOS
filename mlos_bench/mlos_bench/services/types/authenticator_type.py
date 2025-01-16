@@ -13,6 +13,7 @@ T_co = TypeVar("T_co", covariant=True)
 @runtime_checkable
 class SupportsAuth(Protocol[T_co]):
     """Protocol interface for authentication for the cloud services."""
+
     # pylint: disable=unnecessary-ellipsis
 
     def get_access_token(self) -> str:

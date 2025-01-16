@@ -17,6 +17,7 @@ from mlos_bench.services.base_service import Service
 @runtime_checkable
 class SupportsSomeMethod(Protocol):
     """Protocol for some_method."""
+
     # pylint: disable=unnecessary-ellipsis
 
     def some_method(self) -> str:

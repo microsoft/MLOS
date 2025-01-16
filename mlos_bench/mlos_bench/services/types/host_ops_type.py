@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 @runtime_checkable
 class SupportsHostOps(Protocol):
     """Protocol interface for Host/VM boot operations."""
+
     # pylint: disable=unnecessary-ellipsis
 
     def start_host(self, params: dict) -> tuple["Status", dict]:

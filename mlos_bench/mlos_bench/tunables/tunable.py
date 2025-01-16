@@ -6,7 +6,7 @@
 import copy
 import logging
 from collections.abc import Iterable, Sequence
-from typing import Any, Literal, TypedDict, Required
+from typing import Any, Literal, Required, TypedDict
 
 import numpy as np
 
@@ -69,7 +69,8 @@ class TunableDict(TypedDict, total=False):
 
 
 def tunable_dict_from_dict(config: dict[str, Any]) -> "TunableDict":
-    """Creates a TunableDict from a regular dict.
+    """
+    Creates a TunableDict from a regular dict.
 
     Parameters
     ----------
