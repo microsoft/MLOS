@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 @runtime_checkable
 class SupportsRemoteConfig(Protocol):
     """Protocol interface for configuring cloud services."""
+    # pylint: disable=unnecessary-ellipsis
 
     def configure(self, config: dict[str, Any], params: dict[str, Any]) -> tuple["Status", dict]:
         """
@@ -31,6 +32,7 @@ class SupportsRemoteConfig(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...
 
     def is_config_pending(self, config: dict[str, Any]) -> tuple["Status", dict]:
         """
@@ -49,3 +51,4 @@ class SupportsRemoteConfig(Protocol):
             If "isConfigPendingReboot" is set to True, rebooting a VM is necessary.
             Status is one of {PENDING, TIMED_OUT, SUCCEEDED, FAILED}
         """
+        ...

@@ -18,6 +18,7 @@ class SupportsRemoteExec(Protocol):
     """Protocol interface for Service types that provide helper functions to run scripts
     on a remote host OS.
     """
+    # pylint: disable=unnecessary-ellipsis
 
     def remote_exec(
         self,
@@ -46,6 +47,7 @@ class SupportsRemoteExec(Protocol):
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...
 
     def get_remote_exec_results(self, config: dict) -> tuple["Status", dict]:
         """
@@ -64,3 +66,4 @@ class SupportsRemoteExec(Protocol):
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
+        ...

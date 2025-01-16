@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 @runtime_checkable
 class SupportsNetworkProvisioning(Protocol):
     """Protocol interface for Network provisioning operations."""
+    # pylint: disable=unnecessary-ellipsis
 
     def provision_network(self, params: dict) -> tuple["Status", dict]:
         """
@@ -31,6 +32,7 @@ class SupportsNetworkProvisioning(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...
 
     def wait_network_deployment(self, params: dict, *, is_setup: bool) -> tuple["Status", dict]:
         """
@@ -52,6 +54,7 @@ class SupportsNetworkProvisioning(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
+        ...
 
     def deprovision_network(
         self,
@@ -75,3 +78,4 @@ class SupportsNetworkProvisioning(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...

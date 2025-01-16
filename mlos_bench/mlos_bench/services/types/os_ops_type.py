@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 @runtime_checkable
 class SupportsOSOps(Protocol):
     """Protocol interface for Host/OS operations."""
+    # pylint: disable=unnecessary-ellipsis
 
     def shutdown(self, params: dict, force: bool = False) -> tuple["Status", dict]:
         """
@@ -31,6 +32,7 @@ class SupportsOSOps(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...
 
     def reboot(self, params: dict, force: bool = False) -> tuple["Status", dict]:
         """
@@ -49,6 +51,7 @@ class SupportsOSOps(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...
 
     def wait_os_operation(self, params: dict) -> tuple["Status", dict]:
         """
@@ -69,3 +72,4 @@ class SupportsOSOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
+        ...

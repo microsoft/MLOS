@@ -23,6 +23,7 @@ class SupportsLocalExec(Protocol):
     Can be useful for data processing due to reduced dependency management complications
     vs the target environment. Used in LocalEnv and provided by LocalExecService.
     """
+    # pylint: disable=unnecessary-ellipsis
 
     def local_exec(
         self,
@@ -49,6 +50,7 @@ class SupportsLocalExec(Protocol):
         (return_code, stdout, stderr) : (int, str, str)
             A 3-tuple of return code, stdout, and stderr of the script process.
         """
+        ...
 
     def temp_dir_context(
         self,
@@ -67,3 +69,4 @@ class SupportsLocalExec(Protocol):
         temp_dir_context : tempfile.TemporaryDirectory
             Temporary directory context to use in the `with` clause.
         """
+        ...

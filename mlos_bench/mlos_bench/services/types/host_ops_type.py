@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 @runtime_checkable
 class SupportsHostOps(Protocol):
     """Protocol interface for Host/VM boot operations."""
+    # pylint: disable=unnecessary-ellipsis
 
     def start_host(self, params: dict) -> tuple["Status", dict]:
         """
@@ -29,6 +30,7 @@ class SupportsHostOps(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...
 
     def stop_host(self, params: dict, force: bool = False) -> tuple["Status", dict]:
         """
@@ -47,6 +49,7 @@ class SupportsHostOps(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...
 
     def restart_host(self, params: dict, force: bool = False) -> tuple["Status", dict]:
         """
@@ -65,6 +68,7 @@ class SupportsHostOps(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...
 
     def wait_host_operation(self, params: dict) -> tuple["Status", dict]:
         """
@@ -85,3 +89,4 @@ class SupportsHostOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
+        ...

@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 @runtime_checkable
 class SupportsHostProvisioning(Protocol):
     """Protocol interface for Host/VM provisioning operations."""
+    # pylint: disable=unnecessary-ellipsis
 
     def provision_host(self, params: dict) -> tuple["Status", dict]:
         """
@@ -31,6 +32,7 @@ class SupportsHostProvisioning(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...
 
     def wait_host_deployment(self, params: dict, *, is_setup: bool) -> tuple["Status", dict]:
         """
@@ -52,6 +54,7 @@ class SupportsHostProvisioning(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
+        ...
 
     def deprovision_host(self, params: dict) -> tuple["Status", dict]:
         """
@@ -68,6 +71,7 @@ class SupportsHostProvisioning(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...
 
     def deallocate_host(self, params: dict) -> tuple["Status", dict]:
         """
@@ -88,3 +92,4 @@ class SupportsHostProvisioning(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...
