@@ -159,8 +159,6 @@ intersphinx_mapping.update(
 CUSTOM_REF_TYPE_MAP: dict[tuple[str, str], str] = {
     # Internal typevars and aliases:
     ("BaseTypeVar", "class"): "data",
-    ("ConcreteOptimizer", "class"): "data",
-    ("ConcreteSpaceAdapter", "class"): "data",
     ("DistributionName", "class"): "data",
     ("FlamlDomain", "class"): "data",
     ("mlos_core.spaces.converters.flaml.FlamlDomain", "class"): "data",
