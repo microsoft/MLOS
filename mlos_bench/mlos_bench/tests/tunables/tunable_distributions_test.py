@@ -90,5 +90,6 @@ def test_numerical_distribution_unsupported(tunable_type: str) -> None:
     }}
     """
     config = json.loads(json_config)
+    assert isinstance(config, dict)
     with pytest.raises(ValueError):
         Tunable(name="test", config=config)
