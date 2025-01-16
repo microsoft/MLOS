@@ -293,9 +293,11 @@ class Experiment(Storage.Experiment):
         if cur_config is not None:
             return int(cur_config.config_id)  # mypy doesn't know it's always int
         # Config not found, create a new one:
-        config_id: int = conn.execute(
+        new_config_result = conn.execute(
             self._schema.config.insert().values(config_hash=config_hash)
-        ).inserted_primary_key[0]
+        ).inserted_primary_key
+        assert new_config_result
+        config_id: int = new_config_result[0]
         save_params(
             conn,
             self._schema.config_param,

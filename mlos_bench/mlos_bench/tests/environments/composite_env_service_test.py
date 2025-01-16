@@ -5,6 +5,7 @@
 """Check how the services get inherited and overridden in child environments."""
 import os
 
+from mlos_bench.services.local.temp_dir_context import TempDirContextService
 import pytest
 
 from mlos_bench.environments.composite_env import CompositeEnv
@@ -58,6 +59,7 @@ def test_composite_services(composite_env: CompositeEnv) -> None:
     for i, path in ((0, "_test_tmp_global"), (1, "_test_tmp_other_2"), (2, "_test_tmp_other_3")):
         service = composite_env.children[i]._service  # pylint: disable=protected-access
         assert service is not None and hasattr(service, "temp_dir_context")
+        assert isinstance(service, TempDirContextService)
         with service.temp_dir_context() as temp_dir:
             assert os.path.samefile(temp_dir, path)
         os.rmdir(path)
