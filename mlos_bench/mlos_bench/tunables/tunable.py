@@ -6,7 +6,7 @@
 import copy
 import logging
 from collections.abc import Iterable, Sequence
-from typing import Any, Literal, Required, TypedDict
+from typing import Any, Literal, TypedDict
 
 import numpy as np
 
@@ -37,25 +37,29 @@ DistributionName = Literal["uniform", "normal", "beta"]
 """Tunable value distribution type."""
 
 
-class DistributionDict(TypedDict, total=False):
-    """A typed dict for tunable parameters' distributions."""
+class _DistributionDictOpt(TypedDict, total=False):
+    """A typed dict for optional tunable parameters' distributions."""
 
-    type: Required[DistributionName]
     params: dict[str, float] | None
 
 
-class TunableDict(TypedDict, total=False):
+class DistributionDict(_DistributionDictOpt):
+    """A typed dict for tunable parameters' distributions."""
+
+    type: DistributionName
+
+
+class _TunableDictOpt(TypedDict, total=False):
     """
-    A typed dict for tunable parameters.
+    A typed dict for optional tunable parameters.
 
     Mostly used for mypy type checking.
 
     These are the types expected to be received from the json config.
     """
 
-    type: Required[TunableValueTypeName]
+    # Optional fields
     description: str | None
-    default: Required[TunableValue]
     values: list[str | None] | None
     range: Sequence[int] | Sequence[float] | None
     quantization_bins: int | None
@@ -66,6 +70,20 @@ class TunableDict(TypedDict, total=False):
     special_weights: list[float] | None
     range_weight: float | None
     meta: dict[str, Any]
+
+
+class TunableDict(_TunableDictOpt):
+    """
+    A typed dict for tunable parameters.
+
+    Mostly used for mypy type checking.
+
+    These are the types expected to be received from the json config.
+    """
+
+    # Required fields
+    type: TunableValueTypeName
+    default: TunableValue
 
 
 def tunable_dict_from_dict(config: dict[str, Any]) -> "TunableDict":
