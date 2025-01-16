@@ -123,6 +123,7 @@ def test_event_loop_context() -> None:
     # Once we exit the last context, the background thread should be stopped
     # and unusable for running co-routines.
 
+    # pyright: reportAttributeAccessIssue=false
     assert (  # type: ignore[unreachable] # (false positives)
         EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop_thread is None
     )
