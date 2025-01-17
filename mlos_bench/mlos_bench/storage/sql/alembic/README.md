@@ -36,6 +36,13 @@ This document contains some notes on how to use [`alembic`](https://alembic.sqla
 
    > Normally this would be done with `alembic upgrade head`, but this command is convenient to ensure if will work with the `mlos_bench` command line interface as well.
 
+   Examine the results using something like:
+
+   ```sh
+   sqlite3 mlos_bench.sqlite .schema
+   sqlite3 mlos_bench.sqlite "SELECT * FROM alembic_version;"
+   ```
+
 1. If the migration script works, commit the changes to the [`mlos_bench/storage/sql/schema.py`](../schema.py) and [`mlos_bench/storage/sql/alembic/versions`](./versions/) files.
 
    > Be sure to update the latest version in the [`test_storage_schemas.py`](../../../tests/storage/test_storage_schemas.py) file as well.
