@@ -192,9 +192,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
             initial_design_args["n_configs"] = n_random_init
             if n_random_init > 0.25 * max_trials and max_ratio is None:
                 warning(
-                    "Number of random initial configs (%d) is "
-                    "greater than 25%% of max_trials (%d). "
-                    "Consider setting max_ratio to avoid SMAC overriding n_random_init.",
+                    (
+                        "Number of random initial configs (%d) is "
+                        "greater than 25%% of max_trials (%d). "
+                        "Consider setting max_ratio to avoid SMAC overriding n_random_init."
+                    ),
                     n_random_init,
                     max_trials,
                 )
