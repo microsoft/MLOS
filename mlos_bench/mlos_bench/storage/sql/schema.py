@@ -103,6 +103,19 @@ class DbSchema:
             Column("root_env_config", String(1024), nullable=False),
             Column("git_repo", String(1024), nullable=False),
             Column("git_commit", String(40), nullable=False),
+            # For backwards compatibility, we allow NULL for ts_start.
+            Column("ts_start", DateTime),
+            Column("ts_end", DateTime),
+            # Should match the text IDs of `mlos_bench.environments.Status` enum:
+            # For backwards compatibility, we allow NULL for status.
+            Column("status", String(self._STATUS_LEN)),
+            # There may be more than one mlos_benchd_service running on different hosts.
+            # This column stores the host/container name of the driver that
+            # picked up the experiment.
+            # They should use a transaction to update it to their own hostname when
+            # they start if and only if its NULL.
+            Column("driver_name", String(40), comment="Driver Host/Container Name"),
+            Column("driver_pid", Integer, comment="Driver Process ID"),
             PrimaryKeyConstraint("exp_id"),
         )
         """The Table storing
