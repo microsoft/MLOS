@@ -37,25 +37,36 @@ DistributionName = Literal["uniform", "normal", "beta"]
 """Tunable value distribution type."""
 
 
-class _DistributionDictOpt(TypedDict, total=False):
-    """A typed dict for optional tunable parameters' distributions."""
+class DistributionDictOpt(TypedDict, total=False):
+    """
+    A TypedDict for a :def:class:`.Tunable` parameter's optional ``distribution``'s
+    config parameters.
+
+    Mostly used by type checking. These are the types expected to be received from the
+    json config.
+    """
 
     params: dict[str, float] | None
 
 
-class DistributionDict(_DistributionDictOpt):
-    """A typed dict for tunable parameters' distributions."""
+class DistributionDict(DistributionDictOpt):
+    """
+    A TypedDict for a :def:class:`.Tunable` parameter's required ``distribution``'s
+    config parameters.
+
+    Mostly used by type checking. These are the types expected to be received from the
+    json config.
+    """
 
     type: DistributionName
 
 
-class _TunableDictOpt(TypedDict, total=False):
+class TunableDictOpt(TypedDict, total=False):
     """
-    A typed dict for optional tunable parameters.
+    A TypedDict for a :def:class:`.Tunable` parameter's optional config parameters.
 
-    Mostly used for mypy type checking.
-
-    These are the types expected to be received from the json config.
+    Mostly used for mypy type checking. These are the types expected to be received from
+    the json config.
     """
 
     # Optional fields
@@ -72,13 +83,12 @@ class _TunableDictOpt(TypedDict, total=False):
     meta: dict[str, Any]
 
 
-class TunableDict(_TunableDictOpt):
+class TunableDict(TunableDictOpt):
     """
-    A typed dict for tunable parameters.
+    A TypedDict for a :def:class:`.Tunable` parameter's required config parameters.
 
-    Mostly used for mypy type checking.
-
-    These are the types expected to be received from the json config.
+    Mostly used for mypy type checking. These are the types expected to be received from
+    the json config.
     """
 
     # Required fields
