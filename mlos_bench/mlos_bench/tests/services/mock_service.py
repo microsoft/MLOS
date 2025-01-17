@@ -18,11 +18,15 @@ from mlos_bench.services.base_service import Service
 class SupportsSomeMethod(Protocol):
     """Protocol for some_method."""
 
+    # pylint: disable=unnecessary-ellipsis
+
     def some_method(self) -> str:
         """some_method."""
+        ...
 
     def some_other_method(self) -> str:
         """some_other_method."""
+        ...
 
 
 class MockServiceBase(Service, SupportsSomeMethod):

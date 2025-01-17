@@ -172,8 +172,7 @@ def test_basic_interface_toy_problem(
 )
 def test_concrete_optimizer_type(optimizer_type: OptimizerType) -> None:
     """Test that all optimizer types are listed in the ConcreteOptimizer constraints."""
-    # pylint: disable=no-member
-    assert optimizer_type.value in ConcreteOptimizer.__constraints__
+    assert optimizer_type.value in ConcreteOptimizer.__args__
 
 
 @pytest.mark.parametrize(

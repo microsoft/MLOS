@@ -3,7 +3,6 @@
 # Licensed under the MIT License.
 #
 """Tunable parameter definition."""
-import collections
 import copy
 import logging
 from collections.abc import Iterable, Sequence
@@ -38,25 +37,40 @@ DistributionName = Literal["uniform", "normal", "beta"]
 """Tunable value distribution type."""
 
 
-class DistributionDict(TypedDict, total=False):
-    """A typed dict for tunable parameters' distributions."""
+class DistributionDictOpt(TypedDict, total=False):
+    """
+    A TypedDict for a :py:class:`.Tunable` parameter's optional ``distribution``'s
+    config parameters.
 
-    type: DistributionName
+    Mostly used by type checking. These are the types expected to be received from the
+    json config.
+    """
+
     params: dict[str, float] | None
 
 
-class TunableDict(TypedDict, total=False):
+class DistributionDict(DistributionDictOpt):
     """
-    A typed dict for tunable parameters.
+    A TypedDict for a :py:class:`.Tunable` parameter's required ``distribution``'s
+    config parameters.
 
-    Mostly used for mypy type checking.
-
-    These are the types expected to be received from the json config.
+    Mostly used by type checking. These are the types expected to be received from the
+    json config.
     """
 
-    type: TunableValueTypeName
+    type: DistributionName
+
+
+class TunableDictOpt(TypedDict, total=False):
+    """
+    A TypedDict for a :py:class:`.Tunable` parameter's optional config parameters.
+
+    Mostly used for mypy type checking. These are the types expected to be received from
+    the json config.
+    """
+
+    # Optional fields
     description: str | None
-    default: TunableValue
     values: list[str | None] | None
     range: Sequence[int] | Sequence[float] | None
     quantization_bins: int | None
@@ -69,17 +83,64 @@ class TunableDict(TypedDict, total=False):
     meta: dict[str, Any]
 
 
+class TunableDict(TunableDictOpt):
+    """
+    A TypedDict for a :py:class:`.Tunable` parameter's required config parameters.
+
+    Mostly used for mypy type checking. These are the types expected to be received from
+    the json config.
+    """
+
+    # Required fields
+    type: TunableValueTypeName
+    default: TunableValue
+
+
+def tunable_dict_from_dict(config: dict[str, Any]) -> TunableDict:
+    """
+    Creates a TunableDict from a regular dict.
+
+    Parameters
+    ----------
+    config : dict[str, Any]
+        A regular dict that represents a TunableDict.
+
+    Returns
+    -------
+    TunableDict
+    """
+    _type = config.get("type")
+    if _type not in Tunable.DTYPE:
+        raise ValueError(f"Invalid parameter type: {_type}")
+    _meta = config.get("meta", {})
+    return TunableDict(
+        type=_type,
+        description=config.get("description"),
+        default=config.get("default"),
+        values=config.get("values"),
+        range=config.get("range"),
+        quantization_bins=config.get("quantization_bins"),
+        log=config.get("log"),
+        distribution=config.get("distribution"),
+        special=config.get("special"),
+        values_weights=config.get("values_weights"),
+        special_weights=config.get("special_weights"),
+        range_weight=config.get("range_weight"),
+        meta=_meta,
+    )
+
+
 class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-methods
     """A tunable parameter definition and its current value."""
 
-    # Maps tunable types to their corresponding Python types by name.
-    _DTYPE: dict[TunableValueTypeName, TunableValueType] = {
+    DTYPE: dict[TunableValueTypeName, TunableValueType] = {
         "int": int,
         "float": float,
         "categorical": str,
     }
+    """Maps Tunable types to their corresponding Python types by name."""
 
-    def __init__(self, name: str, config: TunableDict):
+    def __init__(self, name: str, config: dict):
         """
         Create an instance of a new tunable parameter.
 
@@ -95,25 +156,26 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         :py:mod:`mlos_bench.tunables` : for more information on tunable parameters and
             their configuration.
         """
+        t_config = tunable_dict_from_dict(config)
         if not isinstance(name, str) or "!" in name:  # TODO: Use a regex here and in JSON schema
             raise ValueError(f"Invalid name of the tunable: {name}")
         self._name = name
-        self._type: TunableValueTypeName = config["type"]  # required
-        if self._type not in self._DTYPE:
+        self._type: TunableValueTypeName = t_config["type"]  # required
+        if self._type not in self.DTYPE:
             raise ValueError(f"Invalid parameter type: {self._type}")
-        self._description = config.get("description")
-        self._default = config["default"]
+        self._description = t_config.get("description")
+        self._default = t_config["default"]
         self._default = self.dtype(self._default) if self._default is not None else self._default
-        self._values = config.get("values")
+        self._values = t_config.get("values")
         if self._values:
             self._values = [str(v) if v is not None else v for v in self._values]
-        self._meta: dict[str, Any] = config.get("meta", {})
+        self._meta: dict[str, Any] = t_config.get("meta", {})
         self._range: tuple[int, int] | tuple[float, float] | None = None
-        self._quantization_bins: int | None = config.get("quantization_bins")
-        self._log: bool | None = config.get("log")
+        self._quantization_bins: int | None = t_config.get("quantization_bins")
+        self._log: bool | None = t_config.get("log")
         self._distribution: DistributionName | None = None
         self._distribution_params: dict[str, float] = {}
-        distr = config.get("distribution")
+        distr = t_config.get("distribution")
         if distr:
             self._distribution = distr["type"]  # required
             self._distribution_params = distr.get("params") or {}
@@ -122,11 +184,11 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             assert len(config_range) == 2, f"Invalid range: {config_range}"
             config_range = (config_range[0], config_range[1])
             self._range = config_range
-        self._special: list[int] | list[float] = config.get("special") or []
+        self._special: list[int] | list[float] = t_config.get("special") or []
         self._weights: list[float] = (
-            config.get("values_weights") or config.get("special_weights") or []
+            t_config.get("values_weights") or t_config.get("special_weights") or []
         )
-        self._range_weight: float | None = config.get("range_weight")
+        self._range_weight: float | None = t_config.get("range_weight")
         self._current_value = None
         self._sanity_check()
         self.value = self._default
@@ -150,7 +212,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         """
         # pylint: disable=too-complex
         assert self.is_categorical
-        if not (self._values and isinstance(self._values, collections.abc.Iterable)):
+        if not (self._values and isinstance(self._values, Iterable)):
             raise ValueError(f"Must specify values for the categorical type tunable {self}")
         if self._range is not None:
             raise ValueError(f"Range must be None for the categorical type tunable {self}")
@@ -523,7 +585,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         dtype : type
             Data type of the tunable - one of {int, float, str}.
         """
-        return self._DTYPE[self._type]
+        return self.DTYPE[self._type]
 
     @property
     def is_categorical(self) -> bool:

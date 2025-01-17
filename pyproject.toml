@@ -81,4 +81,10 @@ exclude = [
     "doc/build/html",
     "doc/build/doctrees",
     "htmlcov",
+    "mlos_*/build/",
+    "mlos_*/dist/",
+    "mlos_*/setup.py"
 ]
+typeCheckingMode = "standard"
+reportMissingTypeStubs = false  # not as granular as mypy to override on a per package basis
+#reportMissingImports = false    # somewhat expected for build files and docs

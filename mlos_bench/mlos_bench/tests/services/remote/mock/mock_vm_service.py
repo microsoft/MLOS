@@ -17,6 +17,8 @@ from mlos_bench.tests.services.remote.mock import mock_operation
 class MockVMService(Service, SupportsHostProvisioning, SupportsHostOps, SupportsOSOps):
     """Mock VM service for testing."""
 
+    # pylint: disable=too-many-ancestors
+
     def __init__(
         self,
         config: dict[str, Any] | None = None,

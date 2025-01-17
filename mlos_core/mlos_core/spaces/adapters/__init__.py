@@ -32,7 +32,6 @@ for additional documentation and examples in the source tree.
 """
 
 from enum import Enum
-from typing import TypeVar
 
 import ConfigSpace
 
@@ -58,19 +57,8 @@ class SpaceAdapterType(Enum):
     """An instance of :class:`.LlamaTuneAdapter` class will be used."""
 
 
-# To make mypy happy, we need to define a type variable for each optimizer type.
-# https://github.com/python/mypy/issues/12952
-# ConcreteSpaceAdapter = TypeVar(
-#    "ConcreteSpaceAdapter",
-#    *[member.value for member in SpaceAdapterType],
-# )
-# To address this, we add a test for complete coverage of the enum.
-ConcreteSpaceAdapter = TypeVar(
-    "ConcreteSpaceAdapter",
-    IdentityAdapter,
-    LlamaTuneAdapter,
-)
-"""Type variable for concrete SpaceAdapter classes (e.g.,
+ConcreteSpaceAdapter = IdentityAdapter | LlamaTuneAdapter
+"""Type alias for concrete SpaceAdapter classes (e.g.,
 :class:`~mlos_core.spaces.adapters.identity_adapter.IdentityAdapter`, etc.)
 """
 
@@ -86,9 +74,9 @@ class SpaceAdapterFactory:
     def create(
         *,
         parameter_space: ConfigSpace.ConfigurationSpace,
-        space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
+        space_adapter_type: SpaceAdapterType | None = SpaceAdapterType.IDENTITY,
         space_adapter_kwargs: dict | None = None,
-    ) -> ConcreteSpaceAdapter:  # type: ignore[type-var]
+    ) -> ConcreteSpaceAdapter:
         """
         Create a new space adapter instance, given the parameter space and potential
         space adapter options.

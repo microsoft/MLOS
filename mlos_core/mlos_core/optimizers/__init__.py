@@ -29,7 +29,6 @@ for additional documentation and examples in the source tree.
 """
 
 from enum import Enum
-from typing import TypeVar
 
 import ConfigSpace
 
@@ -71,19 +70,9 @@ class OptimizerType(Enum):
     """
 
 
-# To make mypy happy, we need to define a type variable for each optimizer type.
-# https://github.com/python/mypy/issues/12952
-# ConcreteOptimizer = TypeVar('ConcreteOptimizer', *[member.value for member in OptimizerType])
-# To address this, we add a test for complete coverage of the enum.
-
-ConcreteOptimizer = TypeVar(
-    "ConcreteOptimizer",
-    RandomOptimizer,
-    FlamlOptimizer,
-    SmacOptimizer,
-)
+ConcreteOptimizer = RandomOptimizer | FlamlOptimizer | SmacOptimizer
 """
-Type variable for concrete optimizer classes.
+Type alias for concrete optimizer classes.
 
 (e.g., :class:`~mlos_core.optimizers.bayesian_optimizers.smac_optimizer.SmacOptimizer`, etc.)
 """
@@ -108,7 +97,7 @@ class OptimizerFactory:
         optimizer_kwargs: dict | None = None,
         space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
         space_adapter_kwargs: dict | None = None,
-    ) -> ConcreteOptimizer:  # type: ignore[type-var]
+    ) -> ConcreteOptimizer:
         """
         Create a new optimizer instance, given the parameter space, optimizer type, and
         potential optimizer options.

@@ -37,6 +37,8 @@ def test_copy_covariant_group(covariant_group: CovariantTunableGroup) -> None:
         new_value = [x for x in tunable.categories if x != tunable.category][0]
     elif tunable.is_numerical:
         new_value = tunable.numerical_value + 1
+    else:
+        raise ValueError(f"{tunable=} :: unsupported tunable type.")
     covariant_group_copy[tunable] = new_value
     assert covariant_group_copy.is_updated()
     assert not covariant_group.is_updated()

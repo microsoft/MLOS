@@ -14,6 +14,7 @@ See Also: `LlamaTune: Sample-Efficient DBMS Configuration Tuning
 <https://www.microsoft.com/en-us/research/publication/llamatune-sample-efficient-dbms-configuration-tuning>`_.
 """
 import os
+from typing import Any
 from warnings import warn
 
 import ConfigSpace
@@ -571,7 +572,9 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
 
         # Compute pseudo-inverse matrix
         try:
-            inv_matrix: npt.NDArray = pinv(proj_matrix)
+            _inv = pinv(proj_matrix)
+            assert _inv is not None and not isinstance(_inv, tuple)
+            inv_matrix: npt.NDArray[np.floating[Any]] = _inv
             self._pinv_matrix = inv_matrix
         except LinAlgError as err:
             raise RuntimeError(

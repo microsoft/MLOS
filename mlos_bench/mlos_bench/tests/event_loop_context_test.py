@@ -137,9 +137,15 @@ def test_event_loop_context() -> None:
     ):
         assert len(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop._ready) == 1
     else:
-        assert len(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop._ready) == 0
+        assert (
+            len(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop._ready)  # pyright: ignore
+            == 0
+        )
     assert hasattr(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop, "_scheduled")
-    assert len(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop._scheduled) == 0
+    assert (
+        len(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop._scheduled)  # pyright: ignore
+        == 0
+    )
 
     with pytest.raises(
         AssertionError

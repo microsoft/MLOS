@@ -179,10 +179,10 @@ class TestFlamlConversion(BaseConversion):
 
     def sample(
         self,
-        config_space: FlamlSpace,  # type: ignore[override]
+        config_space: OptimizerSpace,
         n_samples: int = 1,
     ) -> npt.NDArray:
-        assert isinstance(config_space, dict)
+        assert isinstance(config_space, dict)  # FlamlSpace
         assert isinstance(next(iter(config_space.values())), flaml.tune.sample.Domain)
         ret: npt.NDArray = np.array(
             [domain.sample(size=n_samples) for domain in config_space.values()]

@@ -6,7 +6,8 @@
 
 from importlib import import_module
 from pkgutil import walk_packages
-from typing import TypeAlias, TypeVar
+from types import ModuleType
+from typing import TypeVar
 
 # A common seed to use to avoid tracking down race conditions and intermingling
 # issues of seeds across tests that run in non-deterministic parallel orders.
@@ -15,7 +16,7 @@ SEED = 42
 T = TypeVar("T")
 
 
-def get_all_submodules(pkg: TypeAlias) -> list[str]:
+def get_all_submodules(pkg: ModuleType) -> list[str]:
     """
     Imports all submodules for a package and returns their names.
 
