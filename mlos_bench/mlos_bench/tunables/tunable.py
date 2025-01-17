@@ -448,7 +448,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         """Get the default value of the Tunable."""
         return self._default
 
-    def is_default(self) -> TunableValue:
+    def is_default(self) -> bool:
         """Checks whether the currently assigned value of the Tunable is at its
         default.
         """
