@@ -96,7 +96,7 @@ class TunableDict(TunableDictOpt):
     default: TunableValue
 
 
-def tunable_dict_from_dict(config: dict[str, Any]) -> "TunableDict":
+def tunable_dict_from_dict(config: dict[str, Any]) -> TunableDict:
     """
     Creates a TunableDict from a regular dict.
 
