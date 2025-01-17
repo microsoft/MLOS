@@ -39,7 +39,7 @@ DistributionName = Literal["uniform", "normal", "beta"]
 
 class DistributionDictOpt(TypedDict, total=False):
     """
-    A TypedDict for a :def:class:`.Tunable` parameter's optional ``distribution``'s
+    A TypedDict for a :py:class:`.Tunable` parameter's optional ``distribution``'s
     config parameters.
 
     Mostly used by type checking. These are the types expected to be received from the
@@ -51,7 +51,7 @@ class DistributionDictOpt(TypedDict, total=False):
 
 class DistributionDict(DistributionDictOpt):
     """
-    A TypedDict for a :def:class:`.Tunable` parameter's required ``distribution``'s
+    A TypedDict for a :py:class:`.Tunable` parameter's required ``distribution``'s
     config parameters.
 
     Mostly used by type checking. These are the types expected to be received from the
@@ -63,7 +63,7 @@ class DistributionDict(DistributionDictOpt):
 
 class TunableDictOpt(TypedDict, total=False):
     """
-    A TypedDict for a :def:class:`.Tunable` parameter's optional config parameters.
+    A TypedDict for a :py:class:`.Tunable` parameter's optional config parameters.
 
     Mostly used for mypy type checking. These are the types expected to be received from
     the json config.
@@ -85,7 +85,7 @@ class TunableDictOpt(TypedDict, total=False):
 
 class TunableDict(TunableDictOpt):
     """
-    A TypedDict for a :def:class:`.Tunable` parameter's required config parameters.
+    A TypedDict for a :py:class:`.Tunable` parameter's required config parameters.
 
     Mostly used for mypy type checking. These are the types expected to be received from
     the json config.
