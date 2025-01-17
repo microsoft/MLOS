@@ -28,6 +28,9 @@ Classes
 Tunable
 +++++++
 
+** TODO ** add more links to the Tunable class documentation along with examples of
+how to configure the Tunable in code/json.
+
 The :py:class:`~mlos_bench.tunables.tunable.Tunable` class is used to define a
 single tunable parameter.
 A ``Tunable`` can be a ``categorical`` or numeric (``int`` or ``float``) and always has
@@ -37,8 +40,9 @@ to help control the sampling of the tunable.
 
 For instance:
 
-- Numeric tunables can have a ``distribution`` property to specify the sampling
-  distribution.  ``log`` sampling can also be enabled for numeric tunables.
+- Numeric tunables can have a :py:attr:`~.Tunable.distribution` property to specify the sampling
+  distribution.  :py:attr:`log` <Tunable.is_log>` sampling can also be enabled for
+  numeric tunables.
 - Categorical tunables can have a ``values_weights`` property to specify biased
   sampling of the values
 - ``special`` values can be marked to indicate that they need more explicit testing

@@ -2,7 +2,16 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Tunable parameter definition."""
+"""Definitions for :py:class:`~.Tunable` parameters.
+
+Tunable parameters are one of the core building blocks of the :py:mod:`mlos_bench`
+framework.
+
+See Also
+--------
+:py:mod:`mlos_bench.tunables` : for more information on Tunable parameters and
+    their configuration.
+"""
 import copy
 import logging
 from collections.abc import Iterable, Sequence
@@ -15,35 +24,62 @@ from mlos_bench.util import nullable
 _LOG = logging.getLogger(__name__)
 
 TunableValue = int | float | str | None
-"""A tunable parameter value type alias."""
+"""A Tunable parameter value type alias."""
 
 TunableValueType = type[int] | type[float] | type[str]
-"""Tunable value type."""
+"""A :py:class:`TypeAlias` for :py:class:`.Tunable` value :py:attr:`~.Tunable.type`.
+
+See Also
+--------
+:py:attr:`.Tunable.dtype` : Example of accepted types.
+"""
 
 TunableValueTypeTuple = (int, float, str, type(None))
 """
 Tunable value type tuple.
 
-For checking with isinstance()
+For checking with :py:func:`isinstance`.
 """
 
 TunableValueTypeName = Literal["int", "float", "categorical"]
-"""The string name of a tunable value type."""
+"""The accepted string names of a :py:class:`.Tunable` value
+:py:attr:`~.Tunable.type`.
+
+See Also
+--------
+:py:attr:`.Tunable.type` : Example of accepted type names.
+"""
+# pydoctest doesn't scan variable docstrings so we put the examples elsewhere.
 
 TunableValuesDict = dict[str, TunableValue]
 """Tunable values dictionary type."""
 
 DistributionName = Literal["uniform", "normal", "beta"]
-"""Tunable value distribution type."""
+"""The :py:class:`.Tunable` value :py:attr:`~.Tunable.distribution` type names.
+
+See Also
+--------
+:py:attr:`.Tunable.distribution` : Example of accepted distribution names.
+"""
+# pydoctest doesn't scan variable docstrings so we put the examples elsewhere.
 
 
 class DistributionDictOpt(TypedDict, total=False):
     """
-    A TypedDict for a :py:class:`.Tunable` parameter's optional ``distribution``'s
-    config parameters.
+    A TypedDict for a :py:class:`.Tunable` parameter's optional
+    :py:attr:`~.Tunable.distribution_params` config.
 
-    Mostly used by type checking. These are the types expected to be received from the
-    json config.
+    Mostly used by type checking. These are the types expected to be received from
+    the json config.
+
+    Notes
+    -----
+    :py:class:`.DistributionDict` contains the required fields for the
+    :py:class:`.Tunable`'s :py:attr:`~.Tunable.distribution` parameter.
+
+    See Also
+    --------
+    :py:attr:`.Tunable.distribution_params` : Example of distribution params.
     """
 
     params: dict[str, float] | None
@@ -51,11 +87,32 @@ class DistributionDictOpt(TypedDict, total=False):
 
 class DistributionDict(DistributionDictOpt):
     """
-    A TypedDict for a :py:class:`.Tunable` parameter's required ``distribution``'s
+    A TypedDict for a :py:class:`.Tunable` parameter's required ``distribution`` 's
     config parameters.
 
     Mostly used by type checking. These are the types expected to be received from the
     json config.
+
+    Examples
+    --------
+    >>> # Example values of the DistributionName
+    >>> from mlos_bench.tunables.tunable import DistributionName
+    >>> DistributionName
+    typing.Literal['uniform', 'normal', 'beta']
+
+    >>> # Example values of the DistributionDict
+    >>> from mlos_bench.tunables.tunable import DistributionDict
+    >>> DistributionDict({'type': 'uniform'})
+    {'type': 'uniform'}
+    >>> DistributionDict({'type': 'normal', 'params': {'mu': 0.0, 'sigma': 1.0}})
+    {'type': 'normal', 'params': {'mu': 0.0, 'sigma': 1.0}}
+    >>> DistributionDict({'type': 'beta', 'params': {'alpha': 1.0, 'beta': 1.0}})
+    {'type': 'beta', 'params': {'alpha': 1.0, 'beta': 1.0}}
+
+    See Also
+    --------
+    :py:attr:`.Tunable.distribution` : Example of distributions.
+    :py:attr:`.Tunable.distribution_params` : Example of distribution params.
     """
 
     type: DistributionName
@@ -65,8 +122,13 @@ class TunableDictOpt(TypedDict, total=False):
     """
     A TypedDict for a :py:class:`.Tunable` parameter's optional config parameters.
 
-    Mostly used for mypy type checking. These are the types expected to be received from
+    Mostly used for type checking. These are the types expected to be received from
     the json config.
+
+    Notes
+    -----
+    :py:class:`TunableDict` contains the required fields for the
+    :py:class:`.Tunable` parameter.
     """
 
     # Optional fields
@@ -87,8 +149,19 @@ class TunableDict(TunableDictOpt):
     """
     A TypedDict for a :py:class:`.Tunable` parameter's required config parameters.
 
-    Mostly used for mypy type checking. These are the types expected to be received from
+    Mostly used for type checking. These are the types expected to be received from
     the json config.
+
+    Examples
+    --------
+    >>> # Example values of the TunableDict
+    >>> from mlos_bench.tunables.tunable import TunableDict
+    >>> TunableDict({'type': 'int', 'default': 0, 'range': [0, 10]})
+    {'type': 'int', 'default': 0, 'range': [0, 10]}
+
+    >>> # Example values of the TunableDict with optional fields
+    >>> TunableDict({'type': 'categorical', 'default': 'a', 'values': ['a', 'b']})
+    {'type': 'categorical', 'default': 'a', 'values': ['a', 'b']}
     """
 
     # Required fields
@@ -108,7 +181,19 @@ def tunable_dict_from_dict(config: dict[str, Any]) -> TunableDict:
     Returns
     -------
     TunableDict
-    """
+
+    Examples
+    --------
+    >>> # Example values of the TunableDict
+    >>> import json5 as json
+    >>> from mlos_bench.tunables.tunable import tunable_dict_from_dict
+    >>> config = json.loads("{'type': 'int', 'default': 0, 'range': [0, 10]}")
+    >>> config
+    {'type': 'int', 'default': 0, 'range': [0, 10]}
+    >>> typed_dict = tunable_dict_from_dict(config)
+    >>> typed_dict
+    {'type': 'int', 'description': None, 'default': 0, 'values': None, 'range': [0, 10], 'quantization_bins': None, 'log': None, 'distribution': None, 'special': None, 'values_weights': None, 'special_weights': None, 'range_weight': None, 'meta': {}}
+    """  # pylint: disable=line-too-long # noqa: E501
     _type = config.get("type")
     if _type not in Tunable.DTYPE:
         raise ValueError(f"Invalid parameter type: {_type}")
@@ -131,29 +216,34 @@ def tunable_dict_from_dict(config: dict[str, Any]) -> TunableDict:
 
 
 class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-methods
-    """A tunable parameter definition and its current value."""
+    """A Tunable parameter definition and its current value."""
 
     DTYPE: dict[TunableValueTypeName, TunableValueType] = {
         "int": int,
         "float": float,
         "categorical": str,
     }
-    """Maps Tunable types to their corresponding Python types by name."""
+    """Maps Tunable types to their corresponding Python data types by name.
+
+    See Also
+    --------
+    :py:attr:`.Tunable.dtype` : Example of type mappings.
+    """
 
     def __init__(self, name: str, config: dict):
         """
-        Create an instance of a new tunable parameter.
+        Create an instance of a new Tunable parameter.
 
         Parameters
         ----------
         name : str
-            Human-readable identifier of the tunable parameter.
+            Human-readable identifier of the Tunable parameter.
         config : dict
             Python dict that represents a Tunable (e.g., deserialized from JSON)
 
         See Also
         --------
-        :py:mod:`mlos_bench.tunables` : for more information on tunable parameters and
+        :py:mod:`mlos_bench.tunables` : for more information on Tunable parameters and
             their configuration.
         """
         t_config = tunable_dict_from_dict(config)
@@ -305,8 +395,10 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     def __lt__(self, other: object) -> bool:  # pylint: disable=too-many-return-statements
         """
-        Compare the two Tunable objects. We mostly need this to create a canonical list
-        of tunable objects when hashing a TunableGroup.
+        Compare the two Tunable objects.
+
+        We mostly need this to create a canonical list of Tunable objects when
+        hashing a :py:class:`~mlos_bench.tunables.tunable_groups.TunableGroups`.
 
         Parameters
         ----------
@@ -350,23 +442,23 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     @property
     def default(self) -> TunableValue:
-        """Get the default value of the tunable."""
+        """Get the default value of the Tunable."""
         return self._default
 
     def is_default(self) -> TunableValue:
-        """Checks whether the currently assigned value of the tunable is at its
+        """Checks whether the currently assigned value of the Tunable is at its
         default.
         """
         return self._default == self._current_value
 
     @property
     def value(self) -> TunableValue:
-        """Get the current value of the tunable."""
+        """Get the current value of the Tunable."""
         return self._current_value
 
     @value.setter
     def value(self, value: TunableValue) -> TunableValue:
-        """Set the current value of the tunable."""
+        """Set the current value of the Tunable."""
         # We need this coercion for the values produced by some optimizers
         # (e.g., scikit-optimize) and for data restored from certain storage
         # systems (where values can be strings).
@@ -404,14 +496,14 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
                 type(value),
                 value,
             )
-            raise ValueError(f"Invalid value for the tunable: {self._name}={value}")
+            raise ValueError(f"Invalid value for the Tunable: {self._name}={value}")
 
         self._current_value = coerced_value
         return self._current_value
 
     def update(self, value: TunableValue) -> bool:
         """
-        Assign the value to the tunable. Return True if it is a new value, False
+        Assign the value to the Tunable. Return True if it is a new value, False
         otherwise.
 
         Parameters
@@ -430,7 +522,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     def is_valid(self, value: TunableValue) -> bool:
         """
-        Check if the value can be assigned to the tunable.
+        Check if the value can be assigned to the Tunable.
 
         Parameters
         ----------
@@ -448,15 +540,15 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             if isinstance(value, (int, float)):
                 return self.in_range(value) or value in self._special
             else:
-                raise ValueError(f"Invalid value type for tunable {self}: {value}={type(value)}")
+                raise ValueError(f"Invalid value type for Tunable {self}: {value}={type(value)}")
         else:
             raise ValueError(f"Invalid parameter type: {self._type}")
 
     def in_range(self, value: int | float | str | None) -> bool:
         """
-        Check if the value is within the range of the tunable.
+        Check if the value is within the range of the Tunable.
 
-        Do *NOT* check for special values. Return False if the tunable or value is
+        Do *NOT* check for special values. Return False if the Tunable or value is
         categorical or None.
         """
         return (
@@ -468,15 +560,15 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     @property
     def category(self) -> str | None:
-        """Get the current value of the tunable as a string."""
+        """Get the current value of the Tunable as a string."""
         if self.is_categorical:
             return nullable(str, self._current_value)
         else:
-            raise ValueError("Cannot get categorical values for a numerical tunable.")
+            raise ValueError("Cannot get categorical values for a numerical Tunable.")
 
     @category.setter
     def category(self, new_value: str | None) -> str | None:
-        """Set the current value of the tunable."""
+        """Set the current value of the Tunable."""
         assert self.is_categorical
         assert isinstance(new_value, (str, type(None)))
         self.value = new_value
@@ -484,18 +576,18 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     @property
     def numerical_value(self) -> int | float:
-        """Get the current value of the tunable as a number."""
+        """Get the current value of the Tunable as a number."""
         assert self._current_value is not None
         if self._type == "int":
             return int(self._current_value)
         elif self._type == "float":
             return float(self._current_value)
         else:
-            raise ValueError("Cannot get numerical value for a categorical tunable.")
+            raise ValueError("Cannot get numerical value for a categorical Tunable.")
 
     @numerical_value.setter
     def numerical_value(self, new_value: int | float) -> int | float:
-        """Set the current numerical value of the tunable."""
+        """Set the current numerical value of the Tunable."""
         # We need this coercion for the values produced by some optimizers
         # (e.g., scikit-optimize) and for data restored from certain storage
         # systems (where values can be strings).
@@ -505,37 +597,37 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     @property
     def name(self) -> str:
-        """Get the name / string ID of the tunable."""
+        """Get the name / string ID of the Tunable."""
         return self._name
 
     @property
     def special(self) -> list[int] | list[float]:
         """
-        Get the special values of the tunable. Return an empty list if there are none.
+        Get the special values of the Tunable. Return an empty list if there are none.
 
         Returns
         -------
         special : [int] | [float]
-            A list of special values of the tunable. Can be empty.
+            A list of special values of the Tunable. Can be empty.
         """
         return self._special
 
     @property
     def is_special(self) -> bool:
         """
-        Check if the current value of the tunable is special.
+        Check if the current value of the Tunable is special.
 
         Returns
         -------
         is_special : bool
-            True if the current value of the tunable is special, False otherwise.
+            True if the current value of the Tunable is special, False otherwise.
         """
         return self.value in self._special
 
     @property
     def weights(self) -> list[float] | None:
         """
-        Get the weights of the categories or special values of the tunable. Return None
+        Get the weights of the categories or special values of the Tunable. Return None
         if there are none.
 
         Returns
@@ -548,8 +640,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @property
     def range_weight(self) -> float | None:
         """
-        Get weight of the range of the numeric tunable. Return None if there are no
-        weights or a tunable is categorical.
+        Get weight of the range of the numeric Tunable. Return None if there are no
+        weights or a Tunable is categorical.
 
         Returns
         -------
@@ -564,63 +656,83 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @property
     def type(self) -> TunableValueTypeName:
         """
-        Get the data type of the tunable.
+        Get the string name of the data type of the Tunable.
 
         Returns
         -------
-        type : str
-            Data type of the tunable - one of {'int', 'float', 'categorical'}.
+        type : TunableValueTypeName
+            String representation of the data type of the Tunable.
+
+        Examples
+        --------
+        >>> # Example values of the TunableValueTypeName
+        >>> from mlos_bench.tunables.tunable import TunableValueTypeName
+        >>> TunableValueTypeName
+        typing.Literal['int', 'float', 'categorical']
         """
         return self._type
 
     @property
     def dtype(self) -> TunableValueType:
         """
-        Get the actual Python data type of the tunable.
+        Get the actual Python data type of the Tunable.
 
         This is useful for bulk conversions of the input data.
 
         Returns
         -------
         dtype : type
-            Data type of the tunable - one of {int, float, str}.
+            Data type of the Tunable - one of:
+            ``{int, float, str}``
+
+        Examples
+        --------
+        >>> # Example values of the TunableValueType
+        >>> from mlos_bench.tunables.tunable import TunableValueType
+        >>> TunableValueType
+        type[int] | type[float] | type[str]
+
+        >>> # Example values of the Tunable.DTYPE
+        >>> from mlos_bench.tunables.tunable import Tunable
+        >>> Tunable.DTYPE
+        {'int': <class 'int'>, 'float': <class 'float'>, 'categorical': <class 'str'>}
         """
         return self.DTYPE[self._type]
 
     @property
     def is_categorical(self) -> bool:
         """
-        Check if the tunable is categorical.
+        Check if the Tunable is categorical.
 
         Returns
         -------
         is_categorical : bool
-            True if the tunable is categorical, False otherwise.
+            True if the Tunable is categorical, False otherwise.
         """
         return self._type == "categorical"
 
     @property
     def is_numerical(self) -> bool:
         """
-        Check if the tunable is an integer or float.
+        Check if the Tunable is an integer or float.
 
         Returns
         -------
         is_int : bool
-            True if the tunable is an integer or float, False otherwise.
+            True if the Tunable is an integer or float, False otherwise.
         """
         return self._type in {"int", "float"}
 
     @property
     def range(self) -> tuple[int, int] | tuple[float, float]:
         """
-        Get the range of the tunable if it is numerical, None otherwise.
+        Get the range of the Tunable if it is numerical, None otherwise.
 
         Returns
         -------
-        range : Union[tuple[int, int], tuple[float, float]]
-            A 2-tuple of numbers that represents the range of the tunable.
-            Numbers can be int or float, depending on the type of the tunable.
+        range : tuple[int, int] | tuple[float, float]
+            A 2-tuple of numbers that represents the range of the Tunable.
+            Numbers can be int or float, depending on the type of the Tunable.
         """
         assert self.is_numerical
         assert self._range is not None
@@ -635,8 +747,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
         Returns
         -------
-        Union[int, float]
-            (max - min) for numerical tunables.
+        int | float
+            (max - min) for numerical Tunables.
         """
         num_range = self.range
         return num_range[1] - num_range[0]
@@ -658,13 +770,13 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @property
     def quantized_values(self) -> Iterable[int] | Iterable[float] | None:
         """
-        Get a sequence of quantized values for this tunable.
+        Get a sequence of quantized values for this Tunable.
 
         Returns
         -------
-        Optional[Union[Iterable[int], Iterable[float]]]
+        Iterable[int] | Iterable[float] | None
             If the Tunable is quantizable, returns a sequence of those elements,
-            else None (e.g., for unquantized float type tunables).
+            else None (e.g., for unquantized float type Tunables).
         """
         num_range = self.range
         if self.type == "float":
@@ -680,7 +792,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
                     endpoint=True,
                 )
             )
-        assert self.type == "int", f"Unhandled tunable type: {self}"
+        assert self.type == "int", f"Unhandled Tunable type: {self}"
         return range(
             int(num_range[0]),
             int(num_range[1]) + 1,
@@ -690,15 +802,15 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @property
     def cardinality(self) -> int | None:
         """
-        Gets the cardinality of elements in this tunable, or else None. (i.e., when the
-        tunable is continuous float and not quantized).
+        Gets the cardinality of elements in this Tunable, or else None. (i.e., when the
+        Tunable is continuous float and not quantized).
 
-        If the tunable has quantization set, this
+        If the Tunable has quantization set, this
 
         Returns
         -------
         cardinality : int
-            Either the number of points in the tunable or else None.
+            Either the number of points in the Tunable or else None.
         """
         if self.is_categorical:
             return len(self.categories)
@@ -711,25 +823,40 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @property
     def is_log(self) -> bool | None:
         """
-        Check if numeric tunable is log scale.
+        Check if numeric Tunable is log scale.
 
         Returns
         -------
         log : bool
-            True if numeric tunable is log scale, False if linear.
-        """
+            True if numeric Tunable is log scale, False if linear.
+
+        Examples
+        --------
+        >>> # Example values of the log scale
+        >>> from mlos_bench.tunables.tunable import Tunable
+        >>> tunable = Tunable("tunable", {"type": "int", "default": 0, "range": [0, 1000], "log": True})
+        >>> tunable.is_log
+        True
+        """  # pylint: disable=line-too-long # noqa: E501
         assert self.is_numerical
         return self._log
 
     @property
     def distribution(self) -> DistributionName | None:
         """
-        Get the name of the distribution (uniform, normal, or beta) if specified.
+        Get the name of the distribution if specified.
 
         Returns
         -------
-        distribution : str
-            Name of the distribution (uniform, normal, or beta) or None.
+        distribution : str | None
+            Name of the distribution or None.
+
+        Examples
+        --------
+        >>> # Example values of the DistributionName
+        >>> from mlos_bench.tunables.tunable import DistributionName
+        >>> DistributionName
+        typing.Literal['uniform', 'normal', 'beta']
         """
         return self._distribution
 
@@ -742,20 +869,48 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         -------
         distribution_params : dict[str, float]
             Parameters of the distribution or None.
-        """
-        assert self._distribution is not None
+
+        Examples
+        --------
+        >>> # Example values of a Tunable with a distribution
+        >>> from mlos_bench.tunables.tunable import Tunable
+        >>> common_tunable_conf = {"type": "int", "default": 0, "range": [0, 10]}
+        >>> # Example of a unspecified distribution
+        >>> tunable = Tunable("tunable", {**common_tunable_conf})
+        >>> assert tunable.distribution is None
+        >>> tunable.distribution_params
+        {}
+        >>> # Example of a uniform distribution (the default if not specified)
+        >>> tunable = Tunable("tunable", {**common_tunable_conf, "distribution": {"type": "uniform"}})
+        >>> tunable.distribution
+        'uniform'
+        >>> tunable.distribution_params
+        {}
+        >>> # Example of a normal distribution params
+        >>> tunable = Tunable("tunable", {**common_tunable_conf, "distribution": {"type": "normal", "params": {"mu": 0.0, "sigma": 1.0}}})
+        >>> tunable.distribution
+        'normal'
+        >>> tunable.distribution_params
+        {'mu': 0.0, 'sigma': 1.0}
+        >>> # Example of a beta distribution params
+        >>> tunable = Tunable("tunable", {**common_tunable_conf, "distribution": {"type": "beta", "params": {"alpha": 1.0, "beta": 1.0}}})
+        >>> tunable.distribution
+        'beta'
+        >>> tunable.distribution_params
+        {'alpha': 1.0, 'beta': 1.0}
+        """  # pylint: disable=line-too-long # noqa: E501
         return self._distribution_params
 
     @property
     def categories(self) -> list[str | None]:
         """
-        Get the list of all possible values of a categorical tunable. Return None if the
-        tunable is not categorical.
+        Get the list of all possible values of a categorical Tunable. Return None if the
+        Tunable is not categorical.
 
         Returns
         -------
         values : list[str]
-            List of all possible values of a categorical tunable.
+            List of all possible values of a categorical Tunable.
         """
         assert self.is_categorical
         assert self._values is not None
@@ -764,11 +919,11 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @property
     def values(self) -> Iterable[str | None] | Iterable[int] | Iterable[float] | None:
         """
-        Gets the categories or quantized values for this tunable.
+        Gets the categories or quantized values for this Tunable.
 
         Returns
         -------
-        Optional[Union[Iterable[Optional[str]], Iterable[int], Iterable[float]]]
+        Iterable[str | None] | Iterable[int] | Iterable[float] | None
             Categories or quantized values.
         """
         if self.is_categorical:
@@ -779,9 +934,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @property
     def meta(self) -> dict[str, Any]:
         """
-        Get the tunable's metadata.
+        Get the Tunable's metadata.
 
         This is a free-form dictionary that can be used to store any additional
-        information about the tunable (e.g., the unit information).
+        information about the Tunable (e.g., the unit information).
         """
         return self._meta
