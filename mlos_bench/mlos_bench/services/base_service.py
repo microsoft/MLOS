@@ -279,11 +279,7 @@ class Service(ContextManager):
             for _, svc_method in self._service_methods.items()
             # Note: some methods are actually stand alone functions, so we need
             # to filter them out.
-            if isinstance(svc_method, BoundMethod)
-            and isinstance(
-                svc_method.__self__,
-                Service,
-            )
+            if isinstance(svc_method, BoundMethod) and isinstance(svc_method.__self__, Service)
         }
 
     def export(self) -> dict[str, Callable]:
