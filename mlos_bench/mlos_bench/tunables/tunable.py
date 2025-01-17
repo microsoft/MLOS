@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Definitions for :py:class:`~.Tunable` parameters.
+"""
+Definitions for :py:class:`~.Tunable` parameters.
 
 Tunable parameters are one of the core building blocks of the :py:mod:`mlos_bench`
 framework.
@@ -42,8 +43,8 @@ For checking with :py:func:`isinstance`.
 """
 
 TunableValueTypeName = Literal["int", "float", "categorical"]
-"""The accepted string names of a :py:class:`.Tunable` value
-:py:attr:`~.Tunable.type`.
+"""
+The accepted string names of a :py:class:`.Tunable` value :py:attr:`~.Tunable.type`.
 
 See Also
 --------
@@ -55,7 +56,8 @@ TunableValuesDict = dict[str, TunableValue]
 """Tunable values dictionary type."""
 
 DistributionName = Literal["uniform", "normal", "beta"]
-"""The :py:class:`.Tunable` value :py:attr:`~.Tunable.distribution` type names.
+"""
+The :py:class:`.Tunable` value :py:attr:`~.Tunable.distribution` type names.
 
 See Also
 --------
@@ -223,7 +225,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         "float": float,
         "categorical": str,
     }
-    """Maps Tunable types to their corresponding Python data types by name.
+    """
+    Maps Tunable types to their corresponding Python data types by name.
 
     See Also
     --------
