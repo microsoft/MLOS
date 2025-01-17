@@ -23,6 +23,9 @@ import os
 import sys
 from logging import warning
 
+# Note: doc requirements aren't installed by default.
+# To install them, run `pip install -r doc/requirements.txt`
+
 from docutils.nodes import Element
 from intersphinx_registry import get_intersphinx_mapping
 from sphinx.addnodes import pending_xref
