@@ -23,7 +23,8 @@ if TYPE_CHECKING:
 class SupportsConfigLoading(Protocol):
     """Protocol interface for helper functions to lookup and load configs."""
 
-    # pylint: disable=unnecessary-ellipsis
+    # Needed by pyright
+    # pylint: disable=unnecessary-ellipsis,redundant-returns-doc
 
     def get_config_paths(self) -> list[str]:
         """

@@ -26,6 +26,8 @@ class CopyMode(Enum):
 class SshFileShareService(FileShareService, SshService):
     """A collection of functions for interacting with SSH servers as file shares."""
 
+    # pylint: disable=too-many-ancestors
+
     async def _start_file_copy(
         self,
         params: dict,

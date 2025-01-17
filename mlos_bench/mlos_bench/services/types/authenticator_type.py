@@ -14,7 +14,8 @@ T_co = TypeVar("T_co", covariant=True)
 class SupportsAuth(Protocol[T_co]):
     """Protocol interface for authentication for the cloud services."""
 
-    # pylint: disable=unnecessary-ellipsis
+    # Needed by pyright
+    # pylint: disable=unnecessary-ellipsis,redundant-returns-doc
 
     def get_access_token(self) -> str:
         """

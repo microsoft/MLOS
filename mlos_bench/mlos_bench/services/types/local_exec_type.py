@@ -24,7 +24,8 @@ class SupportsLocalExec(Protocol):
     vs the target environment. Used in LocalEnv and provided by LocalExecService.
     """
 
-    # pylint: disable=unnecessary-ellipsis
+    # Needed by pyright
+    # pylint: disable=unnecessary-ellipsis,redundant-returns-doc
 
     def local_exec(
         self,
