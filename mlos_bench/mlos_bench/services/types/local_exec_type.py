@@ -62,7 +62,7 @@ class SupportsLocalExec(Protocol):
 
         Parameters
         ----------
-        path : str
+        path : str | None
             A path to the temporary directory. Create a new one if None.
 
         Returns

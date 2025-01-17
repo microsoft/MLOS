@@ -100,7 +100,8 @@ def tunable_dict_from_dict(config: dict[str, Any]) -> "TunableDict":
     TunableDict
     """
     _type = config.get("type")
-    assert _type in Tunable.DTYPE, f"Invalid parameter type: {_type}"
+    if _type not in Tunable.DTYPE:
+        raise ValueError(f"Invalid parameter type: {_type}")
     _meta = config.get("meta", {})
     return TunableDict(
         type=_type,
