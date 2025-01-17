@@ -127,9 +127,9 @@ repos:
             (?x)^(
                 doc/source/conf.py
             )$
-    -   id: mypy
-        name: mypy
-        entry: mypy
+    -   id: pyright
+        name: pyright
+        entry: pyright
         language: system
         types: [python]
         require_serial: true
@@ -141,9 +141,9 @@ repos:
                 mlos_viz/setup.py|
                 conftest.py
             )$
-    -   id: pyright
-        name: pyright
-        entry: pyright
+    -   id: mypy
+        name: mypy
+        entry: mypy
         language: system
         types: [python]
         require_serial: true
