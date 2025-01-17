@@ -884,6 +884,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         >>> tunable.distribution_params
         {}
         >>> # Example of a uniform distribution (the default if not specified)
+        # place the common values at the end for better readability
         >>> tunable = Tunable("tunable", {**common_tunable_conf, "distribution": {"type": "uniform"}})
         >>> tunable.distribution
         'uniform'
