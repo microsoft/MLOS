@@ -64,8 +64,8 @@ class MockEnv(Environment):
         seed = int(self.config.get("mock_env_seed", -1))
         self._run_random = random.Random(seed or None) if seed >= 0 else None
         self._status_random = random.Random(seed or None) if seed >= 0 else None
-        self._range = self.config.get("mock_env_range")
-        self._metrics = self.config.get("mock_env_metrics", ["score"])
+        self._range: tuple[int, int] | None = self.config.get("mock_env_range")
+        self._metrics: list[str] | None = self.config.get("mock_env_metrics", ["score"])
         self._is_ready = True
 
     def _produce_metrics(self, rand: random.Random | None) -> dict[str, TunableValue]:
@@ -80,7 +80,7 @@ class MockEnv(Environment):
         if self._range:
             score = self._range[0] + score * (self._range[1] - self._range[0])
 
-        return {metric: score for metric in self._metrics}
+        return {metric: float(score) for metric in self._metrics or []}
 
     def run(self) -> tuple[Status, datetime, dict[str, TunableValue] | None]:
         """

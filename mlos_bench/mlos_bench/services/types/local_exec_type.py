@@ -24,6 +24,9 @@ class SupportsLocalExec(Protocol):
     vs the target environment. Used in LocalEnv and provided by LocalExecService.
     """
 
+    # Needed by pyright
+    # pylint: disable=unnecessary-ellipsis,redundant-returns-doc
+
     def local_exec(
         self,
         script_lines: Iterable[str],
@@ -49,6 +52,7 @@ class SupportsLocalExec(Protocol):
         (return_code, stdout, stderr) : (int, str, str)
             A 3-tuple of return code, stdout, and stderr of the script process.
         """
+        ...
 
     def temp_dir_context(
         self,
@@ -59,7 +63,7 @@ class SupportsLocalExec(Protocol):
 
         Parameters
         ----------
-        path : str
+        path : str | None
             A path to the temporary directory. Create a new one if None.
 
         Returns
@@ -67,3 +71,4 @@ class SupportsLocalExec(Protocol):
         temp_dir_context : tempfile.TemporaryDirectory
             Temporary directory context to use in the `with` clause.
         """
+        ...

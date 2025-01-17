@@ -25,7 +25,8 @@ except OSError:
     warning(f"version.py not found, using dummy VERSION={VERSION}")
 
 try:
-    from setuptools_scm import get_version
+    # Note: setuptools_scm is typically only installed as a part of the build process.
+    from setuptools_scm import get_version  # pyright: ignore[reportMissingImports]
 
     version = get_version(root="..", relative_to=__file__, fallback_version=VERSION)
     if version is not None:

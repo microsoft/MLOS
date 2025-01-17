@@ -4,7 +4,7 @@ ci:
     # Let pre-commit.ci automatically update PRs with formatting fixes.
     autofix_prs: true
     # skip local hooks - they should be managed manually via conda-envs/*.yml
-    skip: [mypy, pylint, pycodestyle]
+    skip: [mypy, pylint, pycodestyle, pyright]
     autoupdate_schedule: monthly
     autoupdate_commit_msg: |
         [pre-commit.ci] pre-commit autoupdate
@@ -15,6 +15,7 @@ ci:
         See Also:
         - https://github.com/microsoft/MLOS/blob/main/conda-envs/mlos.yml
         - https://pypi.org/project/mypy/
+        - https://pypi.org/project/pyright/
         - https://pypi.org/project/pylint/
         - https://pypi.org/project/pycodestyle/
 
@@ -139,6 +140,20 @@ repos:
         exclude: |
             (?x)^(
                 doc/source/conf.py
+            )$
+    -   id: pyright
+        name: pyright
+        entry: pyright
+        language: system
+        types: [python]
+        require_serial: true
+        exclude: |
+            (?x)^(
+                doc/source/conf.py|
+                mlos_core/setup.py|
+                mlos_bench/setup.py|
+                mlos_viz/setup.py|
+                conftest.py
             )$
     -   id: mypy
         name: mypy

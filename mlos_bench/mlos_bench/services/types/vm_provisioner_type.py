@@ -14,6 +14,8 @@ if TYPE_CHECKING:
 class SupportsVMOps(Protocol):
     """Protocol interface for VM provisioning operations."""
 
+    # pylint: disable=unnecessary-ellipsis
+
     def vm_provision(self, params: dict) -> tuple["Status", dict]:
         """
         Check if VM is ready. Deploy a new VM, if necessary.
@@ -31,6 +33,7 @@ class SupportsVMOps(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...
 
     def wait_vm_deployment(self, is_setup: bool, params: dict) -> tuple["Status", dict]:
         """
@@ -51,6 +54,7 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
+        ...
 
     def vm_start(self, params: dict) -> tuple["Status", dict]:
         """
@@ -67,6 +71,7 @@ class SupportsVMOps(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...
 
     def vm_stop(self, params: dict) -> tuple["Status", dict]:
         """
@@ -83,6 +88,7 @@ class SupportsVMOps(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...
 
     def vm_restart(self, params: dict) -> tuple["Status", dict]:
         """
@@ -99,6 +105,7 @@ class SupportsVMOps(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...
 
     def vm_deprovision(self, params: dict) -> tuple["Status", dict]:
         """
@@ -115,6 +122,7 @@ class SupportsVMOps(Protocol):
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        ...
 
     def wait_vm_operation(self, params: dict) -> tuple["Status", dict]:
         """
@@ -135,3 +143,4 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
+        ...

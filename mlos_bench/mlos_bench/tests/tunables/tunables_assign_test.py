@@ -148,6 +148,7 @@ def test_tunable_assign_null_to_categorical() -> None:
     }
     """
     config = json.loads(json_config)
+    assert isinstance(config, dict)
     categorical_tunable = Tunable(name="categorical_test", config=config)
     assert categorical_tunable
     assert categorical_tunable.category == "foo"

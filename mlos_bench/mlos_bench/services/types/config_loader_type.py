@@ -23,6 +23,9 @@ if TYPE_CHECKING:
 class SupportsConfigLoading(Protocol):
     """Protocol interface for helper functions to lookup and load configs."""
 
+    # Needed by pyright
+    # pylint: disable=unnecessary-ellipsis,redundant-returns-doc
+
     def get_config_paths(self) -> list[str]:
         """
         Gets the list of config paths this service will search for config files.
@@ -31,6 +34,7 @@ class SupportsConfigLoading(Protocol):
         -------
         list[str]
         """
+        ...
 
     def resolve_path(self, file_path: str, extra_paths: Iterable[str] | None = None) -> str:
         """
@@ -49,6 +53,7 @@ class SupportsConfigLoading(Protocol):
         path : str
             An actual path to the config or script.
         """
+        ...
 
     def load_config(
         self,
@@ -71,6 +76,7 @@ class SupportsConfigLoading(Protocol):
         config : Union[dict, list[dict]]
             Free-format dictionary that contains the configuration.
         """
+        ...
 
     def build_environment(  # pylint: disable=too-many-arguments
         self,
@@ -108,6 +114,7 @@ class SupportsConfigLoading(Protocol):
         env : Environment
             An instance of the `Environment` class initialized with `config`.
         """
+        ...
 
     def load_environment(
         self,
@@ -140,6 +147,7 @@ class SupportsConfigLoading(Protocol):
         env : Environment
             A new benchmarking environment.
         """
+        ...
 
     def load_environment_list(
         self,
@@ -173,6 +181,7 @@ class SupportsConfigLoading(Protocol):
         env : list[Environment]
             A list of new benchmarking environments.
         """
+        ...
 
     def load_services(
         self,
@@ -198,3 +207,4 @@ class SupportsConfigLoading(Protocol):
         service : Service
             A collection of service methods.
         """
+        ...
