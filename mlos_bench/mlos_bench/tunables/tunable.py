@@ -16,8 +16,8 @@ parameter are available in the Examples docstrings below.
 
 See Also
 --------
-:py:mod:`mlos_bench.tunables` : for more information on Tunable parameters and
-    their configuration.
+:py:mod:`mlos_bench.tunables` :
+    For more information on Tunable parameters and their configuration.
 """
 import copy
 import logging
@@ -55,8 +55,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
         See Also
         --------
-        :py:mod:`mlos_bench.tunables` : for more information on Tunable parameters and
-            their configuration.
+        :py:mod:`mlos_bench.tunables` :
+            For more information on Tunable parameters and their configuration.
         """
         t_config = tunable_dict_from_dict(config)
         if not isinstance(name, str) or "!" in name:  # TODO: Use a regex here and in JSON schema

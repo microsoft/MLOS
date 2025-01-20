@@ -10,8 +10,9 @@ easier analysis.
 
 See Also
 --------
-:py:mod:`mlos_bench.storage` : The base storage module for mlos_bench, which
-    includes some basic examples in the documentation.
+:py:mod:`mlos_bench.storage` :
+    The base storage module for mlos_bench, which includes some basic examples in
+    the documentation.
 """
 
 from abc import ABCMeta, abstractmethod

@@ -31,8 +31,8 @@ class TunableGroups:
 
         See Also
         --------
-        :py:mod:`mlos_bench.tunables` : for more information on tunable parameters and
-            their configuration.
+        :py:mod:`mlos_bench.tunables` :
+            For more information on tunable parameters and their configuration.
         """
         if config is None:
             config = {}

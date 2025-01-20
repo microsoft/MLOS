@@ -24,8 +24,9 @@ tree for some configuration examples.
 
 See Also
 --------
-:py:mod:`mlos_bench.storage` : The base storage module for mlos_bench, which
-    includes some basic examples in the documentation.
+:py:mod:`mlos_bench.storage` :
+    The base storage module for mlos_bench, which includes some basic examples in
+    the documentation.
 """
 from mlos_bench.storage.sql.storage import SqlStorage
 

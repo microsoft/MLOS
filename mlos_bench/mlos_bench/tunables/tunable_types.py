@@ -77,8 +77,8 @@ The :py:attr:`~.Tunable.distribution` type names for a :py:class:`~.Tunable` val
 
 See Also
 --------
-:py:attr:`Tunable.distribution <.Tunable.distribution>` : Example of accepted
-    distribution names.
+:py:attr:`Tunable.distribution <.Tunable.distribution>` :
+    Example of accepted distribution names.
 """
 
 
@@ -97,9 +97,9 @@ class DistributionDictOpt(TypedDict, total=False):  # total=False allows for opt
 
     See Also
     --------
-    :py:attr:`Tunable.distribution_params <.Tunable.distribution_params>` : Examples
-        of distribution parameters.
-    """  # pylint: disable=line-too-long # noqa: E501
+    :py:attr:`Tunable.distribution_params <.Tunable.distribution_params>` :
+        Examples of distribution parameters.
+    """
 
     def __init__(self, *args, **kwargs):  # type: ignore # pylint: disable=useless-super-delegation
         """.. comment: don't inherit the docstring"""
@@ -111,9 +111,9 @@ class DistributionDictOpt(TypedDict, total=False):  # total=False allows for opt
 
     See Also
     --------
-    :py:attr:`Tunable.distribution_params <.Tunable.distribution_params>` : Examples
-        of distribution parameters.
-    """  # pylint: disable=line-too-long # noqa: E501
+    :py:attr:`Tunable.distribution_params <.Tunable.distribution_params>` :
+        Examples of distribution parameters.
+    """
 
 
 class DistributionDict(DistributionDictOpt):
@@ -126,9 +126,11 @@ class DistributionDict(DistributionDictOpt):
 
     See Also
     --------
-    :py:attr:`Tunable.distribution <.Tunable.distribution>`
-    :py:attr:`Tunable.distribution_params <.Tunable.distribution_params>`
-    """  # pylint: disable=line-too-long # noqa: E501
+    :py:attr:`Tunable.distribution <.Tunable.distribution>` :
+        Examples of Tunables with distributions.
+    :py:attr:`Tunable.distribution_params <.Tunable.distribution_params>` :
+        Examples of distribution parameters.
+    """
 
     def __init__(self, *args, **kwargs):  # type: ignore # pylint: disable=useless-super-delegation
         """.. comment: don't inherit the docstring"""
@@ -140,8 +142,8 @@ class DistributionDict(DistributionDictOpt):
 
     See Also
     --------
-    :py:attr:`Tunable.distribution <.Tunable.distribution>` : Examples of
-        distribution names.
+    :py:attr:`Tunable.distribution <.Tunable.distribution>` :
+        Examples of distribution names.
     """
 
 
@@ -221,8 +223,8 @@ class TunableDictOpt(TypedDict, total=False):  # total=False allows for optional
 
     See Also
     --------
-    :py:attr:`Tunable.quantization_bins <.Tunable.quantization_bins>` : Examples of
-        quantized Tunables.
+    :py:attr:`Tunable.quantization_bins <.Tunable.quantization_bins>` :
+        Examples of quantized Tunables.
     """
 
     log: bool | None
@@ -242,11 +244,11 @@ class TunableDictOpt(TypedDict, total=False):  # total=False allows for optional
 
     See Also
     --------
-    :py:attr:`Tunable.distribution <.Tunable.distribution>` : Examples of
-        distributions.
-    :py:attr:`Tunable.distribution_params <.Tunable.distribution_params>` : Examples
-        of distribution parameters.
-    """  # pylint: disable=line-too-long # noqa: E501
+    :py:attr:`Tunable.distribution <.Tunable.distribution>` :
+        Examples of distributions.
+    :py:attr:`Tunable.distribution_params <.Tunable.distribution_params>` :
+        Examples of distribution parameters.
+    """
 
     values_weights: list[float] | None
     """
@@ -275,8 +277,8 @@ class TunableDictOpt(TypedDict, total=False):  # total=False allows for optional
 
     See Also
     --------
-    :py:attr:`Tunable.range_weight <.Tunable.range_weight>` : Examples of weighted
-        sampling Tunables.
+    :py:attr:`Tunable.range_weight <.Tunable.range_weight>` :
+        Examples of weighted sampling Tunables.
     """
 
     meta: dict[str, Any]
