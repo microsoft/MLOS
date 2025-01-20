@@ -219,8 +219,8 @@ See Also
 """
 
 from mlos_bench.tunables.tunable import Tunable
-from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 
 __all__ = [
     "Tunable",

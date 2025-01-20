@@ -12,8 +12,8 @@ from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.track_best_optimizer import TrackBestOptimizer
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import Tunable
-from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 
 _LOG = logging.getLogger(__name__)
 

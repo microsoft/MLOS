@@ -13,8 +13,8 @@ import pytest
 
 from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.grid_search_optimizer import GridSearchOptimizer
-from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 
 # pylint: disable=redefined-outer-name
 

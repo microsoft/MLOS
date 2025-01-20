@@ -6,8 +6,8 @@
 
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
 from mlos_bench.tunables.tunable import Tunable
-from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 
 
 def test_copy_tunable_int(tunable_int: Tunable) -> None:

@@ -14,8 +14,8 @@ from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.tests import requires_docker
 from mlos_bench.tests.environments import check_env_success
 from mlos_bench.tests.services.remote.ssh import SshTestServerInfo
-from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 
 
 @requires_docker

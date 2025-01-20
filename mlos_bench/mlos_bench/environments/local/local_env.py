@@ -25,8 +25,8 @@ from mlos_bench.environments.script_env import ScriptEnv
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.local_exec_type import SupportsLocalExec
-from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.util import datetime_parser, path_join
 
 _LOG = logging.getLogger(__name__)
