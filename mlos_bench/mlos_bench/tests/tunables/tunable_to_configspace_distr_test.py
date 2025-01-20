@@ -21,8 +21,8 @@ from mlos_bench.optimizers.convert_configspace import (
     special_param_names,
     tunable_groups_to_configspace,
 )
-from mlos_bench.tunables.tunable_types import DistributionName
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import DistributionName
 
 _CS_HYPERPARAMETER = {
     ("float", "beta"): BetaFloatHyperparameter,
