@@ -42,6 +42,9 @@ _LOG = logging.getLogger(__name__)
 class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-methods
     """A Tunable parameter definition and its current value."""
 
+    # TODO: Add docstring Examples with JSON configs to all of the attributes in
+    # this class.
+
     def __init__(self, name: str, config: dict):
         """
         Create an instance of a new Tunable parameter.
@@ -52,6 +55,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             Human-readable identifier of the Tunable parameter.
         config : dict
             Python dict that represents a Tunable (e.g., deserialized from JSON)
+            Must be convertible to a
+            :py:class:`~mlos_bench.tunables.tunable_types.TunableDict`.
 
         See Also
         --------
