@@ -697,7 +697,12 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         --------
         >>> # Example values of a Tunable with a distribution
         >>> from mlos_bench.tunables.tunable import Tunable
+        >>> # Common configuration for all Tunables in these examples.
         >>> common_tunable_conf = {"type": "int", "default": 0, "range": [0, 10]}
+
+        # TODO: Move the common_tunable_conf portion to the end?
+        # Or use json strings directly?
+
         >>> # Example of a unspecified distribution
         >>> tunable = Tunable("tunable", {**common_tunable_conf})
         >>> assert tunable.distribution is None
