@@ -136,8 +136,10 @@ def is_on_github_actions():
 intersphinx_mapping = get_intersphinx_mapping(
     packages={
         "asyncssh",
-        "azure-core",
-        "azure-identity",
+        # Azure SDKs removed their intersphinx publishing.
+        # https://github.com/Azure/azure-sdk-for-python/issues/39316
+        # "azure-core",
+        # "azure-identity",
         "configspace",
         "matplotlib",
         "numpy",
@@ -230,6 +232,9 @@ nitpick_ignore = [
 nitpick_ignore_regex = [
     # Ignore some external references that don't use sphinx for their docs.
     (r"py:.*", r"flaml\..*"),
+    # Azure SDKs removed their intersphinx publishing.
+    # https://github.com/Azure/azure-sdk-for-python/issues/39316
+    (r"py:.*", r"azure\..*"),
 ]
 
 # Which documents to include in the build.
