@@ -33,8 +33,10 @@ how to configure the Tunable in code/json.
 
 The :py:class:`~mlos_bench.tunables.tunable.Tunable` class is used to define a
 single tunable parameter.
-A ``Tunable`` can be a ``categorical`` or numeric (``int`` or ``float``) and always has
-at least a domain (``range`` or set of ``values``) and default.
+A ``Tunable`` has a :py:attr:`~.Tunable.type` and can be a ``categorical`` or
+numeric (``int`` or ``float``) and always has at least a domain
+(:py:attr:`~.Tunable.range` or set of :py:attr:`~.Tunable.values`) and a
+:py:attr:`~.Tunable.default`.
 Each type can also have a number of additional properties that can optionally be set
 to help control the sampling of the tunable.
 
@@ -43,15 +45,20 @@ For instance:
 - Numeric tunables can have a :py:attr:`~.Tunable.distribution` property to specify the sampling
   distribution.  :py:attr:`log` <Tunable.is_log>` sampling can also be enabled for
   numeric tunables.
-- Categorical tunables can have a ``values_weights`` property to specify biased
+- Categorical tunables can have a :py:attr:`~.Tunable.values_weights` property to specify biased
   sampling of the values
-- ``special`` values can be marked to indicate that they need more explicit testing
-  This can be useful for values that indicate "automatic" or "disabled" behavior.
+- :py:attr:`~.Tunable.special` values can be marked to indicate that they need more
+  explicit testing.  This can be useful for values that indicate "automatic" or
+  "disabled" behavior.
 
-The full set of supported properties can be found in the `JSON schema for tunable
+The :py:class:`~mlos_bench.tunables.tunable.Tunable` class attributes documentation
+and :py:class:`~mlos_bench.tunables.tunable_types.TunableDict` class documentation
+provides some more information and example on the available properties.
+
+The full set of supported properties is specified in the `JSON schema for tunable
 parameters
 <https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-params-schema.json>`_
-and seen in some of the `test examples in the source tree
+and can be seen in some of the `test examples in the source tree
 <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tests/config/schemas/tunable-params/test-cases/good/>`_.
 
 CovariantGroup
@@ -102,10 +109,10 @@ See the :py:mod:`mlos_bench.environments` module documentation for more informat
 
 Examples
 --------
-Here's a short (incomplete) example of some of the TunableGroups JSON configuration
-options, expressed in Python (for testing purposes).
+Here's a short (incomplete) example of some of the ``TunableGroups`` JSON
+configuration options, expressed in Python (for testing purposes).
 However, most of the time you will be loading these from a JSON config file stored
-along with the associated Environment config.
+along with the associated ``Environment`` config.
 
 For more tunable parameters examples refer to the `JSON schema
 <https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-params-schema.json>`_

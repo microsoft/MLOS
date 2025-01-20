@@ -21,8 +21,8 @@ from mlos_bench.environments.base_environment import Environment
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
-from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.util import (
     instantiate_from_config,
     merge_parameters,

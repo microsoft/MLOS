@@ -27,12 +27,12 @@ from typing import Any
 import numpy as np
 
 from mlos_bench.tunables.tunable_types import (
-    TunableValueTypeName,
-    TunableValueType,
-    TunableValue,
-    DistributionName,
-    tunable_dict_from_dict,
     TUNABLE_DTYPE,
+    DistributionName,
+    TunableValue,
+    TunableValueType,
+    TunableValueTypeName,
+    tunable_dict_from_dict,
 )
 from mlos_bench.util import nullable
 
@@ -732,7 +732,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @property
     def values(self) -> Iterable[str | None] | Iterable[int] | Iterable[float] | None:
         """
-        Gets the categories or quantized values for this Tunable.
+        Gets the :py:attr:`~.Tunable.categories` or
+        :py:attr:`~.Tunable.quantized_values` for this Tunable.
 
         Returns
         -------
