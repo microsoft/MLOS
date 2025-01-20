@@ -19,7 +19,7 @@ from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.convert_configspace import tunable_groups_to_configspace
 from mlos_bench.services.base_service import Service
-from mlos_bench.tunables.tunable import TunableValue
+from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import strtobool
 

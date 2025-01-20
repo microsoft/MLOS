@@ -19,7 +19,7 @@ from typing import Any
 import pandas
 
 from mlos_bench.storage.util import kv_df_to_dict
-from mlos_bench.tunables.tunable import TunableValue
+from mlos_bench.tunables.tunable_types import TunableValue
 
 
 class TunableConfigData(metaclass=ABCMeta):

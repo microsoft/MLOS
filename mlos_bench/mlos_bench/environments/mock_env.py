@@ -14,7 +14,8 @@ import numpy
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
-from mlos_bench.tunables.tunable import Tunable, TunableValue
+from mlos_bench.tunables.tunable import Tunable
+from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)

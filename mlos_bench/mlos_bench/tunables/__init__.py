@@ -221,7 +221,8 @@ See Also
 :py:meth:`.TunableGroups.assign` : Notes on special cases for assigning tunable values.
 """
 
-from mlos_bench.tunables.tunable import Tunable, TunableValue
+from mlos_bench.tunables.tunable import Tunable
+from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 __all__ = [

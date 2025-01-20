@@ -29,7 +29,7 @@ from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.storage.base_storage import Storage
-from mlos_bench.tunables.tunable import TunableValue
+from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import try_parse_val
 

@@ -16,7 +16,7 @@ import logging
 
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.services.base_service import Service
-from mlos_bench.tunables.tunable import TunableValue
+from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)

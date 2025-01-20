@@ -6,7 +6,8 @@
 import copy
 from collections.abc import Iterable
 
-from mlos_bench.tunables.tunable import Tunable, TunableValue
+from mlos_bench.tunables.tunable import Tunable
+from mlos_bench.tunables.tunable_types import TunableValue
 
 
 class CovariantTunableGroup:

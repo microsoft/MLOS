@@ -9,7 +9,8 @@ from collections.abc import Generator, Iterable, Mapping
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
-from mlos_bench.tunables.tunable import Tunable, TunableValue
+from mlos_bench.tunables.tunable import Tunable
+from mlos_bench.tunables.tunable_types import TunableValue
 
 _LOG = logging.getLogger(__name__)
 

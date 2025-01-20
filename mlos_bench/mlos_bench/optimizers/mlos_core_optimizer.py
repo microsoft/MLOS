@@ -20,7 +20,7 @@ from mlos_bench.optimizers.convert_configspace import (
     special_param_names,
 )
 from mlos_bench.services.base_service import Service
-from mlos_bench.tunables.tunable import TunableValue
+from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_core.data_classes import Observations
 from mlos_core.optimizers import (

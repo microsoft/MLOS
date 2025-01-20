@@ -10,7 +10,7 @@ from typing import Any
 import pytest
 
 from mlos_bench.environments.base_environment import Environment
-from mlos_bench.tunables.tunable import TunableValue
+from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
