@@ -7,7 +7,7 @@
 
 import pandas
 
-from mlos_bench.tunables.tunable import TunableValue, TunableValueTypeTuple
+from mlos_bench.tunables.tunable_types import TunableValue, TunableValueTypeTuple
 from mlos_bench.util import try_parse_val
 
 

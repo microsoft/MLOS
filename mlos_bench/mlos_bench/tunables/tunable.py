@@ -478,7 +478,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         Examples
         --------
         >>> # Example values of the TunableValueTypeName
-        >>> from mlos_bench.tunables.tunable import TunableValueTypeName
+        >>> from mlos_bench.tunables.tunable_types import TunableValueTypeName
         >>> TunableValueTypeName
         typing.Literal['int', 'float', 'categorical']
         """
@@ -500,12 +500,12 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         Examples
         --------
         >>> # Example values of the TunableValueType
-        >>> from mlos_bench.tunables.tunable import TunableValueType
+        >>> from mlos_bench.tunables.tunable_types import TunableValueType
         >>> TunableValueType
         type[int] | type[float] | type[str]
 
         >>> # Example values of the Tunable.DTYPE
-        >>> from mlos_bench.tunables.tunable import Tunable
+        >>> from mlos_bench.tunables.tunable_types import Tunable
         >>> Tunable.DTYPE
         {'int': <class 'int'>, 'float': <class 'float'>, 'categorical': <class 'str'>}
         """
@@ -666,7 +666,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         Examples
         --------
         >>> # Example values of the DistributionName
-        >>> from mlos_bench.tunables.tunable import DistributionName
+        >>> from mlos_bench.tunables.tunable_types import DistributionName
         >>> DistributionName
         typing.Literal['uniform', 'normal', 'beta']
         """
