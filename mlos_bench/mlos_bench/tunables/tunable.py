@@ -427,6 +427,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         special : [int] | [float]
             A list of special values of the Tunable. Can be empty.
         """
+        assert self.is_numerical
         return self._special
 
     @property
