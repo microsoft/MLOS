@@ -73,8 +73,8 @@ The :py:class:`~mlos_bench.tunables.tunable.Tunable` value
 
 See Also
 --------
-:py:attr:`mlos_bench.tunables.tunable.Tunable.distribution` : Example of accepted
-    distribution names.
+:py:attr:`Tunable.distribution <mlos_bench.tunables.tunable.Tunable.distribution>` : Example
+    of accepted distribution names.
 """
 
 
@@ -89,14 +89,13 @@ class DistributionDictOpt(TypedDict, total=False):  # total=False allows for opt
     Notes
     -----
     :py:class:`.DistributionDict` contains the required fields for the
-    :py:class:`mlos_bench.tunables.tunable.Tunable` 's
-    :py:attr:`~mlos_bench.tunables.tunable.Tunable.distribution` parameter.
+    :py:attr:`Tunable.distribution <mlos_bench.tunables.tunable.Tunable.distribution>`
+    parameter.
 
     See Also
     --------
-    :py:attr:`mlos_bench.tunables.tunable.Tunable.distribution_params` : Example of
-        distribution params.
-    """
+    :py:attr:`Tunable.distribution_params <mlos_bench.tunables.tunable.Tunable.distribution_params>`
+    """  # pylint: disable=line-too-long # noqa: E501
 
     params: dict[str, float] | None
 
@@ -104,18 +103,16 @@ class DistributionDictOpt(TypedDict, total=False):  # total=False allows for opt
 class DistributionDict(DistributionDictOpt):
     """
     A TypedDict for a :py:class:`mlos_bench.tunables.tunable.Tunable` parameter's
-    required ``distribution`` 's config parameters.
+    required ``distribution`` config parameters.
 
     Mostly used for type checking. These are the types expected to be received from the
     json config.
 
     See Also
     --------
-    :py:attr:`mlos_bench.tunables.tunable.Tunable.distribution` : Example of
-        distributions.
-    :py:attr:`mlos_bench.tunables.tunable.Tunable.distribution_params` : Example of
-        distribution params.
-    """
+    :py:attr:`Tunable.distribution <mlos_bench.tunables.tunable.Tunable.distribution>`
+    :py:attr:`Tunable.distribution_params <mlos_bench.tunables.tunable.Tunable.distribution_params>`
+    """  # pylint: disable=line-too-long # noqa: E501
 
     type: DistributionName
 
@@ -175,8 +172,8 @@ class TunableDictOpt(TypedDict, total=False):  # total=False allows for optional
 
     special: list[int] | list[float] | None
     """
-    List of special values for the :py:class:`mlos_bench.tunables.tunable.Tunable`
-    parameter.
+    List of special values for an "int" or "float" type
+    :py:class:`mlos_bench.tunables.tunable.Tunable` parameter.
 
     These are values that are considered special by the target system (e.g.,
     ``null``, ``0``, ``-1``, ``auto``, etc.) and should be sampled with higher
@@ -214,10 +211,8 @@ class TunableDictOpt(TypedDict, total=False):  # total=False allows for optional
 
     See Also
     --------
-    :py:attr:`Tunable.distribution <mlos_bench.tunables.tunable.Tunable.distribution>` : Example
-        of distributions.
-    :py:attr:`Tunable.distribution_params <mlos_bench.tunables.tunable.Tunable.distribution_params>` : Example
-        of distribution params.
+    :py:attr:`Tunable.distribution <mlos_bench.tunables.tunable.Tunable.distribution>`
+    :py:attr:`Tunable.distribution_params <mlos_bench.tunables.tunable.Tunable.distribution_params>`
     """  # pylint: disable=line-too-long # noqa: E501
 
     values_weights: list[float] | None
@@ -227,17 +222,17 @@ class TunableDictOpt(TypedDict, total=False):  # total=False allows for optional
 
     See Also
     --------
-    :py:attr:`Tunable.values_weights <mlos_bench.tunables.tunable.Tunable.values_weights>`
+    :py:attr:`Tunable.weights <mlos_bench.tunables.tunable.Tunable.weights>`
     """
 
     special_weights: list[float] | None
     """
-    Optional sampling weights for the special values of a
+    Optional sampling weights for the special values of an "int" or "float" type
     :py:class:`mlos_bench.tunables.tunable.Tunable` parameter.
 
     See Also
     --------
-    :py:attr:`Tunable.special_weights <mlos_bench.tunables.tunable.Tunable.special_weights>`
+    :py:attr:`Tunable.weights <mlos_bench.tunables.tunable.Tunable.weights>`
     """
 
     range_weight: float | None

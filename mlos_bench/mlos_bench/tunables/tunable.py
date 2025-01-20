@@ -253,6 +253,11 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         return copy.deepcopy(self)
 
     @property
+    def description(self) -> str | None:
+        """Get the description of the Tunable."""
+        return self._description
+
+    @property
     def default(self) -> TunableValue:
         """Get the default value of the Tunable."""
         return self._default

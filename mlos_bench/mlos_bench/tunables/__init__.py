@@ -43,10 +43,10 @@ to help control the sampling of the tunable.
 For instance:
 
 - Numeric tunables can have a :py:attr:`~.Tunable.distribution` property to specify the sampling
-  distribution.  :py:attr:`log` <Tunable.is_log>` sampling can also be enabled for
+  distribution.  :py:attr:`log <.Tunable.is_log>` sampling can also be enabled for
   numeric tunables.
-- Categorical tunables can have a :py:attr:`~.Tunable.values_weights` property to specify biased
-  sampling of the values
+- Categorical tunables can have a :py:attr:`values_weights <.Tunable.weights>`
+  property to specify biased sampling of the values
 - :py:attr:`~.Tunable.special` values can be marked to indicate that they need more
   explicit testing.  This can be useful for values that indicate "automatic" or
   "disabled" behavior.
