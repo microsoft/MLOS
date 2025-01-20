@@ -445,8 +445,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @property
     def weights(self) -> list[float] | None:
         """
-        Get the weights of the categories or special values of the Tunable. Return None
-        if there are none.
+        Get the weights of the categories or special values of the Tunable. Return
+        None if there are none.
 
         Returns
         -------
