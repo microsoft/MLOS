@@ -28,9 +28,6 @@ Classes
 Tunable
 +++++++
 
-** TODO ** add more links to the Tunable class documentation along with examples of
-how to configure the Tunable in code/json.
-
 The :py:class:`~mlos_bench.tunables.tunable.Tunable` class is used to define a
 single tunable parameter.
 A ``Tunable`` has a :py:attr:`~.Tunable.type` and can be a ``categorical`` or
