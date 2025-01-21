@@ -211,6 +211,9 @@ class MlosCoreOptimizer(Optimizer):
             space_adapter_type = getattr(SpaceAdapterType, space_adapter_type)
             assert isinstance(space_adapter_type, SpaceAdapterType)
             if space_adapter_type == SpaceAdapterType.LLAMATUNE:
+                # This is probably a sane default, especially when
+                # bulk_registering old configs (e.g., Experiment resume), but is
+                # not currently exposed in the config schema.
                 space_adapter_config["use_approximate_reverse_mapping"] = True
 
         self._opt: BaseOptimizer = OptimizerFactory.create(
