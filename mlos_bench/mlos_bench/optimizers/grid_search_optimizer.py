@@ -18,6 +18,9 @@ tunables are not supported).
 Examples
 --------
 >>> # Load tunables from a JSON string.
+>>> # Note: normally these would be automatically loaded from the Environment(s)'s
+>>> # `include_tunables` config parameter.
+>>> #
 >>> import json5 as json
 >>> from mlos_bench.environments.status import Status
 >>> from mlos_bench.services.config_persistence import ConfigPersistenceService
@@ -51,6 +54,7 @@ Examples
 >>> tunables = service.load_tunables(jsons=[json_config])
 >>> tunables.get_param_values()
 {'colors': 'green', 'int_param': 2, 'float_param': 0.5}
+>>> # Now create a GridSearchOptimizer from a JSON config string.
 >>> optimizer_json_config = '''
 ... {
 ...   "class": "mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer",
