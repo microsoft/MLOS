@@ -834,17 +834,17 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         distribution : str | None
             Name of the distribution or None.
 
+        See Also
+        --------
+        :py:attr:`~.Tunable.distribution_params` :
+            For more examples on configuring a Tunable with a distribution.
+
         Examples
         --------
         >>> # Example values of the DistributionName
         >>> from mlos_bench.tunables.tunable_types import DistributionName
         >>> DistributionName
         typing.Literal['uniform', 'normal', 'beta']
-
-        See Also
-        --------
-        :py:attr:`~.Tunable.distribution_params` :
-            For more examples on configuring a Tunable with a distribution.
         """
         return self._distribution
 
