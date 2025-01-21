@@ -693,6 +693,30 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         range : tuple[int, int] | tuple[float, float]
             A 2-tuple of numbers that represents the range of the Tunable.
             Numbers can be int or float, depending on the type of the Tunable.
+
+        Examples
+        --------
+        >>> json_config = '''
+        ... {
+        ...    "type": "int",
+        ...    "default": 0,
+        ...    "range": [0, 10000],
+        ... }
+        ... '''
+        >>> int_tunable = Tunable.from_json("int_tunable", json_config)
+        >>> int_tunable.range
+        (0, 10000)
+
+        >>> json_config = '''
+        ... {
+        ...    "type": "float",
+        ...    "default": 0.0,
+        ...    "range": [0.0, 100.0],
+        ... }
+        ... '''
+        >>> float_tunable = Tunable.from_json("float_tunable", json_config)
+        >>> float_tunable.range
+        (0.0, 100.0)
         """
         assert self.is_numerical
         assert self._range is not None
