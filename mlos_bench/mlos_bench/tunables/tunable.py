@@ -572,7 +572,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         >>> json_config = '''
         ... {
         ...    "type": "float",
-        ...    "default": "50.0",
+        ...    "default": 50.0,
         ...    "range": [1, 100],
         ...    "special": [-1, 0],
         ...    "special_weights": [0.1, 0.2],
