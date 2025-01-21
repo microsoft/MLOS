@@ -2,8 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base class for an interface between the benchmarking framework and
-:py:mod:`mlos_core` optimizers and other config suggestion methods.
+"""
+Base class for an interface between the benchmarking framework and :py:mod:`mlos_core`
+optimizers and other config suggestion methods.
 
 See Also
 --------

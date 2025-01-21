@@ -85,9 +85,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @staticmethod
     def _validate_json_config(name: str, config: dict) -> None:
         """
-        Reconstructs a basic json config that this Tunable might have been
-        constructed with via a TunableGroup for the purposes of schema
-        validation so that we know our test cases are valid.
+        Reconstructs a basic json config that this Tunable might have been constructed
+        with via a TunableGroup for the purposes of schema validation so that we know
+        our test cases are valid.
 
         Notes
         -----
