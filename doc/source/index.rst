@@ -10,6 +10,8 @@ MLOS Documentation
 
 Documentation is generated from both the `source tree markdown <source_tree_docs/index.html>`_ and the Python docstrings for each of the packages with navigation links on the side.
 
+MLOS also has a fairly large test suite, so when in doubt, check the `code <https://github.com/microsoft/MLOS>`_ for additional examples or reach out to the maintainers on `Github <https://github.com/microsoft/MLOS>`_!
+
 .. toctree::
    :caption: Source Tree Documentation
    :maxdepth: 4

@@ -69,7 +69,6 @@ them as JSON strings for explanatory purposes.
 
 Notes
 -----
-<https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tests/config/schemas/optimizers/test-cases/good/>_
 The full set of supported properties is specified in the `JSON schemas for optimizers
 <https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/config/schemas/optimizers/>`_.
 and can be seen in some of the `test examples in the source tree
