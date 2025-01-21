@@ -739,6 +739,21 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         11
         >>> list(quantized_tunable.quantized_values)
         [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
+
+        >>> json_config = '''
+        ... {
+        ...    "type": "float",
+        ...    "default": 0,
+        ...    "range": [0, 1],
+        ...    // Enable quantization.
+        ...    "quantization_bins": 5,
+        ... }
+        ... '''
+        >>> quantized_tunable = Tunable.from_json("quantized_tunable", json_config)
+        >>> quantized_tunable.quantization_bins
+        5
+        >>> list(quantized_tunable.quantized_values)
+        [0.0, 0.25, 0.5, 0.75, 1.0]
         """
         if self.is_categorical:
             return None
@@ -754,6 +769,11 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         Iterable[int] | Iterable[float] | None
             If the Tunable is quantizable, returns a sequence of those elements,
             else None (e.g., for unquantized float type Tunables).
+
+        See Also
+        --------
+        :py:attr:`~.Tunable.quantization_bins` :
+            For more examples on configuring a Tunable with quantization.
         """
         num_range = self.range
         if self.type == "float":
@@ -979,6 +999,10 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         -------
         values : list[str]
             List of all possible values of a categorical Tunable.
+
+        See Also
+        --------
+        Tunable.values : For more examples on getting the categorical values of a Tunable.
         """
         assert self.is_categorical
         assert self._values is not None
@@ -1008,6 +1032,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         >>> categorical_tunable = Tunable.from_json("categorical_tunable", json_config)
         >>> list(categorical_tunable.values)
         ['red', 'blue', 'green']
+        >>> assert categorical_tunable.values == categorical_tunable.categories
 
         >>> # Example values of the Tunable int
         >>> json_config = '''
