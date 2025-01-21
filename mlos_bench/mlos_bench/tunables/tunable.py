@@ -70,7 +70,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         Notes
         -----
         This is mostly for testing purposes.
-        Generally Tunables will be created as a part of loading TunableGroups.
+        Generally Tunables will be created as a part of loading
+        :py:class:`~mlos_bench.tunables.tunable_groups.TunableGroups`.
 
         See Also
         --------
