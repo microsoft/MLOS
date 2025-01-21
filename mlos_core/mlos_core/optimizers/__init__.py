@@ -17,9 +17,15 @@ for all Optimizers and provides the core
 This module also provides a simple :py:class:`~.OptimizerFactory` class to
 :py:meth:`~.OptimizerFactory.create` an Optimizer.
 
-Examples
+Generally speaking, the :py:mod:`mlos_core` package is intended to be used in
+conjunction with the :py:mod:`mlos_bench` package, which provides a higher-level
+interface for running benchmarks and autotuning experiments.
+
+See Also
 --------
-TODO: Add example usage here.
+mlos_bench.optimizers.mlos_core_optimizer :
+    The mlos_bench Optimizer class that uses the mlos_core Optimizers to run
+    autotuning experiments.
 
 Notes
 -----

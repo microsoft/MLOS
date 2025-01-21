@@ -20,9 +20,15 @@ information on how to do this with :py:mod:`mlos_bench`.
 This module provides a simple :py:class:`.SpaceAdapterFactory` class to
 :py:meth:`~.SpaceAdapterFactory.create` space adapters.
 
-Examples
+Generally speaking, the :py:mod:`mlos_core` package is intended to be used in
+conjunction with the :py:mod:`mlos_bench` package, which provides a higher-level
+interface for running benchmarks and autotuning experiments.
+
+See Also
 --------
-TODO: Add example usage here.
+mlos_bench.optimizers.mlos_core_optimizer :
+    The mlos_bench Optimizer class that uses the mlos_core Optimizers and
+    SpaceAdapters to run autotuning experiments.
 
 Notes
 -----
