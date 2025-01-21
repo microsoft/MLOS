@@ -116,7 +116,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
     """
     Grid search optimizer.
 
-    See :py:mod:`above <mlos_bench.grid_search_optimizer>` for more details.
+    See :py:mod:`above <mlos_bench.optimizers.grid_search_optimizer>` for more details.
     """
 
     MAX_CONFIGS = 10000

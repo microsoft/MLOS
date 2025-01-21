@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Mock optimizer for mlos_bench."""
+"""TrackBestOptimizer base class for mlos_bench."""
 
 import logging
 from abc import ABCMeta

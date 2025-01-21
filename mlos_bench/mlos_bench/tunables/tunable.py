@@ -15,7 +15,7 @@ Some details about the configuration of an individual :py:class:`~.Tunable`
 parameter are available in the Examples docstrings below.
 
 However, Tunables are generally provided as a part of a
-:py:class:`~mlos_bench.tunables.tunable_groups.TunableGroup` config specified in a
+:py:class:`~mlos_bench.tunables.tunable_groups.TunableGroups` config specified in a
 JSON config file.
 
 See Also
@@ -89,9 +89,12 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         ----------
         name : str
             Human-readable identifier of the Tunable parameter.
+            NOTE: ``!`` characters are currently disallowed in Tunable names in order
+            handle "special" values sampling logic.
+            See: :py:mod:`mlos_bench.optimizers.convert_configspace` for details.
         config : dict
             Python dict that represents a Tunable (e.g., deserialized from JSON)
-            Must be convertible to a
+            NOTE: Must be convertible to a
             :py:class:`~mlos_bench.tunables.tunable_types.TunableDict`.
 
         See Also

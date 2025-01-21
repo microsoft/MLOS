@@ -2,8 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Functions to convert TunableGroups to ConfigSpace for use with the mlos_core
-optimizers.
+"""Functions to convert :py:class:`.TunableGroups` that :py:mod:`mlos_bench` uses to
+to :py:class:`ConfigSpace.ConfigurationSpace` for use with the
+:py:mod:`mlos_core.optimizers`.
 """
 
 import logging
@@ -279,7 +280,8 @@ def special_param_names(name: str) -> tuple[str, str]:
     Generate the names of the auxiliary hyperparameters that correspond to a tunable
     that can have special values.
 
-    NOTE: `!` characters are currently disallowed in Tunable names in order handle this logic.
+    NOTE: ``!`` characters are currently disallowed in :py:class:`.Tunable` names in
+    order handle this logic.
 
     Parameters
     ----------
@@ -300,7 +302,8 @@ def special_param_name_is_temp(name: str) -> bool:
     """
     Check if name corresponds to a temporary ConfigSpace parameter.
 
-    NOTE: `!` characters are currently disallowed in Tunable names in order handle this logic.
+    NOTE: ``!`` characters are currently disallowed in :py:class:`.Tunable` names in
+    order handle this logic.
 
     Parameters
     ----------
@@ -319,7 +322,8 @@ def special_param_name_strip(name: str) -> str:
     """
     Remove the temporary suffix from a special parameter name.
 
-    NOTE: `!` characters are currently disallowed in Tunable names in order handle this logic.
+    NOTE: ``!`` characters are currently disallowed in :py:class:`.Tunable` names in
+    order handle this logic.
 
     Parameters
     ----------

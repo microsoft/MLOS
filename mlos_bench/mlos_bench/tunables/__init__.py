@@ -209,9 +209,12 @@ Notes
 -----
 Internally, :py:class:`.TunableGroups` are converted to
 :external:py:class:`ConfigSpace.ConfigurationSpace` objects for use with
-:py:mod:`mlos_core`.
+:py:mod:`mlos_core` using the :py:mod:`mlos_bench.optimizers.convert_configspace`.
 See the "Spaces" section in the :py:mod:`mlos_core` module documentation for more
 information.
+
+In order to handle sampling of :py:attr:`.Tunable.special` values, the ``!``
+character is prohibited from being used in the name of a :py:class:`.Tunable`.
 
 See Also
 --------
