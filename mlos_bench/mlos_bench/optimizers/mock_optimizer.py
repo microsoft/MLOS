@@ -32,7 +32,7 @@ class MockOptimizer(TrackBestOptimizer):
         self._random: dict[str, Callable[[Tunable], TunableValue]] = {
             "categorical": lambda tunable: rnd.choice(tunable.categories),
             "float": lambda tunable: rnd.uniform(*tunable.range),
-            "int": lambda tunable: rnd.randint(*tunable.range),
+            "int": lambda tunable: rnd.randint(*(int(x) for x in tunable.range)),
         }
 
     def bulk_register(

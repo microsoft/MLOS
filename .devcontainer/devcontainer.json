@@ -68,7 +68,6 @@
                 "huntertran.auto-markdown-toc",
                 "ibm.output-colorizer",
                 "lextudio.restructuredtext",
-                "matangover.mypy",
                 "ms-azuretools.vscode-docker",
                 "ms-python.black-formatter",
                 "ms-python.pylint",

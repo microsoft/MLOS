@@ -24,6 +24,7 @@ _LOG = logging.getLogger(__name__)
 class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
     """Helper methods to manage machines via SSH."""
 
+    # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-instance-attributes
 
     def __init__(

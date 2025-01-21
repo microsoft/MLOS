@@ -41,7 +41,11 @@ def monkey_patch_hp_quantization(hp: Hyperparameter) -> Hyperparameter:
         # No quantization requested.
         # Remove any previously applied patches.
         if hasattr(dist, "sample_vector_mlos_orig"):
-            setattr(dist, "sample_vector", dist.sample_vector_mlos_orig)
+            setattr(
+                dist,
+                "sample_vector",
+                dist.sample_vector_mlos_orig,  # pyright: ignore[reportAttributeAccessIssue]
+            )
             delattr(dist, "sample_vector_mlos_orig")
         return hp
 
@@ -61,7 +65,10 @@ def monkey_patch_hp_quantization(hp: Hyperparameter) -> Hyperparameter:
         dist,
         "sample_vector",
         lambda n, *, seed=None: quantize(
-            dist.sample_vector_mlos_orig(n, seed=seed),
+            dist.sample_vector_mlos_orig(  # pyright: ignore[reportAttributeAccessIssue]
+                n,
+                seed=seed,
+            ),
             bounds=(dist.lower_vectorized, dist.upper_vectorized),
             bins=quantization_bins,
         ),

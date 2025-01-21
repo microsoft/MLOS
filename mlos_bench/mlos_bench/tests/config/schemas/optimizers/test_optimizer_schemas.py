@@ -151,3 +151,7 @@ def test_optimizer_configs_with_extra_param(test_case_name: str) -> None:
         TEST_CASES.by_type["good"][test_case_name],
         ConfigSchema.UNIFIED,
     )
+
+
+if __name__ == "__main__":
+    pytest.main(args=["-n0", "-k", "grid_search_optimizer"])

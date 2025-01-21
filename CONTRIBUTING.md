@@ -34,26 +34,26 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 
 1. Create the `mlos` Conda environment.
 
-     ```sh
-    conda env create -f conda-envs/mlos.yml
-    ```
+   ```sh
+   conda env create -f conda-envs/mlos.yml
+   ```
 
-    > See the [`conda-envs/`](./conda-envs/) directory for additional conda environment files, including those used for Windows (e.g. [`mlos-windows.yml`](./conda-envs/mlos-windows.yml)).
+   > See the [`conda-envs/`](./conda-envs/) directory for additional conda environment files, including those used for Windows (e.g. [`mlos-windows.yml`](./conda-envs/mlos-windows.yml)).
 
    or
 
-    ```sh
-    # This will also ensure the environment is update to date using "conda env update -f conda-envs/mlos.yml"
-    make conda-env
-    ```
+   ```sh
+   # This will also ensure the environment is update to date using "conda env update -f conda-envs/mlos.yml"
+   make conda-env
+   ```
 
-    > Note: the latter expects a *nix environment.
+   > Note: the latter expects a \*nix environment.
 
 1. Initialize the shell environment.
 
-    ```sh
-    conda activate mlos
-    ```
+   ```sh
+   conda activate mlos
+   ```
 
 ### Details
 
@@ -62,45 +62,47 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 We expect development to follow a typical "forking" style workflow:
 
 1. Fork a copy of the [MLOS repo in Github](https://github.com/microsoft/MLOS).
+
 1. Create a development (a.k.a. topic) branch off of `main` to work on changes.
 
-    For instance:
+   For instance:
 
-    ```shell
-    git checkout -b YourDevName/some-topic-description main
-    ```
+   ```shell
+   git checkout -b YourDevName/some-topic-description main
+   ```
 
 1. Ensure all of the lint checks and tests pass.
 
-    The easiest way to do this is to run the `make` commands that are also used in the CI pipeline:
+   The easiest way to do this is to run the `make` commands that are also used in the CI pipeline:
 
-    ```shell
-    # All at once in parallel.
-    make all
+   ```shell
+   # All at once in parallel.
+   make all
 
-    # Or individually (for easier debugging)
-    make format
-    make check
-    make test
-    make dist-test
-    make doc-test
-    ```
+   # Or individually (for easier debugging)
+   make format
+   make check
+   make test
+   make dist-test
+   make doc-test
+   ```
 
-    > Note: `make format` and `make check` use [`pre-commit`](https://pre-commit.com/) to run checks and auto-formatting.
-    > See the [`.pre-commit-config.yaml`](./.pre-commit-config.yaml) file for more details.
-    > You can also run `pre-commit install` to enable the checks in your local git hooks.
-    >
-    > See the [documentation README](./doc/README.md) for more information on documentation and its testing.
+   > Note: `make format` and `make check` use [`pre-commit`](https://pre-commit.com/) to run checks and auto-formatting.
+   > See the [`.pre-commit-config.yaml`](./.pre-commit-config.yaml) file for more details.
+   > You can also run `pre-commit install` to enable the checks in your local git hooks.
+   >
+   > See the [documentation README](./doc/README.md) for more information on documentation and its testing.
 
 1. Submit changes for inclusion as a [Pull Request on Github](https://github.com/microsoft/MLOS/pulls).
 
-    Some notes on organizing changes to help reviewers:
+   Some notes on organizing changes to help reviewers:
 
-    1. Please try to keep PRs small whenver possible and don't include unnecessaary formatting changes.
-    1. Larger changes can be planned in [Issues](https://github.com/microsoft/MLOS/issues), prototyped in a large draft PR for early feedback, and split into smaller PRs via discussion.
-    1. All changes should include test coverage (either new or existing).
+   1. Please try to keep PRs small whenver possible and don't include unnecessaary formatting changes.
+   1. Larger changes can be planned in [Issues](https://github.com/microsoft/MLOS/issues), prototyped in a large draft PR for early feedback, and split into smaller PRs via discussion.
+   1. All changes should include test coverage (either new or existing).
 
 1. PRs are associated with [Github Issues](https://github.com/microsoft/MLOS/issues) and need [MLOS-committers](https://github.com/orgs/microsoft/teams/MLOS-committers) to sign-off (in addition to other CI pipeline checks like tests and lint checks to pass).
+
 1. Once approved, the PR can be completed using a squash merge in order to keep a nice linear history.
 
 ## Distributing
@@ -109,24 +111,24 @@ You can also locally build and install from wheels like so:
 
 1. Build the *wheel* file(s)
 
-    ```sh
-    make dist
-    ```
+   ```sh
+   make dist
+   ```
 
-2. Install it.
+1. Install it.
 
-    ```sh
-    # this will install just the optimizer component with SMAC support:
-    pip install "dist/tmp/mlos_core-latest-py3-none-any.whl[smac]"
-    ```
+   ```sh
+   # this will install just the optimizer component with SMAC support:
+   pip install "dist/tmp/mlos_core-latest-py3-none-any.whl[smac]"
+   ```
 
-    ```sh
-    # this will install both the optimizer and the experiment runner:
-    pip install "dist/mlos_bench-latest-py3-none-any.whl[azure]"
-    ```
+   ```sh
+   # this will install both the optimizer and the experiment runner:
+   pip install "dist/mlos_bench-latest-py3-none-any.whl[azure]"
+   ```
 
-    > Note: exact versions may differ due to automatic versioning so the `-latest-` part is a symlink.
-    > If distributing elsewhere, adjust for the current version number in the module's `dist` directory.
+   > Note: exact versions may differ due to automatic versioning so the `-latest-` part is a symlink.
+   > If distributing elsewhere, adjust for the current version number in the module's `dist` directory.
 
 ### See Also
 

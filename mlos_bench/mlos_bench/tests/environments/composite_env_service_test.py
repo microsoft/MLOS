@@ -10,6 +10,7 @@ import pytest
 from mlos_bench.environments.composite_env import CompositeEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService
+from mlos_bench.services.types.local_exec_type import SupportsLocalExec
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import path_join
 
@@ -58,6 +59,7 @@ def test_composite_services(composite_env: CompositeEnv) -> None:
     for i, path in ((0, "_test_tmp_global"), (1, "_test_tmp_other_2"), (2, "_test_tmp_other_3")):
         service = composite_env.children[i]._service  # pylint: disable=protected-access
         assert service is not None and hasattr(service, "temp_dir_context")
+        assert isinstance(service, SupportsLocalExec)
         with service.temp_dir_context() as temp_dir:
             assert os.path.samefile(temp_dir, path)
         os.rmdir(path)

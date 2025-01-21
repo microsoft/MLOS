@@ -170,6 +170,5 @@
     "python.testing.unittestEnabled": false,
     "debugpy.debugJustMyCode": false,
     "python.analysis.autoImportCompletions": true,
-    "python.analysis.supportRestructuredText": true,
-    "python.analysis.typeCheckingMode": "standard"
+    "python.analysis.supportRestructuredText": true
 }

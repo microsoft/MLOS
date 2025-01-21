@@ -111,7 +111,7 @@ Classes Overview
    franca for data science.
 
 - :py:meth:`mlos_core.optimizers.OptimizerFactory.create` is a factory function
-  that creates a new :py:type:`~mlos_core.optimizers.ConcreteOptimizer` instance
+  that creates a new :py:attr:`~mlos_core.optimizers.ConcreteOptimizer` instance
 
   To do this it uses the :py:class:`~mlos_core.optimizers.OptimizerType` enum to
   specify which underlying optimizer to use (e.g.,

@@ -38,9 +38,23 @@ The user can employ `LlamaTuneSpaceAdapter` when initializing the `mlos_core` op
 
 ```python
 llamatune_optimizer = OptimizerFactory.create(
-    ...
+    parameter_space=ConfigurationSpace(),
+    optimizer_type=OptimizerType.SMAC,
+    optimization_targets=["score"],
+    optimizer_kwargs={
+        # optimizer kwargs
+        # e.g.,
+        max_trials=100,
+    },
     space_adapter_type=SpaceAdapterType.LLAMATUNE,
-    space_adapter_kwargs=<llamatune_kwargs>,
+    space_adapter_kwargs={
+        # llamatune kwargs
+        # e.g.,
+        num_low_dims=16,
+        special_param_values={
+            "special_param": [-1, 0],
+        },
+    },
 )
 ```
 

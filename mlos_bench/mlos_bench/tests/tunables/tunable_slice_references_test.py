@@ -81,6 +81,7 @@ def test_overlapping_group_merge_tunable_groups(tunable_groups_config: dict) -> 
     """
 
     other_tunables_config = json.loads(other_tunables_json)
+    assert isinstance(other_tunables_config, dict)
     other_tunables = TunableGroups(other_tunables_config)
 
     with pytest.raises(ValueError):
@@ -110,6 +111,7 @@ def test_bad_extended_merge_tunable_group(tunable_groups_config: dict) -> None:
     """
 
     other_tunables_config = json.loads(other_tunables_json)
+    assert isinstance(other_tunables_config, dict)
     other_tunables = TunableGroups(other_tunables_config)
 
     with pytest.raises(ValueError):
@@ -138,6 +140,7 @@ def test_good_extended_merge_tunable_group(tunable_groups_config: dict) -> None:
     """
 
     other_tunables_config = json.loads(other_tunables_json)
+    assert isinstance(other_tunables_config, dict)
     other_tunables = TunableGroups(other_tunables_config)
 
     assert "new-param" not in parent_tunables

@@ -493,7 +493,7 @@ def plot_top_n_configs(
                 data=top_n_config_results_df,
                 x=groupby_column,
                 y=orderby_col,
-                legend=None,
+                legend=False,
                 ax=axis,
             )
         plt.grid()

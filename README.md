@@ -10,25 +10,24 @@ MLOS is a project to enable autotuning for systems.
 
 ## Contents
 
-<!-- TOC -->
+<!-- mdformat-toc start --slug=github --no-anchors --maxlevel=4 --minlevel=2 -->
 
-- [MLOS](#mlos)
-    - [Contents](#contents)
-    - [Overview](#overview)
-    - [Organization](#organization)
-    - [Contributing](#contributing)
-    - [Getting Started](#getting-started)
-        - [conda activation](#conda-activation)
-        - [Usage Examples](#usage-examples)
-            - [mlos-core](#mlos-core)
-            - [mlos-bench](#mlos-bench)
-            - [mlos-viz](#mlos-viz)
-    - [Installation](#installation)
-    - [See Also](#see-also)
-        - [Examples](#examples)
-        - [Publications](#publications)
+- [Contents](#contents)
+- [Overview](#overview)
+- [Organization](#organization)
+- [Contributing](#contributing)
+- [Getting Started](#getting-started)
+  - [`conda` activation](#conda-activation)
+  - [Usage Examples](#usage-examples)
+    - [`mlos-core`](#mlos-core)
+    - [`mlos-bench`](#mlos-bench)
+    - [`mlos-viz`](#mlos-viz)
+- [Installation](#installation)
+- [See Also](#see-also)
+  - [Examples](#examples)
+  - [Publications](#publications)
 
-<!-- /TOC -->
+<!-- mdformat-toc end -->
 
 ## Overview
 
@@ -43,8 +42,11 @@ To accomplish this, the general flow involves
 - Apply that configuration to the target system.
 - Repeat until either the exploration budget is consumed or the configurations' performance appear to have converged.
 
-<!-- markdownlint-disable-next-line MD033 -->
+<!-- markdownlint-disable MD033 -->
+
 <img src="./doc/source/_static/llamatune-loop.png" style="width:700px" alt="optimization loop" />
+
+<!-- markdownlint-enable MD033 -->
 
 > Source: [LlamaTune: VLDB 2022](https://arxiv.org/abs/2203.05128)
 
@@ -60,7 +62,7 @@ To do this this repo provides three Python modules, which can be used independen
 
 - [`mlos-viz`](./mlos_viz/) provides some simple APIs to help automate visualizing the results of benchmark experiments and their trials.
 
-    It provides a simple `plot(experiment_data)` API, where `experiment_data` is obtained from the `mlos_bench.storage` module.
+  It provides a simple `plot(experiment_data)` API, where `experiment_data` is obtained from the `mlos_bench.storage` module.
 
 - [`mlos-core`](./mlos_core/) provides an abstraction around existing optimization frameworks (e.g., [FLAML](https://github.com/microsoft/FLAML), [SMAC](https://github.com/automl/SMAC3), etc.)
 
@@ -92,26 +94,26 @@ For instructions on setting up the development environment please try one of the
 
 1. Create the `mlos` Conda environment.
 
-     ```sh
-    conda env create -f conda-envs/mlos.yml
-    ```
+   ```sh
+   conda env create -f conda-envs/mlos.yml
+   ```
 
-    > See the [`conda-envs/`](./conda-envs/) directory for additional conda environment files, including those used for Windows (e.g. [`mlos-windows.yml`](./conda-envs/mlos-windows.yml)).
+   > See the [`conda-envs/`](./conda-envs/) directory for additional conda environment files, including those used for Windows (e.g. [`mlos-windows.yml`](./conda-envs/mlos-windows.yml)).
 
    or
 
-    ```sh
-    # This will also ensure the environment is update to date using "conda env update -f conda-envs/mlos.yml"
-    make conda-env
-    ```
+   ```sh
+   # This will also ensure the environment is update to date using "conda env update -f conda-envs/mlos.yml"
+   make conda-env
+   ```
 
-    > Note: the latter expects a *nix environment.
+   > Note: the latter expects a \*nix environment.
 
 1. Initialize the shell environment.
 
-    ```sh
-    conda activate mlos
-    ```
+   ```sh
+   conda activate mlos
+   ```
 
 ### Usage Examples
 
@@ -186,7 +188,7 @@ Details on using a local version from git are available in [CONTRIBUTING.md](./C
 
 - [sqlite-autotuning](https://github.com/Microsoft-CISL/sqlite-autotuning)
 
-    Working example of tuning `sqlite` with MLOS.
+  Working example of tuning `sqlite` with MLOS.
 
 These can be used as starting points for new autotuning projects outside of the main MLOS repository if you want to keep your tuning experiment configs separate from the MLOS codebase.
 
