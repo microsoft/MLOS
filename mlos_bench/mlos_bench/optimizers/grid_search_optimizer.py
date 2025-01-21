@@ -2,7 +2,18 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Grid search optimizer for mlos_bench."""
+"""Grid search Optimizer for mlos_bench.
+
+Grid search is a simple optimizer that exhaustively searches the configuration space.
+
+To do this it generates a grid of configurations to try, and then suggests them one by one.
+
+Therefore, the number of configurations to try is the product of the
+:py:attr:`~mlos_bench.tunables.tunable.Tunable.cardinality` of each of the
+:py:mod:`~mlos_bench.tunables`.
+(i.e., non :py:attr:`quantized <mlos_bench.tunables.tunable.Tunable.quantization_bins>`
+tunables are not supported).
+"""
 
 import logging
 from collections.abc import Iterable, Sequence
@@ -22,7 +33,13 @@ _LOG = logging.getLogger(__name__)
 
 
 class GridSearchOptimizer(TrackBestOptimizer):
-    """Grid search optimizer."""
+    """Grid search optimizer.
+
+    See :py:mod:`above <mlos_bench.grid_search_optimizer>` for more details.
+    """
+
+    MAX_CONFIGS = 10000
+    """Maximum number of configurations to enumerate."""
 
     def __init__(
         self,
@@ -52,7 +69,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
             raise ValueError(
                 f"Unquantized tunables are not supported for grid search: {self._tunables}"
             )
-        if size > 10000:
+        if size > self.MAX_CONFIGS:
             _LOG.warning(
                 "Large number %d of config points requested for grid search: %s",
                 size,
