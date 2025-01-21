@@ -41,6 +41,15 @@ Optimizer instance using observations from a prior set of
     Automatically determining whether that makes sense to do is challenging and
     is left to the user to ensure for now.
 
+Stopping Conditions
+^^^^^^^^^^^^^^^^^^^
+Currently the :py:meth:`.Optimizer.not_converged` method only checks that the number
+of suggestions is less than the ``max_suggestions`` property of the Optimizer
+config.
+
+However, in the future we intend to implement more sophisticated stopping conditions
+(e.g., total time, convergence, cost budget, etc.).
+
 Spaces
 ++++++
 
