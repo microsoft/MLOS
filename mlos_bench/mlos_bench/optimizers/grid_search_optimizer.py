@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Grid search Optimizer for mlos_bench.
+"""
+Grid search Optimizer for mlos_bench.
 
 Grid search is a simple optimizer that exhaustively searches the configuration space.
 
@@ -33,7 +34,8 @@ _LOG = logging.getLogger(__name__)
 
 
 class GridSearchOptimizer(TrackBestOptimizer):
-    """Grid search optimizer.
+    """
+    Grid search optimizer.
 
     See :py:mod:`above <mlos_bench.grid_search_optimizer>` for more details.
     """
