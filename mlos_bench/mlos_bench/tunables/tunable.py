@@ -717,11 +717,19 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         Examples
         --------
         >>> # Example values of the log scale
-        >>> from mlos_bench.tunables.tunable import Tunable
-        >>> tunable = Tunable("tunable", {"type": "int", "default": 0, "range": [0, 1000], "log": True})
+        >>> json_config = '''
+        ... {
+        ...    "type": "int",
+        ...    "default": 0,
+        ...    "range": [0, 10000],
+        ...    // Enable log sampling.
+        ...    "log": true,
+        ... }
+        ... '''
+        >>> tunable = Tunable.from_json("log_tunable", json_config)
         >>> tunable.is_log
         True
-        """  # pylint: disable=line-too-long # noqa: E501
+        """
         assert self.is_numerical
         return self._log
 
@@ -756,39 +764,64 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
         Examples
         --------
-        >>> # Example values of a Tunable with a distribution
-        >>> from mlos_bench.tunables.tunable import Tunable
-        >>> # Common configuration for all Tunables in these examples.
-        >>> common_tunable_conf = {"type": "int", "default": 0, "range": [0, 10]}
-
-        # TODO: Move the common_tunable_conf portion to the end?
-        # Or use json strings directly?
-
-        >>> # Example of a unspecified distribution
-        >>> tunable = Tunable("tunable", {**common_tunable_conf})
-        >>> assert tunable.distribution is None
-        >>> tunable.distribution_params
+        >>> json_config = '''
+        ... {
+        ...    "type": "int",
+        ...    "default": 0,
+        ...    "range": [0, 10],
+        ...    // No distribution specified.
+        ... }
+        ... '''
+        >>> base_config = json.loads(json_config)
+        >>> basic_tunable = Tunable("basic_tunable", base_config)
+        >>> assert basic_tunable.distribution is None
+        >>> basic_tunable.distribution_params
         {}
+
         >>> # Example of a uniform distribution (the default if not specified)
-        # place the common values at the end for better readability
-        >>> tunable = Tunable("tunable", {**common_tunable_conf, "distribution": {"type": "uniform"}})
-        >>> tunable.distribution
+        >>> config_with_dist = base_config | {
+        ...    "distribution": {
+        ...        "type": "uniform"
+        ...    }
+        ... }
+        >>> uniform_tunable = Tunable("uniform_tunable", config_with_dist)
+        >>> uniform_tunable.distribution
         'uniform'
-        >>> tunable.distribution_params
+        >>> uniform_tunable.distribution_params
         {}
+
         >>> # Example of a normal distribution params
-        >>> tunable = Tunable("tunable", {**common_tunable_conf, "distribution": {"type": "normal", "params": {"mu": 0.0, "sigma": 1.0}}})
-        >>> tunable.distribution
+        >>> config_with_dist = base_config | {
+        ...    "distribution": {
+        ...        "type": "normal",
+        ...        "params": {
+        ...            "mu": 0.0,
+        ...            "sigma": 1.0,
+        ...        }
+        ...    }
+        ... }
+        >>> normal_tunable = Tunable("normal_tunable", config_with_dist)
+        >>> normal_tunable.distribution
         'normal'
-        >>> tunable.distribution_params
+        >>> normal_tunable.distribution_params
         {'mu': 0.0, 'sigma': 1.0}
+
         >>> # Example of a beta distribution params
-        >>> tunable = Tunable("tunable", {**common_tunable_conf, "distribution": {"type": "beta", "params": {"alpha": 1.0, "beta": 1.0}}})
-        >>> tunable.distribution
+        >>> config_with_dist = base_config | {
+        ...    "distribution": {
+        ...        "type": "beta",
+        ...        "params": {
+        ...            "alpha": 1.0,
+        ...            "beta": 1.0,
+        ...        }
+        ...    }
+        ... }
+        >>> beta_tunable = Tunable("beta_tunable", config_with_dist)
+        >>> beta_tunable.distribution
         'beta'
-        >>> tunable.distribution_params
+        >>> beta_tunable.distribution_params
         {'alpha': 1.0, 'beta': 1.0}
-        """  # pylint: disable=line-too-long # noqa: E501
+        """
         return self._distribution_params
 
     @property
