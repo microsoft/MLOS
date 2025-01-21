@@ -14,6 +14,10 @@ autotuning optimization task.
 Some details about the configuration of an individual :py:class:`~.Tunable`
 parameter are available in the Examples docstrings below.
 
+However, Tunables are generally provided as a part of a
+:py:class:`~mlos_bench.tunables.tunable_groups.TunableGroup` config specified in a
+JSON config file.
+
 See Also
 --------
 :py:mod:`mlos_bench.tunables` :
@@ -518,6 +522,38 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         -------
         weights : [float]
             A list of weights or None.
+
+        Examples
+        --------
+        >>> json_config = '''
+        ... {
+        ...    "type": "categorical",
+        ...    "default": "red",
+        ...    "values": ["red", "blue", "green"],
+        ...    "values_weights": [0.1, 0.2, 0.7],
+        ... }
+        ... '''
+        >>> categorical_tunable = Tunable.from_json("categorical_tunable", json_config)
+        >>> categorical_tunable.weights
+        [0.1, 0.2, 0.7]
+        >>> dict(zip(categorical_tunable.values, categorical_tunable.weights))
+        {'red': 0.1, 'blue': 0.2, 'green': 0.7}
+
+        >>> json_config = '''
+        ... {
+        ...    "type": "float",
+        ...    "default": "50.0",
+        ...    "range": [1, 100],
+        ...    "special": [-1, 0],
+        ...    "special_weights": [0.1, 0.2],
+        ...    "range_weight": 0.7,
+        ... }
+        ... '''
+        >>> float_tunable = Tunable.from_json("float_tunable", json_config)
+        >>> float_tunable.weights
+        [0.1, 0.2]
+        >>> dict(zip(float_tunable.special, float_tunable.weights))
+        {-1: 0.1, 0: 0.2}
         """
         return self._weights
 
@@ -531,6 +567,10 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         -------
         weight : float
             Weight of the range or None.
+
+        Examples
+        --------
+        TODO: Add examples for the range_weight.
         """
         assert self.is_numerical
         assert self._special
@@ -553,6 +593,10 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         >>> from mlos_bench.tunables.tunable_types import TunableValueTypeName
         >>> TunableValueTypeName
         typing.Literal['int', 'float', 'categorical']
+
+        Examples
+        --------
+        TODO: Add examples for basic types.
         """
         return self._type
 
