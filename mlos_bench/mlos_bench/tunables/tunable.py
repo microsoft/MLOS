@@ -33,6 +33,7 @@ from typing import Any
 import json5 as json
 import numpy as np
 
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.tunables.tunable_types import (
     TUNABLE_DTYPE,
     DistributionName,
@@ -78,7 +79,29 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         """  # pylint: disable=line-too-long # noqa: E501
         config = json.loads(json_str)
         assert isinstance(config, dict)
+        Tunable._validate_json_config(name, config)
         return Tunable(name, config)
+
+    @staticmethod
+    def _validate_json_config(name: str, config: dict) -> None:
+        """
+        Reconstructs a basic json config that this Tunable might have been
+        constructed with via a TunableGroup for the purposes of schema
+        validation so that we know our test cases are valid.
+
+        Notes
+        -----
+        This is mostly for testing purposes, so we don't call it during normal
+        Tunable instantiation since it's typically already been done by
+        TunableGroups.
+        """
+        json_config = {
+            "group": {
+                "cost": 1,
+                "params": {name: config},
+            }
+        }
+        ConfigSchema.TUNABLE_PARAMS.validate(json_config)
 
     def __init__(self, name: str, config: dict):
         """
