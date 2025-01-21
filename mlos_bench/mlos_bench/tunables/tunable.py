@@ -458,6 +458,11 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         """
         Get the special values of the Tunable. Return an empty list if there are none.
 
+        Special values are used to mark some values as "special" that need more
+        explicit testing. For example, these might indicate "automatic" or
+        "disabled" behavior for the system being tested instead of an explicit size
+        and hence need more explicit sampling.
+
         Notes
         -----
         Only numerical Tunable parameters can have special values.
@@ -470,7 +475,18 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         Examples
         --------
         >>> # Example values of the special values
-        >>> json_config = '{"type": "int", "default": 0, "range": [0, 100], "special": [-1, 0]}'
+        >>> json_config = '''
+        ... {
+        ...    "type": "int",
+        ...    "default": 50,
+        ...    "range": [1, 100],
+        ...    // These are special and sampled
+        ...    "special": [
+        ...      -1,  // e.g., auto
+        ...       0,  // e.g., disabled
+        ...    ],
+        ... }
+        ... '''
         >>> tunable = Tunable.from_json("tunable_with_special", json_config)
         >>> tunable.special
         [-1, 0]
