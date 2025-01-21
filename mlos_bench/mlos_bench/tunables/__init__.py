@@ -98,12 +98,14 @@ Then individual covariant groups can be enabled via the ``tunable_params`` and
 See the :py:mod:`mlos_bench.config` and :py:mod:`mlos_bench.environments` module
 documentation for more information.
 
-In benchmarking-only mode (e.g., without an ``Optimizer`` specified), ``mlos_bench``
-can still run with a particular set of ``--tunable-values`` (e.g., a simple
-key-value file declaring a set of values to assign to the set of configured tunable
-parameters) in order to manually explore a configuration space.
+In benchmarking-only mode (e.g., without an ``Optimizer`` specified),
+`mlos_bench <../../../mlos_bench.run.usage.html>`_ can still run with a
+particular set of ``--tunable-values`` (e.g., a simple key-value file declaring
+a set of values to assign to the set of configured tunable parameters) in order
+to manually explore a configuration space.
 
-See the :py:mod:`mlos_bench.run` module documentation for more information.
+See the :py:class:`~mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer`
+and :py:mod:`mlos_bench.run` module documentation and the for more information.
 
 During an Environment's
 :py:meth:`~mlos_bench.environments.base_environment.Environment.setup` and
@@ -111,17 +113,19 @@ During an Environment's
 tunables can be exported to a JSON file using the ``dump_params_file`` property
 of the Environment config for the user scripts to use when configuring the
 target system.
-The ``meta`` property of the tunable config can be used to add additional
-information for this step (e.g., a unit suffix to append to the value).
+The :py:attr:`~.Tunable.meta` property of the tunable config can be used to add
+additional information for this step (e.g., a unit suffix to append to the
+value).
 
 See the :py:mod:`mlos_bench.environments` module documentation for more information.
 
 Examples
 --------
-Here's a short (incomplete) example of some of the ``TunableGroups`` JSON
-configuration options, expressed in Python (for testing purposes).
-However, most of the time you will be loading these from a JSON config file stored
-along with the associated ``Environment`` config.
+Here's a short (incomplete) example of some of the :py:class:`.TunableGroups`
+JSON configuration options, expressed in Python (for testing purposes).
+However, most of the time you will be loading these from a JSON config file
+stored along with the associated
+:py:class:`~mlos_bench.environments.base_environment.Environment` config.
 
 For more tunable parameters examples refer to the `JSON schema
 <https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-params-schema.json>`_
