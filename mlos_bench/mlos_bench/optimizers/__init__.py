@@ -76,8 +76,6 @@ Examples
 Note: All of the examples in this module are expressed in Python for testing
 purposes.
 
->>>
-
 >>> # Load tunables from a JSON string.
 >>> # Note: normally these would be automatically loaded from the Environment(s)'s
 >>> # `include_tunables` config parameter.
