@@ -67,6 +67,74 @@ associated with and loaded via JSON config files.
 In the Examples used within this module's documentation we will simply represent
 them as JSON strings for explanatory purposes.
 
+Several properties are common to all Optimizers, but some are specific to the
+Optimizer being used.
+The JSON schemas control what is considered a valid configuration for an Optimizer.
+In the case of an :py:class:`.MlosCoreOptimizer`, the valid options can often be
+inferred from the constructor arguments of the corresponding
+:py:class:`mlos_core.optimizers` class.
+
+Similarly for the SpaceAdapterType, the valid options can be inferred from the
+individual :py:mod:`mlos_core.spaces.adapters` class constructors.
+
+Generally speaking though the JSON config for an Optimizer will look something
+like the following:
+
+.. code-block:: json
+
+    {
+        "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+        "description": "MlosCoreOptimizer",
+        "config": {
+            "max_suggestions": 1000,
+            "optimization_targets": {
+                // Your optimization target(s) mapped to their respective
+                // optimization goals.
+                "throughput": "max",
+                "cost": "min",
+            },
+            "start_with_defaults": true,
+            "seed": 42,
+
+            // Optionally override the default space adapter type.
+            // Must be one of the mlos_core SpaceAdapterType enum values.
+            // e.g., LlamaTune is a method for automatically doing space reduction
+            // from the original space.
+            "space_adapter_type": "LLAMATUNE",
+            "space_adapter_config": {
+                // Optional space adapter configuration.
+                // The JSON schema controls the valid properties here.
+                // In general check the constructor arguments of the specified
+                // SpaceAdapterType.
+                "num_low_dims": 10,
+                "max_unique_values_per_param": 20,
+            }
+
+            // Now starts a collection of key-value pairs that are specific to
+            // the Optimizer class chosen.
+
+            // Override the default optimizer type.
+            // Must be one of the mlos_core OptimizerType enum values.
+            "optimizer_type": "SMAC", // e.g., "RANDOM", "FLAML", "SMAC"
+
+            // Optionally provide some additional configuration options for the optimizer.
+            // Note: these are optimizer-specific and may not be supported by all optimizers.
+            // For instance the following example is only supported by the SMAC optimizer.
+            // In general, for MlosCoreOptimizers you can look at the arguments
+            // to the corresponding OptimizerType in the mlos_core module.
+            "n_random_init": 20,
+            "n_random_probability": 0.25, // increased to prioritize exploration
+        }
+
+However, it can also be as simple as the following and sane defaults will be
+used for the rest.
+
+.. code-block:: json
+
+    {
+        "class": "mlos_bench.optimizers.MlosCoreOptimizer"
+    }
+
 Notes
 -----
 The full set of supported properties is specified in the `JSON schemas for optimizers
@@ -134,6 +202,11 @@ purposes.
 >>> # OptimizerType enum values:
 >>> print([member.name for member in mlos_core.optimizers.OptimizerType])
 ['RANDOM', 'FLAML', 'SMAC']
+
+>>> # We can also specify an optional space_adapter_type, which can sometimes
+>>> # help manipulate the configuration space to something more manageable.
+>>> print([member.name for member in mlos_core.spaces.adapters.SpaceAdapterType])
+['IDENTITY', 'LLAMATUNE']
 
 >>> # Here's an example JSON config for an MlosCoreOptimizer.
 >>> optimizer_json_config = '''
