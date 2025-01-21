@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""TunableGroups definition.
+"""
+TunableGroups definition.
 
 A collection of :py:class:`.CovariantTunableGroup` s of :py:class:`.Tunable`
 parameters.
