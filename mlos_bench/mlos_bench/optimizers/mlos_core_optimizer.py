@@ -12,8 +12,12 @@ following basic structure:
 
 See Also
 --------
-:py:mod:`mlos_core.optimizers` :
+:py:mod:`mlos_bench.optimizers` :
     Another working example of an :py:class:`.MlosCoreOptimizer`.
+:py:mod:`mlos_core.optimizers` :
+    Documentation on the underlying mlos_core Optimizers.
+:py:mod:`mlos_core.spaces.adapters` :
+    Documentation on the underlying mlos_core SpaceAdapters.
 
 Examples
 --------
