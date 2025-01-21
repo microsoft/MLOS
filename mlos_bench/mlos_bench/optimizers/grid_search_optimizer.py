@@ -14,6 +14,85 @@ Therefore, the number of configurations to try is the product of the
 :py:mod:`~mlos_bench.tunables`.
 (i.e., non :py:attr:`quantized <mlos_bench.tunables.tunable.Tunable.quantization_bins>`
 tunables are not supported).
+
+Examples
+--------
+>>> # Load tunables from a JSON string.
+>>> import json5 as json
+>>> from mlos_bench.environments.status import Status
+>>> from mlos_bench.services.config_persistence import ConfigPersistenceService
+>>> service = ConfigPersistenceService()
+>>> json_config = '''
+... {
+...   "group_1": {
+...     "cost": 1,
+...     "params": {
+...       "colors": {
+...         "type": "categorical",
+...         "values": ["red", "blue", "green"],
+...         "default": "green",
+...       },
+...       "int_param": {
+...         "type": "int",
+...         "range": [1, 3],
+...         "default": 2,
+...       },
+...       "float_param": {
+...         "type": "float",
+...         "range": [0, 1],
+...         "default": 0.5,
+...         // Quantize the range into 3 bins
+...         "quantization_bins": 3,
+...       }
+...     }
+...   }
+... }
+... '''
+>>> tunables = service.load_tunables(jsons=[json_config])
+>>> tunables.get_param_values()
+{'colors': 'green', 'int_param': 2, 'float_param': 0.5}
+>>> optimizer_json_config = '''
+... {
+...   "class": "mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer",
+...   "description": "GridSearchOptimizer",
+...     "config": {
+...         "max_suggestions": 100,
+...         "optimization_targets": {"score": "max"},
+...         "start_with_defaults": true
+...     }
+... }
+... '''
+>>> config = json.loads(optimizer_json_config)
+>>> grid_search_optimizer = service.build_optimizer(
+...   tunables=tunables,
+...   service=service,
+...   config=config,
+... )
+>>> # Should have 3 values for each of the 3 tunables
+>>> len(list(grid_search_optimizer.pending_configs))
+27
+>>> next(grid_search_optimizer.pending_configs)
+{'colors': 'red', 'float_param': 0, 'int_param': 1}
+>>> suggested_config_1 = grid_search_optimizer.suggest()
+>>> # Default should be suggested first, per json config.
+>>> suggested_config_1.get_param_values()
+{'colors': 'green', 'int_param': 2, 'float_param': 0.5}
+>>> # Get another suggestion.
+>>> # Note that multiple suggestions can be pending prior to
+>>> # registering their scores, supporting parallel trial execution.
+>>> suggested_config_2 = grid_search_optimizer.suggest()
+>>> suggested_config_2.get_param_values()
+{'colors': 'red', 'int_param': 1, 'float_param': 0.0}
+>>> # Register some scores.
+>>> # Note: Maximization problems track negative scores to produce a minimization problem.
+>>> grid_search_optimizer.register(suggested_config_1, Status.SUCCEEDED, {"score": 42})
+{'score': -42.0}
+>>> grid_search_optimizer.register(suggested_config_2, Status.SUCCEEDED, {"score": 7})
+{'score': -7.0}
+>>> (best_score, best_config) = grid_search_optimizer.get_best_observation()
+>>> best_score
+{'score': 42.0}
+>>> assert best_config == suggested_config_1
 """
 
 import logging

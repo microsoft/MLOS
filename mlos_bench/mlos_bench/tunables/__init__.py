@@ -124,6 +124,7 @@ There are also examples of `tunable values in the source tree
 >>> from mlos_bench.services.config_persistence import ConfigPersistenceService
 >>> service = ConfigPersistenceService()
 >>> json_config = '''
+... // Use json5 (or jsonc) syntax to allow comments and other more flexible syntax.
 ... {
 ...   "group_1": {
 ...     "cost": 1,
@@ -139,18 +140,21 @@ There are also examples of `tunable values in the source tree
 ...       },
 ...       "int_param": {
 ...         "type": "int",
-...         "range": [-1, 10],
+...         "range": [1, 10],
 ...         "default": 5,
 ...         // Mark some values as "special", that need more explicit testing.
 ...         // e.g., maybe these indicate "automatic" or "disabled" behavior for
 ...         // the system being tested instead of an explicit size
 ...         "special": [-1, 0],
-...         // Optionally specify a sampling distribution.
+...         // Optionally specify a sampling distribution
+...         // to influence which values to prioritize.
 ...         "distribution": {
 ...             "type": "uniform" // alternatively, "beta" or "normal"
 ...         },
 ...         // Free form key-value pairs that can be used with the
 ...         // tunable upon sampling for composing configs.
+...         // These can be retrieved later to help generate
+...         // config files from the sampled tunables.
 ...         "meta": {
 ...           "suffix": "MB"
 ...         }
