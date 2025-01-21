@@ -87,9 +87,9 @@ def configuration_space() -> ConfigurationSpace:
             ),
             CategoricalHyperparameter(
                 name=kernel_sched_migration_cost_ns_type,
-                choices=[TunableValueKind.SPECIAL, TunableValueKind.RANGE],
+                choices=[TunableValueKind.SPECIAL.value, TunableValueKind.RANGE.value],
                 weights=[0.5, 0.5],
-                default_value=TunableValueKind.SPECIAL,
+                default_value=TunableValueKind.SPECIAL.value,
             ),
         ]
     )
@@ -98,12 +98,12 @@ def configuration_space() -> ConfigurationSpace:
             EqualsCondition(
                 spaces[kernel_sched_migration_cost_ns_special],
                 spaces[kernel_sched_migration_cost_ns_type],
-                TunableValueKind.SPECIAL,
+                TunableValueKind.SPECIAL.value,
             ),
             EqualsCondition(
                 spaces["kernel_sched_migration_cost_ns"],
                 spaces[kernel_sched_migration_cost_ns_type],
-                TunableValueKind.RANGE,
+                TunableValueKind.RANGE.value,
             ),
         ]
     )

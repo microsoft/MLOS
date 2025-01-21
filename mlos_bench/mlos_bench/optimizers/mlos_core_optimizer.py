@@ -187,8 +187,8 @@ class MlosCoreOptimizer(Optimizer):
                 (special_name, type_name) = special_param_names(tunable.name)
                 tunables_names += [special_name, type_name]
                 is_special = df_configs[tunable.name].apply(tunable.special.__contains__)
-                df_configs[type_name] = TunableValueKind.RANGE
-                df_configs.loc[is_special, type_name] = TunableValueKind.SPECIAL
+                df_configs[type_name] = TunableValueKind.RANGE.value
+                df_configs.loc[is_special, type_name] = TunableValueKind.SPECIAL.value
                 if tunable.type == "int":
                     # Make int column NULLABLE:
                     df_configs[tunable.name] = df_configs[tunable.name].astype("Int64")
