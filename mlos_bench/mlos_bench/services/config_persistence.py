@@ -5,6 +5,10 @@
 """Helper functions to load, instantiate, and serialize Python objects that encapsulate
 a benchmark :py:class:`.Environment`, :py:mod:`~mlos_bench.tunables`,
 :py:class:`.Service` functions, etc from JSON configuration files and strings.
+
+See Also
+--------
+mlos_bench.config : Overview of the configuration system.
 """
 
 import logging
@@ -611,6 +615,10 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         -------
         env : Environment
             A new benchmarking environment.
+
+        See Also
+        --------
+        mlos_bench.environments : Examples of environment configurations.
         """
         config = self.load_config(json, ConfigSchema.ENVIRONMENT)
         assert isinstance(config, dict)
@@ -647,6 +655,10 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         -------
         env : list[Environment]
             A list of new benchmarking environments.
+
+        See Also
+        --------
+        mlos_bench.environments : Examples of environment configurations.
         """
         config = self.load_config(json, ConfigSchema.ENVIRONMENT)
         return [self.build_environment(config, tunables, global_config, parent_args, service)]
@@ -679,6 +691,10 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         -------
         service : Service
             A collection of service methods.
+
+        See Also
+        --------
+        mlos_bench.services : Examples of service configurations.
         """
         _LOG.info("Load services: %s parent: %s", jsons, parent.__class__.__name__)
         service = Service({}, global_config, parent)
@@ -711,6 +727,10 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         -------
         tunables : TunableGroups
             The larger collection of tunable parameters.
+
+        See Also
+        --------
+        mlos_bench.tunables : Examples of tunable parameter configurations.
         """
         _LOG.info("Load tunables: '%s'", jsons)
         if parent is None:
