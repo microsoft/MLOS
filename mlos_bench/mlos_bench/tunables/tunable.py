@@ -47,9 +47,6 @@ _LOG = logging.getLogger(__name__)
 class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-methods
     """A Tunable parameter definition and its current value."""
 
-    # TODO: Add docstring Examples with JSON configs to all of the attributes in
-    # this class.
-
     @staticmethod
     def from_json(name: str, json_str: str) -> "Tunable":
         """
@@ -600,7 +597,38 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
         Examples
         --------
-        TODO: Add examples for basic types.
+        >>> json_config = '''
+        ... {
+        ...    "type": "categorical",
+        ...    "default": "red",
+        ...    "values": ["red", "blue", "green"],
+        ... }
+        ... '''
+        >>> categorical_tunable = Tunable.from_json("categorical_tunable", json_config)
+        >>> categorical_tunable.type
+        'categorical'
+
+        >>> json_config = '''
+        ... {
+        ...    "type": "int",
+        ...    "default": 0,
+        ...    "range": [0, 10000],
+        ... }
+        ... '''
+        >>> int_tunable = Tunable.from_json("int_tunable", json_config)
+        >>> int_tunable.type
+        'int'
+
+        >>> json_config = '''
+        ... {
+        ...    "type": "float",
+        ...    "default": 0.0,
+        ...    "range": [0.0, 10000.0],
+        ... }
+        ... '''
+        >>> float_tunable = Tunable.from_json("float_tunable", json_config)
+        >>> float_tunable.type
+        'float'
         """
         return self._type
 
@@ -694,6 +722,23 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         -------
         quantization_bins : int | None
             Number of quantization bins, or None.
+
+        Examples
+        --------
+        >>> json_config = '''
+        ... {
+        ...    "type": "int",
+        ...    "default": 0,
+        ...    "range": [0, 10000],
+        ...    // Enable quantization.
+        ...    "quantization_bins": 11,
+        ... }
+        ... '''
+        >>> quantized_tunable = Tunable.from_json("quantized_tunable", json_config)
+        >>> quantized_tunable.quantization_bins
+        11
+        >>> list(quantized_tunable.quantized_values)
+        [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
         """
         if self.is_categorical:
             return None
@@ -949,6 +994,45 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         -------
         Iterable[str | None] | Iterable[int] | Iterable[float] | None
             Categories or quantized values.
+
+        Examples
+        --------
+        >>> # Example values of the Tunable categories
+        >>> json_config = '''
+        ... {
+        ...    "type": "categorical",
+        ...    "values": ["red", "blue", "green"],
+        ...    "default": "red",
+        ... }
+        ... '''
+        >>> categorical_tunable = Tunable.from_json("categorical_tunable", json_config)
+        >>> list(categorical_tunable.values)
+        ['red', 'blue', 'green']
+
+        >>> # Example values of the Tunable int
+        >>> json_config = '''
+        ... {
+        ...    "type": "int",
+        ...    "range": [0, 5],
+        ...    "default": 1,
+        ... }
+        ... '''
+        >>> int_tunable = Tunable.from_json("int_tunable", json_config)
+        >>> list(int_tunable.values)
+        [0, 1, 2, 3, 4, 5]
+
+        >>> # Example values of the quantized Tunable float
+        >>> json_config = '''
+        ... {
+        ...    "type": "float",
+        ...    "range": [0, 1],
+        ...    "default": 0.5,
+        ...    "quantization_bins": 3,
+        ... }
+        ... '''
+        >>> float_tunable = Tunable.from_json("float_tunable", json_config)
+        >>> list(float_tunable.values)
+        [0.0, 0.5, 1.0]
         """
         if self.is_categorical:
             return self.categories
@@ -961,6 +1045,26 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         Get the Tunable's metadata.
 
         This is a free-form dictionary that can be used to store any additional
-        information about the Tunable (e.g., the unit information).
+        information about the Tunable (e.g., the unit information) which can be
+        useful when using the ``dump_params_file`` and ``dump_meta_file``
+        properties of the :py:class:`~mlos_bench.environments` config to
+        generate a configuration file for the target system.
+
+        Examples
+        --------
+        >>> json_config = '''
+        ... {
+        ...    "type": "int",
+        ...    "range": [0, 10],
+        ...    "default": 1,
+        ...    "meta": {
+        ...        "unit": "seconds",
+        ...    },
+        ...    "description": "Time to wait before timing out a request.",
+        ... }
+        ... '''
+        >>> tunable = Tunable.from_json("timer_tunable", json_config)
+        >>> tunable.meta
+        {'unit': 'seconds'}
         """
         return self._meta

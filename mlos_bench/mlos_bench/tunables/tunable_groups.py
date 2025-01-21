@@ -2,7 +2,92 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""TunableGroups definition."""
+"""TunableGroups definition.
+
+A collection of :py:class:`.CovariantTunableGroup` s of :py:class:`.Tunable`
+parameters.
+
+Used to define the configuration space for an
+:py:class:`~mlos_bench.environments.base_environment.Environment` for an
+:py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer` to explore.
+
+Config
+++++++
+
+The configuration of the tunable parameters is generally given via a JSON config file.
+The syntax looks something like this:
+
+.. code-block:: json
+
+    {
+        "group1": {
+            "cost": 7,
+            "params": {
+                "param1": {
+                    "type": "int",
+                    "range": [0, 100],
+                    "default": 50
+                },
+                "param2": {
+                    "type": "float",
+                    "range": [0.0, 100.0],
+                    "default": 50.0
+                },
+                "param3": {
+                    "type": "categorical",
+                    "values": ["on", "off", "auto"],
+                    "default": "auto"
+                }
+            }
+        },
+        "group2": {
+            "cost": 7,
+            "params": {
+                "some_param1": {
+                    "type": "int",
+                    "range": [0, 10],
+                    "default": 5
+                },
+                "some_param2": {
+                    "type": "float",
+                    "range": [0.0, 100.0],
+                    "default": 50.0
+                },
+                "some_param3": {
+                    "type": "categorical",
+                    "values": ["red", "green", "blue"],
+                    "default": "green"
+                }
+            }
+        }
+    }
+
+The JSON config is expected to be a dictionary of covariant tunable groups.
+
+Each covariant group has a name and a cost associated with changing any/all of the
+parameters in that covariant group.
+
+Each group has a dictionary of :py:class:`.Tunable` parameters, where the key is
+the name of the parameter and the value is a dictionary of the parameter's
+configuration.
+
+Generally tunables are associated with an
+:py:class:`~mlos_bench.environments.base_environment.Environment` and included along
+with the Environment's config directory (e.g., ``env-name-tunables.mlos.jsonc``) and
+referenced in the Environment config using the ``include_tunables`` property.
+
+See Also
+--------
+:py:mod:`mlos_bench.tunables` :
+    For more information on tunable parameters and their configuration.
+:py:mod:`mlos_bench.tunables.tunable` :
+    Tunable parameter definition.
+:py:mod:`mlos_bench.config` :
+    Configuration system for mlos_bench.
+:py:mod:`mlos_bench.environments` :
+    Environment configuration and setup.
+"""
+
 import copy
 import logging
 from collections.abc import Generator, Iterable, Mapping

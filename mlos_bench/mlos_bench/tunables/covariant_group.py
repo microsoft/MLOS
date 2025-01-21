@@ -2,7 +2,16 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Tunable parameter definition."""
+"""CovariantTunableGroup class definition.
+
+A collection of :py:class:`.Tunable` parameters that are updated together (e.g.,
+with the same cost).
+
+See Also
+--------
+mlos_bench.tunables.tunable_groups : TunableGroups class definition.
+"""
+
 import copy
 from collections.abc import Iterable
 
@@ -12,9 +21,13 @@ from mlos_bench.tunables.tunable_types import TunableValue
 
 class CovariantTunableGroup:
     """
-    A collection of tunable parameters.
+    A collection of :py:class:`.Tunable` parameters.
 
     Changing any of the parameters in the group incurs the same cost of the experiment.
+
+    See Also
+    --------
+    mlos_bench.tunables.tunable_groups : TunableGroups class definition.
     """
 
     def __init__(self, name: str, config: dict):
