@@ -4,6 +4,11 @@
 #
 """Base class for an interface between the benchmarking framework and
 :py:mod:`mlos_core` optimizers and other config suggestion methods.
+
+See Also
+--------
+mlos_bench.optimizers :
+    For more information on the available optimizers and their usage.
 """
 
 import logging
