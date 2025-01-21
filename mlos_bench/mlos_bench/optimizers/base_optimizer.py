@@ -312,6 +312,8 @@ class Optimizer(ContextManager, metaclass=ABCMeta):  # pylint: disable=too-many-
         )
         if status.is_succeeded() == (score is None):  # XOR
             raise ValueError("Status and score must be consistent.")
+        # FIXME: should maximization problems return -score values to the user, or
+        # keep that as an internal nuance.
         return self._get_scores(status, score)
 
     def _get_scores(
