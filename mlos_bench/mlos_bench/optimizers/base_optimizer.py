@@ -2,8 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base class for an interface between the benchmarking framework and :py:mod:`mlos_core`
-optimizers and other config suggestion methods.
+"""Base class for an interface between the benchmarking framework and
+:py:mod:`mlos_core` optimizers and other config suggestion methods.
 """
 
 import logging
@@ -27,8 +27,8 @@ _LOG = logging.getLogger(__name__)
 
 
 class Optimizer(ContextManager, metaclass=ABCMeta):  # pylint: disable=too-many-instance-attributes
-    """An abstract interface between the benchmarking framework and
-    :py:mod:`mlos_core` optimizers and other config suggestion methods.
+    """An abstract interface between the benchmarking framework and :py:mod:`mlos_core`
+    optimizers and other config suggestion methods.
     """
 
     # See Also: mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json

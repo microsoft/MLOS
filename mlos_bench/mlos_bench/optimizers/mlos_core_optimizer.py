@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""A wrapper for :py:mod:`mlos_core.optimizers` for :py:mod:`mlos_bench`.
+"""
+A wrapper for :py:mod:`mlos_core.optimizers` for :py:mod:`mlos_bench`.
 
 Examples
 --------

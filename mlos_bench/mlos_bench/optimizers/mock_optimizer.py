@@ -2,10 +2,10 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Mock optimizer for mlos_bench.
+"""
+Mock optimizer for mlos_bench.
 
-Mostly intended for testing and validation.
-This optimizer produces random suggestions.
+Mostly intended for testing and validation. This optimizer produces random suggestions.
 The range of the suggestions can be controlled by a config.
 
 See the test cases or example json configs for more details.

@@ -2,8 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Functions to convert :py:class:`.TunableGroups` that :py:mod:`mlos_bench` uses to
-to :py:class:`ConfigSpace.ConfigurationSpace` for use with the
+"""Functions to convert :py:class:`.TunableGroups` that :py:mod:`mlos_bench` uses to to
+:py:class:`ConfigSpace.ConfigurationSpace` for use with the
 :py:mod:`mlos_core.optimizers`.
 """
 
@@ -38,9 +38,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class TunableValueKind(enum.Enum):
-    """
-    Enum for the kind of the tunable value (special or not).
-    """
+    """Enum for the kind of the tunable value (special or not)."""
 
     SPECIAL = "special"
     RANGE = "range"
