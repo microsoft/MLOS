@@ -24,6 +24,7 @@ import logging
 from collections.abc import Iterable
 from typing import Any
 
+import json5 as json
 import numpy as np
 
 from mlos_bench.tunables.tunable_types import (
@@ -44,6 +45,36 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     # TODO: Add docstring Examples with JSON configs to all of the attributes in
     # this class.
+
+    @staticmethod
+    def from_json(name: str, json_str: str) -> "Tunable":
+        """
+        Create a Tunable object from a JSON string.
+
+        Parameters
+        ----------
+        name : str
+            Human-readable identifier of the Tunable parameter.
+        json_str : str
+            JSON string that represents a Tunable.
+
+        Returns
+        -------
+        tunable : Tunable
+            A new Tunable object created from the JSON string.
+
+        Notes
+        -----
+        This is mostly for testing purposes.
+        Generally Tunables will be created as a part of loading TunableGroups.
+
+        See Also
+        --------
+        :py:meth:`ConfigPersistenceService.load_tunables <mlos_bench.util.config_persistence.ConfigPersistenceService.load_tunables>`
+        """  # pylint: disable=line-too-long # noqa: E501
+        config = json.loads(json_str)
+        assert isinstance(config, dict)
+        return Tunable(name, config)
 
     def __init__(self, name: str, config: dict):
         """
@@ -427,10 +458,22 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         """
         Get the special values of the Tunable. Return an empty list if there are none.
 
+        Notes
+        -----
+        Only numerical Tunable parameters can have special values.
+
         Returns
         -------
         special : [int] | [float]
             A list of special values of the Tunable. Can be empty.
+
+        Examples
+        --------
+        >>> # Example values of the special values
+        >>> json_config = '{"type": "int", "default": 0, "range": [0, 100], "special": [-1, 0]}'
+        >>> tunable = Tunable.from_json("tunable_with_special", json_config)
+        >>> tunable.special
+        [-1, 0]
         """
         if not self.is_numerical:
             assert not self._special
@@ -517,9 +560,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         >>> TunableValueType
         type[int] | type[float] | type[str]
 
-        >>> # Example values of the Tunable.DTYPE
-        >>> from mlos_bench.tunables.tunable_types import Tunable
-        >>> Tunable.DTYPE
+        >>> # Example values of the TUNABLE_DTYPE
+        >>> from mlos_bench.tunables.tunable_types import TUNABLE_DTYPE
+        >>> TUNABLE_DTYPE
         {'int': <class 'int'>, 'float': <class 'float'>, 'categorical': <class 'str'>}
         """
         return TUNABLE_DTYPE[self._type]
