@@ -12,6 +12,8 @@ scriptpath=$(readlink -f "$0")
 scriptdir=$(dirname "$scriptpath")
 cd "$scriptdir"
 
+SKIP_NGINX_BUILD=${SKIP_NGINX_BUILD:-false}
+
 if [ -f ../.devcontainer/.env ]; then
     source ../.devcontainer/.env
 fi
@@ -28,13 +30,15 @@ cmd="${1:-}"
 if [ "$cmd" == 'start' ]; then
     set -x
     tmpdir=$(mktemp -d)
-    docker build --progress=plain -t mlos-doc-nginx \
-        --build-arg http_proxy=${http_proxy:-} \
-        --build-arg https_proxy=${https_proxy:-} \
-        --build-arg no_proxy=${no_proxy:-} \
-        --build-arg NGINX_PORT=$NGINX_PORT \
-        -f Dockerfile "$tmpdir"
-    rmdir "$tmpdir"
+    if ! $SKIP_NGINX_BUILD; then
+        docker build --progress=plain -t mlos-doc-nginx \
+            --build-arg http_proxy=${http_proxy:-} \
+            --build-arg https_proxy=${https_proxy:-} \
+            --build-arg no_proxy=${no_proxy:-} \
+            --build-arg NGINX_PORT=$NGINX_PORT \
+            -f Dockerfile "$tmpdir"
+        rmdir "$tmpdir"
+    fi
     docker run -d --name mlos-doc-nginx \
         -v "$repo_root/doc/nginx-default.conf":/etc/nginx/templates/default.conf.template \
         -v "$repo_root/doc":/doc \
