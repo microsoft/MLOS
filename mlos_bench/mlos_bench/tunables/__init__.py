@@ -58,8 +58,8 @@ parameters
 and can be seen in some of the `test examples in the source tree
 <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tests/config/schemas/tunable-params/test-cases/good/>`_.
 
-CovariantGroup
-++++++++++++++
+CovariantTunableGroup
++++++++++++++++++++++
 
 The :py:class:`~mlos_bench.tunables.covariant_group.CovariantTunableGroup` class is
 used to define a group of related tunable parameters that are all configured
@@ -72,6 +72,15 @@ TunableGroups
 
 The :py:class:`~mlos_bench.tunables.tunable_groups.TunableGroups` class is used to
 define an entire set of tunable parameters (e.g., combined set of covariant groups).
+
+Limitations
+-----------
+Currently we lack a config language for expressing constraints between tunables
+
+(e.g., ``a < b`` or ``a + b < c``)
+
+This is supported in the underlying :py:mod:`mlos_core` library, but is not yet
+exposed in the ``mlos_bench`` config API.
 
 Usage
 ^^^^^
@@ -96,9 +105,12 @@ parameters) in order to manually explore a configuration space.
 
 See the :py:mod:`mlos_bench.run` module documentation for more information.
 
-During an Environment's ``setup`` and ``run`` phases the tunables can be exported to
-a JSON file using the ``dump_params_file`` property of the Environment config for
-the user scripts to use when configuring the target system.
+During an Environment's
+:py:meth:`~mlos_bench.environments.base_environment.Environment.setup` and
+:py:meth:`~mlos_bench.environments.base_environment.Environment.run` phases the
+tunables can be exported to a JSON file using the ``dump_params_file`` property
+of the Environment config for the user scripts to use when configuring the
+target system.
 The ``meta`` property of the tunable config can be used to add additional
 information for this step (e.g., a unit suffix to append to the value).
 

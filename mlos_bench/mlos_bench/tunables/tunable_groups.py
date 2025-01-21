@@ -20,16 +20,16 @@ The syntax looks something like this:
 
 .. code-block:: json
 
-    {
-        "group1": {
+    { // starts a TunableGroups config (e.g., for one Environment)
+        "group1": { // starts a CovariantTunableGroup config
             "cost": 7,
             "params": {
-                "param1": {
+                "param1": { // starts a Tunable config, named "param1"
                     "type": "int",
                     "range": [0, 100],
                     "default": 50
                 },
-                "param2": {
+                "param2": { // starts a new Tunable config, named "param2", within that same group
                     "type": "float",
                     "range": [0.0, 100.0],
                     "default": 50.0
@@ -41,7 +41,7 @@ The syntax looks something like this:
                 }
             }
         },
-        "group2": {
+        "group2": { // starts a new CovariantTunableGroup config
             "cost": 7,
             "params": {
                 "some_param1": {
@@ -70,7 +70,8 @@ parameters in that covariant group.
 
 Each group has a dictionary of :py:class:`.Tunable` parameters, where the key is
 the name of the parameter and the value is a dictionary of the parameter's
-configuration.
+configuration (see the :py:class:`.Tunable` class for more information on the
+different ways they can be configured).
 
 Generally tunables are associated with an
 :py:class:`~mlos_bench.environments.base_environment.Environment` and included along
