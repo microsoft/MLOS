@@ -511,15 +511,19 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         ...    "default": 50,
         ...    "range": [1, 100],
         ...    // These are special and sampled
+        ...    // Note that the types don't need to match or be in the range.
         ...    "special": [
-        ...      -1,  // e.g., auto
-        ...       0,  // e.g., disabled
+        ...      -1,     // e.g., auto
+        ...       0,     // e.g., disabled
+        ...       true,  // e.g., enabled
+        ...       null,  // e.g., unspecified
         ...    ],
         ... }
         ... '''
         >>> tunable = Tunable.from_json("tunable_with_special", json_config)
+        >>> # JSON values are converted to Python types
         >>> tunable.special
-        [-1, 0]
+        [-1, 0, True, None]
         """
         if not self.is_numerical:
             assert not self._special
