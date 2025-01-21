@@ -70,7 +70,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
         See Also
         --------
-        :py:meth:`ConfigPersistenceService.load_tunables <mlos_bench.util.config_persistence.ConfigPersistenceService.load_tunables>`
+        :py:meth:`ConfigPersistenceService.load_tunables <mlos_bench.services.config_persistence.ConfigPersistenceService.load_tunables>`
         """  # pylint: disable=line-too-long # noqa: E501
         config = json.loads(json_str)
         assert isinstance(config, dict)
@@ -686,15 +686,62 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
     @property
     def cardinality(self) -> int | None:
         """
-        Gets the cardinality of elements in this Tunable, or else None. (i.e., when the
-        Tunable is continuous float and not quantized).
+        Gets the cardinality of elements in this Tunable, or else None (e.g., when
+        the Tunable is continuous float and not quantized).
 
-        If the Tunable has quantization set, this
+        If the Tunable has quantization set, this returns the number of quantization bins.
 
         Returns
         -------
         cardinality : int
             Either the number of points in the Tunable or else None.
+
+        Examples
+        --------
+        >>> json_config = '''
+        ... {
+        ...    "type": "categorical",
+        ...    "default": "red",
+        ...    "values": ["red", "blue", "green"],
+        ... }
+        ... '''
+        >>> categorical_tunable = Tunable.from_json("categorical_tunable", json_config)
+        >>> categorical_tunable.cardinality
+        3
+
+        >>> json_config = '''
+        ... {
+        ...    "type": "int",
+        ...    "default": 0,
+        ...    "range": [0, 10000],
+        ... }
+        ... '''
+        >>> basic_tunable = Tunable.from_json("basic_tunable", json_config)
+        >>> basic_tunable.cardinality
+        10001
+
+        >>> json_config = '''
+        ... {
+        ...    "type": "int",
+        ...    "default": 0,
+        ...    "range": [0, 10000],
+        ...    // Enable quantization.
+        ...    "quantization_bins": 10,
+        ... }
+        ... '''
+        >>> quantized_tunable = Tunable.from_json("quantized_tunable", json_config)
+        >>> quantized_tunable.cardinality
+        10
+
+        >>> json_config = '''
+        ... {
+        ...    "type": "float",
+        ...    "default": 50.0,
+        ...    "range": [0, 100],
+        ... }
+        ... '''
+        >>> float_tunable = Tunable.from_json("float_tunable", json_config)
+        >>> assert float_tunable.cardinality is None
         """
         if self.is_categorical:
             return len(self.categories)
@@ -749,6 +796,11 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         >>> from mlos_bench.tunables.tunable_types import DistributionName
         >>> DistributionName
         typing.Literal['uniform', 'normal', 'beta']
+
+        See Also
+        --------
+        :py:attr:`~.Tunable.distribution_params` :
+            For more examples on configuring a Tunable with a distribution.
         """
         return self._distribution
 
