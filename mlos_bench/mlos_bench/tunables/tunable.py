@@ -569,9 +569,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         weight : float
             Weight of the range or None.
 
-        Examples
+        See Also
         --------
-        TODO: Add examples for the range_weight.
+        Tunable.weights : For example of range_weight configuration.
         """
         assert self.is_numerical
         assert self._special
