@@ -303,7 +303,6 @@ class TunableDict(TunableDictOpt):
     Examples
     --------
     >>> # Example values of the TunableDict
-    >>> from mlos_bench.tunables.tunable import TunableDict
     >>> TunableDict({'type': 'int', 'default': 0, 'range': [0, 10]})
     {'type': 'int', 'default': 0, 'range': [0, 10]}
 
@@ -359,7 +358,6 @@ def tunable_dict_from_dict(config: dict[str, Any]) -> TunableDict:
     --------
     >>> # Example values of the TunableDict
     >>> import json5 as json
-    >>> from mlos_bench.tunables.tunable_types import tunable_dict_from_dict
     >>> config = json.loads("{'type': 'int', 'default': 0, 'range': [0, 10]}")
     >>> config
     {'type': 'int', 'default': 0, 'range': [0, 10]}
