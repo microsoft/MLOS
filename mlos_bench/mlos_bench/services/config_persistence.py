@@ -2,9 +2,10 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Helper functions to load, instantiate, and serialize Python objects that encapsulate
-a benchmark :py:class:`.Environment`, :py:mod:`~mlos_bench.tunables`,
-:py:class:`.Service` functions, etc from JSON configuration files and strings.
+"""
+Helper functions to load, instantiate, and serialize Python objects that encapsulate a
+benchmark :py:class:`.Environment`, :py:mod:`~mlos_bench.tunables`, :py:class:`.Service`
+functions, etc from JSON configuration files and strings.
 
 See Also
 --------
