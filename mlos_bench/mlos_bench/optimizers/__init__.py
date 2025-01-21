@@ -127,6 +127,7 @@ purposes.
 >>> print([member.name for member in mlos_core.optimizers.OptimizerType])
 ['RANDOM', 'FLAML', 'SMAC']
 
+>>> # Here's an example JSON config for an MlosCoreOptimizer.
 >>> optimizer_json_config = '''
 ... {
 ...   "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",

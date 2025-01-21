@@ -52,8 +52,10 @@ Examples
 ... }
 ... '''
 >>> tunables = service.load_tunables(jsons=[json_config])
+>>> # Check the defaults:
 >>> tunables.get_param_values()
 {'colors': 'green', 'int_param': 2, 'float_param': 0.5}
+
 >>> # Now create a GridSearchOptimizer from a JSON config string.
 >>> optimizer_json_config = '''
 ... {
