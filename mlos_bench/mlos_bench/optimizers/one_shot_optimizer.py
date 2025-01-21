@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""No-op optimizer for mlos_bench that proposes a single configuration.
+"""
+No-op optimizer for mlos_bench that proposes a single configuration.
 
 Explicit configs (partial or full) are possible using configuration files.
 
