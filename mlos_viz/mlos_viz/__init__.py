@@ -32,10 +32,15 @@ __version__ = VERSION
 
 
 class MlosVizMethod(Enum):
-    """What method to use for visualizing the experiment results."""
+    """What method to use for visualizing the Experiment results."""
 
     DABL = "dabl"
+    """Use DABL for automatic data correlation and visualization of
+    :py:class:`~.ExperimentData`.
+    """
+
     AUTO = DABL  # use dabl as the current default
+    """The default automatic :py:class:`~.ExperimentData` visualization method."""
 
 
 def ignore_plotter_warnings(plotter_method: MlosVizMethod = MlosVizMethod.AUTO) -> None:
@@ -46,7 +51,7 @@ def ignore_plotter_warnings(plotter_method: MlosVizMethod = MlosVizMethod.AUTO) 
     Parameters
     ----------
     plotter_method: MlosVizMethod
-        The method to use for visualizing the experiment results.
+        The method to use for visualizing the Experiment results.
     """
     base.ignore_plotter_warnings()
     if plotter_method == MlosVizMethod.DABL:
@@ -67,14 +72,14 @@ def plot(
     **kwargs: Any,
 ) -> None:
     """
-    Plots the results of the experiment.
+    Plots the results of the given :py:class:`~.ExperimentData`.
 
     Intended to be used from a Jupyter notebook.
 
     Parameters
     ----------
     exp_data: ExperimentData
-        The experiment data to plot.
+        The Experiment data to plot.
     results_df : pandas.DataFrame | None
         Optional `results_df` to plot.
         If not provided, defaults to :py:attr:`.ExperimentData.results_df` property.
@@ -82,7 +87,7 @@ def plot(
         Optional objectives to plot.
         If not provided, defaults to :py:attr:`.ExperimentData.objectives` property.
     plotter_method: MlosVizMethod
-        The method to use for visualizing the experiment results.
+        The method to use for visualizing the Experiment results.
     filter_warnings: bool
         Whether or not to filter some warnings from the plotter.
     kwargs : dict

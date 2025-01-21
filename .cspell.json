@@ -35,6 +35,7 @@
         "iloc",
         "ipykernel",
         "iterrows",
+        "jsons",
         "jsonschema",
         "jupyterlab",
         "keepalive",

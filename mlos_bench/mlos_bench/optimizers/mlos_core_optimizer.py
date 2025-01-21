@@ -2,7 +2,139 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""A wrapper for mlos_core optimizers for mlos_bench."""
+"""
+A wrapper for :py:mod:`mlos_core.optimizers` for :py:mod:`mlos_bench`.
+
+Config
+------
+The JSON config for an :py:class:`.MlosCoreOptimizer` generally takes the
+following basic structure:
+
+See Also
+--------
+:py:mod:`mlos_bench.optimizers` :
+    Another working example of an :py:class:`.MlosCoreOptimizer`.
+:py:mod:`mlos_core.optimizers` :
+    Documentation on the underlying mlos_core Optimizers.
+:py:mod:`mlos_core.spaces.adapters` :
+    Documentation on the underlying mlos_core SpaceAdapters.
+
+Examples
+--------
+>>> # Load tunables from a JSON string.
+>>> # Note: normally these would be automatically loaded from the Environment(s)'s
+>>> # `include_tunables` config parameter.
+>>> #
+>>> import json5 as json
+>>> import mlos_core.optimizers
+>>> from mlos_bench.environments.status import Status
+>>> from mlos_bench.services.config_persistence import ConfigPersistenceService
+>>> service = ConfigPersistenceService()
+>>> json_config = '''
+... {
+...   "group_1": {
+...     "cost": 1,
+...     "params": {
+...       "flags": {
+...         "type": "categorical",
+...         "values": ["on", "off", "auto"],
+...         "default": "auto",
+...       },
+...       "int_param": {
+...         "type": "int",
+...         "range": [1, 100],
+...         "default": 10,
+...       },
+...       "float_param": {
+...         "type": "float",
+...         "range": [0, 100],
+...         "default": 50.0,
+...       }
+...     }
+...   }
+... }
+... '''
+>>> tunables = service.load_tunables(jsons=[json_config])
+>>> # Here's the defaults:
+>>> tunables.get_param_values()
+{'flags': 'auto', 'int_param': 10, 'float_param': 50.0}
+
+>>> # When using the MlosCoreOptimizer, we can also specify some additional
+>>> # properties, for instance the optimizer_type, which is one of the mlos_core
+>>> # OptimizerType enum values:
+>>> print([member.name for member in mlos_core.optimizers.OptimizerType])
+['RANDOM', 'FLAML', 'SMAC']
+
+>>> # We can also specify
+>>> # properties, for instance the optimizer_type, which is one of the mlos_core
+>>> # OptimizerType enum values:
+>>> print([member.name for member in mlos_core.optimizers.OptimizerType])
+['RANDOM', 'FLAML', 'SMAC']
+
+>>> # Here's an example JSON config for an MlosCoreOptimizer.
+>>> optimizer_json_config = '''
+... {
+...   "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+...   "description": "MlosCoreOptimizer",
+...     "config": {
+...         "max_suggestions": 1000,
+...         "optimization_targets": {
+...             "throughput": "max",
+...             "cost": "min",
+...         },
+...         "start_with_defaults": true,
+...         "seed": 42,
+...         // Override the default optimizer type
+...         // Must be one of the mlos_core OptimizerType enum values.
+...         "optimizer_type": "SMAC",
+...         // Optionally provide some additional configuration options for the optimizer.
+...         // Note: these are optimizer-specific and may not be supported by all optimizers.
+...         "n_random_init": 25,
+...         "n_random_probability": 0.01,
+...         // Optionally override the default space adapter type
+...         // Must be one of the mlos_core SpaceAdapterType enum values.
+...         // LlamaTune is a method for automatically doing space reduction
+...         // from the original space.
+...         "space_adapter_type": "LLAMATUNE",
+...         "space_adapter_config": {
+...             // Note: these values are probably too low,
+...             // but it's just for demonstration.
+...             "num_low_dims": 2,
+...             "max_unique_values_per_param": 10,
+...          }
+...     }
+... }
+... '''
+>>> config = json.loads(optimizer_json_config)
+>>> optimizer = service.build_optimizer(
+...   tunables=tunables,
+...   service=service,
+...   config=config,
+... )
+
+>>> suggested_config_1 = optimizer.suggest()
+>>> # Normally default values should be suggested first, per json config.
+>>> # However, since LlamaTune is being employed here, the first suggestion may
+>>> # be projected to a slightly different space.
+>>> suggested_config_1.get_param_values()
+{'flags': 'auto', 'int_param': 1, 'float_param': 55.5555555555556}
+>>> # Get another suggestion.
+>>> # Note that multiple suggestions can be pending prior to
+>>> # registering their scores, supporting parallel trial execution.
+>>> suggested_config_2 = optimizer.suggest()
+>>> suggested_config_2.get_param_values()
+{'flags': 'on', 'int_param': 78, 'float_param': 88.8888888888889}
+>>> # Register some scores.
+>>> # Note: Maximization problems track negative scores to produce a minimization problem.
+>>> optimizer.register(suggested_config_1, Status.SUCCEEDED, {"throughput": 42, "cost": 19})
+{'throughput': -42.0, 'cost': 19.0}
+>>> optimizer.register(suggested_config_2, Status.SUCCEEDED, {"throughput": 7, "cost": 17.2})
+{'throughput': -7.0, 'cost': 17.2}
+>>> (best_score, best_config) = optimizer.get_best_observation()
+>>> best_score
+{'throughput': 42.0, 'cost': 19.0}
+>>> assert best_config == suggested_config_1
+"""
 
 import logging
 import os
@@ -20,8 +152,8 @@ from mlos_bench.optimizers.convert_configspace import (
     special_param_names,
 )
 from mlos_bench.services.base_service import Service
-from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_core.data_classes import Observations
 from mlos_core.optimizers import (
     DEFAULT_OPTIMIZER_TYPE,
@@ -77,6 +209,12 @@ class MlosCoreOptimizer(Optimizer):
 
         if space_adapter_type is not None:
             space_adapter_type = getattr(SpaceAdapterType, space_adapter_type)
+            assert isinstance(space_adapter_type, SpaceAdapterType)
+            if space_adapter_type == SpaceAdapterType.LLAMATUNE:
+                # This is probably a sane default, especially when
+                # bulk_registering old configs (e.g., Experiment resume), but is
+                # not currently exposed in the config schema.
+                space_adapter_config["use_approximate_reverse_mapping"] = True
 
         self._opt: BaseOptimizer = OptimizerFactory.create(
             parameter_space=self.config_space,
@@ -181,8 +319,8 @@ class MlosCoreOptimizer(Optimizer):
                 (special_name, type_name) = special_param_names(tunable.name)
                 tunables_names += [special_name, type_name]
                 is_special = df_configs[tunable.name].apply(tunable.special.__contains__)
-                df_configs[type_name] = TunableValueKind.RANGE
-                df_configs.loc[is_special, type_name] = TunableValueKind.SPECIAL
+                df_configs[type_name] = TunableValueKind.RANGE.value
+                df_configs.loc[is_special, type_name] = TunableValueKind.SPECIAL.value
                 if tunable.type == "int":
                     # Make int column NULLABLE:
                     df_configs[tunable.name] = df_configs[tunable.name].astype("Int64")

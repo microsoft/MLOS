@@ -10,8 +10,9 @@ tunable parameters).
 
 See Also
 --------
-:py:mod:`mlos_bench.storage` : The base storage module for mlos_bench, which
-    includes some basic examples in the documentation.
+:py:mod:`mlos_bench.storage` :
+    The base storage module for mlos_bench, which includes some basic examples in
+    the documentation.
 """
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
@@ -23,7 +24,7 @@ from pytz import UTC
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_tunable_config_data import TunableConfigData
 from mlos_bench.storage.util import kv_df_to_dict
-from mlos_bench.tunables.tunable import TunableValue
+from mlos_bench.tunables.tunable_types import TunableValue
 
 if TYPE_CHECKING:
     from mlos_bench.storage.base_tunable_config_trial_group_data import (

@@ -15,7 +15,9 @@ Overview
 ``mlos_bench`` can be installed from `pypi <https://pypi.org/project/mlos-bench>`_
 via ``pip install mlos-bench`` and executed using the ``mlos_bench`` `command
 <../../mlos_bench.run.usage.html>`_ using a collection of `json` `configs
-<https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_.
+<https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_
+which are managed and documented in the :py:mod:`~mlos_bench.config` module and
+elsewhere in this package documentation.
 
 It is intended to be used with :py:mod:`mlos_core` via
 :py:class:`~mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer` to help
@@ -59,8 +61,9 @@ intended to be modular and composable to allow reuse and faster development of n
 benchmarking environments or autotuning experiments.
 
 Where possible, the framework will provide common configs for reuse (e.g., deploying
-a VM on Azure, or run benchbase against a database system) to allow users to focus
-on the specifics of their experiments.
+a VM on Azure, or run `benchbase <https://github.com/cmu-db/benchbase>`_ against
+a database system) to allow users to focus on the specifics of their
+experiments.
 
 Where none are currently available, one can create them external to MLOS, however
 users are also encouraged to `submit PRs or Issues
@@ -125,18 +128,20 @@ critically, non-reusable scripts to setup and later parse results and are hence
 harder to scale to many users.
 
 With these features as a part of the MLOS ecosystem, benchmarking can become a
-*service* that any developer, admin, research, etc. can use and adapt.
+*service* that any developer, admin, researcher, etc. can use and adapt.
 
 See below for more information on the classes in this package.
 
 Notes
 -----
-Note that while the docstrings in this package are generated from the source code
-and hence sometimes more focused on the implementation details, most user
-interactions with the package will be through the `json configs
-<https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_. Even
-so it may be useful to look at the source code to understand how those are
-interpreted.
+Note that while the docstrings in this package are generated from the source
+code and hence sometimes more focused on the implementation details, we do try
+to provide some (testable) examples here, but most user interactions with the
+package will be through the `json configs
+<https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_.
+Even so it may be useful to look at the documentation here (perhaps especially
+starting with :py:mod:`mlos_bench.config`) and, if necessary, the `source code
+<https://github.com/microsoft/MLOS>`_ to understand how those are interpreted.
 
 Examples
 --------

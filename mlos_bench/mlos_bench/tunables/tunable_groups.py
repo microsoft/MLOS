@@ -2,14 +2,102 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""TunableGroups definition."""
+"""
+TunableGroups definition.
+
+A collection of :py:class:`.CovariantTunableGroup` s of :py:class:`.Tunable`
+parameters.
+
+Used to define the configuration space for an
+:py:class:`~mlos_bench.environments.base_environment.Environment` for an
+:py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer` to explore.
+
+Config
+++++++
+
+The configuration of the tunable parameters is generally given via a JSON config file.
+The syntax looks something like this:
+
+.. code-block:: json
+
+    { // starts a TunableGroups config (e.g., for one Environment)
+        "group1": { // starts a CovariantTunableGroup config
+            "cost": 7,
+            "params": {
+                "param1": { // starts a Tunable config, named "param1"
+                    "type": "int",
+                    "range": [0, 100],
+                    "default": 50
+                },
+                "param2": { // starts a new Tunable config, named "param2", within that same group
+                    "type": "float",
+                    "range": [0.0, 100.0],
+                    "default": 50.0
+                },
+                "param3": {
+                    "type": "categorical",
+                    "values": ["on", "off", "auto"],
+                    "default": "auto"
+                }
+            }
+        },
+        "group2": { // starts a new CovariantTunableGroup config
+            "cost": 7,
+            "params": {
+                "some_param1": {
+                    "type": "int",
+                    "range": [0, 10],
+                    "default": 5
+                },
+                "some_param2": {
+                    "type": "float",
+                    "range": [0.0, 100.0],
+                    "default": 50.0
+                },
+                "some_param3": {
+                    "type": "categorical",
+                    "values": ["red", "green", "blue"],
+                    "default": "green"
+                }
+            }
+        }
+    }
+
+The JSON config is expected to be a dictionary of covariant tunable groups.
+
+Each covariant group has a name and a cost associated with changing any/all of the
+parameters in that covariant group.
+
+Each group has a dictionary of :py:class:`.Tunable` parameters, where the key is
+the name of the parameter and the value is a dictionary of the parameter's
+configuration (see the :py:class:`.Tunable` class for more information on the
+different ways they can be configured).
+
+Generally tunables are associated with an
+:py:class:`~mlos_bench.environments.base_environment.Environment` and included along
+with the Environment's config directory (e.g., ``env-name-tunables.mlos.jsonc``) and
+referenced in the Environment config using the ``include_tunables`` property.
+
+See Also
+--------
+:py:mod:`mlos_bench.tunables` :
+    For more information on tunable parameters and their configuration.
+:py:mod:`mlos_bench.tunables.tunable` :
+    Tunable parameter definition.
+:py:mod:`mlos_bench.config` :
+    Configuration system for mlos_bench.
+:py:mod:`mlos_bench.environments` :
+    Environment configuration and setup.
+"""
+
 import copy
 import logging
 from collections.abc import Generator, Iterable, Mapping
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
-from mlos_bench.tunables.tunable import Tunable, TunableValue
+from mlos_bench.tunables.tunable import Tunable
+from mlos_bench.tunables.tunable_types import TunableValue
 
 _LOG = logging.getLogger(__name__)
 
@@ -30,8 +118,8 @@ class TunableGroups:
 
         See Also
         --------
-        :py:mod:`mlos_bench.tunables` : for more information on tunable parameters and
-            their configuration.
+        :py:mod:`mlos_bench.tunables` :
+            For more information on tunable parameters and their configuration.
         """
         if config is None:
             config = {}
@@ -356,8 +444,8 @@ class TunableGroups:
         param_values : Mapping[str, TunableValue]
             Dictionary mapping Tunable parameter names to new values.
 
-            As a special behavior when the mapping is empty the method will restore
-            the default values rather than no-op.
+            As a special behavior when the mapping is empty (``{}``) the method will
+            restore the default values rather than no-op.
             This allows an empty dictionary in json configs to be used to reset the
             tunables to defaults without having to copy the original values from the
             tunable_params definition.

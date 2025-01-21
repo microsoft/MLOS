@@ -136,8 +136,10 @@ def is_on_github_actions():
 intersphinx_mapping = get_intersphinx_mapping(
     packages={
         "asyncssh",
-        "azure-core",
-        "azure-identity",
+        # Azure SDKs removed their intersphinx publishing.
+        # https://github.com/Azure/azure-sdk-for-python/issues/39316
+        # "azure-core",
+        # "azure-identity",
         "configspace",
         "matplotlib",
         "numpy",
@@ -166,12 +168,15 @@ CUSTOM_REF_TYPE_MAP: dict[tuple[str, str], str] = {
     ("ConcreteOptimizer", "class"): "data",
     ("ConcreteSpaceAdapter", "class"): "data",
     ("DistributionName", "class"): "data",
+    ("mlos_bench.tunables.tunable_types.DistributionName", "class"): "data",
     ("FlamlDomain", "class"): "data",
     ("mlos_core.spaces.converters.flaml.FlamlDomain", "class"): "data",
     ("TunableValue", "class"): "data",
-    ("mlos_bench.tunables.tunable.TunableValue", "class"): "data",
+    ("mlos_bench.tunables.tunable_types.TunableValue", "class"): "data",
     ("TunableValueType", "class"): "data",
+    ("mlos_bench.tunables.tunable_types.TunableValueType", "class"): "data",
     ("TunableValueTypeName", "class"): "data",
+    ("mlos_bench.tunables.tunable_types.TunableValueTypeName", "class"): "data",
     ("T_co", "class"): "data",
     ("CoroReturnType", "class"): "data",
     ("FutureReturnType", "class"): "data",
@@ -230,6 +235,9 @@ nitpick_ignore = [
 nitpick_ignore_regex = [
     # Ignore some external references that don't use sphinx for their docs.
     (r"py:.*", r"flaml\..*"),
+    # Azure SDKs removed their intersphinx publishing.
+    # https://github.com/Azure/azure-sdk-for-python/issues/39316
+    (r"py:.*", r"azure\..*"),
 ]
 
 # Which documents to include in the build.
@@ -294,6 +302,11 @@ autoapi_keep_files = not is_on_github_actions()  # for local testing
 # a list of builtin themes.
 #
 html_theme = "sphinx_rtd_theme"
+
+html_theme_options = {
+    "canonical_url": "https://microsoft.github.io/MLOS/",
+    "navigation_depth": -1,
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

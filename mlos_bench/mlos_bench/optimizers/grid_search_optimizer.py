@@ -2,7 +2,104 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Grid search optimizer for mlos_bench."""
+"""
+Grid search Optimizer for mlos_bench.
+
+Grid search is a simple optimizer that exhaustively searches the configuration space.
+
+To do this it generates a grid of configurations to try, and then suggests them one by one.
+
+Therefore, the number of configurations to try is the product of the
+:py:attr:`~mlos_bench.tunables.tunable.Tunable.cardinality` of each of the
+:py:mod:`~mlos_bench.tunables`.
+(i.e., non :py:attr:`quantized <mlos_bench.tunables.tunable.Tunable.quantization_bins>`
+tunables are not supported).
+
+Examples
+--------
+>>> # Load tunables from a JSON string.
+>>> # Note: normally these would be automatically loaded from the Environment(s)'s
+>>> # `include_tunables` config parameter.
+>>> #
+>>> import json5 as json
+>>> from mlos_bench.environments.status import Status
+>>> from mlos_bench.services.config_persistence import ConfigPersistenceService
+>>> service = ConfigPersistenceService()
+>>> json_config = '''
+... {
+...   "group_1": {
+...     "cost": 1,
+...     "params": {
+...       "colors": {
+...         "type": "categorical",
+...         "values": ["red", "blue", "green"],
+...         "default": "green",
+...       },
+...       "int_param": {
+...         "type": "int",
+...         "range": [1, 3],
+...         "default": 2,
+...       },
+...       "float_param": {
+...         "type": "float",
+...         "range": [0, 1],
+...         "default": 0.5,
+...         // Quantize the range into 3 bins
+...         "quantization_bins": 3,
+...       }
+...     }
+...   }
+... }
+... '''
+>>> tunables = service.load_tunables(jsons=[json_config])
+>>> # Check the defaults:
+>>> tunables.get_param_values()
+{'colors': 'green', 'int_param': 2, 'float_param': 0.5}
+
+>>> # Now create a GridSearchOptimizer from a JSON config string.
+>>> optimizer_json_config = '''
+... {
+...   "class": "mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer",
+...   "description": "GridSearchOptimizer",
+...     "config": {
+...         "max_suggestions": 100,
+...         "optimization_targets": {"score": "max"},
+...         "start_with_defaults": true
+...     }
+... }
+... '''
+>>> config = json.loads(optimizer_json_config)
+>>> grid_search_optimizer = service.build_optimizer(
+...   tunables=tunables,
+...   service=service,
+...   config=config,
+... )
+>>> # Should have 3 values for each of the 3 tunables
+>>> len(list(grid_search_optimizer.pending_configs))
+27
+>>> next(grid_search_optimizer.pending_configs)
+{'colors': 'red', 'float_param': 0, 'int_param': 1}
+>>> suggested_config_1 = grid_search_optimizer.suggest()
+>>> # Default should be suggested first, per json config.
+>>> suggested_config_1.get_param_values()
+{'colors': 'green', 'int_param': 2, 'float_param': 0.5}
+>>> # Get another suggestion.
+>>> # Note that multiple suggestions can be pending prior to
+>>> # registering their scores, supporting parallel trial execution.
+>>> suggested_config_2 = grid_search_optimizer.suggest()
+>>> suggested_config_2.get_param_values()
+{'colors': 'red', 'int_param': 1, 'float_param': 0.0}
+>>> # Register some scores.
+>>> # Note: Maximization problems track negative scores to produce a minimization problem.
+>>> grid_search_optimizer.register(suggested_config_1, Status.SUCCEEDED, {"score": 42})
+{'score': -42.0}
+>>> grid_search_optimizer.register(suggested_config_2, Status.SUCCEEDED, {"score": 7})
+{'score': -7.0}
+>>> (best_score, best_config) = grid_search_optimizer.get_best_observation()
+>>> best_score
+{'score': 42.0}
+>>> assert best_config == suggested_config_1
+"""
 
 import logging
 from collections.abc import Iterable, Sequence
@@ -15,14 +112,21 @@ from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.convert_configspace import configspace_data_to_tunable_values
 from mlos_bench.optimizers.track_best_optimizer import TrackBestOptimizer
 from mlos_bench.services.base_service import Service
-from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 
 _LOG = logging.getLogger(__name__)
 
 
 class GridSearchOptimizer(TrackBestOptimizer):
-    """Grid search optimizer."""
+    """
+    Grid search optimizer.
+
+    See :py:mod:`above <mlos_bench.optimizers.grid_search_optimizer>` for more details.
+    """
+
+    MAX_CONFIGS = 10000
+    """Maximum number of configurations to enumerate."""
 
     def __init__(
         self,
@@ -52,7 +156,7 @@ class GridSearchOptimizer(TrackBestOptimizer):
             raise ValueError(
                 f"Unquantized tunables are not supported for grid search: {self._tunables}"
             )
-        if size > 10000:
+        if size > self.MAX_CONFIGS:
             _LOG.warning(
                 "Large number %d of config points requested for grid search: %s",
                 size,

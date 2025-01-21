@@ -11,7 +11,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
-from mlos_bench.tunables.tunable import TunableValue
+from mlos_bench.tunables.tunable_types import TunableValue
 
 # pylint: disable=redefined-outer-name
 

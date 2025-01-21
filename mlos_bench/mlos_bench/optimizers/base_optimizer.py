@@ -2,8 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Base class for an interface between the benchmarking framework and mlos_core
-optimizers.
+"""
+Base class for an interface between the benchmarking framework and :py:mod:`mlos_core`
+optimizers and other config suggestion methods.
+
+See Also
+--------
+mlos_bench.optimizers :
+    For more information on the available optimizers and their usage.
 """
 
 import logging
@@ -19,16 +25,16 @@ from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.convert_configspace import tunable_groups_to_configspace
 from mlos_bench.services.base_service import Service
-from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.util import strtobool
 
 _LOG = logging.getLogger(__name__)
 
 
 class Optimizer(ContextManager, metaclass=ABCMeta):  # pylint: disable=too-many-instance-attributes
-    """An abstract interface between the benchmarking framework and mlos_core
-    optimizers.
+    """An abstract interface between the benchmarking framework and :py:mod:`mlos_core`
+    optimizers and other config suggestion methods.
     """
 
     # See Also: mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json
@@ -312,6 +318,8 @@ class Optimizer(ContextManager, metaclass=ABCMeta):  # pylint: disable=too-many-
         )
         if status.is_succeeded() == (score is None):  # XOR
             raise ValueError("Status and score must be consistent.")
+        # FIXME: should maximization problems return -score values to the user, or
+        # keep that as an internal nuance.
         return self._get_scores(status, score)
 
     def _get_scores(

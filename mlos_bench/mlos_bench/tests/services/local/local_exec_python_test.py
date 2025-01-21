@@ -11,7 +11,7 @@ import pytest
 
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService
-from mlos_bench.tunables.tunable import TunableValue
+from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.util import path_join
 
 # pylint: disable=redefined-outer-name

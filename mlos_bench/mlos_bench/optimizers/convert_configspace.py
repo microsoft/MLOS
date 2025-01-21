@@ -2,10 +2,12 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Functions to convert TunableGroups to ConfigSpace for use with the mlos_core
-optimizers.
+"""Functions to convert :py:class:`.TunableGroups` that :py:mod:`mlos_bench` uses to to
+:py:class:`ConfigSpace.ConfigurationSpace` for use with the
+:py:mod:`mlos_core.optimizers`.
 """
 
+import enum
 import logging
 from collections.abc import Hashable
 
@@ -23,8 +25,9 @@ from ConfigSpace import (
 from ConfigSpace.hyperparameters import NumericalHyperparameter
 from ConfigSpace.types import NotSet
 
-from mlos_bench.tunables.tunable import Tunable, TunableValue
+from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.util import try_parse_val
 from mlos_core.spaces.converters.util import (
     QUANTIZATION_BINS_META_KEY,
@@ -34,14 +37,9 @@ from mlos_core.spaces.converters.util import (
 _LOG = logging.getLogger(__name__)
 
 
-class TunableValueKind:
-    """
-    Enum for the kind of the tunable value (special or not).
+class TunableValueKind(enum.Enum):
+    """Enum for the kind of the tunable value (special or not)."""
 
-    It is not a true enum because ConfigSpace wants string values.
-    """
-
-    # pylint: disable=too-few-public-methods
     SPECIAL = "special"
     RANGE = "range"
 
@@ -170,19 +168,19 @@ def _tunable_to_configspace(
             ),
             CategoricalHyperparameter(
                 name=type_name,
-                choices=[TunableValueKind.SPECIAL, TunableValueKind.RANGE],
+                choices=[TunableValueKind.SPECIAL.value, TunableValueKind.RANGE.value],
                 weights=switch_weights,
-                default_value=TunableValueKind.SPECIAL,
+                default_value=TunableValueKind.SPECIAL.value,
             ),
         ]
     )
     conf_space.add(
         [
             EqualsCondition(
-                conf_space[special_name], conf_space[type_name], TunableValueKind.SPECIAL
+                conf_space[special_name], conf_space[type_name], TunableValueKind.SPECIAL.value
             ),
             EqualsCondition(
-                conf_space[tunable.name], conf_space[type_name], TunableValueKind.RANGE
+                conf_space[tunable.name], conf_space[type_name], TunableValueKind.RANGE.value
             ),
         ]
     )
@@ -242,10 +240,10 @@ def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
         if tunable.special:
             (special_name, type_name) = special_param_names(tunable.name)
             if tunable.value in tunable.special:
-                values[type_name] = TunableValueKind.SPECIAL
+                values[type_name] = TunableValueKind.SPECIAL.value
                 values[special_name] = tunable.value
             else:
-                values[type_name] = TunableValueKind.RANGE
+                values[type_name] = TunableValueKind.RANGE.value
                 values[tunable.name] = tunable.value
         else:
             values[tunable.name] = tunable.value
@@ -263,7 +261,7 @@ def configspace_data_to_tunable_values(data: dict) -> dict[str, TunableValue]:
     specials = [special_param_name_strip(k) for k in data.keys() if special_param_name_is_temp(k)]
     for k in specials:
         (special_name, type_name) = special_param_names(k)
-        if data[type_name] == TunableValueKind.SPECIAL:
+        if data[type_name] == TunableValueKind.SPECIAL.value:
             data[k] = data[special_name]
         if special_name in data:
             del data[special_name]
@@ -278,7 +276,8 @@ def special_param_names(name: str) -> tuple[str, str]:
     Generate the names of the auxiliary hyperparameters that correspond to a tunable
     that can have special values.
 
-    NOTE: `!` characters are currently disallowed in Tunable names in order handle this logic.
+    NOTE: ``!`` characters are currently disallowed in :py:class:`.Tunable` names in
+    order handle this logic.
 
     Parameters
     ----------
@@ -299,7 +298,8 @@ def special_param_name_is_temp(name: str) -> bool:
     """
     Check if name corresponds to a temporary ConfigSpace parameter.
 
-    NOTE: `!` characters are currently disallowed in Tunable names in order handle this logic.
+    NOTE: ``!`` characters are currently disallowed in :py:class:`.Tunable` names in
+    order handle this logic.
 
     Parameters
     ----------
@@ -318,7 +318,8 @@ def special_param_name_strip(name: str) -> str:
     """
     Remove the temporary suffix from a special parameter name.
 
-    NOTE: `!` characters are currently disallowed in Tunable names in order handle this logic.
+    NOTE: ``!`` characters are currently disallowed in :py:class:`.Tunable` names in
+    order handle this logic.
 
     Parameters
     ----------

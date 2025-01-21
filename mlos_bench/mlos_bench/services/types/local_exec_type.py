@@ -11,7 +11,7 @@ import tempfile
 from collections.abc import Iterable, Mapping
 from typing import Protocol, runtime_checkable
 
-from mlos_bench.tunables.tunable import TunableValue
+from mlos_bench.tunables.tunable_types import TunableValue
 
 
 @runtime_checkable

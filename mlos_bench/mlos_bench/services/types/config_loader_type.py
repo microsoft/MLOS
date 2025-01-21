@@ -10,7 +10,7 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 from mlos_bench.config.schemas.config_schemas import ConfigSchema
-from mlos_bench.tunables.tunable import TunableValue
+from mlos_bench.tunables.tunable_types import TunableValue
 
 # Avoid's circular import issues.
 if TYPE_CHECKING:

@@ -2,7 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Mock optimizer for mlos_bench."""
+"""
+Mock optimizer for mlos_bench.
+
+Mostly intended for testing and validation. This optimizer produces random suggestions.
+The range of the suggestions can be controlled by a config.
+
+See the test cases or example json configs for more details.
+"""
 
 import logging
 import random
@@ -11,8 +18,9 @@ from collections.abc import Callable, Sequence
 from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.track_best_optimizer import TrackBestOptimizer
 from mlos_bench.services.base_service import Service
-from mlos_bench.tunables.tunable import Tunable, TunableValue
+from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 
 _LOG = logging.getLogger(__name__)
 

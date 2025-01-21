@@ -208,12 +208,14 @@ Well Known Variables
 Here is a list of some well known variables that are provided or required by the
 system and may be used in the config files:
 
-- ``$experiment_id``: A unique identifier for the experiment.
+- ``$experiment_id``: A unique identifier for the ``Experiment``.
     Typically provided in globals.
-- ``$trial_id``: A unique identifier for the trial currently being executed.
+- ``$trial_id``: A unique identifier for the ``Trial`` currently being executed.
     This can be useful in the configs for :py:mod:`mlos_bench.environments` for
     instance (e.g., when writing scripts).
-- TODO: Document more variables here.
+- ``$trial_runner_id``: A unique identifier for the ``TrialRunner``.
+    This can be useful when running multiple trials in parallel (e.g., to
+    provision a numbered VM per worker).
 
 Tunable Configs
 ^^^^^^^^^^^^^^^

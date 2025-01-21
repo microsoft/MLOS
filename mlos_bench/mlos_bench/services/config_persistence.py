@@ -2,9 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Helper functions to load, instantiate, and serialize Python objects that encapsulate
-a benchmark :py:class:`.Environment`, :py:mod:`~mlos_bench.tunables`,
-:py:class:`.Service` functions, etc from JSON configuration files and strings.
+"""
+Helper functions to load, instantiate, and serialize Python objects that encapsulate a
+benchmark :py:class:`.Environment`, :py:mod:`~mlos_bench.tunables`, :py:class:`.Service`
+functions, etc from JSON configuration files and strings.
+
+See Also
+--------
+mlos_bench.config : Overview of the configuration system.
 """
 
 import logging
@@ -21,8 +26,8 @@ from mlos_bench.environments.base_environment import Environment
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
-from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.util import (
     instantiate_from_config,
     merge_parameters,
@@ -417,7 +422,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         parent_args: dict[str, TunableValue] | None = None,
         service: Service | None = None,
     ) -> Environment:
-        # pylint: disable=too-many-arguments,too-many-positional-arguments
+        # pylint: disable=too-many-arguments
         """
         Factory method for a new :py:class:`.Environment` with a given config.
 
@@ -589,7 +594,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         parent_args: dict[str, TunableValue] | None = None,
         service: Service | None = None,
     ) -> Environment:
-        # pylint: disable=too-many-arguments,too-many-positional-arguments
+        # pylint: disable=too-many-arguments
         """
         Load and build new :py:class:`.Environment` from the config file or JSON string.
 
@@ -611,6 +616,10 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         -------
         env : Environment
             A new benchmarking environment.
+
+        See Also
+        --------
+        mlos_bench.environments : Examples of environment configurations.
         """
         config = self.load_config(json, ConfigSchema.ENVIRONMENT)
         assert isinstance(config, dict)
@@ -624,7 +633,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         parent_args: dict[str, TunableValue] | None = None,
         service: Service | None = None,
     ) -> list[Environment]:
-        # pylint: disable=too-many-arguments,too-many-positional-arguments
+        # pylint: disable=too-many-arguments
         """
         Load and build a list of Environments from the config file or JSON string.
 
@@ -647,6 +656,10 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         -------
         env : list[Environment]
             A list of new benchmarking environments.
+
+        See Also
+        --------
+        mlos_bench.environments : Examples of environment configurations.
         """
         config = self.load_config(json, ConfigSchema.ENVIRONMENT)
         return [self.build_environment(config, tunables, global_config, parent_args, service)]
@@ -679,6 +692,10 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         -------
         service : Service
             A collection of service methods.
+
+        See Also
+        --------
+        mlos_bench.services : Examples of service configurations.
         """
         _LOG.info("Load services: %s parent: %s", jsons, parent.__class__.__name__)
         service = Service({}, global_config, parent)
@@ -711,6 +728,10 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         -------
         tunables : TunableGroups
             The larger collection of tunable parameters.
+
+        See Also
+        --------
+        mlos_bench.tunables : Examples of tunable parameter configurations.
         """
         _LOG.info("Load tunables: '%s'", jsons)
         if parent is None:

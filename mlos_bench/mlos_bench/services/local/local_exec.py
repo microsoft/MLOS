@@ -20,7 +20,7 @@ from mlos_bench.services.local.temp_dir_context import TempDirContextService
 from mlos_bench.services.types.local_exec_type import SupportsLocalExec
 
 if TYPE_CHECKING:
-    from mlos_bench.tunables.tunable import TunableValue
+    from mlos_bench.tunables.tunable_types import TunableValue
 
 _LOG = logging.getLogger(__name__)
 

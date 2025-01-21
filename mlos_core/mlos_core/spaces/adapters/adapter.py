@@ -33,6 +33,7 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
 
     def __init__(self, *, orig_parameter_space: ConfigSpace.ConfigurationSpace):
         self._orig_parameter_space: ConfigSpace.ConfigurationSpace = orig_parameter_space
+        # Use the same random state as the original parameter space.
         self._random_state = orig_parameter_space.random
 
     def __repr__(self) -> str:

@@ -30,28 +30,36 @@ Tunable
 
 The :py:class:`~mlos_bench.tunables.tunable.Tunable` class is used to define a
 single tunable parameter.
-A ``Tunable`` can be a ``categorical`` or numeric (``int`` or ``float``) and always has
-at least a domain (``range`` or set of ``values``) and default.
+A ``Tunable`` has a :py:attr:`~.Tunable.type` and can be a ``categorical`` or
+numeric (``int`` or ``float``) and always has at least a domain
+(:py:attr:`~.Tunable.range` or set of :py:attr:`~.Tunable.values`) and a
+:py:attr:`~.Tunable.default`.
 Each type can also have a number of additional properties that can optionally be set
 to help control the sampling of the tunable.
 
 For instance:
 
-- Numeric tunables can have a ``distribution`` property to specify the sampling
-  distribution.  ``log`` sampling can also be enabled for numeric tunables.
-- Categorical tunables can have a ``values_weights`` property to specify biased
-  sampling of the values
-- ``special`` values can be marked to indicate that they need more explicit testing
-  This can be useful for values that indicate "automatic" or "disabled" behavior.
+- Numeric tunables can have a :py:attr:`~.Tunable.distribution` property to specify the sampling
+  distribution.  :py:attr:`log <.Tunable.is_log>` sampling can also be enabled for
+  numeric tunables.
+- Categorical tunables can have a :py:attr:`values_weights <.Tunable.weights>`
+  property to specify biased sampling of the values
+- :py:attr:`~.Tunable.special` values can be marked to indicate that they need more
+  explicit testing.  This can be useful for values that indicate "automatic" or
+  "disabled" behavior.
 
-The full set of supported properties can be found in the `JSON schema for tunable
+The :py:class:`~mlos_bench.tunables.tunable.Tunable` class attributes documentation
+and :py:class:`~mlos_bench.tunables.tunable_types.TunableDict` class documentation
+provides some more information and example on the available properties.
+
+The full set of supported properties is specified in the `JSON schema for tunable
 parameters
 <https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-params-schema.json>`_
-and seen in some of the `test examples in the source tree
+and can be seen in some of the `test examples in the source tree
 <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tests/config/schemas/tunable-params/test-cases/good/>`_.
 
-CovariantGroup
-++++++++++++++
+CovariantTunableGroup
++++++++++++++++++++++
 
 The :py:class:`~mlos_bench.tunables.covariant_group.CovariantTunableGroup` class is
 used to define a group of related tunable parameters that are all configured
@@ -64,6 +72,15 @@ TunableGroups
 
 The :py:class:`~mlos_bench.tunables.tunable_groups.TunableGroups` class is used to
 define an entire set of tunable parameters (e.g., combined set of covariant groups).
+
+Limitations
+-----------
+Currently we lack a config language for expressing constraints between tunables
+
+(e.g., ``a < b`` or ``a + b < c``)
+
+This is supported in the underlying :py:mod:`mlos_core` library, but is not yet
+exposed in the ``mlos_bench`` config API.
 
 Usage
 ^^^^^
@@ -81,27 +98,34 @@ Then individual covariant groups can be enabled via the ``tunable_params`` and
 See the :py:mod:`mlos_bench.config` and :py:mod:`mlos_bench.environments` module
 documentation for more information.
 
-In benchmarking-only mode (e.g., without an ``Optimizer`` specified), ``mlos_bench``
-can still run with a particular set of ``--tunable-values`` (e.g., a simple
-key-value file declaring a set of values to assign to the set of configured tunable
-parameters) in order to manually explore a configuration space.
+In benchmarking-only mode (e.g., without an ``Optimizer`` specified),
+`mlos_bench <../../../mlos_bench.run.usage.html>`_ can still run with a
+particular set of ``--tunable-values`` (e.g., a simple key-value file declaring
+a set of values to assign to the set of configured tunable parameters) in order
+to manually explore a configuration space.
 
-See the :py:mod:`mlos_bench.run` module documentation for more information.
+See the :py:class:`~mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer`
+and :py:mod:`mlos_bench.run` module documentation and the for more information.
 
-During an Environment's ``setup`` and ``run`` phases the tunables can be exported to
-a JSON file using the ``dump_params_file`` property of the Environment config for
-the user scripts to use when configuring the target system.
-The ``meta`` property of the tunable config can be used to add additional
-information for this step (e.g., a unit suffix to append to the value).
+During an Environment's
+:py:meth:`~mlos_bench.environments.base_environment.Environment.setup` and
+:py:meth:`~mlos_bench.environments.base_environment.Environment.run` phases the
+tunables can be exported to a JSON file using the ``dump_params_file`` property
+of the Environment config for the user scripts to use when configuring the
+target system.
+The :py:attr:`~.Tunable.meta` property of the tunable config can be used to add
+additional information for this step (e.g., a unit suffix to append to the
+value).
 
 See the :py:mod:`mlos_bench.environments` module documentation for more information.
 
 Examples
 --------
-Here's a short (incomplete) example of some of the TunableGroups JSON configuration
-options, expressed in Python (for testing purposes).
-However, most of the time you will be loading these from a JSON config file stored
-along with the associated Environment config.
+Here's a short (incomplete) example of some of the :py:class:`.TunableGroups`
+JSON configuration options, expressed in Python (for testing purposes).
+However, most of the time you will be loading these from a JSON config file
+stored along with the associated
+:py:class:`~mlos_bench.environments.base_environment.Environment` config.
 
 For more tunable parameters examples refer to the `JSON schema
 <https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-params-schema.json>`_
@@ -116,6 +140,7 @@ There are also examples of `tunable values in the source tree
 >>> from mlos_bench.services.config_persistence import ConfigPersistenceService
 >>> service = ConfigPersistenceService()
 >>> json_config = '''
+... // Use json5 (or jsonc) syntax to allow comments and other more flexible syntax.
 ... {
 ...   "group_1": {
 ...     "cost": 1,
@@ -131,18 +156,21 @@ There are also examples of `tunable values in the source tree
 ...       },
 ...       "int_param": {
 ...         "type": "int",
-...         "range": [-1, 10],
+...         "range": [1, 10],
 ...         "default": 5,
 ...         // Mark some values as "special", that need more explicit testing.
 ...         // e.g., maybe these indicate "automatic" or "disabled" behavior for
 ...         // the system being tested instead of an explicit size
 ...         "special": [-1, 0],
-...         // Optionally specify a sampling distribution.
+...         // Optionally specify a sampling distribution
+...         // to influence which values to prioritize.
 ...         "distribution": {
 ...             "type": "uniform" // alternatively, "beta" or "normal"
 ...         },
 ...         // Free form key-value pairs that can be used with the
 ...         // tunable upon sampling for composing configs.
+...         // These can be retrieved later to help generate
+...         // config files from the sampled tunables.
 ...         "meta": {
 ...           "suffix": "MB"
 ...         }
@@ -197,9 +225,12 @@ Notes
 -----
 Internally, :py:class:`.TunableGroups` are converted to
 :external:py:class:`ConfigSpace.ConfigurationSpace` objects for use with
-:py:mod:`mlos_core`.
+:py:mod:`mlos_core` using the :py:mod:`mlos_bench.optimizers.convert_configspace`.
 See the "Spaces" section in the :py:mod:`mlos_core` module documentation for more
 information.
+
+In order to handle sampling of :py:attr:`.Tunable.special` values, the ``!``
+character is prohibited from being used in the name of a :py:class:`.Tunable`.
 
 See Also
 --------
@@ -210,8 +241,9 @@ See Also
 :py:meth:`.TunableGroups.assign` : Notes on special cases for assigning tunable values.
 """
 
-from mlos_bench.tunables.tunable import Tunable, TunableValue
+from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 
 __all__ = [
     "Tunable",

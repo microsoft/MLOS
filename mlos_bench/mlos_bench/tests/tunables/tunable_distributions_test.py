@@ -7,7 +7,8 @@
 import json5 as json
 import pytest
 
-from mlos_bench.tunables.tunable import Tunable, TunableValueTypeName
+from mlos_bench.tunables.tunable import Tunable
+from mlos_bench.tunables.tunable_types import TunableValueTypeName
 
 
 def test_categorical_distribution() -> None:
