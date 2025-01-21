@@ -23,6 +23,8 @@ See Also
 :py:mod:`mlos_bench.tunables` :
     For more information on Tunable parameters and their configuration.
 """
+# pylint: disable=too-many-lines # lots of docstring examples
+
 import copy
 import logging
 from collections.abc import Iterable
