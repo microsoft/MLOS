@@ -158,6 +158,7 @@ class ParallelTrialScheduler:
         """Stub start_optimization_loop."""
 
         # Create a pool of processes to run the trials in parallel.
+        # Recreate the child process for each trial to avoid memory leaks or other issues.
         with Pool(processes=len(self._trial_runners), maxtasksperchild=1) as pool:
             while not self.is_done_scheduling() or not self.is_done_running():
                 # Run any existing trials that aren't currently running.
