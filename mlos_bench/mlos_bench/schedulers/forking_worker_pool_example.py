@@ -19,6 +19,7 @@ class TrialRunner:  # pylint: disable=too-few-public-methods
     def run_trial(self, iteration: int, suggestion: int) -> dict[str, int | float]:
         """Stub run_trial."""
         # In the real system we'd run the Trial on the Environment and whatnot.
+        # Most of that *should* remain unchanged, but we'll need some testing to verify.
         sleep_time = random.uniform(0, 1) + 0.01
         print(
             (
@@ -165,8 +166,19 @@ class ParallelTrialScheduler:
                 # Do this first in case we're resuming from a previous run
                 # (e.g., the real system will have remembered which Trials were
                 # in progress by reloading them from the Storage backend).
+                #
+                # In the real system this portion might be replace something
+                # like _run_schedule(), except for the callbacks method of state
+                # management and async scheduling of new trials portion (see
+                # below).
+                # If we stick with the original design that separates
+                # _run_schedule() and _schedule_new_optimizer_suggestions() into
+                # distinct phases we might need to adjust this a bit.
 
                 # Avoid modifying the dictionary while iterating over it.
+                # (shouldn't be an issue if we interact with the Storage backend
+                # since experiment.pending_trials() query results will already
+                # be a copy)
                 trial_schedule = self._trial_schedule.copy()
                 for trial_id, (runner_id, suggestion) in trial_schedule.items():
                     # Skip trials that are already running on their assigned TrialRunner.
@@ -176,6 +188,12 @@ class ParallelTrialScheduler:
                     self._trial_runners_status[runner_id] = pool.apply_async(
                         TrialRunner(runner_id).run_trial,
                         args=(trial_id, suggestion),
+                        # Use a callback to manage the state management.
+                        # Note: this *may* be a problem if the callback can
+                        # timeout (e.g., Storage backend).
+                        # The alternative would be to wait() on each
+                        # AsyncResult, but that can lead to head of line
+                        # blocking and other issues.
                         callback=self._run_trial_finished_callback,
                         error_callback=self._run_trial_failed_callback,
                     )
@@ -189,6 +207,10 @@ class ParallelTrialScheduler:
                     sleep(0.5)
 
                 # Schedule more trials if we can.
+                # This is the async scheduling of new trials portion.
+                # As mentioned above, it's somewhat different than the
+                # _schedule_new_optimizer_suggestions() method in the current
+                # design.
                 self.schedule_new_trials(num_new_trials=self.get_idle_trial_runners_count() or 1)
 
             # Should be all done starting new trials.
