@@ -150,7 +150,6 @@ Here is an example that shows how to run a simple benchmark using the command li
 The entry point for these configs can be found `here
 <https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc>`_.
 
->>> from subprocess import run
 >>> # Note: we show the command wrapped in python here for testing purposes.
 >>> # Alternatively replace test-cli-local-env-bench.jsonc with
 >>> # test-cli-local-env-opt.jsonc for one that does an optimization loop.
@@ -164,6 +163,7 @@ Here's the shell command you'd actually run:
 # mlos_bench --config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc --globals experiment_test_local.jsonc --tunable_values tunable-values/tunable-values-local.jsonc
 
 >>> # Now we run the command and check the output.
+>>> from subprocess import run
 >>> result = run(cmd, shell=True, capture_output=True, text=True, check=True)
 >>> assert result.returncode == 0
 >>> lines = result.stderr.splitlines()
