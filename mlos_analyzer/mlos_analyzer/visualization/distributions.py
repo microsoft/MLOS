@@ -1,3 +1,8 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
+
 # src/mlos_analyzer/visualization/distributions.py
 import plotly.express as px
 import plotly.figure_factory as ff

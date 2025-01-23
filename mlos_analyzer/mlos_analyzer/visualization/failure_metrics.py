@@ -1,5 +1,9 @@
-import plotly.express as px
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 import pandas as pd
+import plotly.express as px
 
 
 def plot_success_failure_distribution(df: pd.DataFrame):

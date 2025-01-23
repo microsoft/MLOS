@@ -1,10 +1,16 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
+
+from typing import List
+
 # src/mlos_analyzer/visualization/timeseries.py
 import plotly.express as px
 import plotly.graph_objects as go
-from typing import List
 
 
-def plot_metric_over_time(df, metric: str, configs: List[str] = None):
+def plot_metric_over_time(df, metric: str, configs: list[str] = None):
     if configs:
         df = df[df["tunable_config_id"].isin(configs)]
 

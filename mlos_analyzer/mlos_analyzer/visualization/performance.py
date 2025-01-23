@@ -1,10 +1,16 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
+
+from typing import List
+
 # src/mlos_analyzer/visualization/performance.py
 import plotly.express as px
 import plotly.graph_objects as go
-from typing import List
 
 
-def plot_parallel_coordinates(df, metrics: List[str]):
+def plot_parallel_coordinates(df, metrics: list[str]):
     fig = px.parallel_coordinates(
         df,
         dimensions=[col for col in df.columns if col.startswith("config") or col in metrics],
@@ -13,7 +19,7 @@ def plot_parallel_coordinates(df, metrics: List[str]):
     return fig
 
 
-def plot_performance_radar(df, metrics: List[str], top_n: int = 5):
+def plot_performance_radar(df, metrics: list[str], top_n: int = 5):
     # Normalize metrics
     normalized_df = df.copy()
     for metric in metrics:
@@ -45,7 +51,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 
-def plot_parallel_coordinates(df, metrics: List[str]):
+def plot_parallel_coordinates(df, metrics: list[str]):
     fig = px.parallel_coordinates(
         df,
         dimensions=[col for col in df.columns if col.startswith("config") or col in metrics],
@@ -54,7 +60,7 @@ def plot_parallel_coordinates(df, metrics: List[str]):
     return fig
 
 
-def plot_performance_radar(df, metrics: List[str], top_n: int = 5):
+def plot_performance_radar(df, metrics: list[str], top_n: int = 5):
     # Normalize metrics
     normalized_df = df.copy()
     for metric in metrics:

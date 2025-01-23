@@ -1,8 +1,14 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
+import logging
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from .models import ExperimentExplanationRequest
+
 from ..core.storage import storage
-import logging
+from .models import ExperimentExplanationRequest
 
 app = FastAPI()
 logging.basicConfig(level=logging.INFO)
@@ -16,9 +22,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/experiments")
 def get_experiments():
     return list(storage.experiments.keys())
+
 
 @app.get("/experiment_results/{experiment_id}")
 def get_experiment_results(experiment_id: str):
