@@ -1,14 +1,21 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 import streamlit as st
 from mlos_analyzer.core.storage import storage
-from mlos_analyzer.visualization.plots import plot_whisker_plots
-from mlos_analyzer.visualization.correlation import plot_heatmap, plot_correlation_table_target
-from mlos_analyzer.visualization.failure_metrics import (
-    plot_success_failure_distribution,
-    plot_failure_rate_by_config,
+from mlos_analyzer.visualization.correlation import (
+    plot_correlation_table_target,
+    plot_heatmap,
 )
+from mlos_analyzer.visualization.failure_metrics import (
+    plot_failure_rate_by_config,
+    plot_success_failure_distribution,
+)
+from mlos_analyzer.visualization.plots import plot_whisker_plots
 from mlos_analyzer.visualization.statistical import (
-    run_pairwise_stat_tests,
     compare_score_distributions,
+    run_pairwise_stat_tests,
 )
 
 
