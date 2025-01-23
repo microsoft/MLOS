@@ -293,7 +293,7 @@ Here's an example JSON config for an :py:class:`.MlosCoreOptimizer`.
 ...         // Must be one of the mlos_core SpaceAdapterType enum values.
 ...         // LlamaTune is a method for automatically doing space reduction
 ...         // from the original space.
-...         /*
+...         /* Not enabled for this example:
 ...         "space_adapter_type": "LLAMATUNE",
 ...         "space_adapter_config": {
 ...             // Note: these values are probably too low,
