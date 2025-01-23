@@ -27,13 +27,31 @@ mlos_bench.run : CLI options for the ``mlos_bench`` command.
 
 Examples
 --------
+>>> # Create a new instance of the ConfigPersistenceService.
+>>> # This will search for config files in the current directory's config subdir.
+>>> # It will also search in the built-in config files that come with the package.
+>>> # And the current working directory.
+>>> service = ConfigPersistenceService(config={"config_path": ["./config"]})
+
+>>> # One of the things the ConfigLoaderType does is find and load config files
+>>> # referenced in other JSON files.
+>>> # For instance:
+>>> config_file_path = "optimizers/mlos_core_default_opt.jsonc"
+>>> resolved_file = service.resolve_path(config_file_path)
+
+>>> # The resolved file should be the same as the expected file.
+>>> # That is, the resolved file should be the same as the built-in file.
 >>> from importlib.resources import files
 >>> from os.path import abspath, samefile
->>> expected_file = abspath(files("mlos_bench.config").joinpath(
-...   "optimizers/mlos_core_default_opt.jsonc"))
->>> service = ConfigPersistenceService(config={"config_path": ["./config"]})
->>> resolved_file = service.resolve_path("optimizers/mlos_core_default_opt.jsonc")
+>>> expected_file = abspath(files("mlos_bench.config").joinpath(config_file_path))
 >>> assert samefile(resolved_file, expected_file)
+
+>>> # Create an Optimizer from that file.
+>>> from mlos_bench.config.schemas.config_schemas import ConfigSchema
+>>> config = service.load_config(config_file_path, schema_type=ConfigSchema.OPTIMIZER)
+>>> optimizer = service.build_optimizer(tunables=TunableGroups(), service=service, config=config)
+>>> from mlos_bench.optimizers.base_optimizer import Optimizer
+>>> assert isinstance(optimizer, Optimizer)
 """
 
 import logging
