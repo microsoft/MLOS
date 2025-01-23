@@ -7,7 +7,7 @@ Protocol interface for helper functions to lookup and load configs.
 
 See Also
 --------
-:py:class:`~mlos_bench.services.config_persistence_service.ConfigPersistenceService`
+:py:class:`~mlos_bench.services.config_persistence.ConfigPersistenceService`
 """
 
 from __future__ import annotations

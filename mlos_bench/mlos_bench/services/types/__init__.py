@@ -3,25 +3,25 @@
 # Licensed under the MIT License.
 #
 """
-Service types (i.e., :py:class:`Protocol`s) for declaring implementation
+Service types (i.e., :external:py:class:`~typing.Protocol`) for declaring implementation
 :py:class:`~mlos_bench.services.base_service.Service` behavior for
 :py:mod:`~mlos_bench.environments` to use in :py:mod:`mlos_bench`.
 
 Overview
 --------
 Service loading in ``mlos_bench`` uses a
-[mix-in](https://en.wikipedia.org/wiki/Mixin#In_Python) approach to combine the
+`mix-in <https://en.wikipedia.org/wiki/Mixin#In_Python>`_ approach to combine the
 functionality of multiple classes specified at runtime through config files into
 a single class that the :py:mod:`~mlos_bench.environments` can use to invoke the
 actions that they were configured to perform (e.g., provisioning a VM, deploying
 a network, running a script, etc.).
 
 Since Services are loaded at runtime and can be swapped out by referencing a
-different set of ``--services`` config files via the :py:mod:`mlos_bench.run`
+different set of config files via the ``--services`` :py:mod:`mlos_bench.run`
 CLI option, this can make it difficult to do type and config checking.
 
-To address this we define ``@runtime_checkable`` decorated
-[`Protocols`](https://peps.python.org/pep-0544/) ("interfaces" in other
+To address this we define :external:py:func:`~typing.runtime_checkable` decorated
+`Protocols <https://peps.python.org/pep-0544/>`_ (e.g., *interfaces* in other
 languages) to declare the expected behavior of the ``Services`` that are loaded
 at runtime in the ``Environments`` that use them.
 
