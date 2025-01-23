@@ -218,7 +218,7 @@ system and may be used in the config files:
     provision a numbered VM per worker).
 
 Tunable Configs
-^^^^^^^^^^^^^^^
++++++++++++++++
 
 There are two forms of tunable configs:
 
@@ -282,7 +282,7 @@ For more information on tunable configs, see the :py:mod:`mlos_bench.tunables`
 module.
 
 Class Configs
-^^^^^^^^^^^^^
++++++++++++++
 
 Class style configs include most anything else and roughly take this form:
 
