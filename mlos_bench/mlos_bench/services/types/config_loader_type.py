@@ -2,7 +2,12 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Protocol interface for helper functions to lookup and load configs."""
+"""Protocol interface for helper functions to lookup and load configs.
+
+See Also
+--------
+:py:class:`~mlos_bench.services.config_persistence_service.ConfigPersistenceService`
+"""
 
 from __future__ import annotations
 
