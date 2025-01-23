@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Protocol representing a bound method.
+"""
+Protocol representing a bound method.
 
 Notes
 -----

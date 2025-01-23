@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Protocol interface for helper functions to lookup and load configs.
+"""
+Protocol interface for helper functions to lookup and load configs.
 
 See Also
 --------

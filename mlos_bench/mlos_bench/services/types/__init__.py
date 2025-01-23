@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Service types (i.e., :py:class:`Protocol`s) for declaring implementation
+"""
+Service types (i.e., :py:class:`Protocol`s) for declaring implementation
 :py:class:`~mlos_bench.services.base_service.Service` behavior for
 :py:mod:`~mlos_bench.environments` to use in :py:mod:`mlos_bench`.
 
