@@ -1,0 +1,15 @@
+Metadata-Version: 2.2
+Name: mlos_analyzer
+Version: 0.1.0
+Requires-Dist: fastapi
+Requires-Dist: pandas
+Requires-Dist: plotly
+Requires-Dist: streamlit
+Requires-Dist: seaborn
+Requires-Dist: matplotlib
+Requires-Dist: scikit-learn
+Requires-Dist: scipy
+Requires-Dist: watchdog
+Requires-Dist: uvicorn
+Requires-Dist: azure-identity
+Dynamic: requires-dist

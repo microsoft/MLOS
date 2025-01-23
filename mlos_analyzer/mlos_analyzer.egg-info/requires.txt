@@ -1,0 +1,11 @@
+fastapi
+pandas
+plotly
+streamlit
+seaborn
+matplotlib
+scikit-learn
+scipy
+watchdog
+uvicorn
+azure-identity
