@@ -1,20 +1,37 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
+
 # Run as "streamlit run example_usage.py"
 
 import streamlit as st
 from mlos_analyzer.core.storage import storage
-from mlos_analyzer.visualization.plots import plot_whisker_plots
-from mlos_analyzer.visualization.correlation import plot_heatmap, plot_correlation_table_target
+from mlos_analyzer.visualization.correlation import (
+    plot_correlation_table_target,
+    plot_heatmap,
+)
+from mlos_analyzer.visualization.distributions import (
+    plot_metric_distribution,
+    plot_violin_comparison,
+)
 from mlos_analyzer.visualization.failure_metrics import (
-    plot_success_failure_distribution,
     plot_failure_rate_by_config,
+    plot_success_failure_distribution,
 )
+from mlos_analyzer.visualization.performance import (
+    plot_parallel_coordinates,
+    plot_performance_radar,
+)
+from mlos_analyzer.visualization.plots import plot_whisker_plots
 from mlos_analyzer.visualization.statistical import (
-    run_pairwise_stat_tests,
     compare_score_distributions,
+    run_pairwise_stat_tests,
 )
-from mlos_analyzer.visualization.timeseries import plot_metric_over_time, plot_moving_average
-from mlos_analyzer.visualization.distributions import plot_metric_distribution, plot_violin_comparison
-from mlos_analyzer.visualization.performance import plot_parallel_coordinates, plot_performance_radar
+from mlos_analyzer.visualization.timeseries import (
+    plot_metric_over_time,
+    plot_moving_average,
+)
 
 
 def main():
@@ -47,7 +64,7 @@ def main():
         with tab2:
             st.header("Performance Analysis")
             selected_metric = st.selectbox("Select Metric", metrics, key="perf_metric")
-            
+
             col1, col2 = st.columns(2)
             with col1:
                 fig_whisker = plot_whisker_plots(df, selected_metric)
@@ -56,7 +73,9 @@ def main():
                 fig_heatmap = plot_heatmap(df)
                 st.plotly_chart(fig_heatmap)
 
-            selected_metrics = st.multiselect("Select Metrics for Advanced Analysis", metrics, default=metrics[:3])
+            selected_metrics = st.multiselect(
+                "Select Metrics for Advanced Analysis", metrics, default=metrics[:3]
+            )
             if selected_metrics:
                 col3, col4 = st.columns(2)
                 with col3:
@@ -70,7 +89,7 @@ def main():
             st.header("Time Series Analysis")
             metric = st.selectbox("Select Metric", metrics, key="ts_metric")
             window = st.slider("Moving Average Window", 2, 20, 5)
-            
+
             col1, col2 = st.columns(2)
             with col1:
                 fig = plot_metric_over_time(df, metric)
@@ -82,7 +101,7 @@ def main():
         with tab4:
             st.header("Distribution Analysis")
             metric = st.selectbox("Select Metric", metrics, key="dist_metric")
-            
+
             col1, col2 = st.columns(2)
             with col1:
                 fig = plot_metric_distribution(df, metric)
