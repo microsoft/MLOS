@@ -385,6 +385,15 @@ class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-a
 
                 orig_value = param.to_value(value)
                 orig_value = np.clip(orig_value, param.lower, param.upper)
+
+                try:
+                    # Convert numpy types to native Python types (e.g., np.int64 to int)
+                    # This was performed automatically in NumPy<2.0, but not anymore.
+                    # see, https://numpy.org/doc/stable/reference/generated/numpy.can_cast.html
+                    orig_value = orig_value.item()
+                except AttributeError:
+                    pass
+
             else:
                 raise NotImplementedError(
                     "Only Categorical, Integer, and Float hyperparameters are currently supported."
