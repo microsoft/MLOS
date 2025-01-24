@@ -7,29 +7,36 @@ The dashboard components can also be used within a notebook, or streamlit, or an
 ## Features
 
 1. **Experiment Overview**:
+
    - View dataset statistics and configuration distributions.
    - Inspect the overall performance of your experiments.
 
-2. **Performance Analysis**:
+1. **Performance Analysis**:
+
    - Visualize metrics with whisker plots and heatmaps.
    - Perform advanced analysis using parallel coordinates and performance radar plots.
 
-3. **Time Series Analysis**:
+1. **Time Series Analysis**:
+
    - Analyze metrics over time.
    - Apply moving average filters for better trend visualization.
 
-4. **Distribution Analysis**:
+1. **Distribution Analysis**:
+
    - View metric distributions with histogram and violin plots.
 
-5. **Failure Analysis**:
+1. **Failure Analysis**:
+
    - Visualize success/failure distributions.
    - Analyze failure rates across different configurations.
 
-6. **Statistical Analysis**:
+1. **Statistical Analysis**:
+
    - Perform pairwise statistical tests for configuration comparison.
    - Compare score distributions between different configurations.
 
 ## Installation
+
 ```bash
 pip install -r requirements.txt
 python setup.py install
