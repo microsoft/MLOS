@@ -4,6 +4,8 @@ This project provides a comprehensive dashboard components for analyzing experim
 
 The dashboard components can also be used within a notebook, or streamlit, or any platform which supports plotly.
 
+Another use would be to automate the process of running statistical significance tests to analyze and identify meaningful differences between configuration sets. It enables users to streamline performance analysis by automatically detecting which configurations yield compelling performance improvements.
+
 ## Features
 
 1. **Experiment Overview**:
