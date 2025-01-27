@@ -9,10 +9,11 @@ Explicit configs (partial or full) are possible using configuration files.
 
 Examples
 --------
->>> # Load tunables from a JSON string.
->>> # Note: normally these would be automatically loaded from the Environment(s)'s
->>> # `include_tunables` config parameter.
->>> #
+Load tunables from a JSON string.
+Note: normally these would be automatically loaded from the
+:py:mod:`~mlos_bench.environments.base_environment.Environment`'s
+``include_tunables`` config parameter.
+
 >>> import json5 as json
 >>> from mlos_bench.environments.status import Status
 >>> from mlos_bench.services.config_persistence import ConfigPersistenceService
@@ -48,10 +49,10 @@ Examples
 >>> tunables.get_param_values()
 {'colors': 'green', 'int_param': 2, 'float_param': 0.5}
 
->>> # Load a JSON config of some tunable values to explicitly test.
->>> # Normally these would be provided by the
->>> # `mlos_bench --tunable-values`
->>> # CLI option.
+Load a JSON config of some tunable values to explicitly test.
+Normally these would be provided by the :py:mod:`mlos_bench.run` CLI's
+``--tunable-values`` option.
+
 >>> tunable_values_json = '''
 ... {
 ...   "colors": "red",
@@ -64,7 +65,8 @@ Examples
 {'colors': 'red', 'int_param': 1, 'float_param': 0.0}
 >>> assert not tunables.is_defaults()
 
->>> # Now create a OneShotOptimizer from a JSON config string.
+Now create a OneShotOptimizer from a JSON config string.
+
 >>> optimizer_json_config = '''
 ... {
 ...   "class": "mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer",
@@ -76,7 +78,9 @@ Examples
 ...   service=service,
 ...   config=config,
 ... )
->>> # Run the optimizer.
+
+Run the optimizer.
+
 >>> # Note that it will only run for a single iteration and return the values we set.
 >>> while optimizer.not_converged():
 ...     suggestion = optimizer.suggest()

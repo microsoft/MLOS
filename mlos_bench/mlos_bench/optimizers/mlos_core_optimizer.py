@@ -7,8 +7,8 @@ A wrapper for :py:mod:`mlos_core.optimizers` for :py:mod:`mlos_bench`.
 
 Config
 ------
-The JSON config for an :py:class:`.MlosCoreOptimizer` generally takes the
-following basic structure:
+:py:mod:`mlos_bench.optimizers` has an overview of the configuration options for
+the py:mod:`.MlosCoreOptimizer`.
 
 See Also
 --------
@@ -21,10 +21,11 @@ See Also
 
 Examples
 --------
->>> # Load tunables from a JSON string.
->>> # Note: normally these would be automatically loaded from the Environment(s)'s
->>> # `include_tunables` config parameter.
->>> #
+Load tunables from a JSON string.
+Note: normally these would be automatically loaded from the
+:py:mod:`~mlos_bench.environments.base_environment.Environment`'s
+``include_tunables`` config parameter.
+
 >>> import json5 as json
 >>> import mlos_core.optimizers
 >>> from mlos_bench.environments.status import Status
@@ -59,19 +60,39 @@ Examples
 >>> tunables.get_param_values()
 {'flags': 'auto', 'int_param': 10, 'float_param': 50.0}
 
->>> # When using the MlosCoreOptimizer, we can also specify some additional
->>> # properties, for instance the optimizer_type, which is one of the mlos_core
->>> # OptimizerType enum values:
+When using the :py:class:`.MlosCoreOptimizer`, we can also specify some
+additional properties, for instance the ``optimizer_type``, which is one of the
+mlos_core :py:data:`~mlos_core.optimizers.OptimizerType` enum values:
+
+>>> import mlos_core.optimizers
 >>> print([member.name for member in mlos_core.optimizers.OptimizerType])
 ['RANDOM', 'FLAML', 'SMAC']
 
->>> # We can also specify
->>> # properties, for instance the optimizer_type, which is one of the mlos_core
->>> # OptimizerType enum values:
->>> print([member.name for member in mlos_core.optimizers.OptimizerType])
-['RANDOM', 'FLAML', 'SMAC']
+These may also include their own configuration options, which can be specified
+as additional key-value pairs in the ``config`` section, where each key-value
+corresponds to an argument to the respective OptimizerTypes's constructor.
+See :py:meth:`mlos_core.optimizers.OptimizerFactory.create` for more details.
 
->>> # Here's an example JSON config for an MlosCoreOptimizer.
+Other Optimizers may also have their own configuration options.
+See each class' documentation for details.
+
+When using :py:class:`.MlosCoreOptimizer`, we can also specify an optional an
+``space_adapter_type``, which can sometimes help manipulate the configuration
+space to something more manageable.  It should be one of the following
+:py:data:`~mlos_core.spaces.adapters.SpaceAdapterType` enum values:
+
+>>> import mlos_core.spaces.adapters
+>>> print([member.name for member in mlos_core.spaces.adapters.SpaceAdapterType])
+['IDENTITY', 'LLAMATUNE']
+
+These may also include their own configuration options, which can be specified
+as additional key-value pairs in the optional ``space_adapter_config`` section,
+where each key-value corresponds to an argument to the respective
+OptimizerTypes's constructor.  See
+:py:meth:`mlos_core.spaces.adapters.SpaceAdapterFactory.create` for more details.
+
+Here's an example JSON config for an :py:class:`.MlosCoreOptimizer`.
+
 >>> optimizer_json_config = '''
 ... {
 ...   "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
@@ -105,12 +126,20 @@ Examples
 ...     }
 ... }
 ... '''
+
+That config will typically be loaded via the ``--optimizer`` command-line
+argument to the :py:mod:`mlos_bench <mlos_bench.run>` CLI.
+However, for demonstration purposes, we can load it directly here:
+
 >>> config = json.loads(optimizer_json_config)
 >>> optimizer = service.build_optimizer(
 ...   tunables=tunables,
 ...   service=service,
 ...   config=config,
 ... )
+
+Internally the Scheduler will call the Optimizer's methods to suggest
+configurations, like so:
 
 >>> suggested_config_1 = optimizer.suggest()
 >>> # Normally default values should be suggested first, per json config.
@@ -167,7 +196,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class MlosCoreOptimizer(Optimizer):
-    """A wrapper class for the mlos_core optimizers."""
+    """A wrapper class for the :py:mod:`mlos_core.optimizers`."""
 
     def __init__(
         self,
