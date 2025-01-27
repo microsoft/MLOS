@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlos_bench.optimizers.grid_search_optimizer &mdash; MLOS 0.6.3.dev18+ged2c0cb150 documentation</title>
+  <title>mlos_bench.optimizers.grid_search_optimizer &mdash; MLOS 0.6.3.dev19+g2295f3ab3a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/optimizers/grid_search_optimizer/index.html"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=9a48a88e"></script>
+      <script src="../../../../_static/documentation_options.js?v=a19691ae"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -161,11 +161,11 @@
 (i.e., non <a class="reference internal" href="../../tunables/tunable/index.html#mlos_bench.tunables.tunable.Tunable.quantization_bins" title="mlos_bench.tunables.tunable.Tunable.quantization_bins"><code class="xref py py-attr docutils literal notranslate"><span class="pre">quantized</span></code></a>
 tunables are not supported).</p>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Load tunables from a JSON string.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Note: normally these would be automatically loaded from the Environment(s)&#39;s</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># `include_tunables` config parameter.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1">#</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">json5</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">json</span>
+<p>Load tunables from a JSON string.
+Note: normally these would be automatically loaded from the
+<a class="reference internal" href="../../environments/base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Environment</span></code></a>’s
+<code class="docutils literal notranslate"><span class="pre">include_tunables</span></code> config parameter.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">json5</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">json</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlos_bench.environments.status</span><span class="w"> </span><span class="kn">import</span> <span class="n">Status</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlos_bench.services.config_persistence</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigPersistenceService</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">service</span> <span class="o">=</span> <span class="n">ConfigPersistenceService</span><span class="p">()</span>
@@ -201,8 +201,8 @@ tunables are not supported).</p>
 <span class="go">{&#39;colors&#39;: &#39;green&#39;, &#39;int_param&#39;: 2, &#39;float_param&#39;: 0.5}</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Now create a GridSearchOptimizer from a JSON config string.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">optimizer_json_config</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<p>Now create a <a class="reference internal" href="#mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer" title="mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridSearchOptimizer</span></code></a> from a JSON config string.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">optimizer_json_config</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
 <span class="gp">... </span><span class="s1">{</span>
 <span class="gp">... </span><span class="s1">  &quot;class&quot;: &quot;mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer&quot;,</span>
 <span class="gp">... </span><span class="s1">  &quot;description&quot;: &quot;GridSearchOptimizer&quot;,</span>
@@ -224,7 +224,10 @@ tunables are not supported).</p>
 <span class="go">27</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">next</span><span class="p">(</span><span class="n">grid_search_optimizer</span><span class="o">.</span><span class="n">pending_configs</span><span class="p">)</span>
 <span class="go">{&#39;colors&#39;: &#39;red&#39;, &#39;float_param&#39;: 0, &#39;int_param&#39;: 1}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">suggested_config_1</span> <span class="o">=</span> <span class="n">grid_search_optimizer</span><span class="o">.</span><span class="n">suggest</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Here are some examples of suggesting and registering configurations.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">suggested_config_1</span> <span class="o">=</span> <span class="n">grid_search_optimizer</span><span class="o">.</span><span class="n">suggest</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Default should be suggested first, per json config.</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">suggested_config_1</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">()</span>
 <span class="go">{&#39;colors&#39;: &#39;green&#39;, &#39;int_param&#39;: 2, &#39;float_param&#39;: 0.5}</span>

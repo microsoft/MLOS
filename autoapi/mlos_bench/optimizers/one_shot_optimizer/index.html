@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlos_bench.optimizers.one_shot_optimizer &mdash; MLOS 0.6.3.dev18+ged2c0cb150 documentation</title>
+  <title>mlos_bench.optimizers.one_shot_optimizer &mdash; MLOS 0.6.3.dev19+g2295f3ab3a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/optimizers/one_shot_optimizer/index.html"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=9a48a88e"></script>
+      <script src="../../../../_static/documentation_options.js?v=a19691ae"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -150,11 +150,11 @@
 <p>No-op optimizer for mlos_bench that proposes a single configuration.</p>
 <p>Explicit configs (partial or full) are possible using configuration files.</p>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Load tunables from a JSON string.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Note: normally these would be automatically loaded from the Environment(s)&#39;s</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># `include_tunables` config parameter.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1">#</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">json5</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">json</span>
+<p>Load tunables from a JSON string.
+Note: normally these would be automatically loaded from the
+<a class="reference internal" href="../../environments/base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Environment</span></code></a>’s
+<code class="docutils literal notranslate"><span class="pre">include_tunables</span></code> config parameter.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">json5</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">json</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlos_bench.environments.status</span><span class="w"> </span><span class="kn">import</span> <span class="n">Status</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlos_bench.services.config_persistence</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigPersistenceService</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">service</span> <span class="o">=</span> <span class="n">ConfigPersistenceService</span><span class="p">()</span>
@@ -190,11 +190,10 @@
 <span class="go">{&#39;colors&#39;: &#39;green&#39;, &#39;int_param&#39;: 2, &#39;float_param&#39;: 0.5}</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Load a JSON config of some tunable values to explicitly test.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Normally these would be provided by the</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># `mlos_bench --tunable-values`</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># CLI option.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tunable_values_json</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<p>Load a JSON config of some tunable values to explicitly test.
+Normally these would be provided by the <a class="reference internal" href="../../run/index.html#module-mlos_bench.run" title="mlos_bench.run"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.run</span></code></a> CLI’s
+<code class="docutils literal notranslate"><span class="pre">--tunable-values</span></code> option.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tunable_values_json</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
 <span class="gp">... </span><span class="s1">{</span>
 <span class="gp">... </span><span class="s1">  &quot;colors&quot;: &quot;red&quot;,</span>
 <span class="gp">... </span><span class="s1">  &quot;int_param&quot;: 1,</span>
@@ -207,8 +206,8 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="ow">not</span> <span class="n">tunables</span><span class="o">.</span><span class="n">is_defaults</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Now create a OneShotOptimizer from a JSON config string.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">optimizer_json_config</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<p>Now create a OneShotOptimizer from a JSON config string.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">optimizer_json_config</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
 <span class="gp">... </span><span class="s1">{</span>
 <span class="gp">... </span><span class="s1">  &quot;class&quot;: &quot;mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer&quot;,</span>
 <span class="gp">... </span><span class="s1">}</span>
@@ -219,8 +218,10 @@
 <span class="gp">... </span>  <span class="n">service</span><span class="o">=</span><span class="n">service</span><span class="p">,</span>
 <span class="gp">... </span>  <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Run the optimizer.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Note that it will only run for a single iteration and return the values we set.</span>
+</pre></div>
+</div>
+<p>Run the optimizer.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Note that it will only run for a single iteration and return the values we set.</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">while</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">not_converged</span><span class="p">():</span>
 <span class="gp">... </span>    <span class="n">suggestion</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">suggest</span><span class="p">()</span>
 <span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">suggestion</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">())</span>

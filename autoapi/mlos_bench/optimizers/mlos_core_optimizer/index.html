@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlos_bench.optimizers.mlos_core_optimizer &mdash; MLOS 0.6.3.dev18+ged2c0cb150 documentation</title>
+  <title>mlos_bench.optimizers.mlos_core_optimizer &mdash; MLOS 0.6.3.dev19+g2295f3ab3a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/optimizers/mlos_core_optimizer/index.html"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=9a48a88e"></script>
+      <script src="../../../../_static/documentation_options.js?v=a19691ae"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -155,8 +155,8 @@
 <p>A wrapper for <a class="reference internal" href="../../../mlos_core/optimizers/index.html#module-mlos_core.optimizers" title="mlos_core.optimizers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_core.optimizers</span></code></a> for <a class="reference internal" href="../../index.html#module-mlos_bench" title="mlos_bench"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench</span></code></a>.</p>
 <section id="config">
 <h2>Config<a class="headerlink" href="#config" title="Link to this heading"></a></h2>
-<p>The JSON config for an <a class="reference internal" href="#mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer" title="mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">MlosCoreOptimizer</span></code></a> generally takes the
-following basic structure:</p>
+<p><a class="reference internal" href="../index.html#module-mlos_bench.optimizers" title="mlos_bench.optimizers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.optimizers</span></code></a> has an overview of the configuration options for
+the py:mod:<cite>.MlosCoreOptimizer</cite>.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
@@ -169,11 +169,11 @@ following basic structure:</p>
 </dl>
 </div>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Load tunables from a JSON string.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Note: normally these would be automatically loaded from the Environment(s)&#39;s</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># `include_tunables` config parameter.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1">#</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">json5</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">json</span>
+<p>Load tunables from a JSON string.
+Note: normally these would be automatically loaded from the
+<a class="reference internal" href="../../environments/base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Environment</span></code></a>’s
+<code class="docutils literal notranslate"><span class="pre">include_tunables</span></code> config parameter.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">json5</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">json</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">mlos_core.optimizers</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlos_bench.environments.status</span><span class="w"> </span><span class="kn">import</span> <span class="n">Status</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlos_bench.services.config_persistence</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigPersistenceService</span>
@@ -208,22 +208,36 @@ following basic structure:</p>
 <span class="go">{&#39;flags&#39;: &#39;auto&#39;, &#39;int_param&#39;: 10, &#39;float_param&#39;: 50.0}</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># When using the MlosCoreOptimizer, we can also specify some additional</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># properties, for instance the optimizer_type, which is one of the mlos_core</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># OptimizerType enum values:</span>
+<p>When using the <a class="reference internal" href="#mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer" title="mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">MlosCoreOptimizer</span></code></a>, we can also specify some
+additional properties, for instance the <code class="docutils literal notranslate"><span class="pre">optimizer_type</span></code>, which is one of the
+mlos_core <a class="reference internal" href="../../../mlos_core/optimizers/index.html#mlos_core.optimizers.OptimizerType" title="mlos_core.optimizers.OptimizerType"><code class="xref py py-data docutils literal notranslate"><span class="pre">OptimizerType</span></code></a> enum values:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">mlos_core.optimizers</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">([</span><span class="n">member</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">mlos_core</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">OptimizerType</span><span class="p">])</span>
 <span class="go">[&#39;RANDOM&#39;, &#39;FLAML&#39;, &#39;SMAC&#39;]</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># We can also specify</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># properties, for instance the optimizer_type, which is one of the mlos_core</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># OptimizerType enum values:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">([</span><span class="n">member</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">mlos_core</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">OptimizerType</span><span class="p">])</span>
-<span class="go">[&#39;RANDOM&#39;, &#39;FLAML&#39;, &#39;SMAC&#39;]</span>
+<p>These may also include their own configuration options, which can be specified
+as additional key-value pairs in the <code class="docutils literal notranslate"><span class="pre">config</span></code> section, where each key-value
+corresponds to an argument to the respective OptimizerTypes’s constructor.
+See <a class="reference internal" href="../../../mlos_core/optimizers/index.html#mlos_core.optimizers.OptimizerFactory.create" title="mlos_core.optimizers.OptimizerFactory.create"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mlos_core.optimizers.OptimizerFactory.create()</span></code></a> for more details.</p>
+<p>Other Optimizers may also have their own configuration options.
+See each class’ documentation for details.</p>
+<p>When using <a class="reference internal" href="#mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer" title="mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">MlosCoreOptimizer</span></code></a>, we can also specify an optional an
+<code class="docutils literal notranslate"><span class="pre">space_adapter_type</span></code>, which can sometimes help manipulate the configuration
+space to something more manageable.  It should be one of the following
+<a class="reference internal" href="../../../mlos_core/spaces/adapters/index.html#mlos_core.spaces.adapters.SpaceAdapterType" title="mlos_core.spaces.adapters.SpaceAdapterType"><code class="xref py py-data docutils literal notranslate"><span class="pre">SpaceAdapterType</span></code></a> enum values:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">mlos_core.spaces.adapters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">([</span><span class="n">member</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">mlos_core</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">adapters</span><span class="o">.</span><span class="n">SpaceAdapterType</span><span class="p">])</span>
+<span class="go">[&#39;IDENTITY&#39;, &#39;LLAMATUNE&#39;]</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Here&#39;s an example JSON config for an MlosCoreOptimizer.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">optimizer_json_config</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<p>These may also include their own configuration options, which can be specified
+as additional key-value pairs in the optional <code class="docutils literal notranslate"><span class="pre">space_adapter_config</span></code> section,
+where each key-value corresponds to an argument to the respective
+OptimizerTypes’s constructor.  See
+<a class="reference internal" href="../../../mlos_core/spaces/adapters/index.html#mlos_core.spaces.adapters.SpaceAdapterFactory.create" title="mlos_core.spaces.adapters.SpaceAdapterFactory.create"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mlos_core.spaces.adapters.SpaceAdapterFactory.create()</span></code></a> for more details.</p>
+<p>Here’s an example JSON config for an <a class="reference internal" href="#mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer" title="mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">MlosCoreOptimizer</span></code></a>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">optimizer_json_config</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
 <span class="gp">... </span><span class="s1">{</span>
 <span class="gp">... </span><span class="s1">  &quot;class&quot;: &quot;mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer&quot;,</span>
 <span class="gp">... </span><span class="s1">  &quot;description&quot;: &quot;MlosCoreOptimizer&quot;,</span>
@@ -256,7 +270,12 @@ following basic structure:</p>
 <span class="gp">... </span><span class="s1">    }</span>
 <span class="gp">... </span><span class="s1">}</span>
 <span class="gp">... </span><span class="s1">&#39;&#39;&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">optimizer_json_config</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>That config will typically be loaded via the <code class="docutils literal notranslate"><span class="pre">--optimizer</span></code> command-line
+argument to the <a class="reference internal" href="../../run/index.html#module-mlos_bench.run" title="mlos_bench.run"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench</span></code></a> CLI.
+However, for demonstration purposes, we can load it directly here:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">optimizer_json_config</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">build_optimizer</span><span class="p">(</span>
 <span class="gp">... </span>  <span class="n">tunables</span><span class="o">=</span><span class="n">tunables</span><span class="p">,</span>
 <span class="gp">... </span>  <span class="n">service</span><span class="o">=</span><span class="n">service</span><span class="p">,</span>
@@ -264,6 +283,8 @@ following basic structure:</p>
 <span class="gp">... </span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Internally the Scheduler will call the Optimizer’s methods to suggest
+configurations, like so:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">suggested_config_1</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">suggest</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Normally default values should be suggested first, per json config.</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># However, since LlamaTune is being employed here, the first suggestion may</span>
@@ -294,7 +315,7 @@ following basic structure:</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer" title="mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MlosCoreOptimizer</span></code></a></p></td>
-<td><p>A wrapper class for the mlos_core optimizers.</p></td>
+<td><p>A wrapper class for the <a class="reference internal" href="../../../mlos_core/optimizers/index.html#module-mlos_core.optimizers" title="mlos_core.optimizers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_core.optimizers</span></code></a>.</p></td>
 </tr>
 </tbody>
 </table>
@@ -305,7 +326,7 @@ following basic structure:</p>
 <dt class="sig sig-object py" id="mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlos_bench.optimizers.mlos_core_optimizer.</span></span><span class="sig-name descname"><span class="pre">MlosCoreOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tunables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><span class="pre">mlos_bench.tunables.tunable_groups.TunableGroups</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../services/base_service/index.html#mlos_bench.services.base_service.Service" title="mlos_bench.services.base_service.Service"><span class="pre">mlos_bench.services.base_service.Service</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/optimizers/mlos_core_optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="../base_optimizer/index.html#mlos_bench.optimizers.base_optimizer.Optimizer" title="mlos_bench.optimizers.base_optimizer.Optimizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mlos_bench.optimizers.base_optimizer.Optimizer</span></code></a></p>
-<p>A wrapper class for the mlos_core optimizers.</p>
+<p>A wrapper class for the <a class="reference internal" href="../../../mlos_core/optimizers/index.html#module-mlos_core.optimizers" title="mlos_core.optimizers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_core.optimizers</span></code></a>.</p>
 <p>Create a new optimizer for the given configuration space defined by the
 tunables.</p>
 <dl class="field-list simple">
