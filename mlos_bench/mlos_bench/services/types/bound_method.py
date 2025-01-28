@@ -2,7 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Protocol representing a bound method."""
+"""
+Protocol representing a bound method.
+
+Notes
+-----
+Mostly just used for type checking of
+:py:class:`~mlos_bench.services.base_service.Service` mix-ins.
+"""
 
 from typing import Any, Protocol, runtime_checkable
 
