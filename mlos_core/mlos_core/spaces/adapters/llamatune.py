@@ -16,7 +16,6 @@ See Also: `LlamaTune: Sample-Efficient DBMS Configuration Tuning
 import os
 from importlib.metadata import version
 from typing import Any
-from packaging.version import Version
 from warnings import warn
 
 import ConfigSpace
@@ -25,12 +24,14 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from ConfigSpace.hyperparameters import NumericalHyperparameter
+from packaging.version import Version
 from sklearn.preprocessing import MinMaxScaler
 
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.util import normalize_config
 
 _NUMPY_VERS = Version(version("numpy"))
+
 
 class LlamaTuneAdapter(BaseSpaceAdapter):  # pylint: disable=too-many-instance-attributes
     """Implementation of LlamaTune, a set of parameter space transformation techniques,

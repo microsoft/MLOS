@@ -8,12 +8,12 @@ import re
 import warnings
 from collections.abc import Callable, Iterable
 from importlib.metadata import version
-from packaging.version import Version
 from typing import Any, Literal
 
 import pandas
 import seaborn as sns
 from matplotlib import pyplot as plt
+from packaging.version import Version
 from pandas.api.types import is_numeric_dtype
 from pandas.core.groupby.generic import SeriesGroupBy
 
