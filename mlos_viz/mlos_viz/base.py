@@ -13,13 +13,14 @@ from typing import Any, Literal
 import pandas
 import seaborn as sns
 from matplotlib import pyplot as plt
+from packaging.version import Version
 from pandas.api.types import is_numeric_dtype
 from pandas.core.groupby.generic import SeriesGroupBy
 
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_viz.util import expand_results_data_args
 
-_SEABORN_VERS = version("seaborn")
+_SEABORN_VERS = Version(version("seaborn"))
 
 
 def _get_kwarg_defaults(target: Callable, **kwargs: Any) -> dict[str, Any]:
@@ -40,7 +41,7 @@ def ignore_plotter_warnings() -> None:
     adding them to the warnings filter.
     """
     warnings.filterwarnings("ignore", category=FutureWarning)
-    if _SEABORN_VERS <= "0.13.1":
+    if _SEABORN_VERS <= Version("0.13.1"):
         warnings.filterwarnings(
             "ignore",
             category=DeprecationWarning,
