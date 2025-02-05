@@ -52,11 +52,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="mlos_benchd")
     parser.add_argument(
         "--storage",
-        required=False,
-        help=(
-            "Path to the storage configuration file. "
-            "If omitted, use the ephemeral in-memory SQL storage."
-        ),
+        required=True,
+        help="Path to the storage configuration file.",
     )
     parser.add_argument(
         "--num_workers",
