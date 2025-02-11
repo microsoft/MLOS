@@ -140,7 +140,11 @@ class AzureDeploymentService(Service, metaclass=abc.ABCMeta):
         session = requests.Session()
         session.mount(
             "https://",
-            HTTPAdapter(max_retries=Retry(total=total_retries, backoff_factor=backoff_factor)),
+            HTTPAdapter(
+                max_retries=Retry(
+                    total=total_retries, backoff_factor=backoff_factor, status_forcelist=[503]
+                )
+            ),
         )
         session.headers.update(self._get_headers())
         return session
