@@ -27,10 +27,6 @@
                         "storageFileShareName": {
                             "description": "Azure storage file share name.",
                             "type": "string"
-                        },
-                        "storageAccountKey": {
-                            "description": "Azure storage account key (typically provided in the global config in order to omit from source control).",
-                            "type": "string"
                         }
                     },
                     "required": [
