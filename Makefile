@@ -73,7 +73,7 @@ FORMAT_COMMON_PREREQS += $(MLOS_GLOBAL_CONF_FILES)
 
 # Formatting pre-commit hooks are marked with the "manual" stage in .pre-commit-config.yaml
 # Since yq is not installed everywhere we need to sync the list here as well.
-FORMATTERS := end-of-file-fixer pretty-format-json trailingwhitespace licenseheaders pyupgrade isort black docformatter
+FORMATTERS := end-of-file-fixer pretty-format-json trailingwhitespace licenseheaders pyupgrade isort black docformatter mdformat
 
 # Provide convenience methods to call individual formatters and checkers via `make` as well.
 # e.g., `make black` or `make pylint`
