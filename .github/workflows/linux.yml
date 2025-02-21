@@ -157,10 +157,23 @@ jobs:
           'from sys import version_info as vers; assert (vers.major, vers.minor) == (3, 13), f"Unexpected python version: {vers}"'
 
     # This is moreso about code cleanliness, which is a dev thing, not a
-    # functionality thing, and the rules for that change between python versions,
-    # so only do this for the default in the devcontainer.
-    #- name: Run lint checks
-    #  run: make CONDA_ENV_NAME=$CONDA_ENV_NAME check
+    # functionality thing, and the rules for that sometimes change between
+    # python versions, so only do this for the default python in addition to the
+    # devcontainer to get an earlier PR status signal.
+
+    - name: Check for formatting issues
+      if: ${{ matrix.python_version == '' }}
+      timeout-minutes: 3
+      run: |
+        set -x
+        make CONDA_ENV_NAME=$CONDA_ENV_NAME format
+        # licenseheaders changes the contents of the files, so make this check fail if there are any changes detected
+        git --no-pager diff --exit-code
+
+    - name: Run lint checks
+      if: ${{ matrix.python_version == '' }}
+      timeout-minutes: 5
+      run: make CONDA_ENV_NAME=$CONDA_ENV_NAME check
 
     # Only run the coverage checks on the devcontainer job.
     - name: Run tests
