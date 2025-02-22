@@ -15,22 +15,22 @@ mlos_bench.storage.base_experiment_data
 
    .. seealso::
 
-      :obj:`mlos_bench.storage`
+      :py:obj:`mlos_bench.storage`
           The base storage module for mlos_bench, which includes some basic examples in the documentation.
 
-      :obj:`ExperimentData.results_df`
+      :py:obj:`ExperimentData.results_df`
           Retrieves a pandas DataFrame of the Experiment's trials' results data.
 
-      :obj:`ExperimentData.trials`
+      :py:obj:`ExperimentData.trials`
           Retrieves a dictionary of the Experiment's trials' data.
 
-      :obj:`ExperimentData.tunable_configs`
+      :py:obj:`ExperimentData.tunable_configs`
           Retrieves a dictionary of the Experiment's sampled configs data.
 
-      :obj:`ExperimentData.tunable_config_trial_groups`
+      :py:obj:`ExperimentData.tunable_config_trial_groups`
           Retrieves a dictionary of the Experiment's trials' data, grouped by shared tunable config.
 
-      :obj:`mlos_bench.storage.base_trial_data.TrialData`
+      :py:obj:`mlos_bench.storage.base_trial_data.TrialData`
           Base interface for accessing the stored benchmark trial data.
 
 

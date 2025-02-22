@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlos_bench.event_loop_context &mdash; MLOS 0.6.3.dev21+gd168d8778f documentation</title>
+  <title>mlos_bench.event_loop_context &mdash; MLOS 0.6.3.dev23+ge7751fdfc3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/event_loop_context/index.html"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=21284dd4"></script>
+      <script src="../../../_static/documentation_options.js?v=f30858f1"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -161,7 +161,7 @@
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="mlos_bench.event_loop_context.EventLoopContext">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlos_bench.event_loop_context.</span></span><span class="sig-name descname"><span class="pre">EventLoopContext</span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/event_loop_context.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.event_loop_context.EventLoopContext" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlos_bench.event_loop_context.</span></span><span class="sig-name descname"><span class="pre">EventLoopContext</span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/event_loop_context.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.event_loop_context.EventLoopContext" title="Link to this definition"></a></dt>
 <dd><p>EventLoopContext encapsulates a background thread for <a class="reference external" href="https://docs.python.org/3/library/asyncio.html#module-asyncio" title="(in Python v3.13)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code></a>
 event loop processing as an aid for context managers.</p>
 <p>There is generally only expected to be one of these, either as a base class instance
@@ -217,9 +217,9 @@ Future that can be used to wait for the result.</p>
 <dd><p>Type variable for the return type of an <a class="reference external" href="https://docs.python.org/3/library/asyncio.html#module-asyncio" title="(in Python v3.13)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">asyncio</span></code></a> coroutine.</p>
 </dd></dl>
 
-<dl class="py data">
+<dl class="py type">
 <dt class="sig sig-object py" id="mlos_bench.event_loop_context.FutureReturnType">
-<span class="sig-prename descclassname"><span class="pre">mlos_bench.event_loop_context.</span></span><span class="sig-name descname"><span class="pre">FutureReturnType</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">TypeAlias</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Future[CoroReturnType]</span></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/event_loop_context.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.event_loop_context.FutureReturnType" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">type</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlos_bench.event_loop_context.</span></span><span class="sig-name descname"><span class="pre">FutureReturnType</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Future</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mlos_bench.event_loop_context.CoroReturnType" title="mlos_bench.event_loop_context.CoroReturnType"><span class="pre">CoroReturnType</span></a><span class="p"><span class="pre">]</span></span></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/event_loop_context.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.event_loop_context.FutureReturnType" title="Link to this definition"></a></dt>
 <dd><p>Type variable for the return type of a <a class="reference external" href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Future" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></a>.</p>
 </dd></dl>
 

@@ -10,7 +10,7 @@ mlos_bench.optimizers.base_optimizer
 
    .. seealso::
 
-      :obj:`mlos_bench.optimizers`
+      :py:obj:`mlos_bench.optimizers`
           For more information on the available optimizers and their usage.
 
 

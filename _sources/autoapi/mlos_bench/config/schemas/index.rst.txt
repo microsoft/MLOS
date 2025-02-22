@@ -9,7 +9,7 @@ mlos_bench.config.schemas
 
    .. seealso::
 
-      :obj:`mlos_bench.config.schemas.config_schemas`
+      :py:obj:`mlos_bench.config.schemas.config_schemas`
           The module handling the actual schema definitions and validation.
 
 

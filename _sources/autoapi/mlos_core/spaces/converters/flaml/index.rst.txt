@@ -41,16 +41,14 @@ Module Contents
    :rtype: dict
 
 
-.. py:data:: FlamlDomain
-   :type:  TypeAlias
-   :value: Domain
+.. py:type:: FlamlDomain
+   :canonical: Domain
 
 
    Flaml domain type alias.
 
-.. py:data:: FlamlSpace
-   :type:  TypeAlias
-   :value: dict[str, Domain]
+.. py:type:: FlamlSpace
+   :canonical: dict[str, Domain]
 
 
    Flaml space type alias - a `dict[str, FlamlDomain]`

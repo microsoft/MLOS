@@ -12,7 +12,7 @@ mlos_bench.tunables.covariant_group
 
    .. seealso::
 
-      :obj:`mlos_bench.tunables.tunable_groups`
+      :py:obj:`mlos_bench.tunables.tunable_groups`
           TunableGroups class definition.
 
 

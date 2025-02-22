@@ -342,16 +342,14 @@ Module Contents
 
    .. seealso:: :py:attr:`Tunable.dtype <.Tunable.dtype>` : Example of type mappings.
 
-.. py:data:: TunableValue
-   :type:  TypeAlias
-   :value: int | float | str | None
+.. py:type:: TunableValue
+   :canonical: int | float | str | None
 
 
    A :py:class:`TypeAlias` for a :py:class:`~.Tunable` parameter value.
 
-.. py:data:: TunableValueType
-   :type:  TypeAlias
-   :value: type[int] | type[float] | type[str]
+.. py:type:: TunableValueType
+   :canonical: type[int] | type[float] | type[str]
 
 
    A :py:class:`TypeAlias` for :py:class:`~.Tunable` value
@@ -371,7 +369,7 @@ Module Contents
 
    .. rubric:: Notes
 
-   For checking whether a param is a :py:data:`.TunableValue` with
+   For checking whether a param is a :py:type:`.TunableValue` with
    :py:func:`isinstance`.
 
 .. py:data:: TunableValuesDict

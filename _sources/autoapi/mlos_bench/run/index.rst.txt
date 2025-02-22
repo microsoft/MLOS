@@ -13,10 +13,10 @@ mlos_bench.run
 
    .. seealso::
 
-      :obj:`mlos_bench.config`
+      :py:obj:`mlos_bench.config`
           documentation on the configuration system.
 
-      :obj:`mlos_bench.launcher.Launcher`
+      :py:obj:`mlos_bench.launcher.Launcher`
           class is responsible for processing the CLI args.
 
 

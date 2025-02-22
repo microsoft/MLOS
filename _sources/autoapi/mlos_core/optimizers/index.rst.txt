@@ -25,7 +25,7 @@ mlos_core.optimizers
 
    .. seealso::
 
-      :obj:`mlos_bench.optimizers.mlos_core_optimizer`
+      :py:obj:`mlos_bench.optimizers.mlos_core_optimizer`
           The mlos_bench Optimizer class that uses the mlos_core Optimizers to run autotuning experiments.
 
    .. rubric:: Notes

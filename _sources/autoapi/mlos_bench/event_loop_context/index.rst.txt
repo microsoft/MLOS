@@ -71,9 +71,8 @@ Module Contents
 
    Type variable for the return type of an :external:py:mod:`asyncio` coroutine.
 
-.. py:data:: FutureReturnType
-   :type:  TypeAlias
-   :value: Future[CoroReturnType]
+.. py:type:: FutureReturnType
+   :canonical: Future[CoroReturnType]
 
 
    Type variable for the return type of a :py:class:`~concurrent.futures.Future`.

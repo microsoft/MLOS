@@ -11,7 +11,7 @@ mlos_bench.services.config_persistence
 
    .. seealso::
 
-      :obj:`mlos_bench.config`
+      :py:obj:`mlos_bench.config`
           Overview of the configuration system.
 
 
@@ -199,7 +199,7 @@ Module Contents
 
       .. seealso::
 
-         :obj:`mlos_bench.environments`
+         :py:obj:`mlos_bench.environments`
              Examples of environment configurations.
 
 
@@ -226,7 +226,7 @@ Module Contents
 
       .. seealso::
 
-         :obj:`mlos_bench.environments`
+         :py:obj:`mlos_bench.environments`
              Examples of environment configurations.
 
 
@@ -253,7 +253,7 @@ Module Contents
 
       .. seealso::
 
-         :obj:`mlos_bench.services`
+         :py:obj:`mlos_bench.services`
              Examples of service configurations.
 
 
@@ -277,7 +277,7 @@ Module Contents
 
       .. seealso::
 
-         :obj:`mlos_bench.tunables`
+         :py:obj:`mlos_bench.tunables`
              Examples of tunable parameter configurations.
 
 

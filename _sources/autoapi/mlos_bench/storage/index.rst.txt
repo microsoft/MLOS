@@ -154,13 +154,13 @@ mlos_bench.storage
 
    .. seealso::
 
-      :obj:`mlos_bench.storage.base_storage`
+      :py:obj:`mlos_bench.storage.base_storage`
           Base interface for backends.
 
-      :obj:`mlos_bench.storage.base_experiment_data`
+      :py:obj:`mlos_bench.storage.base_experiment_data`
           Base interface for ExperimentData.
 
-      :obj:`mlos_bench.storage.base_trial_data`
+      :py:obj:`mlos_bench.storage.base_trial_data`
           Base interface for TrialData.
 
    .. rubric:: Notes

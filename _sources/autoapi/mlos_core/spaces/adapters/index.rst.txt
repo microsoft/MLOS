@@ -28,7 +28,7 @@ mlos_core.spaces.adapters
 
    .. seealso::
 
-      :obj:`mlos_bench.optimizers.mlos_core_optimizer`
+      :py:obj:`mlos_bench.optimizers.mlos_core_optimizer`
           The mlos_bench Optimizer class that uses the mlos_core Optimizers and SpaceAdapters to run autotuning experiments.
 
    .. rubric:: Notes

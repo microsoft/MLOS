@@ -243,7 +243,7 @@ Module Contents
 
       .. seealso::
 
-         :obj:`Tunable.values`
+         :py:obj:`Tunable.values`
              For more examples on getting the categorical values of a Tunable.
 
 
@@ -590,7 +590,7 @@ Module Contents
 
       .. seealso::
 
-         :obj:`Tunable.weights`
+         :py:obj:`Tunable.weights`
              For example of range_weight configuration.
 
 

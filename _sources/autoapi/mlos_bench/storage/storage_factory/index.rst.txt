@@ -11,7 +11,7 @@ mlos_bench.storage.storage_factory
 
    .. seealso::
 
-      :obj:`mlos_bench.storage`
+      :py:obj:`mlos_bench.storage`
           For example usage.
 
 
