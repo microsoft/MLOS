@@ -1,6 +1,6 @@
 setuptools-scm>=8.1.0
-sphinx
-sphinx-autoapi
+sphinx>=8.2.0
+sphinx-autoapi>=3.6.0
 intersphinx_registry>=0.2501.23 # https://github.com/Quansight-Labs/intersphinx_registry/pull/58
 nbsphinx
 jupyter_core>=4.11.2    # nbsphix dependency - addresses CVE-2022-39286
