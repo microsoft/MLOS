@@ -8,6 +8,10 @@ In general the `config` directory layout follows that of the `mlos_bench` module
 
 Full end-to-end examples are provided in the [`cli`](./cli/) directory, and typically and make use of the root [`CompositeEnvironments`](./environments/root/) to combine multiple [`Environments`](./environments/), also referencing [`Services`](./services/), [`Storage`](./storage/), and [`Optimizer`](./optimizers/) configs, into a single [`mlos_bench`](../run.py) run.
 
+## See Also
+
+- [`mlos_bench.config`](https://microsoft.github.io/MLOS/autoapi/mlos_bench/config/index.html) module documentation online for detailed description and additional links to other components and their configuration examples.
+
 ## Config parameters
 
 An `Environment` configuration can have two sections, `const_args` and `tunable_params`.
@@ -43,6 +47,8 @@ One example of the experiment-specific config is the [`experiment_RedisBench.jso
 The [`schemas`](./schemas/) directory contains the [`jsonschema`](https://json-schema.org/) schemas for the `mlos_bench` config files and may also be helpful when writing your own configs.
 
 For instance including a `"$schema"` attribute at the top of your `json` config file will enable `json` validation and auto-complete in many editors (e.g. [VSCode](https://code.visualstudio.com/)):
+
+Alternatively, you can simply name the file `*.mlos.json` or `*.mlos.jsonc` and the schema will be automatically applied using an [extension](https://marketplace.visualstudio.com/items?itemName=remcohaszing.schemastore) to resolve the rules from \<https://www.schemastore.org/json/
 
 ```jsonc
 {
