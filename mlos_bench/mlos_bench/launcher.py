@@ -181,11 +181,16 @@ class Launcher:
 
         # NOTE: Init tunable values *after* the Environment(s), but *before* the Optimizer
         # TODO: should we assign the same or different tunables for all TrialRunner Environments?
+        tunable_values: list[str] | str = config.get("tunable_values", [])
+        if isinstance(tunable_values, str):
+            tunable_values = [tunable_values]
+        tunable_values += args.tunable_values or []
+        assert isinstance(tunable_values, list)
         self.tunables = self._init_tunable_values(
             self.trial_runners[0].environment,
             args.random_init or config.get("random_init", False),
             config.get("random_seed") if args.random_seed is None else args.random_seed,
-            config.get("tunable_values", []) + (args.tunable_values or []),
+            tunable_values,
         )
         _LOG.info("Init tunables: %s", self.tunables)
 
@@ -501,7 +506,7 @@ class Launcher:
         env: Environment,
         random_init: bool,
         seed: int | None,
-        args_tunables: str | None,
+        args_tunables: list[str] | None,
     ) -> TunableGroups:
         """Initialize the tunables and load key/value pairs of the tunable values from
         given JSON files, if specified.
