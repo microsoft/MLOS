@@ -3,13 +3,13 @@
 # Licensed under the MIT License.
 #
 """Unit tests for the service to run the scripts locally."""
-import os
 import sys
 import tempfile
 
 import pandas
 import pytest
 
+from mlos_bench.os_environ import environ
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService, split_cmdline
 from mlos_bench.util import path_join
@@ -92,7 +92,7 @@ def test_run_script_multiline(local_exec_service: LocalExecService) -> None:
 def test_run_script_multiline_env(local_exec_service: LocalExecService) -> None:
     """Run a multiline script locally and pass the environment variables to it."""
     # `echo` should work on all platforms
-    os.environ["LOCAL_VAR"] = "LOCAL_VALUE"  # Make sure parent env is passed to child
+    environ["LOCAL_VAR"] = "LOCAL_VALUE"  # Make sure parent env is passed to child
     (return_code, stdout, stderr) = local_exec_service.local_exec(
         [
             r"echo $var $int_var $LOCAL_VAR",  # Unix shell
