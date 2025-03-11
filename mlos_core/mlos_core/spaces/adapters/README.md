@@ -44,14 +44,14 @@ llamatune_optimizer = OptimizerFactory.create(
     optimizer_kwargs={
         # optimizer kwargs
         # e.g.,
-        max_trials=100,
+        "max_trials": 100,
     },
     space_adapter_type=SpaceAdapterType.LLAMATUNE,
     space_adapter_kwargs={
         # llamatune kwargs
         # e.g.,
-        num_low_dims=16,
-        special_param_values={
+        "num_low_dims": 16,
+        "special_param_values": {
             "special_param": [-1, 0],
         },
     },

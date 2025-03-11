@@ -9,6 +9,7 @@ Revises: f83fb8ae7fc4
 Create Date: 2025-01-14 17:06:36.181503+00:00
 
 """
+# pylint: disable=invalid-name
 # pylint: disable=no-member
 
 from collections.abc import Sequence

@@ -422,7 +422,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         parent_args: dict[str, TunableValue] | None = None,
         service: Service | None = None,
     ) -> Environment:
-        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
         Factory method for a new :py:class:`.Environment` with a given config.
 
@@ -594,7 +594,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         parent_args: dict[str, TunableValue] | None = None,
         service: Service | None = None,
     ) -> Environment:
-        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
         Load and build new :py:class:`.Environment` from the config file or JSON string.
 
@@ -633,7 +633,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         parent_args: dict[str, TunableValue] | None = None,
         service: Service | None = None,
     ) -> list[Environment]:
-        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         """
         Load and build a list of Environments from the config file or JSON string.
 

@@ -136,10 +136,8 @@ def is_on_github_actions():
 intersphinx_mapping = get_intersphinx_mapping(
     packages={
         "asyncssh",
-        # Azure SDKs removed their intersphinx publishing.
-        # https://github.com/Azure/azure-sdk-for-python/issues/39316
-        # "azure-core",
-        # "azure-identity",
+        "azure-core",
+        "azure-identity",
         "configspace",
         "matplotlib",
         "numpy",
@@ -169,17 +167,17 @@ CUSTOM_REF_TYPE_MAP: dict[tuple[str, str], str] = {
     ("ConcreteSpaceAdapter", "class"): "data",
     ("DistributionName", "class"): "data",
     ("mlos_bench.tunables.tunable_types.DistributionName", "class"): "data",
-    ("FlamlDomain", "class"): "data",
-    ("mlos_core.spaces.converters.flaml.FlamlDomain", "class"): "data",
-    ("TunableValue", "class"): "data",
-    ("mlos_bench.tunables.tunable_types.TunableValue", "class"): "data",
-    ("TunableValueType", "class"): "data",
-    ("mlos_bench.tunables.tunable_types.TunableValueType", "class"): "data",
+    ("FlamlDomain", "class"): "type",
+    ("mlos_core.spaces.converters.flaml.FlamlDomain", "class"): "type",
+    ("TunableValue", "class"): "type",
+    ("mlos_bench.tunables.tunable_types.TunableValue", "class"): "type",
+    ("TunableValueType", "class"): "type",
+    ("mlos_bench.tunables.tunable_types.TunableValueType", "class"): "type",
     ("TunableValueTypeName", "class"): "data",
     ("mlos_bench.tunables.tunable_types.TunableValueTypeName", "class"): "data",
     ("T_co", "class"): "data",
     ("CoroReturnType", "class"): "data",
-    ("FutureReturnType", "class"): "data",
+    ("FutureReturnType", "class"): "type",
     ("NullableT", "class"): "data",
 }
 
@@ -194,10 +192,11 @@ def resolve_type_aliases(
     if node["refdomain"] != "py":
         return None
     (orig_type, reftarget) = (node["reftype"], node["reftarget"])
+    # warning(f"Resolving {orig_type} {reftarget}...")
     new_type = CUSTOM_REF_TYPE_MAP.get((reftarget, orig_type))
     if new_type:
         # warning(f"Resolved {orig_type} {reftarget} to {new_type}")
-        return app.env.get_domain("py").resolve_xref(
+        resolved = app.env.get_domain("py").resolve_xref(
             env,
             node["refdoc"],
             app.builder,
@@ -206,6 +205,8 @@ def resolve_type_aliases(
             node,
             contnode,
         )
+        # warning(f"Resolved {orig_type} {reftarget} to xref {resolved}")
+        return resolved
     return None
 
 
@@ -218,6 +219,7 @@ def setup(app: SphinxApp) -> None:
 # sphinx has a hard time finding typealiases and typevars instead of classes.
 # See Also: https://github.com/sphinx-doc/sphinx/issues/10974
 nitpick_ignore = [
+    ("py:class", "Future"),
     ("py:class", "Ellipsis"),
     # Internal typevars and aliases:
     ("py:class", "EnvironType"),
@@ -231,13 +233,11 @@ nitpick_ignore = [
     ("py:class", "sqlalchemy.MetaData"),
     ("py:exc", "jsonschema.exceptions.SchemaError"),
     ("py:exc", "jsonschema.exceptions.ValidationError"),
+    ("py:class", "Domain"),  # flaml
 ]
 nitpick_ignore_regex = [
     # Ignore some external references that don't use sphinx for their docs.
     (r"py:.*", r"flaml\..*"),
-    # Azure SDKs removed their intersphinx publishing.
-    # https://github.com/Azure/azure-sdk-for-python/issues/39316
-    (r"py:.*", r"azure\..*"),
 ]
 
 # Which documents to include in the build.

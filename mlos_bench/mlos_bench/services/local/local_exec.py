@@ -206,12 +206,12 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
         if env_params:
             env = {key: str(val) for (key, val) in env_params.items()}
 
+        env_copy = environ.copy()
         if sys.platform == "win32":
             # A hack to run Python on Windows with env variables set:
-            env_copy = environ.copy()
             env_copy["PYTHONPATH"] = ""
-            env_copy.update(env)
-            env = env_copy
+        env_copy.update(env)
+        env = env_copy
 
         try:
             if sys.platform != "win32":

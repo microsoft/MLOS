@@ -42,7 +42,7 @@ Tunable value ``type`` tuple.
 
 Notes
 -----
-For checking whether a param is a :py:data:`.TunableValue` with
+For checking whether a param is a :py:type:`.TunableValue` with
 :py:func:`isinstance`.
 """
 
