@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 """Unit tests for the service to run the scripts locally."""
+import os
 import sys
 import tempfile
 
@@ -91,15 +92,20 @@ def test_run_script_multiline(local_exec_service: LocalExecService) -> None:
 def test_run_script_multiline_env(local_exec_service: LocalExecService) -> None:
     """Run a multiline script locally and pass the environment variables to it."""
     # `echo` should work on all platforms
+    os.environ["LOCAL_VAR"] = "LOCAL_VALUE"  # Make sure parent env is passed to child
     (return_code, stdout, stderr) = local_exec_service.local_exec(
-        [r"echo $var", r"echo %var%"],  # Unix shell  # Windows cmd
+        [
+            r"echo $var $int_var $LOCAL_VAR",  # Unix shell
+            r"echo %var% %int_var% %LOCAL_VAR%",  # Windows cmd
+        ],
         env={"var": "VALUE", "int_var": 10},
     )
     assert return_code == 0
     if sys.platform == "win32":
-        assert stdout.strip().split() == ["$var", "VALUE"]
+        expected = ["$var", "$int_var", "$LOCAL_VAR", "VALUE", "10", "LOCAL_VALUE"]
     else:
-        assert stdout.strip().split() == ["VALUE", "%var%"]
+        expected = ["VALUE", "10", "LOCAL_VALUE", "%var%", "%int_var%", "%LOCAL_VAR%"]
+    assert stdout.strip().split() == expected
     assert stderr.strip() == ""
 
 
