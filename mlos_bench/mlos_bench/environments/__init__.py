@@ -42,28 +42,30 @@ Environment Parameterization
 
 Each :py:class:`~mlos_bench.environments.Environment` can have a set of parameters that define the
 environment's configuration. These parameters can be _constant_ (i.e., immutable from one trial
-run to the next) or _tunable_ (i.e., suggested by the optimizer or provided by the user).
-The following clauses in the environment configuration are used to declare these parameters:
+run to the next) or _tunable_ (i.e., suggested by the optimizer or provided by the user). The
+following clauses in the environment configuration are used to declare these parameters:
 
-- ``tunable_params``: A list of tunable parameters' _groups_. At each trial, the environment will
-  obtain the new values of these parameters from the outside (e.g., from the optimizer).
+- ``tunable_params``:
+  A list of tunable parameters' _groups_. At each trial, the environment will obtain the new
+  values of these parameters from the outside (e.g., from the optimizer).
 
-- ``const_args``: A dictionary of _constant_ parameters along with their values.
+- ``const_args``:
+  A dictionary of _constant_ parameters along with their values.
 
-- ``required_args``: A list of _constant_ parameters supplied to the environment externally
+- ``required_args``:
+  A list of _constant_ parameters supplied to the environment externally
   (i.e., from a parent environment, global config file, or command line).
 
-That is, tunable parameters change on every trial, while constant parameters stay fixed for the
+Again, tunable parameters change on every trial, while constant parameters stay fixed for the
 entire experiment.
 
 During the setup and run phases, MLOS will combine the constant and tunable parameters and their
 values into a single dictionary and pass it to the corresponding method.
 
 Values of constant parameters defined in the environment config can be overridden with the values
-from the command line and/or external config files.
-That allows MLOS users to have reusable immutable environment configurations and move all
-experiment-specific or sensitive data outside of the version-controlled files.
-We discuss the parameter propagation mechanism in the section below.
+from the command line and/or external config files. That allows MLOS users to have reusable
+immutable environment configurations and move all experiment-specific or sensitive data outside of
+the version-controlled files. We discuss the parameter propagation mechanism in the section below.
 
 Environment Tunables
 ++++++++++++++++++++
@@ -108,6 +110,10 @@ can be overridden with values of the corresponding parameters of the parent envi
 specified in the external config files or the command line. In fact, ``const_args`` or
 ``required_args`` sections can be viewed as placeholders for the parameters that are being pushed
 to the environment from the outside.
+
+The same parameter can be present in both ``const_args`` and ``required_args`` sections.
+``required_args`` is just a way to emphasize the importance of the parameter and create a
+placeholder for it when no default value can be specified the ``const_args`` section.
 
 Variable replacement happens in the bottom-up manner. That is, if a certain parameter is present
 in the parent (composite) environment, it will replace the corresponding parameter in the child,
