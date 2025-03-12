@@ -28,7 +28,7 @@ specific Environment and the configs that Environment was loaded with.
 This lets Environments be very flexible in what they can accomplish.
 
 Environments can be stacked together with the :py:class:`.CompositeEnv` class to
-represent complex setups (e.g., an appication running on a remote VM with a
+represent complex setups (e.g., an application running on a remote VM with a
 benchmark running from a local machine).
 
 See below for the set of Environments currently available in this package.
@@ -36,6 +36,29 @@ See below for the set of Environments currently available in this package.
 Note that additional ones can also be created by extending the base
 :py:class:`.Environment` class and referencing them in the :py:mod:`json configs
 <mlos_bench.config>` using the ``class`` key.
+
+Environment Parameterization
+++++++++++++++++++++++++++++
+
+Each environment can have a set of parameters that define the environment's configuration.
+These parameters can be _constant_ (i.e., immutable from one trial run to the next) or
+_tunable_ (i.e., suggested by the optimizer or provided by the user).
+The following clauses in the environment configuration are used to declare these parameters:
+
+    - `tunable_params`: A list of tunable parameters' _groups_.
+    The environment will obtain these parameters from the outside (e.g., from the optimizer).
+    - `const_args`: A dictionary of constant parameters along with their values.
+    - `required_args`: A list of constant parameters supplied to the environment externally
+    (i.e., from a parent environment, global config file, or command line).
+
+During the setup and run phases, MLOS will combine the constant and tunable parameters and their
+values into a single dictionary and pass it to the corresponding method.
+
+Values of constant parameters defined in the environment config can be overridden with the values
+from the command line and/or external config files.
+That allows MLOS users to have reusable immutable environment configurations and move all
+experiment-specific or sensitive data outside of the version-controlled files.
+We discuss the parameter propagation mechanism in the section below.
 
 Environment Tunables
 ++++++++++++++++++++
@@ -72,6 +95,45 @@ substitution in the values using the `globals` mechanism, this setting can used 
 dynamically change the set of active TunableGroups for a given Experiment using only
 `globals`, allowing for configs to be more modular and composable.
 
+Variable Propagation
+++++++++++++++++++++
+
+Parameters declared in the `const_args` or `required_args` sections of the environment config can
+be overridden with values of the corresponding parameters of the parent environment or specified
+in the external config files or the command line. In fact, `const_args` or `required_args`
+sections can be viewed as placeholders for the parameters that are being pushed to the environment
+from the outside.
+
+Variable replacement happens in the bottom-up manner. That is, if a certain parameter is present
+in the parent (composite) environment, it will replace the corresponding parameter in the child,
+and so on. Note that the parameter _must_ appear in the child environment `const_args` or
+`required_args` section; if a parameter is not present in one of these placeholders of the child
+environment config, it will not be propagated. This hierarchy allows MLOS users to have small
+immutable environment configurations at the lower levels and combine and parameterize them at the
+higher levels.
+
+Taking it to the next level outside of the environment configs, the parameters can be defined in
+the external key-value JSON config files (usually referred to as "global config files" in MLOS
+lingo). Users can have multiple global config files; at runtime, parameters from these files will
+be combined into a single dictionary and pushed to the root environment. This way, users can keep
+their experiment-specific parameters separately from the environment configs making them more
+reusable. Another common use of global config files is to store sensitive data (e.g., passwords,
+tokens, etc.) that should not be version-controlled. The global config files are specified in the
+`globals` section of the top-level CLI config, or in the `--globals` command line parameter.
+
+Finally, any global or environment parameter can be overridden from the command line, by simply
+specifying `--PARAMETER_NAME PARAMETER_VALUE`.
+
+We can summarize the parameter propagation rules as follows:
+1. Child environment will only get the parameters defined in its `const_args` or
+   `required_args` sections.
+1. Value of the parameter defined in the `const_args` section of the parent environment will
+   override the value of the corresponding parameter in the child environments.
+1. Values of the parameters defined in the global config files will override the values of the
+   corresponding parameters in all environments.
+1. Values of the command line parameters take precedence over values defined in the global or
+   environment configs.
+
 Environment Services
 ++++++++++++++++++++
 
@@ -86,10 +148,17 @@ Although this can be done in the Environment config directly with the
 used in different settings (e.g., local machine, SSH accessible machine, Azure VM,
 etc.) without having to change the Environment config.
 
-Variable Propagation
-++++++++++++++++++++
-TODO: Document how variable propagation works in the script environments using
-required_args, const_args, etc.
+Variable propagation rules described in the previous section for the environment configs also
+apply to the service configurations. That is, every parameter defined in the service config can be
+overridden by a corresponding parameter from the global config or the command line.
+
+All global configs, command line parameters, environment `const_args` and `required_args`
+sections, and service config parameters thus form one flat name space of parameters. This imposes
+a certain risk of name clashes, but also simplifies the configuration process and allows users to
+keep all experiment-specific data in a few  human-readable files.
+
+We will discuss the examples of such global and local configuration parameters in the
+documentation of the concrete services and environments.
 
 Examples
 --------
