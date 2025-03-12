@@ -45,11 +45,13 @@ These parameters can be _constant_ (i.e., immutable from one trial run to the ne
 _tunable_ (i.e., suggested by the optimizer or provided by the user).
 The following clauses in the environment configuration are used to declare these parameters:
 
-    - `tunable_params`: A list of tunable parameters' _groups_.
-    The environment will obtain these parameters from the outside (e.g., from the optimizer).
-    - `const_args`: A dictionary of constant parameters along with their values.
-    - `required_args`: A list of constant parameters supplied to the environment externally
-    (i.e., from a parent environment, global config file, or command line).
+- ``tunable_params``: A list of tunable parameters' _groups_.
+  The environment will obtain these parameters from the outside (e.g., from the optimizer).
+
+- ``const_args``: A dictionary of constant parameters along with their values.
+
+- ``required_args``: A list of constant parameters supplied to the environment externally
+  (i.e., from a parent environment, global config file, or command line).
 
 During the setup and run phases, MLOS will combine the constant and tunable parameters and their
 values into a single dictionary and pass it to the corresponding method.
@@ -98,16 +100,16 @@ dynamically change the set of active TunableGroups for a given Experiment using 
 Variable Propagation
 ++++++++++++++++++++
 
-Parameters declared in the `const_args` or `required_args` sections of the environment config can
-be overridden with values of the corresponding parameters of the parent environment or specified
-in the external config files or the command line. In fact, `const_args` or `required_args`
-sections can be viewed as placeholders for the parameters that are being pushed to the environment
-from the outside.
+Parameters declared in the ``const_args`` or ``required_args`` sections of the environment config
+can be overridden with values of the corresponding parameters of the parent environment or
+specified in the external config files or the command line. In fact, ``const_args`` or
+``required_args`` sections can be viewed as placeholders for the parameters that are being pushed
+to the environment from the outside.
 
 Variable replacement happens in the bottom-up manner. That is, if a certain parameter is present
 in the parent (composite) environment, it will replace the corresponding parameter in the child,
-and so on. Note that the parameter _must_ appear in the child environment `const_args` or
-`required_args` section; if a parameter is not present in one of these placeholders of the child
+and so on. Note that the parameter _must_ appear in the child environment ``const_args`` or
+``required_args`` section; if a parameter is not present in one of these placeholders of the child
 environment config, it will not be propagated. This hierarchy allows MLOS users to have small
 immutable environment configurations at the lower levels and combine and parameterize them at the
 higher levels.
@@ -119,19 +121,20 @@ be combined into a single dictionary and pushed to the root environment. This wa
 their experiment-specific parameters separately from the environment configs making them more
 reusable. Another common use of global config files is to store sensitive data (e.g., passwords,
 tokens, etc.) that should not be version-controlled. The global config files are specified in the
-`globals` section of the top-level CLI config, or in the `--globals` command line parameter.
+``globals`` section of the top-level CLI config, or in the ``--globals`` command line parameter.
 
 Finally, any global or environment parameter can be overridden from the command line, by simply
-specifying `--PARAMETER_NAME PARAMETER_VALUE`.
+specifying ``--PARAMETER_NAME PARAMETER_VALUE``.
 
 We can summarize the parameter propagation rules as follows:
-1. Child environment will only get the parameters defined in its `const_args` or
-   `required_args` sections.
-1. Value of the parameter defined in the `const_args` section of the parent environment will
+
+1. Child environment will only get the parameters defined in its ``const_args`` or
+   ``required_args`` sections.
+2. Value of the parameter defined in the ``const_args`` section of the parent environment will
    override the value of the corresponding parameter in the child environments.
-1. Values of the parameters defined in the global config files will override the values of the
+3. Values of the parameters defined in the global config files will override the values of the
    corresponding parameters in all environments.
-1. Values of the command line parameters take precedence over values defined in the global or
+4. Values of the command line parameters take precedence over values defined in the global or
    environment configs.
 
 Environment Services
@@ -152,7 +155,7 @@ Variable propagation rules described in the previous section for the environment
 apply to the service configurations. That is, every parameter defined in the service config can be
 overridden by a corresponding parameter from the global config or the command line.
 
-All global configs, command line parameters, environment `const_args` and `required_args`
+All global configs, command line parameters, environment ``const_args`` and ``required_args``
 sections, and service config parameters thus form one flat name space of parameters. This imposes
 a certain risk of name clashes, but also simplifies the configuration process and allows users to
 keep all experiment-specific data in a few  human-readable files.
