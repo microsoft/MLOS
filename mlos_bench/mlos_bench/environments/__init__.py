@@ -40,18 +40,21 @@ Note that additional ones can also be created by extending the base
 Environment Parameterization
 ++++++++++++++++++++++++++++
 
-Each environment can have a set of parameters that define the environment's configuration.
-These parameters can be _constant_ (i.e., immutable from one trial run to the next) or
-_tunable_ (i.e., suggested by the optimizer or provided by the user).
+Each :py:class:`~mlos_bench.environments.Environment` can have a set of parameters that define the
+environment's configuration. These parameters can be _constant_ (i.e., immutable from one trial
+run to the next) or _tunable_ (i.e., suggested by the optimizer or provided by the user).
 The following clauses in the environment configuration are used to declare these parameters:
 
-- ``tunable_params``: A list of tunable parameters' _groups_.
-  The environment will obtain these parameters from the outside (e.g., from the optimizer).
+- ``tunable_params``: A list of tunable parameters' _groups_. At each trial, the environment will
+  obtain the new values of these parameters from the outside (e.g., from the optimizer).
 
-- ``const_args``: A dictionary of constant parameters along with their values.
+- ``const_args``: A dictionary of _constant_ parameters along with their values.
 
-- ``required_args``: A list of constant parameters supplied to the environment externally
+- ``required_args``: A list of _constant_ parameters supplied to the environment externally
   (i.e., from a parent environment, global config file, or command line).
+
+That is, tunable parameters change on every trial, while constant parameters stay fixed for the
+entire experiment.
 
 During the setup and run phases, MLOS will combine the constant and tunable parameters and their
 values into a single dictionary and pass it to the corresponding method.
@@ -123,8 +126,8 @@ reusable. Another common use of global config files is to store sensitive data (
 tokens, etc.) that should not be version-controlled. The global config files are specified in the
 ``globals`` section of the top-level CLI config, or in the ``--globals`` command line parameter.
 
-Finally, any global or environment parameter can be overridden from the command line, by simply
-specifying ``--PARAMETER_NAME PARAMETER_VALUE``.
+Finally, any global or :py:class:`~mlos_bench.environments.Environment` parameter can be
+overridden from the command line, by simply specifying ``--PARAMETER_NAME PARAMETER_VALUE``.
 
 We can summarize the parameter propagation rules as follows:
 
@@ -161,7 +164,8 @@ a certain risk of name clashes, but also simplifies the configuration process an
 keep all experiment-specific data in a few  human-readable files.
 
 We will discuss the examples of such global and local configuration parameters in the
-documentation of the concrete services and environments.
+documentation of the concrete :py:mod:`~mlos_bench.services` and
+:py:mod:`~mlos_bench.environments`.
 
 Examples
 --------
