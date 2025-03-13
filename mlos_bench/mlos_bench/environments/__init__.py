@@ -72,7 +72,7 @@ Values of constant parameters defined in the Environment config can be
 overridden with the values from the command line and/or external config files.
 That allows MLOS users to have reusable immutable environment configurations and
 move all experiment-specific or sensitive data outside of the version-controlled
-files. We discuss the `variable propagation <#variable-propagation>`_ mechanism
+files. We discuss the `variable propagation <index.html#variable-propagation>`_ mechanism
 in the section below.
 
 Environment Tunables
