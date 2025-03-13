@@ -216,10 +216,9 @@ For instance:
 Users can have multiple global config files, each specified with a ``--globals``
 CLI arg or ``"globals"`` CLI config property.
 
-
 At runtime, parameters from these files will be combined into a single
 dictionary, in the order they appear, and pushed to the root
-:py:class:`~mlos_bench.environments.Environment`.
+:py:class:`Environment <mlos_bench.environments>`.
 
 Any global or :py:class:`~.Environment` parameter can also be overridden from
 the command line, by simply specifying ``--PARAMETER_NAME PARAMETER_VALUE``.
