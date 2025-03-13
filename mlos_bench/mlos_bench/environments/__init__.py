@@ -125,6 +125,9 @@ the outside.
 The same parameter can be present in both ``const_args`` and ``required_args`` sections.
 ``required_args`` is just a way to emphasize the importance of the parameter and create a
 placeholder for it when no default value can be specified the ``const_args`` section.
+If a ``required_args`` parameter is not present in the ``const_args`` section,
+and can't be resolved from the ``globals`` this allows MLOS to fail fast and
+return an error to the user indicating an incomplete config.
 
 Variable replacement happens in the bottom-up manner. That is, if a certain
 parameter is present in the parent (:py:class:`~.CompositeEnv`) Environment, it
@@ -146,8 +149,9 @@ We can summarize the parameter propagation rules as follows:
 
 1. Child environment will only get the parameters defined in its ``const_args`` or
    ``required_args`` sections.
-2. Value of the parameter defined in the ``const_args`` section of the parent Environment will
-   override the value of the corresponding parameter in the child environments.
+2. The value of the parameter defined in the ``const_args`` section of the
+   parent Environment will override the value of the corresponding parameter in the
+   child Environments.
 3. Values of the parameters defined in the global config files will override the values of the
    corresponding parameters in all environments.
 4. Values of the command line parameters take precedence over values defined in the global or
