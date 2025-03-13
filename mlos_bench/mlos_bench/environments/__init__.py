@@ -254,10 +254,11 @@ file for simplicity.
 ... '''
 >>> from mlos_bench.services.config_persistence import ConfigPersistenceService
 >>> from mlos_bench.config.schemas.config_schemas import ConfigSchema
+>>> from mlos_bench.tunables import TunableGroups
+>>> tunable_groups = TunableGroups()
 >>> config_loader_service = ConfigPersistenceService()
 >>> globals_config = config_loader_service.load_config(globals_json, ConfigSchema.GLOBALS)
->>> composite_env_config = config_loader_service.load_config(composite_env_json, ConfigSchema.ENVIRONMENT)
->>> composite_env_config = config_loader_service.load_environment(composite_env_config, globals_config)
+>>> composite_env_config = config_loader_service.load_environment(composite_env_json, tunable_groups, globals_config)
 >>> composite_env_config.const_args["const_arg"]
 'const_arg_from_env1_value'
 >>> composite_env_config.required_args["required_arg"]
