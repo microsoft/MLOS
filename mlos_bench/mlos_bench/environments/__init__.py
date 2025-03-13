@@ -157,6 +157,84 @@ We can summarize the parameter propagation rules as follows:
 4. Values of the command line parameters take precedence over values defined in the global or
    environment configs.
 
+Examples
+^^^^^^^^
+
+Here's a simple working example of a local environment config (written in Python
+instead of JSON for testing) to show how variable propogation works:
+
+
+>>> globals_json = '''
+... {
+...     "required_arg": "required_arg_from_globals_value",
+...     "const_arg": "const_arg1_from_globals_value",
+...     "tunable_params_map": {
+...         "my_env1_tunables": ["dummy_params"],
+...         "my_env2_tunables": [/* none */],
+...     },
+... }
+... '''
+>>> composite_env_json = '''
+... {
+...     "class": "mlos_bench.environments.composite_env.CompositeEnv",
+...     "name": "parent_env",
+...     "config": {
+...         // Must be populated by a global config or command line:
+...         "required_args": ["required_arg"],
+...         // Can be populate by variable expansion from a higher level, or else overridden here.
+...         "const_args": {
+...             "const1_arg": "$required_arg",
+...             "const2_arg": "const_arg2_from_parent_value",
+...         },
+...         "children": [
+...             {
+...                "class": "mlos_bench.environments.local.local_env.LocalEnv",
+...                "name": "child_env1",
+...                "config": {
+...                    "const_args": {
+...                        "const1_arg": "const_arg1_from_env1_value",
+...                        "const2_arg": "const_arg2_from_env1_value",
+...                    },
+...                    "required_args": ["required_arg"],
+...                    "include_tunables": [
+...                        "tunables/dummy-tunables.jsonc",
+...                    ],
+...                    "tunable_params": "$my_env_tunables",
+...                },
+...              },
+...             {
+...                "class": "mlos_bench.environments.local.local_env.LocalEnv",
+...                "name": "child_env2",
+...                "config": {
+...                    "required_args": ["required_arg", "const_arg"],
+...                    "const_args": {
+...                        "const_arg": "$const_arg",
+...                    },
+...                    "include_tunables": [
+...                        "tunables/dummy-tunables.jsonc",
+...                    ],
+...                    "tunable_params": "$my_env2_tunables",
+...                },
+...              },
+...         ],
+...     }
+... }
+... '''
+>>> from mlos_bench.services.config_persistence import ConfigPersistenceService
+>>> from mlos_bench.config.schemas.config_schemas import ConfigSchema
+>>> config_loader_service = ConfigPersistenceService()
+>>> globals_config = config_loader_service.load_config(globals_json, ConfigSchema.GLOBALS)
+>>> composite_env_config = config_loader_service.load_config(composite_env_json, ConfigSchema.ENVIRONMENT)
+>>> composite_env_config = config_loader_service.load_environment(composite_env_config, globals_config)
+>>> composite_env_config.const_args["const_arg"]
+'const_arg_from_env1_value'
+>>> composite_env_config.required_args["required_arg"]
+'required_arg_from_env1_value'
+>>> composite_env_config.tunable_params["my_env_tunables"].tunable_groups
+[0].name
+>>> composite_env_config.tunable_params["my_env_tunables"].tunable_groups[0].name
+'group1'
+
 Environment Services
 ++++++++++++++++++++
 
@@ -219,7 +297,7 @@ See Also
     Overview of the Services available to the Environments and their configurations.
 :py:mod:`mlos_bench.tunables` :
     Overview of the Tunables available to the Environments and their configurations.
-"""
+"""  # pylint: disable=line-too-long # noqa: E501
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.composite_env import CompositeEnv
