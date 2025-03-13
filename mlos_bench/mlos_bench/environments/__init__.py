@@ -252,7 +252,9 @@ file for simplicity.
 ...     }
 ... }
 ... '''
->>> # Import modules
+
+>>> # Load the globals and environment configs defined above.
+>>> # Import the necessary modules to run the example.
 >>> from mlos_bench.services.local.local_exec import LocalExecService
 >>> from mlos_bench.services.config_persistence import ConfigPersistenceService
 >>> from mlos_bench.config.schemas.config_schemas import ConfigSchema
@@ -261,18 +263,21 @@ file for simplicity.
 >>> tunable_groups = TunableGroups()
 >>> config_loader_service = ConfigPersistenceService()
 >>> service = LocalExecService(parent=config_loader_service)
->>> # Load the globals and environment configs defined above.
 >>> globals_config = config_loader_service.load_config(globals_json, ConfigSchema.GLOBALS)
 >>> composite_env_config = config_loader_service.load_environment(composite_env_json, tunable_groups, globals_config, service=service)
+>>> child_env1 = composite_env_config.children[0]
+>>> assert child_env1.name == "child_env1"
+>>> child_env2 = composite_env_config.children[1]
+>>> assert child_env2.name == "child_env2"
+
 >>> # Now see how the variable propagation works.
->>> # TODO ...
->>> composite_env_config.children[0].parameters["const_arg1"]
+>>> child_env1.parameters["const_arg1"]
 'const_arg_from_env1_value'
->>> composite_env_config.children[0].parameters["required_arg"]
+>>> child_env1.parameters["required_arg"]
 'required_arg_from_env1_value'
->>> composite_env_config.tunable_params["my_env1_tunables"].tunable_groups
+>>> child_env1.tunable_params["my_env1_tunables"].tunable_groups
 [0].name
->>> composite_env_config.tunable_params["my_env1_tunables"].tunable_groups[0].name
+>>> child_env1.tunable_params["my_env1_tunables"].tunable_groups[0].name
 'group1'
 
 Environment Services
