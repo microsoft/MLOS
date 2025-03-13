@@ -93,7 +93,8 @@ loaded with the Environment using the ``include_tunables`` property in the
 Environment config.
 
 Then individual covariant groups can be enabled via the ``tunable_params`` and
-``tunable_params_map`` properties, possibly via ``globals`` variable expansion.
+``tunable_params_map`` properties, possibly via ``globals`` `Variable Expansion
+<../config/index.html#globals-and-variable-substitution>`_.
 
 See the :py:mod:`mlos_bench.config` and :py:mod:`mlos_bench.environments` module
 documentation for more information.

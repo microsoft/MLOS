@@ -197,6 +197,20 @@ For instance:
      "current_dir": "$PWD",
      "some_expanded_var": "$some_var: $experiment_id",
      "location": "eastus",
+
+     // This can be specified in the CLI config or the globals config
+     "tunable_params_map": {
+        // a map of tunable_params variables to their covariant group names
+        "environment1_tunables": [
+            "covariant_group_name",
+            "another_covariant_group_name"
+        ],
+        "environment2_tunables": [
+            // empty list means no tunables
+            // are enabled for this environment
+            // during this experiment
+            // (e.g., only use defaults for this environment)
+        ],
    }
 
 There are additional details about `Variable Propagation
@@ -217,6 +231,13 @@ system and may be used in the config files:
 - ``$trial_runner_id``: A unique identifier for the ``TrialRunner``.
     This can be useful when running multiple trials in parallel (e.g., to
     provision a numbered VM per worker).
+- ``$tunable_params_map``: A map of ``tunable_params`` ``$name`` to their list of covariant group names.
+    This is usually used in a CLI ``--config`` CLI config or ``--globals``
+    (e.g., "experiment") config file and is used to control what the
+    ``"tunable_params": $tunable_group_name`` specified in the the
+    :py:mod:`mlos_bench.environments` JSONC configs resolves to.
+    This can be used to control which tunables are enabled for tuning for an
+    experiment without having to change the underlying Environment config.
 
 Tunable Configs
 ^^^^^^^^^^^^^^^
@@ -354,4 +375,4 @@ See `mlos_bench/config/README.md
 `mlos_bench/tests/config/README.md
 <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tests/config/>`_
 for additional documentation and examples in the source tree.
-"""
+"""  # pylint: disable=line-too-long # noqa: E501
