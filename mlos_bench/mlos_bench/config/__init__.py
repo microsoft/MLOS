@@ -178,7 +178,7 @@ Notes
   for some examples of CLI configs.
 
 Globals and Variable Substitution
-+++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :py:attr:`Globals <mlos_bench.config.schemas.config_schemas.ConfigSchema.GLOBALS>`
 are basically just key-value variables that can be used in other configs using
@@ -208,14 +208,15 @@ Well Known Variables
 Here is a list of some well known variables that are provided or required by the
 system and may be used in the config files:
 
-- ``$experiment_id``: A unique identifier for the ``Experiment``.
+- ``$experiment_id`` : A unique identifier for the ``Experiment``.
     Typically provided in globals.
-- ``$trial_id``: A unique identifier for the ``Trial`` currently being executed.
+- ``$trial_id`` : A unique identifier for the ``Trial`` currently being executed.
     This can be useful in the configs for :py:mod:`mlos_bench.environments` for
     instance (e.g., when writing scripts).
-- ``$trial_runner_id``: A unique identifier for the ``TrialRunner``.
-    This can be useful when running multiple trials in parallel (e.g., to
-    provision a numbered VM per worker).
+- ``$trial_runner_id`` : A unique identifier for the
+    :py:class:`~mlos_bench.schedulers.trial_runner.TrialRunner`. This can be
+    useful when running multiple trials in parallel (e.g., to provision a
+    numbered VM per worker).
 
 Tunable Configs
 ^^^^^^^^^^^^^^^
@@ -311,7 +312,7 @@ Each of which have their own submodules and classes that dictate the allowed and
 expected structure of the ``config`` section.
 
 In certain cases (e.g., script command execution) the variable substitution rules
-take on slightly different behavior
+take on slightly different behavior.
 See various documentation in :py:mod:`mlos_bench.environments` for more details.
 
 Config Processing

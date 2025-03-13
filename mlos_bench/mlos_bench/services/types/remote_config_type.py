@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Protocol interface for configuring cloud services."""
+"""Protocol interface for configuring cloud (Saas) services."""
 
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
