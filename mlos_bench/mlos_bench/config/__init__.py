@@ -213,6 +213,23 @@ For instance:
         ],
    }
 
+Users can have multiple global config files, each specified with a ``--globals``
+CLI arg or ``"globals"`` CLI config property.
+
+
+At runtime, parameters from these files will be combined into a single
+dictionary, in the order they appear, and pushed to the root
+:py:class:`~mlos_bench.environments.Environment`.
+
+Any global or :py:class:`~.Environment` parameter can also be overridden from
+the command line, by simply specifying ``--PARAMETER_NAME PARAMETER_VALUE``.
+
+Another common use of global config files is to store sensitive data (e.g.,
+passwords, tokens, etc.) that should not be version-controlled.
+
+This way, users can keep their experiment-specific parameters separately from
+the Environment configs making them more reusable.
+
 There are additional details about `Variable Propagation
 <../environments/index.html#variable-propagation>`_ in the
 :py:mod:`mlos_bench.environments` module.
