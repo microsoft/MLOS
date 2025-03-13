@@ -41,8 +41,8 @@ Environment Parameterization
 ++++++++++++++++++++++++++++
 
 Each :py:class:`~.Environment` can have a set of parameters that define the
-environment's configuration. These parameters can be _constant_ (i.e., immutable from one trial
-run to the next) or _tunable_ (i.e., suggested by the optimizer or provided by the user). The
+environment's configuration. These parameters can be *constant* (i.e., immutable from one trial
+run to the next) or *tunable* (i.e., suggested by the optimizer or provided by the user). The
 following clauses in the environment configuration are used to declare these parameters:
 
 - ``tunable_params``:
@@ -50,10 +50,10 @@ following clauses in the environment configuration are used to declare these par
   values of these parameters from the outside (e.g., from the optimizer).
 
 - ``const_args``:
-  A dictionary of _constant_ parameters along with their values.
+  A dictionary of *constant* parameters along with their values.
 
 - ``required_args``:
-  A list of _constant_ parameters supplied to the environment externally
+  A list of *constant* parameters supplied to the environment externally
   (i.e., from a parent environment, global config file, or command line).
 
 Again, tunable parameters change on every trial, while constant parameters stay fixed for the
@@ -122,7 +122,7 @@ Variable replacement happens in the bottom-up manner. That is, if a certain
 parameter is present in the parent (:py:class:`~.CompositeEnv`) Environment, it
 will replace the corresponding parameter in the child, and so on.
 
-Note that the parameter _must_ appear in the child Environment ``const_args`` or
+Note that the parameter **must** appear in the child Environment ``const_args`` or
 ``required_args`` section; if a parameter is not present in one of these
 placeholders of the child Environment config, it will not be propagated. This
 hierarchy allows MLOS users to have small immutable Environment configurations
