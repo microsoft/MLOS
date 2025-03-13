@@ -183,43 +183,72 @@ file for simplicity.
 ...     "name": "parent_env",
 ...     "config": {
 ...         // Must be populated by a global config or command line:
-...         "required_args": ["required_arg"],
+...         "required_args": [
+...             "required_arg"
+...         ],
 ...         // Can be populate by variable expansion from a higher level, or else overridden here.
 ...         "const_args": {
 ...             "const1_arg": "$required_arg",
-...             "const2_arg": "const_arg2_from_parent_value",
+...             "const2_arg": "const_arg2_from_parent_value"
 ...         },
 ...         "children": [
 ...             {
-...                "class": "mlos_bench.environments.local.local_env.LocalEnv",
-...                "name": "child_env1",
-...                "config": {
-...                    "const_args": {
-...                        "const1_arg": "const_arg1_from_env1_value",
-...                        "const2_arg": "const_arg2_from_env1_value",
-...                    },
-...                    "required_args": ["required_arg"],
-...                    "include_tunables": [
-...                        "tunables/dummy-tunables.jsonc",
-...                    ],
-...                    "tunable_params": "$my_env_tunables",
-...                },
-...              },
+...                 "class": "mlos_bench.environments.local.local_env.LocalEnv",
+...                 "name": "child_env1",
+...                 "include_tunables": [
+...                     "tunables/dummy-tunables.jsonc"
+...                 ],
+...                 "config": {
+...                    "tunable_params": ["$my_env_tunables"],
+...                     "const_args": {
+...                         "const1_arg": "const_arg1_from_env1_value",
+...                         "const2_arg": "const_arg2_from_env1_value"
+...                     },
+...                     "required_args": [
+...                         "required_arg"
+...                     ],
+...                     // Expose the args as shell env vars for the child env.
+...                     "shell_env_params": [
+...                         "required_arg",
+...                         "const1_arg",
+...                         "const2_arg"
+...                     ],
+...                      "run": [
+...                         "echo 'required_arg: $required_arg'",
+...                         "echo 'const1_arg: $const1_arg'",
+...                         "echo 'const2_arg: $const2_arg'"
+...                     ]
+...                 }
+...             },
 ...             {
-...                "class": "mlos_bench.environments.local.local_env.LocalEnv",
-...                "name": "child_env2",
-...                "config": {
-...                    "required_args": ["required_arg", "const_arg"],
-...                    "const_args": {
-...                        "const_arg": "$const_arg",
-...                    },
-...                    "include_tunables": [
-...                        "tunables/dummy-tunables.jsonc",
-...                    ],
-...                    "tunable_params": "$my_env2_tunables",
-...                },
-...              },
-...         ],
+...                 "class": "mlos_bench.environments.local.local_env.LocalEnv",
+...                 "name": "child_env2",
+...                 "include_tunables": [
+...                     "tunables/dummy-tunables.jsonc"
+...                 ],
+...                 "config": {
+...                     "tunable_params": ["$my_env2_tunables"],
+...                     "required_args": [
+...                         "required_arg",
+...                         "const_arg"
+...                     ],
+...                     "const_args": {
+...                         "const_arg": "$const_arg"
+...                     },
+...                     // Expose the args as shell env vars for the child env.
+...                     "shell_env_params": [
+...                         "required_arg",
+...                         "const1_arg",
+...                         "const2_arg"
+...                     ],
+...                     "run": [
+...                         "echo 'required_arg: $required_arg'",
+...                         "echo 'const1_arg: $const1_arg'",
+...                         "echo 'const2_arg: $const2_arg'"
+...                     ]
+...                 }
+...             }
+...         ]
 ...     }
 ... }
 ... '''
