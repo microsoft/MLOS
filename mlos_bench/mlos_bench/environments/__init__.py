@@ -46,8 +46,13 @@ run to the next) or *tunable* (i.e., suggested by the optimizer or provided by t
 following clauses in the environment configuration are used to declare these parameters:
 
 - ``tunable_params``:
-  A list of tunable parameters' _groups_. At each trial, the environment will obtain the new
-  values of these parameters from the outside (e.g., from the optimizer).
+  A list of :py:mod:`tunable <mlos_bench.tunables>` parameters' (covariant) *groups*.
+  At each trial, the Environment will obtain the new values of these parameters
+  from the outside (e.g., from the :py:mod:`Optimizer <mlos_bench.optimizers>`).
+
+  Typically, this is set using variable expansion via the special
+  ``tunable_params_map`` key in the `globals config
+  <../config/index.html#globals-and-variable-substitution>`_.
 
 - ``const_args``:
   A dictionary of *constant* parameters along with their values.
