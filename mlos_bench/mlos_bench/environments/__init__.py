@@ -161,8 +161,11 @@ Examples
 ^^^^^^^^
 
 Here's a simple working example of a local environment config (written in Python
-instead of JSON for testing) to show how variable propogation works:
+instead of JSON for testing) to show how variable propagation works:
 
+Note: this references the `dummy-tunables.jsonc
+<https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/config/tunables/dummy-tunables.jsonc>`_
+file for simplicity.
 
 >>> globals_json = '''
 ... {
