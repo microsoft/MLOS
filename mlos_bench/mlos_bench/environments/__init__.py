@@ -34,13 +34,13 @@ benchmark running from a local machine).
 See below for the set of Environments currently available in this package.
 
 Note that additional ones can also be created by extending the base
-:py:class:`.Environment` class and referencing them in the :py:mod:`json configs
+:py:class:`~.Environment` class and referencing them in the :py:mod:`json configs
 <mlos_bench.config>` using the ``class`` key.
 
 Environment Parameterization
 ++++++++++++++++++++++++++++
 
-Each :py:class:`~mlos_bench.environments.Environment` can have a set of parameters that define the
+Each :py:class:`~.Environment` can have a set of parameters that define the
 environment's configuration. These parameters can be _constant_ (i.e., immutable from one trial
 run to the next) or _tunable_ (i.e., suggested by the optimizer or provided by the user). The
 following clauses in the environment configuration are used to declare these parameters:
@@ -132,7 +132,7 @@ reusable. Another common use of global config files is to store sensitive data (
 tokens, etc.) that should not be version-controlled. The global config files are specified in the
 ``globals`` section of the top-level CLI config, or in the ``--globals`` command line parameter.
 
-Finally, any global or :py:class:`~mlos_bench.environments.Environment` parameter can be
+Finally, any global or :py:class:`~.Environment` parameter can be
 overridden from the command line, by simply specifying ``--PARAMETER_NAME PARAMETER_VALUE``.
 
 We can summarize the parameter propagation rules as follows:
