@@ -199,7 +199,8 @@ For instance:
      "location": "eastus",
    }
 
-There are additional details about variable propagation in the
+There are additional details about `Variable Propagation
+<../environments/index.html#variable-propagation>`_ in the
 :py:mod:`mlos_bench.environments` module.
 
 Well Known Variables
