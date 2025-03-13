@@ -199,7 +199,7 @@ file for simplicity.
 ...                     "tunables/dummy-tunables.jsonc"
 ...                 ],
 ...                 "config": {
-...                    "tunable_params": ["$my_env_tunables"],
+...                    "tunable_params": ["$my_env1_tunables"],
 ...                     "const_args": {
 ...                         "const1_arg": "const_arg1_from_env1_value",
 ...                         "const2_arg": "const_arg2_from_env1_value"
@@ -230,10 +230,10 @@ file for simplicity.
 ...                     "tunable_params": ["$my_env2_tunables"],
 ...                     "required_args": [
 ...                         "required_arg",
-...                         "const_arg"
 ...                     ],
 ...                     "const_args": {
-...                         "const_arg": "$const_arg"
+...                         "const_arg1": "$const_arg"
+...                         // const_arg2 should not be propagated to this child
 ...                     },
 ...                     // Expose the args as shell env vars for the child env.
 ...                     "shell_env_params": [
@@ -252,20 +252,27 @@ file for simplicity.
 ...     }
 ... }
 ... '''
+>>> # Import modules
+>>> from mlos_bench.services.local.local_exec import LocalExecService
 >>> from mlos_bench.services.config_persistence import ConfigPersistenceService
 >>> from mlos_bench.config.schemas.config_schemas import ConfigSchema
 >>> from mlos_bench.tunables import TunableGroups
+>>> # Do some basic setup that mlos_bench usually handles for us.
 >>> tunable_groups = TunableGroups()
 >>> config_loader_service = ConfigPersistenceService()
+>>> service = LocalExecService(parent=config_loader_service)
+>>> # Load the globals and environment configs defined above.
 >>> globals_config = config_loader_service.load_config(globals_json, ConfigSchema.GLOBALS)
->>> composite_env_config = config_loader_service.load_environment(composite_env_json, tunable_groups, globals_config)
->>> composite_env_config.const_args["const_arg"]
+>>> composite_env_config = config_loader_service.load_environment(composite_env_json, tunable_groups, globals_config, service=service)
+>>> # Now see how the variable propagation works.
+>>> # TODO ...
+>>> composite_env_config.children[0].parameters["const_arg1"]
 'const_arg_from_env1_value'
->>> composite_env_config.required_args["required_arg"]
+>>> composite_env_config.children[0].parameters["required_arg"]
 'required_arg_from_env1_value'
->>> composite_env_config.tunable_params["my_env_tunables"].tunable_groups
+>>> composite_env_config.tunable_params["my_env1_tunables"].tunable_groups
 [0].name
->>> composite_env_config.tunable_params["my_env_tunables"].tunable_groups[0].name
+>>> composite_env_config.tunable_params["my_env1_tunables"].tunable_groups[0].name
 'group1'
 
 Environment Services
