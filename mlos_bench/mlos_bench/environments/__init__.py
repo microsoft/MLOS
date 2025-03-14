@@ -242,7 +242,7 @@ file for simplicity.
 ...                         "const_arg_from_local_env": "const_arg_from_local_env_child1_val",
 ...                     },
 ...                      "run": [
-...                         "echo 'child1: required_arg_from_globals: $required_arg_from_globals'",
+...                         "echo 'child1: required_arg_from_globals: ${required_arg_from_globals}'",
 ...                         "echo 'child1: required_arg_from_cli: $required_arg_from_cli'",
 ...                         "echo 'child1: required_arg_from_shell_env: $required_arg_from_shell_env'",
 ...                         "echo 'child1: const_arg_from_required: $const_arg_from_required'",
@@ -251,7 +251,8 @@ file for simplicity.
 ...                         "echo 'child1: const_arg_from_cli: $const_arg_from_cli'",
 ...                         "echo 'child1: const_arg_from_local_env: $const_arg_from_local_env'",
 ...                         "echo 'child1: const_arg_from_parent_env: $const_arg_from_parent_env'",
-...                     ]
+...                     ],
+...                     "results_stdout_pattern": "(?:child[0-9]: )([a-zA-Z0-9_]+): (.+)",
 ...                 }
 ...             },
 ...             {
@@ -299,8 +300,9 @@ file for simplicity.
 ...                         "echo 'child2: const_arg_from_child2_env2: $const_arg_from_child2_env2'",
 ...                         "echo 'child2: const_arg_from_parent_env: $const_arg_from_parent_env'",
 ...                         // Only some of those parameters are actually exposed as shell env vars though.
-...                         "printenv | grep _arg_from_",
-...                     ]
+...                         "printenv | grep _arg_from_ | sed -e 's/^/child2: /' -e 's/=/: /'",
+...                     ],
+...                     "results_stdout_pattern": "(?:child[0-9]: )([a-zA-Z0-9_]+): (.+)",
 ...                 }
 ...             }
 ...         ]
@@ -316,7 +318,7 @@ file for simplicity.
 >>> # if we were calling `mlos_bench` directly on the CLI.
 >>> from mlos_bench.launcher import Launcher
 >>> argv = [
-...     "--log-level=WARNING",
+...     "--log-level=DEBUG", # WARNING
 ...     "--globals", globals_json,
 ...     "--environment", composite_env_json,
 ...     # Override some values via CLI directly:
@@ -331,11 +333,10 @@ file for simplicity.
 >>> assert child_env2.name == "child_env2"
 
 >>> # Demonstrate how tunable parameters are selected.
->>> child_env1.tunable_params
->>> child_env1.tunable_params["dummy_params"]
-[0].name
->>> child_env1.tunable_params["my_env1_tunables"].tunable_groups[0].name
-'group1'
+>>> child_env1.tunable_params.get_param_values()
+{'dummy_param': 'dummy'}
+>>> child_env2.tunable_params.get_param_values()
+{}
 
 >>> # Now see how the variable propagation works.
 >>> child_env1.parameters["required_arg_from_globals"]
@@ -344,11 +345,29 @@ file for simplicity.
 'required_arg_from_cli_val'
 >>> child_env1.parameters["required_arg_from_shell_env"]
 'required_arg_from_shell_env_val'
->>> # TODO: More
+>>> # Note that the default value in the local child env is overridden:
+>>> child_env1.parameters["const_arg_from_globals"]
+'const_arg_from_globals_val'
+>>> child_env1.parameters["const_arg_from_shell_env"]
+'const_arg_from_shell_env_val'
+>>> child_env1.parameters["const_arg_from_cli"]
+'const_arg_from_cli_val'
+>>> # This is treated as a required_arg and inherited from the parent.
+>>> child_env1.parameters["const_arg_from_parent_env"]
+'const_arg_from_parent_env_val'
 
->>> # Simulate running the environment to see its output:
+>>> # TODO: child2
+
+>>> # TODO: Simulate running the environment to see its output:
+>>> from mlos_bench.environments.status import Status
 >>> with child_env1:
-...     child_env1.run()
+...     assert child_env1.setup(child_env1.tunable_params)
+...     (status, ts, result) = child_env1.run()
+...     assert status == Status.SUCCEEDED
+...     child_env1.teardown()
+>>> # TODO: check output
+
+>>> # TODO: child2
 
 Environment Services
 ++++++++++++++++++++
