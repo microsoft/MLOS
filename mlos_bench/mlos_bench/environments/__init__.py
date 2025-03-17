@@ -101,14 +101,48 @@ In the typical json user level configs, this is specified in the
 json files when the :py:class:`~mlos_bench.launcher.Launcher` processes the initial
 set of config files.
 
-The ``tunable_params`` setting in the ``config`` section of the Environment config
-can also be used to limit *which* of the ``TunableGroups`` should be used for the
-Environment.
+The ``tunable_params`` setting in the ``config`` section of the Environment config can then be
+used to limit *which* of the ``TunableGroups`` should be used for the Environment.
 
-Since :py:mod:`json configs <mlos_bench.config>` also support ``$variable``
-substitution in the values using the `globals` mechanism, this setting can used to
-dynamically change the set of active TunableGroups for a given Experiment using only
-`globals`, allowing for configs to be more modular and composable.
+Tunable Parameters Map
+^^^^^^^^^^^^^^^^^^^^^^
+
+Although the full set of tunable parameters (and groups) of each Environment is always known in
+advance, in practice we often want to limit it to a smaller subset for a given experiment. This
+can be done by adding an extra level of indirection and specifying the ``tunable_params_map`` in
+the global config. ``tunable_params_map`` associates a variable name with a list of
+:py:class:`~mlos_bench.tunables.tunable_groups.TunableGroups` names, e.g.,
+
+    .. code-block:: json
+
+        // experiment-globals.mlos.jsonc
+        {
+          "tunable_params_map": {
+            "tunables_ref1": ["tunable_group1", "tunable_group2"],
+            "tunables_ref2": []  // Useful to disable all tunables.
+          }
+        }
+
+Later, in the Environment config, we can use these variable names to refer to the
+tunable groups we want to use for that Environment:
+
+    .. code-block:: json
+
+        // environment.mlos.jsonc
+        {
+          // ...
+          "config": {
+            "tunable_params": [
+              "$tunables_ref1",  // Will be replaced with "tunable_group1", "tunable_group2"
+              "$tunables_ref2",  // A no-op
+              "tunable_group3"   // Can still refer to a group directly.
+            ],
+        // ... etc.
+
+Using such ``"$tunables_ref"`` variables in the Environment config allows us to dynamically
+change the set of active ``TunableGroups`` for a given Environment using the global config
+without modifying the Environment configuration files for each experiment, thus making them
+more modular and composable.
 
 Variable Propagation
 ++++++++++++++++++++
@@ -179,14 +213,13 @@ file for simplicity.
 ...
 ...     // Const args have a default value if not set, but can be overridden by
 ...     // the globals, cli args, shell env, or parent env.
-...
 ...     "const_arg_from_globals": "const_arg_from_globals_val",
 ...     "const_arg_from_shell_env": "$CONST_ARG_FROM_SHELL_ENV",
 ...     "const_arg_from_child2_env2": "FROM@GLOBALS!",
-...     // special map of tunable_params_name to their set of enabled covariant tunable groups
 ...
+...     // special map of tunable_params_name to their set of enabled covariant tunable groups
 ...     "tunable_params_map": {
-...         "my_env1_tunables": ["dummy_params"],
+...         "my_env1_tunables": ["tunable_group1", "tunable_group2"],
 ...         "my_env2_tunables": [/* none */],
 ...     },
 ... }
