@@ -263,19 +263,21 @@ Now that we have our environment and global configurations, we can instantiate t
 ... ]
 >>> launcher = Launcher("sample_launcher", argv=argv)
 >>> env = launcher.root_environment
->>> assert env.name == "test_env1"
+>>> env.name
+'test_env1'
 
 ``env`` is an instance of :py:class:`~.Environment` class that we can use to setup, run, and tear
 down the environment. It also has a set of properties and methods that we can use to access the
 object's parameters. This way we can check the actual runtime configuration of the environment.
 
-First, let's take a look at the tunable parameters:
+First, let's check the tunable parameters:
 
->>> env.tunable_params.get_param_values()
-{'dummy_param': 'dummy',
- 'dummy_param_int': 0,
- 'dummy_param_float': 0.5,
- 'dummy_param3': 0.0}
+>>> assert env.tunable_params.get_param_values() == {
+...    "dummy_param": "dummy",
+...    "dummy_param_int": 0,
+...    "dummy_param_float": 0.5,
+...    "dummy_param3": 0.0
+... }
 
 We can see the tunables from ``dummy_params_group1`` and ``dummy_params_group2`` groups specified
 via ``$tunables_ref1``, as well as the tunables from ``dummy_params_group3`` that we specified
@@ -316,19 +318,20 @@ trial.
 >>> env.tunable_params["dummy_param3"] = 0.999
 >>> with env:
 ...     assert env.setup(env.tunable_params)
-...     env.parameters
-{'const_arg_1': 'Default value of const_arg_1',
- 'const_arg_from_globals_1': 'Substituted from globals',
- 'const_arg_from_cli_1': 'const_arg_from_cli_val1',
- 'const_arg_from_globals_2': 'Substituted from globals',
- 'trial_id': 1,
- 'const_arg_from_cli_2': 'const_arg_from_cli_val2',
- 'trial_runner_id': 1,
- 'experiment_id': 'test_experiment',
- 'dummy_param': 'dummy',
- 'dummy_param_int': 99,
- 'dummy_param_float': 0.5,
- 'dummy_param': 0.999}
+...     assert env.parameters == {
+...         "const_arg_1": "Default value of const_arg_1",
+...         "const_arg_from_globals_1": "Substituted from globals - 1",
+...         "const_arg_from_globals_2": "Substituted from globals - 2",
+...         "const_arg_from_cli_1": "Substituted from CLI - 1",
+...         "const_arg_from_cli_2": "Substituted from CLI - 2",
+...         "trial_id": 1,
+...         "trial_runner_id": 1,
+...         "experiment_id": "test_experiment",
+...         "dummy_param": "dummy",
+...         "dummy_param_int": 99,
+...         "dummy_param_float": 0.5,
+...         "dummy_param3": 0.999
+...     }
 
 These are the values visible to the implementations of the ``setup``, ``run``, and ``teardown``
 methods. We can see both the constant and tunable parameters combined into a single dictionary
