@@ -197,11 +197,12 @@ file for simplicity.
 >>> # globals.jsonc
 >>> globals_json = '''
 ... {
-...     "const_arg_from_globals_1": "Substituted from globals",
+...     "const_arg_from_globals_1": "Substituted from globals - 1",
+...     "const_arg_from_globals_2": "Substituted from globals - 2",
 ...
 ...     // Define reference names to represent tunable groups in the Environment configs.
 ...     "tunable_params_map": {
-...         "tunables_ref2": ["dummy_params_group1", "dummy_params_group2"],
+...         "tunables_ref1": ["dummy_params_group1", "dummy_params_group2"],
 ...         "tunables_ref2": [],  // Useful to disable all tunables for the Environment.
 ...     }
 ... }
@@ -251,35 +252,25 @@ file for simplicity.
 ...     }
 ... }
 ... '''
-
->>> # Setup the shell env as if bash used an "export VAR='val'"
->>> import os
->>> os.environ["REQUIRED_ARG_FROM_SHELL_ENV"] = "required_arg_from_shell_env_val"
->>> os.environ["CONST_ARG_FROM_SHELL_ENV"] = "const_arg_from_shell_env_val"
+...
 >>> # Load the globals and environment configs defined above via the Launcher as
 >>> # if we were calling `mlos_bench` directly on the CLI.
 >>> from mlos_bench.launcher import Launcher
 >>> argv = [
 ...     "--log-level=DEBUG", # WARNING
 ...     "--globals", globals_json,
-...     "--environment", composite_env_json,
+...     "--environment", environment_json,
 ...     # Override some values via CLI directly:
-...     "--required_arg_from_cli", "required_arg_from_cli_val",
-...     "--const_arg_from_cli", "const_arg_from_cli_val",
+...     "--const_arg_from_cli_1", "const_arg_from_cli_val1",
+...     "--const_arg_from_cli_2", "const_arg_from_cli_val2",
 ... ]
 >>> launcher = Launcher("sample_launcher", argv=argv)
->>> composite_env = launcher.root_environment
->>> child_env1 = composite_env.children[0]
->>> assert child_env1.name == "child_env1"
->>> child_env2 = composite_env.children[1]
->>> assert child_env2.name == "child_env2"
-
+>>> env = launcher.root_environment
+>>> env.name
+'test_env1'
 >>> # Demonstrate how tunable parameters are selected.
->>> child_env1.tunable_params.get_param_values()
+>>> env.tunable_params.get_param_values()
 {'dummy_param': 'dummy'}
->>> child_env2.tunable_params.get_param_values()
-{}
-
 >>> # Now see how the variable propagation works.
 >>> child_env1.parameters["required_arg_from_globals"]
 'required_arg_from_globals_val'

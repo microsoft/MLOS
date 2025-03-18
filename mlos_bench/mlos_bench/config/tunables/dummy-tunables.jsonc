@@ -18,7 +18,7 @@
         "params": {
             "dummy_param_int": {
                 "description": "An integer dummy parameter.",
-                "type": "integer",
+                "type": "int",
                 "range": [0, 100],
                 "default": 0
             },
