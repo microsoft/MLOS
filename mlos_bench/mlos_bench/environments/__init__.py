@@ -197,8 +197,12 @@ file for simplicity.
 >>> # globals.jsonc
 >>> globals_json = '''
 ... {
+...     "experiment_id": "test_experiment",
+...
 ...     "const_arg_from_globals_1": "Substituted from globals - 1",
 ...     "const_arg_from_globals_2": "Substituted from globals - 2",
+...
+...     "const_arg_from_cli_1": "Will be overridden from CLI",
 ...
 ...     // Define reference names to represent tunable groups in the Environment configs.
 ...     "tunable_params_map": {
@@ -226,7 +230,6 @@ file for simplicity.
 ...             // Environment-specific non-tunable constant parameters:
 ...             "const_arg_1": "Default value of const_arg_1",
 ...             "const_arg_from_globals_1": "To be replaced from global config",
-...             "const_arg_from_shell_env": "To be replaced from shell env",
 ...             "const_arg_from_cli_1": "To be replaced from CLI"
 ...         },
 ...         "required_args": [
@@ -239,68 +242,107 @@ file for simplicity.
 ...             "const_arg_from_cli_1"
 ...         ],
 ...         "run": [
-...             "echo const_arg_1: $const_arg_1",
-...             "echo const_arg_from_globals_1: $const_arg_from_globals_1",
-...             "echo const_arg_from_globals_2: $const_arg_from_globals_2",
-...             "echo const_arg_from_shell_env: $const_arg_from_shell_env",
-...             "echo const_arg_from_cli_1: $const_arg_from_cli_1",
-...             "echo const_arg_from_cli_2: $const_arg_from_cli_2",
-...             "echo dummy_param: $dummy_param",   // A tunable from dummy_params_group1
-...             "echo dummy_param3: $dummy_param3"  // A tunable from dummy_params_group3
-...         ],
-...         "results_stdout_pattern": "([a-zA-Z0-9_]+): (.+)"
+...             "echo Hello world"
+...         ]
 ...     }
 ... }
 ... '''
-...
+
+Now that we have our environment and global configurations, we can instantiate the
+:py:class:`~.Environment` and inspect it. In this example we will simulate the command line execution to demonstrate how CLI parameters propagate to the environment.
+
 >>> # Load the globals and environment configs defined above via the Launcher as
 >>> # if we were calling `mlos_bench` directly on the CLI.
 >>> from mlos_bench.launcher import Launcher
 >>> argv = [
-...     "--log-level=DEBUG", # WARNING
-...     "--globals", globals_json,
 ...     "--environment", environment_json,
+...     "--globals", globals_json,
 ...     # Override some values via CLI directly:
-...     "--const_arg_from_cli_1", "const_arg_from_cli_val1",
-...     "--const_arg_from_cli_2", "const_arg_from_cli_val2",
+...     "--const_arg_from_cli_1", "Substituted from CLI - 1",
+...     "--const_arg_from_cli_2", "Substituted from CLI - 2",
 ... ]
 >>> launcher = Launcher("sample_launcher", argv=argv)
 >>> env = launcher.root_environment
->>> env.name
-'test_env1'
->>> # Demonstrate how tunable parameters are selected.
+>>> assert env.name == "test_env1"
+
+``env`` is an instance of :py:class:`~.Environment` class that we can use to setup, run, and tear
+down the environment. It also has a set of properties and methods that we can use to access the
+object's parameters. This way we can check the actual runtime configuration of the environment.
+
+First, let's take a look at the tunable parameters:
+
 >>> env.tunable_params.get_param_values()
-{'dummy_param': 'dummy'}
->>> # Now see how the variable propagation works.
->>> child_env1.parameters["required_arg_from_globals"]
-'required_arg_from_globals_val'
->>> child_env1.parameters["required_arg_from_cli"]
-'required_arg_from_cli_val'
->>> child_env1.parameters["required_arg_from_shell_env"]
-'required_arg_from_shell_env_val'
->>> # Note that the default value in the local child env is overridden:
->>> child_env1.parameters["const_arg_from_globals"]
-'const_arg_from_globals_val'
->>> child_env1.parameters["const_arg_from_shell_env"]
-'const_arg_from_shell_env_val'
->>> child_env1.parameters["const_arg_from_cli"]
-'const_arg_from_cli_val'
->>> # This is treated as a required_arg and inherited from the parent.
->>> child_env1.parameters["const_arg_from_parent_env"]
-'const_arg_from_parent_env_val'
+{'dummy_param': 'dummy',
+ 'dummy_param_int': 0,
+ 'dummy_param_float': 0.5,
+ 'dummy_param3': 0.0}
 
->>> # TODO: child2
+We can see the tunables from ``dummy_params_group1`` and ``dummy_params_group2`` groups specified
+via ``$tunables_ref1``, as well as the tunables from ``dummy_params_group3`` that we specified
+directly in the Environment config. All tunables are initialized to their default values.
 
->>> # TODO: Simulate running the environment to see its output:
->>> from mlos_bench.environments.status import Status
->>> with child_env1:
-...     assert child_env1.setup(child_env1.tunable_params)
-...     (status, ts, result) = child_env1.run()
-...     assert status == Status.SUCCEEDED
-...     child_env1.teardown()
->>> # TODO: check output
+Now let's see how the variable propagation works.
 
->>> # TODO: child2
+>>> env.const_args["const_arg_1"]
+'Default value of const_arg_1'
+
+``const_arg_1`` has the value we have assigned in the ``"const_args"`` section of the
+Environment config. No surprises here.
+
+>>> env.const_args["const_arg_from_globals_1"]
+'Substituted from globals - 1'
+>>> env.const_args["const_arg_from_globals_2"]
+'Substituted from globals - 2'
+
+``const_arg_from_globals_1`` and ``const_arg_from_globals_2`` were declared in the Environment's
+``const_args`` and ``required_args`` sections, respectively. Their values were overridden by the
+values from the global config.
+
+>>> env.const_args["const_arg_from_cli_1"]
+'Substituted from CLI - 1'
+>>> env.const_args["const_arg_from_cli_2"]
+'Substituted from CLI - 2'
+
+Likewise, ``const_arg_from_cli_1`` and ``const_arg_from_cli_2`` got their values from the
+command line. Note that for ``const_arg_from_cli_1`` the value from the command line takes
+precedence over the values specified in the Environment's ``const_args`` section **and** the one
+in the global config.
+
+Now let's set up the environment and see how the constant and tunable parameters get combined.
+We'll also assign some non-default values to the tunables, as the optimizer would do on each
+trial.
+
+>>> env.tunable_params["dummy_param_int"] = 99
+>>> env.tunable_params["dummy_param3"] = 0.999
+>>> with env:
+...     assert env.setup(env.tunable_params)
+...     env.parameters
+{'const_arg_1': 'Default value of const_arg_1',
+ 'const_arg_from_globals_1': 'Substituted from globals',
+ 'const_arg_from_cli_1': 'const_arg_from_cli_val1',
+ 'const_arg_from_globals_2': 'Substituted from globals',
+ 'trial_id': 1,
+ 'const_arg_from_cli_2': 'const_arg_from_cli_val2',
+ 'trial_runner_id': 1,
+ 'experiment_id': 'test_experiment',
+ 'dummy_param': 'dummy',
+ 'dummy_param_int': 99,
+ 'dummy_param_float': 0.5,
+ 'dummy_param': 0.999}
+
+These are the values visible to the implementations of the ``setup``, ``run``, and ``teardown``
+methods. We can see both the constant and tunable parameters combined into a single dictionary
+with proper values assigned to each of them on each iteration.
+
+A few "Magic" parameters like ``trial_id`` and ``trial_runner_id`` are added by the Scheduler and
+used for trials parallelization and storage of the results. It is sometimes useful to add them,
+for example, to the paths used by the Environment, as in, e.g.,
+``"/storage/$experiment_id/$trial_id/data/"``, to prevent conflicts when running multiple
+experiments and trials in parallel.
+
+We will discuss passing the parameters to external scripts and using them in referencing files
+and directories in local and shared storage in the documentation of the concrete
+:py:class:`~.Environment` implementations.
 
 Environment Services
 ++++++++++++++++++++
