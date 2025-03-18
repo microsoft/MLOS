@@ -139,6 +139,10 @@ tunable groups we want to use for that Environment:
             ],
         // ... etc.
 
+Note: this references the `dummy-tunables.jsonc
+<https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/config/tunables/dummy-tunables.jsonc>`_
+file for simplicity.
+
 Using such ``"$tunables_ref"`` variables in the Environment config allows us to dynamically
 change the set of active ``TunableGroups`` for a given Environment using the global config
 without modifying the Environment configuration files for each experiment, thus making them
@@ -147,14 +151,10 @@ more modular and composable.
 Variable Propagation
 ++++++++++++++++++++
 
-Parameters declared in the ``const_args`` or ``required_args`` sections of the
-Environment config can be overridden with values of the corresponding parameters
-of the parent Environment or specified in the external config files or the
-command line.
-
-In fact, ``const_args`` or ``required_args`` sections can be viewed as
-placeholders for the parameters that are being pushed to the environment from
-the outside.
+Parameters declared in the ``const_args`` or ``required_args`` sections of the Environment
+config can be overridden with values specified in the external config files or the command
+line. In fact, ``const_args`` or ``required_args`` sections can be viewed as placeholders
+for the parameters that are being pushed to the environment from the outside.
 
 The same parameter can be present in both ``const_args`` and ``required_args`` sections.
 ``required_args`` is just a way to emphasize the importance of the parameter and create a
@@ -163,32 +163,25 @@ If a ``required_args`` parameter is not present in the ``const_args`` section,
 and can't be resolved from the ``globals`` this allows MLOS to fail fast and
 return an error to the user indicating an incomplete config.
 
-Variable replacement happens in the bottom-up manner. That is, if a certain
-parameter is present in the parent (:py:class:`~.CompositeEnv`) Environment, it
-will replace the corresponding parameter in the child, and so on.
-
 Note that the parameter **must** appear in the child Environment ``const_args`` or
 ``required_args`` section; if a parameter is not present in one of these
-placeholders of the child Environment config, it will not be propagated. This
-hierarchy allows MLOS users to have small immutable Environment configurations
-at the lower levels and combine and parameterize them at the higher levels.
+placeholders of the Environment config, it will not be propagated. This allows MLOS
+users to have small immutable Environment configurations and combine and parameterize
+them with external (global) configs.
 
 Taking it to the next level outside of the Environment configs, the parameters
 can be defined in the external key-value JSON config files (usually referred to
-as `global config files
+as global config files
 <../config/index.html#globals-and-variable-substitution>`_ in MLOS lingo).
 See :py:mod:`mlos_bench.config` for more details.
 
 We can summarize the parameter propagation rules as follows:
 
-1. Child environment will only get the parameters defined in its ``const_args`` or
+1. An environment will only get the parameters defined in its ``const_args`` or
    ``required_args`` sections.
-2. The value of the parameter defined in the ``const_args`` section of the
-   parent Environment will override the value of the corresponding parameter in the
-   child Environments.
-3. Values of the parameters defined in the global config files will override the values of the
+2. Values of the parameters defined in the global config files will override the values of the
    corresponding parameters in all environments.
-4. Values of the command line parameters take precedence over values defined in the global or
+3. Values of the command line parameters take precedence over values defined in the global or
    environment configs.
 
 Examples
@@ -204,141 +197,57 @@ file for simplicity.
 >>> # globals.jsonc
 >>> globals_json = '''
 ... {
-...     "experiment_id": "VariablePropagationExample",
+...     "const_arg_from_globals_1": "Substituted from globals",
 ...
-...     // Required arguments must have their value set from globals, cli args, or shell env.
-...     "required_arg_from_globals": "required_arg_from_globals_val",
-...     "required_arg_from_cli": "require_arg_from_globals_NOT_CLI", // will be replaced by cli invocation
-...     "required_arg_from_shell_env": "$REQUIRED_ARG_FROM_SHELL_ENV",
-...
-...     // Const args have a default value if not set, but can be overridden by
-...     // the globals, cli args, shell env, or parent env.
-...     "const_arg_from_globals": "const_arg_from_globals_val",
-...     "const_arg_from_shell_env": "$CONST_ARG_FROM_SHELL_ENV",
-...     "const_arg_from_child2_env2": "FROM@GLOBALS!",
-...
-...     // special map of tunable_params_name to their set of enabled covariant tunable groups
+...     // Define reference names to represent tunable groups in the Environment configs.
 ...     "tunable_params_map": {
-...         "my_env1_tunables": ["tunable_group1", "tunable_group2"],
-...         "my_env2_tunables": [/* none */],
-...     },
+...         "tunables_ref2": ["dummy_params_group1", "dummy_params_group2"],
+...         "tunables_ref2": [],  // Useful to disable all tunables for the Environment.
+...     }
 ... }
 ... '''
 
->>> # composite_env.jsonc
->>> composite_env_json = '''
+>>> # environment.jsonc
+>>> environment_json = '''
 ... {
-...     "class": "mlos_bench.environments.composite_env.CompositeEnv",
-...     "name": "parent_env",
+...     "class": "mlos_bench.environments.local.local_env.LocalEnv",
+...     "name": "test_env1",
+...     "include_tunables": [
+...         "tunables/dummy-tunables.jsonc"  // For simplicity, include all tunables available.
+...     ],
 ...     "config": {
-...         // Must be populated by a global config or command line:
-...         "required_args": [
-...             "required_arg_from_globals",
-...             "required_arg_from_cli",
-...             //"required_arg_from_shell_env",    # TEST ME: does this need to be here to flow down?
+...         "tunable_params": [
+...             "$tunables_ref1",       // Includes "dummy_params_group1", "dummy_params_group2"
+...             "$tunables_ref2",       // A no-op
+...             "dummy_params_group3"   // Can still refer to a group directly.
 ...         ],
-...         // Can be populate by variable expansion from a higher level, or else defaulted to here.
 ...         "const_args": {
-...             "const_arg_from_globals": "const_arg_from_globals_parent_val",
-...             "const_arg_from_shell_env": "const_arg_from_shell_parent_val",
-...             "const_arg_from_cli": "const_arg_from_cli_parent_val",
-...             "const_arg_from_parent_env": "const_arg_from_parent_env_val",
-...             "const_arg_from_local_env": "const_arg_from_local_env_parent_val",
-...             // const_arg defaults can also use variable expansion to refer
-...             // to another variable previously defined (even another const_arg) in order to
-...             // allow for variable renaming
-...             "const_arg_from_required": "$required_arg_from_globals",
+...             // Environment-specific non-tunable constant parameters:
+...             "const_arg_1": "Default value of const_arg_1",
+...             "const_arg_from_globals_1": "To be replaced from global config",
+...             "const_arg_from_shell_env": "To be replaced from shell env",
+...             "const_arg_from_cli_1": "To be replaced from CLI"
 ...         },
-...         "children": [
-...             {
-...                 "class": "mlos_bench.environments.local.local_env.LocalEnv",
-...                 "name": "child_env1",
-...                 "include_tunables": [
-...                     "tunables/dummy-tunables.jsonc"
-...                 ],
-...                 "config": {
-...                    "tunable_params": ["$my_env1_tunables"],
-...                     "required_args": [
-...                         "required_arg_from_globals",
-...                         "required_arg_from_cli",
-...                         "required_arg_from_shell_env",
-...                         // Here, we can simply declare a required_arg as
-...                         // required, but let it inherit a value from a higher level environment.
-...                         "const_arg_from_required",
-...                         "const_arg_from_parent_env",
-...                     ],
-...                     "const_args": {
-...                         // Here we provide defaults, though all of these should be overridden by higher levels.
-...                         "const_arg_from_globals": "const_arg_from_globals_child1_val",
-...                         "const_arg_from_shell_env": "const_arg_from_shell_child1_val",
-...                         "const_arg_from_cli": "const_arg_from_cli_child1_val",
-...                         "const_arg_from_local_env": "const_arg_from_local_env_child1_val",
-...                     },
-...                      "run": [
-...                         "echo 'child1: required_arg_from_globals: ${required_arg_from_globals}'",
-...                         "echo 'child1: required_arg_from_cli: $required_arg_from_cli'",
-...                         "echo 'child1: required_arg_from_shell_env: $required_arg_from_shell_env'",
-...                         "echo 'child1: const_arg_from_required: $const_arg_from_required'",
-...                         "echo 'child1: const_arg_from_globals: $const_arg_from_globals'",
-...                         "echo 'child1: const_arg_from_shell_env: $const_arg_from_shell_env'",
-...                         "echo 'child1: const_arg_from_cli: $const_arg_from_cli'",
-...                         "echo 'child1: const_arg_from_local_env: $const_arg_from_local_env'",
-...                         "echo 'child1: const_arg_from_parent_env: $const_arg_from_parent_env'",
-...                     ],
-...                     "results_stdout_pattern": "(?:child[0-9]: )([a-zA-Z0-9_]+): (.+)",
-...                 }
-...             },
-...             {
-...                 "class": "mlos_bench.environments.local.local_env.LocalEnv",
-...                 "name": "child_env2",
-...                 "include_tunables": [
-...                     "tunables/dummy-tunables.jsonc"
-...                 ],
-...                 "config": {
-...                     "tunable_params": ["$my_env2_tunables"],
-...                     "required_args": [
-...                         "required_arg_from_globals",
-...                         "required_arg_from_cli",
-...                         "required_arg_from_shell_env",
-...                         // Here, we can simply declare a required_arg as
-...                         // required, but let it inherit a value from a higher level environment.
-...                         "const_arg_from_required",
-...                         "const_arg_from_parent_env",
-...                     ],
-...                     "const_args": {
-...                         // Here we provide defaults, though all of these should be overridden by higher levels.
-...                         "const_arg_from_globals": "const_arg_from_globals_child2_val",
-...                         "const_arg_from_shell_env": "const_arg_from_shell_child2_val",
-...                         "const_arg_from_cli": "const_arg_from_cli_child2_val",
-...                         "const_arg_from_local_env": "const_arg_from_local_env_child2_val",
-...                         "const_arg_from_child2_env1": "const_arg_from_child2_val",
-...                         "const_arg_from_child2_env2": "const_arg_from_child2_val",
-...                     },
-...                     // Expose the args as shell env vars for the child env.
-...                     "shell_env_params": [
-...                         "required_arg_from_globals",
-...                         "const_arg_from_globals",
-...                     ],
-...                     "run": [
-...                         // Each of these commands undergoes variable replacement prior to being executed.
-...                         "echo 'child2: required_arg_from_globals: $required_arg_from_globals'",
-...                         "echo 'child2: required_arg_from_cli: $required_arg_from_cli'",
-...                         "echo 'child2: required_arg_from_shell_env: $required_arg_from_shell_env'",
-...                         "echo 'child2: const_arg_from_required: $const_arg_from_required'",
-...                         "echo 'child2: const_arg_from_globals: $const_arg_from_globals'",
-...                         "echo 'child2: const_arg_from_shell_env: $const_arg_from_shell_env'",
-...                         "echo 'child2: const_arg_from_cli: $const_arg_from_cli'",
-...                         "echo 'child2: const_arg_from_local_env: $const_arg_from_local_env'",
-...                         "echo 'child2: const_arg_from_child2_env1: $const_arg_from_child2_env1'",
-...                         "echo 'child2: const_arg_from_child2_env2: $const_arg_from_child2_env2'",
-...                         "echo 'child2: const_arg_from_parent_env: $const_arg_from_parent_env'",
-...                         // Only some of those parameters are actually exposed as shell env vars though.
-...                         "printenv | grep _arg_from_ | sed -e 's/^/child2: /' -e 's/=/: /'",
-...                     ],
-...                     "results_stdout_pattern": "(?:child[0-9]: )([a-zA-Z0-9_]+): (.+)",
-...                 }
-...             }
-...         ]
+...         "required_args": [
+...             // These parameters always come from elsewhere:
+...             "const_arg_from_globals_2",
+...             "const_arg_from_cli_2",
+...             // We already define these parameters in "const_args" section above;
+...             // mentioning them here is optional, but can be used for clarity:
+...             "const_arg_from_globals_1",
+...             "const_arg_from_cli_1"
+...         ],
+...         "run": [
+...             "echo const_arg_1: $const_arg_1",
+...             "echo const_arg_from_globals_1: $const_arg_from_globals_1",
+...             "echo const_arg_from_globals_2: $const_arg_from_globals_2",
+...             "echo const_arg_from_shell_env: $const_arg_from_shell_env",
+...             "echo const_arg_from_cli_1: $const_arg_from_cli_1",
+...             "echo const_arg_from_cli_2: $const_arg_from_cli_2",
+...             "echo dummy_param: $dummy_param",   // A tunable from dummy_params_group1
+...             "echo dummy_param3: $dummy_param3"  // A tunable from dummy_params_group3
+...         ],
+...         "results_stdout_pattern": "([a-zA-Z0-9_]+): (.+)"
 ...     }
 ... }
 ... '''
