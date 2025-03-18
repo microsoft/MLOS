@@ -185,7 +185,7 @@ We can summarize the parameter propagation rules as follows:
    environment configs.
 
 Examples
-^^^^^^^^
+--------
 
 Here's a simple working example of a local environment config (written in Python
 instead of JSON for testing) to show how variable propagation works:
@@ -380,6 +380,7 @@ documentation of the concrete :py:mod:`~mlos_bench.services` and
 
 Examples
 --------
+
 While this documentation is generated from the source code and is intended to be a
 useful reference on the internal details, most users will be more interested in
 generating json configs to be used with the ``mlos_bench`` command line tool.
@@ -394,6 +395,7 @@ directory in the source tree.
 
 Notes
 -----
+
 - See `mlos_bench/environments/README.md
   <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/environments/>`_
   for additional documentation in the source tree.
@@ -403,6 +405,7 @@ Notes
 
 See Also
 --------
+
 :py:mod:`mlos_bench.config` :
     Overview of the configuration system.
 :py:mod:`mlos_bench.services` :
