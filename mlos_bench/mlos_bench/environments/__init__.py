@@ -332,9 +332,17 @@ trial.
 ...         "dummy_param3": 0.999
 ...     }
 
-These are the values visible to the implementations of the ``setup``, ``run``, and ``teardown``
-methods. We can see both the constant and tunable parameters combined into a single dictionary
-with proper values assigned to each of them on each iteration.
+These are the values visible to the implementations of the :py:meth:`~.Environment.setup`,
+:py:meth:`~.Environment.run`, and :py:meth:`~.Environment.teardown` methods. We can see both
+the constant and tunable parameters combined into a single dictionary
+:py:attr:`~.Environment.parameters` with proper values assigned to each of them on each iteration.
+When implementing a new :py:class:`~.Environment`-derived class, developers can rely on the
+:py:attr:`~.Environment.parameters` data in their versions of :py:meth:`~.Environment.setup` and
+other methods. For example, :py:class:`~mlos_bench.environments.remote.vm_env.VMEnv` would then
+pass the :py:attr:`~.Environment.parameters` into an ARM template when provisioning a new VM,
+and :py:class:`~.LocalEnv` can dump them into a JSON file specified in the ``dump_params_file``
+config property, or/and cherry-pick some of these values and make them shell variables with the
+``shell_env_params``.
 
 A few `Well Known Parameters <../config/index.html#well-known-variables>`_
 parameters like ``trial_id`` and ``trial_runner_id`` are added by the
