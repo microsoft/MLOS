@@ -171,7 +171,7 @@ them with external (global) configs.
 
 Taking it to the next level outside of the Environment configs, the parameters
 can be defined in the external key-value JSON config files (usually referred to
-as global config files
+as `global config files
 <../config/index.html#globals-and-variable-substitution>`_ in MLOS lingo).
 See :py:mod:`mlos_bench.config` for more details.
 
@@ -336,11 +336,13 @@ These are the values visible to the implementations of the ``setup``, ``run``, a
 methods. We can see both the constant and tunable parameters combined into a single dictionary
 with proper values assigned to each of them on each iteration.
 
-A few "Magic" parameters like ``trial_id`` and ``trial_runner_id`` are added by the Scheduler and
-used for trials parallelization and storage of the results. It is sometimes useful to add them,
-for example, to the paths used by the Environment, as in, e.g.,
-``"/storage/$experiment_id/$trial_id/data/"``, to prevent conflicts when running multiple
-experiments and trials in parallel.
+A few `Well Known Parameters <../config/index.html#well-known-variables>`_
+parameters like ``trial_id`` and ``trial_runner_id`` are added by the
+:py:mod:`Scheduler <mlos_bench.schedulers>` and used for trials parallelization
+and storage of the results. It is sometimes useful to add them, for example, to
+the paths used by the Environment, as in, e.g.,
+``"/storage/$experiment_id/$trial_id/data/"``, to prevent conflicts when running
+multiple Experiments and Trials in parallel.
 
 We will discuss passing the parameters to external scripts and using them in referencing files
 and directories in local and shared storage in the documentation of the concrete
