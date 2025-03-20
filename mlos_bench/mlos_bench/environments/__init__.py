@@ -354,7 +354,7 @@ multiple Experiments and Trials in parallel.
 
 We will discuss passing the parameters to external scripts and using them in referencing files
 and directories in local and shared storage in the documentation of the concrete
-:py:class:`~.Environment` implementations.
+:py:class:`~.Environment` implementations, especially :py:class:`~mlos_bench.environments.script_env.ScriptEnv` and :py:class:`~mlos_bench.environments.local.local_env.LocalEnv`.
 
 Environment Services
 ++++++++++++++++++++
