@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlos_bench.config &mdash; MLOS 0.6.3.dev26+g168b97f88e documentation</title>
+  <title>mlos_bench.config &mdash; MLOS 0.6.3.dev27+ge262652356 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/config/index.html"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=270eb1e0"></script>
+      <script src="../../../_static/documentation_options.js?v=879440a4"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -331,10 +331,35 @@ are basically just key-value variables that can be used in other configs using
 <span class="w">  </span><span class="nt">&quot;current_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$PWD&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;some_expanded_var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$some_var: $experiment_id&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eastus&quot;</span><span class="p">,</span>
+
+<span class="w">  </span><span class="c1">// This can be specified in the CLI config or the globals config</span>
+<span class="w">  </span><span class="nt">&quot;tunable_params_map&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="c1">// a map of tunable_params variables to their covariant group names</span>
+<span class="w">     </span><span class="nt">&quot;environment1_tunables&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">         </span><span class="s2">&quot;covariant_group_name&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="s2">&quot;another_covariant_group_name&quot;</span>
+<span class="w">     </span><span class="p">],</span>
+<span class="w">     </span><span class="nt">&quot;environment2_tunables&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">         </span><span class="c1">// empty list means no tunables</span>
+<span class="w">         </span><span class="c1">// are enabled for this environment</span>
+<span class="w">         </span><span class="c1">// during this experiment</span>
+<span class="w">         </span><span class="c1">// (e.g., only use defaults for this environment)</span>
+<span class="w">     </span><span class="p">],</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>There are additional details about variable propagation in the
+<p>Users can have multiple global config files, each specified with a <code class="docutils literal notranslate"><span class="pre">--globals</span></code>
+CLI arg or <code class="docutils literal notranslate"><span class="pre">&quot;globals&quot;</span></code> CLI config property.</p>
+<p>At runtime, parameters from these files will be combined into a single
+dictionary, in the order they appear, and pushed to the root
+<a class="reference internal" href="../environments/index.html#module-mlos_bench.environments" title="mlos_bench.environments"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a>.</p>
+<p>Any global or <a class="reference internal" href="../environments/base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> parameter can also be overridden from
+the command line, by simply specifying <code class="docutils literal notranslate"><span class="pre">--PARAMETER_NAME</span> <span class="pre">PARAMETER_VALUE</span></code>.</p>
+<p>Another common use of global config files is to store sensitive data (e.g.,
+passwords, tokens, etc.) that should not be version-controlled.</p>
+<p>This way, users can keep their experiment-specific parameters separately from
+the Environment configs making them more reusable.</p>
+<p>There are additional details about <a class="reference external" href="../environments/index.html#variable-propagation">Variable Propagation</a> in the
 <a class="reference internal" href="../environments/index.html#module-mlos_bench.environments" title="mlos_bench.environments"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.environments</span></code></a> module.</p>
 <section id="well-known-variables">
 <h3><a class="toc-backref" href="#id7" role="doc-backlink">Well Known Variables</a><a class="headerlink" href="#well-known-variables" title="Link to this heading"></a></h3>
@@ -355,6 +380,16 @@ instance (e.g., when writing scripts).</p>
 <li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">$trial_runner_id</span></code>: A unique identifier for the <code class="docutils literal notranslate"><span class="pre">TrialRunner</span></code>.</dt><dd><p>This can be useful when running multiple trials in parallel (e.g., to
 provision a numbered VM per worker).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">$tunable_params_map</span></code>: A map of <code class="docutils literal notranslate"><span class="pre">tunable_params</span></code> <code class="docutils literal notranslate"><span class="pre">$name</span></code> to their list of covariant group names.</dt><dd><p>This is usually used in a CLI <code class="docutils literal notranslate"><span class="pre">--config</span></code> CLI config or <code class="docutils literal notranslate"><span class="pre">--globals</span></code>
+(e.g., “experiment”) config file and is used to control what the
+<code class="docutils literal notranslate"><span class="pre">&quot;tunable_params&quot;:</span> <span class="pre">$tunable_group_name</span></code> specified in the the
+<a class="reference internal" href="../environments/index.html#module-mlos_bench.environments" title="mlos_bench.environments"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.environments</span></code></a> JSONC configs resolves to.
+This can be used to control which tunables are enabled for tuning for an
+experiment without having to change the underlying Environment config.</p>
 </dd>
 </dl>
 </li>
