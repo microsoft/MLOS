@@ -340,9 +340,9 @@ When implementing a new :py:class:`~.Environment`-derived class, developers can 
 :py:attr:`~.Environment.parameters` data in their versions of :py:meth:`~.Environment.setup` and
 other methods. For example, :py:class:`~mlos_bench.environments.remote.vm_env.VMEnv` would then
 pass the :py:attr:`~.Environment.parameters` into an ARM template when provisioning a new VM,
-and :py:class:`~.LocalEnv` can dump them into a JSON file specified in the ``dump_params_file``
-config property, or/and cherry-pick some of these values and make them shell variables with the
-``shell_env_params``.
+and :py:class:`~mlos_bench.environments.local.local_env.LocalEnv` can dump them into a JSON file
+specified in the ``dump_params_file`` config property, or/and cherry-pick some of these values
+and make them shell variables with the ``shell_env_params``.
 
 A few `Well Known Parameters <../config/index.html#well-known-variables>`_
 parameters like ``trial_id`` and ``trial_runner_id`` are added by the
@@ -354,7 +354,9 @@ multiple Experiments and Trials in parallel.
 
 We will discuss passing the parameters to external scripts and using them in referencing files
 and directories in local and shared storage in the documentation of the concrete
-:py:class:`~.Environment` implementations, especially :py:class:`~mlos_bench.environments.script_env.ScriptEnv` and :py:class:`~mlos_bench.environments.local.local_env.LocalEnv`.
+:py:class:`~.Environment` implementations, especially
+:py:class:`~mlos_bench.environments.script_env.ScriptEnv` and
+:py:class:`~mlos_bench.environments.local.local_env.LocalEnv`.
 
 Environment Services
 ++++++++++++++++++++
