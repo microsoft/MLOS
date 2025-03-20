@@ -609,7 +609,7 @@ class Launcher:
             return SyncScheduler(
                 # All config values can be overridden from global config
                 config={
-                    "experiment_id": "UNDEFINED - override from global config",
+                    "experiment_id": "DEFAULT_EXPERIMENT_ID",
                     "trial_id": 0,
                     "config_id": -1,
                     "trial_config_repeat_count": 1,

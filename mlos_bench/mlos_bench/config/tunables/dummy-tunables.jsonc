@@ -1,6 +1,6 @@
 // FIXME: A workaround to a bug (#613) in the config system that requires non-empty configs.
 {
-    "dummy_params": {
+    "dummy_params_group1": {
         "cost": 0,
         "description": "Dummy parameter group to allow a non-empty config for testing creating singleton resources that have no tunable params.",
         "params": {
@@ -9,6 +9,36 @@
                 "type": "categorical",
                 "values": ["dummy"],
                 "default": "dummy"
+            }
+        }
+    },
+    "dummy_params_group2": {
+        "cost": 1,
+        "description": "Dummy parameter group for testing",
+        "params": {
+            "dummy_param_int": {
+                "description": "An integer dummy parameter.",
+                "type": "int",
+                "range": [0, 100],
+                "default": 0
+            },
+            "dummy_param_float": {
+                "description": "A float dummy parameter.",
+                "type": "float",
+                "range": [0, 1],
+                "default": 0.5
+            }
+        }
+    },
+    "dummy_params_group3": {
+        "cost": 1,
+        "description": "Another dummy parameter group for testing",
+        "params": {
+            "dummy_param3": {
+                "description": "One more dummy parameter.",
+                "type": "float",
+                "range": [-1, 1],
+                "default": 0.0
             }
         }
     }

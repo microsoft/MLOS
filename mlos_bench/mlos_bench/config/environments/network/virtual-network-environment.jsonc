@@ -18,7 +18,7 @@
     "config": {
         // FIXME: There aren't currently any tunable params for the network environment.
         // But one is required to workaround a bug (#613) in the config storage layer.
-        "tunable_params": ["dummy_params"],
+        "tunable_params": ["dummy_params_group1"],
 
         // Typically don't want to deprovision the network environment on teardown
         // since other experiments in this same RG might be using it.

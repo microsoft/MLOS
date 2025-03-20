@@ -457,6 +457,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         if env_services_path is not None:
             service = self.load_services(env_services_path, global_config, service)
 
+        if service is None:
+            service = Service(parent=self)
+
         env_tunables_path = config.get("include_tunables")
         if env_tunables_path is not None:
             tunables = self.load_tunables(env_tunables_path, tunables)
