@@ -16,7 +16,6 @@
         // 3 unhandled config parameters:
         "storageAccountName": "storage-account-name",
         "storageFileShareName": "file-share-name",
-        "storageAccountKey": "storage-account-key-blob",
 
         "requestTimeout": 20
     }
