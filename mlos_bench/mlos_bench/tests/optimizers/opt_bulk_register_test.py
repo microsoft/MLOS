@@ -76,6 +76,7 @@ def _test_opt_update_max(
     assert score["score"] == pytest.approx(99.99, 0.01)
     assert tunables is not None
     assert tunables.get_param_values() == {
+        "123": 2,
         "vmSize": "Standard_B2s",
         "idle": "mwait",
         "kernel_sched_migration_cost_ns": 200000,
