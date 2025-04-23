@@ -64,14 +64,21 @@ def test_schedule_trial(
     # Scheduler side: get trials ready to run at certain timestamps:
 
     # Pretend 1 minute has passed, get trials scheduled to run:
-    pending_trials = exp_storage.pending_trials(timestamp + timedelta_1min, running=False)
-    pending_ids = _trial_ids(pending_trials)
+    pending_ids = _trial_ids(exp_storage.pending_trials(timestamp + timedelta_1min, running=False))
     assert pending_ids == {
         trial_now1.trial_id,
         trial_now2.trial_id,
     }
-    pending_trial_now2 = next(iter(t for t in pending_trials if t.trial_id == trial_now2.trial_id))
-    assert pending_trial_now2.trial_runner_id == trial_now2_data.trial_runner_id
+
+    # Make sure that the pending trials and trial_runner_ids match.
+    pending_trial_runner_ids = {
+        pending_trial.trial_id: pending_trial.trial_runner_id
+        for pending_trial in exp_storage.pending_trials(timestamp + timedelta_1min, running=False)
+    }
+    assert pending_trial_runner_ids == {
+        trial_now1.trial_id: trial_now1.trial_runner_id,
+        trial_now2.trial_id: trial_now2.trial_runner_id,
+    }
 
     # Get trials scheduled to run within the next 1 hour:
     pending_ids = _trial_ids(exp_storage.pending_trials(timestamp + timedelta_1hr, running=False))
