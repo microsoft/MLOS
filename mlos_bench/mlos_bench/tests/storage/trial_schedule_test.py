@@ -47,12 +47,19 @@ def test_schedule_trial(
     # Schedule 2 hours in the future:
     trial_2h = exp_storage.new_trial(tunable_groups, timestamp + timedelta_1hr * 2, config)
 
+    # Check that if we assign a TrialRunner that that value is still available on restore.
+    trial_now2.set_trial_runner(1)
+    assert trial_now2.trial_runner_id
+
     exp_data = storage.experiments[exp_storage.experiment_id]
     trial_now1_data = exp_data.trials[trial_now1.trial_id]
     assert trial_now1_data.trial_runner_id is None
     assert trial_now1_data.status == Status.PENDING
     # Check that Status matches in object vs. backend storage.
     assert trial_now1.status == trial_now1_data.status
+
+    trial_now2_data = exp_data.trials[trial_now2.trial_id]
+    assert trial_now2_data.trial_runner_id == trial_now2.trial_runner_id
 
     # Scheduler side: get trials ready to run at certain timestamps:
 
@@ -61,6 +68,16 @@ def test_schedule_trial(
     assert pending_ids == {
         trial_now1.trial_id,
         trial_now2.trial_id,
+    }
+
+    # Make sure that the pending trials and trial_runner_ids match.
+    pending_trial_runner_ids = {
+        pending_trial.trial_id: pending_trial.trial_runner_id
+        for pending_trial in exp_storage.pending_trials(timestamp + timedelta_1min, running=False)
+    }
+    assert pending_trial_runner_ids == {
+        trial_now1.trial_id: trial_now1.trial_runner_id,
+        trial_now2.trial_id: trial_now2.trial_runner_id,
     }
 
     # Get trials scheduled to run within the next 1 hour:
