@@ -276,6 +276,7 @@ class Experiment(Storage.Experiment):
                     experiment_id=self._experiment_id,
                     trial_id=trial.trial_id,
                     config_id=trial.config_id,
+                    trial_runner_id=trial.trial_runner_id,
                     opt_targets=self._opt_targets,
                     config=config,
                 )
@@ -350,6 +351,7 @@ class Experiment(Storage.Experiment):
                     experiment_id=self._experiment_id,
                     trial_id=self._trial_id,
                     config_id=config_id,
+                    trial_runner_id=None,  # initially, Trials are not assigned to a TrialRunner
                     opt_targets=self._opt_targets,
                     config=config,
                     status=new_trial_status,
