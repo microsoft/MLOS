@@ -210,7 +210,7 @@ Module Contents
 
 
 
-   .. py:class:: Trial(*, tunables: mlos_bench.tunables.tunable_groups.TunableGroups, experiment_id: str, trial_id: int, tunable_config_id: int, trial_runner_id: int | None = None, opt_targets: dict[str, Literal['min', 'max']], config: dict[str, Any] | None = None, status: mlos_bench.environments.status.Status = Status.UNKNOWN)
+   .. py:class:: Trial(*, tunables: mlos_bench.tunables.tunable_groups.TunableGroups, experiment_id: str, trial_id: int, tunable_config_id: int, trial_runner_id: int | None, opt_targets: dict[str, Literal['min', 'max']], config: dict[str, Any] | None = None, status: mlos_bench.environments.status.Status = Status.UNKNOWN)
 
       Base interface for storing the results of a single run of the experiment.
 
