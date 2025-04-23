@@ -5,28 +5,24 @@
 """A simple single-threaded synchronous optimization loop implementation."""
 
 import copy
-from datetime import datetime
 import logging
 import threading
-from typing import Callable, Optional
-
-from pytz import UTC
-
-import logging
+import time
+from collections.abc import Callable
 from datetime import datetime
+from typing import Optional
 
 from pytz import UTC
-
-from mlos_bench.storage.base_storage import Storage
 
 from mlos_bench.schedulers.base_scheduler import Scheduler
 from mlos_bench.storage.base_storage import Storage
-import time
 
 _LOG = logging.getLogger(__name__)
 
+
 class ParallelScheduler(Scheduler):
     """A simple multi-threaded asynchronous optimization loop implementation."""
+
     def start(self) -> None:
         """Start the optimization loop."""
         super().start()
@@ -75,7 +71,7 @@ class ParallelScheduler(Scheduler):
 
         for trial in pending_trials:
             # Wait for an idle trial runner
-            trial_runner_id: Optional[int] = None
+            trial_runner_id: int | None = None
             while trial_runner_id is None:
                 with self._runner_lock:
                     for update in self._pending_updates:
@@ -106,13 +102,12 @@ class ParallelScheduler(Scheduler):
         trial : Storage.Trial
             A Storage class based Trial used to persist the experiment trial data.
         """
-        register_fn = self.get_trial_runner(trial)._run_trial(
-            trial, copy.copy(self.global_config)
-        )
+        register_fn = self.get_trial_runner(trial)._run_trial(trial, copy.copy(self.global_config))
 
         def callback(trial: Storage.Trial = trial):
             """
-            Callback to pass to the main thread to register the results with the storage.
+            Callback to pass to the main thread to register the results with the
+            storage.
 
             Parameters
             ----------
