@@ -16,5 +16,7 @@ exp_storage = sql_storage_fixtures.exp_storage
 exp_no_tunables_storage = sql_storage_fixtures.exp_no_tunables_storage
 mixed_numerics_exp_storage = sql_storage_fixtures.mixed_numerics_exp_storage
 exp_data = sql_storage_fixtures.exp_data
+parallel_exp_data = sql_storage_fixtures.parallel_exp_data
+
 exp_no_tunables_data = sql_storage_fixtures.exp_no_tunables_data
 mixed_numerics_exp_data = sql_storage_fixtures.mixed_numerics_exp_data

@@ -5,6 +5,7 @@
 """Simple class to run an individual Trial on a given Environment."""
 
 import logging
+from collections.abc import Callable
 from datetime import datetime
 from types import TracebackType
 from typing import Any, Literal
@@ -164,14 +165,14 @@ class TrialRunner:
         """Get the running state of the current TrialRunner."""
         return self._is_running
 
-    def run_trial(
+    def _run_trial(
         self,
         trial: Storage.Trial,
         global_config: dict[str, Any] | None = None,
-    ) -> None:
+    ) -> Callable[[], None]:
         """
-        Run a single trial on this TrialRunner's Environment and stores the results in
-        the backend Trial Storage.
+        Run a single trial on this TrialRunner's Environment and return a callback to
+        store the results in the backend Trial Storage.
 
         Parameters
         ----------
@@ -182,8 +183,8 @@ class TrialRunner:
 
         Returns
         -------
-        (trial_status, trial_score) : (Status, dict[str, float] | None)
-            Status and results of the trial.
+        callback : Callable[[], None]
+            Returns a callback to register the results with the storage backend.
         """
         assert self._in_context
 
@@ -199,8 +200,18 @@ class TrialRunner:
             _LOG.warning("Setup failed: %s :: %s", self.environment, trial.tunables)
             # FIXME: Use the actual timestamp from the environment.
             _LOG.info("TrialRunner: Update trial results: %s :: %s", trial, Status.FAILED)
-            trial.update(Status.FAILED, datetime.now(UTC))
-            return
+
+            def fail_callback() -> None:
+                """
+                A callback to register the results with the storage backend.
+
+                This must be called from the main thread. For a synchronous scheduler
+                this can just be called directly. For an asynchronous scheduler, this
+                will be passed to the main thread when the trial is finished.
+                """
+                trial.update(Status.FAILED, datetime.now(UTC))
+
+            return fail_callback
 
         # TODO: start background status polling of the environments in the event loop.
 
@@ -214,12 +225,62 @@ class TrialRunner:
 
         # Use the status and timestamp from `.run()` as it is the final status of the experiment.
         # TODO: Use the `.status()` output in async mode.
-        trial.update_telemetry(status, timestamp, telemetry)
+        def success_callback() -> None:
+            """
+            A callback to register the results with the storage backend.
 
-        trial.update(status, timestamp, results)
-        _LOG.info("TrialRunner: Update trial results: %s :: %s %s", trial, status, results)
+            This must be called from the main thread. For a synchronous scheduler this
+            can just be called directly. For an asynchronous scheduler, this will be
+            passed to the main thread when the trial is finished.
+            """
+            trial.update_telemetry(status, timestamp, telemetry)
+            trial.update(status, timestamp, results)
+            _LOG.info("TrialRunner: Update trial results: %s :: %s %s", trial, status, results)
 
         self._is_running = False
+
+        return success_callback
+
+    def run_trial(
+        self,
+        trial: Storage.Trial,
+        global_config: dict[str, Any] | None = None,
+    ) -> None:
+        """
+        Run a single trial on this TrialRunner's Environment and store the results in
+        the backend Trial Storage.
+
+        Parameters
+        ----------
+        trial : Storage.Trial
+            A Storage class based Trial used to persist the experiment trial data.
+        global_config : dict
+            Global configuration parameters.
+        """
+        self._run_trial(trial, global_config)()
+
+    async def async_run_trial(
+        self,
+        trial: Storage.Trial,
+        global_config: dict[str, Any] | None = None,
+    ) -> Callable[[], None]:
+        """
+        Run a single trial on this TrialRunner's Environment and return a callback to
+        store the results in the backend Trial Storage.
+
+        Parameters
+        ----------
+        trial : Storage.Trial
+            A Storage class based Trial used to persist the experiment trial data.
+        global_config : dict
+            Global configuration parameters.
+
+        Returns
+        -------
+        callback : Callable[[], None]
+            Returns a callback to register the results with the storage backend.
+        """
+        return self._run_trial(trial, global_config)
 
     def teardown(self) -> None:
         """

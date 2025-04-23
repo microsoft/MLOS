@@ -3,14 +3,17 @@
 # Licensed under the MIT License.
 #
 """Unit tests for scheduling trials for some future time."""
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from datetime import datetime, timedelta
+from typing import Any
 
+import numpy as np
 from pytz import UTC
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.base_storage import Storage
+from mlos_bench.storage.base_trial_data import TrialData
 from mlos_bench.tests.storage import (
     CONFIG_COUNT,
     CONFIG_TRIAL_REPEAT_COUNT,
@@ -156,3 +159,29 @@ def test_rr_scheduling(exp_data: ExperimentData) -> None:
         assert (
             trial.trial_runner_id == expected_runner_id
         ), f"Expected trial_runner_id {expected_runner_id} for {trial}"
+
+
+def test_parallel_scheduling(parallel_exp_data: ExperimentData) -> None:
+    """
+    Checks that the scheduler schedules all of Trials across TrialRunners.
+
+    Note that we can no longer assume the order of the trials, since they can complete
+    in any order.
+    """
+    extractor: Callable[[Callable[[TrialData], Any]], list[Any]] = lambda fn: [
+        fn(parallel_exp_data.trials[id])
+        for id in range(1, CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT + 1)
+    ]
+
+    trial_ids = extractor(lambda trial: trial.trial_id)
+    assert set(trial_ids) == set(range(1, CONFIG_COUNT * CONFIG_TRIAL_REPEAT_COUNT + 1))
+
+    config_ids = extractor(lambda trial: trial.tunable_config_id)
+    unique_config_ids, config_counts = np.unique(config_ids, return_counts=True)
+    assert len(unique_config_ids) == CONFIG_COUNT
+    assert all(count == CONFIG_TRIAL_REPEAT_COUNT for count in config_counts)
+
+    repeat_nums = extractor(lambda trial: trial.metadata_dict["repeat_i"])
+    unique_repeat_nums, repeat_nums_counts = np.unique(repeat_nums, return_counts=True)
+    assert len(unique_repeat_nums) == CONFIG_TRIAL_REPEAT_COUNT
+    assert all(count == CONFIG_COUNT for count in repeat_nums_counts)
