@@ -113,7 +113,8 @@ class ParallelScheduler(Scheduler):
         loop.run_until_complete(asyncio.gather(*pending))
 
     def run_trial(self, trial: Storage.Trial) -> None:
-        """Parallel Scheduler does not support run_trial. Use async_run_trial instead.
+        """
+        Parallel Scheduler does not support run_trial. Use async_run_trial instead.
 
         Parameters
         ----------
