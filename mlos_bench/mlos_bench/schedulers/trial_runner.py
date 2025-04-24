@@ -259,7 +259,7 @@ class TrialRunner:
         """
         self._run_trial(trial, global_config)()
 
-    async def async_run_trial(
+    def deferred_run_trial(
         self,
         trial: Storage.Trial,
         global_config: dict[str, Any] | None = None,
