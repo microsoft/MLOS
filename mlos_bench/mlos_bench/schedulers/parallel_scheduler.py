@@ -48,6 +48,8 @@ class ParallelScheduler(Scheduler):
     def teardown(self) -> None:
         """Stop the optimization loop."""
         super().teardown()
+
+        # Shutdown the thread pool and wait for all tasks to finish
         self.pool.shutdown(wait=True)
         self._run_callbacks()
 
@@ -65,6 +67,7 @@ class ParallelScheduler(Scheduler):
             id for id, runner in self.trial_runners.items() if not runner.is_running
         ]
 
+        # Assign pending trials to idle runners
         for trial, runner_id in zip(pending_trials, idle_runner_ids):
             trial.update(status=Status.SCHEDULED, timestamp=datetime.now(UTC))
             trial.set_trial_runner(runner_id)
@@ -83,7 +86,9 @@ class ParallelScheduler(Scheduler):
 
         for trial in scheduled_trials:
             trial.update(status=Status.READY, timestamp=datetime.now(UTC))
-            task = self.pool.submit(self.async_run_trial, trial)
+            task = self.pool.submit(self.deferred_run_trial, trial)
+
+            # This is required to ensure that the callback happens on the main thread
             asyncio.get_event_loop().call_soon_threadsafe(self._on_trial_finished, task)
 
     @staticmethod
@@ -124,7 +129,7 @@ class ParallelScheduler(Scheduler):
             "ParallelScheduler does not support run_trial. Use async_run_trial instead."
         )
 
-    def async_run_trial(self, trial: Storage.Trial) -> Callable[[], None]:
+    def deferred_run_trial(self, trial: Storage.Trial) -> Callable[[], None]:
         """
         Set up and run a single trial asynchronously.
 
