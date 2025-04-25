@@ -91,8 +91,8 @@ class ParallelScheduler(Scheduler):
             """
             Callback to be called when a trial is finished.
 
-            This must always be called from the main thread. Exceptions can also be handled
-            here
+            This must always be called from the main thread. Exceptions can also be
+            handled here
             """
             try:
                 (status, timestamp, results, telemetry) = result.result()
