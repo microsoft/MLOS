@@ -5,7 +5,6 @@
 """Simple class to run an individual Trial on a given Environment."""
 
 import logging
-from collections.abc import Callable
 from datetime import datetime
 from types import TracebackType
 from typing import Any, Literal
@@ -14,7 +13,6 @@ from pytz import UTC
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.status import Status
-from mlos_bench.event_loop_context import EventLoopContext
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService
@@ -118,7 +116,6 @@ class TrialRunner:
         assert self._env.parameters["trial_runner_id"] == self._trial_runner_id
         self._in_context = False
         self._is_running = False
-        self._event_loop_context = EventLoopContext()
 
     def __repr__(self) -> str:
         return (
@@ -165,27 +162,11 @@ class TrialRunner:
         """Get the running state of the current TrialRunner."""
         return self._is_running
 
-    def _run_trial(
+    def _prepare_run_trial(
         self,
         trial: Storage.Trial,
         global_config: dict[str, Any] | None = None,
-    ) -> Callable[[], None]:
-        """
-        Run a single trial on this TrialRunner's Environment and return a callback to
-        store the results in the backend Trial Storage.
-
-        Parameters
-        ----------
-        trial : Storage.Trial
-            A Storage class based Trial used to persist the experiment trial data.
-        global_config : dict
-            Global configuration parameters.
-
-        Returns
-        -------
-        callback : Callable[[], None]
-            Returns a callback to register the results with the storage backend.
-        """
+    ):
         assert self._in_context
 
         assert not self._is_running
@@ -197,49 +178,26 @@ class TrialRunner:
         )
 
         if not self.environment.setup(trial.tunables, trial.config(global_config)):
-            _LOG.warning("Setup failed: %s :: %s", self.environment, trial.tunables)
-            # FIXME: Use the actual timestamp from the environment.
-            _LOG.info("TrialRunner: Update trial results: %s :: %s", trial, Status.FAILED)
+            trial.update(Status.FAILED, datetime.now(UTC))
 
-            def fail_callback() -> None:
-                """
-                A callback to register the results with the storage backend.
-
-                This must be called from the main thread. For a synchronous scheduler
-                this can just be called directly. For an asynchronous scheduler, this
-                will be passed to the main thread when the trial is finished.
-                """
-                trial.update(Status.FAILED, datetime.now(UTC))
-
-            return fail_callback
-
-        # TODO: start background status polling of the environments in the event loop.
-
+    @staticmethod
+    def _execute_run_trial(
+        environment: Environment,
+    ):
         # Block and wait for the final result.
-        (status, timestamp, results) = self.environment.run()
-        _LOG.info("TrialRunner Results: %s :: %s\n%s", trial.tunables, status, results)
+        (status, timestamp, results) = environment.run()
 
         # In async mode (TODO), poll the environment for status and telemetry
         # and update the storage with the intermediate results.
-        (_status, _timestamp, telemetry) = self.environment.status()
+        (_status, _timestamp, telemetry) = environment.status()
 
-        # Use the status and timestamp from `.run()` as it is the final status of the experiment.
-        # TODO: Use the `.status()` output in async mode.
-        def success_callback() -> None:
-            """
-            A callback to register the results with the storage backend.
+        return (status, timestamp, results, telemetry)
 
-            This must be called from the main thread. For a synchronous scheduler this
-            can just be called directly. For an asynchronous scheduler, this will be
-            passed to the main thread when the trial is finished.
-            """
-            trial.update_telemetry(status, timestamp, telemetry)
-            trial.update(status, timestamp, results)
-            _LOG.info("TrialRunner: Update trial results: %s :: %s %s", trial, status, results)
-
+    def _finalize_run_trial(self, trial, status, timestamp, results, telemetry):
+        trial.update_telemetry(status, timestamp, telemetry)
+        trial.update(status, timestamp, results)
+        _LOG.info("TrialRunner: Update trial results: %s :: %s %s", trial, status, results)
         self._is_running = False
-
-        return success_callback
 
     def run_trial(
         self,
@@ -257,30 +215,9 @@ class TrialRunner:
         global_config : dict
             Global configuration parameters.
         """
-        self._run_trial(trial, global_config)()
-
-    def deferred_run_trial(
-        self,
-        trial: Storage.Trial,
-        global_config: dict[str, Any] | None = None,
-    ) -> Callable[[], None]:
-        """
-        Run a single trial on this TrialRunner's Environment and return a callback to
-        store the results in the backend Trial Storage.
-
-        Parameters
-        ----------
-        trial : Storage.Trial
-            A Storage class based Trial used to persist the experiment trial data.
-        global_config : dict
-            Global configuration parameters.
-
-        Returns
-        -------
-        callback : Callable[[], None]
-            Returns a callback to register the results with the storage backend.
-        """
-        return self._run_trial(trial, global_config)
+        self._prepare_run_trial(trial, global_config)
+        (status, timestamp, results, telemetry) = self._execute_run_trial(self._env)
+        self._finalize_run_trial(trial, status, timestamp, results, telemetry)
 
     def teardown(self) -> None:
         """

@@ -2,12 +2,11 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""A simple single-threaded synchronous optimization loop implementation."""
+"""A simple multi-threaded asynchronous optimization loop implementation."""
 
 import asyncio
 import logging
-from collections.abc import Callable
-from concurrent.futures import Future, ThreadPoolExecutor
+from concurrent.futures import Future, ProcessPoolExecutor
 from datetime import datetime
 from typing import Any
 
@@ -27,7 +26,7 @@ class ParallelScheduler(Scheduler):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
 
         super().__init__(*args, **kwargs)
-        self.pool = ThreadPoolExecutor(max_workers=len(self._trial_runners))
+        self.pool = ProcessPoolExecutor(max_workers=len(self._trial_runners))
 
     def start(self) -> None:
         """Start the optimization loop."""
@@ -47,11 +46,10 @@ class ParallelScheduler(Scheduler):
 
     def teardown(self) -> None:
         """Stop the optimization loop."""
-        super().teardown()
-
         # Shutdown the thread pool and wait for all tasks to finish
         self.pool.shutdown(wait=True)
         self._run_callbacks()
+        super().teardown()
 
     def schedule_trial(self, tunables: TunableGroups) -> None:
         """Assign a trial to a trial runner."""
@@ -86,24 +84,25 @@ class ParallelScheduler(Scheduler):
 
         for trial in scheduled_trials:
             trial.update(status=Status.READY, timestamp=datetime.now(UTC))
-            task = self.pool.submit(self.deferred_run_trial, trial)
+            self.deferred_run_trial(trial)
 
-            # This is required to ensure that the callback happens on the main thread
-            asyncio.get_event_loop().call_soon_threadsafe(self._on_trial_finished, task)
+    def _on_trial_finished_closure(self, trial: Storage.Trial):
+        def _on_trial_finished(self: ParallelScheduler, result: Future) -> None:
+            """
+            Callback to be called when a trial is finished.
 
-    @staticmethod
-    def _on_trial_finished(result: Future[Callable[[], None]]) -> None:
-        """
-        Callback to be called when a trial is finished.
+            This must always be called from the main thread. Exceptions can also be handled
+            here
+            """
+            try:
+                (status, timestamp, results, telemetry) = result.result()
+                self.get_trial_runner(trial)._finalize_run_trial(
+                    trial, status, timestamp, results, telemetry
+                )
+            except Exception as exception:  # pylint: disable=broad-except
+                _LOG.error("Trial failed: %s", exception)
 
-        This must always be called from the main thread. Exceptions can also be handled
-        here
-        """
-        try:
-            callback = result.result()
-            callback()
-        except Exception as exception:  # pylint: disable=broad-except
-            _LOG.error("Trial failed: %s", exception)
+        return _on_trial_finished
 
     @staticmethod
     def _run_callbacks() -> None:
@@ -130,7 +129,7 @@ class ParallelScheduler(Scheduler):
             "ParallelScheduler does not support run_trial. Use async_run_trial instead."
         )
 
-    def deferred_run_trial(self, trial: Storage.Trial) -> Callable[[], None]:
+    def deferred_run_trial(self, trial: Storage.Trial) -> None:
         """
         Set up and run a single trial asynchronously.
 
@@ -139,6 +138,12 @@ class ParallelScheduler(Scheduler):
         super().run_trial(trial)
         # In the sync scheduler we run each trial on its own TrialRunner in sequence.
         trial_runner = self.get_trial_runner(trial)
-        result = trial_runner.deferred_run_trial(trial, self.global_config)
+        trial_runner._prepare_run_trial(trial, self.global_config)
+
+        task = self.pool.submit(trial_runner._execute_run_trial, trial_runner.environment)
+        # This is required to ensure that the callback happens on the main thread
+        asyncio.get_event_loop().call_soon_threadsafe(
+            self._on_trial_finished_closure(trial), self, task
+        )
+
         _LOG.info("QUEUE: Finished trial: %s on %s", trial, trial_runner)
-        return result
