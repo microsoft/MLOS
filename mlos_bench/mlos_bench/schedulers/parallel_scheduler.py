@@ -6,9 +6,9 @@
 
 import asyncio
 import logging
+from collections.abc import Callable
 from concurrent.futures import Future, ProcessPoolExecutor
 from datetime import datetime
-from collections.abc import Callable
 from typing import Any
 
 from pytz import UTC
@@ -91,13 +91,15 @@ class ParallelScheduler(Scheduler):
     def _on_trial_finished_closure(
         self, trial: Storage.Trial
     ) -> Callable[["ParallelScheduler", Future], None]:
-        """Generate a closure to handle the callback for when a trial is finished.
+        """
+        Generate a closure to handle the callback for when a trial is finished.
 
         Parameters
         ----------
         trial : Storage.Trial
             The trial to finish.
         """
+
         def _on_trial_finished(self: ParallelScheduler, result: Future) -> None:
             """
             Callback to be called when a trial is finished.

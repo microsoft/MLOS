@@ -168,7 +168,8 @@ class TrialRunner:
         trial: Storage.Trial,
         global_config: dict[str, Any] | None = None,
     ) -> None:
-        """Prepare the trial runner for running a trial.
+        """
+        Prepare the trial runner for running a trial.
 
         Parameters
         ----------
@@ -194,7 +195,8 @@ class TrialRunner:
     def execute_run_trial(
         environment: Environment,
     ) -> tuple[Status, datetime, dict[str, TunableValue] | None, list[tuple[datetime, str, Any]]]:
-        """Execute the trial run on the environment.
+        """
+        Execute the trial run on the environment.
 
         Parameters
         ----------
@@ -223,7 +225,8 @@ class TrialRunner:
         results: dict[str, TunableValue] | None,
         telemetry: list[tuple[datetime, str, Any]],
     ) -> None:
-        """Finalize the trial run in the storage backend.
+        """
+        Finalize the trial run in the storage backend.
 
         Parameters
         ----------
