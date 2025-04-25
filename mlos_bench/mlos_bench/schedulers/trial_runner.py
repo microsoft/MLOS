@@ -19,6 +19,7 @@ from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.services.types import SupportsConfigLoading
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 
 _LOG = logging.getLogger(__name__)
 
@@ -162,11 +163,20 @@ class TrialRunner:
         """Get the running state of the current TrialRunner."""
         return self._is_running
 
-    def _prepare_run_trial(
+    def prepare_run_trial(
         self,
         trial: Storage.Trial,
         global_config: dict[str, Any] | None = None,
-    ):
+    ) -> None:
+        """Prepare the trial runner for running a trial.
+
+        Parameters
+        ----------
+        trial : Storage.Trial
+            The trial to prepare.
+        global_config : dict[str, Any] | None, optional
+            Global configuration parameters, by default None
+        """
         assert self._in_context
 
         assert not self._is_running
@@ -181,9 +191,21 @@ class TrialRunner:
             trial.update(Status.FAILED, datetime.now(UTC))
 
     @staticmethod
-    def _execute_run_trial(
+    def execute_run_trial(
         environment: Environment,
-    ):
+    ) -> tuple[Status, datetime, dict[str, TunableValue] | None, list[tuple[datetime, str, Any]]]:
+        """Execute the trial run on the environment.
+
+        Parameters
+        ----------
+        environment : Environment
+            The environment to run the trial on.
+
+        Returns
+        -------
+        tuple[Status, datetime, Optional[dict[str, TunableValue]], list[tuple[datetime, str, Any]]]
+            The fill results of the trial run, including status, timestamp, results, and telemetry.
+        """
         # Block and wait for the final result.
         (status, timestamp, results) = environment.run()
 
@@ -193,7 +215,29 @@ class TrialRunner:
 
         return (status, timestamp, results, telemetry)
 
-    def _finalize_run_trial(self, trial, status, timestamp, results, telemetry):
+    def finalize_run_trial(  # pylint: disable=too-many-arguments, too-many-positional-arguments
+        self,
+        trial: Storage.Trial,
+        status: Status,
+        timestamp: datetime,
+        results: dict[str, TunableValue] | None,
+        telemetry: list[tuple[datetime, str, Any]],
+    ) -> None:
+        """Finalize the trial run in the storage backend.
+
+        Parameters
+        ----------
+        trial : Storage.Trial
+            The trial to finalize.
+        status : Status
+            The status of the trial.
+        timestamp : datetime
+            The timestamp of the trial execution.
+        results : Optional[dict[str, TunableValue]]
+            The results of the trial
+        telemetry : list[tuple[datetime, str, Any]]
+            The telemetry data of the trial.
+        """
         trial.update_telemetry(status, timestamp, telemetry)
         trial.update(status, timestamp, results)
         _LOG.info("TrialRunner: Update trial results: %s :: %s %s", trial, status, results)
@@ -215,9 +259,9 @@ class TrialRunner:
         global_config : dict
             Global configuration parameters.
         """
-        self._prepare_run_trial(trial, global_config)
-        (status, timestamp, results, telemetry) = self._execute_run_trial(self._env)
-        self._finalize_run_trial(trial, status, timestamp, results, telemetry)
+        self.prepare_run_trial(trial, global_config)
+        (status, timestamp, results, telemetry) = self.execute_run_trial(self._env)
+        self.finalize_run_trial(trial, status, timestamp, results, telemetry)
 
     def teardown(self) -> None:
         """

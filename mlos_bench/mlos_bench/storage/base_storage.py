@@ -315,13 +315,13 @@ class Storage(metaclass=ABCMeta):
         ) -> Iterator["Storage.Trial"]:
             """
             Return an iterator over the pending trials that are scheduled to run on or
-            before the specified timestamp matching one of status listed.
+            before the specified timestamp matching one of statuses listed.
 
             Parameters
             ----------
             timestamp : datetime.datetime
                 The time in UTC to check for scheduled trials.
-            status : list[Status]
+            statuses : list[Status]
                 Status of the trials to filter in.
 
             Returns

@@ -8,12 +8,14 @@ import asyncio
 import logging
 from concurrent.futures import Future, ProcessPoolExecutor
 from datetime import datetime
+from collections.abc import Callable
 from typing import Any
 
 from pytz import UTC
 
 from mlos_bench.environments.status import Status
 from mlos_bench.schedulers.base_scheduler import Scheduler
+from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -86,7 +88,16 @@ class ParallelScheduler(Scheduler):
             trial.update(status=Status.READY, timestamp=datetime.now(UTC))
             self.deferred_run_trial(trial)
 
-    def _on_trial_finished_closure(self, trial: Storage.Trial):
+    def _on_trial_finished_closure(
+        self, trial: Storage.Trial
+    ) -> Callable[["ParallelScheduler", Future], None]:
+        """Generate a closure to handle the callback for when a trial is finished.
+
+        Parameters
+        ----------
+        trial : Storage.Trial
+            The trial to finish.
+        """
         def _on_trial_finished(self: ParallelScheduler, result: Future) -> None:
             """
             Callback to be called when a trial is finished.
@@ -96,7 +107,7 @@ class ParallelScheduler(Scheduler):
             """
             try:
                 (status, timestamp, results, telemetry) = result.result()
-                self.get_trial_runner(trial)._finalize_run_trial(
+                self.get_trial_runner(trial).finalize_run_trial(
                     trial, status, timestamp, results, telemetry
                 )
             except Exception as exception:  # pylint: disable=broad-except
@@ -138,9 +149,9 @@ class ParallelScheduler(Scheduler):
         super().run_trial(trial)
         # In the sync scheduler we run each trial on its own TrialRunner in sequence.
         trial_runner = self.get_trial_runner(trial)
-        trial_runner._prepare_run_trial(trial, self.global_config)
+        trial_runner.prepare_run_trial(trial, self.global_config)
 
-        task = self.pool.submit(trial_runner._execute_run_trial, trial_runner.environment)
+        task = self.pool.submit(TrialRunner.execute_run_trial, trial_runner.environment)
         # This is required to ensure that the callback happens on the main thread
         asyncio.get_event_loop().call_soon_threadsafe(
             self._on_trial_finished_closure(trial), self, task
