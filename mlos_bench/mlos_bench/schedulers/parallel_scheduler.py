@@ -21,7 +21,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class ParallelScheduler(Scheduler):
-    """A simple multi-threaded asynchronous optimization loop implementation."""
+    """A simple multi-process asynchronous optimization loop implementation."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
 

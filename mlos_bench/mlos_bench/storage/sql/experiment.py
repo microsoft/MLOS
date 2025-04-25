@@ -236,7 +236,9 @@ class Experiment(Storage.Experiment):
         )
 
     def filter_trials_by_status(
-        self, timestamp: datetime, statuses: list[Status]
+        self,
+        timestamp: datetime,
+        statuses: list[Status],
     ) -> Iterator[Storage.Trial]:
         timestamp = utcify_timestamp(timestamp, origin="local")
         _LOG.info("Retrieve pending trials for: %s @ %s", self._experiment_id, timestamp)
