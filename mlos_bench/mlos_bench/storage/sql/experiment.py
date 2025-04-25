@@ -236,7 +236,7 @@ class Experiment(Storage.Experiment):
         )
 
     def filter_trials_by_status(
-        self, timestamp: datetime, status: list[Status]
+        self, timestamp: datetime, statuses: list[Status]
     ) -> Iterator[Storage.Trial]:
         timestamp = utcify_timestamp(timestamp, origin="local")
         _LOG.info("Retrieve pending trials for: %s @ %s", self._experiment_id, timestamp)
@@ -249,7 +249,7 @@ class Experiment(Storage.Experiment):
                         | (self._schema.trial.c.ts_start <= timestamp)
                     ),
                     self._schema.trial.c.ts_end.is_(None),
-                    self._schema.trial.c.status.in_([s.name for s in status]),
+                    self._schema.trial.c.status.in_([s.name for s in statuses]),
                 )
             )
             for trial in cur_trials.fetchall():
@@ -284,7 +284,7 @@ class Experiment(Storage.Experiment):
             pending_status = [Status.PENDING, Status.READY, Status.RUNNING]
         else:
             pending_status = [Status.PENDING]
-        return self.filter_trials_by_status(timestamp=timestamp, status=pending_status)
+        return self.filter_trials_by_status(timestamp=timestamp, statuses=pending_status)
 
     def _get_config_id(self, conn: Connection, tunables: TunableGroups) -> int:
         """

@@ -311,7 +311,7 @@ class Storage(metaclass=ABCMeta):
         def filter_trials_by_status(
             self,
             timestamp: datetime,
-            status: list[Status],
+            statuses: list[Status],
         ) -> Iterator["Storage.Trial"]:
             """
             Return an iterator over the pending trials that are scheduled to run on or
