@@ -174,7 +174,7 @@ class TrialRunner:
         ----------
         trial : Storage.Trial
             The trial to prepare.
-        global_config : dict[str, Any] | None, optional
+        global_config : dict[str, Any] | None
             Global configuration parameters, by default None
         """
         assert self._in_context
@@ -203,8 +203,13 @@ class TrialRunner:
 
         Returns
         -------
-        tuple[Status, datetime, Optional[dict[str, TunableValue]], list[tuple[datetime, str, Any]]]
-            The fill results of the trial run, including status, timestamp, results, and telemetry.
+        tuple[
+            Status,
+            datetime.datetime,
+            dict[str, TunableValue] | None,
+            list[tuple[datetime.datetime, str, Any]]
+        ]
+            The full results of the trial run, including status, timestamp, results, and telemetry.
         """
         # Block and wait for the final result.
         (status, timestamp, results) = environment.run()
@@ -231,11 +236,11 @@ class TrialRunner:
             The trial to finalize.
         status : Status
             The status of the trial.
-        timestamp : datetime
+        timestamp : datetime.datetime
             The timestamp of the trial execution.
-        results : Optional[dict[str, TunableValue]]
+        results : dict[str, TunableValue] | None,
             The results of the trial
-        telemetry : list[tuple[datetime, str, Any]]
+        telemetry : list[tuple[datetime.datetime, str, Any]]
             The telemetry data of the trial.
         """
         trial.update_telemetry(status, timestamp, telemetry)
