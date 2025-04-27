@@ -23,12 +23,16 @@ mlos_bench.storage.base_trial_data.TrialData :
 """
 
 import logging
+import os
+import platform
 from abc import ABCMeta, abstractmethod
 from collections.abc import Iterator, Mapping
 from contextlib import AbstractContextManager as ContextManager
 from datetime import datetime
 from types import TracebackType
 from typing import Any, Literal
+
+from pytz import UTC
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.dict_templater import DictTemplater
@@ -133,6 +137,17 @@ class Storage(metaclass=ABCMeta):
             the results of the experiment and related data.
         """
 
+    @abstractmethod
+    def get_runnable_experiment(self) -> str | None:
+        """
+        Get the ID of the experiment that can be run.
+
+        Returns
+        -------
+        experiment_id : str | None
+            ID of the experiment that can be run.
+        """
+
     class Experiment(ContextManager, metaclass=ABCMeta):
         # pylint: disable=too-many-instance-attributes
         """
@@ -150,6 +165,7 @@ class Storage(metaclass=ABCMeta):
             root_env_config: str,
             description: str,
             opt_targets: dict[str, Literal["min", "max"]],
+            ts_start: datetime | None = None,
         ):
             self._tunables = tunables.copy()
             self._trial_id = trial_id
@@ -159,6 +175,11 @@ class Storage(metaclass=ABCMeta):
             )
             self._description = description
             self._opt_targets = opt_targets
+            self._ts_start = ts_start or datetime.now(UTC)
+            self._ts_end: datetime | None = None
+            self._status = Status.PENDING
+            self._driver_name: str | None = None
+            self._driver_pid: int | None = None
             self._in_context = False
 
         def __enter__(self) -> "Storage.Experiment":
@@ -209,6 +230,9 @@ class Storage(metaclass=ABCMeta):
 
             This method is called by `Storage.Experiment.__enter__()`.
             """
+            self._status = Status.RUNNING
+            self._driver_name = platform.node()
+            self._driver_pid = os.getpid()
 
         def _teardown(self, is_ok: bool) -> None:
             """
@@ -221,6 +245,11 @@ class Storage(metaclass=ABCMeta):
             is_ok : bool
                 True if there were no exceptions during the experiment, False otherwise.
             """
+            if is_ok:
+                self._status = Status.SUCCEEDED
+            else:
+                self._status = Status.FAILED
+            self._ts_end = datetime.now(UTC)
 
         @property
         def experiment_id(self) -> str:
@@ -393,6 +422,10 @@ class Storage(metaclass=ABCMeta):
                 An object that allows to update the storage with
                 the results of the experiment trial run.
             """
+
+        @abstractmethod
+        def save(self) -> None:
+            """Save the experiment to the storage, without running it."""
 
     class Trial(metaclass=ABCMeta):
         # pylint: disable=too-many-instance-attributes
