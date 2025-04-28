@@ -39,5 +39,6 @@ class SyncScheduler(Scheduler):
         super().run_trial(trial)
         # In the sync scheduler we run each trial on its own TrialRunner in sequence.
         trial_runner = self.get_trial_runner(trial)
-        trial_runner.run_trial(trial, self.global_config)
-        _LOG.info("QUEUE: Finished trial: %s on %s", trial, trial_runner)
+        with trial_runner:
+            trial_runner.run_trial(trial, self.global_config)
+            _LOG.info("QUEUE: Finished trial: %s on %s", trial, trial_runner)
