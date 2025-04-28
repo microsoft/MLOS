@@ -18,7 +18,7 @@ from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.launcher import Launcher
 from mlos_bench.optimizers import MlosCoreOptimizer, OneShotOptimizer
 from mlos_bench.os_environ import environ
-from mlos_bench.schedulers import SyncScheduler
+from mlos_bench.schedulers import ParallelScheduler, SyncScheduler
 from mlos_bench.services.types import (
     SupportsAuth,
     SupportsConfigLoading,
@@ -305,6 +305,68 @@ def test_launcher_args_parse_3(config_paths: list[str]) -> None:
     assert isinstance(launcher.scheduler, SyncScheduler)
     # from test-cli-config.jsonc (should override scheduler config file)
     assert launcher.scheduler.trial_config_repeat_count == 2
+
+
+def test_launcher_args_parse_4(config_paths: list[str]) -> None:
+    """
+    Test that using multiple --globals arguments works and that multiple space separated
+    options to --config-paths works.
+
+    Check $var expansion and Environment loading.
+    """
+    # Here we have multiple paths following --config-paths and --service.
+    cli_args = (
+        "--config-paths "
+        + " ".join(config_paths)
+        + " --num-trial-runners 5"
+        + " --service services/remote/mock/mock_auth_service.jsonc"
+        " services/remote/mock/mock_remote_exec_service.jsonc"
+        " --scheduler schedulers/parallel_scheduler.jsonc"
+        f" --environment {ENV_CONF_PATH}"
+        " --globals globals/global_test_config.jsonc"
+        " --globals globals/global_test_extra_config.jsonc"
+        " --test_global_value_2 from-args"
+    )
+    launcher = _get_launcher(__name__, cli_args)
+    # Check some additional features of the the parent service
+    assert isinstance(launcher.service, SupportsAuth)  # from --service
+    assert isinstance(launcher.service, SupportsRemoteExec)  # from --service
+    # Check that the first --globals file is loaded and $var expansion is handled.
+    assert launcher.global_config["experiment_id"] == "MockExperiment"
+    assert launcher.global_config["testVmName"] == "MockExperiment-vm"
+    # Check that secondary expansion also works.
+    assert launcher.global_config["testVnetName"] == "MockExperiment-vm-vnet"
+    # Check that the second --globals file is loaded.
+    assert launcher.global_config["test_global_value"] == "from-file"
+    # Check overriding values in a file from the command line.
+    assert launcher.global_config["test_global_value_2"] == "from-args"
+    # Check that we can expand a $var in a config file that references an environment variable.
+    assert path_join(launcher.global_config["pathVarWithEnvVarRef"], abs_path=True) == path_join(
+        os.getcwd(), "foo", abs_path=True
+    )
+    assert launcher.global_config["varWithEnvVarRef"] == f"user:{getuser()}"
+    assert launcher.teardown
+    # Make sure we have the right number of trial runners.
+    assert len(launcher.trial_runners) == 5  # from cli args
+    # Check that the environment that got loaded looks to be of the right type.
+    env_config = launcher.config_loader.load_config(ENV_CONF_PATH, ConfigSchema.ENVIRONMENT)
+    assert env_config["class"] == "mlos_bench.environments.mock_env.MockEnv"
+    # All TrialRunners should get the same Environment.
+    assert all(
+        check_class_name(trial_runner.environment, env_config["class"])
+        for trial_runner in launcher.trial_runners
+    )
+    # Check that the optimizer looks right.
+    assert isinstance(launcher.optimizer, OneShotOptimizer)
+    # Check that the optimizer got initialized with defaults.
+    assert launcher.optimizer.tunable_params.is_defaults()
+    assert launcher.optimizer.max_suggestions == 1  # value for OneShotOptimizer
+    # Check that we pick up the right scheduler config:
+    assert isinstance(launcher.scheduler, ParallelScheduler)
+    assert (
+        launcher.scheduler.trial_config_repeat_count == 3
+    )  # from the custom sync_scheduler.jsonc config
+    assert launcher.scheduler.max_trials == -1
 
 
 if __name__ == "__main__":

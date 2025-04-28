@@ -308,6 +308,29 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
+        def filter_trials_by_status(
+            self,
+            timestamp: datetime,
+            statuses: list[Status],
+        ) -> Iterator["Storage.Trial"]:
+            """
+            Return an iterator over the pending trials that are scheduled to run on or
+            before the specified timestamp matching one of statuses listed.
+
+            Parameters
+            ----------
+            timestamp : datetime.datetime
+                The time in UTC to check for scheduled trials.
+            statuses : list[Status]
+                Status of the trials to filter in.
+
+            Returns
+            -------
+            trials : Iterator[Storage.Trial]
+                An iterator over the matching trials.
+            """
+
+        @abstractmethod
         def pending_trials(
             self,
             timestamp: datetime,

@@ -235,13 +235,13 @@ class Experiment(Storage.Experiment):
             row._tuple() for row in cur_result.fetchall()  # pylint: disable=protected-access
         )
 
-    def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator[Storage.Trial]:
+    def filter_trials_by_status(
+        self,
+        timestamp: datetime,
+        statuses: list[Status],
+    ) -> Iterator[Storage.Trial]:
         timestamp = utcify_timestamp(timestamp, origin="local")
         _LOG.info("Retrieve pending trials for: %s @ %s", self._experiment_id, timestamp)
-        if running:
-            pending_status = [Status.PENDING.name, Status.READY.name, Status.RUNNING.name]
-        else:
-            pending_status = [Status.PENDING.name]
         with self._engine.connect() as conn:
             cur_trials = conn.execute(
                 self._schema.trial.select().where(
@@ -251,7 +251,7 @@ class Experiment(Storage.Experiment):
                         | (self._schema.trial.c.ts_start <= timestamp)
                     ),
                     self._schema.trial.c.ts_end.is_(None),
-                    self._schema.trial.c.status.in_(pending_status),
+                    self._schema.trial.c.status.in_([s.name for s in statuses]),
                 )
             )
             for trial in cur_trials.fetchall():
@@ -280,6 +280,13 @@ class Experiment(Storage.Experiment):
                     opt_targets=self._opt_targets,
                     config=config,
                 )
+
+    def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator[Storage.Trial]:
+        if running:
+            pending_status = [Status.PENDING, Status.READY, Status.RUNNING]
+        else:
+            pending_status = [Status.PENDING]
+        return self.filter_trials_by_status(timestamp=timestamp, statuses=pending_status)
 
     def _get_config_id(self, conn: Connection, tunables: TunableGroups) -> int:
         """

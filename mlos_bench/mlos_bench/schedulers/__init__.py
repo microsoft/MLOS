@@ -5,9 +5,11 @@
 """Interfaces and implementations of the optimization loop scheduling policies."""
 
 from mlos_bench.schedulers.base_scheduler import Scheduler
+from mlos_bench.schedulers.parallel_scheduler import ParallelScheduler
 from mlos_bench.schedulers.sync_scheduler import SyncScheduler
 
 __all__ = [
     "Scheduler",
     "SyncScheduler",
+    "ParallelScheduler",
 ]

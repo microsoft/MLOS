@@ -1,0 +1,6 @@
+{
+    "class": "mlos_bench.schedulers.parallel_scheduler.ParallelScheduler",
+    "config": {
+        "extra": "unsupported"
+    }
+}

@@ -13,13 +13,13 @@ from pytz import UTC
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.status import Status
-from mlos_bench.event_loop_context import EventLoopContext
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.services.types import SupportsConfigLoading
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 
 _LOG = logging.getLogger(__name__)
 
@@ -117,7 +117,6 @@ class TrialRunner:
         assert self._env.parameters["trial_runner_id"] == self._trial_runner_id
         self._in_context = False
         self._is_running = False
-        self._event_loop_context = EventLoopContext()
 
     def __repr__(self) -> str:
         return (
@@ -164,26 +163,20 @@ class TrialRunner:
         """Get the running state of the current TrialRunner."""
         return self._is_running
 
-    def run_trial(
+    def prepare_run_trial(
         self,
         trial: Storage.Trial,
         global_config: dict[str, Any] | None = None,
     ) -> None:
         """
-        Run a single trial on this TrialRunner's Environment and stores the results in
-        the backend Trial Storage.
+        Prepare the trial runner for running a trial.
 
         Parameters
         ----------
         trial : Storage.Trial
-            A Storage class based Trial used to persist the experiment trial data.
-        global_config : dict
-            Global configuration parameters.
-
-        Returns
-        -------
-        (trial_status, trial_score) : (Status, dict[str, float] | None)
-            Status and results of the trial.
+            The trial to prepare.
+        global_config : dict[str, Any] | None
+            Global configuration parameters, by default None
         """
         assert self._in_context
 
@@ -196,30 +189,87 @@ class TrialRunner:
         )
 
         if not self.environment.setup(trial.tunables, trial.config(global_config)):
-            _LOG.warning("Setup failed: %s :: %s", self.environment, trial.tunables)
-            # FIXME: Use the actual timestamp from the environment.
-            _LOG.info("TrialRunner: Update trial results: %s :: %s", trial, Status.FAILED)
             trial.update(Status.FAILED, datetime.now(UTC))
-            return
 
-        # TODO: start background status polling of the environments in the event loop.
+    @staticmethod
+    def execute_run_trial(
+        environment: Environment,
+    ) -> tuple[Status, datetime, dict[str, TunableValue] | None, list[tuple[datetime, str, Any]]]:
+        """
+        Execute the trial run on the environment.
 
+        Parameters
+        ----------
+        environment : Environment
+            The environment to run the trial on.
+
+        Returns
+        -------
+        tuple[
+            Status,
+            datetime.datetime,
+            dict[str, TunableValue] | None,
+            list[tuple[datetime.datetime, str, Any]]
+        ]
+            The full results of the trial run, including status, timestamp, results, and telemetry.
+        """
         # Block and wait for the final result.
-        (status, timestamp, results) = self.environment.run()
-        _LOG.info("TrialRunner Results: %s :: %s\n%s", trial.tunables, status, results)
+        (status, timestamp, results) = environment.run()
 
         # In async mode (TODO), poll the environment for status and telemetry
         # and update the storage with the intermediate results.
-        (_status, _timestamp, telemetry) = self.environment.status()
+        (_status, _timestamp, telemetry) = environment.status()
 
-        # Use the status and timestamp from `.run()` as it is the final status of the experiment.
-        # TODO: Use the `.status()` output in async mode.
+        return (status, timestamp, results, telemetry)
+
+    def finalize_run_trial(  # pylint: disable=too-many-arguments, too-many-positional-arguments
+        self,
+        trial: Storage.Trial,
+        status: Status,
+        timestamp: datetime,
+        results: dict[str, TunableValue] | None,
+        telemetry: list[tuple[datetime, str, Any]],
+    ) -> None:
+        """
+        Finalize the trial run in the storage backend.
+
+        Parameters
+        ----------
+        trial : Storage.Trial
+            The trial to finalize.
+        status : Status
+            The status of the trial.
+        timestamp : datetime.datetime
+            The timestamp of the trial execution.
+        results : dict[str, TunableValue] | None,
+            The results of the trial
+        telemetry : list[tuple[datetime.datetime, str, Any]]
+            The telemetry data of the trial.
+        """
         trial.update_telemetry(status, timestamp, telemetry)
-
         trial.update(status, timestamp, results)
         _LOG.info("TrialRunner: Update trial results: %s :: %s %s", trial, status, results)
-
         self._is_running = False
+
+    def run_trial(
+        self,
+        trial: Storage.Trial,
+        global_config: dict[str, Any] | None = None,
+    ) -> None:
+        """
+        Run a single trial on this TrialRunner's Environment and store the results in
+        the backend Trial Storage.
+
+        Parameters
+        ----------
+        trial : Storage.Trial
+            A Storage class based Trial used to persist the experiment trial data.
+        global_config : dict
+            Global configuration parameters.
+        """
+        self.prepare_run_trial(trial, global_config)
+        (status, timestamp, results, telemetry) = self.execute_run_trial(self._env)
+        self.finalize_run_trial(trial, status, timestamp, results, telemetry)
 
     def teardown(self) -> None:
         """
