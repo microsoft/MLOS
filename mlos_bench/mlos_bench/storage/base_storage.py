@@ -22,6 +22,8 @@ mlos_bench.storage.base_trial_data.TrialData :
     Base interface for accessing the stored benchmark trial data.
 """
 
+from __future__ import annotations
+
 import logging
 from abc import ABCMeta, abstractmethod
 from collections.abc import Iterator, Mapping
@@ -31,7 +33,6 @@ from types import TracebackType
 from typing import Any, Literal
 
 from mlos_bench.config.schemas import ConfigSchema
-from mlos_bench.dict_templater import DictTemplater
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.storage.base_experiment_data import ExperimentData
@@ -92,6 +93,25 @@ class Storage(metaclass=ABCMeta):
         -------
         experiments : dict[str, ExperimentData]
             A dictionary of the experiments' data, keyed by experiment id.
+        """
+
+    @abstractmethod
+    def get_experiment_by_id(
+        self,
+        experiment_id: str,
+    ) -> Storage.Experiment | None:
+        """
+        Gets an Experiment by its ID.
+
+        Parameters
+        ----------
+        experiment_id : str
+            ID of the Experiment to retrieve.
+
+        Returns
+        -------
+        experiment : Storage.Experiment | None
+            The Experiment object, or None if it doesn't exist.
         """
 
     @abstractmethod
@@ -308,11 +328,30 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
+        def get_trial_by_id(
+            self,
+            trial_id: int,
+        ) -> Storage.Trial | None:
+            """
+            Gets a Trial by its ID.
+
+            Parameters
+            ----------
+            trial_id : int
+                ID of the Trial to retrieve for this Experiment.
+
+            Returns
+            -------
+            trial : Storage.Trial | None
+                The Trial object, or None if it doesn't exist.
+            """
+
+        @abstractmethod
         def filter_trials_by_status(
             self,
             timestamp: datetime,
             statuses: list[Status],
-        ) -> Iterator["Storage.Trial"]:
+        ) -> Iterator[Storage.Trial]:
             """
             Return an iterator over the pending trials that are scheduled to run on or
             before the specified timestamp matching one of statuses listed.
@@ -336,7 +375,7 @@ class Storage(metaclass=ABCMeta):
             timestamp: datetime,
             *,
             running: bool,
-        ) -> Iterator["Storage.Trial"]:
+        ) -> Iterator[Storage.Trial]:
             """
             Return an iterator over the pending trials that are scheduled to run on or
             before the specified timestamp.
@@ -360,7 +399,7 @@ class Storage(metaclass=ABCMeta):
             tunables: TunableGroups,
             ts_start: datetime | None = None,
             config: dict[str, Any] | None = None,
-        ) -> "Storage.Trial":
+        ) -> Storage.Trial:
             """
             Create a new experiment run in the storage.
 
@@ -397,7 +436,7 @@ class Storage(metaclass=ABCMeta):
             tunables: TunableGroups,
             ts_start: datetime | None = None,
             config: dict[str, Any] | None = None,
-        ) -> "Storage.Trial":
+        ) -> Storage.Trial:
             """
             Create a new experiment run in the storage.
 

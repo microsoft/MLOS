@@ -263,7 +263,8 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         """
         Tear down the TrialRunners/Environment(s).
 
-        Call it after the completion of the `.start()` in the scheduler context.
+        Call it after the completion of the :py:meth:`Scheduler.start` in the
+        Scheduler context.
         """
         assert self.experiment is not None
         if self._do_teardown:

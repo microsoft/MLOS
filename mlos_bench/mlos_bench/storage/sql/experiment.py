@@ -235,6 +235,46 @@ class Experiment(Storage.Experiment):
             row._tuple() for row in cur_result.fetchall()  # pylint: disable=protected-access
         )
 
+    # TODO: Needs tests.
+    def get_trial_by_id(
+        self,
+        trial_id: int,
+    ) -> Storage.Trial | None:
+        with self._engine.connect() as conn:
+            trial = conn.execute(
+                self._schema.trial.select().where(
+                    self._schema.trial.c.exp_id == self._experiment_id,
+                    self._schema.trial.c.trial_id == trial_id,
+                )
+            ).fetchone()
+            if trial is None:
+                return None
+            tunables = self._get_key_val(
+                conn,
+                self._schema.config_param,
+                "param",
+                config_id=trial.config_id,
+            )
+            config = self._get_key_val(
+                conn,
+                self._schema.trial_param,
+                "param",
+                exp_id=self._experiment_id,
+                trial_id=trial_id,
+            )
+            return Trial(
+                engine=self._engine,
+                schema=self._schema,
+                # Reset .is_updated flag after the assignment:
+                tunables=self._tunables.copy().assign(tunables).reset(),
+                experiment_id=self._experiment_id,
+                trial_id=trial_id,
+                config_id=trial.config_id,
+                trial_runner_id=trial.trial_runner_id,
+                opt_targets=self._opt_targets,
+                config=config,
+            )
+
     def filter_trials_by_status(
         self,
         timestamp: datetime,
