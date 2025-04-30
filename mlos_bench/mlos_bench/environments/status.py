@@ -18,7 +18,6 @@ class Status(enum.Enum):
     CANCELED = 5
     FAILED = 6
     TIMED_OUT = 7
-    SCHEDULED = 8
 
     def is_good(self) -> bool:
         """Check if the status of the benchmark/environment is good."""
@@ -27,7 +26,6 @@ class Status(enum.Enum):
             Status.READY,
             Status.RUNNING,
             Status.SUCCEEDED,
-            Status.SCHEDULED,
         }
 
     def is_completed(self) -> bool:
@@ -76,9 +74,3 @@ class Status(enum.Enum):
         TIMED_OUT.
         """
         return self == Status.FAILED
-
-    def is_scheduled(self) -> bool:
-        """Check if the status of the benchmark/environment Trial or Experiment is
-        SCHEDULED.
-        """
-        return self == Status.SCHEDULED
