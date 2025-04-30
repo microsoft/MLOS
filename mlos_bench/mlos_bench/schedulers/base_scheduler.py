@@ -463,6 +463,9 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         # TODO: Move this to main loop.
         self.assign_trial_runners(pending_trials)
         for trial in pending_trials:
+            if trial.trial_runner_id is None:
+                logging.warning("Trial %s has no TrialRunner assigned yet.")
+                continue
             self.run_trial(trial)
 
     def not_done(self) -> bool:

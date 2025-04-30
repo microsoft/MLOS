@@ -2,37 +2,163 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""A simple multi-threaded asynchronous optimization loop implementation."""
+"""
+A simple multi-process asynchronous optimization loop implementation.
 
-import asyncio
+TODO: Add more details about the design and constraints and gotchas here.
+
+Examples
+--------
+TODO: Add config examples here.
+"""
+
 import logging
-from collections.abc import Callable
-from concurrent.futures import Future, ProcessPoolExecutor
+from collections.abc import Callable, Iterable
+from multiprocessing import current_process as mp_proccess_name
+from multiprocessing.pool import AsyncResult, Pool
 from datetime import datetime
 from typing import Any
+from time import sleep
 
+from attr import dataclass
 from pytz import UTC
 
-from mlos_bench.environments.status import Status
 from mlos_bench.schedulers.base_scheduler import Scheduler
 from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.storage.base_storage import Storage
-from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.optimizers.base_optimizer import Optimizer
+from mlos_bench.tunables.tunable_types import TunableValue
 
 _LOG = logging.getLogger(__name__)
 
 
+def _is_child_process() -> bool:
+    """Check if the current process is a child process."""
+    return mp_proccess_name() != "MainProcess"
+
+
+@dataclass
+class TrialRunnerResult:
+    """A simple data class to hold the :py:class:`AsyncResult` of a
+    :py:class:`TrialRunner` operation."""
+
+    trial_runner_id: int
+    result: dict[str, TunableValue] | None
+    trial_id: int | None = None
+
+
 class ParallelScheduler(Scheduler):
-    """A simple multi-process asynchronous optimization loop implementation."""
+    """A simple multi-process asynchronous optimization loop implementation.
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    See :py:mod:`mlos_bench.schedulers.parallel_scheduler` for more usage details.
 
-        super().__init__(*args, **kwargs)
-        self.pool = ProcessPoolExecutor(max_workers=len(self._trial_runners))
+    Notes
+    -----
+    This schedule uses :ext:py:class:`multiprocessing.Pool` to run trials in parallel.
 
+    To avoid issues with Python's forking implementation, which relies on pickling
+    objects from the main process and sending them to the child process, we need
+    to avoid incompatible objects, which includes any additional threads (e.g.,
+    :py:mod:`asyncio` tasks such as
+    :py:class:`mlos_bench.event_loop_context.EventLoopContext`), database
+    connections (e.g., :py:mod:`mlos_bench.storage`), and file handles (e.g.,
+    :ext:py:mod:`logging`) that are pickle incompatible.
+
+    To accomplish this, we avoid entering the :py:class:`~.TrialRunner` context
+    until we are in the child process and allow each child to manage its own
+    incompatible resources via that context.
+
+    Hence, each child process in the pool actually starts in functions in
+    special handler functions in the :py:class:`~.ParallelScheduler` class that
+    receive as inputs all the necessary (and picklable) info as arguments, then
+    enter the given :py:class:`~.TrialRunner` instance context and invoke that
+    procedure.
+    """
+
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        *,
+        config: dict[str, Any],
+        global_config: dict[str, Any],
+        trial_runners: Iterable[TrialRunner],
+        optimizer: Optimizer,
+        storage: Storage,
+        root_env_config: str,
+    ):
+        super().__init__(
+            config=config,
+            global_config=global_config,
+            trial_runners=trial_runners,
+            optimizer=optimizer,
+            storage=storage,
+            root_env_config=root_env_config,
+        )
+
+        self._polling_interval: float = config.get("polling_interval", 1.0)
+
+        # TODO: Setup logging for the child processes via a logging queue.
+
+        self._pool: Pool | None = None
+        """Parallel pool to run Trials in separate TrialRunner processes.
+
+        Only initiated on context __enter__.
+        """
+
+        self._trial_runners_status: dict[int, AsyncResult[TrialRunnerResult] | None] = {
+            trial_runner.trial_runner_id: None for trial_runner in self._trial_runners.values()
+        }
+        """A dict to keep track of the status of each TrialRunner.
+
+        Since TrialRunners enter their running context within each pool task, we
+        can't check :py:meth:`.TrialRunner.is_running` within the parent
+        generally.
+
+        Instead, we use a dict to keep track of the status of each TrialRunner
+        as either None (idle) or AsyncResult (running).
+
+        This also helps us to gather AsyncResults from each worker.
+        """
+
+    def _get_idle_trial_runners_count(self) -> int:
+        return len(
+            [
+                trial_runner_status
+                for trial_runner_status in self._trial_runners_status.values()
+                if trial_runner_status is None
+            ]
+        )
+
+    def _has_running_trial_runners(self) -> bool:
+        return any(
+            True
+            for trial_runner_status in self._trial_runners_status.values()
+            if trial_runner_status is not None
+        )
+
+    def __enter__(self):
+        assert self._pool is None
+        self._pool = Pool(processes=len(self.trial_runners), maxtasksperchild=1)
+        self._pool.__enter__()
+        # Delay context entry in the parent process
+        return super().__enter__()
+
+    def __exit__(self, ex_type, ex_val, ex_tb):
+        assert self._pool is not None
+        # Shutdown the process pool and wait for all tasks to finish
+        # (everything should be done by now)
+        assert self._has_running_trial_runners() is False
+        assert self._get_idle_trial_runners_count() == len(self._trial_runners)
+        self._pool.close()
+        self._pool.join()
+        self._pool.__exit__(ex_type, ex_val, ex_tb)
+        self._pool = None
+        return super().__exit__(ex_type, ex_val, ex_tb)
+
+    # TODO: Consolidate to base_scheduler?
     def start(self) -> None:
         """Start the optimization loop."""
         super().start()
+        assert self.experiment is not None
 
         is_warm_up: bool = self.optimizer.supports_preload
         if not is_warm_up:
