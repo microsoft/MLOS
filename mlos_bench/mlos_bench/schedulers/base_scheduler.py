@@ -290,6 +290,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
             _LOG.debug("Config %d ::\n%s", config_id, json.dumps(tunable_values, indent=2))
         return tunables.copy()
 
+    # FIXME: Maybe rename this to "add_new_optimizer_suggestions" (see below).
     def _schedule_new_optimizer_suggestions(self) -> bool:
         """
         Optimizer part of the loop.
@@ -311,6 +312,9 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
 
         return not_done
 
+    # FIXME: This might be better called: `enqueue_trial` or
+    # `add_trial_to_queue` since `assign_trial_runners` is a separate method
+    # that actually assigns Trials to TrialRunners.
     def schedule_trial(self, tunables: TunableGroups) -> None:
         """Add a configuration to the queue of trials."""
         # TODO: Alternative scheduling policies may prefer to expand repeats over
@@ -378,6 +382,11 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
                     trial.set_trial_runner(trial_runner)
                 ...
 
+        Notes
+        -----
+        Subclasses are *not* required to assign a TrialRunner to the Trial
+        (e.g., if the Trial should be deferred to a later time).
+
         Parameters
         ----------
         trials : Iterable[Storage.Trial]
@@ -425,7 +434,11 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         -------
         TrialRunner
         """
+        # FIXME: May need to improve handling here in the case of
+        # assign_trial_runners doesn't assign a TrialRunner to a particular
+        # Trial for some reason.
         if trial.trial_runner_id is None:
+            # TODO: Maybe we can force it here?
             self.assign_trial_runners([trial])
         assert trial.trial_runner_id is not None
         trial_runner = self._trial_runners.get(trial.trial_runner_id)

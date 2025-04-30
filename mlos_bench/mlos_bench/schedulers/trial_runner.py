@@ -117,6 +117,8 @@ class TrialRunner:
         assert self._env.parameters["trial_runner_id"] == self._trial_runner_id
         self._in_context = False
         self._is_running = False
+        # TODO: Check and see if we need to delay creating the event loop
+        # context until context entry.
         self._event_loop_context = EventLoopContext()
 
     def __repr__(self) -> str:
