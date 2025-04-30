@@ -460,6 +460,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         assert self.experiment is not None
         # Make sure that any pending trials have a TrialRunner assigned.
         pending_trials = list(self.experiment.pending_trials(datetime.now(UTC), running=running))
+        # TODO: Move this to main loop.
         self.assign_trial_runners(pending_trials)
         for trial in pending_trials:
             self.run_trial(trial)
