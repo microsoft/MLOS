@@ -125,7 +125,7 @@ class Storage(metaclass=ABCMeta):
         description: str,
         tunables: TunableGroups,
         opt_targets: dict[str, Literal["min", "max"]],
-    ) -> "Storage.Experiment":
+    ) -> Storage.Experiment:
         """
         Create a new experiment in the storage.
 
@@ -182,7 +182,7 @@ class Storage(metaclass=ABCMeta):
             self._opt_targets = opt_targets
             self._in_context = False
 
-        def __enter__(self) -> "Storage.Experiment":
+        def __enter__(self) -> Storage.Experiment:
             """
             Enter the context of the experiment.
 
@@ -358,8 +358,8 @@ class Storage(metaclass=ABCMeta):
             """
             Return an iterator over the :py:class:`~.Storage.Trial`s that are
             :py:attr:`~.Status.PENDING` and have a scheduled
-            :py:attr:`~.Storage.Trial.ts_start` time to run on or before the
-            specified timestamp.
+            :py:attr:`~.Storage.Trial.ts_start` time to run on or before the specified
+            timestamp.
 
             Parameters
             ----------

@@ -6,7 +6,6 @@
 
 import logging
 
-
 from mlos_bench.schedulers.base_scheduler import Scheduler
 from mlos_bench.storage.base_storage import Storage
 

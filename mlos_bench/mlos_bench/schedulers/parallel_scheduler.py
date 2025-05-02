@@ -14,28 +14,27 @@ TODO: Add config examples here.
 
 import logging
 from collections.abc import Callable, Iterable
+from datetime import datetime
 from multiprocessing import current_process
 from multiprocessing.pool import AsyncResult, Pool
-from datetime import datetime
-from typing import Any
 from time import sleep
+from typing import Any
 
 from attr import dataclass
 from pytz import UTC
 
 from mlos_bench.environments.status import Status
+from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.schedulers.base_scheduler import Scheduler
 from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.storage.base_storage import Storage
-from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.tunables.tunable_types import TunableValue
 
 _LOG = logging.getLogger(__name__)
 
 
 MAIN_PROCESS_NAME = "MainProcess"
-"""
-Name of the main process in control of the
+"""Name of the main process in control of the
 :external:py:class:`multiprocessing.Pool`.
 """
 
@@ -47,8 +46,7 @@ def is_child_process() -> bool:
 
 @dataclass
 class TrialRunnerResult:
-    """
-    A simple data class to hold the :py:class:`AsyncResult` of a
+    """A simple data class to hold the :py:class:`AsyncResult` of a
     :py:class:`TrialRunner` operation.
     """
 
@@ -60,7 +58,8 @@ class TrialRunnerResult:
 
 
 class ParallelScheduler(Scheduler):
-    """A simple multi-process asynchronous optimization loop implementation.
+    """
+    A simple multi-process asynchronous optimization loop implementation.
 
     See :py:mod:`mlos_bench.schedulers.parallel_scheduler` for more usage details.
 
@@ -115,8 +114,8 @@ class ParallelScheduler(Scheduler):
 
         self._pool: Pool | None = None
         """
-        Parallel :external:py:class:`.Pool` to run :py:class:`~.Storage.Trial`s
-        in separate :py:class:`.TrialRunner` processes.
+        Parallel :external:py:class:`.Pool` to run :py:class:`~.Storage.Trial`s in
+        separate :py:class:`.TrialRunner` processes.
 
         Only initiated on context :py:meth:`.__enter__`.
         """
@@ -124,7 +123,8 @@ class ParallelScheduler(Scheduler):
         self._trial_runners_status: dict[int, AsyncResult[TrialRunnerResult] | None] = {
             trial_runner.trial_runner_id: None for trial_runner in self._trial_runners.values()
         }
-        """A dict to keep track of the status of each :py:class:`.TrialRunner`.
+        """
+        A dict to keep track of the status of each :py:class:`.TrialRunner`.
 
         Since TrialRunners enter their running context within each pool task, we
         can't check :py:meth:`.TrialRunner.is_running` within the parent
@@ -137,10 +137,11 @@ class ParallelScheduler(Scheduler):
         """
 
     def _get_idle_trial_runners_count(self) -> int:
-        """Return a count of idle trial runners.
+        """
+        Return a count of idle trial runners.
 
-        Can be used as a hint for the number of new trials we can run when we
-        next get more suggestions from the Optimizer.
+        Can be used as a hint for the number of new trials we can run when we next get
+        more suggestions from the Optimizer.
         """
         return len(
             [
@@ -185,8 +186,8 @@ class ParallelScheduler(Scheduler):
         global_config: dict[str, Any] | None,
     ) -> TrialRunnerResult:
         """
-        Retrieve and run a :py:class:`~.Storage.Trial` on a specific :py:class:`.TrialRunner`
-        in a :py:class:`~.Pool` background worker process.
+        Retrieve and run a :py:class:`~.Storage.Trial` on a specific
+        :py:class:`.TrialRunner` in a :py:class:`~.Pool` background worker process.
 
         Parameters
         ----------

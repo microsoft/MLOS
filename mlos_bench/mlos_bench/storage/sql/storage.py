@@ -7,7 +7,7 @@
 import logging
 from typing import Literal
 
-from sqlalchemy import Engine, URL, create_engine
+from sqlalchemy import URL, Engine, create_engine
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.storage.base_experiment_data import ExperimentData
