@@ -14,7 +14,7 @@ TODO: Add config examples here.
 
 import logging
 from collections.abc import Callable, Iterable
-from multiprocessing import current_process as mp_proccess_name
+from multiprocessing import current_process
 from multiprocessing.pool import AsyncResult, Pool
 from datetime import datetime
 from typing import Any
@@ -23,6 +23,7 @@ from time import sleep
 from attr import dataclass
 from pytz import UTC
 
+from mlos_bench.environments.status import Status
 from mlos_bench.schedulers.base_scheduler import Scheduler
 from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.storage.base_storage import Storage
@@ -32,18 +33,29 @@ from mlos_bench.tunables.tunable_types import TunableValue
 _LOG = logging.getLogger(__name__)
 
 
-def _is_child_process() -> bool:
+MAIN_PROCESS_NAME = "MainProcess"
+"""
+Name of the main process in control of the
+:external:py:class:`multiprocessing.Pool`.
+"""
+
+
+def is_child_process() -> bool:
     """Check if the current process is a child process."""
-    return mp_proccess_name() != "MainProcess"
+    return current_process().name != MAIN_PROCESS_NAME
 
 
 @dataclass
 class TrialRunnerResult:
-    """A simple data class to hold the :py:class:`AsyncResult` of a
-    :py:class:`TrialRunner` operation."""
+    """
+    A simple data class to hold the :py:class:`AsyncResult` of a
+    :py:class:`TrialRunner` operation.
+    """
 
     trial_runner_id: int
-    result: dict[str, TunableValue] | None
+    results: dict[str, TunableValue] | None
+    timestamp: datetime | None = None
+    status: Status | None = None
     trial_id: int | None = None
 
 
@@ -54,12 +66,13 @@ class ParallelScheduler(Scheduler):
 
     Notes
     -----
-    This schedule uses :ext:py:class:`multiprocessing.Pool` to run trials in parallel.
+    This schedule uses :ext:py:class:`multiprocessing.Pool` to run
+    :py:class:`~.Storage.Trial`s in parallel.
 
     To avoid issues with Python's forking implementation, which relies on pickling
-    objects from the main process and sending them to the child process, we need
-    to avoid incompatible objects, which includes any additional threads (e.g.,
-    :py:mod:`asyncio` tasks such as
+    objects and functions from the main process and sending them to the child
+    process to invoke, we need to avoid incompatible objects, which includes any
+    additional threads (e.g., :py:mod:`asyncio` tasks such as
     :py:class:`mlos_bench.event_loop_context.EventLoopContext`), database
     connections (e.g., :py:mod:`mlos_bench.storage`), and file handles (e.g.,
     :ext:py:mod:`logging`) that are pickle incompatible.
@@ -73,6 +86,8 @@ class ParallelScheduler(Scheduler):
     receive as inputs all the necessary (and picklable) info as arguments, then
     enter the given :py:class:`~.TrialRunner` instance context and invoke that
     procedure.
+
+    For instance :py:meth:`~.ParallelScheduler._teardown_trial_runner` is a function that
     """
 
     def __init__(  # pylint: disable=too-many-arguments
@@ -94,20 +109,22 @@ class ParallelScheduler(Scheduler):
             root_env_config=root_env_config,
         )
 
-        self._polling_interval: float = config.get("polling_interval", 1.0)
+        self._polling_interval = float(config.get("polling_interval", 1.0))
 
         # TODO: Setup logging for the child processes via a logging queue.
 
         self._pool: Pool | None = None
-        """Parallel pool to run Trials in separate TrialRunner processes.
+        """
+        Parallel :external:py:class:`.Pool` to run :py:class:`~.Storage.Trial`s
+        in separate :py:class:`.TrialRunner` processes.
 
-        Only initiated on context __enter__.
+        Only initiated on context :py:meth:`.__enter__`.
         """
 
         self._trial_runners_status: dict[int, AsyncResult[TrialRunnerResult] | None] = {
             trial_runner.trial_runner_id: None for trial_runner in self._trial_runners.values()
         }
-        """A dict to keep track of the status of each TrialRunner.
+        """A dict to keep track of the status of each :py:class:`.TrialRunner`.
 
         Since TrialRunners enter their running context within each pool task, we
         can't check :py:meth:`.TrialRunner.is_running` within the parent
@@ -120,6 +137,11 @@ class ParallelScheduler(Scheduler):
         """
 
     def _get_idle_trial_runners_count(self) -> int:
+        """Return a count of idle trial runners.
+
+        Can be used as a hint for the number of new trials we can run when we
+        next get more suggestions from the Optimizer.
+        """
         return len(
             [
                 trial_runner_status
@@ -129,6 +151,7 @@ class ParallelScheduler(Scheduler):
         )
 
     def _has_running_trial_runners(self) -> bool:
+        """Check to see if any TrialRunners are currently busy."""
         return any(
             True
             for trial_runner_status in self._trial_runners_status.values()
@@ -136,7 +159,7 @@ class ParallelScheduler(Scheduler):
         )
 
     def __enter__(self):
-        assert self._pool is None
+        # Setup the process pool to run the trials in parallel.
         self._pool = Pool(processes=len(self.trial_runners), maxtasksperchild=1)
         self._pool.__enter__()
         # Delay context entry in the parent process
@@ -145,163 +168,243 @@ class ParallelScheduler(Scheduler):
     def __exit__(self, ex_type, ex_val, ex_tb):
         assert self._pool is not None
         # Shutdown the process pool and wait for all tasks to finish
-        # (everything should be done by now)
-        assert self._has_running_trial_runners() is False
+        # (everything should be done by now anyways)
+        assert not self._has_running_trial_runners()
         assert self._get_idle_trial_runners_count() == len(self._trial_runners)
         self._pool.close()
         self._pool.join()
         self._pool.__exit__(ex_type, ex_val, ex_tb)
-        self._pool = None
         return super().__exit__(ex_type, ex_val, ex_tb)
 
-    # TODO: Consolidate to base_scheduler?
-    def start(self) -> None:
-        """Start the optimization loop."""
-        super().start()
-        assert self.experiment is not None
-
-        is_warm_up: bool = self.optimizer.supports_preload
-        if not is_warm_up:
-            _LOG.warning("Skip pending trials and warm-up: %s", self.optimizer)
-
-        not_done: bool = True
-        while not_done:
-            _LOG.info("Optimization loop: Last trial ID: %d", self._last_trial_id)
-            self._run_schedule(is_warm_up)
-            not_done = self._schedule_new_optimizer_suggestions()
-            pending_trials = self.experiment.pending_trials(datetime.now(UTC), running=False)
-            self.assign_trial_runners(pending_trials)
-            is_warm_up = False
-
-    def _teardown_trial_runner(
-        self,
-        trial_runner_id: int,
+    @staticmethod
+    def run_trial_on_trial_runner(
+        storage: Storage,
+        experiment_id: str,
+        trial_id: int,
+        trial_runner: TrialRunner,
+        global_config: dict[str, Any] | None,
     ) -> TrialRunnerResult:
-        """Tear down a specific TrialRunner in a Pool worker."""
-        assert self._pool is None, "This should only be called in a Pool worker."
-        trial_runner = self._trial_runners[trial_runner_id]
+        """
+        Retrieve and run a :py:class:`~.Storage.Trial` on a specific :py:class:`.TrialRunner`
+        in a :py:class:`~.Pool` background worker process.
+
+        Parameters
+        ----------
+        storage : Storage
+            The :py:class:`~.Storage` to use to retrieve the :py:class:`.Storage.Trial`.
+        experiment_id : str
+            The ID of the experiment the trial is a part of.
+        trial_id : int
+            The ID of the trial.
+        trial_runner : TrialRunner
+            The :py:class:`.TrialRunner` to run on.
+        global_config : dict[str, Any] | None
+            The global configuration to use for the trial.
+
+        Returns
+        -------
+        TrialRunnerResult
+            The result of the :py:meth:`.TrialRunner.run_trial` operation.
+
+        Notes
+        -----
+        This is called in the Pool worker process, so it must receive arguments
+        that are picklable and be able to construct all necessary state from that.
+        Upon completion a callback is used to update the status of the
+        TrialRunner in the ParallelScheduler with the value in the
+        TrialRunnerResult.
+        """
+        assert is_child_process(), "This should be called in a Pool worker."
+        exp = storage.get_experiment_by_id(experiment_id)
+        assert exp is not None, "Experiment not found."
+        trial = exp.get_trial_by_id(trial_id)
+        assert trial is not None, "Trial not found."
+        assert (
+            trial.trial_runner_id == trial_runner.trial_runner_id
+        ), f"Unexpected Trial Runner {trial_runner} for Trial {trial}."
         with trial_runner:
+            (status, ts, results) = trial_runner.run_trial(trial, global_config)
             return TrialRunnerResult(
-                trial_runner_id=trial_runner_id,
-                result=trial_runner.teardown(),
+                trial_runner_id=trial_runner.trial_runner_id,
+                results=results,
+                timestamp=ts,
+                status=status,
+                trial_id=trial.trial_id,
             )
 
-    def _teardown_trial_runner_finished_callback(
+    def _run_trial_on_trial_runner_finished_callback(
         self,
         result: TrialRunnerResult,
     ) -> None:
-        """Callback to be called when a TrialRunner is finished with teardown."""
+        """Callback to be called when a TrialRunner is finished with run_trial."""
         trial_runner_id = result.trial_runner_id
-        assert trial_runner_id in self._trial_runners_status
-        assert self._trial_runners_status[trial_runner_id] is not None
+        assert (
+            trial_runner_id in self._trial_runners_status
+        ), f"Unexpected TrialRunner {trial_runner_id}."
+        assert (
+            self._trial_runners_status[trial_runner_id] is not None
+        ), f"TrialRunner {trial_runner_id} should have been running."
+        # Mark the TrialRunner as finished.
         self._trial_runners_status[result.trial_runner_id] = None
+        # TODO: save the results?
+        # TODO: Allow scheduling of new trials here.
 
-    def _teardown_trial_runner_failed_closure(
+    def _run_trial_on_trial_runner_failed_closure(
         self,
         trial_runner_id: int,
     ) -> Callable[[Any], None]:
         # pylint: disable=no-self-use
-        """Callback to be called when a TrialRunner failed running teardown."""
+        """Callback to be called when a TrialRunner failed running run_trial."""
 
-        def _teardown_trial_runner_failed(obj: Any) -> None:
-            """Callback to be called when a TrialRunner failed running teardown."""
+        def _run_trial_on_trial_runner_failed(obj: Any) -> None:
+            """Callback to be called when a TrialRunner failed running run_trial."""
             # TODO: improve error handling here
-            _LOG.error("TrialRunner %d failed to run teardown: %s", trial_runner_id, obj)
-            raise RuntimeError(f"TrialRunner {trial_runner_id} failed to run teardown: {obj}")
+            _LOG.error("TrialRunner %d failed on run_trial: %s", trial_runner_id, obj)
+            raise RuntimeError(f"TrialRunner {trial_runner_id} failed on run_trial: {obj}")
 
-        return _teardown_trial_runner_failed
+        return _run_trial_on_trial_runner_failed
 
     def run_trial(self, trial: Storage.Trial) -> None:
         """
         Set up and run a single Trial on a TrialRunner in a child process in the pool.
 
-        Save the results in the storage.
+        The TrialRunner saves the results in the Storage.
         """
-        assert self._pool is None, "This should only be called in a Pool worker."
-        super().run_trial(trial)
-        # In the sync scheduler we run each trial on its own TrialRunner in sequence.
-        trial_runner = self.get_trial_runner(trial)
-        with trial_runner:
-            trial_runner.run_trial(trial, self.global_config)
-            _LOG.info("QUEUE: Finished trial: %s on %s", trial, trial_runner)
-
-    def run_trial_on_trial_runner(
-        self,
-        trial_runner: TrialRunner,
-        storage: Storage,
-        experiment_id: str,
-        trial_id: int,
-    ):
-        """Run a single trial on a TrialRunner in a child process in the pool.
-
-        Save the results in the storage.
-        """
-
-    def _run_schedule(self, running: bool = False) -> None:
         assert self._pool is not None
+        assert self._in_context
+        assert not is_child_process(), "This should be called in the parent process."
 
-        pending_trials = self.experiment.pending_trials(datetime.now(UTC), running=running)
+        # Run the given trial in the child process targeting a particular runner.
+        trial_runner_id = trial.trial_runner_id
+        assert trial_runner_id is not None, f"Trial {trial} has not been assigned a trial runner."
+        trial_runner = self._trial_runners[trial_runner_id]
+
+        if self._trial_runners_status[trial_runner_id] is not None:
+            _LOG.info("TrialRunner %s is still active. Skipping trial %s.", trial_runner, trial)
+
+        # Update our trial bookkeeping.
+        super().run_trial(trial)
+        # Start the trial in a child process.
+        self._trial_runners_status[trial_runner_id] = self._pool.apply_async(
+            # Call the teardown function in the child process targeting
+            # a particular trial_runner.
+            self.run_trial_on_trial_runner,
+            args=(
+                self.storage,
+                self._experiment_id,
+                trial.trial_id,
+                trial_runner,
+                self.global_config,
+            ),
+            callback=self._run_trial_on_trial_runner_finished_callback,
+            error_callback=self._run_trial_on_trial_runner_failed_closure(trial_runner_id),
+        )
+
+    def run_schedule(self, running: bool = False) -> None:
+        """
+        Runs the current schedule of Trials on parallel background workers.
+
+        Check for :py:class:`.Trial`s with `:py:attr:`.Status.PENDING` and an
+        assigned :py:attr:`~.Trial.trial_runner_id` in the queue and run them
+        with :py:meth:`~.Scheduler.run_trial`.
+        """
+
+        assert not is_child_process(), "This should be called in the parent process."
+        assert self._pool is not None
+        assert self._experiment is not None
+
+        scheduled_trials = self._experiment.pending_trials(
+            datetime.now(UTC),
+            running=running,
+            trial_runner_assigned=True,
+        )
         scheduled_trials = [
-            pending_trial
-            for pending_trial in pending_trials
-            if pending_trial.trial_runner_id is not None and pending_trial.trial_runner_id >= 0
+            trial
+            for trial in scheduled_trials
+            if trial.trial_runner_id is not None and trial.trial_runner_id >= 0
         ]
 
+        # Start each of the scheduled trials in the background.
         for trial in scheduled_trials:
-            trial_runner_id = trial.trial_runner_id
-            assert trial_runner_id is not None
-            trial_runner_status = self._trial_runners_status[trial_runner_id]
-            if trial_runner_status is not None:
-                _LOG.warning(
-                    "Cannot start Trial %d - its assigned TrialRunner %d is already running: %s",
-                    trial.trial_id,
-                    trial_runner_id,
-                    trial_runner_status,
-                )
-                continue
-
-            # Update our trial bookkeeping.
-            super().run_trial(trial)
-            # Run the trial in the child process targeting a particular runner.
-            # TODO:
+            self.run_trial(trial)
+        # Now all available trial should be started in the background.
 
         # Wait for all trial runners to finish.
         while self._has_running_trial_runners():
             sleep(self._polling_interval)
+
+        # NOTE: This organization is blocking in that it will wait for *all*
+        # scheduled trials to finish running prior to scheduling more.
+        # TODO: This can be improved.
+        # For instance:
+        # 1. Allow eagerly scheduling new trials in the callback immediately
+        # after one finishes (maybe make this a configurable option).
+        # 2. Run the above in a while loop to continually evaluate for newly
+        # scheduled trials that are available to run.
+        # Alternatively:
+        # We can move the "has_running_trial_runners" check to the start()
+        # method and allow this return eagerly (so that it becomes more like
+        # "start_schedule").
+
         assert self._get_idle_trial_runners_count() == len(self._trial_runners)
 
-    def _teardown_trial_runner(
-        self,
-        trial_runner_id: int,
-    ) -> TrialRunnerResult:
-        """Tear down a specific TrialRunner in a Pool worker."""
-        assert self._pool is None, "This should only be called in a Pool worker."
-        trial_runner = self._trial_runners[trial_runner_id]
+    @staticmethod
+    def teardown_trial_runner(trial_runner: TrialRunner) -> TrialRunnerResult:
+        """
+        Tear down a specific :py:class:`.TrialRunner` (and its
+        :py:class:`~mlos_bench.environments.base_environment.Environment`) in a
+        :py:class:`.Pool` worker.
+
+        Parameters
+        ----------
+        trial_runner : TrialRunner
+            The :py:class:`.TrialRunner` to tear down.
+
+        Returns
+        -------
+        TrialRunnerResult
+            The result of the teardown operation, including the trial_runner_id
+            and the result of the teardown operation.
+
+        Notes
+        -----
+        This is called in the Pool worker process, so it must receive arguments
+        that are picklable.
+        To keep life simple we pass the entire TrialRunner object, which should
+        **not** be have entered its context (else it may have non-picklable
+        state), and make this a static method of the class to avoid needing to
+        pass the :py:class:`~.ParallelScheduler` instance.
+        Upon completion a callback is used to update the status of the
+        TrialRunner in the ParallelScheduler with the value in the
+        TrialRunnerResult.
+        """
+        assert is_child_process(), "This should be called in a Pool worker."
         with trial_runner:
             return TrialRunnerResult(
-                trial_runner_id=trial_runner_id,
-                result=trial_runner.teardown(),
+                trial_runner_id=trial_runner.trial_runner_id,
+                results=trial_runner.teardown(),
             )
 
-    def _teardown_trial_runner_finished_callback(
-        self,
-        result: TrialRunnerResult,
-    ) -> None:
+    def _teardown_trial_runner_finished_callback(self, result: TrialRunnerResult) -> None:
         """Callback to be called when a TrialRunner is finished with teardown."""
+        assert not is_child_process(), "This should be called in the parent process."
         trial_runner_id = result.trial_runner_id
-        assert trial_runner_id in self._trial_runners_status
-        assert self._trial_runners_status[trial_runner_id] is not None
+        assert (
+            trial_runner_id in self._trial_runners_status
+        ), f"Unexpected TrialRunner {trial_runner_id}."
+        assert (
+            self._trial_runners_status[trial_runner_id] is not None
+        ), f"TrialRunner {trial_runner_id} should have been running."
         self._trial_runners_status[result.trial_runner_id] = None
+        # Nothing to do with the result.
 
-    def _teardown_trial_runner_failed_closure(
-        self,
-        trial_runner_id: int,
-    ) -> Callable[[Any], None]:
-        # pylint: disable=no-self-use
+    @staticmethod
+    def _teardown_trial_runner_failed_closure(trial_runner_id: int) -> Callable[[Any], None]:
         """Callback to be called when a TrialRunner failed running teardown."""
 
         def _teardown_trial_runner_failed(obj: Any) -> None:
             """Callback to be called when a TrialRunner failed running teardown."""
+            assert not is_child_process(), "This should be called in the parent process."
             # TODO: improve error handling here
             _LOG.error("TrialRunner %d failed to run teardown: %s", trial_runner_id, obj)
             raise RuntimeError(f"TrialRunner {trial_runner_id} failed to run teardown: {obj}")
@@ -309,30 +412,34 @@ class ParallelScheduler(Scheduler):
         return _teardown_trial_runner_failed
 
     def teardown(self) -> None:
+        assert not is_child_process(), "This should be called in the parent process."
         assert self._pool is not None
+        assert self._in_context
+        assert not self._has_running_trial_runners(), "All trial runners should be idle."
         if self._do_teardown:
             # Call teardown on each TrialRunner in the pool in parallel.
-            for trial_runner_id in self._trial_runners:
+            for trial_runner_id, trial_runner in self._trial_runners.items():
                 assert (
                     self._trial_runners_status[trial_runner_id] is None
-                ), f"TrialRunner {trial_runner_id} is still active."
+                ), f"TrialRunner {trial_runner} is still active."
                 self._trial_runners_status[trial_runner_id] = self._pool.apply_async(
                     # Call the teardown function in the child process targeting
-                    # a particular trial_runner_id.
-                    self._teardown_trial_runner,
-                    args=(trial_runner_id,),
+                    # a particular trial_runner.
+                    self.teardown_trial_runner,
+                    args=(trial_runner,),
                     callback=self._teardown_trial_runner_finished_callback,
                     error_callback=self._teardown_trial_runner_failed_closure(trial_runner_id),
                 )
 
-        # Wait for all trial runners to finish.
-        while self._has_running_trial_runners():
-            sleep(self._polling_interval)
-        assert self._get_idle_trial_runners_count() == len(self._trial_runners)
+            # Wait for all trial runners to finish.
+            while self._has_running_trial_runners():
+                sleep(self._polling_interval)
+        assert not self._has_running_trial_runners(), "All trial runners should be idle."
 
     def assign_trial_runners(self, trials: Iterable[Storage.Trial]) -> None:
         """
-        Assign Trials to the first available and idle TrialRunner.
+        Assign :py:class:`~.Storage.Trial`s to the first available and idle
+        :py:class:`.TrialRunner`.
 
         Parameters
         ----------
@@ -340,8 +447,9 @@ class ParallelScheduler(Scheduler):
         """
         assert self._in_context
         assert self.experiment is not None
+        assert not is_child_process(), "This should be called in the parent process."
 
-        pending_trials: list[Storage.Trial] = list(
+        scheduleable_trials: list[Storage.Trial] = list(
             trial
             for trial in trials
             if trial.status.is_pending() and trial.trial_runner_id is None
@@ -354,13 +462,5 @@ class ParallelScheduler(Scheduler):
         ]
 
         # Assign pending trials to idle runners
-        for trial, runner_id in zip(pending_trials, idle_runner_ids):
-            # FIXME: This results in two separate non-transactional updates.
-            # Should either set Status=SCHEDULED when we set_trial_runner
-            # or remove SCHEDULED as a Status altogether and filter by
-            # "Status=PENDING AND trial_runner_id != NULL"
-            # Or ... even better, we could use a single transaction to update
-            # the status and trial_runner_id of all trials in the same batch at once.
+        for trial, runner_id in zip(scheduleable_trials, idle_runner_ids):
             trial.set_trial_runner(runner_id)
-            # Moreover this doesn't even update the status of the Trial - it only updates the telemetry.
-            trial.update(status=Status.SCHEDULED, timestamp=datetime.now(UTC))

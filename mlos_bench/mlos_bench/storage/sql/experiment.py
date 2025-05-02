@@ -275,25 +275,35 @@ class Experiment(Storage.Experiment):
                 config=config,
             )
 
-    def filter_trials_by_status(
+    def pending_trials(
         self,
         timestamp: datetime,
-        statuses: list[Status],
+        *,
+        running: bool = False,
+        trial_runner_assigned: bool | None = None,
     ) -> Iterator[Storage.Trial]:
+        if running:
+            statuses = [Status.PENDING, Status.READY, Status.RUNNING]
+        else:
+            statuses = [Status.PENDING]
         timestamp = utcify_timestamp(timestamp, origin="local")
         _LOG.info("Retrieve pending trials for: %s @ %s", self._experiment_id, timestamp)
         with self._engine.connect() as conn:
-            cur_trials = conn.execute(
-                self._schema.trial.select().where(
-                    self._schema.trial.c.exp_id == self._experiment_id,
-                    (
-                        self._schema.trial.c.ts_start.is_(None)
-                        | (self._schema.trial.c.ts_start <= timestamp)
-                    ),
-                    self._schema.trial.c.ts_end.is_(None),
-                    self._schema.trial.c.status.in_([s.name for s in statuses]),
-                )
+            stmt = self._schema.trial.select().where(
+                self._schema.trial.c.exp_id == self._experiment_id,
+                (
+                    self._schema.trial.c.ts_start.is_(None)
+                    | (self._schema.trial.c.ts_start <= timestamp)
+                ),
+                self._schema.trial.c.ts_end.is_(None),
+                self._schema.trial.c.status.in_([s.name for s in statuses]),
             )
+            if trial_runner_assigned:
+                stmt.where(self._schema.trial.c.trial_runner_id.isnot(None))
+            elif trial_runner_assigned is False:
+                stmt.where(self._schema.trial.c.trial_runner_id.is_(None))
+            # else: # No filtering by trial_runner_id
+            cur_trials = conn.execute(stmt)
             for trial in cur_trials.fetchall():
                 tunables = self._get_key_val(
                     conn,
@@ -320,13 +330,6 @@ class Experiment(Storage.Experiment):
                     opt_targets=self._opt_targets,
                     config=config,
                 )
-
-    def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator[Storage.Trial]:
-        if running:
-            pending_status = [Status.PENDING, Status.READY, Status.RUNNING]
-        else:
-            pending_status = [Status.PENDING]
-        return self.filter_trials_by_status(timestamp=timestamp, statuses=pending_status)
 
     def _get_config_id(self, conn: Connection, tunables: TunableGroups) -> int:
         """

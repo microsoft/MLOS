@@ -33,6 +33,7 @@ from types import TracebackType
 from typing import Any, Literal
 
 from mlos_bench.config.schemas import ConfigSchema
+from mlos_bench.dict_templater import DictTemplater
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.storage.base_experiment_data import ExperimentData
@@ -347,46 +348,32 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def filter_trials_by_status(
-            self,
-            timestamp: datetime,
-            statuses: list[Status],
-        ) -> Iterator[Storage.Trial]:
-            """
-            Return an iterator over the pending trials that are scheduled to run on or
-            before the specified timestamp matching one of statuses listed.
-
-            Parameters
-            ----------
-            timestamp : datetime.datetime
-                The time in UTC to check for scheduled trials.
-            statuses : list[Status]
-                Status of the trials to filter in.
-
-            Returns
-            -------
-            trials : Iterator[Storage.Trial]
-                An iterator over the matching trials.
-            """
-
-        @abstractmethod
         def pending_trials(
             self,
             timestamp: datetime,
             *,
             running: bool,
+            trial_runner_assigned: bool | None = None,
         ) -> Iterator[Storage.Trial]:
             """
-            Return an iterator over the pending trials that are scheduled to run on or
-            before the specified timestamp.
+            Return an iterator over the :py:class:`~.Storage.Trial`s that are
+            :py:attr:`~.Status.PENDING` and have a scheduled
+            :py:attr:`~.Storage.Trial.ts_start` time to run on or before the
+            specified timestamp.
 
             Parameters
             ----------
             timestamp : datetime.datetime
-                The time in UTC to check for scheduled trials.
+                The time in UTC to check for scheduled Trials.
             running : bool
-                If True, include the trials that are already running.
+                If True, include the Trials that are also
+                :py:attr:`~.Status.RUNNING` or :py:attr:`~.Status.READY`.
                 Otherwise, return only the scheduled trials.
+            trial_runner_assigned : bool | None
+                If True, include the Trials that are assigned to a
+                :py:class:`~.TrialRunner`. If False, return only the trials
+                that are not assigned to any :py:class:`~.TrialRunner`.
+                If None, return all trials regardless of their assignment.
 
             Returns
             -------
