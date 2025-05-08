@@ -276,7 +276,6 @@ class ParallelScheduler(Scheduler):
         # Mark the TrialRunner as finished.
         self._trial_runners_status[result.trial_runner_id] = None
         # TODO: save the results?
-        # TODO: Allow scheduling of new trials here.
 
     def _run_trial_on_trial_runner_failed_closure(
         self,
@@ -311,7 +310,7 @@ class ParallelScheduler(Scheduler):
         if self._trial_runners_status[trial_runner_id] is not None:
             _LOG.info("TrialRunner %s is still active. Skipping trial %s.", trial_runner, trial)
 
-        # Update our trial bookkeeping.
+        # Update the scheduler's trial bookkeeping.
         super().run_trial(trial)
         # Start the trial in a child process.
         self._trial_runners_status[trial_runner_id] = self._pool.apply_async(

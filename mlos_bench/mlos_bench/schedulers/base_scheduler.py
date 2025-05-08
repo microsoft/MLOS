@@ -380,6 +380,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         # Check if the optimizer has converged or not.
         not_done = self.not_done()
         if not_done:
+            # TODO: Allow scheduling multiple configs at once (e.g., in the case of idle workers).
             tunables = self.optimizer.suggest()
             self.add_trial_to_queue(tunables)
         return not_done
@@ -392,7 +393,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         """
         Add a configuration to the queue of trials 1 or more times.
 
-        (e.g., according to the :py:attr:`.trial_config_repeat_count`)
+        (e.g., according to the :py:attr:`~.Scheduler.trial_config_repeat_count`)
 
         Parameters
         ----------
