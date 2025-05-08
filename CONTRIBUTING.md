@@ -97,9 +97,11 @@ We expect development to follow a typical "forking" style workflow:
 
    Some notes on organizing changes to help reviewers:
 
-   1. Please try to keep PRs small whenver possible and don't include unnecessaary formatting changes.
+   1. Please try to keep PRs small whenever possible and don't include unnecessary formatting changes.
    1. Larger changes can be planned in [Issues](https://github.com/microsoft/MLOS/issues), prototyped in a large draft PR for early feedback, and split into smaller PRs via discussion.
    1. All changes should include test coverage (either new or existing).
+
+   > For additional advice on PR reviews, see [.github/instructions/](.github/instructions/) for Copilot instructions.
 
 1. PRs are associated with [Github Issues](https://github.com/microsoft/MLOS/issues) and need [MLOS-committers](https://github.com/orgs/microsoft/teams/MLOS-committers) to sign-off (in addition to other CI pipeline checks like tests and lint checks to pass).
 
