@@ -8,7 +8,7 @@ the benchmark experiment data using `SQLAlchemy <https://sqlalchemy.org>`_ backe
 
 import hashlib
 import logging
-from collections.abc import Iterator, Iterable
+from collections.abc import Iterable, Iterator
 from datetime import datetime
 from typing import Any, Literal
 

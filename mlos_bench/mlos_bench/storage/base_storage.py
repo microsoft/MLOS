@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABCMeta, abstractmethod
-from collections.abc import Iterator, Mapping, Iterable
+from collections.abc import Iterable, Iterator, Mapping
 from contextlib import AbstractContextManager as ContextManager
 from datetime import datetime
 from types import TracebackType
