@@ -108,6 +108,25 @@ class ParallelScheduler(Scheduler):
             root_env_config=root_env_config,
         )
 
+        # TODO: Add schema support for this config.
+        self._idle_worker_scheduling_batch_size = int(
+            # By default wait for 1 idle workers before scheduling new trials.
+            config.get("idle_worker_scheduling_batch_size", 1)
+        )
+        # Never wait for more than the number of trial runners.
+        self._idle_worker_scheduling_batch_size = min(
+            self._idle_worker_scheduling_batch_size,
+            len(self._trial_runners),
+        )
+        if self._idle_worker_scheduling_batch_size < 1:
+            _LOG.warning(
+                "Idle worker scheduling is set to %d, which is less than 1. "
+                f"Setting it to number of TrialRunners {len(self._trial_runners)}.",
+                self._idle_worker_scheduling_batch_size,
+            )
+            self._idle_worker_scheduling_batch_size = len(self._trial_runners)
+
+        # TODO: Add schema support for this config.
         self._polling_interval = float(config.get("polling_interval", 1.0))
 
         # TODO: Setup logging for the child processes via a logging queue.

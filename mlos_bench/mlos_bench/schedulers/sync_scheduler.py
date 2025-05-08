@@ -31,3 +31,10 @@ class SyncScheduler(Scheduler):
         with trial_runner:
             trial_runner.run_trial(trial, self.global_config)
             _LOG.info("QUEUE: Finished trial: %s on %s", trial, trial_runner)
+
+    def wait_for_trial_runners(self) -> None:
+        # The default base implementation of wait_for_trial_runners() is a no-op
+        # because trial_runner.run_trial() is blocking so SyncScheduler only
+        # runs a single trial at a time.
+        # pylint: disable=useless-super-delegation
+        super().wait_for_trial_runners()

@@ -28,6 +28,7 @@ _LOG = logging.getLogger(__name__)
 
 class Scheduler(ContextManager, metaclass=ABCMeta):
     # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-public-methods
     """Base class for the optimization loop scheduling policies."""
 
     def __init__(  # pylint: disable=too-many-arguments
@@ -271,6 +272,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
                 self._longest_finished_trial_sequence_id,
             )
             self.run_schedule(is_warm_up)
+            self.wait_for_trial_runners()
             not_done = self.add_new_optimizer_suggestions()
             self.assign_trial_runners(
                 self.experiment.pending_trials(
@@ -280,6 +282,16 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
                 )
             )
             is_warm_up = False
+
+    @abstractmethod
+    def wait_for_trial_runners(self) -> None:
+        """
+        Wait for (enough) TrialRunners to finish.
+
+        This is a blocking call that waits for enough of the the TrialRunners to finish.
+        The base class implementation waits for all of the TrialRunners to finish.
+        However this can be overridden in subclasses to implement a more asynchronous behavior.
+        """
 
     def teardown(self) -> None:
         """
