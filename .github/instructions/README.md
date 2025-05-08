@@ -7,11 +7,11 @@ The instructions are designed to guide the AI in providing responses that align 
 
 - Language specific instructions go in their own file, with the cross task instructions in the root of this directory.
 
-    (e.g., [python.instructions.md](python.instructions.md), [bash.instructions.md](bash.instructions.md), [markdown.instructions.md](markdown.instructions.md), [json.instructions.md](json.instructions.md)).
+  (e.g., [python.instructions.md](python.instructions.md), [bash.instructions.md](bash.instructions.md), [markdown.instructions.md](markdown.instructions.md), [json.instructions.md](json.instructions.md)).
 
 - Instructions relevant to all languages go in the `default.instructions.md` file.
 
-    (e.g., [default.instructions.md](default.instructions.md)).
+  (e.g., [default.instructions.md](default.instructions.md)).
 
 ## See Also
 

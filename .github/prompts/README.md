@@ -21,7 +21,7 @@ Some prompts take additional arguments to help Copilot understand the context of
 There are two types of custom prompts:
 
 1. Those for MLOS developers (e.g. `add-sphinx-crossref-to-docstrings.prompt.md`).
-2. Those for MLOS users (e.g., `generate-mlos-configuration-file.prompt.md`).
+1. Those for MLOS users (e.g., `generate-mlos-configuration-file.prompt.md`).
 
 ## See Also
 

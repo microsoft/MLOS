@@ -1,7 +1,7 @@
 # Custom Prompt: Add Sphinx Crossref Links to Python Docstrings
 
 Add Sphinx cross-references to python docstrings referencing classes or functions or methods or attributes or data in this file using `:py:class:` or `:py:func:` or `:py:meth:` or `:py:attr:` or `:py:data` syntax, respectively.
-    - See Also <https://www.sphinx-doc.org/en/master/usage/domains/python.html#python-xref-roles>
+\- See Also <https://www.sphinx-doc.org/en/master/usage/domains/python.html#python-xref-roles>
 
 We don't need to do this for the parameter types listed in the Parameters or Returns sections of the docstring though.
 

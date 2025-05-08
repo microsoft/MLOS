@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.md"
+applyTo: '**/*.md'
 ---
 
 # Markdown language instructions
