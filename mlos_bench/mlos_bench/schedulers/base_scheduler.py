@@ -100,8 +100,9 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         self._optimizer = optimizer
         self._storage = storage
         self._root_env_config = root_env_config
-        self._last_trial_id = -1
+        self._longest_finished_trial_sequence_id = -1
         self._ran_trials: list[Storage.Trial] = []
+        self._registered_trial_ids: set[int] = set()
 
         _LOG.debug("Scheduler instantiated: %s :: %s", self, config)
 
@@ -265,7 +266,10 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
 
         not_done: bool = True
         while not_done:
-            _LOG.info("Optimization loop: Last trial ID: %d", self._last_trial_id)
+            _LOG.info(
+                "Optimization loop: Longest finished trial sequence ID: %d",
+                self._longest_finished_trial_sequence_id,
+            )
             self.run_schedule(is_warm_up)
             not_done = self.add_new_optimizer_suggestions()
             self.assign_trial_runners(
@@ -327,14 +331,33 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         assert self.experiment is not None
         # Load the results of the trials that have been run since the last time
         # we queried the Optimizer.
-        # FIXME: This can miss some straggler results from parallel trial
-        # executions.
-        # Maybe just maintain a set?
-        (trial_ids, configs, scores, status) = self.experiment.load(self._last_trial_id)
+        # Note: We need to handle the case of straggler trials that finish out of order.
+        (trial_ids, configs, scores, status) = self.experiment.load(
+            last_trial_id=self._longest_finished_trial_sequence_id,
+            omit_registered_trial_ids=self._registered_trial_ids,
+        )
         _LOG.info("QUEUE: Update the optimizer with trial results: %s", trial_ids)
         self.optimizer.bulk_register(configs, scores, status)
-        self._last_trial_id = max(trial_ids, default=self._last_trial_id)
+        # Mark those trials as registered so we don't load them again.
+        self._registered_trial_ids.update(trial_ids)
+        # Update the longest finished trial sequence ID.
+        self._longest_finished_trial_sequence_id = max(
+            [
+                self.experiment.get_longest_prefix_finished_trial_id(),
+                self._longest_finished_trial_sequence_id,
+            ],
+            default=self._longest_finished_trial_sequence_id,
+        )
+        # Remove trial ids that are older than the longest finished trial sequence ID.
+        # This is an optimization to avoid a long list of trial ids to omit from
+        # the load() operation or a long list of trial ids to maintain in memory.
+        self._registered_trial_ids = {
+            trial_id
+            for trial_id in self._registered_trial_ids
+            if trial_id > self._longest_finished_trial_sequence_id
+        }
 
+        # Check if the optimizer has converged or not.
         not_done = self.not_done()
         if not_done:
             tunables = self.optimizer.suggest()
@@ -527,6 +550,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         By default, stop when the :py:class:`.Optimizer` converges or the limit
         of :py:attr:`~.Scheduler.max_trials` is reached.
         """
+        # TODO: Add more stopping conditions: https://github.com/microsoft/MLOS/issues/427
         return self.optimizer.not_converged() and (
             self._trial_count < self._max_trials or self._max_trials <= 0
         )
