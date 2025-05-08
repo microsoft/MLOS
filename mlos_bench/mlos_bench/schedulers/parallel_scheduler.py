@@ -155,6 +155,15 @@ class ParallelScheduler(Scheduler):
         This also helps us to gather AsyncResults from each worker.
         """
 
+    @property
+    def idle_worker_scheduling_batch_size(self) -> int:
+        """
+        Get the batch size for idle worker scheduling.
+
+        This is the number of idle workers to wait for before scheduling new trials.
+        """
+        return self._idle_worker_scheduling_batch_size
+
     def _get_idle_trial_runners_count(self) -> int:
         """
         Return a count of idle trial runners.
@@ -348,25 +357,43 @@ class ParallelScheduler(Scheduler):
         for trial in scheduled_trials:
             self.run_trial(trial)
         # Now all available trial should be started in the background.
+        # We can move on to wait_trial_runners() to wait for some to finish.
 
-        # Wait for all trial runners to finish.
-        while self._has_running_trial_runners():
-            sleep(self._polling_interval)
+    def wait_for_trial_runners(self, wait_all: bool = False) -> None:
+        """
+        Wait for all :py:class:`.TrialRunner`s to finish running.
 
-        # NOTE: This organization is blocking in that it will wait for *all*
-        # scheduled trials to finish running prior to scheduling more.
-        # TODO: This can be improved.
-        # For instance:
-        # 1. Allow eagerly scheduling new trials in the callback immediately
-        # after one finishes (maybe make this a configurable option).
-        # 2. Run the above in a while loop to continually evaluate for newly
-        # scheduled trials that are available to run.
-        # Alternatively:
-        # We can move the "has_running_trial_runners" check to the start()
-        # method and allow this return eagerly (so that it becomes more like
-        # "start_schedule").
+        This is a blocking call that will wait for all trial runners to finish
+        running before returning.
 
-        assert self._get_idle_trial_runners_count() == len(self._trial_runners)
+        Parameters
+        ----------
+        wait_all : bool
+            If True, wait for all trial runners to finish. If False, wait for
+            :py:attr:`~.TrialRunner.idle_worker_scheduling_batch_size` number of
+            idle trial runners to finish. Default is False.
+
+        Notes
+        -----
+        This is called in the parent process, so it must not block the main
+        thread.
+        """
+        assert not is_child_process(), "This should be called in the parent process."
+        if wait_all:
+            # Wait for all trial runners to finish.
+            _LOG.info("Waiting for all trial runners to finish.")
+            while self._has_running_trial_runners():
+                sleep(self._polling_interval)
+            assert not self._has_running_trial_runners(), "All trial runners should be idle."
+        else:
+            # Wait for a batch of idle trial runners to finish.
+            _LOG.info(
+                "Waiting for %d idle trial runners to finish.",
+                self._idle_worker_scheduling_batch_size,
+            )
+            while self._get_idle_trial_runners_count() < self._idle_worker_scheduling_batch_size:
+                sleep(self._polling_interval)
+            assert self._get_idle_trial_runners_count() >= self._idle_worker_scheduling_batch_size
 
     @staticmethod
     def teardown_trial_runner(trial_runner: TrialRunner) -> TrialRunnerResult:
