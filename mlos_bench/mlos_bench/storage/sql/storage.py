@@ -92,7 +92,7 @@ class SqlStorage(Storage):
 
     def get_experiment_by_id(
         self,
-        experiment_id,
+        experiment_id: str,
         tunables: TunableGroups,
         opt_targets: dict[str, Literal["min", "max"]],
     ) -> Storage.Experiment | None:
