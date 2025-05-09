@@ -28,6 +28,7 @@ _LOG = logging.getLogger(__name__)
 
 class Scheduler(ContextManager, metaclass=ABCMeta):
     # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-public-methods
     """Base class for the optimization loop scheduling policies."""
 
     def __init__(  # pylint: disable=too-many-arguments
@@ -274,7 +275,6 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
                 self.experiment.pending_trials(
                     datetime.now(UTC),
                     running=False,
-                    trial_runner_assigned=False,
                 )
             )
             is_warm_up = False

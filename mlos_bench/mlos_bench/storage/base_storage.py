@@ -24,7 +24,7 @@ mlos_bench.storage.base_trial_data.TrialData :
 
 import logging
 from abc import ABCMeta, abstractmethod
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterable, Iterator, Mapping
 from contextlib import AbstractContextManager as ContextManager
 from datetime import datetime
 from types import TracebackType
