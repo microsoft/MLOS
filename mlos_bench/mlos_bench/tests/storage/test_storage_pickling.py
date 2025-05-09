@@ -1,9 +1,8 @@
-
+#
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
-"""
-Test pickling and unpickling of Storage, and restoring Experiment and Trial by id.
-"""
+#
+"""Test pickling and unpickling of Storage, and restoring Experiment and Trial by id."""
 import os
 import pickle
 import tempfile
@@ -12,10 +11,11 @@ from typing import Literal
 from mlos_bench.storage.sql.storage import SqlStorage
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
+
 def test_storage_pickle_restore_experiment_and_trial(tunable_groups: TunableGroups) -> None:
     # pylint: disable=too-many-locals
-    """Check that we can pickle and unpickle the Storage object, and restore
-    Experiment and Trial by id.
+    """Check that we can pickle and unpickle the Storage object, and restore Experiment
+    and Trial by id.
     """
     with tempfile.TemporaryDirectory() as tmpdir:
         db_path = os.path.join(tmpdir, "mlos_bench.sqlite")
