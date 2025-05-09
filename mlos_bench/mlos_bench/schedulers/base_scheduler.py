@@ -500,9 +500,24 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         Check for :py:class:`.Trial`s with `:py:attr:`.Status.PENDING` and an
         assigned :py:attr:`~.Trial.trial_runner_id` in the queue and run them
         with :py:meth:`~.Scheduler.run_trial`.
+
+        Subclasses can override this method to implement a more sophisticated
+        scheduling policy.
+
+        Parameters
+        ----------
+        running : bool
+            If True, run the trials that are already in a "running" state (e.g., to resume them).
+            If False (default), run the trials that are pending.
         """
         assert self.experiment is not None
-        pending_trials = list(self.experiment.pending_trials(datetime.now(UTC), running=running))
+        pending_trials = list(
+            self.experiment.pending_trials(
+                datetime.now(UTC),
+                running=running,
+                trial_runner_assigned=True,
+            )
+        )
         for trial in pending_trials:
             if trial.trial_runner_id is None:
                 logging.warning("Trial %s has no TrialRunner assigned yet.")
