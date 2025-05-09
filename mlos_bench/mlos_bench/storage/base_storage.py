@@ -353,7 +353,7 @@ class Storage(metaclass=ABCMeta):
             timestamp: datetime,
             *,
             running: bool,
-        ) -> Iterator["Storage.Trial"]:
+        ) -> Iterator[Storage.Trial]:
             """
             Return an iterator over the pending trials that are scheduled to run on or
             before the specified timestamp.
