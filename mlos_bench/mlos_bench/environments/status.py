@@ -5,7 +5,10 @@
 """Enum for the status of the benchmark/environment Trial or Experiment."""
 
 import enum
+import logging
 
+
+_LOG = logging.getLogger(__name__)
 
 class Status(enum.Enum):
     """Enum for the status of the benchmark/environment Trial or Experiment."""
@@ -18,6 +21,21 @@ class Status(enum.Enum):
     CANCELED = 5
     FAILED = 6
     TIMED_OUT = 7
+
+    @staticmethod
+    def from_str(status_str: str) -> "Status":
+        """Convert a string to a Status enum."""
+        if status_str.isdigit():
+            try:
+                return Status(int(status_str))
+            except ValueError:
+                _LOG.warning("Unknown status: %d", int(status_str))
+        try:
+            status_str = status_str.upper()
+            return Status[status_str]
+        except KeyError:
+            _LOG.warning("Unknown status: %s", status_str)
+        return Status.UNKNOWN
 
     def is_good(self) -> bool:
         """Check if the status of the benchmark/environment is good."""
