@@ -71,10 +71,15 @@ applyTo: '**/*.py'
   Adding a trailing comma to the last argument is optional, but recommended for consistency whenever a single line is insufficient.
 
 - Code should be formatting using `black`.
+
 - Code should be type checked using `mypy`.
+
   - All function and method parameters should be type annotated.
+
 - Code should be linted using `pylint`.
 
 - Tests should be included for all new code and should be run using `pytest`.
+
 - Tests should be organized roughly the same way as the code they are testing (e.g., `tests/some/test_module.py` for `some/module.py`).
+
 - Test fixtures that setup the resources for the tests (e.g., Environments, Services, Storage, Optimizer, Scheduler, etc.) should be included in a `conftest.py` file in the same directory as the tests or else a `fixtures.py` file in the same directory as the tests.
