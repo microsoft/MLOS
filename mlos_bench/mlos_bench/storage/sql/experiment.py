@@ -235,7 +235,6 @@ class Experiment(Storage.Experiment):
             row._tuple() for row in cur_result.fetchall()  # pylint: disable=protected-access
         )
 
-    # TODO: Add tests for trial_runner_assigned filtering.
     def pending_trials(
         self,
         timestamp: datetime,
@@ -260,9 +259,9 @@ class Experiment(Storage.Experiment):
                 self._schema.trial.c.status.in_([s.name for s in statuses]),
             )
             if trial_runner_assigned:
-                stmt.where(self._schema.trial.c.trial_runner_id.isnot(None))
+                stmt = stmt.where(self._schema.trial.c.trial_runner_id.isnot(None))
             elif trial_runner_assigned is False:
-                stmt.where(self._schema.trial.c.trial_runner_id.is_(None))
+                stmt = stmt.where(self._schema.trial.c.trial_runner_id.is_(None))
             # else: # No filtering by trial_runner_id
             cur_trials = conn.execute(stmt)
             for trial in cur_trials.fetchall():
