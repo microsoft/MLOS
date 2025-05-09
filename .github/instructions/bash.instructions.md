@@ -6,9 +6,9 @@ applyTo: '**/*.sh'
 
 - Include instructions from [default.instructions.md](default.instructions.md) for all languages.
 
-- Scripts schould use `set -e` or `set -o errexit` to exit on error.
+- Scripts should use `set -e` or `set -o errexit` to exit on error.
 
-- Scripts should use use `set -u` or `set -o nounset` to exit on unset variables.
+- Scripts should use `set -u` or `set -o nounset` to exit on unset variables.
 
 - Scripts should use `set -o pipefail` to exit on errors in pipelines.
 

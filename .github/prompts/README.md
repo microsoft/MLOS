@@ -4,7 +4,7 @@ This directory contains custom `.prompt.md` files for Github Copilot.
 
 These files are used to customize the behavior of Github Copilot when generating code.
 
-The can be invoked with the `/custom-prompt-file-name-prefix` command in the Copilot Chat view (generally when in Agent mode).
+They can be invoked with the `/custom-prompt-file-name-prefix` command in the Copilot Chat view (generally when in Agent mode).
 
 For instance:
 

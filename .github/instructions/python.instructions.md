@@ -62,7 +62,7 @@ applyTo: '**/*.py'
 
         Example
         -------
-        Refer to to :py:mod:`mlos_bench.environments.my_special_env` for usage examples.
+        Refer to :py:mod:`mlos_bench.environments.my_special_env` for usage examples.
         """
     ```
 
