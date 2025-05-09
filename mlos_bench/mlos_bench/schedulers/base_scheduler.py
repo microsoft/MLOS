@@ -349,7 +349,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         tunables : TunableGroups
             The tunable configuration to add to the queue.
 
-        ts_start : datetime | None
+        ts_start : datetime.datetime | None
             Optional timestamp to use to start the trial.
 
         Notes
@@ -405,7 +405,8 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
 
     def assign_trial_runners(self, trials: Iterable[Storage.Trial]) -> None:
         """
-        Assigns :py:class:`~.TrialRunner`s to the given :py:class:`~.Trial`s in batch.
+        Assigns a :py:class:`~.TrialRunner` to each :py:class:`~.Storage.Trial` in
+        the batch.
 
         The base class implements a simple round-robin scheduling algorithm for
         each Trial in sequence.
@@ -497,9 +498,9 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         """
         Runs the current schedule of trials.
 
-        Check for :py:class:`.Trial`s with `:py:attr:`.Status.PENDING` and an
-        assigned :py:attr:`~.Trial.trial_runner_id` in the queue and run them
-        with :py:meth:`~.Scheduler.run_trial`.
+        Check for :py:class:`~.Storage.Trial` instances with `:py:attr:`.Status.PENDING`
+        and an assigned :py:attr:`~.Storage.Trial.trial_runner_id` in the queue and run
+        them with :py:meth:`~.Scheduler.run_trial`.
 
         Subclasses can override this method to implement a more sophisticated
         scheduling policy.

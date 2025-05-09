@@ -316,10 +316,9 @@ class Storage(metaclass=ABCMeta):
             trial_runner_assigned: bool | None = None,
         ) -> Iterator["Storage.Trial"]:
             """
-            Return an iterator over the :py:class:`~.Storage.Trial`s that are
-            :py:attr:`~.Status.PENDING` and have a scheduled
-            :py:attr:`~.Storage.Trial.ts_start` time to run on or before the specified
-            timestamp.
+            Return an iterator over :py:attr:`~.Status.PENDING`
+            :py:class:`~.Storage.Trial` instances that have a scheduled start
+            time to run on or before the specified timestamp.
 
             Parameters
             ----------
