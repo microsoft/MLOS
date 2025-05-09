@@ -263,12 +263,8 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
 
         not_done: bool = True
         while not_done:
-            _LOG.info(
-                "Optimization loop: Longest finished trial sequence ID: %d",
-                self._longest_finished_trial_sequence_id,
-            )
+            _LOG.info("Optimization loop: Last trial ID: %d", self._last_trial_id)
             self.run_schedule(is_warm_up)
-            self.wait_for_trial_runners()
             not_done = self.add_new_optimizer_suggestions()
             self.assign_trial_runners(
                 self.experiment.pending_trials(
@@ -278,24 +274,6 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
                 )
             )
             is_warm_up = False
-        self.wait_for_trial_runners(wait_all=True)
-
-    @abstractmethod
-    def wait_for_trial_runners(self, wait_all: bool = False) -> None:
-        """
-        Wait for (enough) TrialRunners to finish.
-
-        This is a blocking call that waits for enough of the the TrialRunners to finish.
-        The base class implementation waits for all of the TrialRunners to finish.
-        However this can be overridden in subclasses to implement a more asynchronous behavior.
-
-        Parameters
-        ----------
-        wait_all : bool
-            If True, wait for all TrialRunners to finish.
-            If False, wait for "enough" TrialRunners to finish (which for the
-            base class is all of them).
-        """
 
     def teardown(self) -> None:
         """
