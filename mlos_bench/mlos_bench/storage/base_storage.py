@@ -22,9 +22,11 @@ mlos_bench.storage.base_trial_data.TrialData :
     Base interface for accessing the stored benchmark trial data.
 """
 
+from __future__ import annotations
+
 import logging
 from abc import ABCMeta, abstractmethod
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterable, Iterator, Mapping
 from contextlib import AbstractContextManager as ContextManager
 from datetime import datetime
 from types import TracebackType
@@ -95,6 +97,25 @@ class Storage(metaclass=ABCMeta):
         """
 
     @abstractmethod
+    def get_experiment_by_id(
+        self,
+        experiment_id: str,
+    ) -> Storage.Experiment | None:
+        """
+        Gets an Experiment by its ID.
+
+        Parameters
+        ----------
+        experiment_id : str
+            ID of the Experiment to retrieve.
+
+        Returns
+        -------
+        experiment : Storage.Experiment | None
+            The Experiment object, or None if it doesn't exist.
+        """
+
+    @abstractmethod
     def experiment(  # pylint: disable=too-many-arguments
         self,
         *,
@@ -104,7 +125,7 @@ class Storage(metaclass=ABCMeta):
         description: str,
         tunables: TunableGroups,
         opt_targets: dict[str, Literal["min", "max"]],
-    ) -> "Storage.Experiment":
+    ) -> Storage.Experiment:
         """
         Create a new experiment in the storage.
 
@@ -161,7 +182,7 @@ class Storage(metaclass=ABCMeta):
             self._opt_targets = opt_targets
             self._in_context = False
 
-        def __enter__(self) -> "Storage.Experiment":
+        def __enter__(self) -> Storage.Experiment:
             """
             Enter the context of the experiment.
 
@@ -308,6 +329,25 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
+        def get_trial_by_id(
+            self,
+            trial_id: int,
+        ) -> Storage.Trial | None:
+            """
+            Gets a Trial by its ID.
+
+            Parameters
+            ----------
+            trial_id : int
+                ID of the Trial to retrieve for this Experiment.
+
+            Returns
+            -------
+            trial : Storage.Trial | None
+                The Trial object, or None if it doesn't exist.
+            """
+
+        @abstractmethod
         def pending_trials(
             self,
             timestamp: datetime,
@@ -337,7 +377,7 @@ class Storage(metaclass=ABCMeta):
             tunables: TunableGroups,
             ts_start: datetime | None = None,
             config: dict[str, Any] | None = None,
-        ) -> "Storage.Trial":
+        ) -> Storage.Trial:
             """
             Create a new experiment run in the storage.
 
@@ -374,7 +414,7 @@ class Storage(metaclass=ABCMeta):
             tunables: TunableGroups,
             ts_start: datetime | None = None,
             config: dict[str, Any] | None = None,
-        ) -> "Storage.Trial":
+        ) -> Storage.Trial:
             """
             Create a new experiment run in the storage.
 
