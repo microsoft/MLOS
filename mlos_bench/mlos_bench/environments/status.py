@@ -7,8 +7,8 @@
 import enum
 import logging
 
-
 _LOG = logging.getLogger(__name__)
+
 
 class Status(enum.Enum):
     """Enum for the status of the benchmark/environment Trial or Experiment."""
