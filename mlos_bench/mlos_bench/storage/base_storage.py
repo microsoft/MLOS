@@ -144,8 +144,10 @@ class Storage(metaclass=ABCMeta):
         opt_targets: dict[str, Literal["min", "max"]],
     ) -> Storage.Experiment:
         """
-        Create a new experiment in the storage.
+        Create or reload an experiment in the Storage.
 
+        Notes
+        -----
         We need the `opt_target` parameter here to know what metric to retrieve
         when we load the data from previous trials. Later we will replace it with
         full metadata about the optimization direction, multiple objectives, etc.
@@ -468,10 +470,11 @@ class Storage(metaclass=ABCMeta):
             tunable_config_id: int,
             trial_runner_id: int | None,
             opt_targets: dict[str, Literal["min", "max"]],
+            status: Status,
+            restoring: bool,
             config: dict[str, Any] | None = None,
-            status: Status = Status.UNKNOWN,
         ):
-            if status not in (Status.UNKNOWN, Status.PENDING):
+            if not restoring and status not in (Status.UNKNOWN, Status.PENDING):
                 raise ValueError(f"Invalid status for a new trial: {status}")
             self._tunables = tunables
             self._experiment_id = experiment_id

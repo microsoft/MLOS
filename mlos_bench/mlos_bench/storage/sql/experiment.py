@@ -273,8 +273,8 @@ class Experiment(Storage.Experiment):
                 trial_runner_id=trial.trial_runner_id,
                 opt_targets=self._opt_targets,
                 status=Status.from_str(trial.status),
-                config=config,
                 restoring=True,
+                config=config,
             )
 
     def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator[Storage.Trial]:
@@ -320,6 +320,8 @@ class Experiment(Storage.Experiment):
                     config_id=trial.config_id,
                     trial_runner_id=trial.trial_runner_id,
                     opt_targets=self._opt_targets,
+                    status=Status.from_str(trial.status),
+                    restoring=True,
                     config=config,
                 )
 
@@ -395,8 +397,9 @@ class Experiment(Storage.Experiment):
                     config_id=config_id,
                     trial_runner_id=None,  # initially, Trials are not assigned to a TrialRunner
                     opt_targets=self._opt_targets,
-                    config=config,
                     status=new_trial_status,
+                    restoring=False,
+                    config=config,
                 )
                 self._trial_id += 1
                 return trial
