@@ -3,12 +3,18 @@
 # Licensed under the MIT License.
 #
 """Test pickling and unpickling of Storage, and restoring Experiment and Trial by id."""
+import json
 import os
 import pickle
 import tempfile
+from datetime import datetime
 from typing import Literal
 
+from pytz import UTC
+
+from mlos_bench.environments.status import Status
 from mlos_bench.storage.sql.storage import SqlStorage
+from mlos_bench.storage.storage_factory import from_config
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
@@ -19,12 +25,18 @@ def test_storage_pickle_restore_experiment_and_trial(tunable_groups: TunableGrou
     """
     with tempfile.TemporaryDirectory() as tmpdir:
         db_path = os.path.join(tmpdir, "mlos_bench.sqlite")
-        config = {
-            "drivername": "sqlite",
-            "database": db_path,
-            "lazy_schema_create": False,
-        }
-        storage = SqlStorage(config)
+        config_str = json.dumps(
+            {
+                "class": "mlos_bench.storage.sql.storage.SqlStorage",
+                "config": {
+                    "drivername": "sqlite",
+                    "database": db_path,
+                    "lazy_schema_create": False,
+                },
+            }
+        )
+
+        storage = from_config(config_str)
         storage.update_schema()
 
         # Create an Experiment and a Trial
@@ -41,6 +53,7 @@ def test_storage_pickle_restore_experiment_and_trial(tunable_groups: TunableGrou
             trial = experiment.new_trial(tunable_groups)
             trial_id_created = trial.trial_id
             trial.set_trial_runner(1)
+            trial.update(Status.RUNNING, datetime.now(UTC))
 
         # Pickle and unpickle the Storage object
         pickled = pickle.dumps(storage)
