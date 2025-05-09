@@ -100,6 +100,8 @@ class Storage(metaclass=ABCMeta):
     def get_experiment_by_id(
         self,
         experiment_id: str,
+        tunables: TunableGroups,
+        opt_targets: dict[str, Literal["min", "max"]],
     ) -> Storage.Experiment | None:
         """
         Gets an Experiment by its ID.
@@ -108,11 +110,26 @@ class Storage(metaclass=ABCMeta):
         ----------
         experiment_id : str
             ID of the Experiment to retrieve.
+        tunables : TunableGroups
+            The tunables for the Experiment.
+        opt_targets : dict[str, Literal["min", "max"]]
+            The optimization targets for the Experiment's
+            :py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer`.
 
         Returns
         -------
         experiment : Storage.Experiment | None
             The Experiment object, or None if it doesn't exist.
+
+        Notes
+        -----
+        Tunables are not stored in the database for the Experiment, only for the
+        Trials, so currently they can change if the user (incorrectly) adjusts
+        the configs on disk between resume runs.
+        Since this method is generally meant to load th Experiment from the
+        database for a child process to execute a Trial in the background we are
+        generally safe to simply pass these values from the parent process
+        rather than look them up in the database.
         """
 
     @abstractmethod
