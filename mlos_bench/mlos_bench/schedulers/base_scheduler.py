@@ -405,8 +405,8 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
 
     def assign_trial_runners(self, trials: Iterable[Storage.Trial]) -> None:
         """
-        Assigns a :py:class:`~.TrialRunner` to each :py:class:`~.Storage.Trial` in
-        the batch.
+        Assigns a :py:class:`~.TrialRunner` to each :py:class:`~.Storage.Trial` in the
+        batch.
 
         The base class implements a simple round-robin scheduling algorithm for
         each Trial in sequence.

@@ -317,8 +317,8 @@ class Storage(metaclass=ABCMeta):
         ) -> Iterator["Storage.Trial"]:
             """
             Return an iterator over :py:attr:`~.Status.PENDING`
-            :py:class:`~.Storage.Trial` instances that have a scheduled start
-            time to run on or before the specified timestamp.
+            :py:class:`~.Storage.Trial` instances that have a scheduled start time to
+            run on or before the specified timestamp.
 
             Parameters
             ----------
