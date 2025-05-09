@@ -285,9 +285,19 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
+        def get_longest_prefix_finished_trial_id(self) -> int:
+            """
+            Calculate the last trial ID for the experiment.
+
+            This is used to determine the last trial ID that finished (failed or
+            successful) such that all Trials before it are also finished.
+            """
+
+        @abstractmethod
         def load(
             self,
             last_trial_id: int = -1,
+            omit_registered_trial_ids: Iterable[int] | None = None,
         ) -> tuple[list[int], list[dict], list[dict[str, Any] | None], list[Status]]:
             """
             Load (tunable values, benchmark scores, status) to warm-up the optimizer.
@@ -296,10 +306,20 @@ class Storage(metaclass=ABCMeta):
             that were scheduled *after* the given trial ID. Otherwise, return data from ALL
             merged-in experiments and attempt to impute the missing tunable values.
 
+            Additionally, if `omit_registered_trial_ids` is provided, omit the
+            trials matching those ids.
+
+            The parameters together allow us to efficiently load data from
+            finished trials that we haven't registered with the Optimizer yet
+            for bulk registering.
+
             Parameters
             ----------
             last_trial_id : int
                 (Optional) Trial ID to start from.
+            omit_registered_trial_ids : Iterable[int] | None = None,
+                (Optional) List of trial IDs to omit. If None, load all trials.
+
 
             Returns
             -------

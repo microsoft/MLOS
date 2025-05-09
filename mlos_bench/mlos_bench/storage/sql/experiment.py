@@ -8,7 +8,7 @@ the benchmark experiment data using `SQLAlchemy <https://sqlalchemy.org>`_ backe
 
 import hashlib
 import logging
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 from datetime import datetime
 from typing import Any, Literal
 
@@ -153,13 +153,43 @@ class Experiment(Storage.Experiment):
                 for row in cur_telemetry.fetchall()
             ]
 
+    # TODO: Add a test for this method.
+    def get_longest_prefix_finished_trial_id(self) -> int:
+        with self._engine.connect() as conn:
+            # Get the first (minimum) trial ID with an unfinished status.
+            first_unfinished_trial_id_stmt = (
+                self._schema.trial.select()
+                .with_only_columns(
+                    func.min(self._schema.trial.c.trial_id),
+                )
+                .where(
+                    self._schema.trial.c.exp_id == self._experiment_id,
+                    func.not_(
+                        self._schema.trial.c.status.in_(
+                            [
+                                Status.SUCCEEDED.name,
+                                Status.FAILED.name,
+                                Status.TIMED_OUT.name,
+                            ]
+                        ),
+                    ),
+                )
+            )
+
+            max_trial_id = conn.execute(first_unfinished_trial_id_stmt).scalar()
+            if max_trial_id is None:
+                return -1
+            # Return one less than the first unfinished trial ID - it should be
+            # finished (or not exist, which is fine as a limit).
+            return int(max_trial_id) - 1
+
     def load(
         self,
         last_trial_id: int = -1,
+        omit_registered_trial_ids: Iterable[int] | None = None,
     ) -> tuple[list[int], list[dict], list[dict[str, Any] | None], list[Status]]:
-
         with self._engine.connect() as conn:
-            cur_trials = conn.execute(
+            stmt = (
                 self._schema.trial.select()
                 .with_only_columns(
                     self._schema.trial.c.trial_id,
@@ -181,6 +211,15 @@ class Experiment(Storage.Experiment):
                     self._schema.trial.c.trial_id.asc(),
                 )
             )
+
+            # TODO: Add a test for this parameter.
+
+            # Note: if we have a very large number of trials, this may encounter
+            # SQL text length limits, so we may need to chunk this.
+            if omit_registered_trial_ids is not None:
+                stmt = stmt.where(self._schema.trial.c.trial_id.notin_(omit_registered_trial_ids))
+
+            cur_trials = conn.execute(stmt)
 
             trial_ids: list[int] = []
             configs: list[dict[str, Any]] = []
