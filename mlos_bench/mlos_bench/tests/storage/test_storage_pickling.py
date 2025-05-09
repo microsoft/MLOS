@@ -40,6 +40,7 @@ def test_storage_pickle_restore_experiment_and_trial(tunable_groups: TunableGrou
         with experiment:
             trial = experiment.new_trial(tunable_groups)
             trial_id_created = trial.trial_id
+            trial.set_trial_runner(1)
 
         # Pickle and unpickle the Storage object
         pickled = pickle.dumps(storage)
@@ -65,3 +66,6 @@ def test_storage_pickle_restore_experiment_and_trial(tunable_groups: TunableGrou
             assert restored_trial.trial_id == trial.trial_id
             assert restored_trial.experiment_id == trial.experiment_id
             assert restored_trial.tunables == trial.tunables
+            assert restored_trial.status == trial.status
+            assert restored_trial.config() == trial.config()
+            assert restored_trial.trial_runner_id == trial.trial_runner_id
