@@ -492,6 +492,11 @@ class Storage(metaclass=ABCMeta):
             )
 
         @property
+        def experiment_id(self) -> str:
+            """Experiment ID of the Trial."""
+            return self._experiment_id
+
+        @property
         def trial_id(self) -> int:
             """ID of the current trial."""
             return self._trial_id
