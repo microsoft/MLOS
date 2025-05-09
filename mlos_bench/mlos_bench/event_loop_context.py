@@ -39,6 +39,7 @@ class EventLoopContext:
     def __init__(self) -> None:
         self._event_loop: AbstractEventLoop | None = None
         self._event_loop_thread: Thread | None = None
+        # TODO: Check if we can fork the ThreadLock or need to delay using that.
         self._event_loop_thread_lock = ThreadLock()
         self._event_loop_thread_refcnt: int = 0
 

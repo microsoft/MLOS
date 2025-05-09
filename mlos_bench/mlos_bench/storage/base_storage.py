@@ -22,9 +22,11 @@ mlos_bench.storage.base_trial_data.TrialData :
     Base interface for accessing the stored benchmark trial data.
 """
 
+from __future__ import annotations
+
 import logging
 from abc import ABCMeta, abstractmethod
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterable, Iterator, Mapping
 from contextlib import AbstractContextManager as ContextManager
 from datetime import datetime
 from types import TracebackType
@@ -95,6 +97,25 @@ class Storage(metaclass=ABCMeta):
         """
 
     @abstractmethod
+    def get_experiment_by_id(
+        self,
+        experiment_id: str,
+    ) -> Storage.Experiment | None:
+        """
+        Gets an Experiment by its ID.
+
+        Parameters
+        ----------
+        experiment_id : str
+            ID of the Experiment to retrieve.
+
+        Returns
+        -------
+        experiment : Storage.Experiment | None
+            The Experiment object, or None if it doesn't exist.
+        """
+
+    @abstractmethod
     def experiment(  # pylint: disable=too-many-arguments
         self,
         *,
@@ -104,7 +125,7 @@ class Storage(metaclass=ABCMeta):
         description: str,
         tunables: TunableGroups,
         opt_targets: dict[str, Literal["min", "max"]],
-    ) -> "Storage.Experiment":
+    ) -> Storage.Experiment:
         """
         Create a new experiment in the storage.
 
@@ -161,7 +182,7 @@ class Storage(metaclass=ABCMeta):
             self._opt_targets = opt_targets
             self._in_context = False
 
-        def __enter__(self) -> "Storage.Experiment":
+        def __enter__(self) -> Storage.Experiment:
             """
             Enter the context of the experiment.
 
@@ -285,9 +306,19 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
+        def get_longest_prefix_finished_trial_id(self) -> int:
+            """
+            Calculate the last trial ID for the experiment.
+
+            This is used to determine the last trial ID that finished (failed or
+            successful) such that all Trials before it are also finished.
+            """
+
+        @abstractmethod
         def load(
             self,
             last_trial_id: int = -1,
+            omit_registered_trial_ids: Iterable[int] | None = None,
         ) -> tuple[list[int], list[dict], list[dict[str, Any] | None], list[Status]]:
             """
             Load (tunable values, benchmark scores, status) to warm-up the optimizer.
@@ -296,10 +327,20 @@ class Storage(metaclass=ABCMeta):
             that were scheduled *after* the given trial ID. Otherwise, return data from ALL
             merged-in experiments and attempt to impute the missing tunable values.
 
+            Additionally, if `omit_registered_trial_ids` is provided, omit the
+            trials matching those ids.
+
+            The parameters together allow us to efficiently load data from
+            finished trials that we haven't registered with the Optimizer yet
+            for bulk registering.
+
             Parameters
             ----------
             last_trial_id : int
                 (Optional) Trial ID to start from.
+            omit_registered_trial_ids : Iterable[int] | None = None,
+                (Optional) List of trial IDs to omit. If None, load all trials.
+
 
             Returns
             -------
@@ -308,23 +349,51 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
+        def get_trial_by_id(
+            self,
+            trial_id: int,
+        ) -> Storage.Trial | None:
+            """
+            Gets a Trial by its ID.
+
+            Parameters
+            ----------
+            trial_id : int
+                ID of the Trial to retrieve for this Experiment.
+
+            Returns
+            -------
+            trial : Storage.Trial | None
+                The Trial object, or None if it doesn't exist.
+            """
+
+        @abstractmethod
         def pending_trials(
             self,
             timestamp: datetime,
             *,
             running: bool,
-        ) -> Iterator["Storage.Trial"]:
+            trial_runner_assigned: bool | None = None,
+        ) -> Iterator[Storage.Trial]:
             """
-            Return an iterator over the pending trials that are scheduled to run on or
-            before the specified timestamp.
+            Return an iterator over the :py:class:`~.Storage.Trial`s that are
+            :py:attr:`~.Status.PENDING` and have a scheduled
+            :py:attr:`~.Storage.Trial.ts_start` time to run on or before the specified
+            timestamp.
 
             Parameters
             ----------
             timestamp : datetime.datetime
-                The time in UTC to check for scheduled trials.
+                The time in UTC to check for scheduled Trials.
             running : bool
-                If True, include the trials that are already running.
+                If True, include the Trials that are also
+                :py:attr:`~.Status.RUNNING` or :py:attr:`~.Status.READY`.
                 Otherwise, return only the scheduled trials.
+            trial_runner_assigned : bool | None
+                If True, include the Trials that are assigned to a
+                :py:class:`~.TrialRunner`. If False, return only the trials
+                that are not assigned to any :py:class:`~.TrialRunner`.
+                If None, return all trials regardless of their assignment.
 
             Returns
             -------
@@ -337,7 +406,7 @@ class Storage(metaclass=ABCMeta):
             tunables: TunableGroups,
             ts_start: datetime | None = None,
             config: dict[str, Any] | None = None,
-        ) -> "Storage.Trial":
+        ) -> Storage.Trial:
             """
             Create a new experiment run in the storage.
 
@@ -374,7 +443,7 @@ class Storage(metaclass=ABCMeta):
             tunables: TunableGroups,
             ts_start: datetime | None = None,
             config: dict[str, Any] | None = None,
-        ) -> "Storage.Trial":
+        ) -> Storage.Trial:
             """
             Create a new experiment run in the storage.
 

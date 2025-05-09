@@ -2,12 +2,10 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/schedulers/scheduler-schema.json",
     "title": "mlos_bench Scheduler config",
-
     "$defs": {
         "comment": {
             "$comment": "This section contains reusable partial schema bits (or just split out for readability)"
         },
-
         "config_base_scheduler": {
             "$comment": "config properties common to all Scheduler types.",
             "type": "object",
@@ -29,18 +27,23 @@
                     "description": "Max. number of trials to run. Use -1 or 0 for unlimited.",
                     "type": "integer",
                     "minimum": -1,
-                    "examples": [50, -1]
+                    "examples": [
+                        50,
+                        -1
+                    ]
                 },
                 "trial_config_repeat_count": {
                     "description": "Number of times to repeat a config.",
                     "type": "integer",
                     "minimum": 1,
-                    "examples": [3, 5]
+                    "examples": [
+                        3,
+                        5
+                    ]
                 }
             }
         }
     },
-
     "description": "config for the mlos_bench scheduler",
     "$comment": "top level schema document rules",
     "type": "object",
@@ -51,21 +54,20 @@
             "$comment": "This is optional, but if provided, should match the name of this file.",
             "pattern": "/schemas/schedulers/scheduler-schema.json$"
         },
-
         "description": {
             "description": "Optional description of the config.",
             "type": "string"
         },
-
         "class": {
             "description": "The name of the scheduler class to use.",
             "$comment": "required",
             "enum": [
                 "mlos_bench.schedulers.SyncScheduler",
-                "mlos_bench.schedulers.sync_scheduler.SyncScheduler"
+                "mlos_bench.schedulers.sync_scheduler.SyncScheduler",
+                "mlos_bench.schedulers.ParallelScheduler",
+                "mlos_bench.schedulers.parallel_scheduler.ParallelScheduler"
             ]
         },
-
         "config": {
             "description": "The scheduler-specific config.",
             "$comment": "Stub for scheduler-specific config appended with condition statements below",
@@ -73,8 +75,9 @@
             "minProperties": 1
         }
     },
-    "required": ["class"],
-
+    "required": [
+        "class"
+    ],
     "oneOf": [
         {
             "$comment": "extensions to the 'config' object properties when synchronous scheduler is being used",
@@ -83,17 +86,25 @@
                     "class": {
                         "enum": [
                             "mlos_bench.schedulers.SyncScheduler",
-                            "mlos_bench.schedulers.sync_scheduler.SyncScheduler"
+                            "mlos_bench.schedulers.sync_scheduler.SyncScheduler",
+                            "mlos_bench.schedulers.ParallelScheduler",
+                            "mlos_bench.schedulers.parallel_scheduler.ParallelScheduler"
                         ]
                     }
                 },
-                "required": ["class"]
+                "required": [
+                    "class"
+                ]
             },
             "then": {
                 "properties": {
                     "config": {
                         "type": "object",
-                        "allOf": [{ "$ref": "#/$defs/config_base_scheduler" }],
+                        "allOf": [
+                            {
+                                "$ref": "#/$defs/config_base_scheduler"
+                            }
+                        ],
                         "$comment": "disallow other properties",
                         "unevaluatedProperties": false
                     }

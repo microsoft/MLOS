@@ -1,0 +1,7 @@
+{
+    "class": "mlos_bench.schedulers.ParallelScheduler",
+    "config": {
+        "trial_config_repeat_count": 3,
+        "teardown": false
+    }
+}

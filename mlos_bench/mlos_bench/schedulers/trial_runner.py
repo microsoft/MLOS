@@ -20,6 +20,7 @@ from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.services.types import SupportsConfigLoading
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tunables.tunable_types import TunableValue
 
 _LOG = logging.getLogger(__name__)
 
@@ -117,6 +118,8 @@ class TrialRunner:
         assert self._env.parameters["trial_runner_id"] == self._trial_runner_id
         self._in_context = False
         self._is_running = False
+        # TODO: Check and see if we need to delay creating the event loop
+        # context until context entry.
         self._event_loop_context = EventLoopContext()
 
     def __repr__(self) -> str:
@@ -168,7 +171,7 @@ class TrialRunner:
         self,
         trial: Storage.Trial,
         global_config: dict[str, Any] | None = None,
-    ) -> None:
+    ) -> tuple[Status, datetime, dict[str, TunableValue] | None]:
         """
         Run a single trial on this TrialRunner's Environment and stores the results in
         the backend Trial Storage.
@@ -198,9 +201,10 @@ class TrialRunner:
         if not self.environment.setup(trial.tunables, trial.config(global_config)):
             _LOG.warning("Setup failed: %s :: %s", self.environment, trial.tunables)
             # FIXME: Use the actual timestamp from the environment.
-            _LOG.info("TrialRunner: Update trial results: %s :: %s", trial, Status.FAILED)
-            trial.update(Status.FAILED, datetime.now(UTC))
-            return
+            (status, timestamp, results) = (Status.FAILED, datetime.now(UTC), None)
+            _LOG.info("TrialRunner: Update trial results: %s :: %s", trial, status)
+            trial.update(status, timestamp)
+            return (status, timestamp, results)
 
         # TODO: start background status polling of the environments in the event loop.
 
@@ -220,6 +224,8 @@ class TrialRunner:
         _LOG.info("TrialRunner: Update trial results: %s :: %s %s", trial, status, results)
 
         self._is_running = False
+
+        return (status, timestamp, results)
 
     def teardown(self) -> None:
         """

@@ -1,0 +1,5 @@
+{
+    "class": "mlos_bench.schedulers.ParallelScheduler",
+    "config": {
+    }
+}
