@@ -89,13 +89,13 @@ class SqlStorage(Storage):
     def __repr__(self) -> str:
         return self._repr
 
-    # TODO: Implement me:
-    # TODO: Needs tests.
-    def get_experiment_by_id(self, experiment_id):
+    def get_experiment_by_id(
+        self,
+        experiment_id,
+        tunables: TunableGroups,
+        opt_targets: dict[str, Literal["min", "max"]],
+    ) -> Storage.Experiment | None:
         with self._engine.connect() as conn:
-            # TODO: need to join with the trial table to get the max trial_id,
-            # objectives to get the opt_targets, and tunable_params to get the
-            # tunables.
             cur_exp = conn.execute(
                 self._schema.experiment.select().where(
                     self._schema.experiment.c.exp_id == experiment_id,
@@ -108,12 +108,11 @@ class SqlStorage(Storage):
                 engine=self._engine,
                 schema=self._schema,
                 experiment_id=exp.exp_id,
-                trial_id=-1,
-                tunables=TunableGroups(),
+                trial_id=-1,  # will be loaded upon __enter__ which calls _setup()
                 description=exp.description,
                 root_env_config=exp.root_env_config,
-                git_repo=exp.git_repo,
-                git_commit=exp.git_commit,
+                tunables=tunables,
+                opt_targets=opt_targets,
             )
 
     def experiment(  # pylint: disable=too-many-arguments

@@ -235,6 +235,48 @@ class Experiment(Storage.Experiment):
             row._tuple() for row in cur_result.fetchall()  # pylint: disable=protected-access
         )
 
+    def get_trial_by_id(
+        self,
+        trial_id: int,
+    ) -> Storage.Trial | None:
+        with self._engine.connect() as conn:
+            cur_trial = conn.execute(
+                self._schema.trial.select().where(
+                    self._schema.trial.c.exp_id == self._experiment_id,
+                    self._schema.trial.c.trial_id == trial_id,
+                )
+            )
+            trial = cur_trial.fetchone()
+            if trial is None:
+                return None
+            tunables = self._get_key_val(
+                conn,
+                self._schema.config_param,
+                "param",
+                config_id=trial.config_id,
+            )
+            config = self._get_key_val(
+                conn,
+                self._schema.trial_param,
+                "param",
+                exp_id=self._experiment_id,
+                trial_id=trial.trial_id,
+            )
+            return Trial(
+                engine=self._engine,
+                schema=self._schema,
+                # Reset .is_updated flag after the assignment:
+                tunables=self._tunables.copy().assign(tunables).reset(),
+                experiment_id=self._experiment_id,
+                trial_id=trial.trial_id,
+                config_id=trial.config_id,
+                trial_runner_id=trial.trial_runner_id,
+                opt_targets=self._opt_targets,
+                status=Status.from_str(trial.status),
+                config=config,
+                restoring=True,
+            )
+
     def pending_trials(self, timestamp: datetime, *, running: bool) -> Iterator[Storage.Trial]:
         timestamp = utcify_timestamp(timestamp, origin="local")
         _LOG.info("Retrieve pending trials for: %s @ %s", self._experiment_id, timestamp)
