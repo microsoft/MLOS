@@ -61,6 +61,53 @@ def test_schedule_trial(
     trial_now2_data = exp_data.trials[trial_now2.trial_id]
     assert trial_now2_data.trial_runner_id == trial_now2.trial_runner_id
 
+    # --- Test the trial_runner_assigned parameter ---
+    # At this point:
+    # - trial_now1: no trial_runner assigned
+    # - trial_now2: trial_runner assigned
+    # - trial_1h, trial_2h: no trial_runner assigned
+
+    # All pending trials (should include all 4)
+    all_pending = _trial_ids(
+        exp_storage.pending_trials(
+            timestamp + timedelta_1hr * 3,
+            running=False,
+            trial_runner_assigned=None,
+        )
+    )
+    assert all_pending == {
+        trial_now1.trial_id,
+        trial_now2.trial_id,
+        trial_1h.trial_id,
+        trial_2h.trial_id,
+    }, f"Expected all pending trials, got {all_pending}"
+
+    # Only those with a trial_runner assigned
+    assigned_pending = _trial_ids(
+        exp_storage.pending_trials(
+            timestamp + timedelta_1hr * 3,
+            running=False,
+            trial_runner_assigned=True,
+        )
+    )
+    assert assigned_pending == {
+        trial_now2.trial_id
+    }, f"Expected only trials with a runner assigned, got {assigned_pending}"
+
+    # Only those without a trial_runner assigned
+    unassigned_pending = _trial_ids(
+        exp_storage.pending_trials(
+            timestamp + timedelta_1hr * 3,
+            running=False,
+            trial_runner_assigned=False,
+        )
+    )
+    assert unassigned_pending == {
+        trial_now1.trial_id,
+        trial_1h.trial_id,
+        trial_2h.trial_id,
+    }, f"Expected only trials without a runner assigned, got {unassigned_pending}"
+
     # Scheduler side: get trials ready to run at certain timestamps:
 
     # Pretend 1 minute has passed, get trials scheduled to run:
