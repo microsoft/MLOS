@@ -91,4 +91,4 @@ class Status(enum.Enum):
         """Check if the status of the benchmark/environment Trial or Experiment is
         TIMED_OUT.
         """
-        return self == Status.FAILED
+        return self == Status.TIMED_OUT
