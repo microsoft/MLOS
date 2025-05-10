@@ -6,10 +6,12 @@
 import json
 import os
 import pickle
+import sys
 import tempfile
 from datetime import datetime
 from typing import Literal
 
+import pytest
 from pytz import UTC
 
 from mlos_bench.environments.status import Status
@@ -18,11 +20,15 @@ from mlos_bench.storage.storage_factory import from_config
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="Windows doesn't support multiple processes accessing the same file.",
+)
 def test_storage_pickle_restore_experiment_and_trial(tunable_groups: TunableGroups) -> None:
-    # pylint: disable=too-many-locals
     """Check that we can pickle and unpickle the Storage object, and restore Experiment
     and Trial by id.
     """
+    # pylint: disable=too-many-locals
     with tempfile.TemporaryDirectory() as tmpdir:
         db_path = os.path.join(tmpdir, "mlos_bench.sqlite")
         config_str = json.dumps(
