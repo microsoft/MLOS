@@ -68,25 +68,30 @@ def test_storage_pickle_restore_experiment_and_trial(tunable_groups: TunableGrou
         restored_storage = pickle.loads(pickled)
         assert isinstance(restored_storage, SqlStorage)
 
-        # Restore the Experiment from storage by id
+        # Restore the Experiment from storage by id and check that it matches the original
         restored_experiment = restored_storage.get_experiment_by_id(
             experiment_id=experiment.experiment_id,
             tunables=tunable_groups,
             opt_targets=opt_targets,
         )
         assert restored_experiment is not None
+        assert restored_experiment is not experiment
         assert restored_experiment.experiment_id == experiment.experiment_id
         assert restored_experiment.description == experiment.description
         assert restored_experiment.root_env_config == experiment.root_env_config
+        assert restored_experiment.tunables == experiment.tunables
         assert restored_experiment.opt_targets == experiment.opt_targets
-
-        # Restore the Trial from storage by id
         with restored_experiment:
-            restored_trial = restored_experiment.get_trial_by_id(trial_id_created)
-            assert restored_trial is not None
-            assert restored_trial.trial_id == trial.trial_id
-            assert restored_trial.experiment_id == trial.experiment_id
-            assert restored_trial.tunables == trial.tunables
-            assert restored_trial.status == trial.status
-            assert restored_trial.config() == trial.config()
-            assert restored_trial.trial_runner_id == trial.trial_runner_id
+            # trial_id should have been restored during __enter__
+            assert restored_experiment.trial_id == experiment.trial_id
+
+        # Restore the Trial from storage by id and check that it matches the original
+        restored_trial = restored_experiment.get_trial_by_id(trial_id_created)
+        assert restored_trial is not None
+        assert restored_trial is not trial
+        assert restored_trial.trial_id == trial.trial_id
+        assert restored_trial.experiment_id == trial.experiment_id
+        assert restored_trial.tunables == trial.tunables
+        assert restored_trial.status == trial.status
+        assert restored_trial.config() == trial.config()
+        assert restored_trial.trial_runner_id == trial.trial_runner_id
