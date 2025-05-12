@@ -24,6 +24,7 @@ class SqlStorage(Storage):
     """An implementation of the :py:class:`~.Storage` interface using SQLAlchemy
     backend.
     """
+
     # pylint: disable=too-many-instance-attributes
 
     def __init__(
