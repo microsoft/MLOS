@@ -101,8 +101,8 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         self._optimizer = optimizer
         self._storage = storage
         self._root_env_config = root_env_config
-        self._longest_finished_trial_sequence_id = -1
         self._ran_trials: list[Storage.Trial] = []
+        self._longest_finished_trial_sequence_id = -1
         self._registered_trial_ids: set[int] = set()
 
         _LOG.debug("Scheduler instantiated: %s :: %s", self, config)
