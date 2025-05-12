@@ -146,7 +146,8 @@
     "isort.check": true,
     "[python]": {
         "editor.codeActionsOnSave": {
-            "source.organizeImports": "explicit"
+            "source.organizeImports": "explicit",
+            //"source.unusedImports": "explicit"
         },
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true,
@@ -169,5 +170,11 @@
     "python.testing.unittestEnabled": false,
     "debugpy.debugJustMyCode": false,
     "python.analysis.autoImportCompletions": true,
-    "python.analysis.supportRestructuredText": true
+    "python.analysis.supportRestructuredText": true,
+    "makefile.configureOnOpen": false,
+
+    "githubPullRequests.experimental.chat": true,
+    "github.copilot.chat.codesearch.enabled": true,
+    "github.copilot.chat.copilotDebugCommand.enabled": true,
+    "github.copilot.chat.reviewSelection.enabled": true
 }
