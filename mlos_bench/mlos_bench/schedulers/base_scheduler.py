@@ -200,8 +200,9 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         _LOG.debug("Scheduler START :: %s", self)
         assert self.experiment is None
         assert not self._in_context
-        for trial_runner in self._trial_runners.values():
-            trial_runner.__enter__()
+        # NOTE: We delay entering the context of trial_runners until it's time
+        # to run the trial in order to avoid incompatibilities with
+        # multiprocessing.Pool.
         self._optimizer.__enter__()
         # Start new or resume the existing experiment. Verify that the
         # experiment configuration is compatible with the previous runs.
@@ -235,7 +236,8 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         self._experiment.__exit__(ex_type, ex_val, ex_tb)
         self._optimizer.__exit__(ex_type, ex_val, ex_tb)
         for trial_runner in self._trial_runners.values():
-            trial_runner.__exit__(ex_type, ex_val, ex_tb)
+            # TrialRunners should have already exited their context after running the Trial.
+            assert not trial_runner._in_context  # pylint: disable=protected-access
         self._experiment = None
         self._in_context = False
         return False  # Do not suppress exceptions
@@ -286,7 +288,8 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         if self._do_teardown:
             for trial_runner in self._trial_runners.values():
                 assert not trial_runner.is_running
-                trial_runner.teardown()
+                with trial_runner:
+                    trial_runner.teardown()
 
     def get_best_observation(self) -> tuple[dict[str, float] | None, TunableGroups | None]:
         """Get the best observation from the optimizer."""
