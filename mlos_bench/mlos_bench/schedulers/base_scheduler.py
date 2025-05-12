@@ -437,43 +437,43 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
 
     def assign_trial_runners(self, trials: Iterable[Storage.Trial]) -> None:
         """
-<<<<<<< HEAD
-        Assigns :py:class:`~.TrialRunner`s to the given :py:class:`~.Trial`s in batch.
-=======
-        Assigns a :py:class:`~.TrialRunner` to each :py:class:`~.Storage.Trial` in the
-        batch.
->>>>>>> refactor/rename-reorg-scheduler-methods
+        <<<<<<< HEAD
+                Assigns :py:class:`~.TrialRunner`s to the given :py:class:`~.Trial`s in batch.
+        =======
+                Assigns a :py:class:`~.TrialRunner` to each :py:class:`~.Storage.Trial` in the
+                batch.
+        >>>>>>> refactor/rename-reorg-scheduler-methods
 
-        The base class implements a simple round-robin scheduling algorithm for
-        each Trial in sequence.
+                The base class implements a simple round-robin scheduling algorithm for
+                each Trial in sequence.
 
-        Subclasses can override this method to implement a more sophisticated policy.
-        For instance::
+                Subclasses can override this method to implement a more sophisticated policy.
+                For instance::
 
-            def assign_trial_runners(
-                self,
-                trials: Iterable[Storage.Trial],
-            ) -> TrialRunner:
-                trial_runners_map = {}
-                # Implement a more sophisticated policy here.
-                # For example, to assign the Trial to the TrialRunner with the least
-                # number of running Trials.
-                # Or assign the Trial to the TrialRunner that hasn't executed this
-                # TunableValues Config yet.
-                for (trial, trial_runner) in trial_runners_map:
-                    # Call the base class method to assign the TrialRunner in the Trial's metadata.
-                    trial.set_trial_runner(trial_runner)
-                ...
+                    def assign_trial_runners(
+                        self,
+                        trials: Iterable[Storage.Trial],
+                    ) -> TrialRunner:
+                        trial_runners_map = {}
+                        # Implement a more sophisticated policy here.
+                        # For example, to assign the Trial to the TrialRunner with the least
+                        # number of running Trials.
+                        # Or assign the Trial to the TrialRunner that hasn't executed this
+                        # TunableValues Config yet.
+                        for (trial, trial_runner) in trial_runners_map:
+                            # Call the base class method to assign the TrialRunner in the Trial's metadata.
+                            trial.set_trial_runner(trial_runner)
+                        ...
 
-        Notes
-        -----
-        Subclasses are *not* required to assign a TrialRunner to the Trial
-        (e.g., if the Trial should be deferred to a later time).
+                Notes
+                -----
+                Subclasses are *not* required to assign a TrialRunner to the Trial
+                (e.g., if the Trial should be deferred to a later time).
 
-        Parameters
-        ----------
-        trials : Iterable[Storage.Trial]
-            The trial to assign a TrialRunner to.
+                Parameters
+                ----------
+                trials : Iterable[Storage.Trial]
+                    The trial to assign a TrialRunner to.
         """
         for trial in trials:
             if trial.trial_runner_id is not None:
