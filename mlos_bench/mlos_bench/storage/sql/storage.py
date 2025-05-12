@@ -21,10 +21,10 @@ _LOG = logging.getLogger(__name__)
 
 
 class SqlStorage(Storage):
-    # pylint: disable=too-many-instance-attributes
     """An implementation of the :py:class:`~.Storage` interface using SQLAlchemy
     backend.
     """
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(
         self,
