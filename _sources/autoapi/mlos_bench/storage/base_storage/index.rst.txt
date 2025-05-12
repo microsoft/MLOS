@@ -149,18 +149,25 @@ Module Contents
 
 
 
-      .. py:method:: pending_trials(timestamp: datetime.datetime, *, running: bool) -> collections.abc.Iterator[Storage]
+      .. py:method:: pending_trials(timestamp: datetime.datetime, *, running: bool, trial_runner_assigned: bool | None = None) -> collections.abc.Iterator[Storage]
          :abstractmethod:
 
 
-         Return an iterator over the pending trials that are scheduled to run on or
-         before the specified timestamp.
+         Return an iterator over :py:attr:`~.Status.PENDING`
+         :py:class:`~.Storage.Trial` instances that have a scheduled start time to
+         run on or before the specified timestamp.
 
-         :param timestamp: The time in UTC to check for scheduled trials.
+         :param timestamp: The time in UTC to check for scheduled Trials.
          :type timestamp: datetime.datetime
-         :param running: If True, include the trials that are already running.
+         :param running: If True, include the Trials that are also
+                         :py:attr:`~.Status.RUNNING` or :py:attr:`~.Status.READY`.
                          Otherwise, return only the scheduled trials.
          :type running: bool
+         :param trial_runner_assigned: If True, include the Trials that are assigned to a
+                                       :py:class:`~.TrialRunner`. If False, return only the trials
+                                       that are not assigned to any :py:class:`~.TrialRunner`.
+                                       If None, return all trials regardless of their assignment.
+         :type trial_runner_assigned: bool | None
 
          :returns: **trials** -- An iterator over the scheduled (and maybe running) trials.
          :rtype: Iterator[Storage.Trial]

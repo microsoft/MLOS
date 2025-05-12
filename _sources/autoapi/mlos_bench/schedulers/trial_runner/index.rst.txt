@@ -76,7 +76,7 @@ Module Contents
 
 
 
-   .. py:method:: run_trial(trial: mlos_bench.storage.base_storage.Storage.Trial, global_config: dict[str, Any] | None = None) -> None
+   .. py:method:: run_trial(trial: mlos_bench.storage.base_storage.Storage.Trial, global_config: dict[str, Any] | None = None) -> tuple[mlos_bench.environments.status.Status, datetime.datetime, dict[str, mlos_bench.tunables.tunable_types.TunableValue] | None]
 
       Run a single trial on this TrialRunner's Environment and stores the results in
       the backend Trial Storage.

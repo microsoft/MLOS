@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlos_bench.schedulers.sync_scheduler &mdash; MLOS 0.6.3.dev30+ged84cd9729 documentation</title>
+  <title>mlos_bench.schedulers.sync_scheduler &mdash; MLOS 0.6.3.dev31+gca4c78ea68 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/schedulers/sync_scheduler/index.html"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=6206f1c0"></script>
+      <script src="../../../../_static/documentation_options.js?v=ec5fa714"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -76,7 +76,6 @@
 <li class="toctree-l6"><a class="reference internal" href="#module-contents">Module Contents</a><ul>
 <li class="toctree-l7"><a class="reference internal" href="#mlos_bench.schedulers.sync_scheduler.SyncScheduler"><code class="docutils literal notranslate"><span class="pre">SyncScheduler</span></code></a><ul>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.sync_scheduler.SyncScheduler.run_trial"><code class="docutils literal notranslate"><span class="pre">SyncScheduler.run_trial()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.sync_scheduler.SyncScheduler.start"><code class="docutils literal notranslate"><span class="pre">SyncScheduler.start()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -176,7 +175,8 @@ and Optimizer are provided by the Launcher.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mlos_bench.schedulers.sync_scheduler.SyncScheduler.run_trial">
 <span class="sig-name descname"><span class="pre">run_trial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../storage/base_storage/index.html#mlos_bench.storage.base_storage.Storage.Trial" title="mlos_bench.storage.base_storage.Storage.Trial"><span class="pre">mlos_bench.storage.base_storage.Storage.Trial</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/schedulers/sync_scheduler.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.schedulers.sync_scheduler.SyncScheduler.run_trial" title="Link to this definition"></a></dt>
-<dd><p>Set up and run a single trial.</p>
+<dd><p>Set up and run a single <a class="reference internal" href="../../storage/base_storage/index.html#mlos_bench.storage.base_storage.Storage.Trial" title="mlos_bench.storage.base_storage.Storage.Trial"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trial</span></code></a> on its
+<a class="reference internal" href="../trial_runner/index.html#mlos_bench.schedulers.trial_runner.TrialRunner" title="mlos_bench.schedulers.trial_runner.TrialRunner"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrialRunner</span></code></a>.</p>
 <p>Save the results in the storage.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -184,17 +184,6 @@ and Optimizer are provided by the Launcher.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mlos_bench.schedulers.sync_scheduler.SyncScheduler.start">
-<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/schedulers/sync_scheduler.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.schedulers.sync_scheduler.SyncScheduler.start" title="Link to this definition"></a></dt>
-<dd><p>Start the optimization loop.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>

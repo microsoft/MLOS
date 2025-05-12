@@ -67,12 +67,47 @@ Module Contents
 
 
 
+   .. py:method:: add_new_optimizer_suggestions() -> bool
+
+      Optimizer part of the loop.
+
+      Load the results of the executed trials into the
+      :py:class:`~.Optimizer`, suggest new configurations, and add them to the
+      queue.
+
+      :returns: The return value indicates whether the optimization process should
+                continue to get suggestions from the Optimizer or not.
+                See Also: :py:meth:`~.Scheduler.not_done`.
+      :rtype: bool
+
+
+
+   .. py:method:: add_trial_to_queue(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, ts_start: datetime.datetime | None = None) -> None
+
+      Add a configuration to the queue of trials 1 or more times.
+
+      (e.g., according to the :py:attr:`~.Scheduler.trial_config_repeat_count`)
+
+      :param tunables: The tunable configuration to add to the queue.
+      :type tunables: TunableGroups
+      :param ts_start: Optional timestamp to use to start the trial.
+      :type ts_start: datetime.datetime | None
+
+      .. rubric:: Notes
+
+      Alternative scheduling policies may prefer to expand repeats over
+      time as well as space, or adjust the number of repeats (budget) of a given
+      trial based on whether initial results are promising.
+
+
+
    .. py:method:: assign_trial_runners(trials: collections.abc.Iterable[mlos_bench.storage.base_storage.Storage.Trial]) -> None
 
-      Assigns TrialRunners to the given Trial in batch.
+      Assigns a :py:class:`~.TrialRunner` to each :py:class:`~.Storage.Trial` in the
+      batch.
 
-      The base class implements a simple round-robin scheduling algorithm for each
-      Trial in sequence.
+      The base class implements a simple round-robin scheduling algorithm for
+      each Trial in sequence.
 
       Subclasses can override this method to implement a more sophisticated policy.
       For instance::
@@ -92,6 +127,11 @@ Module Contents
                   trial.set_trial_runner(trial_runner)
               ...
 
+      .. rubric:: Notes
+
+      Subclasses are *not* required to assign a TrialRunner to the Trial
+      (e.g., if the Trial should be deferred to a later time).
+
       :param trials: The trial to assign a TrialRunner to.
       :type trials: Iterable[Storage.Trial]
 
@@ -105,7 +145,8 @@ Module Contents
 
    .. py:method:: get_trial_runner(trial: mlos_bench.storage.base_storage.Storage.Trial) -> mlos_bench.schedulers.trial_runner.TrialRunner
 
-      Gets the TrialRunner associated with the given Trial.
+      Gets the :py:class:`~.TrialRunner` associated with the given
+      :py:class:`~.Storage.Trial`.
 
       :param trial: The trial to get the associated TrialRunner for.
       :type trial: Storage.Trial
@@ -124,7 +165,25 @@ Module Contents
 
       Check the stopping conditions.
 
-      By default, stop when the optimizer converges or max limit of trials reached.
+      By default, stop when the :py:class:`.Optimizer` converges or the limit
+      of :py:attr:`~.Scheduler.max_trials` is reached.
+
+
+
+   .. py:method:: run_schedule(running: bool = False) -> None
+
+      Runs the current schedule of trials.
+
+      Check for :py:class:`~.Storage.Trial` instances with `:py:attr:`.Status.PENDING`
+      and an assigned :py:attr:`~.Storage.Trial.trial_runner_id` in the queue and run
+      them with :py:meth:`~.Scheduler.run_trial`.
+
+      Subclasses can override this method to implement a more sophisticated
+      scheduling policy.
+
+      :param running: If True, run the trials that are already in a "running" state (e.g., to resume them).
+                      If False (default), run the trials that are pending.
+      :type running: bool
 
 
 
@@ -138,15 +197,7 @@ Module Contents
 
 
 
-   .. py:method:: schedule_trial(tunables: mlos_bench.tunables.tunable_groups.TunableGroups) -> None
-
-      Add a configuration to the queue of trials.
-
-
-
    .. py:method:: start() -> None
-      :abstractmethod:
-
 
       Start the scheduling loop.
 
@@ -156,7 +207,8 @@ Module Contents
 
       Tear down the TrialRunners/Environment(s).
 
-      Call it after the completion of the `.start()` in the scheduler context.
+      Call it after the completion of the :py:meth:`Scheduler.start` in the
+      Scheduler context.
 
 
 

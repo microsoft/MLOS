@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlos_bench.schedulers.base_scheduler &mdash; MLOS 0.6.3.dev30+ged84cd9729 documentation</title>
+  <title>mlos_bench.schedulers.base_scheduler &mdash; MLOS 0.6.3.dev31+gca4c78ea68 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/schedulers/base_scheduler/index.html"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=6206f1c0"></script>
+      <script src="../../../../_static/documentation_options.js?v=ec5fa714"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -77,13 +77,15 @@
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.__enter__"><code class="docutils literal notranslate"><span class="pre">Scheduler.__enter__()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.__exit__"><code class="docutils literal notranslate"><span class="pre">Scheduler.__exit__()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.__repr__"><code class="docutils literal notranslate"><span class="pre">Scheduler.__repr__()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.add_new_optimizer_suggestions"><code class="docutils literal notranslate"><span class="pre">Scheduler.add_new_optimizer_suggestions()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.add_trial_to_queue"><code class="docutils literal notranslate"><span class="pre">Scheduler.add_trial_to_queue()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.assign_trial_runners"><code class="docutils literal notranslate"><span class="pre">Scheduler.assign_trial_runners()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.get_best_observation"><code class="docutils literal notranslate"><span class="pre">Scheduler.get_best_observation()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.get_trial_runner"><code class="docutils literal notranslate"><span class="pre">Scheduler.get_trial_runner()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.load_tunable_config"><code class="docutils literal notranslate"><span class="pre">Scheduler.load_tunable_config()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.not_done"><code class="docutils literal notranslate"><span class="pre">Scheduler.not_done()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.run_schedule"><code class="docutils literal notranslate"><span class="pre">Scheduler.run_schedule()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.run_trial"><code class="docutils literal notranslate"><span class="pre">Scheduler.run_trial()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.schedule_trial"><code class="docutils literal notranslate"><span class="pre">Scheduler.schedule_trial()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.start"><code class="docutils literal notranslate"><span class="pre">Scheduler.start()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.teardown"><code class="docutils literal notranslate"><span class="pre">Scheduler.teardown()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.environments"><code class="docutils literal notranslate"><span class="pre">Scheduler.environments</span></code></a></li>
@@ -238,11 +240,53 @@ and Optimizer are provided by the Launcher.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mlos_bench.schedulers.base_scheduler.Scheduler.add_new_optimizer_suggestions">
+<span class="sig-name descname"><span class="pre">add_new_optimizer_suggestions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/schedulers/base_scheduler.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.schedulers.base_scheduler.Scheduler.add_new_optimizer_suggestions" title="Link to this definition"></a></dt>
+<dd><p>Optimizer part of the loop.</p>
+<p>Load the results of the executed trials into the
+<a class="reference internal" href="../../optimizers/base_optimizer/index.html#mlos_bench.optimizers.base_optimizer.Optimizer" title="mlos_bench.optimizers.base_optimizer.Optimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Optimizer</span></code></a>, suggest new configurations, and add them to the
+queue.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The return value indicates whether the optimization process should
+continue to get suggestions from the Optimizer or not.
+See Also: <a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.not_done" title="mlos_bench.schedulers.base_scheduler.Scheduler.not_done"><code class="xref py py-meth docutils literal notranslate"><span class="pre">not_done()</span></code></a>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlos_bench.schedulers.base_scheduler.Scheduler.add_trial_to_queue">
+<span class="sig-name descname"><span class="pre">add_trial_to_queue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tunables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><span class="pre">mlos_bench.tunables.tunable_groups.TunableGroups</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.13)"><span class="pre">datetime.datetime</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/schedulers/base_scheduler.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.schedulers.base_scheduler.Scheduler.add_trial_to_queue" title="Link to this definition"></a></dt>
+<dd><p>Add a configuration to the queue of trials 1 or more times.</p>
+<p>(e.g., according to the <a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.trial_config_repeat_count" title="mlos_bench.schedulers.base_scheduler.Scheduler.trial_config_repeat_count"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trial_config_repeat_count</span></code></a>)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tunables</strong> (<a class="reference internal" href="../../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><em>TunableGroups</em></a>) – The tunable configuration to add to the queue.</p></li>
+<li><p><strong>ts_start</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.13)"><em>datetime.datetime</em></a><em> | </em><em>None</em>) – Optional timestamp to use to start the trial.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Alternative scheduling policies may prefer to expand repeats over
+time as well as space, or adjust the number of repeats (budget) of a given
+trial based on whether initial results are promising.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mlos_bench.schedulers.base_scheduler.Scheduler.assign_trial_runners">
 <span class="sig-name descname"><span class="pre">assign_trial_runners</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trials</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(in Python v3.13)"><span class="pre">collections.abc.Iterable</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../storage/base_storage/index.html#mlos_bench.storage.base_storage.Storage.Trial" title="mlos_bench.storage.base_storage.Storage.Trial"><span class="pre">mlos_bench.storage.base_storage.Storage.Trial</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/schedulers/base_scheduler.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.schedulers.base_scheduler.Scheduler.assign_trial_runners" title="Link to this definition"></a></dt>
-<dd><p>Assigns TrialRunners to the given Trial in batch.</p>
-<p>The base class implements a simple round-robin scheduling algorithm for each
-Trial in sequence.</p>
+<dd><p>Assigns a <a class="reference internal" href="../trial_runner/index.html#mlos_bench.schedulers.trial_runner.TrialRunner" title="mlos_bench.schedulers.trial_runner.TrialRunner"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrialRunner</span></code></a> to each <a class="reference internal" href="../../storage/base_storage/index.html#mlos_bench.storage.base_storage.Storage.Trial" title="mlos_bench.storage.base_storage.Storage.Trial"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trial</span></code></a> in the
+batch.</p>
+<p>The base class implements a simple round-robin scheduling algorithm for
+each Trial in sequence.</p>
 <p>Subclasses can override this method to implement a more sophisticated policy.
 For instance:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">assign_trial_runners</span><span class="p">(</span>
@@ -261,6 +305,9 @@ For instance:</p>
     <span class="o">...</span>
 </pre></div>
 </div>
+<p class="rubric">Notes</p>
+<p>Subclasses are <em>not</em> required to assign a TrialRunner to the Trial
+(e.g., if the Trial should be deferred to a later time).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>trials</strong> (<em>Iterable</em><em>[</em><a class="reference internal" href="../../storage/base_storage/index.html#mlos_bench.storage.base_storage.Storage.Trial" title="mlos_bench.storage.base_storage.Storage.Trial"><em>Storage.Trial</em></a><em>]</em>) – The trial to assign a TrialRunner to.</p>
@@ -285,7 +332,8 @@ For instance:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mlos_bench.schedulers.base_scheduler.Scheduler.get_trial_runner">
 <span class="sig-name descname"><span class="pre">get_trial_runner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../storage/base_storage/index.html#mlos_bench.storage.base_storage.Storage.Trial" title="mlos_bench.storage.base_storage.Storage.Trial"><span class="pre">mlos_bench.storage.base_storage.Storage.Trial</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../trial_runner/index.html#mlos_bench.schedulers.trial_runner.TrialRunner" title="mlos_bench.schedulers.trial_runner.TrialRunner"><span class="pre">mlos_bench.schedulers.trial_runner.TrialRunner</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/schedulers/base_scheduler.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.schedulers.base_scheduler.Scheduler.get_trial_runner" title="Link to this definition"></a></dt>
-<dd><p>Gets the TrialRunner associated with the given Trial.</p>
+<dd><p>Gets the <a class="reference internal" href="../trial_runner/index.html#mlos_bench.schedulers.trial_runner.TrialRunner" title="mlos_bench.schedulers.trial_runner.TrialRunner"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrialRunner</span></code></a> associated with the given
+<a class="reference internal" href="../../storage/base_storage/index.html#mlos_bench.storage.base_storage.Storage.Trial" title="mlos_bench.storage.base_storage.Storage.Trial"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trial</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>trial</strong> (<a class="reference internal" href="../../storage/base_storage/index.html#mlos_bench.storage.base_storage.Storage.Trial" title="mlos_bench.storage.base_storage.Storage.Trial"><em>Storage.Trial</em></a>) – The trial to get the associated TrialRunner for.</p>
@@ -314,10 +362,31 @@ For instance:</p>
 <dt class="sig sig-object py" id="mlos_bench.schedulers.base_scheduler.Scheduler.not_done">
 <span class="sig-name descname"><span class="pre">not_done</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/schedulers/base_scheduler.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.schedulers.base_scheduler.Scheduler.not_done" title="Link to this definition"></a></dt>
 <dd><p>Check the stopping conditions.</p>
-<p>By default, stop when the optimizer converges or max limit of trials reached.</p>
+<p>By default, stop when the <a class="reference internal" href="../../optimizers/base_optimizer/index.html#mlos_bench.optimizers.base_optimizer.Optimizer" title="mlos_bench.optimizers.base_optimizer.Optimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Optimizer</span></code></a> converges or the limit
+of <a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.max_trials" title="mlos_bench.schedulers.base_scheduler.Scheduler.max_trials"><code class="xref py py-attr docutils literal notranslate"><span class="pre">max_trials</span></code></a> is reached.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlos_bench.schedulers.base_scheduler.Scheduler.run_schedule">
+<span class="sig-name descname"><span class="pre">run_schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">running</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/schedulers/base_scheduler.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.schedulers.base_scheduler.Scheduler.run_schedule" title="Link to this definition"></a></dt>
+<dd><p>Runs the current schedule of trials.</p>
+<p>Check for <a class="reference internal" href="../../storage/base_storage/index.html#mlos_bench.storage.base_storage.Storage.Trial" title="mlos_bench.storage.base_storage.Storage.Trial"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trial</span></code></a> instances with <cite>:py:attr:</cite>.Status.PENDING`
+and an assigned <a class="reference internal" href="../../storage/base_storage/index.html#mlos_bench.storage.base_storage.Storage.Trial.trial_runner_id" title="mlos_bench.storage.base_storage.Storage.Trial.trial_runner_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trial_runner_id</span></code></a> in the queue and run
+them with <a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.run_trial" title="mlos_bench.schedulers.base_scheduler.Scheduler.run_trial"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run_trial()</span></code></a>.</p>
+<p>Subclasses can override this method to implement a more sophisticated
+scheduling policy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>running</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, run the trials that are already in a “running” state (e.g., to resume them).
+If False (default), run the trials that are pending.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -338,22 +407,8 @@ For instance:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mlos_bench.schedulers.base_scheduler.Scheduler.schedule_trial">
-<span class="sig-name descname"><span class="pre">schedule_trial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tunables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><span class="pre">mlos_bench.tunables.tunable_groups.TunableGroups</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/schedulers/base_scheduler.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.schedulers.base_scheduler.Scheduler.schedule_trial" title="Link to this definition"></a></dt>
-<dd><p>Add a configuration to the queue of trials.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>tunables</strong> (<a class="reference internal" href="../../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><em>mlos_bench.tunables.tunable_groups.TunableGroups</em></a>)</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mlos_bench.schedulers.base_scheduler.Scheduler.start">
-<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/schedulers/base_scheduler.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.schedulers.base_scheduler.Scheduler.start" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/schedulers/base_scheduler.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.schedulers.base_scheduler.Scheduler.start" title="Link to this definition"></a></dt>
 <dd><p>Start the scheduling loop.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -366,7 +421,8 @@ For instance:</p>
 <dt class="sig sig-object py" id="mlos_bench.schedulers.base_scheduler.Scheduler.teardown">
 <span class="sig-name descname"><span class="pre">teardown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/schedulers/base_scheduler.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.schedulers.base_scheduler.Scheduler.teardown" title="Link to this definition"></a></dt>
 <dd><p>Tear down the TrialRunners/Environment(s).</p>
-<p>Call it after the completion of the <cite>.start()</cite> in the scheduler context.</p>
+<p>Call it after the completion of the <a class="reference internal" href="#mlos_bench.schedulers.base_scheduler.Scheduler.start" title="mlos_bench.schedulers.base_scheduler.Scheduler.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Scheduler.start()</span></code></a> in the
+Scheduler context.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>

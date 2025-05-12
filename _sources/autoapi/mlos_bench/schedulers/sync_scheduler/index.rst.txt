@@ -48,15 +48,10 @@ Module Contents
 
    .. py:method:: run_trial(trial: mlos_bench.storage.base_storage.Storage.Trial) -> None
 
-      Set up and run a single trial.
+      Set up and run a single :py:class:`~.Storage.Trial` on its
+      :py:class:`~.TrialRunner`.
 
       Save the results in the storage.
-
-
-
-   .. py:method:: start() -> None
-
-      Start the optimization loop.
 
 
 
