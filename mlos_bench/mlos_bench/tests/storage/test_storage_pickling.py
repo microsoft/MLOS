@@ -20,6 +20,8 @@ from mlos_bench.storage.storage_factory import from_config
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
+# TODO: When we introduce ParallelTrialScheduler warn at config startup time
+# that it is incompatible with sqlite storage on Windows.
 @pytest.mark.skipif(
     sys.platform == "win32",
     reason="Windows doesn't support multiple processes accessing the same file.",
