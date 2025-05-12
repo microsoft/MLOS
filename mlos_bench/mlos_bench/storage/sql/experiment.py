@@ -41,6 +41,7 @@ class Experiment(Storage.Experiment):
         root_env_config: str,
         description: str,
         opt_targets: dict[str, Literal["min", "max"]],
+        ts_start: datetime | None = None,
     ):
         super().__init__(
             tunables=tunables,
@@ -49,12 +50,12 @@ class Experiment(Storage.Experiment):
             root_env_config=root_env_config,
             description=description,
             opt_targets=opt_targets,
+            ts_start=ts_start,
         )
         self._engine = engine
         self._schema = schema
 
-    def _setup(self) -> None:
-        super()._setup()
+    def _ensure_persisted(self) -> None:
         with self._engine.begin() as conn:
             # Get git info and the last trial ID for the experiment.
             # pylint: disable=not-callable
@@ -90,6 +91,8 @@ class Experiment(Storage.Experiment):
                         git_repo=self._git_repo,
                         git_commit=self._git_commit,
                         root_env_config=self._root_env_config,
+                        ts_start=self._ts_start,
+                        status=self._status.name,
                     )
                 )
                 conn.execute(
@@ -124,6 +127,39 @@ class Experiment(Storage.Experiment):
                         exp_info.git_repo,
                         exp_info.git_commit,
                     )
+
+    def save(self) -> None:
+        self._ensure_persisted()
+
+    def _setup(self) -> None:
+        super()._setup()
+        self._ensure_persisted()
+        with self._engine.begin() as conn:
+            conn.execute(
+                self._schema.experiment.update()
+                .where(self._schema.experiment.c.exp_id == self._experiment_id)
+                .values(
+                    {
+                        self._schema.experiment.c.status: self._status.name,
+                        self._schema.experiment.c.driver_name: self._driver_name,
+                        self._schema.experiment.c.driver_pid: self._driver_pid,
+                    }
+                )
+            )
+
+    def _teardown(self, is_ok: bool) -> None:
+        super()._teardown(is_ok)
+        with self._engine.begin() as conn:
+            conn.execute(
+                self._schema.experiment.update()
+                .where(self._schema.experiment.c.exp_id == self._experiment_id)
+                .values(
+                    {
+                        self._schema.experiment.c.status: self._status.name,
+                        self._schema.experiment.c.ts_end: self._ts_end,
+                    }
+                )
+            )
 
     def merge(self, experiment_ids: list[str]) -> None:
         _LOG.info("Merge: %s <- %s", self._experiment_id, experiment_ids)
