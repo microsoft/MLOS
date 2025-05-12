@@ -242,7 +242,6 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         self._in_context = False
         return False  # Do not suppress exceptions
 
-    @abstractmethod
     def start(self) -> None:
         """Start the scheduling loop."""
         assert self.experiment is not None
@@ -257,13 +256,33 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
 
         if self._config_id > 0:
             tunables = self.load_tunable_config(self._config_id)
-            self.schedule_trial(tunables)
+            # If a config_id is provided, assume it is expected to be run immediately.
+            self.add_trial_to_queue(tunables, ts_start=datetime.now(UTC))
+
+        is_warm_up: bool = self.optimizer.supports_preload
+        if not is_warm_up:
+            _LOG.warning("Skip pending trials and warm-up: %s", self.optimizer)
+
+        not_done: bool = True
+        while not_done:
+            _LOG.info("Optimization loop: Last trial ID: %d", self._last_trial_id)
+            self.run_schedule(is_warm_up)
+            not_done = self.add_new_optimizer_suggestions()
+            self.assign_trial_runners(
+                self.experiment.pending_trials(
+                    datetime.now(UTC),
+                    running=False,
+                    trial_runner_assigned=False,
+                )
+            )
+            is_warm_up = False
 
     def teardown(self) -> None:
         """
         Tear down the TrialRunners/Environment(s).
 
-        Call it after the completion of the `.start()` in the scheduler context.
+        Call it after the completion of the :py:meth:`Scheduler.start` in the
+        Scheduler context.
         """
         assert self.experiment is not None
         if self._do_teardown:
@@ -290,13 +309,20 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
             _LOG.debug("Config %d ::\n%s", config_id, json.dumps(tunable_values, indent=2))
         return tunables.copy()
 
-    def _schedule_new_optimizer_suggestions(self) -> bool:
+    def add_new_optimizer_suggestions(self) -> bool:
         """
         Optimizer part of the loop.
 
-        Load the results of the executed trials into the optimizer, suggest new
-        configurations, and add them to the queue. Return True if optimization is not
-        over, False otherwise.
+        Load the results of the executed trials into the
+        :py:class:`~.Optimizer`, suggest new configurations, and add them to the
+        queue.
+
+        Returns
+        -------
+        bool
+            The return value indicates whether the optimization process should
+            continue to get suggestions from the Optimizer or not.
+            See Also: :py:meth:`~.Scheduler.not_done`.
         """
         assert self.experiment is not None
         (trial_ids, configs, scores, status) = self.experiment.load(self._last_trial_id)
@@ -304,39 +330,66 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         self.optimizer.bulk_register(configs, scores, status)
         self._last_trial_id = max(trial_ids, default=self._last_trial_id)
 
+        # Check if the optimizer has converged or not.
         not_done = self.not_done()
         if not_done:
             tunables = self.optimizer.suggest()
-            self.schedule_trial(tunables)
-
+            self.add_trial_to_queue(tunables)
         return not_done
 
-    def schedule_trial(self, tunables: TunableGroups) -> None:
-        """Add a configuration to the queue of trials."""
-        # TODO: Alternative scheduling policies may prefer to expand repeats over
-        # time as well as space, or adjust the number of repeats (budget) of a given
-        # trial based on whether initial results are promising.
+    def add_trial_to_queue(
+        self,
+        tunables: TunableGroups,
+        ts_start: datetime | None = None,
+    ) -> None:
+        """
+        Add a configuration to the queue of trials 1 or more times.
+
+        (e.g., according to the :py:attr:`~.Scheduler.trial_config_repeat_count`)
+
+        Parameters
+        ----------
+        tunables : TunableGroups
+            The tunable configuration to add to the queue.
+
+        ts_start : datetime.datetime | None
+            Optional timestamp to use to start the trial.
+
+        Notes
+        -----
+        Alternative scheduling policies may prefer to expand repeats over
+        time as well as space, or adjust the number of repeats (budget) of a given
+        trial based on whether initial results are promising.
+        """
         for repeat_i in range(1, self._trial_config_repeat_count + 1):
             self._add_trial_to_queue(
                 tunables,
-                config={
-                    # Add some additional metadata to track for the trial such as the
-                    # optimizer config used.
-                    # Note: these values are unfortunately mutable at the moment.
-                    # Consider them as hints of what the config was the trial *started*.
-                    # It is possible that the experiment configs were changed
-                    # between resuming the experiment (since that is not currently
-                    # prevented).
-                    "optimizer": self.optimizer.name,
-                    "repeat_i": repeat_i,
-                    "is_defaults": tunables.is_defaults(),
-                    **{
-                        f"opt_{key}_{i}": val
-                        for (i, opt_target) in enumerate(self.optimizer.targets.items())
-                        for (key, val) in zip(["target", "direction"], opt_target)
-                    },
-                },
+                ts_start=ts_start,
+                config=self._augment_trial_config_metadata(tunables, repeat_i),
             )
+
+    def _augment_trial_config_metadata(
+        self,
+        tunables: TunableGroups,
+        repeat_i: int,
+    ) -> dict[str, Any]:
+        return {
+            # Add some additional metadata to track for the trial such as the
+            # optimizer config used.
+            # Note: these values are unfortunately mutable at the moment.
+            # Consider them as hints of what the config was the trial *started*.
+            # It is possible that the experiment configs were changed
+            # between resuming the experiment (since that is not currently
+            # prevented).
+            "optimizer": self.optimizer.name,
+            "repeat_i": repeat_i,
+            "is_defaults": tunables.is_defaults(),
+            **{
+                f"opt_{key}_{i}": val
+                for (i, opt_target) in enumerate(self.optimizer.targets.items())
+                for (key, val) in zip(["target", "direction"], opt_target)
+            },
+        }
 
     def _add_trial_to_queue(
         self,
@@ -355,10 +408,11 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
 
     def assign_trial_runners(self, trials: Iterable[Storage.Trial]) -> None:
         """
-        Assigns TrialRunners to the given Trial in batch.
+        Assigns a :py:class:`~.TrialRunner` to each :py:class:`~.Storage.Trial` in the
+        batch.
 
-        The base class implements a simple round-robin scheduling algorithm for each
-        Trial in sequence.
+        The base class implements a simple round-robin scheduling algorithm for
+        each Trial in sequence.
 
         Subclasses can override this method to implement a more sophisticated policy.
         For instance::
@@ -377,6 +431,11 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
                     # Call the base class method to assign the TrialRunner in the Trial's metadata.
                     trial.set_trial_runner(trial_runner)
                 ...
+
+        Notes
+        -----
+        Subclasses are *not* required to assign a TrialRunner to the Trial
+        (e.g., if the Trial should be deferred to a later time).
 
         Parameters
         ----------
@@ -414,7 +473,8 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
 
     def get_trial_runner(self, trial: Storage.Trial) -> TrialRunner:
         """
-        Gets the TrialRunner associated with the given Trial.
+        Gets the :py:class:`~.TrialRunner` associated with the given
+        :py:class:`~.Storage.Trial`.
 
         Parameters
         ----------
@@ -437,25 +497,45 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         assert trial_runner.trial_runner_id == trial.trial_runner_id
         return trial_runner
 
-    def _run_schedule(self, running: bool = False) -> None:
+    def run_schedule(self, running: bool = False) -> None:
         """
-        Scheduler part of the loop.
+        Runs the current schedule of trials.
 
-        Check for pending trials in the queue and run them.
+        Check for :py:class:`~.Storage.Trial` instances with `:py:attr:`.Status.PENDING`
+        and an assigned :py:attr:`~.Storage.Trial.trial_runner_id` in the queue and run
+        them with :py:meth:`~.Scheduler.run_trial`.
+
+        Subclasses can override this method to implement a more sophisticated
+        scheduling policy.
+
+        Parameters
+        ----------
+        running : bool
+            If True, run the trials that are already in a "running" state (e.g., to resume them).
+            If False (default), run the trials that are pending.
         """
         assert self.experiment is not None
-        # Make sure that any pending trials have a TrialRunner assigned.
-        pending_trials = list(self.experiment.pending_trials(datetime.now(UTC), running=running))
-        self.assign_trial_runners(pending_trials)
+        pending_trials = list(
+            self.experiment.pending_trials(
+                datetime.now(UTC),
+                running=running,
+                trial_runner_assigned=True,
+            )
+        )
         for trial in pending_trials:
+            assert (
+                trial.trial_runner_id is not None
+            ), f"Trial {trial} has no TrialRunner assigned yet."
             self.run_trial(trial)
 
     def not_done(self) -> bool:
         """
         Check the stopping conditions.
 
-        By default, stop when the optimizer converges or max limit of trials reached.
+        By default, stop when the :py:class:`.Optimizer` converges or the limit
+        of :py:attr:`~.Scheduler.max_trials` is reached.
         """
+        # TODO: Add more stopping conditions: https://github.com/microsoft/MLOS/issues/427
         return self.optimizer.not_converged() and (
             self._trial_count < self._max_trials or self._max_trials <= 0
         )
