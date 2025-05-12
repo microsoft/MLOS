@@ -277,6 +277,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
                 self.experiment.pending_trials(
                     datetime.now(UTC),
                     running=False,
+                    trial_runner_assigned=False,
                 )
             )
             is_warm_up = False
@@ -380,7 +381,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         tunables : TunableGroups
             The tunable configuration to add to the queue.
 
-        ts_start : datetime | None
+        ts_start : datetime.datetime | None
             Optional timestamp to use to start the trial.
 
         Notes
@@ -436,7 +437,12 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
 
     def assign_trial_runners(self, trials: Iterable[Storage.Trial]) -> None:
         """
+<<<<<<< HEAD
         Assigns :py:class:`~.TrialRunner`s to the given :py:class:`~.Trial`s in batch.
+=======
+        Assigns a :py:class:`~.TrialRunner` to each :py:class:`~.Storage.Trial` in the
+        batch.
+>>>>>>> refactor/rename-reorg-scheduler-methods
 
         The base class implements a simple round-robin scheduling algorithm for
         each Trial in sequence.
@@ -528,16 +534,31 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         """
         Runs the current schedule of trials.
 
-        Check for :py:class:`.Trial`s with `:py:attr:`.Status.PENDING` and an
-        assigned :py:attr:`~.Trial.trial_runner_id` in the queue and run them
-        with :py:meth:`~.Scheduler.run_trial`.
+        Check for :py:class:`~.Storage.Trial` instances with `:py:attr:`.Status.PENDING`
+        and an assigned :py:attr:`~.Storage.Trial.trial_runner_id` in the queue and run
+        them with :py:meth:`~.Scheduler.run_trial`.
+
+        Subclasses can override this method to implement a more sophisticated
+        scheduling policy.
+
+        Parameters
+        ----------
+        running : bool
+            If True, run the trials that are already in a "running" state (e.g., to resume them).
+            If False (default), run the trials that are pending.
         """
         assert self.experiment is not None
-        pending_trials = list(self.experiment.pending_trials(datetime.now(UTC), running=running))
+        pending_trials = list(
+            self.experiment.pending_trials(
+                datetime.now(UTC),
+                running=running,
+                trial_runner_assigned=True,
+            )
+        )
         for trial in pending_trials:
-            if trial.trial_runner_id is None:
-                logging.warning("Trial %s has no TrialRunner assigned yet.")
-                continue
+            assert (
+                trial.trial_runner_id is not None
+            ), f"Trial {trial} has no TrialRunner assigned yet."
             self.run_trial(trial)
 
     def not_done(self) -> bool:

@@ -17,7 +17,8 @@ class SyncScheduler(Scheduler):
 
     def run_trial(self, trial: Storage.Trial) -> None:
         """
-        Set up and run a single trial.
+        Set up and run a single :py:class:`~.Storage.Trial` on its
+        :py:class:`~.TrialRunner`.
 
         Save the results in the storage.
         """
