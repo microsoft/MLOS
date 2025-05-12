@@ -306,7 +306,7 @@ class Storage(metaclass=ABCMeta):
             that were scheduled *after* the given trial ID. Otherwise, return data from ALL
             merged-in experiments and attempt to impute the missing tunable values.
 
-            Additionally, if `omit_registered_trial_ids` is provided, omit the
+            Additionally, if ``omit_registered_trial_ids`` is provided, omit the
             trials matching those ids.
 
             The parameters together allow us to efficiently load data from
