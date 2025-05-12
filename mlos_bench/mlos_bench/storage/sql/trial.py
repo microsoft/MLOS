@@ -52,8 +52,8 @@ class Trial(Storage.Trial):
             trial_runner_id=trial_runner_id,
             opt_targets=opt_targets,
             status=status,
-            config=config,
             restoring=restoring,
+            config=config,
         )
         self._engine = engine
         self._schema = schema
