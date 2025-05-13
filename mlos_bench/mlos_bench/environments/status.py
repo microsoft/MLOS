@@ -74,6 +74,12 @@ class Status(enum.Enum):
         """
         return self == Status.READY
 
+    def is_running(self) -> bool:
+        """Check if the status of the benchmark/environment Trial or Experiment is
+        RUNNING.
+        """
+        return self == Status.RUNNING
+
     def is_succeeded(self) -> bool:
         """Check if the status of the benchmark/environment Trial or Experiment is
         SUCCEEDED.
