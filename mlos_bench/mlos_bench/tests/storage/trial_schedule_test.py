@@ -25,14 +25,18 @@ def _trial_ids(trials: Iterator[Storage.Trial]) -> set[int]:
     return {t.trial_id for t in trials}
 
 
-def test_schedule_trial(
+def test_storage_schedule(
     storage: Storage,
     exp_storage: Storage.Experiment,
     tunable_groups: TunableGroups,
 ) -> None:
     # pylint: disable=too-many-locals,too-many-statements
-    """Schedule several trials for future execution and retrieve them later at certain
-    timestamps.
+    """Test some storage functions that schedule several trials for future
+    execution and retrieve them later at certain timestamps.
+
+    Notes
+    -----
+    This doesn't actually test the Scheduler.
     """
     timestamp = datetime.now(UTC)
     timedelta_1min = timedelta(minutes=1)
