@@ -156,6 +156,8 @@ class Experiment(Storage.Experiment):
     # TODO: Add a test for this method.
     def get_longest_prefix_finished_trial_id(self) -> int:
         with self._engine.connect() as conn:
+            # TODO: Do this in a single query?
+
             # Get the first (minimum) trial ID with an unfinished status.
             first_unfinished_trial_id_stmt = (
                 self._schema.trial.select()
