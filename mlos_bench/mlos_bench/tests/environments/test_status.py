@@ -1,3 +1,7 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 """
 Unit tests for the :py:class:`mlos_bench.environments.status.Status` class.
 
@@ -11,6 +15,7 @@ from typing import Any
 import pytest
 
 from mlos_bench.environments.status import Status
+
 
 @pytest.mark.parametrize(
     ["input_str", "expected_status"],
@@ -32,7 +37,7 @@ from mlos_bench.environments.status import Status
         ("TIMED_OUT", Status.TIMED_OUT),
         ("7", Status.TIMED_OUT),
         (" TIMED_OUT ", Status.TIMED_OUT),
-    ]
+    ],
 )
 def test_status_from_str_valid(input_str: str, expected_status: Status) -> None:
     """
@@ -71,12 +76,10 @@ def test_status_from_str_valid(input_str: str, expected_status: Status) -> None:
         123,
         [],
         {},
-    ]
+    ],
 )
 def test_status_from_str_invalid(invalid_input: Any) -> None:
-    """
-    Test :py:meth:`Status.from_str` raises ValueError for invalid input.
-    """
+    """Test :py:meth:`Status.from_str` raises ValueError for invalid input."""
     assert (
         Status.from_str(invalid_input) == Status.UNKNOWN
     ), f"Expected Status.UNKNOWN for invalid input: {invalid_input}"
