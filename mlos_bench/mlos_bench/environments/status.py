@@ -50,16 +50,17 @@ class Status(enum.Enum):
             Status.SUCCEEDED,
         }
 
+    # Class based accessor method to avoid circular import
+    @staticmethod
+    def completed_statuses() -> set["Status"]:
+        """Get the set of :py:data:`.COMPLETED_STATUSES`."""
+        return COMPLETED_STATUSES
+
     def is_completed(self) -> bool:
         """Check if the status of the benchmark/environment Trial or Experiment is one
-        of {SUCCEEDED, CANCELED, FAILED, TIMED_OUT}.
+        of :py:data:`.COMPLETED_STATUSES`.
         """
-        return self in {
-            Status.SUCCEEDED,
-            Status.CANCELED,
-            Status.FAILED,
-            Status.TIMED_OUT,
-        }
+        return self in COMPLETED_STATUSES
 
     def is_pending(self) -> bool:
         """Check if the status of the benchmark/environment Trial or Experiment is
@@ -96,3 +97,12 @@ class Status(enum.Enum):
         TIMED_OUT.
         """
         return self == Status.TIMED_OUT
+
+
+COMPLETED_STATUSES = {
+    Status.SUCCEEDED,
+    Status.CANCELED,
+    Status.FAILED,
+    Status.TIMED_OUT,
+}
+"""The set of completed statuses."""
