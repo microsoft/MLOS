@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for mlos_bench/mlos_bench/services/remote/azure/azure_vm_services.py: 79%</title>
+    <title>Coverage for mlos_bench/mlos_bench/services/remote/azure/azure_vm_services.py: 80%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
     <link rel="stylesheet" href="style_cb_8e611ae1.css" type="text/css">
     <script src="coverage_html_cb_6fb7b396.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>mlos_bench/mlos_bench/services/remote/azure/azure_vm_services.py</b>:
-            <span class="pc_cov">79%</span>
+            <span class="pc_cov">80%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">137 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">108<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">29<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">109<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">28<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_3f378eb4eadac84f___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.8.0">coverage.py v7.8.0</a>,
-            created at 2025-05-12 22:36 +0000
+            created at 2025-05-13 00:49 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -626,7 +626,7 @@
     <p class="pln"><span class="n"><a id="t544" href="#t544">544</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t545" href="#t545">545</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t546" href="#t546">546</a></span><span class="t">        <span class="key">if</span> <span class="nam">_LOG</span><span class="op">.</span><span class="nam">isEnabledFor</span><span class="op">(</span><span class="nam">logging</span><span class="op">.</span><span class="nam">DEBUG</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t547" href="#t547">547</a></span><span class="t">            <span class="nam">_LOG</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span><span class="str">"Request: PUT %s\n%s"</span><span class="op">,</span> <span class="nam">url</span><span class="op">,</span> <span class="nam">json</span><span class="op">.</span><span class="nam">dumps</span><span class="op">(</span><span class="nam">json_req</span><span class="op">,</span> <span class="nam">indent</span><span class="op">=</span><span class="num">2</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t547" href="#t547">547</a></span><span class="t">            <span class="nam">_LOG</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span><span class="str">"Request: PUT %s\n%s"</span><span class="op">,</span> <span class="nam">url</span><span class="op">,</span> <span class="nam">json</span><span class="op">.</span><span class="nam">dumps</span><span class="op">(</span><span class="nam">json_req</span><span class="op">,</span> <span class="nam">indent</span><span class="op">=</span><span class="num">2</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t548" href="#t548">548</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t549" href="#t549">549</a></span><span class="t">        <span class="nam">response</span> <span class="op">=</span> <span class="nam">requests</span><span class="op">.</span><span class="nam">put</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t550" href="#t550">550</a></span><span class="t">            <span class="nam">url</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -636,13 +636,13 @@
     <p class="pln"><span class="n"><a id="t554" href="#t554">554</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t555" href="#t555">555</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t556" href="#t556">556</a></span><span class="t">        <span class="key">if</span> <span class="nam">_LOG</span><span class="op">.</span><span class="nam">isEnabledFor</span><span class="op">(</span><span class="nam">logging</span><span class="op">.</span><span class="nam">DEBUG</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t557" href="#t557">557</a></span><span class="t">            <span class="nam">_LOG</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t557" href="#t557">557</a></span><span class="t">            <span class="nam">_LOG</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t558" href="#t558">558</a></span><span class="t">                <span class="str">"Response: %s\n%s"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t559" href="#t559">559</a></span><span class="t">                <span class="nam">response</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t560" href="#t560">560</a></span><span class="t">                <span class="nam">json</span><span class="op">.</span><span class="nam">dumps</span><span class="op">(</span><span class="nam">response</span><span class="op">.</span><span class="nam">json</span><span class="op">(</span><span class="op">)</span><span class="op">,</span> <span class="nam">indent</span><span class="op">=</span><span class="num">2</span><span class="op">)</span> <span class="key">if</span> <span class="nam">response</span><span class="op">.</span><span class="nam">content</span> <span class="key">else</span> <span class="str">""</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t561" href="#t561">561</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t562" href="#t562">562</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t563" href="#t563">563</a></span><span class="t">            <span class="nam">_LOG</span><span class="op">.</span><span class="nam">info</span><span class="op">(</span><span class="str">"Response: %s"</span><span class="op">,</span> <span class="nam">response</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t563" href="#t563">563</a></span><span class="t">            <span class="nam">_LOG</span><span class="op">.</span><span class="nam">info</span><span class="op">(</span><span class="str">"Response: %s"</span><span class="op">,</span> <span class="nam">response</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t564" href="#t564">564</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t565" href="#t565">565</a></span><span class="t">        <span class="key">if</span> <span class="nam">response</span><span class="op">.</span><span class="nam">status_code</span> <span class="key">in</span> <span class="op">{</span><span class="num">200</span><span class="op">,</span> <span class="num">201</span><span class="op">}</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t566" href="#t566">566</a></span><span class="t">            <span class="nam">results_url</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_URL_REXEC_RESULT</span><span class="op">.</span><span class="nam">format</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
@@ -767,7 +767,7 @@
             <a class="nav" href="z_3f378eb4eadac84f___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.8.0">coverage.py v7.8.0</a>,
-            created at 2025-05-12 22:36 +0000
+            created at 2025-05-13 00:49 +0000
         </p>
     </div>
 </footer>
