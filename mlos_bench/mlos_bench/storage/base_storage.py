@@ -22,6 +22,8 @@ mlos_bench.storage.base_trial_data.TrialData :
     Base interface for accessing the stored benchmark trial data.
 """
 
+from __future__ import annotations
+
 import logging
 from abc import ABCMeta, abstractmethod
 from collections.abc import Iterable, Iterator, Mapping
@@ -95,6 +97,42 @@ class Storage(metaclass=ABCMeta):
         """
 
     @abstractmethod
+    def get_experiment_by_id(
+        self,
+        experiment_id: str,
+        tunables: TunableGroups,
+        opt_targets: dict[str, Literal["min", "max"]],
+    ) -> Storage.Experiment | None:
+        """
+        Gets an Experiment by its ID.
+
+        Parameters
+        ----------
+        experiment_id : str
+            ID of the Experiment to retrieve.
+        tunables : TunableGroups
+            The tunables for the Experiment.
+        opt_targets : dict[str, Literal["min", "max"]]
+            The optimization targets for the Experiment's
+            :py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer`.
+
+        Returns
+        -------
+        experiment : Storage.Experiment | None
+            The Experiment object, or None if it doesn't exist.
+
+        Notes
+        -----
+        Tunables are not stored in the database for the Experiment, only for the
+        Trials, so currently they can change if the user (incorrectly) adjusts
+        the configs on disk between resume runs.
+        Since this method is generally meant to load th Experiment from the
+        database for a child process to execute a Trial in the background we are
+        generally safe to simply pass these values from the parent process
+        rather than look them up in the database.
+        """
+
+    @abstractmethod
     def experiment(  # pylint: disable=too-many-arguments
         self,
         *,
@@ -104,10 +142,12 @@ class Storage(metaclass=ABCMeta):
         description: str,
         tunables: TunableGroups,
         opt_targets: dict[str, Literal["min", "max"]],
-    ) -> "Storage.Experiment":
+    ) -> Storage.Experiment:
         """
-        Create a new experiment in the storage.
+        Create or reload an experiment in the Storage.
 
+        Notes
+        -----
         We need the `opt_target` parameter here to know what metric to retrieve
         when we load the data from previous trials. Later we will replace it with
         full metadata about the optimization direction, multiple objectives, etc.
@@ -161,7 +201,7 @@ class Storage(metaclass=ABCMeta):
             self._opt_targets = opt_targets
             self._in_context = False
 
-        def __enter__(self) -> "Storage.Experiment":
+        def __enter__(self) -> Storage.Experiment:
             """
             Enter the context of the experiment.
 
@@ -328,13 +368,32 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
+        def get_trial_by_id(
+            self,
+            trial_id: int,
+        ) -> Storage.Trial | None:
+            """
+            Gets a Trial by its ID.
+
+            Parameters
+            ----------
+            trial_id : int
+                ID of the Trial to retrieve for this Experiment.
+
+            Returns
+            -------
+            trial : Storage.Trial | None
+                The Trial object, or None if it doesn't exist.
+            """
+
+        @abstractmethod
         def pending_trials(
             self,
             timestamp: datetime,
             *,
             running: bool,
             trial_runner_assigned: bool | None = None,
-        ) -> Iterator["Storage.Trial"]:
+        ) -> Iterator[Storage.Trial]:
             """
             Return an iterator over :py:attr:`~.Status.PENDING`
             :py:class:`~.Storage.Trial` instances that have a scheduled start time to
@@ -365,7 +424,7 @@ class Storage(metaclass=ABCMeta):
             tunables: TunableGroups,
             ts_start: datetime | None = None,
             config: dict[str, Any] | None = None,
-        ) -> "Storage.Trial":
+        ) -> Storage.Trial:
             """
             Create a new experiment run in the storage.
 
@@ -402,7 +461,7 @@ class Storage(metaclass=ABCMeta):
             tunables: TunableGroups,
             ts_start: datetime | None = None,
             config: dict[str, Any] | None = None,
-        ) -> "Storage.Trial":
+        ) -> Storage.Trial:
             """
             Create a new experiment run in the storage.
 
@@ -439,10 +498,11 @@ class Storage(metaclass=ABCMeta):
             tunable_config_id: int,
             trial_runner_id: int | None,
             opt_targets: dict[str, Literal["min", "max"]],
+            status: Status,
+            restoring: bool,
             config: dict[str, Any] | None = None,
-            status: Status = Status.UNKNOWN,
         ):
-            if status not in (Status.UNKNOWN, Status.PENDING):
+            if not restoring and status not in (Status.UNKNOWN, Status.PENDING):
                 raise ValueError(f"Invalid status for a new trial: {status}")
             self._tunables = tunables
             self._experiment_id = experiment_id
@@ -458,6 +518,11 @@ class Storage(metaclass=ABCMeta):
                 f"{self._experiment_id}:{self._trial_id}:"
                 f"{self._tunable_config_id}:{self.trial_runner_id}"
             )
+
+        @property
+        def experiment_id(self) -> str:
+            """Experiment ID of the Trial."""
+            return self._experiment_id
 
         @property
         def trial_id(self) -> int:

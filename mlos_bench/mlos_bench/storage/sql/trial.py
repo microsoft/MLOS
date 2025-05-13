@@ -40,8 +40,9 @@ class Trial(Storage.Trial):
         config_id: int,
         trial_runner_id: int | None,
         opt_targets: dict[str, Literal["min", "max"]],
+        status: Status,
+        restoring: bool,
         config: dict[str, Any] | None = None,
-        status: Status = Status.UNKNOWN,
     ):
         super().__init__(
             tunables=tunables,
@@ -50,8 +51,9 @@ class Trial(Storage.Trial):
             tunable_config_id=config_id,
             trial_runner_id=trial_runner_id,
             opt_targets=opt_targets,
-            config=config,
             status=status,
+            restoring=restoring,
+            config=config,
         )
         self._engine = engine
         self._schema = schema
