@@ -28,6 +28,14 @@ Module Contents
    Enum for the status of the benchmark/environment Trial or Experiment.
 
 
+   .. py:method:: from_str(status_str: str) -> Status
+      :staticmethod:
+
+
+      Convert a string to a Status enum.
+
+
+
    .. py:method:: is_canceled() -> bool
 
       Check if the status of the benchmark/environment Trial or Experiment is

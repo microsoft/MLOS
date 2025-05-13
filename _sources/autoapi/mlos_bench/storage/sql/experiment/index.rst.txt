@@ -29,6 +29,18 @@ Module Contents
    Logic for retrieving and storing the results of a single experiment.
 
 
+   .. py:method:: get_trial_by_id(trial_id: int) -> mlos_bench.storage.base_storage.Storage.Trial | None
+
+      Gets a Trial by its ID.
+
+      :param trial_id: ID of the Trial to retrieve for this Experiment.
+      :type trial_id: int
+
+      :returns: **trial** -- The Trial object, or None if it doesn't exist.
+      :rtype: Storage.Trial | None
+
+
+
    .. py:method:: load(last_trial_id: int = -1) -> tuple[list[int], list[dict], list[dict[str, Any] | None], list[mlos_bench.environments.status.Status]]
 
       Load (tunable values, benchmark scores, status) to warm-up the optimizer.

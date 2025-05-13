@@ -21,7 +21,7 @@ Classes
 Module Contents
 ---------------
 
-.. py:class:: Trial(*, engine: sqlalchemy.engine.Engine, schema: mlos_bench.storage.sql.schema.DbSchema, tunables: mlos_bench.tunables.tunable_groups.TunableGroups, experiment_id: str, trial_id: int, config_id: int, trial_runner_id: int | None, opt_targets: dict[str, Literal['min', 'max']], config: dict[str, Any] | None = None, status: mlos_bench.environments.status.Status = Status.UNKNOWN)
+.. py:class:: Trial(*, engine: sqlalchemy.engine.Engine, schema: mlos_bench.storage.sql.schema.DbSchema, tunables: mlos_bench.tunables.tunable_groups.TunableGroups, experiment_id: str, trial_id: int, config_id: int, trial_runner_id: int | None, opt_targets: dict[str, Literal['min', 'max']], status: mlos_bench.environments.status.Status, restoring: bool, config: dict[str, Any] | None = None)
 
    Bases: :py:obj:`mlos_bench.storage.base_storage.Storage.Trial`
 
