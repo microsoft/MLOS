@@ -188,7 +188,7 @@ class Experiment(Storage.Experiment):
             status: list[Status] = []
 
             for trial in cur_trials.fetchall():
-                stat = Status[trial.status]
+                stat = Status.from_str(trial.status)
                 status.append(stat)
                 trial_ids.append(trial.trial_id)
                 configs.append(
@@ -234,6 +234,48 @@ class Experiment(Storage.Experiment):
         return dict(
             row._tuple() for row in cur_result.fetchall()  # pylint: disable=protected-access
         )
+
+    def get_trial_by_id(
+        self,
+        trial_id: int,
+    ) -> Storage.Trial | None:
+        with self._engine.connect() as conn:
+            cur_trial = conn.execute(
+                self._schema.trial.select().where(
+                    self._schema.trial.c.exp_id == self._experiment_id,
+                    self._schema.trial.c.trial_id == trial_id,
+                )
+            )
+            trial = cur_trial.fetchone()
+            if trial is None:
+                return None
+            tunables = self._get_key_val(
+                conn,
+                self._schema.config_param,
+                "param",
+                config_id=trial.config_id,
+            )
+            config = self._get_key_val(
+                conn,
+                self._schema.trial_param,
+                "param",
+                exp_id=self._experiment_id,
+                trial_id=trial.trial_id,
+            )
+            return Trial(
+                engine=self._engine,
+                schema=self._schema,
+                # Reset .is_updated flag after the assignment:
+                tunables=self._tunables.copy().assign(tunables).reset(),
+                experiment_id=self._experiment_id,
+                trial_id=trial.trial_id,
+                config_id=trial.config_id,
+                trial_runner_id=trial.trial_runner_id,
+                opt_targets=self._opt_targets,
+                status=Status.from_str(trial.status),
+                restoring=True,
+                config=config,
+            )
 
     def pending_trials(
         self,
@@ -288,6 +330,8 @@ class Experiment(Storage.Experiment):
                     config_id=trial.config_id,
                     trial_runner_id=trial.trial_runner_id,
                     opt_targets=self._opt_targets,
+                    status=Status.from_str(trial.status),
+                    restoring=True,
                     config=config,
                 )
 
@@ -363,8 +407,9 @@ class Experiment(Storage.Experiment):
                     config_id=config_id,
                     trial_runner_id=None,  # initially, Trials are not assigned to a TrialRunner
                     opt_targets=self._opt_targets,
-                    config=config,
                     status=new_trial_status,
+                    restoring=False,
+                    config=config,
                 )
                 self._trial_id += 1
                 return trial

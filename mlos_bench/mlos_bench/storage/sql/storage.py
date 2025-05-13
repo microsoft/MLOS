@@ -7,7 +7,7 @@
 import logging
 from typing import Literal
 
-from sqlalchemy import URL, create_engine
+from sqlalchemy import URL, Engine, create_engine
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.storage.base_experiment_data import ExperimentData
@@ -25,6 +25,8 @@ class SqlStorage(Storage):
     backend.
     """
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(
         self,
         config: dict,
@@ -32,20 +34,43 @@ class SqlStorage(Storage):
         service: Service | None = None,
     ):
         super().__init__(config, global_config, service)
-        lazy_schema_create = self._config.pop("lazy_schema_create", False)
+        self._lazy_schema_create = self._config.pop("lazy_schema_create", False)
         self._log_sql = self._config.pop("log_sql", False)
         self._url = URL.create(**self._config)
         self._repr = f"{self._url.get_backend_name()}:{self._url.database}"
+        self._engine: Engine
+        self._db_schema: DbSchema
+        self._schema_created = False
+        self._schema_updated = False
+        self._init_engine()
+
+    def _init_engine(self) -> None:
+        """Initialize the SQLAlchemy engine."""
+        # This is a no-op, as the engine is created in __init__.
         _LOG.info("Connect to the database: %s", self)
         self._engine = create_engine(self._url, echo=self._log_sql)
         self._db_schema = DbSchema(self._engine)
-        self._schema_created = False
-        self._schema_updated = False
-        if not lazy_schema_create:
+        if not self._lazy_schema_create:
             assert self._schema
             self.update_schema()
         else:
             _LOG.info("Using lazy schema create for database: %s", self)
+
+    # Make the object picklable.
+
+    def __getstate__(self) -> dict:
+        """Return the state of the object for pickling."""
+        state = self.__dict__.copy()
+        # Don't pickle the engine, as it cannot be pickled.
+        state.pop("_engine", None)
+        state.pop("_db_schema", None)
+        return state
+
+    def __setstate__(self, state: dict) -> None:
+        """Restore the state of the object from pickling."""
+        self.__dict__.update(state)
+        # Recreate the engine and schema.
+        self._init_engine()
 
     @property
     def _schema(self) -> DbSchema:
@@ -65,6 +90,32 @@ class SqlStorage(Storage):
 
     def __repr__(self) -> str:
         return self._repr
+
+    def get_experiment_by_id(
+        self,
+        experiment_id: str,
+        tunables: TunableGroups,
+        opt_targets: dict[str, Literal["min", "max"]],
+    ) -> Storage.Experiment | None:
+        with self._engine.connect() as conn:
+            cur_exp = conn.execute(
+                self._schema.experiment.select().where(
+                    self._schema.experiment.c.exp_id == experiment_id,
+                )
+            )
+            exp = cur_exp.fetchone()
+            if exp is None:
+                return None
+            return Experiment(
+                engine=self._engine,
+                schema=self._schema,
+                experiment_id=exp.exp_id,
+                trial_id=-1,  # will be loaded upon __enter__ which calls _setup()
+                description=exp.description,
+                root_env_config=exp.root_env_config,
+                tunables=tunables,
+                opt_targets=opt_targets,
+            )
 
     def experiment(  # pylint: disable=too-many-arguments
         self,

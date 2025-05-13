@@ -95,7 +95,7 @@ def get_trials(
                 config_id=trial.config_id,
                 ts_start=utcify_timestamp(trial.ts_start, origin="utc"),
                 ts_end=utcify_nullable_timestamp(trial.ts_end, origin="utc"),
-                status=Status[trial.status],
+                status=Status.from_str(trial.status),
                 trial_runner_id=trial.trial_runner_id,
             )
             for trial in trials.fetchall()
