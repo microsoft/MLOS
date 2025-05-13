@@ -170,6 +170,7 @@ class Experiment(Storage.Experiment):
                                 Status.SUCCEEDED.name,
                                 Status.FAILED.name,
                                 Status.TIMED_OUT.name,
+                                Status.CANCELED.name,
                             ]
                         ),
                     ),
@@ -204,6 +205,7 @@ class Experiment(Storage.Experiment):
                             Status.SUCCEEDED.name,
                             Status.FAILED.name,
                             Status.TIMED_OUT.name,
+                            Status.CANCELED.name,
                         ]
                     ),
                 )
