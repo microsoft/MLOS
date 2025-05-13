@@ -1,0 +1,59 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/schedulers/mock-scheduler-subschema.json",
+    "title": "mlos_bench Mock Scheduler config",
+    "description": "config for an mlos_bench Mock Scheduler",
+    "type": "object",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.tests.schedulers.mock_scheduler.MockScheduler"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "../base-scheduler-subschema.json#/$defs/base_scheduler_config"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "mock_trial_data": {
+                            "description": "A list of trial data to use for testing.",
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "trial_id": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "enum",
+                                        "enum": [
+                                            null,
+                                            "UNKNOWN",
+                                            "PENDING",
+                                            "READY",
+                                            "RUNNING",
+                                            "SUCCEEDED",
+                                            "CANCELED",
+                                            "FAILED",
+                                            "TIMED_OUT"
+                                        ]
+                                    },
+                                    "score": "number"
+                                },
+                                "required": ["trial_id", "status"]
+                            }
+                        }
+                    },
+                    "minProperties": 1
+                }
+            ],
+            "minProperties": 1,
+            "unevaluatedProperties": false
+        }
+    },
+    "required": ["class"]
+}

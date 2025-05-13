@@ -1,0 +1,27 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/schedulers/sync-scheduler-subschema.json",
+    "title": "mlos_bench SyncScheduler config",
+    "description": "config for an mlos_bench SyncScheduler",
+    "type": "object",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.schedulers.SyncScheduler",
+                "mlos_bench.schedulers.sync_scheduler.SyncScheduler"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "$comment": "No extra properties supported by SyncScheduler.",
+            "allOf": [
+                {
+                    "$ref": "../base-scheduler-subschema.json#/$defs/base_scheduler_config"
+                }
+            ],
+            "minProperties": 1,
+            "unevaluatedProperties": false
+        }
+    },
+    "required": ["class"]
+}
