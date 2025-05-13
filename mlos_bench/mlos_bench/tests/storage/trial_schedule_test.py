@@ -223,6 +223,30 @@ def test_rr_scheduling(exp_data: ExperimentData) -> None:
         ), f"Expected trial_runner_id {expected_runner_id} for {trial}"
 
 
+def test_empty_get_longest_prefix_finished_trial_id(
+    storage: Storage,
+    exp_storage: Storage.Experiment,
+) -> None:
+    """
+    Test that the longest prefix of finished trials is empty when no trials are present.
+
+    See Also
+    --------
+    Storage.get_longest_prefix_finished_trial_id
+    """
+    assert not storage.experiments[
+        exp_storage.experiment_id
+    ].trials, "Expected no trials in the experiment."
+
+    # Retrieve the longest prefix of finished trials when no trials are present
+    longest_prefix_id = exp_storage.get_longest_prefix_finished_trial_id()
+
+    # Assert that the longest prefix is empty
+    assert (
+        longest_prefix_id == -1
+    ), f"Expected longest prefix to be -1, but got {longest_prefix_id}"
+
+
 def test_get_longest_prefix_finished_trial_id(
     exp_storage: Storage.Experiment,
     tunable_groups: TunableGroups,

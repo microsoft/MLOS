@@ -164,25 +164,31 @@ class Experiment(Storage.Experiment):
                 )
                 .where(
                     self._schema.trial.c.exp_id == self._experiment_id,
-                    func.not_(
-                        self._schema.trial.c.status.in_(
-                            [
-                                Status.SUCCEEDED.name,
-                                Status.FAILED.name,
-                                Status.TIMED_OUT.name,
-                                Status.CANCELED.name,
-                            ]
-                        ),
-                    ),
+                    func.not_(self._schema.trial.c.status.in_(Status.completed_statuses())),
                 )
             )
-
             max_trial_id = conn.execute(first_unfinished_trial_id_stmt).scalar()
-            if max_trial_id is None:
-                return -1
-            # Return one less than the first unfinished trial ID - it should be
-            # finished (or not exist, which is fine as a limit).
-            return int(max_trial_id) - 1
+            if max_trial_id is not None:
+                # Return one less than the first unfinished trial ID - it should be
+                # finished (or not exist, which is fine as a limit).
+                return int(max_trial_id) - 1
+
+            # No unfinished trials, so get the largest completed trial ID.
+            last_finished_trial_id = (
+                self._schema.trial.select()
+                .with_only_columns(
+                    func.max(self._schema.trial.c.trial_id),
+                )
+                .where(
+                    self._schema.trial.c.exp_id == self._experiment_id,
+                    self._schema.trial.c.status.in_(Status.completed_statuses()),
+                )
+            )
+            max_trial_id = conn.execute(last_finished_trial_id).scalar()
+            if max_trial_id is not None:
+                return int(max_trial_id)
+            # Else no trial exist.
+            return -1
 
     def load(
         self,

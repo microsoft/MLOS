@@ -198,6 +198,15 @@ def _dummy_run_exp(
 
 
 @pytest.fixture
+def empty_exp_data(
+    storage: SqlStorage,
+    exp_storage: SqlStorage.Experiment,
+) -> ExperimentData:
+    """Test fixture for ExperimentData."""
+    return storage.experiments[exp_storage.experiment_id]
+
+
+@pytest.fixture
 def exp_data(
     storage: SqlStorage,
     exp_storage: SqlStorage.Experiment,

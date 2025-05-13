@@ -342,9 +342,11 @@ class Storage(metaclass=ABCMeta):
             """
             Load (tunable values, benchmark scores, status) to warm-up the optimizer.
 
-            If `last_trial_id` is present, load only the data from the (completed) trials
-            that were scheduled *after* the given trial ID. Otherwise, return data from ALL
-            merged-in experiments and attempt to impute the missing tunable values.
+            If `last_trial_id` is present, load only the data from the
+            (:py:meth:`completed <Status.is_completed>`) trials that were
+            added *after* the given trial ID. Otherwise, return data from
+            ALL merged-in experiments and attempt to impute the missing tunable
+            values.
 
             Additionally, if ``omit_registered_trial_ids`` is provided, omit the
             trials matching those ids.
@@ -358,8 +360,8 @@ class Storage(metaclass=ABCMeta):
             last_trial_id : int
                 (Optional) Trial ID to start from.
             omit_registered_trial_ids : Iterable[int] | None = None,
-                (Optional) List of trial IDs to omit. If None, load all trials.
-
+                (Optional) List of trial IDs to omit. If None, load all trials
+                after ``last_trial_id``.
 
             Returns
             -------
