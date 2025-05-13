@@ -188,7 +188,7 @@ class Experiment(Storage.Experiment):
             status: list[Status] = []
 
             for trial in cur_trials.fetchall():
-                stat = Status[trial.status]
+                stat = Status.from_str(trial.status)
                 status.append(stat)
                 trial_ids.append(trial.trial_id)
                 configs.append(
