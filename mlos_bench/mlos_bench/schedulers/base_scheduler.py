@@ -385,6 +385,11 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
             continue to get suggestions from the Optimizer or not.
             See Also: :py:meth:`~.Scheduler.not_done`.
 
+        Notes
+        -----
+        Subclasses can override this method to implement a more sophisticated
+        scheduling policy using the information obtained from the Optimizer.
+
         See Also
         --------
         Scheduler.not_done
