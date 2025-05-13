@@ -244,12 +244,13 @@ def test_async_get_longest_prefix_finished_trial_id(
 
 # TODO: Can we simplify this to use something like SyncScheduler and
 # bulk_register_completed_trials?
+# TODO: Update to use MockScheduler
 def test_exp_load_async(
     exp_storage: Storage.Experiment,
     tunable_groups: TunableGroups,
 ) -> None:
     """
-    Test the `omit_registered_trial_ids` argument of the `Experiment.load()` method.
+    Test the ``omit_registered_trial_ids`` argument of the ``Experiment.load()`` method.
 
     Create several trials with mixed statuses (PENDING and completed).
     Verify that completed trials included in a local set of registered configs
