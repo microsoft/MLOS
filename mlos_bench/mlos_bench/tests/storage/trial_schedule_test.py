@@ -5,8 +5,8 @@
 """Unit tests for scheduling trials for some future time."""
 from collections.abc import Iterator
 from datetime import datetime, timedelta
-
 from random import random
+
 from pytz import UTC
 
 from mlos_bench.environments.status import Status
