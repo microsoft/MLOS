@@ -5,7 +5,6 @@
 """Unit tests for scheduling trials for some future time."""
 from collections.abc import Iterator
 from datetime import datetime, timedelta
-from random import random
 
 from pytz import UTC
 
@@ -31,8 +30,9 @@ def test_storage_schedule(
     tunable_groups: TunableGroups,
 ) -> None:
     # pylint: disable=too-many-locals,too-many-statements
-    """Test some storage functions that schedule several trials for future
-    execution and retrieve them later at certain timestamps.
+    """
+    Test some storage functions that schedule several trials for future execution and
+    retrieve them later at certain timestamps.
 
     Notes
     -----

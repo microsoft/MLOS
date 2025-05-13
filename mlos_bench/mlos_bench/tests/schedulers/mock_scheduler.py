@@ -2,29 +2,25 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-A mock scheduler that returns predefined status and score for specific trial IDs.
-"""
+"""A mock scheduler that returns predefined status and score for specific trial IDs."""
 
 import logging
-
-from datetime import datetime
 from collections.abc import Iterable
+from datetime import datetime
 from typing import Any
 
 from pytz import UTC
 
-from mlos_bench.schedulers.base_scheduler import Scheduler
-from mlos_bench.storage.base_storage import Storage
-from mlos_bench.schedulers.base_scheduler import Optimizer
+from mlos_bench.schedulers.base_scheduler import Optimizer, Scheduler
 from mlos_bench.schedulers.trial_runner import TrialRunner
+from mlos_bench.storage.base_storage import Storage
 
 _LOG = logging.getLogger(__name__)
 
 
 class MockScheduler(Scheduler):
-    """
-    A mock scheduler that returns predefined status and score for specific trial IDs.
+    """A mock scheduler that returns predefined status and score for specific trial
+    IDs.
     """
 
     def __init__(  # pylint: disable=too-many-arguments
@@ -47,15 +43,14 @@ class MockScheduler(Scheduler):
         )
         self._mock_trial_data = config.get("mock_trial_data", [])
         self._mock_trial_data = {
-            trial_info["trial_id"]: trial_info
-            for trial_info in self._mock_trial_data
+            trial_info["trial_id"]: trial_info for trial_info in self._mock_trial_data
         }
 
     def run_trial(self, trial: Storage.Trial) -> None:
         """
         Mock the execution of a trial.
 
-        Parameters:
+        Parameters
         ----------
         trial : Storage.Trial
             The trial to be executed.
@@ -66,4 +61,5 @@ class MockScheduler(Scheduler):
 
         trial_info = self._mock_trial_data[trial_id]
         _LOG.info("Running trial %d: %s", trial_id, trial_info)
+        # Don't run it - just update the status and optionally score.
         trial.update(trial_info["status"], datetime.now(UTC), trial_info.get("score"))

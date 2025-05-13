@@ -3,11 +3,9 @@
 # Licensed under the MIT License.
 #
 """Unit tests for the storage subsystem."""
-from atexit import register
 from datetime import datetime, timedelta, tzinfo
 from random import random
 
-from more_itertools import last
 import pytest
 from pytz import UTC
 
@@ -166,8 +164,8 @@ def test_empty_get_longest_prefix_finished_trial_id(
     storage: Storage,
     exp_storage: Storage.Experiment,
 ) -> None:
-    """
-    Test that the longest prefix of finished trials is empty when no trials are present.
+    """Test that the longest prefix of finished trials is empty when no trials are
+    present.
     """
     assert not storage.experiments[
         exp_storage.experiment_id
@@ -186,9 +184,8 @@ def test_sync_success_get_longest_prefix_finished_trial_id(
     exp_storage: Storage.Experiment,
     tunable_groups: TunableGroups,
 ) -> None:
-    """
-    Test that the longest prefix of finished trials is returned correctly when
-    all trial are finished.
+    """Test that the longest prefix of finished trials is returned correctly when all
+    trial are finished.
     """
     timestamp = datetime.now(UTC)
     config = {}
@@ -217,9 +214,8 @@ def test_async_get_longest_prefix_finished_trial_id(
     exp_storage: Storage.Experiment,
     tunable_groups: TunableGroups,
 ) -> None:
-    """
-    Test that the longest prefix of finished trials is returned correctly when
-    trial finish out of order.
+    """Test that the longest prefix of finished trials is returned correctly when trial
+    finish out of order.
     """
     timestamp = datetime.now(UTC)
     config = {}
