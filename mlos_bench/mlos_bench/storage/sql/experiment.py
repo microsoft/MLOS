@@ -166,7 +166,11 @@ class Experiment(Storage.Experiment):
                 )
                 .where(
                     self._schema.trial.c.exp_id == self._experiment_id,
-                    func.not_(self._schema.trial.c.status.in_(Status.completed_statuses())),
+                    func.not_(
+                        self._schema.trial.c.status.in_(
+                            [status.name for status in Status.completed_statuses()]
+                        )
+                    ),
                 )
             )
             max_trial_id = conn.execute(first_unfinished_trial_id_stmt).scalar()
@@ -175,7 +179,8 @@ class Experiment(Storage.Experiment):
                 # finished (or not exist, which is fine as a limit).
                 return int(max_trial_id) - 1
 
-            # No unfinished trials, so get the largest completed trial ID.
+            # No unfinished trials, so *all* trials are completed - get the
+            # largest completed trial ID.
             last_finished_trial_id = (
                 self._schema.trial.select()
                 .with_only_columns(
@@ -183,13 +188,15 @@ class Experiment(Storage.Experiment):
                 )
                 .where(
                     self._schema.trial.c.exp_id == self._experiment_id,
-                    self._schema.trial.c.status.in_(Status.completed_statuses()),
+                    self._schema.trial.c.status.in_(
+                        [status.name for status in Status.completed_statuses()]
+                    ),
                 )
             )
             max_trial_id = conn.execute(last_finished_trial_id).scalar()
             if max_trial_id is not None:
                 return int(max_trial_id)
-            # Else no trial exist.
+            # Else no trials yet exist for this experiment.
             return -1
 
     def load(
@@ -209,12 +216,7 @@ class Experiment(Storage.Experiment):
                     self._schema.trial.c.exp_id == self._experiment_id,
                     self._schema.trial.c.trial_id > last_trial_id,
                     self._schema.trial.c.status.in_(
-                        [
-                            Status.SUCCEEDED.name,
-                            Status.FAILED.name,
-                            Status.TIMED_OUT.name,
-                            Status.CANCELED.name,
-                        ]
+                        [status.name for status in Status.completed_statuses()]
                     ),
                 )
                 .order_by(
