@@ -6,6 +6,7 @@
 from collections.abc import Iterator
 from datetime import datetime, timedelta
 
+from random import random
 from pytz import UTC
 
 from mlos_bench.environments.status import Status
@@ -220,3 +221,39 @@ def test_rr_scheduling(exp_data: ExperimentData) -> None:
         assert (
             trial.trial_runner_id == expected_runner_id
         ), f"Expected trial_runner_id {expected_runner_id} for {trial}"
+
+
+def test_get_longest_prefix_finished_trial_id(
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+) -> None:
+    """
+    Test that the longest prefix of finished trials is returned correctly.
+
+    See Also
+    --------
+    Storage.get_longest_prefix_finished_trial_id
+    """
+    timestamp = datetime.now(UTC)
+    config = {}
+    metrics = {metric: random() for metric in exp_storage.opt_targets}
+
+    # Create several trials
+    trials = [exp_storage.new_trial(tunable_groups, config=config) for _ in range(0, 10)]
+
+    # Mark some trials at the beginning and end as finished
+    trials[0].update(Status.SUCCEEDED, timestamp + timedelta(minutes=1), metrics=metrics)
+    trials[1].update(Status.FAILED, timestamp + timedelta(minutes=2), metrics=metrics)
+    trials[2].update(Status.TIMED_OUT, timestamp + timedelta(minutes=3), metrics=metrics)
+    # Leave trials[3] to trials[7] as PENDING
+    trials[8].update(Status.CANCELED, timestamp + timedelta(minutes=4), metrics=metrics)
+    trials[9].update(Status.SUCCEEDED, timestamp + timedelta(minutes=5), metrics=metrics)
+
+    # Retrieve the longest prefix of finished trials starting from trial_id 1
+    longest_prefix_id = exp_storage.get_longest_prefix_finished_trial_id()
+
+    # Assert that the longest prefix includes only the first three trials
+    assert longest_prefix_id == trials[2].trial_id, (
+        f"Expected longest prefix to end at trial_id {trials[2].trial_id}, "
+        f"but got {longest_prefix_id}"
+    )
