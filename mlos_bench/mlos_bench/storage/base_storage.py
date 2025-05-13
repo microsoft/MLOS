@@ -367,6 +367,12 @@ class Storage(metaclass=ABCMeta):
             -------
             (trial_ids, configs, scores, status) : ([int], [dict], [dict] | None, [Status])
                 Trial ids, Tunable values, benchmark scores, and status of the trials.
+
+            See Also
+            --------
+            Storage.Experiment.get_longest_prefix_finished_trial_id :
+                Get the last (registered) trial ID for the experiment.
+            Scheduler.add_new_optimizer_suggestions
             """
 
         @abstractmethod

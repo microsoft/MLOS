@@ -272,6 +272,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
                 self._longest_finished_trial_sequence_id,
             )
             self.run_schedule(is_warm_up)
+            self.bulk_register_completed_trials()
             not_done = self.add_new_optimizer_suggestions()
             self.assign_trial_runners(
                 self.experiment.pending_trials(
@@ -314,20 +315,27 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
             _LOG.debug("Config %d ::\n%s", config_id, json.dumps(tunable_values, indent=2))
         return tunables.copy()
 
-    def add_new_optimizer_suggestions(self) -> bool:
+    def bulk_register_completed_trials(self) -> None:
         """
-        Optimizer part of the loop.
+        Bulk register the most recent completed Trials in the Storage.
 
-        Load the results of the executed trials into the
-        :py:class:`~.Optimizer`, suggest new configurations, and add them to the
-        queue.
+        Notes
+        -----
+        This method is called after the Trials have been run (or started) and
+        the results have been recorded in the Storage by the TrialRunner(s).
 
-        Returns
-        -------
-        bool
-            The return value indicates whether the optimization process should
-            continue to get suggestions from the Optimizer or not.
-            See Also: :py:meth:`~.Scheduler.not_done`.
+        It has logic to handle straggler Trials that finish out of order so
+        should be usable by both
+        :py:class:`~mlos_bench.schedulers.SyncScheduler` and async Schedulers.
+
+        See Also
+        --------
+        Scheduler.start
+            The main loop of the Scheduler.
+        Storage.Experiment.load
+            Load the results of the Trials based on some filtering criteria.
+        Optimizer.bulk_register
+            Register the results of the Trials in the Optimizer.
         """
         assert self.experiment is not None
         # Load the results of the trials that have been run since the last time
@@ -358,6 +366,33 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
             if trial_id > self._longest_finished_trial_sequence_id
         }
 
+    def add_new_optimizer_suggestions(self) -> bool:
+        """
+        Optimizer part of the loop.
+
+        Asks the :py:class:`~.Optimizer` for new suggestions and adds them to
+        the queue.  This method is called after the trials have been run and the
+        results have been loaded into the optimizer.
+
+        Load the results of the executed trials into the
+        :py:class:`~.Optimizer`, suggest new configurations, and add them to the
+        queue.
+
+        Returns
+        -------
+        bool
+            The return value indicates whether the optimization process should
+            continue to get suggestions from the Optimizer or not.
+            See Also: :py:meth:`~.Scheduler.not_done`.
+
+        See Also
+        --------
+        Scheduler.not_done
+            The stopping conditions for the optimization process.
+
+        Scheduler.bulk_register_completed_trials
+            Bulk register the most recent completed trials in the storage.
+        """
         # Check if the optimizer has converged or not.
         not_done = self.not_done()
         if not_done:
