@@ -8,14 +8,6 @@ applyTo: '**/*.py'
 
 - All functions, methods, classes, and attributes should have docstrings.
 
-- Docstrings should be formatted using the [NumPy style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html) format.
-
-  - The docstring should include a summary of the function or method's purpose, followed by a description of its parameters and return values.
-
-  - The docstring should also include any exceptions that may be raised by the function or method.
-
-  - Where possible docstring should include an executable example of how to use the function or method, including any important details about its usage.
-
 - Docstrings should include Sphinx style crossref directives for functions, methods, classes, attributes, and data whenever possible using `:py:class:` or `:py:func:` or `:py:meth:` or `:py:attr:` or `:py:data` syntax, respectively,
 
   See Also <https://www.sphinx-doc.org/en/master/usage/domains/python.html#python-xref-roles>
