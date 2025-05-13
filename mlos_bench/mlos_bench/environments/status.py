@@ -23,15 +23,18 @@ class Status(enum.Enum):
     TIMED_OUT = 7
 
     @staticmethod
-    def from_str(status_str: str) -> "Status":
+    def from_str(status_str: str | int) -> "Status":
         """Convert a string to a Status enum."""
+        if not isinstance(status_str, str):
+            _LOG.warning("Expected type %s for status: %s", type(status_str), status_str)
+            status_str = str(status_str)
         if status_str.isdigit():
             try:
                 return Status(int(status_str))
             except ValueError:
                 _LOG.warning("Unknown status: %d", int(status_str))
         try:
-            status_str = status_str.upper()
+            status_str = status_str.upper().strip()
             return Status[status_str]
         except KeyError:
             _LOG.warning("Unknown status: %s", status_str)
