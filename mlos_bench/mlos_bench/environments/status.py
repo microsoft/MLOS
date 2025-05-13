@@ -6,6 +6,7 @@
 
 import enum
 import logging
+from typing import Any
 
 _LOG = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ class Status(enum.Enum):
     TIMED_OUT = 7
 
     @staticmethod
-    def from_str(status_str: str) -> "Status":
+    def from_str(status_str: Any) -> "Status":
         """Convert a string to a Status enum."""
         if not isinstance(status_str, str):
             _LOG.warning("Expected type %s for status: %s", type(status_str), status_str)
