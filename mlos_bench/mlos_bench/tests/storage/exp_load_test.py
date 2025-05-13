@@ -3,8 +3,11 @@
 # Licensed under the MIT License.
 #
 """Unit tests for the storage subsystem."""
-from datetime import datetime, tzinfo
+from atexit import register
+from datetime import datetime, timedelta, tzinfo
+from random import random
 
+from more_itertools import last
 import pytest
 from pytz import UTC
 
@@ -157,3 +160,266 @@ def test_exp_trial_pending_3(
     assert status == [Status.FAILED, Status.SUCCEEDED]
     assert tunable_groups.copy().assign(configs[0]).reset() == trial_fail.tunables
     assert tunable_groups.copy().assign(configs[1]).reset() == trial_succ.tunables
+
+
+def test_empty_get_longest_prefix_finished_trial_id(
+    storage: Storage,
+    exp_storage: Storage.Experiment,
+) -> None:
+    """
+    Test that the longest prefix of finished trials is empty when no trials are present.
+    """
+    assert not storage.experiments[
+        exp_storage.experiment_id
+    ].trials, "Expected no trials in the experiment."
+
+    # Retrieve the longest prefix of finished trials when no trials are present
+    longest_prefix_id = exp_storage.get_longest_prefix_finished_trial_id()
+
+    # Assert that the longest prefix is empty
+    assert (
+        longest_prefix_id == -1
+    ), f"Expected longest prefix to be -1, but got {longest_prefix_id}"
+
+
+def test_sync_success_get_longest_prefix_finished_trial_id(
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+) -> None:
+    """
+    Test that the longest prefix of finished trials is returned correctly when
+    all trial are finished.
+    """
+    timestamp = datetime.now(UTC)
+    config = {}
+    metrics = {metric: random() for metric in exp_storage.opt_targets}
+
+    # Create several trials
+    trials = [exp_storage.new_trial(tunable_groups, config=config) for _ in range(0, 4)]
+
+    # Mark some trials at the beginning and end as finished
+    trials[0].update(Status.SUCCEEDED, timestamp + timedelta(minutes=1), metrics=metrics)
+    trials[1].update(Status.FAILED, timestamp + timedelta(minutes=2), metrics=metrics)
+    trials[2].update(Status.TIMED_OUT, timestamp + timedelta(minutes=3), metrics=metrics)
+    trials[3].update(Status.CANCELED, timestamp + timedelta(minutes=4), metrics=metrics)
+
+    # Retrieve the longest prefix of finished trials starting from trial_id 1
+    longest_prefix_id = exp_storage.get_longest_prefix_finished_trial_id()
+
+    # Assert that the longest prefix includes only the first three trials
+    assert longest_prefix_id == trials[3].trial_id, (
+        f"Expected longest prefix to end at trial_id {trials[3].trial_id}, "
+        f"but got {longest_prefix_id}"
+    )
+
+
+def test_async_get_longest_prefix_finished_trial_id(
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+) -> None:
+    """
+    Test that the longest prefix of finished trials is returned correctly when
+    trial finish out of order.
+    """
+    timestamp = datetime.now(UTC)
+    config = {}
+    metrics = {metric: random() for metric in exp_storage.opt_targets}
+
+    # Create several trials
+    trials = [exp_storage.new_trial(tunable_groups, config=config) for _ in range(0, 10)]
+
+    # Mark some trials at the beginning and end as finished
+    trials[0].update(Status.SUCCEEDED, timestamp + timedelta(minutes=1), metrics=metrics)
+    trials[1].update(Status.FAILED, timestamp + timedelta(minutes=2), metrics=metrics)
+    trials[2].update(Status.TIMED_OUT, timestamp + timedelta(minutes=3), metrics=metrics)
+    trials[3].update(Status.CANCELED, timestamp + timedelta(minutes=4), metrics=metrics)
+    # Leave trials[3] to trials[7] as PENDING
+    trials[9].update(Status.SUCCEEDED, timestamp + timedelta(minutes=5), metrics=metrics)
+
+    # Retrieve the longest prefix of finished trials starting from trial_id 1
+    longest_prefix_id = exp_storage.get_longest_prefix_finished_trial_id()
+
+    # Assert that the longest prefix includes only the first three trials
+    assert longest_prefix_id == trials[3].trial_id, (
+        f"Expected longest prefix to end at trial_id {trials[3].trial_id}, "
+        f"but got {longest_prefix_id}"
+    )
+
+
+# TODO: Can we simplify this to use something like SyncScheduler and
+# bulk_register_completed_trials?
+def test_exp_load_async(
+    exp_storage: Storage.Experiment,
+    tunable_groups: TunableGroups,
+) -> None:
+    """
+    Test the `omit_registered_trial_ids` argument of the `Experiment.load()` method.
+
+    Create several trials with mixed statuses (PENDING and completed).
+    Verify that completed trials included in a local set of registered configs
+    are omitted from the `load` operation.
+    """
+    # pylint: disable=too-many-locals,too-many-statements
+
+    last_trial_id = exp_storage.get_longest_prefix_finished_trial_id()
+    assert last_trial_id == -1, "Expected no trials in the experiment."
+    registered_trial_ids: set[int] = set()
+
+    # Load trials, omitting registered ones
+    trial_ids, configs, scores, status = exp_storage.load(
+        last_trial_id=last_trial_id,
+        omit_registered_trial_ids=registered_trial_ids,
+    )
+
+    assert trial_ids == []
+    assert configs == []
+    assert scores == []
+    assert status == []
+
+    # Create trials with mixed statuses
+    trial_1_success = exp_storage.new_trial(tunable_groups)
+    trial_2_failed = exp_storage.new_trial(tunable_groups)
+    trial_3_pending = exp_storage.new_trial(tunable_groups)
+    trial_4_timedout = exp_storage.new_trial(tunable_groups)
+    trial_5_pending = exp_storage.new_trial(tunable_groups)
+
+    # Update statuses for completed trials
+    trial_1_success.update(Status.SUCCEEDED, datetime.now(UTC), {"score": 95.0})
+    trial_2_failed.update(Status.FAILED, datetime.now(UTC), {"score": -1})
+    trial_4_timedout.update(Status.TIMED_OUT, datetime.now(UTC), {"score": -1})
+
+    # Now evaluate some different sequences of loading trials by simulating what
+    # we expect a Scheduler to do.
+    # See Also: Scheduler.add_new_optimizer_suggestions()
+
+    trial_ids, configs, scores, status = exp_storage.load(
+        last_trial_id=last_trial_id,
+        omit_registered_trial_ids=registered_trial_ids,
+    )
+
+    # Verify that all completed trials are returned.
+    completed_trials = [
+        trial_1_success,
+        trial_2_failed,
+        trial_4_timedout,
+    ]
+    assert trial_ids == [trial.trial_id for trial in completed_trials]
+    assert len(configs) == len(completed_trials)
+    assert status == [trial.status for trial in completed_trials]
+
+    last_trial_id = exp_storage.get_longest_prefix_finished_trial_id()
+    assert last_trial_id == trial_2_failed.trial_id, (
+        f"Expected longest prefix to end at trial_id {trial_2_failed.trial_id}, "
+        f"but got {last_trial_id}"
+    )
+    registered_trial_ids |= {completed_trial.trial_id for completed_trial in completed_trials}
+    registered_trial_ids = {i for i in registered_trial_ids if i > last_trial_id}
+
+    # Create some more trials and update their statuses.
+    # Note: we are leaving some trials in the middle in the PENDING state.
+    trial_6_canceled = exp_storage.new_trial(tunable_groups)
+    trial_7_success2 = exp_storage.new_trial(tunable_groups)
+    trial_6_canceled.update(Status.CANCELED, datetime.now(UTC), {"score": -1})
+    trial_7_success2.update(Status.SUCCEEDED, datetime.now(UTC), {"score": 90.0})
+
+    # Load trials, omitting registered ones
+    trial_ids, configs, scores, status = exp_storage.load(
+        last_trial_id=last_trial_id,
+        omit_registered_trial_ids=registered_trial_ids,
+    )
+    # Verify that only unregistered completed trials are returned
+    completed_trials = [
+        trial_6_canceled,
+        trial_7_success2,
+    ]
+    assert trial_ids == [trial.trial_id for trial in completed_trials]
+    assert len(configs) == len(completed_trials)
+    assert status == [trial.status for trial in completed_trials]
+
+    # Update our tracking of registered trials
+    last_trial_id = exp_storage.get_longest_prefix_finished_trial_id()
+    # Should still be the same as before since we haven't adjusted the PENDING
+    # trials at the beginning yet.
+    assert last_trial_id == trial_2_failed.trial_id, (
+        f"Expected longest prefix to end at trial_id {trial_2_failed.trial_id}, "
+        f"but got {last_trial_id}"
+    )
+    registered_trial_ids |= {completed_trial.trial_id for completed_trial in completed_trials}
+    registered_trial_ids = {i for i in registered_trial_ids if i > last_trial_id}
+
+    trial_ids, configs, scores, status = exp_storage.load(
+        last_trial_id=last_trial_id,
+        omit_registered_trial_ids=registered_trial_ids,
+    )
+
+    # Verify that only unregistered completed trials are returned
+    completed_trials = []
+    assert trial_ids == [trial.trial_id for trial in completed_trials]
+    assert len(configs) == len(completed_trials)
+    assert status == [trial.status for trial in completed_trials]
+
+    # Now update the PENDING trials to be TIMED_OUT.
+    trial_3_pending.update(Status.TIMED_OUT, datetime.now(UTC), {"score": -1})
+
+    # Load trials, omitting registered ones
+    trial_ids, configs, scores, status = exp_storage.load(
+        last_trial_id=last_trial_id,
+        omit_registered_trial_ids=registered_trial_ids,
+    )
+
+    # Verify that only unregistered completed trials are returned
+    completed_trials = [
+        trial_3_pending,
+    ]
+    assert trial_ids == [trial.trial_id for trial in completed_trials]
+    assert len(configs) == len(completed_trials)
+    assert status == [trial.status for trial in completed_trials]
+
+    # Update our tracking of registered trials
+    last_trial_id = exp_storage.get_longest_prefix_finished_trial_id()
+    assert last_trial_id == trial_4_timedout.trial_id, (
+        f"Expected longest prefix to end at trial_id {trial_4_timedout.trial_id}, "
+        f"but got {last_trial_id}"
+    )
+    registered_trial_ids |= {completed_trial.trial_id for completed_trial in completed_trials}
+    registered_trial_ids = {i for i in registered_trial_ids if i > last_trial_id}
+
+    # Load trials, omitting registered ones
+    trial_ids, configs, scores, status = exp_storage.load(
+        last_trial_id=last_trial_id,
+        omit_registered_trial_ids=registered_trial_ids,
+    )
+    # Verify that only unregistered completed trials are returned
+    completed_trials = []
+    assert trial_ids == [trial.trial_id for trial in completed_trials]
+    assert len(configs) == len(completed_trials)
+    assert status == [trial.status for trial in completed_trials]
+    # And that the longest prefix is still the same.
+    assert last_trial_id == trial_4_timedout.trial_id, (
+        f"Expected longest prefix to end at trial_id {trial_4_timedout.trial_id}, "
+        f"but got {last_trial_id}"
+    )
+
+    # Mark the last trial as finished.
+    trial_5_pending.update(Status.SUCCEEDED, datetime.now(UTC), {"score": 95.0})
+    # Load trials, omitting registered ones
+    trial_ids, configs, scores, status = exp_storage.load(
+        last_trial_id=last_trial_id,
+        omit_registered_trial_ids=registered_trial_ids,
+    )
+    # Verify that only unregistered completed trials are returned
+    completed_trials = [
+        trial_5_pending,
+    ]
+    assert trial_ids == [trial.trial_id for trial in completed_trials]
+    assert len(configs) == len(completed_trials)
+    assert status == [trial.status for trial in completed_trials]
+    # And that the longest prefix is now the last trial.
+    last_trial_id = exp_storage.get_longest_prefix_finished_trial_id()
+    assert last_trial_id == trial_7_success2.trial_id, (
+        f"Expected longest prefix to end at trial_id {trial_7_success2.trial_id}, "
+        f"but got {last_trial_id}"
+    )
+    registered_trial_ids |= {completed_trial.trial_id for completed_trial in completed_trials}
+    registered_trial_ids = {i for i in registered_trial_ids if i > last_trial_id}
+    assert registered_trial_ids == set()
