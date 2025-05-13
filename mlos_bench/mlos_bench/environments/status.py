@@ -23,7 +23,7 @@ class Status(enum.Enum):
     TIMED_OUT = 7
 
     @staticmethod
-    def from_str(status_str: str | int) -> "Status":
+    def from_str(status_str: str) -> "Status":
         """Convert a string to a Status enum."""
         if not isinstance(status_str, str):
             _LOG.warning("Expected type %s for status: %s", type(status_str), status_str)
