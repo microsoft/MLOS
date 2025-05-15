@@ -1,8 +1,7 @@
 {
     "class": "mlos_bench.services.remote.azure.AzureFileShareService",
     "config": {
-        "storageAccountName": "storage-account-name",
-        //"storageFileShareName": "required param missing",
-        "storageAccountKey": "required param missing"
+        // "storageAccountName": "storage-account-name",
+        "storageFileShareName": "required param missing"
     }
 }
