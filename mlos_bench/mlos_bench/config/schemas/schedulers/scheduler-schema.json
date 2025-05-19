@@ -12,16 +12,17 @@
             "$ref": "./base-scheduler-subschema.json"
         },
         {
-            "$comment": "The set of known scheduler subschemas.",
+            "$comment": "The set of known Scheduler subschemas.  Add others as needed.",
             "oneOf": [
                 {
-                    "$ref": "./sync-scheduler-subschema.json"
+                    "$ref": "./mock-scheduler-subschema.json"
                 },
                 {
-                    "$ref": "./mock-scheduler-subschema.json"
+                    "$ref": "./sync-scheduler-subschema.json"
                 }
             ]
         }
     ],
-    "required": ["class"]
+    "required": ["class"],
+    "unevaluatedProperties": false
 }
