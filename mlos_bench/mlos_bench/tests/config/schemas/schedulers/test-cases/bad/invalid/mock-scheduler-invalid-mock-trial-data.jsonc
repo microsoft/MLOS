@@ -1,0 +1,14 @@
+{
+    "class": "mlos_bench.tests.schedulers.mock_scheduler.MockScheduler",
+    "config": {
+        "mock_trial_data": [
+            {
+                "trial_id": 1,
+                "status": "INVALID"
+            },
+            {
+                "status": "SUCCEEDED"
+            }
+        ]
+    }
+}

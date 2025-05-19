@@ -1,0 +1,7 @@
+{
+    "class": "mlos_bench.tests.schedulers.mock_scheduler.MockScheduler",
+    "config": {
+        "extra": "unsupported"
+    },
+    "extra": "unsupported"
+}
