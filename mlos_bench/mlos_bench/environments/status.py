@@ -105,10 +105,12 @@ class Status(enum.Enum):
         return self == Status.TIMED_OUT
 
 
-COMPLETED_STATUSES = {
-    Status.SUCCEEDED,
-    Status.CANCELED,
-    Status.FAILED,
-    Status.TIMED_OUT,
-}
+COMPLETED_STATUSES = frozenset(
+    {
+        Status.SUCCEEDED,
+        Status.CANCELED,
+        Status.FAILED,
+        Status.TIMED_OUT,
+    }
+)
 """The set of completed statuses."""
