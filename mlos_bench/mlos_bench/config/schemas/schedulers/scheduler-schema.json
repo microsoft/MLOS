@@ -20,5 +20,6 @@
             ]
         }
     ],
-    "required": ["class"]
+    "required": ["class"],
+    "unevaluatedProperties": false
 }
