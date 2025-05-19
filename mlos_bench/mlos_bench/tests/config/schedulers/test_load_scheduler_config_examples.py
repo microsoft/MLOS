@@ -7,6 +7,8 @@ import logging
 
 import pytest
 
+import mlos_bench.tests.optimizers.fixtures
+import mlos_bench.tests.storage.sql.fixtures
 from mlos_bench.config.schemas.config_schemas import ConfigSchema
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.schedulers.base_scheduler import Scheduler
@@ -15,9 +17,6 @@ from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.sql.storage import SqlStorage
 from mlos_bench.tests.config import locate_config_examples
 from mlos_bench.util import get_class_from_name
-
-import mlos_bench.tests.storage.sql.fixtures
-import mlos_bench.tests.optimizers.fixtures
 
 mock_opt = mlos_bench.tests.optimizers.fixtures.mock_opt
 sqlite_storage = mlos_bench.tests.storage.sql.fixtures.sqlite_storage
