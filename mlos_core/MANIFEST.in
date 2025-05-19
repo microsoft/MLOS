@@ -3,3 +3,6 @@
 prune **/tests
 # Also exclude the example notebooks.
 prune notebooks/
+# Include license files.
+include ../LICENSE.txt
+include ../NOTICE
