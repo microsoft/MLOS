@@ -113,4 +113,15 @@ COMPLETED_STATUSES = frozenset(
         Status.TIMED_OUT,
     }
 )
-"""The set of completed statuses."""
+"""
+The set of completed statuses.
+
+Includes all statuses that indicate the trial or experiment has finished, either
+successfully or not.
+This set is used to determine if a trial or experiment has reached a final state.
+This includes:
+- :py:data:`.Status.SUCCEEDED`: The trial or experiment completed successfully.
+- :py:data:`.Status.CANCELED`: The trial or experiment was canceled.
+- :py:data:`.Status.FAILED`: The trial or experiment failed.
+- :py:data:`.Status.TIMED_OUT`: The trial or experiment timed out.
+"""
