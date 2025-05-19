@@ -15,6 +15,10 @@
     "resourceGroup": "mlos-autotuning-test-rg",
     "location": "eastus",
     "vmName": "vmTestName",
+    "ssh_username": "testuser",
+    "ssh_priv_key_path": "/home/testuser/.ssh/id_rsa",
+    "ssh_hostname": "${vmName}",
+    "ssh_port": 22,
     "tunable_params_map": {
         "linux-runtime": ["linux-scheduler", "linux-swap"],
         "linux-boot": ["linux-kernel-boot"],

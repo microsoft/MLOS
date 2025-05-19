@@ -29,7 +29,6 @@ def mock_env_config_path() -> str:
 
     This file is used to create TrialRunner instances for testing.
     """
-
     # Use the files() routine to locate the file relative to this directory
     return path_join(
         str(files("mlos_bench.config").joinpath("environments", "mock", "mock_env.jsonc")),

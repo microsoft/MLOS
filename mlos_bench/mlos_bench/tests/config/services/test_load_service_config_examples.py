@@ -10,7 +10,7 @@ import pytest
 from mlos_bench.config.schemas.config_schemas import ConfigSchema
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.config_persistence import ConfigPersistenceService
-from mlos_bench.tests.config import locate_config_examples
+from mlos_bench.tests.config import BUILTIN_TEST_CONFIG_PATH, locate_config_examples
 
 _LOG = logging.getLogger(__name__)
 _LOG.setLevel(logging.DEBUG)
@@ -39,6 +39,14 @@ configs = locate_config_examples(
     filter_configs,
 )
 assert configs
+
+test_configs = locate_config_examples(
+    BUILTIN_TEST_CONFIG_PATH,
+    CONFIG_TYPE,
+    filter_configs,
+)
+assert test_configs
+configs.extend(test_configs)
 
 
 @pytest.mark.parametrize("config_path", configs)
