@@ -22,6 +22,12 @@ cat /tmp/conda-tmp/mlos.yml \
     | egrep -v -e '--editable' -e '^\s*$' \
     | tee /tmp/conda-tmp/mlos_deps.yml
 
+# Use a virtual environment to ensure that we have up to date python libraries.
+python3 -m venv /tmp/mlos-venv
+source /tmp/mlos-venv/bin/activate
+python3 -m pip install -U pip
+python3 -m pip install -U setuptools wheel
+
 # Try to grab the requirements.txt files for the python packages.
 tmpdir=$(mktemp -d)
 get_python_deps() {
