@@ -15,7 +15,7 @@ from mlos_bench.schedulers.base_scheduler import Scheduler
 from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.sql.storage import SqlStorage
-from mlos_bench.tests.config import locate_config_examples
+from mlos_bench.tests.config import locate_config_examples, BUILTIN_TEST_CONFIG_PATH
 from mlos_bench.util import get_class_from_name
 
 mock_opt = mlos_bench.tests.optimizers.fixtures.mock_opt
@@ -42,6 +42,14 @@ configs = locate_config_examples(
     filter_configs,
 )
 assert configs
+
+test_configs = locate_config_examples(
+    BUILTIN_TEST_CONFIG_PATH,
+    CONFIG_TYPE,
+    filter_configs,
+)
+# assert test_configs
+configs.extend(test_configs)
 
 
 @pytest.mark.parametrize("config_path", configs)
