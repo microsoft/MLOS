@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>64", "setuptools-scm>=8.1.0", "wheel"]
+requires = ["setuptools>=77.0.0", "setuptools-scm>=8.1.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -13,7 +13,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Intended Audience :: System Administrators",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
@@ -21,7 +20,8 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 ]
-license = { "text" = "MIT" }
+license = "MIT"
+#license-files = ["LICENSE.txt", "NOTICE"]
 requires-python = ">=3.10"
 authors = [
     { name = "Microsoft", email = "mlos-maintainers@service.microsoft.com" },
@@ -54,9 +54,3 @@ exclude = ["*.tests", "*.tests.*"]
 
 [tool.setuptools.package-data]
 mlos_core = ["py.typed", "**/*.pyi"]
-
-[tool.distutils.bdist_wheel]
-# Command option bdist_wheel.universal is not defined
-#universal = 1
-# https://github.com/pypa/wheel/issues/582
-py-limited-api = "cp38"

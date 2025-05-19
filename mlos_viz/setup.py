@@ -89,4 +89,5 @@ setup(
     ],
     extras_require=extra_requires,
     **_get_long_desc_from_readme("https://github.com/microsoft/MLOS/tree/main/mlos_viz"),
+    options={"bdist_wheel": {"py_limited_api": "cp310"}},
 )

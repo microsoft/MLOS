@@ -109,4 +109,5 @@ setup(
     ],  # NOTE: For now sqlite is a fallback storage backend, so we always install it.
     extras_require=extra_requires,
     **_get_long_desc_from_readme("https://github.com/microsoft/MLOS/tree/main/mlos_bench"),
+    options={"bdist_wheel": {"py_limited_api": "cp310"}},
 )
