@@ -24,7 +24,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 FROM mcr.microsoft.com/vscode/devcontainers/base AS deps-prep
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends \
-        python3-minimal python3-setuptools
+        python3-minimal python3-venv
 COPY --chown=vscode . /tmp/conda-tmp/
 RUN /tmp/conda-tmp/prep-deps-files.sh \
     && ls -l /tmp/conda-tmp/ # && cat /tmp/conda-tmp/combined.requirements.txt /tmp/conda-tmp/mlos_deps.yml
