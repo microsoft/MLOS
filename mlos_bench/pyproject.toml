@@ -71,9 +71,3 @@ mlos_bench = [
     "config/**/*.cmd",
     "config/**/*.ps1",
 ]
-
-[tool.distutils.bdist_wheel]
-# Command option bdist_wheel.universal is not defined
-#universal = 1
-# https://github.com/pypa/wheel/issues/582
-py-limited-api = "cp38"
