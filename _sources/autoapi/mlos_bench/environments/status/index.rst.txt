@@ -9,6 +9,14 @@ mlos_bench.environments.status
 
 
 
+Attributes
+----------
+
+.. autoapisummary::
+
+   mlos_bench.environments.status.COMPLETED_STATUSES
+
+
 Classes
 -------
 
@@ -28,7 +36,15 @@ Module Contents
    Enum for the status of the benchmark/environment Trial or Experiment.
 
 
-   .. py:method:: from_str(status_str: str) -> Status
+   .. py:method:: completed_statuses() -> frozenset[Status]
+      :staticmethod:
+
+
+      Get the set of :py:data:`.COMPLETED_STATUSES`.
+
+
+
+   .. py:method:: from_str(status_str: Any) -> Status
       :staticmethod:
 
 
@@ -46,7 +62,7 @@ Module Contents
    .. py:method:: is_completed() -> bool
 
       Check if the status of the benchmark/environment Trial or Experiment is one
-      of {SUCCEEDED, CANCELED, FAILED, TIMED_OUT}.
+      of :py:data:`.COMPLETED_STATUSES`.
 
 
 
@@ -74,6 +90,13 @@ Module Contents
 
       Check if the status of the benchmark/environment Trial or Experiment is
       READY.
+
+
+
+   .. py:method:: is_running() -> bool
+
+      Check if the status of the benchmark/environment Trial or Experiment is
+      RUNNING.
 
 
 
@@ -130,4 +153,8 @@ Module Contents
       :value: 0
 
 
+
+.. py:data:: COMPLETED_STATUSES
+
+   The set of completed statuses.
 
