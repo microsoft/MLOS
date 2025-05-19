@@ -11,7 +11,7 @@ from mlos_bench.config.schemas.config_schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.composite_env import CompositeEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
-from mlos_bench.tests.config import locate_config_examples, BUILTIN_TEST_CONFIG_PATH
+from mlos_bench.tests.config import BUILTIN_TEST_CONFIG_PATH, locate_config_examples
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)

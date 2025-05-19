@@ -15,7 +15,7 @@ from mlos_bench.schedulers.base_scheduler import Scheduler
 from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.sql.storage import SqlStorage
-from mlos_bench.tests.config import locate_config_examples, BUILTIN_TEST_CONFIG_PATH
+from mlos_bench.tests.config import BUILTIN_TEST_CONFIG_PATH, locate_config_examples
 from mlos_bench.util import get_class_from_name
 
 mock_opt = mlos_bench.tests.optimizers.fixtures.mock_opt

@@ -10,7 +10,7 @@ import pytest
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.services.config_persistence import ConfigPersistenceService
-from mlos_bench.tests.config import locate_config_examples, BUILTIN_TEST_CONFIG_PATH
+from mlos_bench.tests.config import BUILTIN_TEST_CONFIG_PATH, locate_config_examples
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import get_class_from_name
 
