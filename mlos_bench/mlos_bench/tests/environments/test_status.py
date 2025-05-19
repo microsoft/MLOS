@@ -60,7 +60,7 @@ def test_status_from_str_valid(input_str: str, expected_status: Status) -> None:
     if input_str.isdigit():
         # Also test the numeric representation
         assert (
-            Status.from_str(int(input_str)) == expected_status  # type: ignore
+            Status.from_str(int(input_str)) == expected_status
         ), f"Expected {expected_status} for input: {int(input_str)}"
 
 
@@ -79,7 +79,9 @@ def test_status_from_str_valid(input_str: str, expected_status: Status) -> None:
     ],
 )
 def test_status_from_str_invalid(invalid_input: Any) -> None:
-    """Test :py:meth:`Status.from_str` raises ValueError for invalid input."""
+    """Test :py:meth:`Status.from_str` returns :py:attr:`Status.UNKNOWN` for invalid
+    input.
+    """
     assert (
         Status.from_str(invalid_input) == Status.UNKNOWN
     ), f"Expected Status.UNKNOWN for invalid input: {invalid_input}"

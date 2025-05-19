@@ -52,7 +52,7 @@ class Status(enum.Enum):
 
     # Class based accessor method to avoid circular import
     @staticmethod
-    def completed_statuses() -> set["Status"]:
+    def completed_statuses() -> frozenset["Status"]:
         """Get the set of :py:data:`.COMPLETED_STATUSES`."""
         return COMPLETED_STATUSES
 
@@ -105,10 +105,12 @@ class Status(enum.Enum):
         return self == Status.TIMED_OUT
 
 
-COMPLETED_STATUSES = {
-    Status.SUCCEEDED,
-    Status.CANCELED,
-    Status.FAILED,
-    Status.TIMED_OUT,
-}
+COMPLETED_STATUSES = frozenset(
+    {
+        Status.SUCCEEDED,
+        Status.CANCELED,
+        Status.FAILED,
+        Status.TIMED_OUT,
+    }
+)
 """The set of completed statuses."""
