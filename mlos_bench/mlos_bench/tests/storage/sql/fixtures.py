@@ -6,6 +6,7 @@
 
 import json
 import os
+import sys
 import tempfile
 from collections.abc import Generator
 from random import seed as rand_seed
@@ -30,6 +31,10 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 # pylint: disable=redefined-outer-name
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="File-based SQLite storage can fail on Windows due to file-locking in parallel tests.",
+)
 @pytest.fixture
 def sqlite_storage() -> Generator[SqlStorage]:
     """
