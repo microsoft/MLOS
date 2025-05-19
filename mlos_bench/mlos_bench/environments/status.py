@@ -6,6 +6,7 @@
 
 import enum
 import logging
+from typing import Any
 
 _LOG = logging.getLogger(__name__)
 
@@ -23,15 +24,18 @@ class Status(enum.Enum):
     TIMED_OUT = 7
 
     @staticmethod
-    def from_str(status_str: str) -> "Status":
+    def from_str(status_str: Any) -> "Status":
         """Convert a string to a Status enum."""
+        if not isinstance(status_str, str):
+            _LOG.warning("Expected type %s for status: %s", type(status_str), status_str)
+            status_str = str(status_str)
         if status_str.isdigit():
             try:
                 return Status(int(status_str))
             except ValueError:
                 _LOG.warning("Unknown status: %d", int(status_str))
         try:
-            status_str = status_str.upper()
+            status_str = status_str.upper().strip()
             return Status[status_str]
         except KeyError:
             _LOG.warning("Unknown status: %s", status_str)
@@ -46,16 +50,17 @@ class Status(enum.Enum):
             Status.SUCCEEDED,
         }
 
+    # Class based accessor method to avoid circular import
+    @staticmethod
+    def completed_statuses() -> frozenset["Status"]:
+        """Get the set of :py:data:`.COMPLETED_STATUSES`."""
+        return COMPLETED_STATUSES
+
     def is_completed(self) -> bool:
         """Check if the status of the benchmark/environment Trial or Experiment is one
-        of {SUCCEEDED, CANCELED, FAILED, TIMED_OUT}.
+        of :py:data:`.COMPLETED_STATUSES`.
         """
-        return self in {
-            Status.SUCCEEDED,
-            Status.CANCELED,
-            Status.FAILED,
-            Status.TIMED_OUT,
-        }
+        return self in COMPLETED_STATUSES
 
     def is_pending(self) -> bool:
         """Check if the status of the benchmark/environment Trial or Experiment is
@@ -68,6 +73,12 @@ class Status(enum.Enum):
         READY.
         """
         return self == Status.READY
+
+    def is_running(self) -> bool:
+        """Check if the status of the benchmark/environment Trial or Experiment is
+        RUNNING.
+        """
+        return self == Status.RUNNING
 
     def is_succeeded(self) -> bool:
         """Check if the status of the benchmark/environment Trial or Experiment is
@@ -92,3 +103,14 @@ class Status(enum.Enum):
         TIMED_OUT.
         """
         return self == Status.TIMED_OUT
+
+
+COMPLETED_STATUSES = frozenset(
+    {
+        Status.SUCCEEDED,
+        Status.CANCELED,
+        Status.FAILED,
+        Status.TIMED_OUT,
+    }
+)
+"""The set of completed statuses."""
