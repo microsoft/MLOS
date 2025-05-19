@@ -52,7 +52,7 @@ class Status(enum.Enum):
 
     # Class based accessor method to avoid circular import
     @staticmethod
-    def completed_statuses() -> set["Status"]:
+    def completed_statuses() -> frozenset["Status"]:
         """Get the set of :py:data:`.COMPLETED_STATUSES`."""
         return COMPLETED_STATUSES
 

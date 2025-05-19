@@ -60,7 +60,7 @@ def test_status_from_str_valid(input_str: str, expected_status: Status) -> None:
     if input_str.isdigit():
         # Also test the numeric representation
         assert (
-            Status.from_str(int(input_str)) == expected_status  # type: ignore
+            Status.from_str(int(input_str)) == expected_status
         ), f"Expected {expected_status} for input: {int(input_str)}"
 
 
