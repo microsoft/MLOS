@@ -29,7 +29,7 @@ def test_schedule_trial(
     exp_storage: Storage.Experiment,
     tunable_groups: TunableGroups,
 ) -> None:
-    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals,too-many-statements
     """Schedule several trials for future execution and retrieve them later at certain
     timestamps.
     """
