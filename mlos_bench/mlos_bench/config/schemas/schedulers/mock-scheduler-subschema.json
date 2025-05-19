@@ -14,7 +14,7 @@
             "type": "object",
             "allOf": [
                 {
-                    "$ref": "../base-scheduler-subschema.json#/$defs/base_scheduler_config"
+                    "$ref": "base-scheduler-subschema.json#/$defs/base_scheduler_config"
                 },
                 {
                     "type": "object",
@@ -29,7 +29,6 @@
                                         "type": "string"
                                     },
                                     "status": {
-                                        "type": "enum",
                                         "enum": [
                                             null,
                                             "UNKNOWN",

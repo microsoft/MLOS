@@ -9,7 +9,7 @@
     "allOf": [
         {
             "$comment": "All scheduler subschemas support these base properties.",
-            "$ref": "../base-scheduler-subschema.json"
+            "$ref": "./base-scheduler-subschema.json"
         },
         {
             "$comment": "The set of known scheduler subschemas.",

@@ -16,7 +16,7 @@
             "$comment": "No extra properties supported by SyncScheduler.",
             "allOf": [
                 {
-                    "$ref": "../base-scheduler-subschema.json#/$defs/base_scheduler_config"
+                    "$ref": "base-scheduler-subschema.json#/$defs/base_scheduler_config"
                 }
             ],
             "minProperties": 1,
