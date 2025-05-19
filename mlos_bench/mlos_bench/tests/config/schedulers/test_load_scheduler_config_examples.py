@@ -54,6 +54,7 @@ def test_load_scheduler_config_examples(
     mock_opt: MockOptimizer,
 ) -> None:
     """Tests loading a config example."""
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     config = config_loader_service.load_config(config_path, ConfigSchema.SCHEDULER)
     assert isinstance(config, dict)
     cls = get_class_from_name(config["class"])
