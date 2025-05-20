@@ -1,0 +1,69 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/schedulers/base-scheduler-subschema.json",
+    "title": "mlos_bench base Scheduler config schema definitions",
+    "description": "mlos_bench base Scheduler config schema definitions for all Scheduler types.",
+
+    "$defs": {
+        "base_scheduler_config": {
+            "$comment": "config properties common to all Scheduler types.",
+            "description": "The scheduler-specific config.",
+            "type": "object",
+            "minProperties": 1,
+            "properties": {
+                "experiment_id": {
+                    "$ref": "../cli/common-defs-subschemas.json#/$defs/experiment_id"
+                },
+                "trial_id": {
+                    "$ref": "../cli/common-defs-subschemas.json#/$defs/trial_id"
+                },
+                "config_id": {
+                    "$ref": "../cli/common-defs-subschemas.json#/$defs/config_id"
+                },
+                "teardown": {
+                    "description": "Whether to teardown the experiment after running it.",
+                    "type": "boolean"
+                },
+                "max_trials": {
+                    "description": "Max. number of trials to run. Use -1 or 0 for unlimited.",
+                    "type": "integer",
+                    "minimum": -1,
+                    "examples": [50, -1]
+                },
+                "trial_config_repeat_count": {
+                    "description": "Number of times to repeat a config.",
+                    "type": "integer",
+                    "minimum": 1,
+                    "examples": [3, 5]
+                }
+            }
+        }
+    },
+
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "description": "The schema to use for validating the scheduler config (accepts both URLs and local paths).",
+            "type": "string",
+            "$comment": "This is optional, but if provided, should match the name of the root schema file.",
+            "pattern": "/schemas/schedulers/scheduler-schema.json$"
+        },
+
+        "description": {
+            "description": "Optional description of the config.",
+            "type": "string"
+        },
+
+        "class": {
+            "description": "The name of the scheduler class to use.",
+            "type": "string",
+            "$comment": "Exact matches are handled elsewhere.",
+            "pattern": "^mlos_bench[.]schedulers[.]"
+        },
+
+        "config": {
+            "$ref": "#/$defs/base_scheduler_config"
+        }
+    },
+    "required": ["class"]
+}
