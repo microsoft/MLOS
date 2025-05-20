@@ -15,6 +15,9 @@
             "$comment": "The set of known Scheduler subschemas.  Add others as needed.",
             "oneOf": [
                 {
+                    "$ref": "./mock-scheduler-subschema.json"
+                },
+                {
                     "$ref": "./sync-scheduler-subschema.json"
                 }
             ]

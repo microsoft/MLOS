@@ -1,0 +1,31 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/schedulers/scheduler-schema.json",
+    "class": "mlos_bench.tests.schedulers.mock_scheduler.MockScheduler",
+    "config": {
+        "trial_config_repeat_count": 3,
+        "teardown": false,
+        "experiment_id": "MyExperimentName",
+        "config_id": 1,
+        "trial_id": 1,
+        "max_trials": 2,
+
+        "mock_trial_data": [
+            {
+                "status": "SUCCEEDED",
+                "trial_id": 1,
+                "metrics": {
+                    "score": 0.9,
+                    "color": "green"
+                }
+            },
+            {
+                "status": "FAILED",
+                "trial_id": 2,
+                "metrics": {
+                    "score": 0.1,
+                    "color": "red"
+                }
+            }
+        ]
+    }
+}

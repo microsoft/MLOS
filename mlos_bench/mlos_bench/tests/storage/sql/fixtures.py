@@ -4,6 +4,9 @@
 #
 """Test fixtures for mlos_bench storage."""
 
+import json
+import os
+import tempfile
 from collections.abc import Generator
 from random import seed as rand_seed
 
@@ -15,6 +18,7 @@ from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.storage import SqlStorage
+from mlos_bench.storage.storage_factory import from_config
 from mlos_bench.tests import SEED
 from mlos_bench.tests.storage import (
     CONFIG_TRIAL_REPEAT_COUNT,
@@ -24,6 +28,38 @@ from mlos_bench.tests.storage import (
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
+
+
+@pytest.fixture
+def sqlite_storage() -> Generator[SqlStorage]:
+    """
+    Fixture for file based SQLite storage in a temporary directory.
+
+    Yields
+    ------
+    Generator[SqlStorage]
+
+    Notes
+    -----
+    Can't be used in parallel tests on Windows.
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        db_path = os.path.join(tmpdir, "mlos_bench.sqlite")
+        config_str = json.dumps(
+            {
+                "class": "mlos_bench.storage.sql.storage.SqlStorage",
+                "config": {
+                    "drivername": "sqlite",
+                    "database": db_path,
+                    "lazy_schema_create": False,
+                },
+            }
+        )
+
+        storage = from_config(config_str)
+        assert isinstance(storage, SqlStorage)
+        storage.update_schema()
+        yield storage
 
 
 @pytest.fixture

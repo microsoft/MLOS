@@ -58,7 +58,7 @@
             "description": "The name of the scheduler class to use.",
             "type": "string",
             "$comment": "Exact matches are handled elsewhere.",
-            "pattern": "^mlos_bench[.]schedulers[.]"
+            "pattern": "^mlos_bench([.]tests)?[.]schedulers[.]"
         },
 
         "config": {

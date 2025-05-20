@@ -14,7 +14,7 @@
             "type": "object",
             "allOf": [
                 {
-                    "$ref": "../base-scheduler-subschema.json#/$defs/base_scheduler_config"
+                    "$ref": "base-scheduler-subschema.json#/$defs/base_scheduler_config"
                 },
                 {
                     "type": "object",
@@ -25,11 +25,17 @@
                             "items": {
                                 "type": "object",
                                 "properties": {
+                                    "comments": {
+                                        "type": "string",
+                                        "description": "Optional comments about the trial status being reported."
+                                    },
                                     "trial_id": {
-                                        "type": "string"
+                                        "type": "integer",
+                                        "description": "Unique identifier for the trial.",
+                                        "examples": [1, 2, 3],
+                                        "minimum": 1
                                     },
                                     "status": {
-                                        "type": "enum",
                                         "enum": [
                                             null,
                                             "UNKNOWN",
@@ -42,9 +48,27 @@
                                             "TIMED_OUT"
                                         ]
                                     },
-                                    "score": "number"
+                                    "metrics": {
+                                        "type": "object",
+                                        "description": "A dictionary of metrics for the trial.",
+                                        "additionalProperties": {
+                                            "type": ["number", "string", "boolean"],
+                                            "description": "The value of the metric."
+                                        },
+                                        "examples": [
+                                            {
+                                                "score": 0.95,
+                                                "color": "green"
+                                            },
+                                            {
+                                                "accuracy": 0.85,
+                                                "loss": 0.15
+                                            }
+                                        ]
+                                    }
                                 },
-                                "required": ["trial_id", "status"]
+                                "required": ["trial_id", "status"],
+                                "additionalProperties": false
                             }
                         }
                     },
