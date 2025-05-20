@@ -11,7 +11,8 @@ from typing import Any
 
 from pytz import UTC
 
-from mlos_bench.schedulers.base_scheduler import Optimizer, Scheduler
+from mlos_bench.schedulers.base_scheduler import Scheduler
+from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.storage.base_storage import Storage
 
