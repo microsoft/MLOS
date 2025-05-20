@@ -242,8 +242,8 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         self._in_context = False
         return False  # Do not suppress exceptions
 
-    def start(self) -> None:
-        """Start the scheduling loop."""
+    def _prepare_start(self) -> bool:
+        """Prepare the scheduler for starting."""
         assert self.experiment is not None
         _LOG.info(
             "START: Experiment: %s Env: %s Optimizer: %s",
@@ -262,20 +262,38 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         is_warm_up: bool = self.optimizer.supports_preload
         if not is_warm_up:
             _LOG.warning("Skip pending trials and warm-up: %s", self.optimizer)
+        return is_warm_up
 
+    def start(self) -> None:
+        """Start the scheduling loop."""
+        assert self.experiment is not None
+        is_warm_up = self._prepare_start()
         not_done: bool = True
         while not_done:
-            _LOG.info("Optimization loop: Last trial ID: %d", self._last_trial_id)
-            self.run_schedule(is_warm_up)
-            not_done = self.add_new_optimizer_suggestions()
-            self.assign_trial_runners(
-                self.experiment.pending_trials(
-                    datetime.now(UTC),
-                    running=False,
-                    trial_runner_assigned=False,
-                )
-            )
+            not_done = self._execute_scheduling_step(is_warm_up)
             is_warm_up = False
+
+    def _execute_scheduling_step(self, is_warm_up: bool) -> bool:
+        """
+        Perform a single scheduling step.
+
+        Notes
+        -----
+        This method is called by the :py:meth:`Scheduler.start` method.
+        It is split out mostly to allow for easier testing with MockSchedulers.
+        """
+        assert self.experiment is not None
+        _LOG.info("Optimization loop: Last trial ID: %d", self._last_trial_id)
+        self.run_schedule(is_warm_up)
+        not_done = self.add_new_optimizer_suggestions()
+        self.assign_trial_runners(
+            self.experiment.pending_trials(
+                datetime.now(UTC),
+                running=False,
+                trial_runner_assigned=False,
+            )
+        )
+        return not_done
 
     def teardown(self) -> None:
         """
