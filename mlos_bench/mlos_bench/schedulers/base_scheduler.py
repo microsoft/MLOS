@@ -27,8 +27,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class Scheduler(ContextManager, metaclass=ABCMeta):
-    # pylint: disable=too-many-instance-attributes
-    # pylint: disable=too-many-public-methods
+    # pylint: disable=too-many-instance-attributes,too-many-public-methods
     """Base class for the optimization loop scheduling policies."""
 
     def __init__(  # pylint: disable=too-many-arguments
