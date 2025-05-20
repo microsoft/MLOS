@@ -19,7 +19,6 @@ from mlos_bench.tests.config import BUILTIN_TEST_CONFIG_PATH, locate_config_exam
 from mlos_bench.util import get_class_from_name
 
 mock_opt = mlos_bench.tests.optimizers.fixtures.mock_opt
-
 storage = mlos_bench.tests.storage.sql.fixtures.storage
 
 
