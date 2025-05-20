@@ -23,7 +23,6 @@ mock_opt = mlos_bench.tests.optimizers.fixtures.mock_opt
 storage = mlos_bench.tests.storage.sql.fixtures.storage
 
 
-
 _LOG = logging.getLogger(__name__)
 _LOG.setLevel(logging.DEBUG)
 
@@ -60,9 +59,7 @@ def test_load_scheduler_config_examples(
     config_path: str,
     mock_env_config_path: str,
     trial_runners: list[TrialRunner],
-
     storage: SqlStorage,
-
     mock_opt: MockOptimizer,
 ) -> None:
     """Tests loading a config example."""
@@ -82,9 +79,7 @@ def test_load_scheduler_config_examples(
         global_config=global_config,
         trial_runners=trial_runners,
         optimizer=mock_opt,
-
         storage=storage,
-
         root_env_config=mock_env_config_path,
     )
     assert scheduler_inst is not None
