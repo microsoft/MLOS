@@ -91,6 +91,12 @@ def configuration_space() -> ConfigurationSpace:
                 weights=[0.5, 0.5],
                 default_value=TunableValueKind.SPECIAL.value,
             ),
+            UniformIntegerHyperparameter(
+                name="123",
+                lower=1,
+                upper=3,
+                default_value=2,
+            ),
         ]
     )
     spaces.add(

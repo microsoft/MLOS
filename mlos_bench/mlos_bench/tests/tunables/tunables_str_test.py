@@ -17,6 +17,17 @@ def test_tunable_groups_str(tunable_groups: TunableGroups) -> None:
     # Same as `tunable_groups` (defined in the `conftest.py` file), but in different order:
     tunables_other = TunableGroups(
         {
+            "integer_keyed": {
+                "cost": 0,
+                "params": {
+                    "123": {
+                        "description": "A parameter with an integer key",
+                        "type": "int",
+                        "default": 2,
+                        "range": [1, 3],
+                    }
+                },
+            },
             "kernel": {
                 "cost": 1,
                 "params": {
