@@ -54,8 +54,8 @@
             </div>
         </aside>
         <h2>
-            <span class="text">8 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">8<span class="text"> run</span></button>
+            <span class="text">9 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">9<span class="text"> run</span></button>
             <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">0<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_6d460002ba244c5c_exp_context_test_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.8.0">coverage.py v7.8.0</a>,
-            created at 2025-05-20 00:50 +0000
+            created at 2025-05-20 00:58 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -94,12 +94,13 @@
     <p class="pln"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t"><span class="com"># Expose some of those as local names so they can be picked up as fixtures by pytest.</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t"><span class="nam">storage</span> <span class="op">=</span> <span class="nam">sql_storage_fixtures</span><span class="op">.</span><span class="nam">storage</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t"><span class="nam">exp_storage</span> <span class="op">=</span> <span class="nam">sql_storage_fixtures</span><span class="op">.</span><span class="nam">exp_storage</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t"><span class="nam">exp_no_tunables_storage</span> <span class="op">=</span> <span class="nam">sql_storage_fixtures</span><span class="op">.</span><span class="nam">exp_no_tunables_storage</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t"><span class="nam">mixed_numerics_exp_storage</span> <span class="op">=</span> <span class="nam">sql_storage_fixtures</span><span class="op">.</span><span class="nam">mixed_numerics_exp_storage</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t"><span class="nam">exp_data</span> <span class="op">=</span> <span class="nam">sql_storage_fixtures</span><span class="op">.</span><span class="nam">exp_data</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t"><span class="nam">exp_no_tunables_data</span> <span class="op">=</span> <span class="nam">sql_storage_fixtures</span><span class="op">.</span><span class="nam">exp_no_tunables_data</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t"><span class="nam">mixed_numerics_exp_data</span> <span class="op">=</span> <span class="nam">sql_storage_fixtures</span><span class="op">.</span><span class="nam">mixed_numerics_exp_data</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t"><span class="nam">sqlite_storage</span> <span class="op">=</span> <span class="nam">sql_storage_fixtures</span><span class="op">.</span><span class="nam">sqlite_storage</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t"><span class="nam">exp_storage</span> <span class="op">=</span> <span class="nam">sql_storage_fixtures</span><span class="op">.</span><span class="nam">exp_storage</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t"><span class="nam">exp_no_tunables_storage</span> <span class="op">=</span> <span class="nam">sql_storage_fixtures</span><span class="op">.</span><span class="nam">exp_no_tunables_storage</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t"><span class="nam">mixed_numerics_exp_storage</span> <span class="op">=</span> <span class="nam">sql_storage_fixtures</span><span class="op">.</span><span class="nam">mixed_numerics_exp_storage</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t"><span class="nam">exp_data</span> <span class="op">=</span> <span class="nam">sql_storage_fixtures</span><span class="op">.</span><span class="nam">exp_data</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t"><span class="nam">exp_no_tunables_data</span> <span class="op">=</span> <span class="nam">sql_storage_fixtures</span><span class="op">.</span><span class="nam">exp_no_tunables_data</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t"><span class="nam">mixed_numerics_exp_data</span> <span class="op">=</span> <span class="nam">sql_storage_fixtures</span><span class="op">.</span><span class="nam">mixed_numerics_exp_data</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -109,7 +110,7 @@
             <a class="nav" href="z_6d460002ba244c5c_exp_context_test_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.8.0">coverage.py v7.8.0</a>,
-            created at 2025-05-20 00:50 +0000
+            created at 2025-05-20 00:58 +0000
         </p>
     </div>
 </footer>
