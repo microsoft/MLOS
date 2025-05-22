@@ -248,7 +248,7 @@ class MockEnv(Environment):
 
         Note
         ----
-        This method must be called after the base :py:meth:`Environment.setup`
+        This method must be called after the base :py:meth:`.Environment.setup`
         method is called to ensure the current ``trial_id`` is set.
         """
         trial_id = self.current_trial_id
