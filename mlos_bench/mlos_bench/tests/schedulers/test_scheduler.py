@@ -100,7 +100,7 @@ def test_scheduler(
         scheduler.start()
         scheduler.teardown()
 
-    # Now check the results.
+    # Now check the overall results.
     # TODO:
     # Check the overall results:
     # 1. Check the results in storage.
