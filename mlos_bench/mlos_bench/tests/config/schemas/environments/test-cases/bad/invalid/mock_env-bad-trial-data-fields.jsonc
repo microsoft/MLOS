@@ -1,0 +1,24 @@
+{
+    "class": "mlos_bench.environments.mock_env.MockEnv",
+    "config": {
+        "mock_trial_data": {
+            "1": {
+                "run": {
+                    // bad types
+                    "status": null,
+                    "metrics": [],
+                    "exception": null,
+                    "sleep": "1",
+                },
+                // missing fields
+                "setup": {},
+                "teardown": {
+                    "status": "UNKNOWN",
+                    "metrics": {
+                        "unexpected": "field"
+                    }
+                }
+            }
+        }
+    }
+}
