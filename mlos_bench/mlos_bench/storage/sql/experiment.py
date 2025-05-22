@@ -188,7 +188,7 @@ class Experiment(Storage.Experiment):
             status: list[Status] = []
 
             for trial in cur_trials.fetchall():
-                stat = Status.from_str(trial.status)
+                stat = Status.parse(trial.status)
                 status.append(stat)
                 trial_ids.append(trial.trial_id)
                 configs.append(
@@ -272,7 +272,7 @@ class Experiment(Storage.Experiment):
                 config_id=trial.config_id,
                 trial_runner_id=trial.trial_runner_id,
                 opt_targets=self._opt_targets,
-                status=Status.from_str(trial.status),
+                status=Status.parse(trial.status),
                 restoring=True,
                 config=config,
             )
@@ -330,7 +330,7 @@ class Experiment(Storage.Experiment):
                     config_id=trial.config_id,
                     trial_runner_id=trial.trial_runner_id,
                     opt_targets=self._opt_targets,
-                    status=Status.from_str(trial.status),
+                    status=Status.parse(trial.status),
                     restoring=True,
                     config=config,
                 )

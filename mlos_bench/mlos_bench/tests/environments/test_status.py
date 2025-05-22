@@ -51,16 +51,16 @@ def test_status_from_str_valid(input_str: str, expected_status: Status) -> None:
         Expected Status enum value.
     """
     assert (
-        Status.from_str(input_str) == expected_status
+        Status.parse(input_str) == expected_status
     ), f"Expected {expected_status} for input: {input_str}"
     # Check lowercase representation
     assert (
-        Status.from_str(input_str.lower()) == expected_status
+        Status.parse(input_str.lower()) == expected_status
     ), f"Expected {expected_status} for input: {input_str.lower()}"
     if input_str.isdigit():
         # Also test the numeric representation
         assert (
-            Status.from_str(int(input_str)) == expected_status
+            Status.parse(int(input_str)) == expected_status
         ), f"Expected {expected_status} for input: {int(input_str)}"
 
 
@@ -83,7 +83,7 @@ def test_status_from_str_invalid(invalid_input: Any) -> None:
     input.
     """
     assert (
-        Status.from_str(invalid_input) == Status.UNKNOWN
+        Status.parse(invalid_input) == Status.UNKNOWN
     ), f"Expected Status.UNKNOWN for invalid input: {invalid_input}"
 
 
