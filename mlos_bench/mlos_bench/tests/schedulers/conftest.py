@@ -9,6 +9,7 @@ import json
 import re
 
 import pytest
+from pytest import FixtureRequest
 
 from mlos_bench.environments.mock_env import MockEnv
 from mlos_bench.schedulers.trial_runner import TrialRunner
@@ -68,7 +69,7 @@ def mock_env_config() -> dict:
 
 
 @pytest.fixture
-def global_config(request) -> dict:
+def global_config(request: FixtureRequest) -> dict:
     """A global config for a MockEnv."""
     test_name = request.node.name
     test_name = re.sub(r"[^a-zA-Z0-9]", "_", test_name)

@@ -6,7 +6,6 @@
 
 import sys
 from logging import warning
-from unittest.mock import patch
 
 import pytest
 
@@ -38,7 +37,6 @@ def create_scheduler(
     """Create a Scheduler instance using trial_runners, mock_opt, and sqlite_storage
     fixtures.
     """
-
     env = trial_runners[0].environment
     assert isinstance(env, MockEnv), "Environment is not a MockEnv instance."
     max_trials = max(trial_id for trial_id in env.mock_trial_data.keys())
