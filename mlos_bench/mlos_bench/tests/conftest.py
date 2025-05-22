@@ -8,8 +8,10 @@ import os
 import sys
 from collections.abc import Generator
 from typing import Any
+import re
 
 import pytest
+from pytest import FixtureRequest
 from fasteners import InterProcessLock, InterProcessReaderWriterLock
 from pytest_docker.plugin import Services as DockerServices
 from pytest_docker.plugin import get_docker_services
@@ -30,7 +32,22 @@ covariant_group = tunable_groups_fixtures.covariant_group
 
 
 @pytest.fixture
-def mock_env(tunable_groups: TunableGroups) -> MockEnv:
+def mock_env_global_config(request: FixtureRequest) -> dict:
+    """A global config for a MockEnv."""
+    test_name = request.node.name
+    test_name = re.sub(r"[^a-zA-Z0-9]", "_", test_name)
+    experiment_id = f"TestExperiment-{test_name}"
+    return {
+        "experiment_id": experiment_id,
+        "trial_id": 1,
+    }
+
+
+@pytest.fixture
+def mock_env(
+    tunable_groups: TunableGroups,
+    mock_env_global_config: dict,
+) -> MockEnv:
     """Test fixture for MockEnv."""
     return MockEnv(
         name="Test Env",
@@ -41,11 +58,15 @@ def mock_env(tunable_groups: TunableGroups) -> MockEnv:
             "mock_env_metrics": ["score"],
         },
         tunables=tunable_groups,
+        global_config=mock_env_global_config,
     )
 
 
 @pytest.fixture
-def mock_env_no_noise(tunable_groups: TunableGroups) -> MockEnv:
+def mock_env_no_noise(
+    tunable_groups: TunableGroups,
+    mock_env_global_config: dict,
+) -> MockEnv:
     """Test fixture for MockEnv."""
     return MockEnv(
         name="Test Env No Noise",
@@ -56,6 +77,7 @@ def mock_env_no_noise(tunable_groups: TunableGroups) -> MockEnv:
             "mock_env_metrics": ["score", "other_score"],
         },
         tunables=tunable_groups,
+        global_config=mock_env_global_config,
     )
 
 

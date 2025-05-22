@@ -310,10 +310,12 @@ class MockEnv(Environment):
             time.sleep(mock_trial_data.run.sleep)
         if mock_trial_data.run.exception:
             raise RuntimeError(f"Mock trial data run exception: {mock_trial_data.run.exception}")
-        if mock_trial_data.run.metrics is None:
+        if mock_trial_data.run.metrics is not None:
+            metrics = mock_trial_data.run.metrics
+        else:
             # If no metrics are provided, generate them.
-            mock_trial_data.run.metrics = self._produce_metrics(self._run_random)
-        return (mock_trial_data.run.status, timestamp, mock_trial_data.run.metrics)
+            metrics = self._produce_metrics(self._run_random)
+        return (mock_trial_data.run.status, timestamp, metrics)
 
     def status(self) -> tuple[Status, datetime, list[tuple[datetime, str, Any]]]:
         """

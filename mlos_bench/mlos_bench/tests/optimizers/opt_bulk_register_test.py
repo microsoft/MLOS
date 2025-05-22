@@ -40,7 +40,12 @@ def mock_scores() -> list[dict[str, TunableValue] | None]:
 @pytest.fixture
 def mock_status() -> list[Status]:
     """Mock status values for earlier experiments."""
-    return [Status.FAILED, Status.SUCCEEDED, Status.SUCCEEDED, Status.SUCCEEDED]
+    return [
+        Status.FAILED,
+        Status.SUCCEEDED,
+        Status.SUCCEEDED,
+        Status.SUCCEEDED,
+    ]
 
 
 def _test_opt_update_min(

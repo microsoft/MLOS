@@ -84,7 +84,7 @@ def test_scheduler_with_mock_trial_data(
     trial_runners: list[TrialRunner],
     mock_opt: MockOptimizer,
     sqlite_storage: SqlStorage,
-    global_config: dict,
+    mock_env_global_config: dict,
 ) -> None:
     """
     Full integration test for Scheduler: runs trials, checks storage, optimizer
@@ -98,7 +98,7 @@ def test_scheduler_with_mock_trial_data(
         trial_runners,
         mock_opt,
         sqlite_storage,
-        global_config,
+        mock_env_global_config,
     )
 
     root_env = scheduler.root_environment

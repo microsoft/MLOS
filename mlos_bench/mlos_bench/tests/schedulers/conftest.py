@@ -6,10 +6,8 @@
 # pylint: disable=redefined-outer-name
 
 import json
-import re
 
 import pytest
-from pytest import FixtureRequest
 
 from mlos_bench.environments.mock_env import MockEnv
 from mlos_bench.schedulers.trial_runner import TrialRunner
@@ -38,7 +36,7 @@ def mock_env_config() -> dict:
             "mock_trial_data": {
                 "1": {
                     "run": {
-                        "sleep": 0.15,
+                        "sleep": 0.25,
                         "status": "SUCCEEDED",
                         "metrics": {
                             "score": 1.0,
@@ -47,7 +45,7 @@ def mock_env_config() -> dict:
                 },
                 "2": {
                     "run": {
-                        "sleep": 0.2,
+                        "sleep": 0.3,
                         "status": "SUCCEEDED",
                         "metrics": {
                             "score": 2.0,
@@ -56,7 +54,7 @@ def mock_env_config() -> dict:
                 },
                 "3": {
                     "run": {
-                        "sleep": 0.1,
+                        "sleep": 0.2,
                         "status": "SUCCEEDED",
                         "metrics": {
                             "score": 3.0,
@@ -65,18 +63,6 @@ def mock_env_config() -> dict:
                 },
             },
         },
-    }
-
-
-@pytest.fixture
-def global_config(request: FixtureRequest) -> dict:
-    """A global config for a MockEnv."""
-    test_name = request.node.name
-    test_name = re.sub(r"[^a-zA-Z0-9]", "_", test_name)
-    experiment_id = f"TestExperiment-{test_name}"
-    return {
-        "experiment_id": experiment_id,
-        "trial_id": 1,
     }
 
 
@@ -90,7 +76,7 @@ def mock_env_json_config(mock_env_config: dict) -> str:
 def mock_env(
     mock_env_json_config: str,
     tunable_groups: TunableGroups,
-    global_config: dict,
+    mock_env_global_config: dict,
 ) -> MockEnv:
     """A fixture to create a MockEnv instance using the mock_env_json_config."""
     config_loader_service = ConfigPersistenceService()
@@ -98,7 +84,7 @@ def mock_env(
         mock_env_json_config,
         tunable_groups,
         service=config_loader_service,
-        global_config=global_config,
+        global_config=mock_env_global_config,
     )
     assert isinstance(mock_env, MockEnv)
     return mock_env
@@ -108,16 +94,18 @@ def mock_env(
 def trial_runners(
     mock_env_json_config: str,
     tunable_groups: TunableGroups,
-    global_config: dict,
+    mock_env_global_config: dict,
 ) -> list[TrialRunner]:
     """A fixture to create a list of TrialRunner instances using the
     mock_env_json_config.
     """
-    config_loader_service = ConfigPersistenceService(global_config=global_config)
+    config_loader_service = ConfigPersistenceService(
+        global_config=mock_env_global_config,
+    )
     return TrialRunner.create_from_json(
         config_loader=config_loader_service,
         env_json=mock_env_json_config,
         tunable_groups=tunable_groups,
         num_trial_runners=NUM_TRIAL_RUNNERS,
-        global_config=global_config,
+        global_config=mock_env_global_config,
     )

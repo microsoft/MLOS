@@ -72,10 +72,11 @@ class MockOptimizer(TrackBestOptimizer):
         score: dict[str, TunableValue] | None = None,
     ) -> dict[str, float] | None:
         # Track the registered scores for testing and validation.
-        score = score or {}
         # Almost the same as _get_scores, but we don't adjust the direction here.
         scores: dict[str, TunableValue] = {
-            k: float(v) for k, v in score.items() if k in self._opt_targets and v is not None
+            k: float(v)
+            for k, v in (score or {}).items()
+            if k in self._opt_targets and v is not None
         }
         self._registered_scores.append(
             RegisteredScore(
