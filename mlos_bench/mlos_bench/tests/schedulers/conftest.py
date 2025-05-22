@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Pytest fixtures for mlos_bench.schedulers tests.
-"""
+"""Pytest fixtures for mlos_bench.schedulers tests."""
 # pylint: disable=redefined-outer-name
 
 import json
@@ -12,10 +10,9 @@ import json
 import pytest
 
 from mlos_bench.environments.mock_env import MockEnv
-from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.schedulers.trial_runner import TrialRunner
+from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.tunables.tunable_groups import TunableGroups
-
 
 NUM_TRIAL_RUNNERS = 4
 
@@ -109,7 +106,8 @@ def trial_runners(
     global_config: dict,
 ) -> list[TrialRunner]:
     """A fixture to create a list of TrialRunner instances using the
-    mock_env_json_config."""
+    mock_env_json_config.
+    """
     config_loader_service = ConfigPersistenceService(global_config=global_config)
     return TrialRunner.create_from_json(
         config_loader=config_loader_service,

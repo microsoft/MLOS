@@ -2,23 +2,21 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""
-Unit tests for :py:class:`mlos_bench.schedulers` and their internals.
-"""
+"""Unit tests for :py:class:`mlos_bench.schedulers` and their internals."""
 
-from unittest.mock import patch
 import sys
+from unittest.mock import patch
 
 import pytest
 
-from mlos_core.tests import get_all_concrete_subclasses
-from mlos_bench.environments.mock_env import MockEnv
-from mlos_bench.storage.sql.storage import SqlStorage
-from mlos_bench.schedulers.base_scheduler import Scheduler
-from mlos_bench.optimizers.mock_optimizer import MockOptimizer
-from mlos_bench.schedulers.trial_runner import TrialRunner
 import mlos_bench.tests.optimizers.fixtures as optimizers_fixtures
 import mlos_bench.tests.storage.sql.fixtures as sql_storage_fixtures
+from mlos_bench.environments.mock_env import MockEnv
+from mlos_bench.optimizers.mock_optimizer import MockOptimizer
+from mlos_bench.schedulers.base_scheduler import Scheduler
+from mlos_bench.schedulers.trial_runner import TrialRunner
+from mlos_bench.storage.sql.storage import SqlStorage
+from mlos_core.tests import get_all_concrete_subclasses
 
 mock_opt = optimizers_fixtures.mock_opt
 sqlite_storage = sql_storage_fixtures.sqlite_storage
@@ -33,8 +31,9 @@ def create_scheduler(
     sqlite_storage: SqlStorage,
     global_config: dict,
 ) -> Scheduler:
-    """Create a Scheduler instance using trial_runners, mock_opt, and
-    sqlite_storage fixtures."""
+    """Create a Scheduler instance using trial_runners, mock_opt, and sqlite_storage
+    fixtures.
+    """
 
     env = trial_runners[0].environment
     assert isinstance(env, MockEnv), "Environment is not a MockEnv instance."
