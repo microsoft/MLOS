@@ -231,7 +231,7 @@ class MockEnv(Environment):
         Gets mock trial data for the current trial ID.
 
         If no (or missing) mock trial data is found, a new instance of
-        MockTrialData is created from random data.
+        MockTrialData is created and later filled with random data.
 
         Note
         ----
@@ -262,7 +262,18 @@ class MockEnv(Environment):
             raise RuntimeError(
                 f"Mock trial data setup exception: {mock_trial_data.setup.exception}"
             )
-        return is_success and mock_trial_data.setup.status.is_ready()
+        return is_success
+
+    def teardown(self) -> None:
+        mock_trial_data = self.get_current_mock_trial_data()
+        if mock_trial_data.teardown.sleep:
+            _LOG.debug("Sleeping for %s seconds", mock_trial_data.teardown.sleep)
+            time.sleep(mock_trial_data.teardown.sleep)
+        if mock_trial_data.teardown.exception:
+            raise RuntimeError(
+                f"Mock trial data teardown exception: {mock_trial_data.teardown.exception}"
+            )
+        super().teardown()
 
     def run(self) -> tuple[Status, datetime, dict[str, TunableValue] | None]:
         """
@@ -286,7 +297,6 @@ class MockEnv(Environment):
             time.sleep(mock_trial_data.run.sleep)
         if mock_trial_data.run.exception:
             raise RuntimeError(f"Mock trial data run exception: {mock_trial_data.run.exception}")
-
         if mock_trial_data.run.metrics is None:
             # If no metrics are provided, generate them.
             mock_trial_data.run.metrics = self._produce_metrics(self._run_random)
@@ -316,9 +326,13 @@ class MockEnv(Environment):
             )
         if mock_trial_data.status.metrics is None:
             # If no metrics are provided, generate them.
+            # Note: we don't save these in the mock trial data as they may need
+            # to change to preserve backwards compatibility with previous tests.
             metrics = self._produce_metrics(self._status_random)
         else:
             # If metrics are provided, use them.
+            # Note: current implementation uses the same metrics for all status
+            # calls of this trial.
             metrics = mock_trial_data.status.metrics
         return (
             mock_trial_data.status.status,
