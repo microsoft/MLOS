@@ -8,6 +8,7 @@
         "**/__pycache__/": true,
         "**/node_modules/": true,
         "**/*.egg-info": true,
+        "mlos_*/build/": true,
         "doc/source/autoapi/": true,
         "doc/build/doctrees/": true,
         "doc/build/html/": true,

@@ -55,8 +55,9 @@ class Launcher:
             Other required_args values can also be pulled from shell environment
             variables.
 
-            For additional details, please see the website or the README.md files in
-            the source tree:
+            For additional details, please see the documentation website or the
+            README.md files in the source tree:
+            <https://microsoft.github.io/MLOS/autoapi/mlos_bench/environments/>
             <https://github.com/microsoft/MLOS/tree/main/mlos_bench/>
             """
         parser = argparse.ArgumentParser(description=f"{description} : {long_text}", epilog=epilog)
