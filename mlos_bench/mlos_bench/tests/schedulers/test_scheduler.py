@@ -5,7 +5,6 @@
 """Unit tests for :py:class:`mlos_bench.schedulers` and their internals."""
 
 import sys
-from logging import warning
 
 import pytest
 
@@ -21,8 +20,6 @@ from mlos_core.tests import get_all_concrete_subclasses
 
 mock_opt = optimizers_fixtures.mock_opt
 sqlite_storage = sql_storage_fixtures.sqlite_storage
-
-DEBUG_WARNINGS_ENABLED = False
 
 # pylint: disable=redefined-outer-name
 
@@ -54,45 +51,17 @@ def create_scheduler(
     )
 
 
-def debug_warn(*args: object) -> None:
-    """Optionally issue warnings for debugging."""
-    if DEBUG_WARNINGS_ENABLED:
-        warning(*args)
-
-
 def mock_opt_has_registered_trial_score(
     mock_opt: MockOptimizer,
     trial_data: TrialData,
 ) -> bool:
     """Check that the MockOptimizer has registered a given MockTrialData."""
-    # pylint: disable=consider-using-any-or-all
-    # Split out for easier debugging.
-    for registered_score in mock_opt.registered_scores:
-        match = True
-        if registered_score.status != trial_data.status:
-            match = False
-            debug_warn(
-                "Registered status %s does not match trial data %s.",
-                registered_score.status,
-                trial_data.results_dict,
-            )
-        elif registered_score.score != trial_data.results_dict:
-            debug_warn(
-                "Registered score %s does not match trial data %s.",
-                registered_score.score,
-                trial_data.results_dict,
-            )
-            match = False
-        elif registered_score.config.get_param_values() != trial_data.tunable_config.config_dict:
-            debug_warn(
-                "Registered config %s does not match trial data %s.",
-                registered_score.config.get_param_values(),
-                trial_data.results_dict,
-            )
-            match = False
-        if match:
-            return True
-    return False
+    return any(
+        registered_score.status == trial_data.status
+        and registered_score.score == trial_data.results_dict
+        and registered_score.config.get_param_values() == trial_data.tunable_config.config_dict
+        for registered_score in mock_opt.registered_scores
+    )
 
 
 scheduler_classes = get_all_concrete_subclasses(
