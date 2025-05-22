@@ -1,3 +1,7 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 """
 Unit tests for base scheduler internals.
 
@@ -21,7 +25,8 @@ Check that:
    - use `mock` to patch the `add_new_optimizer_suggestions` method in the `Scheduler` class and check the `_last_trial_id`
 """
 
-import pytest
 import unittest.mock
+
+import pytest
 
 from mlos_bench.schedulers import Scheduler, SyncScheduler

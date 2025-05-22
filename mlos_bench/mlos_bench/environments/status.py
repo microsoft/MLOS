@@ -25,7 +25,8 @@ class Status(enum.Enum):
 
     @staticmethod
     def parse(status: Any) -> "Status":
-        """Convert the input to a Status enum.
+        """
+        Convert the input to a Status enum.
 
         Parameters
         ----------

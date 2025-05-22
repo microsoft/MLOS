@@ -6,10 +6,10 @@
 
 import logging
 import random
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
-import time
 
 import numpy
 
@@ -227,7 +227,8 @@ class MockEnv(Environment):
         return {metric: float(score) for metric in self._metrics or []}
 
     def get_current_mock_trial_data(self) -> MockTrialData:
-        """Gets mock trial data for the current trial ID.
+        """
+        Gets mock trial data for the current trial ID.
 
         If no (or missing) mock trial data is found, a new instance of
         MockTrialData is created from random data.

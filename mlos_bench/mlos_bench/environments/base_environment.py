@@ -394,9 +394,8 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
     @property
     def trial_runner_id(self) -> int:
         """
-        Get the ID of the
-        :py:class:`~.mlos_bench.schedulers.trial_runner.TrialRunner` for this
-        Environment.
+        Get the ID of the :py:class:`~.mlos_bench.schedulers.trial_runner.TrialRunner`
+        for this Environment.
 
         This value can be used in scripts or environment variables to help
         identify the TrialRunner for this Environment.
