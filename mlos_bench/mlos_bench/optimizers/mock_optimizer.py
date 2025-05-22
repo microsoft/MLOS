@@ -14,8 +14,8 @@ See the test cases or example json configs for more details.
 import logging
 import random
 from collections.abc import Callable, Sequence
-
 from dataclasses import dataclass
+
 from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.track_best_optimizer import TrackBestOptimizer
 from mlos_bench.services.base_service import Service
@@ -56,7 +56,8 @@ class MockOptimizer(TrackBestOptimizer):
 
     @property
     def registered_scores(self) -> list[RegisteredScore]:
-        """Return the list of registered scores.
+        """
+        Return the list of registered scores.
 
         Notes
         -----

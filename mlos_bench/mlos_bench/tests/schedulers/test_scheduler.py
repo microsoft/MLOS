@@ -4,8 +4,8 @@
 #
 """Unit tests for :py:class:`mlos_bench.schedulers` and their internals."""
 
-from logging import warning
 import sys
+from logging import warning
 from unittest.mock import patch
 
 import pytest
