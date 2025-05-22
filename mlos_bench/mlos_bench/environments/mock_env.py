@@ -227,6 +227,7 @@ class MockEnv(Environment):
 
         return {metric: float(score) for metric in self._metrics or []}
 
+    @property
     def mock_trial_data(self) -> dict[int, MockTrialData]:
         """
         Get the mock trial data for all trials.
