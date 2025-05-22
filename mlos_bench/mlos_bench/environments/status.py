@@ -136,8 +136,8 @@ Includes all statuses that indicate the trial or experiment has finished, either
 successfully or not.
 This set is used to determine if a trial or experiment has reached a final state.
 This includes:
-- :py:data:`.Status.SUCCEEDED`: The trial or experiment completed successfully.
-- :py:data:`.Status.CANCELED`: The trial or experiment was canceled.
-- :py:data:`.Status.FAILED`: The trial or experiment failed.
-- :py:data:`.Status.TIMED_OUT`: The trial or experiment timed out.
+- :py:attr:`.Status.SUCCEEDED`: The trial or experiment completed successfully.
+- :py:attr:`.Status.CANCELED`: The trial or experiment was canceled.
+- :py:attr:`.Status.FAILED`: The trial or experiment failed.
+- :py:attr:`.Status.TIMED_OUT`: The trial or experiment timed out.
 """
