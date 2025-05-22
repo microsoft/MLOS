@@ -114,16 +114,32 @@ def test_scheduler(
             for result_key, result_value in metrics.items():
                 assert (
                     result_key in trial_data.results_dict
-                ), f"Result column {result_key} not found in storage."
+                ), f"Result {result_key} not found in storage for trial {trial_data}."
                 assert (
                     trial_data.results_dict[result_key] == result_value
                 ), f"Result value for {result_key} does not match expected value."
+        else:
+            # metrics weren't explicit in the mock trial data, so we only check
+            # that a score was registered
+            for opt_target in mock_opt.targets:
+                assert (
+                    opt_target in trial_data.results_dict
+                ), f"Result column {opt_target} not found in storage."
+                assert (
+                    trial_data.results_dict[opt_target] is not None
+                ), f"Result value for {opt_target} is None."
+
+        assert (
+            trial_data.status == mock_trial_data.run.status
+        ), f"Trial {trial_id} status {trial_data.status} was not {mock_trial_data.run.status}."
+
+        # TODO: Check the trial status telemetry.
 
     # TODO:
-    # Check the overall results:
-    # 1. Check the results in storage.
     # 2. Check the optimizer registration.
     # 3. Check the bookkeeping for ran_trials.
+
+    # TODO: And check the intermediary results.
     # 4. Check the bookkeeping for add_new_optimizer_suggestions and _last_trial_id.
     #    This last part may require patching and intercepting during the start()
     #    loop to validate in-progress book keeping instead of just overall.
