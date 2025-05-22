@@ -7,6 +7,7 @@
 import logging
 import random
 import time
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
@@ -225,6 +226,17 @@ class MockEnv(Environment):
             score = self._range[0] + score * (self._range[1] - self._range[0])
 
         return {metric: float(score) for metric in self._metrics or []}
+
+    def mock_trial_data(self) -> dict[int, MockTrialData]:
+        """
+        Get the mock trial data for all trials.
+
+        Returns
+        -------
+        dict[int, MockTrialData]
+            Dictionary of mock trial data keyed by trial ID.
+        """
+        return deepcopy(self._mock_trial_data)
 
     def get_current_mock_trial_data(self) -> MockTrialData:
         """
