@@ -57,6 +57,9 @@ def test_status_from_str_valid(input_str: str, expected_status: Status) -> None:
     assert (
         Status.parse(input_str.lower()) == expected_status
     ), f"Expected {expected_status} for input: {input_str.lower()}"
+    assert (
+        Status.parse(expected_status) == expected_status
+    ), f"Expected {expected_status} for input: {expected_status}"
     if input_str.isdigit():
         # Also test the numeric representation
         assert (
