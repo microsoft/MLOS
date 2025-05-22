@@ -243,7 +243,14 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         return False  # Do not suppress exceptions
 
     def _prepare_start(self) -> bool:
-        """Prepare the scheduler for starting."""
+        """
+        Prepare the scheduler for starting.
+
+        Notes
+        -----
+        This method is called by the :py:meth:`Scheduler.start` method.
+        It is split out mostly to allow for easier unit testing/mocking.
+        """
         assert self.experiment is not None
         _LOG.info(
             "START: Experiment: %s Env: %s Optimizer: %s",
@@ -280,7 +287,7 @@ class Scheduler(ContextManager, metaclass=ABCMeta):
         Notes
         -----
         This method is called by the :py:meth:`Scheduler.start` method.
-        It is split out mostly to allow for easier testing with MockSchedulers.
+        It is split out mostly to allow for easier unit testing/mocking.
         """
         assert self.experiment is not None
         _LOG.info("Optimization loop: Last trial ID: %d", self._last_trial_id)
