@@ -5,14 +5,14 @@
 """Common fixtures for mock TunableGroups and Environment objects."""
 
 import os
+import re
 import sys
 from collections.abc import Generator
 from typing import Any
-import re
 
 import pytest
-from pytest import FixtureRequest
 from fasteners import InterProcessLock, InterProcessReaderWriterLock
+from pytest import FixtureRequest
 from pytest_docker.plugin import Services as DockerServices
 from pytest_docker.plugin import get_docker_services
 
