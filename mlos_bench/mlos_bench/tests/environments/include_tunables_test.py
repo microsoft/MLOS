@@ -50,6 +50,7 @@ def test_two_groups_setup(tunable_groups: TunableGroups) -> None:
             },
         },
         tunables=tunable_groups,
+        global_config=BUILT_IN_ENV_VAR_DEFAULTS,
     )
     expected_params = {
         "vmSize": "Standard_B4ms",
@@ -98,6 +99,7 @@ def test_zero_groups_implicit_setup(tunable_groups: TunableGroups) -> None:
             },
         },
         tunables=tunable_groups,
+        global_config=BUILT_IN_ENV_VAR_DEFAULTS,
     )
     assert env.tunable_params.get_param_values() == {}
 
@@ -137,7 +139,11 @@ def test_loader_level_include() -> None:
             ]
         }
     )
-    env = loader.build_environment(config=env_json, tunables=TunableGroups())
+    env = loader.build_environment(
+        config=env_json,
+        tunables=TunableGroups(),
+        global_config=BUILT_IN_ENV_VAR_DEFAULTS,
+    )
     expected_params = {
         "align_va_addr": "on",
         "idle": "halt",

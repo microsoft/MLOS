@@ -356,8 +356,10 @@ class Optimizer(ContextManager, metaclass=ABCMeta):  # pylint: disable=too-many-
         assert scores is not None
         target_metrics: dict[str, float] = {}
         for opt_target, opt_dir in self._opt_targets.items():
+            if opt_target not in scores:
+                raise ValueError(f"Score for {opt_target} not found in {scores}.")
             val = scores[opt_target]
-            assert val is not None
+            assert val is not None, f"Score for {opt_target} is None."
             target_metrics[opt_target] = float(val) * opt_dir
 
         return target_metrics
