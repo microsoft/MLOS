@@ -24,21 +24,36 @@ class Status(enum.Enum):
     TIMED_OUT = 7
 
     @staticmethod
-    def from_str(status_str: Any) -> "Status":
-        """Convert a string to a Status enum."""
-        if not isinstance(status_str, str):
-            _LOG.warning("Expected type %s for status: %s", type(status_str), status_str)
-            status_str = str(status_str)
-        if status_str.isdigit():
+    def parse(status: Any) -> "Status":
+        """Convert the input to a Status enum.
+
+        Parameters
+        ----------
+        status : Any
+            The status to parse. This can be a string (or string convertible),
+            int, or Status enum.
+
+        Returns
+        -------
+        Status
+            The corresponding Status enum value or else UNKNOWN if the input is not
+            recognized.
+        """
+        if isinstance(status, Status):
+            return status
+        if not isinstance(status, str):
+            _LOG.warning("Expected type %s for status: %s", type(status), status)
+            status = str(status)
+        if status.isdigit():
             try:
-                return Status(int(status_str))
+                return Status(int(status))
             except ValueError:
-                _LOG.warning("Unknown status: %d", int(status_str))
+                _LOG.warning("Unknown status: %d", int(status))
         try:
-            status_str = status_str.upper().strip()
-            return Status[status_str]
+            status = status.upper().strip()
+            return Status[status]
         except KeyError:
-            _LOG.warning("Unknown status: %s", status_str)
+            _LOG.warning("Unknown status: %s", status)
         return Status.UNKNOWN
 
     def is_good(self) -> bool:
