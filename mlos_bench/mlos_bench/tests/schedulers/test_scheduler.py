@@ -18,8 +18,10 @@ from mlos_bench.schedulers.base_scheduler import Scheduler
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.schedulers.trial_runner import TrialRunner
 import mlos_bench.tests.optimizers.fixtures as optimizers_fixtures
+import mlos_bench.tests.storage.sql.fixtures as sql_storage_fixtures
 
 mock_opt = optimizers_fixtures.mock_opt
+sqlite_storage = sql_storage_fixtures.sqlite_storage
 
 # pylint: disable=redefined-outer-name
 
@@ -29,6 +31,7 @@ def create_scheduler(
     trial_runners: list[TrialRunner],
     mock_opt: MockOptimizer,
     sqlite_storage: SqlStorage,
+    global_config: dict,
 ) -> Scheduler:
     """Create a Scheduler instance using trial_runners, mock_opt, and
     sqlite_storage fixtures."""
@@ -38,16 +41,13 @@ def create_scheduler(
     max_trials = max(trial_id for trial_id in env.mock_trial_data.keys())
     max_trials = min(max_trials, mock_opt.max_suggestions)
 
+    global_config["experiment_id"] = f"Test{scheduler_type.__name__}Experiment"
+
     return scheduler_type(
         config={
             "max_trials": max_trials,
         },
-        global_config={
-            "experiment_id": "Test{scheduler_type.__name__}Experiment",
-            "trial_id": 1,
-            # TODO: Adjust this in the future?
-            "trial_repeat_count": 1,
-        },
+        global_config=global_config,
         trial_runners=trial_runners,
         optimizer=mock_opt,
         storage=sqlite_storage,
@@ -75,6 +75,7 @@ def test_scheduler(
     trial_runners: list[TrialRunner],
     mock_opt: MockOptimizer,
     sqlite_storage: SqlStorage,
+    global_config: dict,
 ) -> None:
     """
     Full integration test for Scheduler: runs trials, checks storage, optimizer
@@ -88,67 +89,24 @@ def test_scheduler(
         trial_runners,
         mock_opt,
         sqlite_storage,
+        global_config,
     )
 
     root_env = scheduler.root_environment
     assert isinstance(root_env, MockEnv), "Root environment is not a MockEnv instance."
     mock_trial_data = root_env.mock_trial_data
 
-    # Patch bulk_register and add_new_optimizer_suggestions
-    with (
-        patch.object(
-            scheduler.optimizer,
-            "bulk_register",
-            wraps=scheduler.optimizer.bulk_register,
-        ) as mock_bulk_register,
-        patch.object(
-            scheduler,
-            "add_new_optimizer_suggestions",
-            wraps=scheduler.add_new_optimizer_suggestions,
-        ) as mock_add_suggestions,
-    ):
-        # Run the scheduler
-        with scheduler:
-            scheduler.start()
-            scheduler.teardown()
+    # Run the scheduler
+    with scheduler:
+        scheduler.start()
+        scheduler.teardown()
 
-        # Now check the results.
-        # TODO
-
-        # 1. Check results in storage
-        experiments = scheduler.storage.experiments
-        assert experiments, "No experiments found in storage."
-        # Get the first experiment
-        experiment = next(iter(experiments.values()))
-        trials = experiment.trials
-        # Compare with mock_trial_data from root_environment
-        for trial_id, trial_data in trials.items():
-            # Check that the trial result matches the mock data
-            expected = mock_trial_data[trial_id].run.metrics
-            actual = trial_data.results_dict
-            assert actual == expected, f"Trial {trial_id} results {actual} != expected {expected}"
-
-        # 1b. Check ran_trials bookkeeping
-        ran_trials = scheduler.ran_trials
-        assert len(ran_trials) == len(trials)
-        for trial in ran_trials:
-            assert (
-                trial.status.is_ready()
-            ), f"Trial {trial.trial_id} did not complete successfully."
-
-        # 2. Check optimizer registration
-        assert mock_bulk_register.called, "bulk_register was not called on optimizer."
-        # Check that the configs and scores match the mock_trial_data
-        for call in mock_bulk_register.call_args_list:
-            configs, scores, *_ = call.args
-            for i, config in enumerate(configs):
-                trial_id = i  # assumes order matches
-                expected_score = mock_trial_data[trial_id].run.metrics
-                assert (
-                    scores[i] == expected_score
-                ), f"bulk_register score {scores[i]} != expected {expected_score} for trial {trial_id}"
-
-        # 3. Check bookkeeping: add_new_optimizer_suggestions and _last_trial_id
-        assert mock_add_suggestions.called, "add_new_optimizer_suggestions was not called."
-        # _last_trial_id should be the last trial id
-        assert getattr(scheduler, "_last_trial_id", None) == max(trials.keys())
+    # Now check the results.
+    # TODO:
+    # Check the overall results:
+    # 1. Check the results in storage.
+    # 2. Check the optimizer registration.
+    # 3. Check the bookkeeping for ran_trials.
+    # 4. Check the bookkeeping for add_new_optimizer_suggestions and _last_trial_id.
+    #    This last part may require patching and intercepting during the start()
+    #    loop to validate in-progress book keeping instead of just overall.

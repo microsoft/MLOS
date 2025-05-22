@@ -385,9 +385,10 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
         """
         val = self._params["trial_id"]
         assert isinstance(val, int), (
-            "Expected trial_id to be an int, but got %s (type %s)",
+            "Expected trial_id to be an int, but got %s (type %s): %s",
             val,
             type(val),
+            self._params,
         )
         return val
 
