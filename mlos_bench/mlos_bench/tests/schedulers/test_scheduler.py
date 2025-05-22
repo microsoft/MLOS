@@ -40,8 +40,6 @@ def create_scheduler(
     max_trials = max(trial_id for trial_id in env.mock_trial_data.keys())
     max_trials = min(max_trials, mock_opt.max_suggestions)
 
-    global_config["experiment_id"] = f"Test{scheduler_type.__name__}Experiment"
-
     return scheduler_type(
         config={
             "max_trials": max_trials,
@@ -92,6 +90,7 @@ def test_scheduler(
     )
 
     root_env = scheduler.root_environment
+    experiment_id = root_env.experiment_id
     assert isinstance(root_env, MockEnv), "Root environment is not a MockEnv instance."
     mock_trial_data = root_env.mock_trial_data
 
@@ -101,6 +100,25 @@ def test_scheduler(
         scheduler.teardown()
 
     # Now check the overall results.
+
+    # Check the results in storage.
+    exp_data = sqlite_storage.experiments[experiment_id]
+    for mock_trial_data in mock_trial_data.values():
+        trial_id = mock_trial_data.trial_id
+        assert trial_id in exp_data.trials, f"Trial {trial_id} not found in storage."
+        trial_data = exp_data.trials[trial_id]
+
+        # Check the results.
+        metrics = mock_trial_data.run.metrics
+        if metrics:
+            for result_key, result_value in metrics.items():
+                assert (
+                    result_key in trial_data.results_dict
+                ), f"Result column {result_key} not found in storage."
+                assert (
+                    trial_data.results_dict[result_key] == result_value
+                ), f"Result value for {result_key} does not match expected value."
+
     # TODO:
     # Check the overall results:
     # 1. Check the results in storage.

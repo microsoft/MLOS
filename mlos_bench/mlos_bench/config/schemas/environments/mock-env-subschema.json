@@ -124,7 +124,7 @@
             "description": "A set of mock trial data to use for testing, keyed by trial id. Used by MockEnv.",
             "type": "object",
             "patternProperties": {
-                "^[0-9]+$": {
+                "^[1-9][0-9]*$": {
                     "$ref": "#/$defs/mock_trial_data_item"
                 }
             },

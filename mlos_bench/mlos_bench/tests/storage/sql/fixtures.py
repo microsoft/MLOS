@@ -30,7 +30,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 # pylint: disable=redefined-outer-name
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def sqlite_storage() -> Generator[SqlStorage]:
     """
     Fixture for file based SQLite storage in a temporary directory.

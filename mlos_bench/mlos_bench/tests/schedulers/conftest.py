@@ -6,6 +6,7 @@
 # pylint: disable=redefined-outer-name
 
 import json
+import re
 
 import pytest
 
@@ -34,7 +35,7 @@ def mock_env_config() -> dict:
             "mock_env_metrics": ["score"],
             # TODO: Add more mock trial data here:
             "mock_trial_data": {
-                "0": {
+                "1": {
                     "run": {
                         "sleep": 0.15,
                         "status": "SUCCEEDED",
@@ -43,7 +44,7 @@ def mock_env_config() -> dict:
                         },
                     },
                 },
-                "1": {
+                "2": {
                     "run": {
                         "sleep": 0.2,
                         "status": "SUCCEEDED",
@@ -52,7 +53,7 @@ def mock_env_config() -> dict:
                         },
                     },
                 },
-                "2": {
+                "3": {
                     "run": {
                         "sleep": 0.1,
                         "status": "SUCCEEDED",
@@ -67,10 +68,13 @@ def mock_env_config() -> dict:
 
 
 @pytest.fixture
-def global_config() -> dict:
+def global_config(request) -> dict:
     """A global config for a MockEnv."""
+    test_name = request.node.name
+    test_name = re.sub(r"[^a-zA-Z0-9]", "_", test_name)
+    experiment_id = f"TestExperiment-{test_name}"
     return {
-        "experiment_id": "TestExperiment",
+        "experiment_id": experiment_id,
         "trial_id": 1,
     }
 

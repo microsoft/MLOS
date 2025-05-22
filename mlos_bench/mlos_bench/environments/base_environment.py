@@ -419,7 +419,8 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
         )
         return val
 
-    def experiment_id(self) -> int:
+    @property
+    def experiment_id(self) -> str:
         """
         Get the ID of the experiment.
 
@@ -428,7 +429,7 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        experiment_id : int
+        experiment_id : str
             The ID of the experiment.
 
         Notes
@@ -441,7 +442,7 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
         mlos_bench.config : documentation on the configuration system
         """
         val = self._params["experiment_id"]
-        assert isinstance(val, int), (
+        assert isinstance(val, str), (
             "Expected experiment_id to be an int, but got %s (type %s)",
             val,
             type(val),
