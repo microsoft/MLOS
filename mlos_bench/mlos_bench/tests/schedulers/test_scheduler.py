@@ -168,7 +168,14 @@ def test_scheduler_with_mock_trial_data(
             trial_data.status == mock_trial_data.run.status
         ), f"Trial {trial_id} status {trial_data.status} was not {mock_trial_data.run.status}."
 
-        # TODO: Check the trial status telemetry.
+        # Check the trial status telemetry.
+        telemetry_dict = dict(
+            zip(trial_data.telemetry_df["metric"], trial_data.telemetry_df["value"])
+        )
+        assert telemetry_dict == mock_trial_data.status.metrics, (
+            f"Trial {trial_id} telemetry {telemetry_dict} does not match expected "
+            f"{mock_trial_data.status.metrics}."
+        )
 
         # Check the optimizer registration.
         assert mock_opt_has_registered_trial_score(
