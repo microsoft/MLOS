@@ -64,7 +64,7 @@ class MockTrialPhaseData:
         """
         data = data or {}
         assert phase in {"setup", "run", "status", "teardown"}, f"Invalid phase: {phase}"
-        if phase in {"teardown", "status"}:
+        if phase in {"setup", "teardown"}:
             # setup/teardown phase is not expected to have metrics or status.
             assert "metrics" not in data, f"Unexpected metrics data in {phase} phase: {data}"
             assert "status" not in data, f"Unexpected status data in {phase} phase: {data}"
