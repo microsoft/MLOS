@@ -12,6 +12,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
+from pytz import UTC
+
 import numpy
 
 from mlos_bench.environments.base_environment import Environment
@@ -300,6 +302,8 @@ class MockEnv(Environment):
         if mock_trial_data.run.sleep:
             _LOG.debug("Sleeping for %s seconds", mock_trial_data.run.sleep)
             time.sleep(mock_trial_data.run.sleep)
+            # Update the timestamp after the sleep.
+            timestamp = datetime.now(UTC)
         if mock_trial_data.run.exception:
             raise RuntimeError(f"Mock trial data run exception: {mock_trial_data.run.exception}")
         if mock_trial_data.run.metrics is not None:
@@ -327,6 +331,8 @@ class MockEnv(Environment):
         if mock_trial_data.status.sleep:
             _LOG.debug("Sleeping for %s seconds", mock_trial_data.status.sleep)
             time.sleep(mock_trial_data.status.sleep)
+            # Update the timestamp after the sleep.
+            timestamp = datetime.now(UTC)
         if mock_trial_data.status.exception:
             raise RuntimeError(
                 f"Mock trial data status exception: {mock_trial_data.status.exception}"

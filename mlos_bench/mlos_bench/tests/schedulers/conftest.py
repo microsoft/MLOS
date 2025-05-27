@@ -35,6 +35,9 @@ def mock_env_config() -> dict:
             # TODO: Add more mock trial data here:
             "mock_trial_data": {
                 "1": {
+                    "setup": {
+                        "sleep": 0.1,
+                    },
                     "run": {
                         "sleep": 0.25,
                         "status": "SUCCEEDED",
@@ -44,6 +47,9 @@ def mock_env_config() -> dict:
                     },
                 },
                 "2": {
+                    "setup": {
+                        "sleep": 0.1,
+                    },
                     "run": {
                         "sleep": 0.3,
                         "status": "SUCCEEDED",
@@ -53,6 +59,9 @@ def mock_env_config() -> dict:
                     },
                 },
                 "3": {
+                    "setup": {
+                        "sleep": 0.1,
+                    },
                     "run": {
                         "sleep": 0.2,
                         "status": "SUCCEEDED",

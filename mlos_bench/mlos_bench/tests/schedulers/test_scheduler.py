@@ -151,17 +151,17 @@ def test_scheduler_with_mock_trial_data(
             ), f"Result value for {opt_target} is None."
 
         # Check that the appropriate sleeps occurred.
-        trial_time_lb = 0.0
-        trial_time_lb += mock_trial_data.setup.sleep or 0
-        trial_time_lb += mock_trial_data.run.sleep or 0
-        trial_time_lb += mock_trial_data.status.sleep or 0
-        trial_time_lb += mock_trial_data.teardown.sleep or 0
+        min_trial_time = 0.0
+        min_trial_time += mock_trial_data.setup.sleep or 0
+        min_trial_time += mock_trial_data.run.sleep or 0
+        min_trial_time += mock_trial_data.status.sleep or 0
+        min_trial_time += mock_trial_data.teardown.sleep or 0
         assert trial_data.ts_end is not None, f"Trial {trial_id} has no end time."
         trial_duration = trial_data.ts_end - trial_data.ts_start
         trial_dur_secs = trial_duration.total_seconds()
         assert (
-            trial_dur_secs >= trial_time_lb
-        ), f"Trial {trial_id} took less time ({trial_dur_secs}) than expected ({trial_time_lb}). "
+            trial_dur_secs >= min_trial_time
+        ), f"Trial {trial_id} took less time ({trial_dur_secs}) than expected ({min_trial_time}). "
 
         # Check that the trial status matches what we expected.
         assert (
