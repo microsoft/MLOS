@@ -4,6 +4,7 @@
 #
 """Unit tests for :py:class:`mlos_bench.schedulers` and their internals."""
 
+from logging import warning
 import sys
 
 import pytest
@@ -22,6 +23,8 @@ mock_opt = optimizers_fixtures.mock_opt
 sqlite_storage = sql_storage_fixtures.sqlite_storage
 
 # pylint: disable=redefined-outer-name
+
+DEBUGGING = False  # Set to True to enable debugging output for easier stepping through the code.
 
 
 def create_scheduler(
@@ -51,17 +54,56 @@ def create_scheduler(
     )
 
 
+def is_subset_of(dict_a: dict, dict_b: dict) -> bool:
+    """Check if dict_a is a subset of dict_b."""
+    return all(item in dict_b.items() for item in dict_a.items())
+
+
 def mock_opt_has_registered_trial_score(
     mock_opt: MockOptimizer,
     trial_data: TrialData,
 ) -> bool:
     """Check that the MockOptimizer has registered a given MockTrialData."""
-    return any(
-        registered_score.status == trial_data.status
-        and registered_score.score == trial_data.results_dict
-        and registered_score.config.get_param_values() == trial_data.tunable_config.config_dict
-        for registered_score in mock_opt.registered_scores
+    if not DEBUGGING:
+        return any(
+            registered_score.status == trial_data.status
+            and registered_score.score is not None
+            and is_subset_of(registered_score.score, trial_data.results_dict)
+            and registered_score.config.get_param_values() == trial_data.tunable_config.config_dict
+            for registered_score in mock_opt.registered_scores
+        )
+    # For debugging, we can print the data to examine mismatches.
+    for registered_score in mock_opt.registered_scores:
+        if registered_score.status != trial_data.status:
+            warning(
+                f"Registered status: {registered_score.status} "
+                f"!= TrialData status: {trial_data.status}"
+            )
+            continue
+        # Check if registered_score.score is a subset of trial_data.results_dict
+        if not (
+            registered_score.score is not None
+            and is_subset_of(registered_score.score, trial_data.results_dict)
+        ):
+            warning(
+                f"Registered score: {registered_score.score} "
+                f"is not a subset of TrialData results: {trial_data.results_dict}"
+            )
+            continue
+        if registered_score.config.get_param_values() != trial_data.tunable_config.config_dict:
+            warning(
+                f"Registered config: {registered_score.config.get_param_values()} "
+                f"!= TrialData config: {trial_data.tunable_config.config_dict}"
+            )
+            continue
+        # Else, found a match!
+        warning(f"Found matching registered score for trial {trial_data}: {registered_score}")
+        return True
+    warning(
+        f"No matching registered score found for trial {trial_data}. "
+        f"Registered scores: {mock_opt.registered_scores}"
     )
+    return False
 
 
 scheduler_classes = get_all_concrete_subclasses(

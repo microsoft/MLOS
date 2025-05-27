@@ -122,6 +122,7 @@ def mock_env_config() -> dict:
                         "sleep": 0.2,
                         "status": "SUCCEEDED",
                         "metrics": {
+                            # Return multiple scores.
                             "color": "green",
                             "score": 3.1,
                         },
