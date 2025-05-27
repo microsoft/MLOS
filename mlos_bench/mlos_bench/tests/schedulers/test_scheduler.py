@@ -36,7 +36,7 @@ def create_scheduler(
     """
     env = trial_runners[0].environment
     assert isinstance(env, MockEnv), "Environment is not a MockEnv instance."
-    max_trials = max(trial_id for trial_id in env.mock_trial_data.keys())
+    max_trials = max(int(trial_id) for trial_id in env.mock_trial_data.keys())
     max_trials = min(max_trials, mock_opt.max_suggestions)
 
     return scheduler_type(
