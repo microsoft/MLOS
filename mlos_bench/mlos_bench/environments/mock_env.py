@@ -12,9 +12,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
-from pytz import UTC
-
 import numpy
+from pytz import UTC
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.status import Status

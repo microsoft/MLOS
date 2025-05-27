@@ -16,7 +16,12 @@ from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.base_trial_data import TrialData
 from mlos_bench.storage.sql.schema import DbSchema
-from mlos_bench.util import nullable, try_parse_val, utcify_nullable_timestamp, utcify_timestamp
+from mlos_bench.util import (
+    nullable,
+    try_parse_val,
+    utcify_nullable_timestamp,
+    utcify_timestamp,
+)
 
 
 def save_params(

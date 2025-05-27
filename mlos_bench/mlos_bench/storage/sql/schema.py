@@ -39,8 +39,8 @@ from sqlalchemy import (
     create_mock_engine,
     inspect,
 )
-from sqlalchemy.engine import Engine
 from sqlalchemy.dialects import mysql
+from sqlalchemy.engine import Engine
 
 from mlos_bench.util import path_join
 
