@@ -16,7 +16,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.base_trial_data import TrialData
 from mlos_bench.storage.sql.schema import DbSchema
-from mlos_bench.util import nullable, utcify_nullable_timestamp, utcify_timestamp
+from mlos_bench.util import nullable, try_parse_val, utcify_nullable_timestamp, utcify_timestamp
 
 
 def save_params(
@@ -239,10 +239,7 @@ def get_results_df(
             columns="param",
             values="value",
         )
-        configs_df = configs_df.apply(
-            pandas.to_numeric,
-            errors="coerce",
-        ).fillna(configs_df)
+        configs_df["value"] = configs_df["value"].apply(try_parse_val)
 
         # Get each trial's results in wide format.
         results_stmt = (
@@ -285,10 +282,7 @@ def get_results_df(
             columns="metric",
             values="value",
         )
-        results_df = results_df.apply(
-            pandas.to_numeric,
-            errors="coerce",
-        ).fillna(results_df)
+        results_df["value"] = results_df["value"].apply(try_parse_val)
 
         # Concat the trials, configs, and results.
         return trials_df.merge(configs_df, on=["trial_id", "tunable_config_id"], how="left").merge(
