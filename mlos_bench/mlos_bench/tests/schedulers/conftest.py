@@ -38,6 +38,13 @@ def mock_env_config() -> dict:
                     "setup": {
                         "sleep": 0.1,
                     },
+                    "status": {
+                        "sleep": 0.1,
+                        "metrics": {
+                            "color": "orange",
+                            "tps": 8,
+                        },
+                    },
                     "run": {
                         "sleep": 0.25,
                         "status": "SUCCEEDED",
@@ -49,6 +56,13 @@ def mock_env_config() -> dict:
                 "2": {
                     "setup": {
                         "sleep": 0.1,
+                    },
+                    "status": {
+                        "sleep": 0.1,
+                        "metrics": {
+                            "color": "purple",
+                            "tps": 7,
+                        },
                     },
                     "run": {
                         "sleep": 0.3,
@@ -62,11 +76,54 @@ def mock_env_config() -> dict:
                     "setup": {
                         "sleep": 0.1,
                     },
+                    "status": {
+                        "sleep": 0.1,
+                        "metrics": {
+                            "color": "blue",
+                            "tps": 6789,
+                        },
+                    },
                     "run": {
                         "sleep": 0.2,
                         "status": "SUCCEEDED",
                         "metrics": {
                             "score": 3.0,
+                        },
+                    },
+                },
+                "4": {
+                    "setup": {
+                        "sleep": 0.1,
+                    },
+                    "status": {
+                        "sleep": 0.1,
+                        "metrics": {
+                            "color": "blue",
+                            "tps": 5,
+                        },
+                    },
+                    "run": {
+                        "sleep": 0.2,
+                        "status": "SUCCEEDED",
+                        "metrics": {
+                            "score": 2.7,
+                        },
+                    },
+                },
+                "5": {
+                    "setup": {
+                        "sleep": 0.1,
+                    },
+                    "status": {
+                        "sleep": 0.1,
+                        "metrics": {},
+                    },
+                    "run": {
+                        "sleep": 0.2,
+                        "status": "SUCCEEDED",
+                        "metrics": {
+                            "color": "green",
+                            "score": 3.1,
                         },
                     },
                 },
