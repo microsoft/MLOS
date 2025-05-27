@@ -252,18 +252,10 @@ class MockEnv(Environment):
         method is called to ensure the current ``trial_id`` is set.
         """
         trial_id = self.current_trial_id
-        mock_trial_data = self._mock_trial_data.get(trial_id)
-        if not mock_trial_data:
-            mock_trial_data = MockTrialData(
-                trial_id=trial_id,
-                setup=MockTrialPhaseData.from_dict(phase="setup", data=None),
-                run=MockTrialPhaseData.from_dict(phase="run", data=None),
-                status=MockTrialPhaseData.from_dict(phase="status", data=None),
-                teardown=MockTrialPhaseData.from_dict(phase="teardown", data=None),
-            )
-            # Save the generated data for later.
-            self._mock_trial_data[trial_id] = mock_trial_data
-        return mock_trial_data
+        if trial_id not in self._mock_trial_data:
+            # Make an empty mock trial data object if not found.
+            self._mock_trial_data[trial_id] = MockTrialData.from_dict(trial_id, data={})
+        return self._mock_trial_data[trial_id]
 
     def setup(self, tunables: TunableGroups, global_config: dict | None = None) -> bool:
         is_success = super().setup(tunables, global_config)
