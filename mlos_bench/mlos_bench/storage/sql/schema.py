@@ -40,6 +40,7 @@ from sqlalchemy import (
     inspect,
 )
 from sqlalchemy.engine import Engine
+from sqlalchemy.dialects import mysql
 
 from mlos_bench.util import path_join
 
@@ -104,8 +105,8 @@ class DbSchema:
             Column("git_repo", String(1024), nullable=False),
             Column("git_commit", String(40), nullable=False),
             # For backwards compatibility, we allow NULL for ts_start.
-            Column("ts_start", DateTime),
-            Column("ts_end", DateTime),
+            Column("ts_start", DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql")),
+            Column("ts_end", DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql")),
             # Should match the text IDs of `mlos_bench.environments.Status` enum:
             # For backwards compatibility, we allow NULL for status.
             Column("status", String(self._STATUS_LEN)),
@@ -179,8 +180,16 @@ class DbSchema:
             Column("trial_id", Integer, nullable=False),
             Column("config_id", Integer, nullable=False),
             Column("trial_runner_id", Integer, nullable=True, default=None),
-            Column("ts_start", DateTime, nullable=False),
-            Column("ts_end", DateTime),
+            Column(
+                "ts_start",
+                DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"),
+                nullable=False,
+            ),
+            Column(
+                "ts_end",
+                DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"),
+                nullable=True,
+            ),
             # Should match the text IDs of `mlos_bench.environments.Status` enum:
             Column("status", String(self._STATUS_LEN), nullable=False),
             PrimaryKeyConstraint("exp_id", "trial_id"),
@@ -232,7 +241,12 @@ class DbSchema:
             self._meta,
             Column("exp_id", String(self._ID_LEN), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("ts", DateTime(timezone=True), nullable=False, default="now"),
+            Column(
+                "ts",
+                DateTime(timezone=True).with_variant(mysql.DATETIME(fsp=6), "mysql"),
+                nullable=False,
+                default="now",
+            ),
             Column("status", String(self._STATUS_LEN), nullable=False),
             UniqueConstraint("exp_id", "trial_id", "ts"),
             ForeignKeyConstraint(
@@ -267,7 +281,12 @@ class DbSchema:
             self._meta,
             Column("exp_id", String(self._ID_LEN), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("ts", DateTime(timezone=True), nullable=False, default="now"),
+            Column(
+                "ts",
+                DateTime(timezone=True).with_variant(mysql.DATETIME(fsp=6), "mysql"),
+                nullable=False,
+                default="now",
+            ),
             Column("metric_id", String(self._ID_LEN), nullable=False),
             Column("metric_value", String(self._METRIC_VALUE_LEN)),
             UniqueConstraint("exp_id", "trial_id", "ts", "metric_id"),
