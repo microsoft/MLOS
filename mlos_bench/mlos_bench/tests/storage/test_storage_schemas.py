@@ -14,6 +14,7 @@ from mlos_bench.storage.sql.storage import SqlStorage
 # See Also: schema.py for an example of programmatic alembic config access.
 CURRENT_ALEMBIC_HEAD = "8928a401115b"
 
+# TODO: Test other engines as well.
 
 def test_storage_schemas(storage: SqlStorage) -> None:
     """Test storage schema creation."""

@@ -8,7 +8,7 @@
         "log_sql": false,  // Write all SQL statements to the log.
         // Parameters below must match kwargs of `sqlalchemy.URL.create()`:
         "drivername": "postgresql+psycopg2",
-        "database": "osat",
+        "database": "mlos_bench",
         "username": "postgres",
         "password": "PLACERHOLDER PASSWORD",  // Comes from global config
         "host": "localhost",
