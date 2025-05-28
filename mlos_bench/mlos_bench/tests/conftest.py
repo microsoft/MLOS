@@ -15,7 +15,7 @@ from pytest_docker.plugin import Services as DockerServices
 from pytest_docker.plugin import get_docker_services
 
 from mlos_bench.environments.mock_env import MockEnv
-from mlos_bench.tests import SEED, tunable_groups_fixtures
+from mlos_bench.tests import SEED, tunable_groups_fixtures, resolve_host_name
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
@@ -27,6 +27,22 @@ tunable_groups_config = tunable_groups_fixtures.tunable_groups_config
 tunable_groups = tunable_groups_fixtures.tunable_groups
 mixed_numerics_tunable_groups = tunable_groups_fixtures.mixed_numerics_tunable_groups
 covariant_group = tunable_groups_fixtures.covariant_group
+
+
+HOST_DOCKER_NAME = "host.docker.internal"
+
+
+@pytest.fixture(scope="session")
+def docker_hostname() -> str:
+    """Returns the local hostname to use to connect to the test ssh server."""
+    if sys.platform != "win32" and resolve_host_name(HOST_DOCKER_NAME):
+        # On Linux, if we're running in a docker container, we can use the
+        # --add-host (extra_hosts in docker-compose.yml) to refer to the host IP.
+        return HOST_DOCKER_NAME
+    # Docker (Desktop) for Windows (WSL2) uses a special networking magic
+    # to refer to the host machine as `localhost` when exposing ports.
+    # In all other cases, assume we're executing directly inside conda on the host.
+    return "localhost"
 
 
 @pytest.fixture
