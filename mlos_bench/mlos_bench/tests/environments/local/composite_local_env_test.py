@@ -17,8 +17,8 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 def _format_str(zone_info: tzinfo | None) -> str:
     if zone_info is not None:
-        return "%Y-%m-%d %H:%M:%S %z"
-    return "%Y-%m-%d %H:%M:%S"
+        return "%Y-%m-%d %H:%M:%S.%f %z"
+    return "%Y-%m-%d %H:%M:%S.%f"
 
 
 # FIXME: This fails with zone_info = None when run with `TZ="America/Chicago pytest -n0 ...`
@@ -34,7 +34,6 @@ def test_composite_env(tunable_groups: TunableGroups, zone_info: tzinfo | None) 
     See Also: http://github.com/microsoft/MLOS/issues/501
     """
     ts1 = datetime.now(zone_info)
-    ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=2)
 
     format_str = _format_str(zone_info)
