@@ -276,7 +276,7 @@ class DbSchema:
             Column("exp_id", String(self._exp_id_len), nullable=False),
             Column("trial_id", Integer, nullable=False),
             Column("ts", DateTime(timezone=True), nullable=False, default="now"),
-            Column("metric_id", String(self._exp_id_len), nullable=False),
+            Column("metric_id", String(self._metric_id_len), nullable=False),
             Column("metric_value", String(self._metric_value_len)),
             UniqueConstraint("exp_id", "trial_id", "ts", "metric_id"),
             ForeignKeyConstraint(
