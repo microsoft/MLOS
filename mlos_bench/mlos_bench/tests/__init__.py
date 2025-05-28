@@ -11,9 +11,11 @@ import filecmp
 import os
 import shutil
 import socket
+import sys
 from datetime import tzinfo
 from logging import debug, warning
 from subprocess import run
+from pytest_docker.plugin import Services as DockerServices
 
 import pytest
 import pytz
