@@ -13,6 +13,7 @@ This document contains some notes on how to use [`alembic`](https://alembic.sqla
    > In the remainder of this document we should some examples for different DB types.
    > Pick the one you're targeting and stick with it thru the example.
    > You may need to repeat the process several times to test all of them.
+   >
    > - [ ] TODO: Add scripts to automatically do this for several different backend engines all at once.
 
    For instance:
@@ -63,21 +64,21 @@ This document contains some notes on how to use [`alembic`](https://alembic.sqla
       mlos_bench --storage storage/postgresql.jsonc --create-update-storage-schema-only --password=password
       ```
 
-2. Now, adjust the [`mlos_bench/storage/sql/schema.py`](../schema.py) file to reflect the new desired schema.
+1. Now, adjust the [`mlos_bench/storage/sql/schema.py`](../schema.py) file to reflect the new desired schema.
 
    > Keep each change small and atomic.
    > For example, if you want to add a new column, do that in one change.
    > If you want to rename a column, do that in another change.
 
-3. Generate a new migration script with the following command:
+1. Generate a new migration script with the following command:
 
    ```sh
    alembic revision --autogenerate -m "CHANGEME: Descriptive text about the change."
    ```
 
-4. Review the generated migration script in the [`mlos_bench/storage/sql/alembic/versions`](./versions/) directory.
+1. Review the generated migration script in the [`mlos_bench/storage/sql/alembic/versions`](./versions/) directory.
 
-5. Verify that the migration script works by running the following command:
+1. Verify that the migration script works by running the following command:
 
    ```sh
    # sqlite
@@ -116,22 +117,22 @@ This document contains some notes on how to use [`alembic`](https://alembic.sqla
 
    > Use different CLI clients for targeting other engines.
 
-6. If the migration script works, commit the changes to the [`mlos_bench/storage/sql/schema.py`](../schema.py) and [`mlos_bench/storage/sql/alembic/versions`](./versions/) files.
+1. If the migration script works, commit the changes to the [`mlos_bench/storage/sql/schema.py`](../schema.py) and [`mlos_bench/storage/sql/alembic/versions`](./versions/) files.
 
    > Be sure to update the latest version in the [`test_storage_schemas.py`](../../../tests/storage/test_storage_schemas.py) file as well.
 
-7. Cleanup any server instances you started.
+1. Cleanup any server instances you started.
 
-    For instance:
+   For instance:
 
-    ```sh
-    rm mlos_bench/storage/sql/mlos_bench.sqlite
-    ```
+   ```sh
+   rm mlos_bench/storage/sql/mlos_bench.sqlite
+   ```
 
-    ```sh
-    docker kill mysql-alembic
-    ```
+   ```sh
+   docker kill mysql-alembic
+   ```
 
-8. Merge that to the `main` branch.
+1. Merge that to the `main` branch.
 
-9. Might be good to cut a new `mlos_bench` release at this point as well.
+1. Might be good to cut a new `mlos_bench` release at this point as well.

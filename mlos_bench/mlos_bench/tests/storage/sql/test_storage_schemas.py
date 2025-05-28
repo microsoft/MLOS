@@ -5,15 +5,13 @@
 """Test sql schemas for mlos_bench storage."""
 
 import pytest
-from pytest_lazy_fixtures.lazy_fixture import lf as lazy_fixture
-
 from alembic.migration import MigrationContext
+from pytest_lazy_fixtures.lazy_fixture import lf as lazy_fixture
 from sqlalchemy import inspect
 
 from mlos_bench.storage.sql.storage import SqlStorage
-from mlos_bench.tests.storage.sql.fixtures import storage as sql_storage
-
 from mlos_bench.tests import DOCKER
+from mlos_bench.tests.storage.sql.fixtures import storage as sql_storage
 
 # NOTE: This value is hardcoded to the latest revision in the alembic versions directory.
 # It could also be obtained programmatically using the "alembic heads" command or heads() API.

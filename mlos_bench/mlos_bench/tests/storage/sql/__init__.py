@@ -7,7 +7,6 @@
 from dataclasses import dataclass
 from subprocess import run
 
-
 # The DB servers' names and other connection info.
 # See Also: docker-compose.yml
 
@@ -20,7 +19,8 @@ SQL_TEST_SERVER_PASSWORD = "password"
 
 @dataclass
 class SqlTestServerInfo:
-    """A data class for SqlTestServerInfo.
+    """
+    A data class for SqlTestServerInfo.
 
     See Also
     --------
