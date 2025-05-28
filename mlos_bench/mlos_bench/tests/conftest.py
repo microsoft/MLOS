@@ -42,7 +42,7 @@ def docker_hostname() -> str:
     # Docker (Desktop) for Windows (WSL2) uses a special networking magic
     # to refer to the host machine as `localhost` when exposing ports.
     # In all other cases, assume we're executing directly inside conda on the host.
-    return "localhost"
+    return "127.0.0.1"  # "localhost"
 
 
 @pytest.fixture
