@@ -315,6 +315,31 @@ class DbSchema:
         alembic_cfg.attributes["connection"] = conn
         return alembic_cfg
 
+    def drop_all_tables(self, *, force: bool = False) -> None:
+        """
+        Helper method used in testing to reset the DB schema.
+
+        Notes
+        -----
+        This method is not intended for production use, as it will drop all tables
+        in the database. Use with caution.
+
+        Parameters
+        ----------
+        force : bool
+            If True, drop all tables in the target database.
+            If False, this method will not drop any tables and will log a warning.
+        """
+        assert self._engine
+        self.meta.reflect(bind=self._engine)
+        if force:
+            self.meta.drop_all(bind=self._engine)
+        else:
+            _LOG.warning(
+                "Resetting the schema without force is not implemented. "
+                "Use force=True to drop all tables."
+            )
+
     def create(self) -> "DbSchema":
         """Create the DB schema."""
         _LOG.info("Create the DB schema")

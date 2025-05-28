@@ -90,6 +90,7 @@ def docker_compose_file(pytestconfig: pytest.Config) -> list[str]:
     _ = pytestconfig  # unused
     return [
         os.path.join(os.path.dirname(__file__), "services", "remote", "ssh", "docker-compose.yml"),
+        os.path.join(os.path.dirname(__file__), "storage", "sql", "docker-compose.yml"),
         # Add additional configs as necessary here.
     ]
 
