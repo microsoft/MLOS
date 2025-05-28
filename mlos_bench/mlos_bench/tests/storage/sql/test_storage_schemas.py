@@ -26,14 +26,18 @@ if DOCKER:
         lazy_fixture("mysql_storage"),
         lazy_fixture("postgres_storage"),
     ]
-@pytest.mark.parameterize(
-        ["some_sql_storage_fixture"], [
-            lazy_fixture("sql_storage"),
-            *docker_dbms_fixtures,
-        ]
+
+
+@pytest.mark.parametrize(
+    "some_sql_storage_fixture",
+    [
+        lazy_fixture("sqlite_storage"),
+        *docker_dbms_fixtures,
+    ],
 )
 def test_storage_schemas(some_sql_storage_fixture: SqlStorage) -> None:
     """Test storage schema creation."""
+    assert isinstance(some_sql_storage_fixture, SqlStorage)
     eng = some_sql_storage_fixture._engine  # pylint: disable=protected-access
     with eng.connect() as conn:  # pylint: disable=protected-access
         inspector = inspect(conn)

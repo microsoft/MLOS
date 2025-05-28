@@ -4,6 +4,7 @@
 #
 """Test fixtures for mlos_bench storage."""
 
+from contextlib import contextmanager
 import json
 import os
 import tempfile
@@ -23,7 +24,7 @@ from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.storage import SqlStorage
 from mlos_bench.storage.storage_factory import from_config
 from mlos_bench.util import path_join
-from mlos_bench.tests import SEED, wait_docker_service_socket
+from mlos_bench.tests import SEED, wait_docker_service_healthy
 from mlos_bench.tests.storage import (
     CONFIG_TRIAL_REPEAT_COUNT,
     MAX_TRIALS,
@@ -55,11 +56,12 @@ def mysql_storage_info(
         service_name=MYSQL_TEST_SERVER_NAME,
         hostname=docker_hostname,
     )
-    wait_docker_service_socket(
+    wait_docker_service_healthy(
         locked_docker_services,
-        storage_info.hostname,
-        storage_info.get_port(),
+        storage_info.compose_project_name,
+        storage_info.service_name,
     )
+
     return storage_info
 
 
@@ -77,14 +79,15 @@ def postgres_storage_info(
         service_name=PGSQL_TEST_SERVER_NAME,
         hostname=docker_hostname,
     )
-    wait_docker_service_socket(
+    wait_docker_service_healthy(
         locked_docker_services,
-        storage_info.hostname,
-        storage_info.get_port(),
+        storage_info.compose_project_name,
+        storage_info.service_name,
     )
     return storage_info
 
 
+@contextmanager
 def _create_storage_from_test_server_info(
     config_file: str,
     test_server_info: SqlTestServerInfo,
@@ -107,7 +110,7 @@ def _create_storage_from_test_server_info(
     sql_storage_name = test_server_info.service_name
     with FileLock(path_join(shared_temp_dir, f"{sql_storage_name}-{short_testrun_uid}.lock")):
         global_config = {
-            "host": test_server_info.username,
+            "host": test_server_info.hostname,
             "port": test_server_info.get_port() or 0,
             "database": test_server_info.database,
             "username": test_server_info.username,
@@ -137,12 +140,13 @@ def mysql_storage(
     --------
     _create_storage_from_test_server_info
     """
-    return _create_storage_from_test_server_info(
+    with _create_storage_from_test_server_info(
         path_join(str(files("mlos_bench.config")), "storage", "mysql.jsonc"),
         mysql_storage_info,
         shared_temp_dir,
         short_testrun_uid,
-    )
+    ) as storage:
+        yield storage
 
 
 @pytest.fixture(scope="function")
@@ -158,12 +162,13 @@ def postgres_storage(
     --------
     _create_storage_from_test_server_info
     """
-    return _create_storage_from_test_server_info(
+    with _create_storage_from_test_server_info(
         path_join(str(files("mlos_bench.config")), "storage", "postgresql.jsonc"),
         postgres_storage_info,
         shared_temp_dir,
         short_testrun_uid,
-    )
+    ) as storage:
+        yield storage
 
 
 @pytest.fixture

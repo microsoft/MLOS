@@ -11,7 +11,9 @@ import mlos_bench.tests.storage.sql.fixtures as sql_storage_fixtures
 # same.
 
 # Expose some of those as local names so they can be picked up as fixtures by pytest.
+mysql_storage_info = sql_storage_fixtures.mysql_storage_info
 mysql_storage = sql_storage_fixtures.mysql_storage
+postgres_storage_info = sql_storage_fixtures.postgres_storage_info
 postgres_storage = sql_storage_fixtures.postgres_storage
 sqlite_storage = sql_storage_fixtures.sqlite_storage
 storage = sql_storage_fixtures.storage

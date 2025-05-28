@@ -12,7 +12,7 @@ from pytest_docker.plugin import Services as DockerServices
 
 from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
 from mlos_bench.services.remote.ssh.ssh_service import SshClient
-from mlos_bench.tests import requires_docker, wait_docker_service_socket,
+from mlos_bench.tests import requires_docker, wait_docker_service_socket
 from mlos_bench.tests.services.remote.ssh import (
     ALT_TEST_SERVER_NAME,
     REBOOT_TEST_SERVER_NAME,

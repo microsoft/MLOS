@@ -8,6 +8,7 @@ Tests for mlos_bench.
 Used to make mypy happy about multiple conftest.py modules.
 """
 import filecmp
+import json
 import os
 import shutil
 import socket
@@ -18,6 +19,7 @@ from subprocess import run
 from pytest_docker.plugin import Services as DockerServices
 
 import pytest
+from pytest_docker.plugin import Services as DockerServices
 import pytz
 
 from mlos_bench.util import get_class_from_name, nullable
@@ -102,6 +104,44 @@ def docker_hostname() -> str:
     # to refer to the host machine as `localhost` when exposing ports.
     # In all other cases, assume we're executing directly inside conda on the host.
     return "localhost"
+
+
+def wait_docker_service_socket(docker_services: DockerServices, hostname: str, port: int) -> None:
+    """Wait until a docker service is ready."""
+    docker_services.wait_until_responsive(
+        check=lambda: check_socket(hostname, port),
+        timeout=30.0,
+        pause=0.5,
+    )
+
+
+def is_docker_service_healthy(
+    compose_project_name: str,
+    service_name: str,
+) -> bool:
+    """Check if a docker service is healthy."""
+    docker_ps_out = run(
+        f"docker compose -p {compose_project_name} " f"ps --format json {service_name}",
+        shell=True,
+        check=True,
+        capture_output=True,
+    )
+    docker_ps_json = json.loads(docker_ps_out.stdout.decode().strip())
+    return docker_ps_json["State"] == "running" and docker_ps_json["Health"] == "healthy"
+
+
+def wait_docker_service_healthy(
+    docker_services: DockerServices,
+    project_name: str,
+    service_name: str,
+    timeout: float = 30.0,
+) -> None:
+    """Wait until a docker service is healthy."""
+    docker_services.wait_until_responsive(
+        check=lambda: is_docker_service_healthy(project_name, service_name),
+        timeout=timeout,
+        pause=0.5,
+    )
 
 
 def wait_docker_service_socket(docker_services: DockerServices, hostname: str, port: int) -> None:
