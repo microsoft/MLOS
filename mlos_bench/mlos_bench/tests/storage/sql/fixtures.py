@@ -4,16 +4,16 @@
 #
 """Test fixtures for mlos_bench storage."""
 
-from contextlib import contextmanager
 import json
 import os
 import tempfile
 from collections.abc import Generator
+from contextlib import contextmanager
 from importlib.resources import files
 from random import seed as rand_seed
 
-from filelock import FileLock
 import pytest
+from filelock import FileLock
 from pytest_docker.plugin import Services as DockerServices
 
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
@@ -23,7 +23,6 @@ from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.storage import SqlStorage
 from mlos_bench.storage.storage_factory import from_config
-from mlos_bench.util import path_join
 from mlos_bench.tests import SEED, wait_docker_service_healthy
 from mlos_bench.tests.storage import (
     CONFIG_TRIAL_REPEAT_COUNT,
@@ -31,11 +30,12 @@ from mlos_bench.tests.storage import (
     TRIAL_RUNNER_COUNT,
 )
 from mlos_bench.tests.storage.sql import (
-    SqlTestServerInfo,
     MYSQL_TEST_SERVER_NAME,
     PGSQL_TEST_SERVER_NAME,
+    SqlTestServerInfo,
 )
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.util import path_join
 
 # pylint: disable=redefined-outer-name
 
@@ -48,9 +48,7 @@ def mysql_storage_info(
     docker_compose_project_name: str,
     locked_docker_services: DockerServices,
 ) -> SqlTestServerInfo:
-    """
-    Fixture for getting mysql storage connection info.
-    """
+    """Fixture for getting mysql storage connection info."""
     storage_info = SqlTestServerInfo(
         compose_project_name=docker_compose_project_name,
         service_name=MYSQL_TEST_SERVER_NAME,
@@ -71,9 +69,7 @@ def postgres_storage_info(
     docker_compose_project_name: str,
     locked_docker_services: DockerServices,
 ) -> SqlTestServerInfo:
-    """
-    Fixture for getting postgres storage connection info.
-    """
+    """Fixture for getting postgres storage connection info."""
     storage_info = SqlTestServerInfo(
         compose_project_name=docker_compose_project_name,
         service_name=PGSQL_TEST_SERVER_NAME,

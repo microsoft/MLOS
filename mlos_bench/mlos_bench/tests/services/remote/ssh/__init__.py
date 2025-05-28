@@ -7,7 +7,6 @@
 from dataclasses import dataclass
 from subprocess import run
 
-
 # The SSH test server port and name.
 # See Also: docker-compose.yml
 SSH_TEST_SERVER_PORT = 2254
@@ -18,7 +17,8 @@ REBOOT_TEST_SERVER_NAME = "reboot-server"
 
 @dataclass
 class SshTestServerInfo:
-    """A data class for SshTestServerInfo.
+    """
+    A data class for SshTestServerInfo.
 
     See Also
     --------

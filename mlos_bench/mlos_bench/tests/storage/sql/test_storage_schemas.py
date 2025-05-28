@@ -5,9 +5,8 @@
 """Test sql schemas for mlos_bench storage."""
 
 import pytest
-from pytest_lazy_fixtures.lazy_fixture import lf as lazy_fixture
-
 from alembic.migration import MigrationContext
+from pytest_lazy_fixtures.lazy_fixture import lf as lazy_fixture
 from sqlalchemy import inspect
 
 from mlos_bench.storage.sql.storage import SqlStorage
