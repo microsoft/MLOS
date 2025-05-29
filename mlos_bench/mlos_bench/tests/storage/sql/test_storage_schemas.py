@@ -11,7 +11,6 @@ from sqlalchemy import inspect
 
 from mlos_bench.storage.sql.storage import SqlStorage
 from mlos_bench.tests import DOCKER
-from mlos_bench.tests.storage.sql.fixtures import storage as sql_storage
 
 # NOTE: This value is hardcoded to the latest revision in the alembic versions directory.
 # It could also be obtained programmatically using the "alembic heads" command or heads() API.
