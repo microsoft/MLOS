@@ -5,11 +5,12 @@
 """Alembic environment script."""
 # pylint: disable=no-member
 
+import os
 import sys
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import create_engine, engine_from_config, pool
 
 from mlos_bench.storage.sql.schema import DbSchema
 
@@ -25,7 +26,12 @@ if config.config_file_name is not None and "alembic" in sys.argv[0]:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-target_metadata = DbSchema(engine=None).meta
+# First, try to read it from an environment variable that we set in mlos_bench.
+# Then, fallback to the config file (should only be used by alembic cli while
+# devs prepare schema changes).
+url = os.getenv("MLOS_ALEMBIC_URL") or config.get_main_option("sqlalchemy.url")
+engine = create_engine(url) if url else None
+target_metadata = DbSchema(engine=engine).meta
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

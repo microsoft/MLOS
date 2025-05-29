@@ -5,6 +5,7 @@
 """Saving and restoring the benchmark data in SQL database."""
 
 import logging
+import os
 from typing import Literal
 
 from sqlalchemy import URL, Engine, create_engine
@@ -37,6 +38,8 @@ class SqlStorage(Storage):
         self._lazy_schema_create = self._config.pop("lazy_schema_create", False)
         self._log_sql = self._config.pop("log_sql", False)
         self._url = URL.create(**self._config)
+        os.environ["MLOS_ALEMBIC_URL"] = str(self._url)
+        _LOG.debug("MLOS_ALEMBIC_URL: %s", os.environ["MLOS_ALEMBIC_URL"])
         self._repr = f"{self._url.get_backend_name()}:{self._url.database}"
         self._engine: Engine
         self._db_schema: DbSchema
