@@ -315,10 +315,16 @@ class DbSchema:
         """Return the SQLAlchemy MetaData object."""
         return self._meta
 
-    @staticmethod
-    def _get_alembic_cfg(conn: Connection) -> config.Config:
+    def _get_alembic_cfg(self, conn: Connection) -> config.Config:
         alembic_cfg = config.Config(
             path_join(str(files("mlos_bench.storage.sql")), "alembic.ini", abs_path=True)
+        )
+        assert self._engine is not None
+        alembic_cfg.set_main_option(
+            "sqlalchemy.url",
+            self._engine.url.render_as_string(
+                hide_password=False,
+            ),
         )
         alembic_cfg.attributes["connection"] = conn
         return alembic_cfg
