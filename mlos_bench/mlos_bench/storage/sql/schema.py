@@ -112,8 +112,8 @@ class DbSchema:
             Column("git_repo", String(1024), nullable=False),
             Column("git_commit", String(40), nullable=False),
             # For backwards compatibility, we allow NULL for ts_start.
-            Column("ts_start", DateTime),
-            Column("ts_end", DateTime),
+            Column("ts_start", DateTime(timezone=True)),
+            Column("ts_end", DateTime(timezone=True)),
             # Should match the text IDs of `mlos_bench.environments.Status` enum:
             # For backwards compatibility, we allow NULL for status.
             Column("status", String(self._status_len)),
@@ -187,8 +187,8 @@ class DbSchema:
             Column("trial_id", Integer, nullable=False),
             Column("config_id", Integer, nullable=False),
             Column("trial_runner_id", Integer, nullable=True, default=None),
-            Column("ts_start", DateTime, nullable=False),
-            Column("ts_end", DateTime, nullable=True),
+            Column("ts_start", DateTime(timezone=True), nullable=False),
+            Column("ts_end", DateTime(timezone=True), nullable=True),
             # Should match the text IDs of `mlos_bench.environments.Status` enum:
             Column("status", String(self._status_len), nullable=False),
             PrimaryKeyConstraint("exp_id", "trial_id"),
