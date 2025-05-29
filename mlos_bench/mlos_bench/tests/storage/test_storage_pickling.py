@@ -32,7 +32,7 @@ if DOCKER:
     reason="Windows doesn't support multiple processes accessing the same file.",
 )
 @pytest.mark.parametrize(
-    ["persistent_storage"],
+    "persistent_storage",
     [
         # TODO: Improve this test to support non-sql backends eventually as well.
         lazy_fixture("sqlite_storage"),

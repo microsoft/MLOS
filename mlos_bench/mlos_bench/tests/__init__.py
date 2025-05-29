@@ -19,8 +19,8 @@ from subprocess import run
 from pytest_docker.plugin import Services as DockerServices
 
 import pytest
-from pytest_docker.plugin import Services as DockerServices
 import pytz
+from pytest_docker.plugin import Services as DockerServices
 
 from mlos_bench.util import get_class_from_name, nullable
 
