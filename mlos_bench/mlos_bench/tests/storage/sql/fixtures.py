@@ -120,9 +120,11 @@ def _create_storage_from_test_server_info(
             global_configs=[json.dumps(global_config)],
         )
         assert isinstance(storage, SqlStorage)
-        yield storage
-        # Cleanup the storage on return
-        storage._reset_schema(force=True)  # pylint: disable=protected-access
+        try:
+            yield storage
+        finally:
+            # Cleanup the storage on return
+            storage._reset_schema(force=True)  # pylint: disable=protected-access
 
 
 @pytest.fixture(scope="function")
