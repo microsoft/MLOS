@@ -49,6 +49,8 @@ This document contains some notes on how to use [`alembic`](https://alembic.sqla
 
    1. Prime the DB schema
 
+      > Note: you may want to `git checkout main` first to make sure you're using the current schema here.
+
       ```sh
       # sqlite
       mlos_bench --storage storage/sqlite.jsonc --create-update-storage-schema-only --password=password
@@ -66,7 +68,10 @@ This document contains some notes on how to use [`alembic`](https://alembic.sqla
 
 1. Now, adjust the [`mlos_bench/storage/sql/schema.py`](../schema.py) file to reflect the new desired schema.
 
+   > Don't forget to do this on a new branch.
+   > \
    > Keep each change small and atomic.
+   > \
    > For example, if you want to add a new column, do that in one change.
    > If you want to rename a column, do that in another change.
 
@@ -131,6 +136,10 @@ This document contains some notes on how to use [`alembic`](https://alembic.sqla
 
    ```sh
    docker kill mysql-alembic
+   ```
+
+   ```sh
+   docker kill postgres-alembic
    ```
 
 1. Merge that to the `main` branch.
