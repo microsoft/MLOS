@@ -7,7 +7,7 @@
 
 import sys
 from logging.config import fileConfig
-from logging import info
+from logging import info, warning
 
 from alembic import context
 from sqlalchemy import create_engine, engine_from_config, pool
@@ -33,6 +33,8 @@ url = config.get_main_option("sqlalchemy.url")
 engine = create_engine(url) if url else None
 if engine:
     info(f"engine.url {str(engine.url)}")
+else:
+    warning("Missing engine.url: schema changes may not be accurate.")
 target_metadata = DbSchema(engine=engine).meta
 
 # other values from the config, defined by the needs of env.py,

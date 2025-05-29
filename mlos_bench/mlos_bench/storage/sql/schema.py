@@ -73,19 +73,15 @@ class DbSchema:
     # for all DB tables, so it's ok to disable the warnings.
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, engine: Engine | None):
+    def __init__(self, engine: Engine):
         """
         Declare the SQLAlchemy schema for the database.
 
         Parameters
         ----------
-        engine : sqlalchemy.engine.Engine | None
-            The SQLAlchemy engine to use for the DB schema.
-            Listed as optional for `alembic <https://alembic.sqlalchemy.org>`_
-            schema migration purposes so we can reference it inside it's ``env.py``
-            config file for :attr:`~meta` data inspection, but won't generally be
-            functional without one.
+        engine : sqlalchemy.engine.Engine
         """
+        assert engine, "Error: can't create schema without engine."
         _LOG.info("Create the DB schema for: %s", engine)
         self._engine = engine
         self._meta = MetaData()
