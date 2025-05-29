@@ -127,7 +127,11 @@ def is_docker_service_healthy(
         capture_output=True,
     )
     docker_ps_json = json.loads(docker_ps_out.stdout.decode().strip())
-    return docker_ps_json["State"] == "running" and docker_ps_json["Health"] == "healthy"
+    state = docker_ps_json["State"]
+    assert isinstance(state, str)
+    health = docker_ps_json["Health"]
+    assert isinstance(health, str)
+    return state == "running" and health == "healthy"
 
 
 def wait_docker_service_healthy(
