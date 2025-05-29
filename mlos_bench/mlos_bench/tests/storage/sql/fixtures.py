@@ -13,7 +13,7 @@ from importlib.resources import files
 from random import seed as rand_seed
 
 import pytest
-from filelock import FileLock
+from fasteners import InterProcessLock
 from pytest_docker.plugin import Services as DockerServices
 
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
@@ -104,7 +104,9 @@ def _create_storage_from_test_server_info(
     SqlStorage
     """
     sql_storage_name = test_server_info.service_name
-    with FileLock(path_join(shared_temp_dir, f"{sql_storage_name}-{short_testrun_uid}.lock")):
+    with InterProcessLock(
+        path_join(shared_temp_dir, f"{sql_storage_name}-{short_testrun_uid}.lock")
+    ):
         global_config = {
             "host": test_server_info.hostname,
             "port": test_server_info.get_port() or 0,
