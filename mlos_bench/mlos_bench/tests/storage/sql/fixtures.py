@@ -23,7 +23,7 @@ from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.storage import SqlStorage
 from mlos_bench.storage.storage_factory import from_config
-from mlos_bench.tests import SEED, wait_docker_service_healthy
+from mlos_bench.tests import SEED, wait_docker_service_healthy, DOCKER
 from mlos_bench.tests.storage import (
     CONFIG_TRIAL_REPEAT_COUNT,
     MAX_TRIALS,
@@ -39,7 +39,16 @@ from mlos_bench.util import path_join
 
 # pylint: disable=redefined-outer-name
 
-# TODO: Add mysql_storage and postgres_storage
+DOCKER_DBMS_FIXTURES = []
+if DOCKER:
+    DOCKER_DBMS_FIXTURES = [
+        lazy_fixture("mysql_storage"),
+        lazy_fixture("postgres_storage"),
+    ]
+
+PERSISTENT_SQL_STORAGE_FIXTURES = [lazy_fixture("sqlite_storage")]
+if DOCKER:
+    PERSISTENT_SQL_STORAGE_FIXTURES.extend(DOCKER_DBMS_FIXTURES)
 
 
 @pytest.fixture(scope="session")
