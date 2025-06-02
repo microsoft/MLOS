@@ -33,6 +33,7 @@ from mlos_bench.util import (
     merge_parameters,
     path_join,
     preprocess_dynamic_configs,
+    sanitize_conf,
 )
 
 if TYPE_CHECKING:
@@ -277,7 +278,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             _LOG.debug(
                 "Instantiating: %s with config:\n%s",
                 class_name,
-                json5.dumps(class_config, indent=2),
+                json5.dumps(sanitize_conf(class_config), indent=2),
             )
 
         return (class_name, class_config)
@@ -574,7 +575,13 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             services from the list plus the parent mix-in.
         """
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Build service from config:\n%s", json5.dumps(config, indent=2))
+            _LOG.debug(
+                "Build service from config:\n%s",
+                json5.dumps(
+                    sanitize_conf(config),
+                    indent=2,
+                ),
+            )
 
         assert isinstance(config, dict)
         config_list: list[dict[str, Any]]
