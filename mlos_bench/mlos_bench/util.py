@@ -478,7 +478,7 @@ def sanitize_conf(config: dict[str, Any]) -> dict[str, Any]:
     dict
         Sanitized configuration dictionary.
     """
-    sanitize_keys = {"password"}
+    sanitize_keys = {"password", "secret", "token", "api_key"}
 
     def recursive_sanitize(conf: dict[str, Any]) -> dict[str, Any]:
         """
