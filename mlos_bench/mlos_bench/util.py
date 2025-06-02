@@ -479,4 +479,19 @@ def sanitize_conf(config: dict[str, Any]) -> dict[str, Any]:
         Sanitized configuration dictionary.
     """
     sanitize_keys = {"password"}
-    return {k: "[REDACTED]" if k in sanitize_keys else v for k, v in config.items()}
+
+    def recursive_sanitize(conf: dict[str, Any]) -> dict[str, Any]:
+        """
+        Recursively sanitize a dictionary.
+        """
+        sanitized = {}
+        for k, v in conf.items():
+            if k in sanitize_keys:
+                sanitized[k] = "[REDACTED]"
+            elif isinstance(v, dict):
+                sanitized[k] = recursive_sanitize(v)
+            else:
+                sanitized[k] = v
+        return sanitized
+
+    return recursive_sanitize(config)
