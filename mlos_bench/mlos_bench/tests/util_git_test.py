@@ -3,15 +3,16 @@
 # Licensed under the MIT License.
 #
 """Unit tests for get_git_info utility function."""
-import re
 import os
+import re
 
 from mlos_bench.util import get_git_info, path_join
 
 
 def test_get_git_info() -> None:
-    """Check that we can retrieve git info about the current repository
-    correctly from a file."""
+    """Check that we can retrieve git info about the current repository correctly from a
+    file.
+    """
     (git_repo, git_commit, rel_path, abs_path) = get_git_info(__file__)
     assert "mlos" in git_repo.lower()
     assert re.match(r"[0-9a-f]{40}", git_commit) is not None
@@ -20,8 +21,9 @@ def test_get_git_info() -> None:
 
 
 def test_get_git_info_dir() -> None:
-    """Check that we can retrieve git info about the current repository
-    correctly from a directory."""
+    """Check that we can retrieve git info about the current repository correctly from a
+    directory.
+    """
     dirname = os.path.dirname(__file__)
     (git_repo, git_commit, rel_path, abs_path) = get_git_info(dirname)
     assert "mlos" in git_repo.lower()

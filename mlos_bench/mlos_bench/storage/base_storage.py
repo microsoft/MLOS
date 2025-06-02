@@ -326,17 +326,18 @@ class Storage(metaclass=ABCMeta):
 
         @property
         def rel_root_env_config(self) -> str:
-            """Get the Experiment's root Environment config's relative file path
-            to the git repo root.
+            """Get the Experiment's root Environment config's relative file path to the
+            git repo root.
             """
             return self._rel_root_env_config
 
         @property
         def abs_root_env_config(self) -> str:
-            """Get the Experiment's root Environment config file path.
+            """
+            Get the Experiment's root Environment config file path.
 
-            This returns the current absolute path to the root config for this
-            process instead of the path relative to the git repo root.
+            This returns the current absolute path to the root config for this process
+            instead of the path relative to the git repo root.
             """
             return self._abs_root_env_config
 
