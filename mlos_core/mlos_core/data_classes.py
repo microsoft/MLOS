@@ -283,11 +283,23 @@ class Observations:
 
     def __iter__(self) -> Iterator["Observation"]:
         for idx in self._configs.index:
+            config = self._configs.loc[idx]
+            assert isinstance(config, pd.Series)
+            score = self._scores.loc[idx]
+            assert isinstance(score, pd.Series)
+            context = None
+            if self._contexts is not None:
+                context = self._contexts.loc[idx]
+                assert isinstance(context, pd.Series)
+            metadata = None
+            if self._metadata is not None:
+                metadata = self._metadata.loc[idx]
+                assert isinstance(metadata, pd.Series)
             yield Observation(
-                config=self._configs.loc[idx],
-                score=self._scores.loc[idx],
-                context=None if self._contexts is None else self._contexts.loc[idx],
-                metadata=None if self._metadata is None else self._metadata.loc[idx],
+                config=config,
+                score=score,
+                context=context,
+                metadata=metadata,
             )
 
     def __repr__(self) -> str:
