@@ -10,7 +10,7 @@ from pytest_lazy_fixtures.lazy_fixture import lf as lazy_fixture
 from sqlalchemy import inspect
 
 from mlos_bench.storage.sql.storage import SqlStorage
-from mlos_bench.tests import DOCKER
+from mlos_bench.tests.storage.sql.fixtures import DOCKER_DBMS_FIXTURES
 
 # NOTE: This value is hardcoded to the latest revision in the alembic versions directory.
 # It could also be obtained programmatically using the "alembic heads" command or heads() API.
@@ -18,19 +18,13 @@ from mlos_bench.tests import DOCKER
 CURRENT_ALEMBIC_HEAD = "8928a401115b"
 
 # Try to test multiple DBMS engines.
-docker_dbms_fixtures = []
-if DOCKER:
-    docker_dbms_fixtures = [
-        lazy_fixture("mysql_storage"),
-        lazy_fixture("postgres_storage"),
-    ]
 
 
 @pytest.mark.parametrize(
     "some_sql_storage_fixture",
     [
         lazy_fixture("sqlite_storage"),
-        *docker_dbms_fixtures,
+        *DOCKER_DBMS_FIXTURES,
     ],
 )
 def test_storage_schemas(some_sql_storage_fixture: SqlStorage) -> None:

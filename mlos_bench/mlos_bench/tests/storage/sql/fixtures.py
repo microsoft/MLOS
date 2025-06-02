@@ -15,6 +15,7 @@ from random import seed as rand_seed
 import pytest
 from fasteners import InterProcessLock
 from pytest_docker.plugin import Services as DockerServices
+from pytest_lazy_fixtures.lazy_fixture import lf as lazy_fixture
 
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.schedulers.sync_scheduler import SyncScheduler
@@ -23,7 +24,7 @@ from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.storage import SqlStorage
 from mlos_bench.storage.storage_factory import from_config
-from mlos_bench.tests import SEED, wait_docker_service_healthy
+from mlos_bench.tests import SEED, wait_docker_service_healthy, DOCKER
 from mlos_bench.tests.storage import (
     CONFIG_TRIAL_REPEAT_COUNT,
     MAX_TRIALS,
@@ -39,7 +40,13 @@ from mlos_bench.util import path_join
 
 # pylint: disable=redefined-outer-name
 
-# TODO: Add mysql_storage and postgres_storage
+# Try to test multiple DBMS engines.
+DOCKER_DBMS_FIXTURES = []
+if DOCKER:
+    DOCKER_DBMS_FIXTURES = [
+        lazy_fixture("mysql_storage"),
+        lazy_fixture("postgres_storage"),
+    ]
 
 
 @pytest.fixture(scope="session")
