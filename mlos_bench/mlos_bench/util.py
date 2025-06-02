@@ -481,9 +481,7 @@ def sanitize_conf(config: dict[str, Any]) -> dict[str, Any]:
     sanitize_keys = {"password", "secret", "token", "api_key"}
 
     def recursive_sanitize(conf: dict[str, Any]) -> dict[str, Any]:
-        """
-        Recursively sanitize a dictionary.
-        """
+        """Recursively sanitize a dictionary."""
         sanitized = {}
         for k, v in conf.items():
             if k in sanitize_keys:
