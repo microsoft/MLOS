@@ -14,15 +14,8 @@ from pytz import UTC
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_storage import Storage
-from mlos_bench.tests import DOCKER
+from mlos_bench.tests.storage.sql.fixtures import DOCKER_DBMS_FIXTURES
 from mlos_bench.tunables.tunable_groups import TunableGroups
-
-docker_dbms_fixtures = []
-if DOCKER:
-    docker_dbms_fixtures = [
-        lazy_fixture("mysql_storage"),
-        lazy_fixture("postgres_storage"),
-    ]
 
 
 # TODO: When we introduce ParallelTrialScheduler warn at config startup time
@@ -36,7 +29,7 @@ if DOCKER:
     [
         # TODO: Improve this test to support non-sql backends eventually as well.
         lazy_fixture("sqlite_storage"),
-        *docker_dbms_fixtures,
+        *DOCKER_DBMS_FIXTURES,
     ],
 )
 def test_storage_pickle_restore_experiment_and_trial(
