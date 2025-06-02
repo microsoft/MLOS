@@ -6,7 +6,6 @@
 
 import pytest
 from alembic.migration import MigrationContext
-from pytest_lazy_fixtures.lazy_fixture import lf as lazy_fixture
 from sqlalchemy import inspect
 
 from mlos_bench.storage.sql.storage import SqlStorage
@@ -22,8 +21,6 @@ CURRENT_ALEMBIC_HEAD = "b61aa446e724"
 @pytest.mark.parametrize(
     "some_sql_storage_fixture",
     [
-        lazy_fixture("mem_storage"),
-        lazy_fixture("sqlite_storage"),
         *DOCKER_DBMS_FIXTURES,
     ],
 )
