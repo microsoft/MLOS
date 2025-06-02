@@ -11,7 +11,7 @@ from mlos_bench.util import sanitize_config
 
 
 def test_sanitize_config_simple():
-    """test sanitization of a simple configuration dictionary."""
+    """Test sanitization of a simple configuration dictionary."""
     config = {
         "username": "user1",
         "password": "mypassword",
@@ -20,7 +20,7 @@ def test_sanitize_config_simple():
         "secret": "shh",
         "other": 42,
     }
-    sanitized = sanitize_conf(config)
+    sanitized = sanitize_config(config)
     assert sanitized["username"] == "user1"
     assert sanitized["password"] == "[REDACTED]"
     assert sanitized["token"] == "[REDACTED]"
@@ -30,7 +30,7 @@ def test_sanitize_config_simple():
 
 
 def test_sanitize_config_nested():
-    """test sanitization of nested dictionaries."""
+    """Test sanitization of nested dictionaries."""
     config = {
         "outer": {
             "password": "pw",
@@ -38,7 +38,7 @@ def test_sanitize_config_nested():
         },
         "api_key": "key",
     }
-    sanitized = sanitize_conf(config)
+    sanitized = sanitize_config(config)
     assert sanitized["outer"]["password"] == "[REDACTED]"
     assert sanitized["outer"]["inner"]["token"] == "[REDACTED]"
     assert sanitized["outer"]["inner"]["foo"] == "bar"
@@ -46,21 +46,21 @@ def test_sanitize_config_nested():
 
 
 def test_sanitize_config_no_sensitive_keys():
-    """test that no changes are made if no sensitive keys are present."""
+    """Test that no changes are made if no sensitive keys are present."""
     config = {"foo": 1, "bar": {"baz": 2}}
-    sanitized = sanitize_conf(config)
+    sanitized = sanitize_config(config)
     assert sanitized == config
 
 
 def test_sanitize_config_mixed_types():
-    """test sanitization with mixed types including lists and dicts."""
+    """Test sanitization with mixed types including lists and dicts."""
     config = {
         "password": None,
         "token": 123,
         "secret": ["a", "b"],
         "api_key": {"nested": "val"},
     }
-    sanitized = sanitize_conf(config)
+    sanitized = sanitize_config(config)
     assert sanitized["password"] == "[REDACTED]"
     assert sanitized["token"] == "[REDACTED]"
     assert sanitized["secret"] == "[REDACTED]"
