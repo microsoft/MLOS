@@ -464,7 +464,7 @@ def datetime_parser(
     return new_datetime_col
 
 
-def sanitize_conf(config: dict[str, Any]) -> dict[str, Any]:
+def sanitize_config(config: dict[str, Any]) -> dict[str, Any]:
     """
     Sanitize a configuration dictionary by obfuscating potentially sensitive keys.
 

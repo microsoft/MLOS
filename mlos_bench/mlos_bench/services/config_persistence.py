@@ -33,7 +33,7 @@ from mlos_bench.util import (
     merge_parameters,
     path_join,
     preprocess_dynamic_configs,
-    sanitize_conf,
+    sanitize_config,
 )
 
 if TYPE_CHECKING:
@@ -278,7 +278,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             _LOG.debug(
                 "Instantiating: %s with config:\n%s",
                 class_name,
-                json5.dumps(sanitize_conf(class_config), indent=2),
+                json5.dumps(sanitize_config(class_config), indent=2),
             )
 
         return (class_name, class_config)
@@ -578,7 +578,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             _LOG.debug(
                 "Build service from config:\n%s",
                 json5.dumps(
-                    sanitize_conf(config),
+                    sanitize_config(config),
                     indent=2,
                 ),
             )

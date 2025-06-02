@@ -7,11 +7,11 @@ Unit tests for sanitize_conf utility function.
 
 Tests cover obfuscation of sensitive keys and recursive sanitization.
 """
-from mlos_bench.util import sanitize_conf
+from mlos_bench.util import sanitize_config
 
 
-def test_sanitize_conf_simple():
-    """Test sanitization of a simple configuration dictionary."""
+def test_sanitize_config_simple():
+    """test sanitization of a simple configuration dictionary."""
     config = {
         "username": "user1",
         "password": "mypassword",
@@ -29,8 +29,8 @@ def test_sanitize_conf_simple():
     assert sanitized["other"] == 42
 
 
-def test_sanitize_conf_nested():
-    """Test sanitization of nested dictionaries."""
+def test_sanitize_config_nested():
+    """test sanitization of nested dictionaries."""
     config = {
         "outer": {
             "password": "pw",
@@ -45,15 +45,15 @@ def test_sanitize_conf_nested():
     assert sanitized["api_key"] == "[REDACTED]"
 
 
-def test_sanitize_conf_no_sensitive_keys():
-    """Test that no changes are made if no sensitive keys are present."""
+def test_sanitize_config_no_sensitive_keys():
+    """test that no changes are made if no sensitive keys are present."""
     config = {"foo": 1, "bar": {"baz": 2}}
     sanitized = sanitize_conf(config)
     assert sanitized == config
 
 
-def test_sanitize_conf_mixed_types():
-    """Test sanitization with mixed types including lists and dicts."""
+def test_sanitize_config_mixed_types():
+    """test sanitization with mixed types including lists and dicts."""
     config = {
         "password": None,
         "token": 123,
