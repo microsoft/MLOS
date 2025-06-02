@@ -13,8 +13,8 @@ from importlib.resources import files
 from random import seed as rand_seed
 
 import pytest
-from pytest import FixtureRequest
 from fasteners import InterProcessLock
+from pytest import FixtureRequest
 from pytest_docker.plugin import Services as DockerServices
 from pytest_lazy_fixtures.lazy_fixture import lf as lazy_fixture
 
@@ -25,7 +25,7 @@ from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.storage import SqlStorage
 from mlos_bench.storage.storage_factory import from_config
-from mlos_bench.tests import SEED, wait_docker_service_healthy, DOCKER
+from mlos_bench.tests import DOCKER, SEED, wait_docker_service_healthy
 from mlos_bench.tests.storage import (
     CONFIG_TRIAL_REPEAT_COUNT,
     MAX_TRIALS,

@@ -16,10 +16,10 @@ import sys
 from datetime import tzinfo
 from logging import debug, warning
 from subprocess import run
-from pytest_docker.plugin import Services as DockerServices
 
 import pytest
 import pytz
+from pytest_docker.plugin import Services as DockerServices
 
 from mlos_bench.util import get_class_from_name, nullable
 
@@ -88,6 +88,7 @@ def check_class_name(obj: object, expected_class_name: str) -> bool:
     """Compares the class name of the given object with the given name."""
     full_class_name = obj.__class__.__module__ + "." + obj.__class__.__name__
     return full_class_name == try_resolve_class_name(expected_class_name)
+
 
 HOST_DOCKER_NAME = "host.docker.internal"
 

@@ -2,19 +2,19 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Support fractional seconds with MySQL
+"""
+Support fractional seconds with MySQL.
 
 Revision ID: b61aa446e724
 Revises: 8928a401115b
 Create Date: 2025-06-02 17:56:34.746642+00:00
-
 """
 # pylint: disable=no-member
 
 from collections.abc import Sequence
 
-from alembic import context, op
 import sqlalchemy as sa
+from alembic import context, op
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.

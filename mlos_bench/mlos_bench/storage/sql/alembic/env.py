@@ -5,17 +5,17 @@
 """Alembic environment script."""
 # pylint: disable=no-member
 
+import logging
 import sys
 from logging.config import fileConfig
-import logging
 
 from alembic import context
 from alembic.migration import MigrationContext
 from sqlalchemy import create_engine, engine_from_config, pool
+from sqlalchemy.dialects import mysql
 from sqlalchemy.schema import Column as SchemaColumn
 from sqlalchemy.sql.schema import Column
 from sqlalchemy.types import TypeEngine
-from sqlalchemy.dialects import mysql
 
 from mlos_bench.storage.sql.schema import DbSchema
 
@@ -60,7 +60,8 @@ def custom_compare_types(
     inspected_type: TypeEngine,
     metadata_type: TypeEngine,
 ) -> bool | None:
-    """Custom column type comparator.
+    """
+    Custom column type comparator.
 
     See `Comparing Types
     <https://alembic.sqlalchemy.org/en/latest/autogenerate.html#comparing-types>`_
