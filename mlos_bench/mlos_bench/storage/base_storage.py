@@ -25,10 +25,12 @@ mlos_bench.storage.base_trial_data.TrialData :
 from __future__ import annotations
 
 import logging
+import os
 from abc import ABCMeta, abstractmethod
 from collections.abc import Iterator, Mapping
 from contextlib import AbstractContextManager as ContextManager
 from datetime import datetime
+from subprocess import CalledProcessError
 from types import TracebackType
 from typing import Any, Literal
 
@@ -38,7 +40,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import get_git_info
+from mlos_bench.util import get_git_info, get_git_root, path_join
 
 _LOG = logging.getLogger(__name__)
 
@@ -187,16 +189,61 @@ class Storage(metaclass=ABCMeta):
             tunables: TunableGroups,
             experiment_id: str,
             trial_id: int,
-            root_env_config: str,
+            root_env_config: str | None,
             description: str,
             opt_targets: dict[str, Literal["min", "max"]],
+            git_repo: str | None = None,
+            git_commit: str | None = None,
+            rel_root_env_config: str | None = None,
         ):
             self._tunables = tunables.copy()
             self._trial_id = trial_id
             self._experiment_id = experiment_id
-            (self._git_repo, self._git_commit, self._root_env_config) = get_git_info(
-                root_env_config
-            )
+            if root_env_config is None:
+                # Restoring from DB.
+                if not (git_repo and git_commit and rel_root_env_config):
+                    raise ValueError(
+                        "Missing required args: git_repo, git_commit, rel_root_env_config"
+                    )
+                self._git_repo = git_repo
+                self._git_commit = git_commit
+                self._rel_root_env_config = rel_root_env_config
+
+                # Currently we only store the relative path of the root env config
+                # from the git repo it came from.
+                git_root = git_repo
+                if not os.path.exists(git_root):
+                    try:
+                        git_root = get_git_root(os.curdir)
+                    except CalledProcessError:
+                        _LOG.warning(
+                            "Failed to find a git repo in the current working directory: %s",
+                            os.curdir,
+                        )
+                        git_root = get_git_root(__file__)
+
+                self._abs_root_env_config = path_join(
+                    git_root,
+                    self._rel_root_env_config,
+                    abs_path=True,
+                )
+                _LOG.info(
+                    "Resolved relative root_config %s for experiment %s to %s",
+                    self._rel_root_env_config,
+                    self._experiment_id,
+                    self._abs_root_env_config,
+                )
+            else:
+                if git_repo or git_commit or rel_root_env_config:
+                    raise ValueError("Unexpected args: git_repo, git_commit, rel_root_env_config")
+                (
+                    self._git_repo,
+                    self._git_commit,
+                    self._rel_root_env_config,
+                    self._abs_root_env_config,
+                ) = get_git_info(
+                    root_env_config,
+                )
             self._description = description
             self._opt_targets = opt_targets
             self._in_context = False
@@ -278,9 +325,20 @@ class Storage(metaclass=ABCMeta):
             return self._description
 
         @property
-        def root_env_config(self) -> str:
-            """Get the Experiment's root Environment config file path."""
-            return self._root_env_config
+        def rel_root_env_config(self) -> str:
+            """Get the Experiment's root Environment config's relative file path
+            to the git repo root.
+            """
+            return self._rel_root_env_config
+
+        @property
+        def abs_root_env_config(self) -> str:
+            """Get the Experiment's root Environment config file path.
+
+            This returns the current absolute path to the root config for this
+            process instead of the path relative to the git repo root.
+            """
+            return self._abs_root_env_config
 
         @property
         def tunables(self) -> TunableGroups:

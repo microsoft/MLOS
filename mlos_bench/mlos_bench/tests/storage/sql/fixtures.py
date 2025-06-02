@@ -238,7 +238,7 @@ def exp_storage(
     with storage.experiment(
         experiment_id="Test-001",
         trial_id=1,
-        root_env_config="environment.jsonc",
+        root_env_config="my-environment.jsonc",
         description="pytest experiment",
         tunables=tunable_groups,
         opt_targets={"score": "min"},
@@ -372,7 +372,7 @@ def _dummy_run_exp(
         trial_runners=trial_runners,
         optimizer=opt,
         storage=storage,
-        root_env_config=exp.root_env_config,
+        root_env_config=exp.abs_root_env_config,
     )
 
     # Add some trial data to that experiment by "running" it.
