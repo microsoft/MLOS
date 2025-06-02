@@ -287,14 +287,10 @@ class Observations:
             assert isinstance(config, pd.Series)
             score = self._scores.loc[idx]
             assert isinstance(score, pd.Series)
-            context = None
-            if self._contexts is not None:
-                context = self._contexts.loc[idx]
-                assert isinstance(context, pd.Series)
-            metadata = None
-            if self._metadata is not None:
-                metadata = self._metadata.loc[idx]
-                assert isinstance(metadata, pd.Series)
+            context = self._contexts.loc[idx] if self._contexts is not None else None
+            assert isinstance(context, (pd.Series, type(None)))
+            metadata = self._metadata.loc[idx] if self._metadata is not None else None
+            assert isinstance(metadata, (pd.Series, type(None)))
             yield Observation(
                 config=config,
                 score=score,
