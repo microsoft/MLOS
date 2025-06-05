@@ -16,7 +16,7 @@ from mlos_bench.storage.base_trial_data import TrialData
 from mlos_bench.storage.base_tunable_config_data import TunableConfigData
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.sql.tunable_config_data import TunableConfigSqlData
-from mlos_bench.util import utcify_timestamp
+from mlos_bench.util import try_parse_val, utcify_timestamp
 
 if TYPE_CHECKING:
     from mlos_bench.storage.base_tunable_config_trial_group_data import (
@@ -97,7 +97,10 @@ class TrialSqlData(TrialData):
                 )
             )
             return pandas.DataFrame(
-                [(row.metric_id, row.metric_value) for row in cur_results.fetchall()],
+                [
+                    (row.metric_id, try_parse_val(row.metric_value))
+                    for row in cur_results.fetchall()
+                ],
                 columns=["metric", "value"],
             )
 
@@ -120,7 +123,11 @@ class TrialSqlData(TrialData):
             # We try to ensure data is entered in UTC and augment it on return again here.
             return pandas.DataFrame(
                 [
-                    (utcify_timestamp(row.ts, origin="utc"), row.metric_id, row.metric_value)
+                    (
+                        utcify_timestamp(row.ts, origin="utc"),
+                        row.metric_id,
+                        try_parse_val(row.metric_value),
+                    )
                     for row in cur_telemetry.fetchall()
                 ],
                 columns=["ts", "metric", "value"],
@@ -145,6 +152,6 @@ class TrialSqlData(TrialData):
                 )
             )
             return pandas.DataFrame(
-                [(row.param_id, row.param_value) for row in cur_params.fetchall()],
+                [(row.param_id, try_parse_val(row.param_value)) for row in cur_params.fetchall()],
                 columns=["parameter", "value"],
             )

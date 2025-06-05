@@ -13,7 +13,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tests import ZONE_INFO
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import nullable
+from mlos_bench.util import nullable, try_parse_val
 
 # pylint: disable=redefined-outer-name
 
@@ -41,12 +41,12 @@ def zoned_telemetry_data(zone_info: tzinfo | None) -> list[tuple[datetime, str, 
     )
 
 
-def _telemetry_str(
+def _telemetry_val(
     data: list[tuple[datetime, str, Any]],
-) -> list[tuple[datetime, str, str | None]]:
+) -> list[tuple[datetime, str, int | float | str | None]]:
     """Convert telemetry values to strings."""
     # All retrieved timestamps should have been converted to UTC.
-    return [(ts.astimezone(UTC), key, nullable(str, val)) for (ts, key, val) in data]
+    return [(ts.astimezone(UTC), key, try_parse_val(val)) for (ts, key, val) in data]
 
 
 @pytest.mark.parametrize(("origin_zone_info"), ZONE_INFO)
@@ -62,13 +62,13 @@ def test_update_telemetry(
     assert exp_storage.load_telemetry(trial.trial_id) == []
 
     trial.update_telemetry(Status.RUNNING, datetime.now(origin_zone_info), telemetry_data)
-    assert exp_storage.load_telemetry(trial.trial_id) == _telemetry_str(telemetry_data)
+    assert exp_storage.load_telemetry(trial.trial_id) == _telemetry_val(telemetry_data)
 
     # Also check that the TrialData telemetry looks right.
     trial_data = storage.experiments[exp_storage.experiment_id].trials[trial.trial_id]
     trial_telemetry_df = trial_data.telemetry_df
     trial_telemetry_data = [tuple(r) for r in trial_telemetry_df.to_numpy()]
-    assert _telemetry_str(trial_telemetry_data) == _telemetry_str(telemetry_data)
+    assert _telemetry_val(trial_telemetry_data) == _telemetry_val(telemetry_data)
 
 
 @pytest.mark.parametrize(("origin_zone_info"), ZONE_INFO)
@@ -84,4 +84,4 @@ def test_update_telemetry_twice(
     trial.update_telemetry(Status.RUNNING, timestamp, telemetry_data)
     trial.update_telemetry(Status.RUNNING, timestamp, telemetry_data)
     trial.update_telemetry(Status.RUNNING, timestamp, telemetry_data)
-    assert exp_storage.load_telemetry(trial.trial_id) == _telemetry_str(telemetry_data)
+    assert exp_storage.load_telemetry(trial.trial_id) == _telemetry_val(telemetry_data)

@@ -104,12 +104,12 @@ def test_exp_trial_update_categ(
         [
             {
                 "idle": "halt",
-                "kernel_sched_latency_ns": "2000000",
-                "kernel_sched_migration_cost_ns": "-1",
+                "kernel_sched_latency_ns": 2000000,
+                "kernel_sched_migration_cost_ns": -1,
                 "vmSize": "Standard_B4ms",
             }
         ],
-        [{"score": "99.9", "benchmark": "test"}],
+        [{"score": 99.9, "benchmark": "test"}],
         [Status.SUCCEEDED],
     )
 
@@ -153,7 +153,7 @@ def test_exp_trial_pending_3(
     (trial_ids, configs, scores, status) = exp_storage.load()
     assert trial_ids == [trial_fail.trial_id, trial_succ.trial_id]
     assert len(configs) == 2
-    assert scores == [None, {"score": f"{score}"}]
+    assert scores == [None, {"score": score}]
     assert status == [Status.FAILED, Status.SUCCEEDED]
     assert tunable_groups.copy().assign(configs[0]).reset() == trial_fail.tunables
     assert tunable_groups.copy().assign(configs[1]).reset() == trial_succ.tunables

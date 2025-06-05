@@ -22,7 +22,7 @@ def test_exp_trial_pending(exp_storage: Storage.Experiment, tunable_groups: Tuna
     assert pending.tunables == tunable_groups
     assert pending.config() == {
         "location": "westus2",
-        "num_repeats": "100",
+        "num_repeats": 100,
         "experiment_id": "Test-001",
         "trial_id": trial.trial_id,
     }
