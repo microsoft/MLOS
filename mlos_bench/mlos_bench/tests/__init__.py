@@ -106,15 +106,6 @@ def docker_hostname() -> str:
     return "localhost"
 
 
-def wait_docker_service_socket(docker_services: DockerServices, hostname: str, port: int) -> None:
-    """Wait until a docker service is ready."""
-    docker_services.wait_until_responsive(
-        check=lambda: check_socket(hostname, port),
-        timeout=30.0,
-        pause=0.5,
-    )
-
-
 def is_docker_service_healthy(
     compose_project_name: str,
     service_name: str,
