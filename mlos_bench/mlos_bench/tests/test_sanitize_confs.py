@@ -45,14 +45,14 @@ def test_sanitize_config_nested() -> None:
     assert sanitized["api_key"] == "[REDACTED]"
 
 
-def test_sanitize_config_no_sensitive_keys():
+def test_sanitize_config_no_sensitive_keys() -> None:
     """Test that no changes are made if no sensitive keys are present."""
     config = {"foo": 1, "bar": {"baz": 2}}
     sanitized = sanitize_config(config)
     assert sanitized == config
 
 
-def test_sanitize_config_mixed_types():
+def test_sanitize_config_mixed_types() -> None:
     """Test sanitization with mixed types including lists and dicts."""
     config = {
         "password": None,

@@ -487,7 +487,7 @@ def sanitize_config(config: dict[str, Any]) -> dict[str, Any]:
             if k in sanitize_keys:
                 sanitized[k] = "[REDACTED]"
             elif isinstance(v, dict):
-                sanitized[k] = recursive_sanitize(v)
+                sanitized[k] = recursive_sanitize(v) # type: ignore[assignment]
             else:
                 sanitized[k] = v
         return sanitized
