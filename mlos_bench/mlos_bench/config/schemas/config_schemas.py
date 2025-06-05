@@ -218,7 +218,7 @@ class ConfigSchema(Enum):
 
     See Also
     --------
-    <https://www.schemastore.org/json/>
+    <https://www.schemastore.org/>
     """
 
     @property
