@@ -10,7 +10,7 @@ Tests cover obfuscation of sensitive keys and recursive sanitization.
 from mlos_bench.util import sanitize_config
 
 
-def test_sanitize_config_simple():
+def test_sanitize_config_simple() -> None:
     """Test sanitization of a simple configuration dictionary."""
     config = {
         "username": "user1",
@@ -29,7 +29,7 @@ def test_sanitize_config_simple():
     assert sanitized["other"] == 42
 
 
-def test_sanitize_config_nested():
+def test_sanitize_config_nested() -> None:
     """Test sanitization of nested dictionaries."""
     config = {
         "outer": {
