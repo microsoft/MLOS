@@ -163,7 +163,7 @@ def postgres_storage(
     short_testrun_uid: str,
 ) -> Generator[SqlStorage]:
     """
-    Fixture of a MySQL backed SqlStorage engine.
+    Fixture of a Postgres backed SqlStorage engine.
 
     See Also
     --------
