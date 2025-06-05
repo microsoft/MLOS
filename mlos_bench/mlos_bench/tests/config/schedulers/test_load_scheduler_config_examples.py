@@ -14,7 +14,7 @@ from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.schedulers.base_scheduler import Scheduler
 from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.services.config_persistence import ConfigPersistenceService
-from mlos_bench.storage.sql.storage import SqlStorage
+from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tests.config import BUILTIN_TEST_CONFIG_PATH, locate_config_examples
 from mlos_bench.util import get_class_from_name
 
@@ -58,7 +58,7 @@ def test_load_scheduler_config_examples(
     config_path: str,
     mock_env_config_path: str,
     trial_runners: list[TrialRunner],
-    storage: SqlStorage,
+    storage: Storage,
     mock_opt: MockOptimizer,
 ) -> None:
     """Tests loading a config example."""
