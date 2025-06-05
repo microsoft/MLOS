@@ -16,8 +16,8 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 def _format_str(zone_info: tzinfo | None) -> str:
     if zone_info is not None:
-        return "%Y-%m-%d %H:%M:%S %z"
-    return "%Y-%m-%d %H:%M:%S"
+        return "%Y-%m-%d %H:%M:%S.%f %z"
+    return "%Y-%m-%d %H:%M:%S.%f"
 
 
 # FIXME: This fails with zone_info = None when run with `TZ="America/Chicago pytest -n0 ...`
@@ -25,7 +25,6 @@ def _format_str(zone_info: tzinfo | None) -> str:
 def test_local_env_telemetry(tunable_groups: TunableGroups, zone_info: tzinfo | None) -> None:
     """Produce benchmark and telemetry data in a local script and read it."""
     ts1 = datetime.now(zone_info)
-    ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=1)
 
     format_str = _format_str(zone_info)
@@ -77,7 +76,6 @@ def test_local_env_telemetry_no_header(
 ) -> None:
     """Read the telemetry data with no header."""
     ts1 = datetime.now(zone_info)
-    ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=1)
 
     format_str = _format_str(zone_info)
@@ -121,7 +119,6 @@ def test_local_env_telemetry_wrong_header(
 ) -> None:
     """Read the telemetry data with incorrect header."""
     ts1 = datetime.now(zone_info)
-    ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=1)
 
     format_str = _format_str(zone_info)
@@ -150,7 +147,6 @@ def test_local_env_telemetry_invalid(tunable_groups: TunableGroups) -> None:
     """Fail when the telemetry data has wrong format."""
     zone_info = UTC
     ts1 = datetime.now(zone_info)
-    ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=1)
 
     format_str = _format_str(zone_info)
