@@ -48,7 +48,7 @@ The [`schemas`](./schemas/) directory contains the [`jsonschema`](https://json-s
 
 For instance including a `"$schema"` attribute at the top of your `json` config file will enable `json` validation and auto-complete in many editors (e.g. [VSCode](https://code.visualstudio.com/)):
 
-Alternatively, you can simply name the file `*.mlos.json` or `*.mlos.jsonc` and the schema will be automatically applied using an [extension](https://marketplace.visualstudio.com/items?itemName=remcohaszing.schemastore) to resolve the rules from \<https://www.schemastore.org/json/
+Alternatively, you can simply name the file `*.mlos.json` or `*.mlos.jsonc` and the schema will be automatically applied using an [extension](https://marketplace.visualstudio.com/items?itemName=remcohaszing.schemastore) to resolve the rules from <https://www.schemastore.org/>
 
 ```jsonc
 {
