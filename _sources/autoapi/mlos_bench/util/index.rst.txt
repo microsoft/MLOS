@@ -34,6 +34,7 @@ Functions
    mlos_bench.util.path_join
    mlos_bench.util.prepare_class_load
    mlos_bench.util.preprocess_dynamic_configs
+   mlos_bench.util.sanitize_config
    mlos_bench.util.strtobool
    mlos_bench.util.try_parse_val
    mlos_bench.util.utcify_nullable_timestamp
@@ -188,6 +189,17 @@ Module Contents
    :type source: dict | None
 
    :returns: **dest** -- A reference to the destination config after the preprocessing.
+   :rtype: dict
+
+
+.. py:function:: sanitize_config(config: dict[str, Any]) -> dict[str, Any]
+
+   Sanitize a configuration dictionary by obfuscating potentially sensitive keys.
+
+   :param config: Configuration dictionary to sanitize.
+   :type config: dict
+
+   :returns: Sanitized configuration dictionary.
    :rtype: dict
 
 

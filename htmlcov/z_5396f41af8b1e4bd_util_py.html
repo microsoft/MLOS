@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for mlos_bench/mlos_bench/util.py: 89%</title>
+    <title>Coverage for mlos_bench/mlos_bench/util.py: 90%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
     <link rel="stylesheet" href="style_cb_81f8c14c.css" type="text/css">
     <script src="coverage_html_cb_6fb7b396.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>mlos_bench/mlos_bench/util.py</b>:
-            <span class="pc_cov">89%</span>
+            <span class="pc_cov">90%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -54,8 +54,8 @@
             </div>
         </aside>
         <h2>
-            <span class="text">121 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">108<span class="text"> run</span></button>
+            <span class="text">133 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">120<span class="text"> run</span></button>
             <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">13<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">6<span class="text"> excluded</span></button>
         </h2>
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_5396f41af8b1e4bd_version_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.0">coverage.py v7.9.0</a>,
-            created at 2025-06-12 00:50 +0000
+            created at 2025-06-12 01:34 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -544,6 +544,37 @@
     <p class="run"><span class="n"><a id="t462" href="#t462">462</a></span><span class="t">    <span class="key">if</span> <span class="nam">new_datetime_col</span><span class="op">.</span><span class="nam">le</span><span class="op">(</span><span class="nam">_MIN_TS</span><span class="op">)</span><span class="op">.</span><span class="nam">any</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t463" href="#t463">463</a></span><span class="t">        <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Invalid date range in the data: </span><span class="op">{</span><span class="nam">datetime_col</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t464" href="#t464">464</a></span><span class="t">    <span class="key">return</span> <span class="nam">new_datetime_col</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t465" href="#t465">465</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t466" href="#t466">466</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t467" href="#t467">467</a></span><span class="t"><span class="key">def</span> <span class="nam">sanitize_config</span><span class="op">(</span><span class="nam">config</span><span class="op">:</span> <span class="nam">dict</span><span class="op">[</span><span class="nam">str</span><span class="op">,</span> <span class="nam">Any</span><span class="op">]</span><span class="op">)</span> <span class="op">-></span> <span class="nam">dict</span><span class="op">[</span><span class="nam">str</span><span class="op">,</span> <span class="nam">Any</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t468" href="#t468">468</a></span><span class="t">    <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t469" href="#t469">469</a></span><span class="t"><span class="str">    Sanitize a configuration dictionary by obfuscating potentially sensitive keys.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t470" href="#t470">470</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t471" href="#t471">471</a></span><span class="t"><span class="str">    Parameters</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t472" href="#t472">472</a></span><span class="t"><span class="str">    ----------</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t473" href="#t473">473</a></span><span class="t"><span class="str">    config : dict</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t474" href="#t474">474</a></span><span class="t"><span class="str">        Configuration dictionary to sanitize.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t475" href="#t475">475</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t476" href="#t476">476</a></span><span class="t"><span class="str">    Returns</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t477" href="#t477">477</a></span><span class="t"><span class="str">    -------</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t478" href="#t478">478</a></span><span class="t"><span class="str">    dict</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t479" href="#t479">479</a></span><span class="t"><span class="str">        Sanitized configuration dictionary.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t480" href="#t480">480</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t481" href="#t481">481</a></span><span class="t">    <span class="nam">sanitize_keys</span> <span class="op">=</span> <span class="op">{</span><span class="str">"password"</span><span class="op">,</span> <span class="str">"secret"</span><span class="op">,</span> <span class="str">"token"</span><span class="op">,</span> <span class="str">"api_key"</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t482" href="#t482">482</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t483" href="#t483">483</a></span><span class="t">    <span class="key">def</span> <span class="nam">recursive_sanitize</span><span class="op">(</span><span class="nam">conf</span><span class="op">:</span> <span class="nam">dict</span><span class="op">[</span><span class="nam">str</span><span class="op">,</span> <span class="nam">Any</span><span class="op">]</span><span class="op">)</span> <span class="op">-></span> <span class="nam">dict</span><span class="op">[</span><span class="nam">str</span><span class="op">,</span> <span class="nam">Any</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t484" href="#t484">484</a></span><span class="t">        <span class="str">"""Recursively sanitize a dictionary."""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t485" href="#t485">485</a></span><span class="t">        <span class="nam">sanitized</span> <span class="op">=</span> <span class="op">{</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t486" href="#t486">486</a></span><span class="t">        <span class="key">for</span> <span class="nam">k</span><span class="op">,</span> <span class="nam">v</span> <span class="key">in</span> <span class="nam">conf</span><span class="op">.</span><span class="nam">items</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t487" href="#t487">487</a></span><span class="t">            <span class="key">if</span> <span class="nam">k</span> <span class="key">in</span> <span class="nam">sanitize_keys</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t488" href="#t488">488</a></span><span class="t">                <span class="nam">sanitized</span><span class="op">[</span><span class="nam">k</span><span class="op">]</span> <span class="op">=</span> <span class="str">"[REDACTED]"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t489" href="#t489">489</a></span><span class="t">            <span class="key">elif</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">v</span><span class="op">,</span> <span class="nam">dict</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t490" href="#t490">490</a></span><span class="t">                <span class="nam">sanitized</span><span class="op">[</span><span class="nam">k</span><span class="op">]</span> <span class="op">=</span> <span class="nam">recursive_sanitize</span><span class="op">(</span><span class="nam">v</span><span class="op">)</span>  <span class="com"># type: ignore[assignment]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t491" href="#t491">491</a></span><span class="t">            <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t492" href="#t492">492</a></span><span class="t">                <span class="nam">sanitized</span><span class="op">[</span><span class="nam">k</span><span class="op">]</span> <span class="op">=</span> <span class="nam">v</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t493" href="#t493">493</a></span><span class="t">        <span class="key">return</span> <span class="nam">sanitized</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t494" href="#t494">494</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t495" href="#t495">495</a></span><span class="t">    <span class="key">return</span> <span class="nam">recursive_sanitize</span><span class="op">(</span><span class="nam">config</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -553,7 +584,7 @@
             <a class="nav" href="z_5396f41af8b1e4bd_version_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.0">coverage.py v7.9.0</a>,
-            created at 2025-06-12 00:50 +0000
+            created at 2025-06-12 01:34 +0000
         </p>
     </div>
 </footer>

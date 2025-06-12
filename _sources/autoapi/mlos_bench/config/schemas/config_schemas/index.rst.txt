@@ -167,7 +167,7 @@ Module Contents
       <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/mlos-bench-config-schema.json>`__
       use to validate any ``mlos_bench`` config file (e.g., ``*.mlos.jsonc`` files).
 
-      .. seealso:: <https://www.schemastore.org/json/>
+      .. seealso:: <https://www.schemastore.org/>
 
 
    .. py:property:: schema

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlos_bench.util &mdash; MLOS 0.6.3.dev38+ga883a7eaba documentation</title>
+  <title>mlos_bench.util &mdash; MLOS 0.6.3.dev40+g3111f9be48 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/util/index.html"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=9edc85a6"></script>
+      <script src="../../../_static/documentation_options.js?v=1058ede5"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -86,6 +86,7 @@
 <li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.path_join"><code class="docutils literal notranslate"><span class="pre">path_join()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.prepare_class_load"><code class="docutils literal notranslate"><span class="pre">prepare_class_load()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.preprocess_dynamic_configs"><code class="docutils literal notranslate"><span class="pre">preprocess_dynamic_configs()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.sanitize_config"><code class="docutils literal notranslate"><span class="pre">sanitize_config()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.strtobool"><code class="docutils literal notranslate"><span class="pre">strtobool()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.try_parse_val"><code class="docutils literal notranslate"><span class="pre">try_parse_val()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.utcify_nullable_timestamp"><code class="docutils literal notranslate"><span class="pre">utcify_nullable_timestamp()</span></code></a></li>
@@ -193,16 +194,19 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.util.preprocess_dynamic_configs" title="mlos_bench.util.preprocess_dynamic_configs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess_dynamic_configs</span></code></a>(→ dict)</p></td>
 <td><p>Replaces all <code class="docutils literal notranslate"><span class="pre">$name</span></code> values in the destination config with the corresponding value</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.util.strtobool" title="mlos_bench.util.strtobool"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strtobool</span></code></a>(→ bool)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.util.sanitize_config" title="mlos_bench.util.sanitize_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sanitize_config</span></code></a>(→ dict[str, Any])</p></td>
+<td><p>Sanitize a configuration dictionary by obfuscating potentially sensitive keys.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.util.strtobool" title="mlos_bench.util.strtobool"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strtobool</span></code></a>(→ bool)</p></td>
 <td><p>Convert a string representation of truth to true (1) or false (0).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.util.try_parse_val" title="mlos_bench.util.try_parse_val"><code class="xref py py-obj docutils literal notranslate"><span class="pre">try_parse_val</span></code></a>(→ int | float | str | None)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.util.try_parse_val" title="mlos_bench.util.try_parse_val"><code class="xref py py-obj docutils literal notranslate"><span class="pre">try_parse_val</span></code></a>(→ int | float | str | None)</p></td>
 <td><p>Try to parse the value as an int or float, otherwise return the string.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.util.utcify_nullable_timestamp" title="mlos_bench.util.utcify_nullable_timestamp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">utcify_nullable_timestamp</span></code></a>(→ datetime.datetime | None)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.util.utcify_nullable_timestamp" title="mlos_bench.util.utcify_nullable_timestamp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">utcify_nullable_timestamp</span></code></a>(→ datetime.datetime | None)</p></td>
 <td><p>A nullable version of utcify_timestamp.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.util.utcify_timestamp" title="mlos_bench.util.utcify_timestamp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">utcify_timestamp</span></code></a>(→ datetime.datetime)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.util.utcify_timestamp" title="mlos_bench.util.utcify_timestamp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">utcify_timestamp</span></code></a>(→ datetime.datetime)</p></td>
 <td><p>Augment a timestamp with zoneinfo if missing and convert it to UTC.</p></td>
 </tr>
 </tbody>
@@ -417,6 +421,23 @@ from the source config.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>dest</strong> – A reference to the destination config after the preprocessing.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.sanitize_config">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">sanitize_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.sanitize_config" title="Link to this definition"></a></dt>
+<dd><p>Sanitize a configuration dictionary by obfuscating potentially sensitive keys.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Configuration dictionary to sanitize.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Sanitized configuration dictionary.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
