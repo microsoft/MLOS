@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlos_bench.environments.status &mdash; MLOS 0.6.3.dev40+g3111f9be48 documentation</title>
+  <title>mlos_bench.environments.status &mdash; MLOS 0.6.3.dev41+g869001ba23 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/environments/status/index.html"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=1058ede5"></script>
+      <script src="../../../../_static/documentation_options.js?v=5758e8f6"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -81,7 +81,6 @@
 <li class="toctree-l6"><a class="reference internal" href="#module-contents">Module Contents</a><ul>
 <li class="toctree-l7"><a class="reference internal" href="#mlos_bench.environments.status.Status"><code class="docutils literal notranslate"><span class="pre">Status</span></code></a><ul>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.environments.status.Status.completed_statuses"><code class="docutils literal notranslate"><span class="pre">Status.completed_statuses()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.environments.status.Status.from_str"><code class="docutils literal notranslate"><span class="pre">Status.from_str()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.environments.status.Status.is_canceled"><code class="docutils literal notranslate"><span class="pre">Status.is_canceled()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.environments.status.Status.is_completed"><code class="docutils literal notranslate"><span class="pre">Status.is_completed()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.environments.status.Status.is_failed"><code class="docutils literal notranslate"><span class="pre">Status.is_failed()</span></code></a></li>
@@ -91,6 +90,7 @@
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.environments.status.Status.is_running"><code class="docutils literal notranslate"><span class="pre">Status.is_running()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.environments.status.Status.is_succeeded"><code class="docutils literal notranslate"><span class="pre">Status.is_succeeded()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.environments.status.Status.is_timed_out"><code class="docutils literal notranslate"><span class="pre">Status.is_timed_out()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.environments.status.Status.parse"><code class="docutils literal notranslate"><span class="pre">Status.parse()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.environments.status.Status.CANCELED"><code class="docutils literal notranslate"><span class="pre">Status.CANCELED</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.environments.status.Status.FAILED"><code class="docutils literal notranslate"><span class="pre">Status.FAILED</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#mlos_bench.environments.status.Status.PENDING"><code class="docutils literal notranslate"><span class="pre">Status.PENDING</span></code></a></li>
@@ -206,20 +206,6 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mlos_bench.environments.status.Status.from_str">
-<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mlos_bench.environments.status.Status" title="mlos_bench.environments.status.Status"><span class="pre">Status</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/environments/status.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.environments.status.Status.from_str" title="Link to this definition"></a></dt>
-<dd><p>Convert a string to a Status enum.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>status_str</strong> (<em>Any</em>)</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#mlos_bench.environments.status.Status" title="mlos_bench.environments.status.Status">Status</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mlos_bench.environments.status.Status.is_canceled">
 <span class="sig-name descname"><span class="pre">is_canceled</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/environments/status.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.environments.status.Status.is_canceled" title="Link to this definition"></a></dt>
 <dd><p>Check if the status of the benchmark/environment Trial or Experiment is
@@ -326,6 +312,25 @@ TIMED_OUT.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="mlos_bench.environments.status.Status.parse">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mlos_bench.environments.status.Status" title="mlos_bench.environments.status.Status"><span class="pre">Status</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/environments/status.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.environments.status.Status.parse" title="Link to this definition"></a></dt>
+<dd><p>Convert the input to a Status enum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>status</strong> (<em>Any</em>) – The status to parse. This can be a string (or string convertible),
+int, or Status enum.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The corresponding Status enum value or else UNKNOWN if the input is not
+recognized.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mlos_bench.environments.status.Status" title="mlos_bench.environments.status.Status">Status</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mlos_bench.environments.status.Status.CANCELED">
 <span class="sig-name descname"><span class="pre">CANCELED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/environments/status.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.environments.status.Status.CANCELED" title="Link to this definition"></a></dt>
@@ -372,6 +377,14 @@ TIMED_OUT.</p>
 <dt class="sig sig-object py" id="mlos_bench.environments.status.COMPLETED_STATUSES">
 <span class="sig-prename descclassname"><span class="pre">mlos_bench.environments.status.</span></span><span class="sig-name descname"><span class="pre">COMPLETED_STATUSES</span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/environments/status.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.environments.status.COMPLETED_STATUSES" title="Link to this definition"></a></dt>
 <dd><p>The set of completed statuses.</p>
+<p>Includes all statuses that indicate the trial or experiment has finished, either
+successfully or not.
+This set is used to determine if a trial or experiment has reached a final state.
+This includes:
+- <a class="reference internal" href="#mlos_bench.environments.status.Status.SUCCEEDED" title="mlos_bench.environments.status.Status.SUCCEEDED"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Status.SUCCEEDED</span></code></a>: The trial or experiment completed successfully.
+- <a class="reference internal" href="#mlos_bench.environments.status.Status.CANCELED" title="mlos_bench.environments.status.Status.CANCELED"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Status.CANCELED</span></code></a>: The trial or experiment was canceled.
+- <a class="reference internal" href="#mlos_bench.environments.status.Status.FAILED" title="mlos_bench.environments.status.Status.FAILED"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Status.FAILED</span></code></a>: The trial or experiment failed.
+- <a class="reference internal" href="#mlos_bench.environments.status.Status.TIMED_OUT" title="mlos_bench.environments.status.Status.TIMED_OUT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Status.TIMED_OUT</span></code></a>: The trial or experiment timed out.</p>
 </dd></dl>
 
 </section>

@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_feb2aa4ec14319ea_experiment_data_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.0">coverage.py v7.9.0</a>,
-            created at 2025-06-12 01:34 +0000
+            created at 2025-06-12 02:03 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -270,7 +270,7 @@
     <p class="run"><span class="n"><a id="t188" href="#t188">188</a></span><span class="t">            <span class="nam">status</span><span class="op">:</span> <span class="nam">list</span><span class="op">[</span><span class="nam">Status</span><span class="op">]</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t189" href="#t189">189</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t190" href="#t190">190</a></span><span class="t">            <span class="key">for</span> <span class="nam">trial</span> <span class="key">in</span> <span class="nam">cur_trials</span><span class="op">.</span><span class="nam">fetchall</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t191" href="#t191">191</a></span><span class="t">                <span class="nam">stat</span> <span class="op">=</span> <span class="nam">Status</span><span class="op">.</span><span class="nam">from_str</span><span class="op">(</span><span class="nam">trial</span><span class="op">.</span><span class="nam">status</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t191" href="#t191">191</a></span><span class="t">                <span class="nam">stat</span> <span class="op">=</span> <span class="nam">Status</span><span class="op">.</span><span class="nam">parse</span><span class="op">(</span><span class="nam">trial</span><span class="op">.</span><span class="nam">status</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t192" href="#t192">192</a></span><span class="t">                <span class="nam">status</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="nam">stat</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t193" href="#t193">193</a></span><span class="t">                <span class="nam">trial_ids</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="nam">trial</span><span class="op">.</span><span class="nam">trial_id</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t194" href="#t194">194</a></span><span class="t">                <span class="nam">configs</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
@@ -354,7 +354,7 @@
     <p class="pln"><span class="n"><a id="t272" href="#t272">272</a></span><span class="t">                <span class="nam">config_id</span><span class="op">=</span><span class="nam">trial</span><span class="op">.</span><span class="nam">config_id</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t273" href="#t273">273</a></span><span class="t">                <span class="nam">trial_runner_id</span><span class="op">=</span><span class="nam">trial</span><span class="op">.</span><span class="nam">trial_runner_id</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t274" href="#t274">274</a></span><span class="t">                <span class="nam">opt_targets</span><span class="op">=</span><span class="nam">self</span><span class="op">.</span><span class="nam">_opt_targets</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t275" href="#t275">275</a></span><span class="t">                <span class="nam">status</span><span class="op">=</span><span class="nam">Status</span><span class="op">.</span><span class="nam">from_str</span><span class="op">(</span><span class="nam">trial</span><span class="op">.</span><span class="nam">status</span><span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t275" href="#t275">275</a></span><span class="t">                <span class="nam">status</span><span class="op">=</span><span class="nam">Status</span><span class="op">.</span><span class="nam">parse</span><span class="op">(</span><span class="nam">trial</span><span class="op">.</span><span class="nam">status</span><span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t276" href="#t276">276</a></span><span class="t">                <span class="nam">restoring</span><span class="op">=</span><span class="key">True</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t277" href="#t277">277</a></span><span class="t">                <span class="nam">config</span><span class="op">=</span><span class="nam">config</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t278" href="#t278">278</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -412,7 +412,7 @@
     <p class="pln"><span class="n"><a id="t330" href="#t330">330</a></span><span class="t">                    <span class="nam">config_id</span><span class="op">=</span><span class="nam">trial</span><span class="op">.</span><span class="nam">config_id</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t331" href="#t331">331</a></span><span class="t">                    <span class="nam">trial_runner_id</span><span class="op">=</span><span class="nam">trial</span><span class="op">.</span><span class="nam">trial_runner_id</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t332" href="#t332">332</a></span><span class="t">                    <span class="nam">opt_targets</span><span class="op">=</span><span class="nam">self</span><span class="op">.</span><span class="nam">_opt_targets</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t333" href="#t333">333</a></span><span class="t">                    <span class="nam">status</span><span class="op">=</span><span class="nam">Status</span><span class="op">.</span><span class="nam">from_str</span><span class="op">(</span><span class="nam">trial</span><span class="op">.</span><span class="nam">status</span><span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t333" href="#t333">333</a></span><span class="t">                    <span class="nam">status</span><span class="op">=</span><span class="nam">Status</span><span class="op">.</span><span class="nam">parse</span><span class="op">(</span><span class="nam">trial</span><span class="op">.</span><span class="nam">status</span><span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t334" href="#t334">334</a></span><span class="t">                    <span class="nam">restoring</span><span class="op">=</span><span class="key">True</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t335" href="#t335">335</a></span><span class="t">                    <span class="nam">config</span><span class="op">=</span><span class="nam">config</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t336" href="#t336">336</a></span><span class="t">                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -507,7 +507,7 @@
             <a class="nav" href="z_feb2aa4ec14319ea_experiment_data_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.0">coverage.py v7.9.0</a>,
-            created at 2025-06-12 01:34 +0000
+            created at 2025-06-12 02:03 +0000
         </p>
     </div>
 </footer>

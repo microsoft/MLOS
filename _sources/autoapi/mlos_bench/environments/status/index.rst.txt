@@ -44,14 +44,6 @@ Module Contents
 
 
 
-   .. py:method:: from_str(status_str: Any) -> Status
-      :staticmethod:
-
-
-      Convert a string to a Status enum.
-
-
-
    .. py:method:: is_canceled() -> bool
 
       Check if the status of the benchmark/environment Trial or Experiment is
@@ -114,6 +106,22 @@ Module Contents
 
 
 
+   .. py:method:: parse(status: Any) -> Status
+      :staticmethod:
+
+
+      Convert the input to a Status enum.
+
+      :param status: The status to parse. This can be a string (or string convertible),
+                     int, or Status enum.
+      :type status: Any
+
+      :returns: The corresponding Status enum value or else UNKNOWN if the input is not
+                recognized.
+      :rtype: Status
+
+
+
    .. py:attribute:: CANCELED
       :value: 5
 
@@ -157,4 +165,13 @@ Module Contents
 .. py:data:: COMPLETED_STATUSES
 
    The set of completed statuses.
+
+   Includes all statuses that indicate the trial or experiment has finished, either
+   successfully or not.
+   This set is used to determine if a trial or experiment has reached a final state.
+   This includes:
+   - :py:attr:`.Status.SUCCEEDED`: The trial or experiment completed successfully.
+   - :py:attr:`.Status.CANCELED`: The trial or experiment was canceled.
+   - :py:attr:`.Status.FAILED`: The trial or experiment failed.
+   - :py:attr:`.Status.TIMED_OUT`: The trial or experiment timed out.
 
