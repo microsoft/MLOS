@@ -462,3 +462,34 @@ def datetime_parser(
     if new_datetime_col.le(_MIN_TS).any():
         raise ValueError(f"Invalid date range in the data: {datetime_col}")
     return new_datetime_col
+
+
+def sanitize_config(config: dict[str, Any]) -> dict[str, Any]:
+    """
+    Sanitize a configuration dictionary by obfuscating potentially sensitive keys.
+
+    Parameters
+    ----------
+    config : dict
+        Configuration dictionary to sanitize.
+
+    Returns
+    -------
+    dict
+        Sanitized configuration dictionary.
+    """
+    sanitize_keys = {"password", "secret", "token", "api_key"}
+
+    def recursive_sanitize(conf: dict[str, Any]) -> dict[str, Any]:
+        """Recursively sanitize a dictionary."""
+        sanitized = {}
+        for k, v in conf.items():
+            if k in sanitize_keys:
+                sanitized[k] = "[REDACTED]"
+            elif isinstance(v, dict):
+                sanitized[k] = recursive_sanitize(v)  # type: ignore[assignment]
+            else:
+                sanitized[k] = v
+        return sanitized
+
+    return recursive_sanitize(config)
