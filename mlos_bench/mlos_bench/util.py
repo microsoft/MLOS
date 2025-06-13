@@ -274,7 +274,32 @@ def check_required_params(config: Mapping[str, Any], required_params: Iterable[s
         )
 
 
-def get_git_info(path: str = __file__) -> tuple[str, str, str]:
+def get_git_root(path: str = __file__) -> str:
+    """
+    Get the root dir of the git repository.
+
+    Parameters
+    ----------
+    path : str, optional
+        Path to the file in git repository.
+
+    Returns
+    -------
+    str
+        _description_
+    """
+    abspath = path_join(path, abs_path=True)
+    if not os.path.exists(abspath) or not os.path.isdir(abspath):
+        dirname = os.path.dirname(abspath)
+    else:
+        dirname = abspath
+    git_root = subprocess.check_output(
+        ["git", "-C", dirname, "rev-parse", "--show-toplevel"], text=True
+    ).strip()
+    return git_root
+
+
+def get_git_info(path: str = __file__) -> tuple[str, str, str, str]:
     """
     Get the git repository, commit hash, and local path of the given file.
 
@@ -286,9 +311,13 @@ def get_git_info(path: str = __file__) -> tuple[str, str, str]:
     Returns
     -------
     (git_repo, git_commit, git_path) : tuple[str, str, str]
-        Git repository URL, last commit hash, and relative file path.
+        Git repository URL, last commit hash, and relative file path and current absolute path.
     """
-    dirname = os.path.dirname(path)
+    abspath = path_join(path, abs_path=True)
+    if not os.path.exists(abspath) or not os.path.isdir(abspath):
+        dirname = os.path.dirname(abspath)
+    else:
+        dirname = abspath
     git_repo = subprocess.check_output(
         ["git", "-C", dirname, "remote", "get-url", "origin"], text=True
     ).strip()
@@ -299,8 +328,8 @@ def get_git_info(path: str = __file__) -> tuple[str, str, str]:
         ["git", "-C", dirname, "rev-parse", "--show-toplevel"], text=True
     ).strip()
     _LOG.debug("Current git branch: %s %s", git_repo, git_commit)
-    rel_path = os.path.relpath(os.path.abspath(path), os.path.abspath(git_root))
-    return (git_repo, git_commit, rel_path.replace("\\", "/"))
+    rel_path = os.path.relpath(abspath, os.path.abspath(git_root))
+    return (git_repo, git_commit, rel_path.replace("\\", "/"), abspath)
 
 
 # Note: to avoid circular imports, we don't specify TunableValue here.

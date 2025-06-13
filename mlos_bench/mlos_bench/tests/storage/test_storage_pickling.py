@@ -72,7 +72,7 @@ def test_storage_pickle_restore_experiment_and_trial(
     assert restored_experiment is not experiment
     assert restored_experiment.experiment_id == experiment.experiment_id
     assert restored_experiment.description == experiment.description
-    assert restored_experiment.root_env_config == experiment.root_env_config
+    assert restored_experiment.rel_root_env_config == experiment.rel_root_env_config
     assert restored_experiment.tunables == experiment.tunables
     assert restored_experiment.opt_targets == experiment.opt_targets
     with restored_experiment:
