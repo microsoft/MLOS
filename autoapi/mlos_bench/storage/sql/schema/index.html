@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlos_bench.storage.sql.schema &mdash; MLOS 0.6.3.dev41+g869001ba23 documentation</title>
+  <title>mlos_bench.storage.sql.schema &mdash; MLOS 0.6.3.dev42+gc06003958b documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/storage/sql/schema/index.html"/>
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=5758e8f6"></script>
+      <script src="../../../../../_static/documentation_options.js?v=f317fdf1"></script>
       <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -88,6 +88,7 @@
 <li class="toctree-l9"><a class="reference internal" href="#mlos_bench.storage.sql.schema.DbSchema"><code class="docutils literal notranslate"><span class="pre">DbSchema</span></code></a><ul>
 <li class="toctree-l10"><a class="reference internal" href="#mlos_bench.storage.sql.schema.DbSchema.__repr__"><code class="docutils literal notranslate"><span class="pre">DbSchema.__repr__()</span></code></a></li>
 <li class="toctree-l10"><a class="reference internal" href="#mlos_bench.storage.sql.schema.DbSchema.create"><code class="docutils literal notranslate"><span class="pre">DbSchema.create()</span></code></a></li>
+<li class="toctree-l10"><a class="reference internal" href="#mlos_bench.storage.sql.schema.DbSchema.drop_all_tables"><code class="docutils literal notranslate"><span class="pre">DbSchema.drop_all_tables()</span></code></a></li>
 <li class="toctree-l10"><a class="reference internal" href="#mlos_bench.storage.sql.schema.DbSchema.update"><code class="docutils literal notranslate"><span class="pre">DbSchema.update()</span></code></a></li>
 <li class="toctree-l10"><a class="reference internal" href="#mlos_bench.storage.sql.schema.DbSchema.config"><code class="docutils literal notranslate"><span class="pre">DbSchema.config</span></code></a></li>
 <li class="toctree-l10"><a class="reference internal" href="#mlos_bench.storage.sql.schema.DbSchema.config_param"><code class="docutils literal notranslate"><span class="pre">DbSchema.config_param</span></code></a></li>
@@ -229,6 +230,24 @@ to log the schema, and if the logging level is set to DEBUG.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#mlos_bench.storage.sql.schema.DbSchema" title="mlos_bench.storage.sql.schema.DbSchema">DbSchema</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlos_bench.storage.sql.schema.DbSchema.drop_all_tables">
+<span class="sig-name descname"><span class="pre">drop_all_tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/storage/sql/schema.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.storage.sql.schema.DbSchema.drop_all_tables" title="Link to this definition"></a></dt>
+<dd><p>Helper method used in testing to reset the DB schema.</p>
+<p class="rubric">Notes</p>
+<p>This method is not intended for production use, as it will drop all tables
+in the database. Use with caution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>force</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, drop all tables in the target database.
+If False, this method will not drop any tables and will log a warning.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>

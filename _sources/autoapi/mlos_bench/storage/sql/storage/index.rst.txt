@@ -34,6 +34,12 @@ Module Contents
    :type config: dict
 
 
+   .. py:method:: __exit__(exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: types.TracebackType | None) -> Literal[False]
+
+      Close the engine connection when exiting the context.
+
+
+
    .. py:method:: __getstate__() -> dict
 
       Return the state of the object for pickling.
@@ -46,6 +52,12 @@ Module Contents
    .. py:method:: __setstate__(state: dict) -> None
 
       Restore the state of the object from pickling.
+
+
+
+   .. py:method:: dispose() -> None
+
+      Closes the database connection pool.
 
 
 

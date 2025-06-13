@@ -65,6 +65,21 @@ Module Contents
 
 
 
+   .. py:method:: drop_all_tables(*, force: bool = False) -> None
+
+      Helper method used in testing to reset the DB schema.
+
+      .. rubric:: Notes
+
+      This method is not intended for production use, as it will drop all tables
+      in the database. Use with caution.
+
+      :param force: If True, drop all tables in the target database.
+                    If False, this method will not drop any tables and will log a warning.
+      :type force: bool
+
+
+
    .. py:method:: update() -> DbSchema
 
       Updates the DB schema to the latest version.
