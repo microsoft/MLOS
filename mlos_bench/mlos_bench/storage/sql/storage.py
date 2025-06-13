@@ -5,6 +5,7 @@
 """Saving and restoring the benchmark data in SQL database."""
 
 import logging
+from types import TracebackType
 from typing import Literal
 
 from sqlalchemy import URL, Engine, create_engine
@@ -77,10 +78,15 @@ class SqlStorage(Storage):
             self._engine.dispose()
             _LOG.info("Closed the database connection: %s", self)
 
-    def __exit__(self, exc_type=None, exc_value=None, traceback=None) -> Literal[False]:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,  # pylint: disable=unused-argument
+        exc_val: BaseException | None,  # pylint: disable=unused-argument
+        exc_tb: TracebackType | None,  # pylint: disable=unused-argument
+    ) -> Literal[False]:
         """Close the engine connection when exiting the context."""
         self.dispose()
-        return super().__exit__(exc_type, exc_value, traceback)
+        return False
 
     @property
     def _schema(self) -> DbSchema:
