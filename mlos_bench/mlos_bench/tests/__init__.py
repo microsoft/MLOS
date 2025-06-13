@@ -12,7 +12,6 @@ import json
 import os
 import shutil
 import socket
-import sys
 from datetime import tzinfo
 from logging import debug, warning
 from subprocess import run
