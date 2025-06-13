@@ -75,7 +75,10 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
         },
         tunables=tunable_groups,
         service=ConfigPersistenceService({}),
-        global_config={"global_param": "global_value"},
+        global_config={
+            "global_param": "global_value",
+            **BUILT_IN_ENV_VAR_DEFAULTS,
+        },
     )
 
 
@@ -231,7 +234,10 @@ def nested_composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
         },
         tunables=tunable_groups,
         service=ConfigPersistenceService({}),
-        global_config={"global_param": "global_value"},
+        global_config={
+            "global_param": "global_value",
+            **BUILT_IN_ENV_VAR_DEFAULTS,
+        },
     )
 
 

@@ -22,7 +22,7 @@ from mlos_bench.storage.sql.common import save_params
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.sql.trial import Trial
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import utcify_timestamp
+from mlos_bench.util import try_parse_val, utcify_timestamp
 
 _LOG = logging.getLogger(__name__)
 
@@ -149,7 +149,11 @@ class Experiment(Storage.Experiment):
             # Not all storage backends store the original zone info.
             # We try to ensure data is entered in UTC and augment it on return again here.
             return [
-                (utcify_timestamp(row.ts, origin="utc"), row.metric_id, row.metric_value)
+                (
+                    utcify_timestamp(row.ts, origin="utc"),
+                    row.metric_id,
+                    try_parse_val(row.metric_value),
+                )
                 for row in cur_telemetry.fetchall()
             ]
 
@@ -229,10 +233,15 @@ class Experiment(Storage.Experiment):
             .select_from(table)
             .where(*[column(key) == val for (key, val) in kwargs.items()])
         )
+
+        def _tuple_to_kv(row_tuple: tuple[str, Any]) -> tuple[str, Any]:
+            return row_tuple[0], try_parse_val(row_tuple[1])
+
         # NOTE: `Row._tuple()` is NOT a protected member; the class uses `_` to
         # avoid naming conflicts.
         return dict(
-            row._tuple() for row in cur_result.fetchall()  # pylint: disable=protected-access
+            _tuple_to_kv(row._tuple())  # pylint: disable=protected-access
+            for row in cur_result.fetchall()
         )
 
     def get_trial_by_id(
@@ -367,11 +376,7 @@ class Experiment(Storage.Experiment):
         ts_start: datetime | None = None,
         config: dict[str, Any] | None = None,
     ) -> Storage.Trial:
-        # MySQL can round microseconds into the future causing scheduler to skip trials.
-        # Truncate microseconds to avoid this issue.
-        ts_start = utcify_timestamp(ts_start or datetime.now(UTC), origin="local").replace(
-            microsecond=0
-        )
+        ts_start = utcify_timestamp(ts_start or datetime.now(UTC), origin="local")
         _LOG.debug("Create trial: %s:%d @ %s", self._experiment_id, self._trial_id, ts_start)
         with self._engine.begin() as conn:
             try:

@@ -14,6 +14,7 @@ See the test cases or example json configs for more details.
 import logging
 import random
 from collections.abc import Callable, Sequence
+from dataclasses import dataclass
 
 from mlos_bench.environments.status import Status
 from mlos_bench.optimizers.track_best_optimizer import TrackBestOptimizer
@@ -23,6 +24,15 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.tunables.tunable_types import TunableValue
 
 _LOG = logging.getLogger(__name__)
+
+
+@dataclass
+class RegisteredScore:
+    """A registered score for a trial."""
+
+    config: TunableGroups
+    score: dict[str, TunableValue] | None
+    status: Status
 
 
 class MockOptimizer(TrackBestOptimizer):
@@ -42,6 +52,40 @@ class MockOptimizer(TrackBestOptimizer):
             "float": lambda tunable: rnd.uniform(*tunable.range),
             "int": lambda tunable: rnd.randint(*(int(x) for x in tunable.range)),
         }
+        self._registered_scores: list[RegisteredScore] = []
+
+    @property
+    def registered_scores(self) -> list[RegisteredScore]:
+        """
+        Return the list of registered scores.
+
+        Notes
+        -----
+        Used for testing and validation.
+        """
+        return self._registered_scores
+
+    def register(
+        self,
+        tunables: TunableGroups,
+        status: Status,
+        score: dict[str, TunableValue] | None = None,
+    ) -> dict[str, float] | None:
+        # Track the registered scores for testing and validation.
+        # Almost the same as _get_scores, but we don't adjust the direction here.
+        scores: dict[str, TunableValue] = {
+            k: float(v)
+            for k, v in (score or {}).items()
+            if k in self._opt_targets and v is not None
+        }
+        self._registered_scores.append(
+            RegisteredScore(
+                config=tunables.copy(),
+                score=scores,
+                status=status,
+            )
+        )
+        return super().register(tunables, status, score)
 
     def bulk_register(
         self,
