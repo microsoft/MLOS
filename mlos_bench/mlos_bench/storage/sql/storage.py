@@ -74,6 +74,7 @@ class SqlStorage(Storage):
         self._init_engine()
 
     def dispose(self) -> None:
+        """Closes the database connection pool."""
         if self._engine:
             self._engine.dispose()
             _LOG.info("Closed the database connection: %s", self)
