@@ -62,7 +62,8 @@ class Storage(metaclass=ABCMeta):
         config : dict
             Free-format key/value pairs of configuration parameters.
         """
-        _LOG.debug("Storage config: %s", sanitize_config(config))
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("Storage config: %s", sanitize_config(config))
         self._validate_json_config(config)
         self._service = service
         self._config = config.copy()

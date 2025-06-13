@@ -478,7 +478,8 @@ class Launcher:
         # other CLI options to use as common python/json variable replacements.
         config = {k.replace("-", "_"): v for k, v in config.items()}
 
-        _LOG.debug("Parsed config: %s", sanitize_config(config))
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("Parsed config: %s", sanitize_config(config))
         return config
 
     def _load_config(

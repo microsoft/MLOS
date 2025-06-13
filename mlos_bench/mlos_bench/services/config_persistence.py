@@ -191,7 +191,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         if any(c in json for c in ("{", "[")):
             # If the path contains braces, it is likely already a json string,
             # so just parse it.
-            _LOG.info("Load config from json string: %s", sanitize_config(json))
+            if _LOG.isEnabledFor(logging.INFO):
+                _LOG.info("Load config from json string: %s", sanitize_config(json))
             try:
                 config: Any = json5.loads(json)
             except ValueError as ex:
@@ -707,11 +708,12 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         --------
         mlos_bench.services : Examples of service configurations.
         """
-        _LOG.info(
-            "Load services: %s parent: %s",
-            sanitize_config(jsons),
-            parent.__class__.__name__,
-        )
+        if _LOG.isEnabledFor(logging.INFO):
+            _LOG.info(
+                "Load services: %s parent: %s",
+                sanitize_config(jsons),
+                parent.__class__.__name__,
+            )
         service = Service({}, global_config, parent)
         for json in jsons:
             config = self.load_config(json, ConfigSchema.SERVICE)
