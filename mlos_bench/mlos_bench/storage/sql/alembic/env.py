@@ -67,9 +67,6 @@ def custom_compare_types(
     <https://alembic.sqlalchemy.org/en/latest/autogenerate.html#comparing-types>`_
     documentation for more details.
 
-    Parameters
-    ----------
-
     Notes
     -----
     In the case of a MySQL DateTime variant, it makes sure that the floating
