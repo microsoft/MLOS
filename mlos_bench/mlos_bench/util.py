@@ -477,6 +477,8 @@ def _recursive_sanitize(
     conf: dict[str, Any] | list[Any] | str,
 ) -> dict[str, Any] | list[Any] | str:
     """Recursively sanitize a dictionary."""
+    if isinstance(conf, str) and conf in _SANITIZE_KEYS:
+        return "[REDACTED]"
     if isinstance(conf, list):
         return [_recursive_sanitize(item) for item in conf]
     if isinstance(conf, dict):
