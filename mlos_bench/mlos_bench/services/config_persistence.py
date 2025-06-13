@@ -745,7 +745,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         --------
         mlos_bench.tunables : Examples of tunable parameter configurations.
         """
-        _LOG.info("Load tunables: '%s'", sanitize_config(jsons))
+        _LOG.info("Load tunables: '%s'", jsons)
         if parent is None:
             parent = TunableGroups()
         tunables = parent.copy()
