@@ -121,6 +121,9 @@ def custom_compare_types(
                 )
                 return True
             else:
+                assert isinstance(
+                    inspected_type, (mysql.DATETIME, mysql.TIMESTAMP)
+                ), "Expected inspected_type to be a MySQL DATETIME or TIMESTAMP type."
                 if inspected_type.fsp != metadata_dialect_type.fsp:
                     alembic_logger.info(
                         "inspected_type.fsp (%s) and metadata_dialect_type.fsp (%s) don't match",
