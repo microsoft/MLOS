@@ -499,16 +499,30 @@ def _recursive_sanitize(
 
 def sanitize_config(config: dict[str, Any] | list[Any] | Any) -> dict[str, Any] | list[Any] | Any:
     """
-    Sanitize a configuration dictionary by obfuscating potentially sensitive keys.
+    Attempts to sanitize a configuration dictionary by obfuscating potentially sensitive keys.
+
+    Notes
+    -----
+    Mostly used to make CodeQL scans happy by redacting sensitive information
+    (e.g., passwords, tokens, API keys) in the configuration.
+
+    Will also attempt to parse the input as a JSON string if it is a string,
+    and return a JSON string if the original input was a JSON string.
+    Therefore this function is somewhat expensive so logging should be blocked with
+    ``if _LOG.isEnabledFor(logging.INFO):`` checks (or similar) before calling it.
+
+    Finally, it will also replace bare strings that match the sensitive keys
+    with "[REDACTED]" to avoid leaking sensitive information in the logs, though
+    this is obviously a less effective approach and may hinder useful debugging.
 
     Parameters
     ----------
-    config : dict
+    config : dict | list | Any
         Configuration dictionary to sanitize.
 
     Returns
     -------
-    dict
+    dict | list | Any
         Sanitized configuration dictionary.
     """
     # Try and parse the config as a JSON string first, if it's a string.
