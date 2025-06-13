@@ -15,6 +15,7 @@ from collections.abc import Callable, Iterable, Mapping
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Literal, TypeVar, Union
 
+import json5
 import pandas
 import pytz
 
@@ -512,11 +513,11 @@ def sanitize_config(config: dict[str, Any] | list[Any] | Any) -> dict[str, Any] 
     """
     # Try and parse the config as a JSON string first, if it's a string.
     was_json = False
-    if isinstance(config, str):
+    if isinstance(config, str) and config:
         try:
-            config = json.loads(config)
+            config = json5.loads(config)
             was_json = True
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, ValueError):
             # If it fails to parse, return the original string.
             return config
     sanitized = _recursive_sanitize(config)

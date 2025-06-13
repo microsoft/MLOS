@@ -7,6 +7,7 @@ Unit tests for sanitize_conf utility function.
 
 Tests cover obfuscation of sensitive keys and recursive sanitization.
 """
+import json5
 from mlos_bench.util import sanitize_config
 
 
@@ -110,3 +111,56 @@ def test_sanitize_config_with_non_string_values() -> None:
     assert sanitized["none_value"] is None
     assert sanitized["list_value"] == [1, "password", 3]  # don't redact raw strings
     assert sanitized["dict_value"] == {"key": "value"}
+
+
+def test_sanitize_config_json_string() -> None:
+    """Test sanitization when input is a JSON string."""
+    config = {
+        "username": "user1",
+        "password": "mypassword",
+        "token": "abc123",
+        "nested": {"api_key": "key", "other": 1},
+        "list": [{"secret": "shh"}, {"foo": "bar"}],
+    }
+    config_json = json5.dumps(config)
+    sanitized = sanitize_config(config_json)
+    # Should return a JSON string
+    assert isinstance(sanitized, str)
+    sanitized_dict = json5.loads(sanitized)
+    assert isinstance(sanitized_dict, dict)
+    assert sanitized_dict["username"] == "user1"
+    assert sanitized_dict["password"] == "[REDACTED]"
+    assert sanitized_dict["token"] == "[REDACTED]"
+    assert sanitized_dict["nested"]["api_key"] == "[REDACTED]"
+    assert sanitized_dict["nested"]["other"] == 1
+    assert sanitized_dict["list"][0]["secret"] == "[REDACTED]"
+    assert sanitized_dict["list"][1]["foo"] == "bar"
+
+
+def test_sanitize_config_invalid_json_string() -> None:
+    """Test sanitization with an invalid JSON string input."""
+    invalid_json = '{"username": "user1", "password": "pw"'  # missing closing brace
+    assert sanitize_config(invalid_json) == invalid_json
+
+
+def test_sanitize_config_json5_string() -> None:
+    """Test sanitization with an invalid JSON5 string input."""
+    invalid_json = '{"username": "user1", "password": "pw", }'  # with trailing comma
+    # Should return processed json as string
+    sanitized = sanitize_config(invalid_json)
+    assert isinstance(sanitized, str)
+    sanitize_dict = json5.loads(sanitized)
+    assert isinstance(sanitize_dict, dict)
+    assert len(sanitize_dict) == 2
+    assert sanitize_dict["username"] == "user1"
+    assert sanitize_dict["password"] == "[REDACTED]"
+
+
+def test_sanitize_config_json_string_no_sensitive_keys() -> None:
+    """Test sanitization of a JSON string with no sensitive keys."""
+    config = {"foo": 1, "bar": {"baz": 2}}
+    config_json = json5.dumps(config)
+    sanitized = sanitize_config(config_json)
+    assert isinstance(sanitized, str)
+    sanitized_dict = json5.loads(sanitized)
+    assert sanitized_dict == config
