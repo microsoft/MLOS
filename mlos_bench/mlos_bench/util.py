@@ -464,6 +464,38 @@ def datetime_parser(
     return new_datetime_col
 
 
+_SANITIZE_KEYS = {
+    "password",
+    "secret",
+    "token",
+    "api_key",
+}
+
+
+def _recursive_sanitize(
+    conf: dict[str, Any] | list[Any] | str,
+) -> dict[str, Any] | list[Any] | str:
+    """Recursively sanitize a dictionary."""
+    if isinstance(conf, list):
+        return [_recursive_sanitize(item) for item in conf]
+    if isinstance(conf, dict):
+        sanitized = {}
+        for k, v in conf.items():
+            if k in _SANITIZE_KEYS:
+                sanitized[k] = "[REDACTED]"
+            elif isinstance(v, dict):
+                sanitized[k] = _recursive_sanitize(v)  # type: ignore[assignment]
+            elif isinstance(v, list):
+                sanitized[k] = [
+                    _recursive_sanitize(item) for item in v  # type: ignore[assignment]
+                ]
+            else:
+                sanitized[k] = v
+        return sanitized
+    # else, return un altered value (e.g., int, float, str)
+    return conf
+
+
 def sanitize_config(config: dict[str, Any] | list[Any] | Any) -> dict[str, Any] | list[Any] | Any:
     """
     Sanitize a configuration dictionary by obfuscating potentially sensitive keys.
@@ -478,8 +510,6 @@ def sanitize_config(config: dict[str, Any] | list[Any] | Any) -> dict[str, Any] 
     dict
         Sanitized configuration dictionary.
     """
-    sanitize_keys = {"password", "secret", "token", "api_key"}
-
     # Try and parse the config as a JSON string first, if it's a string.
     was_json = False
     if isinstance(config, str):
@@ -489,31 +519,7 @@ def sanitize_config(config: dict[str, Any] | list[Any] | Any) -> dict[str, Any] 
         except json.JSONDecodeError:
             # If it fails to parse, return the original string.
             return config
-
-    def recursive_sanitize(
-        conf: dict[str, Any] | list[Any] | str,
-    ) -> dict[str, Any] | list[Any] | str:
-        """Recursively sanitize a dictionary."""
-        if isinstance(conf, list):
-            return [recursive_sanitize(item) for item in conf]
-        if isinstance(conf, dict):
-            sanitized = {}
-            for k, v in conf.items():
-                if k in sanitize_keys:
-                    sanitized[k] = "[REDACTED]"
-                elif isinstance(v, dict):
-                    sanitized[k] = recursive_sanitize(v)  # type: ignore[assignment]
-                elif isinstance(v, list):
-                    sanitized[k] = [
-                        recursive_sanitize(item) for item in v  # type: ignore[assignment]
-                    ]
-                else:
-                    sanitized[k] = v
-            return sanitized
-        # else, return un altered value (e.g., int, float, str)
-        return conf
-
-    sanitized = recursive_sanitize(config)
+    sanitized = _recursive_sanitize(config)
     if was_json:
         # If the original config was a JSON string, return it as a JSON string.
         return json.dumps(sanitized, indent=2)
