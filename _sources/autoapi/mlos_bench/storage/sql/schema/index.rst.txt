@@ -31,18 +31,14 @@ Classes
 Module Contents
 ---------------
 
-.. py:class:: DbSchema(engine: sqlalchemy.engine.Engine | None)
+.. py:class:: DbSchema(engine: sqlalchemy.engine.Engine)
 
    A class to define and create the DB schema.
 
    Declare the SQLAlchemy schema for the database.
 
-   :param engine: The SQLAlchemy engine to use for the DB schema.
-                  Listed as optional for `alembic <https://alembic.sqlalchemy.org>`_
-                  schema migration purposes so we can reference it inside it's ``env.py``
-                  config file for :attr:`~meta` data inspection, but won't generally be
-                  functional without one.
-   :type engine: sqlalchemy.engine.Engine | None
+   :param engine:
+   :type engine: sqlalchemy.engine.Engine
 
 
    .. py:method:: __repr__() -> str
