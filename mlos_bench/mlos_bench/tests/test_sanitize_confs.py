@@ -8,6 +8,7 @@ Unit tests for sanitize_conf utility function.
 Tests cover obfuscation of sensitive keys and recursive sanitization.
 """
 import json5
+
 from mlos_bench.util import sanitize_config
 
 
