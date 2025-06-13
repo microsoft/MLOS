@@ -484,17 +484,17 @@ def sanitize_config(config: dict[str, Any] | list[Any] | Any) -> dict[str, Any] 
         conf: dict[str, Any] | list[Any] | str,
     ) -> dict[str, Any] | list[Any] | str:
         """Recursively sanitize a dictionary."""
-        sanitized = {}
         if isinstance(conf, list):
             return [recursive_sanitize(item) for item in conf]
         if isinstance(conf, dict):
+            sanitized = {}
             for k, v in conf.items():
                 if k in sanitize_keys:
                     sanitized[k] = "[REDACTED]"
                 elif isinstance(v, dict):
-                    sanitized[k] = recursive_sanitize(v)
+                    sanitized[k] = recursive_sanitize(v)  # type: ignore[assignment]
                 elif isinstance(v, list):
-                    sanitized[k] = [recursive_sanitize(item) for item in v]
+                    sanitized[k] = [recursive_sanitize(item) for item in v]  # type: ignore[assignment]
                 else:
                     sanitized[k] = v
             return sanitized

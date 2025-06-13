@@ -72,7 +72,7 @@ def test_sanitize_config_mixed_types() -> None:
 
 def test_sanitize_config_empty() -> None:
     """Test sanitization of an empty configuration."""
-    config = {}
+    config: dict = {}
     sanitized = sanitize_config(config)
     assert sanitized == config  # Should remain empty dictionary
 
