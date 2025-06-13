@@ -21,6 +21,7 @@ def test_sanitize_config_simple() -> None:
         "other": 42,
     }
     sanitized = sanitize_config(config)
+    assert isinstance(sanitized, dict)
     assert sanitized["username"] == "user1"
     assert sanitized["password"] == "[REDACTED]"
     assert sanitized["token"] == "[REDACTED]"
@@ -39,6 +40,7 @@ def test_sanitize_config_nested() -> None:
         "api_key": "key",
     }
     sanitized = sanitize_config(config)
+    assert isinstance(sanitized, dict)
     assert sanitized["outer"]["password"] == "[REDACTED]"
     assert sanitized["outer"]["inner"]["token"] == "[REDACTED]"
     assert sanitized["outer"]["inner"]["foo"] == "bar"
@@ -61,7 +63,50 @@ def test_sanitize_config_mixed_types() -> None:
         "api_key": {"nested": "val"},
     }
     sanitized = sanitize_config(config)
+    assert isinstance(sanitized, dict)
     assert sanitized["password"] == "[REDACTED]"
     assert sanitized["token"] == "[REDACTED]"
     assert sanitized["secret"] == "[REDACTED]"
     assert sanitized["api_key"] == "[REDACTED]"
+
+
+def test_sanitize_config_empty() -> None:
+    """Test sanitization of an empty configuration."""
+    config = {}
+    sanitized = sanitize_config(config)
+    assert sanitized == config  # Should remain empty dictionary
+
+
+def test_sanitize_array() -> None:
+    """Test sanitization of an array with sensitive keys."""
+    config = [
+        {"username": "user1", "password": "pass1"},
+        {"username": "user2", "password": "pass2"},
+    ]
+    sanitized = sanitize_config(config)
+    assert isinstance(sanitized, list)
+    assert len(sanitized) == 2
+    assert sanitized[0]["username"] == "user1"
+    assert sanitized[0]["password"] == "[REDACTED]"
+    assert sanitized[1]["username"] == "user2"
+    assert sanitized[1]["password"] == "[REDACTED]"
+
+
+def test_sanitize_config_with_non_string_values() -> None:
+    """Test sanitization with non-string values."""
+    config = {
+        "int_value": 42,
+        "float_value": 3.14,
+        "bool_value": True,
+        "none_value": None,
+        "list_value": [1, "password", 3],
+        "dict_value": {"key": "value"},
+    }
+    sanitized = sanitize_config(config)
+    assert isinstance(sanitized, dict)
+    assert sanitized["int_value"] == 42
+    assert sanitized["float_value"] == 3.14
+    assert sanitized["bool_value"] is True
+    assert sanitized["none_value"] is None
+    assert sanitized["list_value"] == [1, "password", 3]  # don't redact raw strings
+    assert sanitized["dict_value"] == {"key": "value"}

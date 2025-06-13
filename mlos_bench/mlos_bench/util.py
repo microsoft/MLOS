@@ -464,7 +464,7 @@ def datetime_parser(
     return new_datetime_col
 
 
-def sanitize_config(config: dict[str, Any]) -> dict[str, Any]:
+def sanitize_config(config: dict[str, Any] | list[Any] | Any) -> dict[str, Any] | list[Any] | Any:
     """
     Sanitize a configuration dictionary by obfuscating potentially sensitive keys.
 
@@ -480,16 +480,25 @@ def sanitize_config(config: dict[str, Any]) -> dict[str, Any]:
     """
     sanitize_keys = {"password", "secret", "token", "api_key"}
 
-    def recursive_sanitize(conf: dict[str, Any]) -> dict[str, Any]:
+    def recursive_sanitize(
+        conf: dict[str, Any] | list[Any] | str,
+    ) -> dict[str, Any] | list[Any] | str:
         """Recursively sanitize a dictionary."""
         sanitized = {}
-        for k, v in conf.items():
-            if k in sanitize_keys:
-                sanitized[k] = "[REDACTED]"
-            elif isinstance(v, dict):
-                sanitized[k] = recursive_sanitize(v)  # type: ignore[assignment]
-            else:
-                sanitized[k] = v
-        return sanitized
+        if isinstance(conf, list):
+            return [recursive_sanitize(item) for item in conf]
+        if isinstance(conf, dict):
+            for k, v in conf.items():
+                if k in sanitize_keys:
+                    sanitized[k] = "[REDACTED]"
+                elif isinstance(v, dict):
+                    sanitized[k] = recursive_sanitize(v)
+                elif isinstance(v, list):
+                    sanitized[k] = [recursive_sanitize(item) for item in v]
+                else:
+                    sanitized[k] = v
+            return sanitized
+        # else, return un altered value (e.g., int, float, str)
+        return conf
 
     return recursive_sanitize(config)
