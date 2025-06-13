@@ -24,6 +24,20 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 
+def _mysql_datetime(*, with_fsp: bool = False) -> mysql.DATETIME:
+    """
+    Return a MySQL DATETIME type with fractional seconds precision (fsp=6).
+
+    Notes
+    -----
+    Split out to allow single mypy ignore.
+    See <https://github.com/sqlalchemy/sqlalchemy/pull/12164> for details.
+    """
+    if with_fsp:
+        return mysql.DATETIME(fsp=6)  # type: ignore[no-untyped-call]
+    return mysql.DATETIME()  # type: ignore[no-untyped-call]
+
+
 def upgrade() -> None:
     """The schema upgrade script for this revision."""
     bind = context.get_bind()
@@ -32,43 +46,61 @@ def upgrade() -> None:
         op.alter_column(
             "experiment",
             "ts_start",
-            existing_type=mysql.DATETIME(),
-            type_=sa.DateTime(timezone=True).with_variant(mysql.DATETIME(fsp=6), "mysql"),
+            existing_type=_mysql_datetime(),
+            type_=sa.DateTime(timezone=True).with_variant(
+                _mysql_datetime(with_fsp=True),
+                "mysql",
+            ),
             existing_nullable=True,
         )
         op.alter_column(
             "experiment",
             "ts_end",
-            existing_type=mysql.DATETIME(),
-            type_=sa.DateTime(timezone=True).with_variant(mysql.DATETIME(fsp=6), "mysql"),
+            existing_type=_mysql_datetime(),
+            type_=sa.DateTime(timezone=True).with_variant(
+                _mysql_datetime(with_fsp=True),
+                "mysql",
+            ),
             existing_nullable=True,
         )
         op.alter_column(
             "trial",
             "ts_start",
-            existing_type=mysql.DATETIME(),
-            type_=sa.DateTime(timezone=True).with_variant(mysql.DATETIME(fsp=6), "mysql"),
+            existing_type=_mysql_datetime(),
+            type_=sa.DateTime(timezone=True).with_variant(
+                _mysql_datetime(with_fsp=True),
+                "mysql",
+            ),
             existing_nullable=False,
         )
         op.alter_column(
             "trial",
             "ts_end",
-            existing_type=mysql.DATETIME(),
-            type_=sa.DateTime(timezone=True).with_variant(mysql.DATETIME(fsp=6), "mysql"),
+            existing_type=_mysql_datetime(),
+            type_=sa.DateTime(timezone=True).with_variant(
+                _mysql_datetime(with_fsp=True),
+                "mysql",
+            ),
             existing_nullable=True,
         )
         op.alter_column(
             "trial_status",
             "ts",
-            existing_type=mysql.DATETIME(),
-            type_=sa.DateTime(timezone=True).with_variant(mysql.DATETIME(fsp=6), "mysql"),
+            existing_type=_mysql_datetime(),
+            type_=sa.DateTime(timezone=True).with_variant(
+                _mysql_datetime(with_fsp=True),
+                "mysql",
+            ),
             existing_nullable=False,
         )
         op.alter_column(
             "trial_telemetry",
             "ts",
-            existing_type=mysql.DATETIME(),
-            type_=sa.DateTime(timezone=True).with_variant(mysql.DATETIME(fsp=6), "mysql"),
+            existing_type=_mysql_datetime(),
+            type_=sa.DateTime(timezone=True).with_variant(
+                _mysql_datetime(with_fsp=True),
+                "mysql",
+            ),
             existing_nullable=False,
         )
         # ### end Alembic commands ###
@@ -82,43 +114,61 @@ def downgrade() -> None:
         op.alter_column(
             "trial_telemetry",
             "ts",
-            existing_type=sa.DateTime(timezone=True).with_variant(mysql.DATETIME(fsp=6), "mysql"),
-            type_=mysql.DATETIME(),
+            existing_type=sa.DateTime(timezone=True).with_variant(
+                _mysql_datetime(with_fsp=True),
+                "mysql",
+            ),
+            type_=_mysql_datetime(),
             existing_nullable=False,
         )
         op.alter_column(
             "trial_status",
             "ts",
-            existing_type=sa.DateTime(timezone=True).with_variant(mysql.DATETIME(fsp=6), "mysql"),
-            type_=mysql.DATETIME(),
+            existing_type=sa.DateTime(timezone=True).with_variant(
+                _mysql_datetime(with_fsp=True),
+                "mysql",
+            ),
+            type_=_mysql_datetime(),
             existing_nullable=False,
         )
         op.alter_column(
             "trial",
             "ts_end",
-            existing_type=sa.DateTime(timezone=True).with_variant(mysql.DATETIME(fsp=6), "mysql"),
-            type_=mysql.DATETIME(),
+            existing_type=sa.DateTime(timezone=True).with_variant(
+                _mysql_datetime(with_fsp=True),
+                "mysql",
+            ),
+            type_=_mysql_datetime(),
             existing_nullable=True,
         )
         op.alter_column(
             "trial",
             "ts_start",
-            existing_type=sa.DateTime(timezone=True).with_variant(mysql.DATETIME(fsp=6), "mysql"),
-            type_=mysql.DATETIME(),
+            existing_type=sa.DateTime(timezone=True).with_variant(
+                _mysql_datetime(with_fsp=True),
+                "mysql",
+            ),
+            type_=_mysql_datetime(),
             existing_nullable=False,
         )
         op.alter_column(
             "experiment",
             "ts_end",
-            existing_type=sa.DateTime(timezone=True).with_variant(mysql.DATETIME(fsp=6), "mysql"),
-            type_=mysql.DATETIME(),
+            existing_type=sa.DateTime(timezone=True).with_variant(
+                _mysql_datetime(with_fsp=True),
+                "mysql",
+            ),
+            type_=_mysql_datetime(),
             existing_nullable=True,
         )
         op.alter_column(
             "experiment",
             "ts_start",
-            existing_type=sa.DateTime(timezone=True).with_variant(mysql.DATETIME(fsp=6), "mysql"),
-            type_=mysql.DATETIME(),
+            existing_type=sa.DateTime(timezone=True).with_variant(
+                _mysql_datetime(with_fsp=True),
+                "mysql",
+            ),
+            type_=_mysql_datetime(),
             existing_nullable=True,
         )
         # ### end Alembic commands ###
