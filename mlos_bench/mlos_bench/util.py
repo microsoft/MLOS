@@ -504,7 +504,9 @@ def sanitize_config(config: dict[str, Any] | list[Any] | Any) -> dict[str, Any] 
                 elif isinstance(v, dict):
                     sanitized[k] = recursive_sanitize(v)  # type: ignore[assignment]
                 elif isinstance(v, list):
-                    sanitized[k] = [recursive_sanitize(item) for item in v]  # type: ignore[assignment]
+                    sanitized[k] = [
+                        recursive_sanitize(item) for item in v  # type: ignore[assignment]
+                    ]
                 else:
                     sanitized[k] = v
             return sanitized
