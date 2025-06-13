@@ -105,8 +105,7 @@ This data produced in the `global_config_azure.jsonc` file is in the format that
 ```jsonc
 {
   "subscription": "some-guid",
-  "tenant": "some-other-guid",
-  "storageAccountKey": "some-base-64-encoded-key",
+  "tenant": "some-other-guid"
 }
 ```
 
