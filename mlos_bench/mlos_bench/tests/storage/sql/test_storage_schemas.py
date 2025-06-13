@@ -6,6 +6,7 @@
 
 import pytest
 from alembic.migration import MigrationContext
+from pytest_lazy_fixtures.lazy_fixture import lf as lazy_fixture
 from sqlalchemy import inspect
 
 from mlos_bench.storage.sql.storage import SqlStorage
@@ -16,11 +17,13 @@ from mlos_bench.tests.storage.sql.fixtures import DOCKER_DBMS_FIXTURES
 # See Also: schema.py for an example of programmatic alembic config access.
 CURRENT_ALEMBIC_HEAD = "b61aa446e724"
 
-
 # Try to test multiple DBMS engines.
+
+
 @pytest.mark.parametrize(
     "some_sql_storage_fixture",
     [
+        lazy_fixture("sqlite_storage"),
         *DOCKER_DBMS_FIXTURES,
     ],
 )

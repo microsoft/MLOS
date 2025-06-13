@@ -53,7 +53,7 @@ class SqlTestServerInfo:
 
     def get_port(self, uncached: bool = False) -> int:
         """
-        Gets the port that the SSH test server is listening on.
+        Gets the port that the DB test server is listening on.
 
         Note: this value can change when the service restarts so we can't rely on
         the DockerServices.

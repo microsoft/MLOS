@@ -12,7 +12,6 @@ import json
 import os
 import shutil
 import socket
-import sys
 from datetime import tzinfo
 from logging import debug, warning
 from subprocess import run
@@ -88,22 +87,6 @@ def check_class_name(obj: object, expected_class_name: str) -> bool:
     """Compares the class name of the given object with the given name."""
     full_class_name = obj.__class__.__module__ + "." + obj.__class__.__name__
     return full_class_name == try_resolve_class_name(expected_class_name)
-
-
-HOST_DOCKER_NAME = "host.docker.internal"
-
-
-@pytest.fixture(scope="session")
-def docker_hostname() -> str:
-    """Returns the local hostname to use to connect to the test ssh server."""
-    if sys.platform != "win32" and resolve_host_name(HOST_DOCKER_NAME):
-        # On Linux, if we're running in a docker container, we can use the
-        # --add-host (extra_hosts in docker-compose.yml) to refer to the host IP.
-        return HOST_DOCKER_NAME
-    # Docker (Desktop) for Windows (WSL2) uses a special networking magic
-    # to refer to the host machine as `localhost` when exposing ports.
-    # In all other cases, assume we're executing directly inside conda on the host.
-    return "localhost"
 
 
 def is_docker_service_healthy(
