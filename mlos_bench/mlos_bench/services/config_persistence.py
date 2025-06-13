@@ -700,7 +700,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         --------
         mlos_bench.services : Examples of service configurations.
         """
-        _LOG.info("Load services: %s parent: %s", sanitize_config(jsons), parent.__class__.__name__)
+        _LOG.info(
+            "Load services: %s parent: %s", sanitize_config(jsons), parent.__class__.__name__
+        )
         service = Service({}, global_config, parent)
         for json in jsons:
             config = self.load_config(json, ConfigSchema.SERVICE)
