@@ -208,6 +208,7 @@ def sqlite_storage() -> Generator[SqlStorage]:
         assert isinstance(storage, SqlStorage)
         storage.update_schema()
         yield storage
+        storage.dispose()
 
 
 @pytest.fixture

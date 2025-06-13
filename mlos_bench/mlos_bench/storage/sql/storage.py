@@ -72,6 +72,16 @@ class SqlStorage(Storage):
         # Recreate the engine and schema.
         self._init_engine()
 
+    def dispose(self) -> None:
+        if self._engine:
+            self._engine.dispose()
+            _LOG.info("Closed the database connection: %s", self)
+
+    def __exit__(self, exc_type=None, exc_value=None, traceback=None) -> Literal[False]:
+        """Close the engine connection when exiting the context."""
+        self.dispose()
+        return super().__exit__(exc_type, exc_value, traceback)
+
     @property
     def _schema(self) -> DbSchema:
         """Lazily create schema upon first access."""
