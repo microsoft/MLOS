@@ -518,8 +518,8 @@ def sanitize_config(config: dict[str, Any] | list[Any] | Any) -> dict[str, Any] 
             config = json5.loads(config)
             was_json = True
         except (json.JSONDecodeError, ValueError):
-            # If it fails to parse, return the original string.
-            return config
+            # If it fails to parse, use the original string.
+            pass
     sanitized = _recursive_sanitize(config)
     if was_json:
         # If the original config was a JSON string, return it as a JSON string.
