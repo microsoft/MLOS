@@ -15,12 +15,7 @@ from pytest_docker.plugin import Services as DockerServices
 from pytest_docker.plugin import get_docker_services
 
 from mlos_bench.environments.mock_env import MockEnv
-from mlos_bench.tests import (
-    HOST_DOCKER_NAME,
-    SEED,
-    resolve_host_name,
-    tunable_groups_fixtures,
-)
+from mlos_bench.tests import SEED, resolve_host_name, tunable_groups_fixtures
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
@@ -32,6 +27,9 @@ tunable_groups_config = tunable_groups_fixtures.tunable_groups_config
 tunable_groups = tunable_groups_fixtures.tunable_groups
 mixed_numerics_tunable_groups = tunable_groups_fixtures.mixed_numerics_tunable_groups
 covariant_group = tunable_groups_fixtures.covariant_group
+
+
+HOST_DOCKER_NAME = "host.docker.internal"
 
 
 @pytest.fixture(scope="session")

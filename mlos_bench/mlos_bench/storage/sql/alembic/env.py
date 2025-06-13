@@ -14,7 +14,7 @@ from alembic.migration import MigrationContext
 from sqlalchemy import create_engine, engine_from_config, pool
 from sqlalchemy.dialects import mysql
 from sqlalchemy.schema import Column as SchemaColumn
-from sqlalchemy.sql.schema import Column
+from sqlalchemy.sql.schema import Column as MetadataColumn
 from sqlalchemy.types import TypeEngine
 
 from mlos_bench.storage.sql.schema import DbSchema
@@ -54,9 +54,9 @@ def fq_class_name(t: object) -> str:
 
 
 def custom_compare_types(
-    migration_context: MigrationContext,  # pylint: disable=unused-argument
-    inspected_column: SchemaColumn | None,  # pylint: disable=unused-argument
-    metadata_column: Column,  # pylint: disable=unused-argument
+    migration_context: MigrationContext,
+    inspected_column: SchemaColumn | None,
+    metadata_column: MetadataColumn,
     inspected_type: TypeEngine,
     metadata_type: TypeEngine,
 ) -> bool | None:
@@ -66,9 +66,6 @@ def custom_compare_types(
     See `Comparing Types
     <https://alembic.sqlalchemy.org/en/latest/autogenerate.html#comparing-types>`_
     documentation for more details.
-
-    Parameters
-    ----------
 
     Notes
     -----
@@ -124,6 +121,9 @@ def custom_compare_types(
                 )
                 return True
             else:
+                assert isinstance(
+                    inspected_type, (mysql.DATETIME, mysql.TIMESTAMP)
+                ), "Expected inspected_type to be a MySQL DATETIME or TIMESTAMP type."
                 if inspected_type.fsp != metadata_dialect_type.fsp:
                     alembic_logger.info(
                         "inspected_type.fsp (%s) and metadata_dialect_type.fsp (%s) don't match",

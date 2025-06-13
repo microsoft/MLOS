@@ -11,7 +11,7 @@ There are currently two services defined in that config, though others could be 
 
 We rely on `docker compose` to map their internal container service ports to random ports on the host.
 Hence, when connecting, we need to look up these ports on demand using something akin to `docker compose port`.
-Because of complexities of networking in different development environments (especially for Docker on WSL2 for Windows), we may also have to connect to a different host address than `localhost` (e.g., `host.docker.internal`, which is dynamically requested as a part of of the [devcontainer](../../../../../../.devcontainer/docker-compose.yml) setup).
+Because of complexities of networking in different development environments (especially for Docker on WSL2 for Windows), we may also have to connect to a different host address than `localhost` (e.g., `host.docker.internal`, which is dynamically requested as a part of of the [devcontainer](../../../../../.devcontainer/docker-compose.yml) setup).
 
 These containers are brought up as session fixtures under a unique (PID based) compose project name for each `pytest` invocation, but only when docker is detected on the host (via the `@docker_required` decorator we define in [`mlos_bench/tests/__init__.py`](../../../__init__.py)), else those tests are skipped.
 
@@ -24,4 +24,4 @@ Additionally, since `scope="session"` fixtures are executed once per worker, whi
 
 ## See Also
 
-Notes in the [`mlos_bench/tests/services/remote/ssh/README.md`](../../../services/remote/ssh/README.md) file for a similar setup for SSH services.
+Notes in the [`mlos_bench/tests/services/remote/ssh/README.md`](../../services/remote/ssh/README.md) file for a similar setup for SSH services.

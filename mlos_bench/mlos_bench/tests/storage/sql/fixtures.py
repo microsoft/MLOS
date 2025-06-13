@@ -15,6 +15,7 @@ from random import seed as rand_seed
 import pytest
 from fasteners import InterProcessLock
 from pytest_docker.plugin import Services as DockerServices
+from pytest_lazy_fixtures.lazy_fixture import lf as lazy_fixture
 
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.schedulers.sync_scheduler import SyncScheduler
@@ -39,6 +40,7 @@ from mlos_bench.util import path_join
 
 # pylint: disable=redefined-outer-name
 
+# Try to test multiple DBMS engines.
 DOCKER_DBMS_FIXTURES = []
 if DOCKER:
     DOCKER_DBMS_FIXTURES = [
@@ -165,7 +167,7 @@ def postgres_storage(
     short_testrun_uid: str,
 ) -> Generator[SqlStorage]:
     """
-    Fixture of a MySQL backed SqlStorage engine.
+    Fixture of a Postgres backed SqlStorage engine.
 
     See Also
     --------
@@ -210,6 +212,7 @@ def sqlite_storage() -> Generator[SqlStorage]:
         assert isinstance(storage, SqlStorage)
         storage.update_schema()
         yield storage
+        storage.dispose()
 
 
 @pytest.fixture

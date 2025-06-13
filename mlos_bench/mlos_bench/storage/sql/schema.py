@@ -47,6 +47,18 @@ from mlos_bench.util import path_join
 _LOG = logging.getLogger(__name__)
 
 
+def _mysql_datetime_with_fsp() -> mysql.DATETIME:
+    """
+    Return a MySQL DATETIME type with fractional seconds precision (fsp=6).
+
+    Notes
+    -----
+    Split out to allow single mypy ignore.
+    See <https://github.com/sqlalchemy/sqlalchemy/pull/12164> for details.
+    """
+    return mysql.DATETIME(fsp=6)  # type: ignore[no-untyped-call]
+
+
 class _DDL:
     """
     A helper class to capture the DDL statements from SQLAlchemy.
@@ -112,14 +124,14 @@ class DbSchema:
             Column(
                 "ts_start",
                 DateTime(timezone=True).with_variant(
-                    mysql.DATETIME(fsp=6),
+                    _mysql_datetime_with_fsp(),
                     "mysql",
                 ),
             ),
             Column(
                 "ts_end",
                 DateTime(timezone=True).with_variant(
-                    mysql.DATETIME(fsp=6),
+                    _mysql_datetime_with_fsp(),
                     "mysql",
                 ),
             ),
@@ -199,7 +211,7 @@ class DbSchema:
             Column(
                 "ts_start",
                 DateTime(timezone=True).with_variant(
-                    mysql.DATETIME(fsp=6),
+                    _mysql_datetime_with_fsp(),
                     "mysql",
                 ),
                 nullable=False,
@@ -207,7 +219,7 @@ class DbSchema:
             Column(
                 "ts_end",
                 DateTime(timezone=True).with_variant(
-                    mysql.DATETIME(fsp=6),
+                    _mysql_datetime_with_fsp(),
                     "mysql",
                 ),
                 nullable=True,
@@ -266,7 +278,7 @@ class DbSchema:
             Column(
                 "ts",
                 DateTime(timezone=True).with_variant(
-                    mysql.DATETIME(fsp=6),
+                    _mysql_datetime_with_fsp(),
                     "mysql",
                 ),
                 nullable=False,
@@ -309,7 +321,7 @@ class DbSchema:
             Column(
                 "ts",
                 DateTime(timezone=True).with_variant(
-                    mysql.DATETIME(fsp=6),
+                    _mysql_datetime_with_fsp(),
                     "mysql",
                 ),
                 nullable=False,

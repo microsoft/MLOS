@@ -90,18 +90,6 @@ def check_class_name(obj: object, expected_class_name: str) -> bool:
     return full_class_name == try_resolve_class_name(expected_class_name)
 
 
-HOST_DOCKER_NAME = "host.docker.internal"
-
-
-def wait_docker_service_socket(docker_services: DockerServices, hostname: str, port: int) -> None:
-    """Wait until a docker service is ready."""
-    docker_services.wait_until_responsive(
-        check=lambda: check_socket(hostname, port),
-        timeout=30.0,
-        pause=0.5,
-    )
-
-
 def is_docker_service_healthy(
     compose_project_name: str,
     service_name: str,
