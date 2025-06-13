@@ -38,9 +38,12 @@ class Experiment(Storage.Experiment):
         tunables: TunableGroups,
         experiment_id: str,
         trial_id: int,
-        root_env_config: str,
+        root_env_config: str | None,
         description: str,
         opt_targets: dict[str, Literal["min", "max"]],
+        git_repo: str | None = None,
+        git_commit: str | None = None,
+        rel_root_env_config: str | None = None,
     ):
         super().__init__(
             tunables=tunables,
@@ -49,6 +52,9 @@ class Experiment(Storage.Experiment):
             root_env_config=root_env_config,
             description=description,
             opt_targets=opt_targets,
+            git_repo=git_repo,
+            git_commit=git_commit,
+            rel_root_env_config=rel_root_env_config,
         )
         self._engine = engine
         self._schema = schema
@@ -89,7 +95,7 @@ class Experiment(Storage.Experiment):
                         description=self._description,
                         git_repo=self._git_repo,
                         git_commit=self._git_commit,
-                        root_env_config=self._root_env_config,
+                        root_env_config=self._rel_root_env_config,
                     )
                 )
                 conn.execute(
@@ -367,11 +373,7 @@ class Experiment(Storage.Experiment):
         ts_start: datetime | None = None,
         config: dict[str, Any] | None = None,
     ) -> Storage.Trial:
-        # MySQL can round microseconds into the future causing scheduler to skip trials.
-        # Truncate microseconds to avoid this issue.
-        ts_start = utcify_timestamp(ts_start or datetime.now(UTC), origin="local").replace(
-            microsecond=0
-        )
+        ts_start = utcify_timestamp(ts_start or datetime.now(UTC), origin="local")
         _LOG.debug("Create trial: %s:%d @ %s", self._experiment_id, self._trial_id, ts_start)
         with self._engine.begin() as conn:
             try:

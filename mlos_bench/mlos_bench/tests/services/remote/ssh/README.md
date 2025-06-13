@@ -22,7 +22,7 @@ These are brought up as session fixtures under a unique (PID based) compose proj
 
 In the case of `pytest`, since the `SshService` base class implements a shared connection cache that we wish to test, and testing "rebooting" of servers (containers) is also necessary, but we want to avoid single threaded execution for tests, we start a third container only for testing reboots.
 
-Additionally, since `scope="session"` fixtures are executed once per worker, which is excessive in our case, we use lockfiles (one of the only portal synchronization methods) to ensure that the usual `docker_services` fixture which starts and stops the containers is only executed once per test run and uses a shared compose instance.
+Additionally, since `scope="session"` fixtures are executed once per worker, which is excessive in our case, we use lockfiles (one of the only portable synchronization methods) to ensure that the usual `docker_services` fixture which starts and stops the containers is only executed once per test run and uses a shared compose instance.
 
 ## See Also
 

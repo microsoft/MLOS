@@ -39,6 +39,7 @@ from sqlalchemy import (
     create_mock_engine,
     inspect,
 )
+from sqlalchemy.dialects import mysql
 from sqlalchemy.engine import Engine
 
 from mlos_bench.util import path_join
@@ -72,43 +73,59 @@ class DbSchema:
     # for all DB tables, so it's ok to disable the warnings.
     # pylint: disable=too-many-instance-attributes
 
-    # Common string column sizes.
-    _ID_LEN = 512
-    _PARAM_VALUE_LEN = 1024
-    _METRIC_VALUE_LEN = 255
-    _STATUS_LEN = 16
-
-    def __init__(self, engine: Engine | None):
+    def __init__(self, engine: Engine):
         """
         Declare the SQLAlchemy schema for the database.
 
         Parameters
         ----------
-        engine : sqlalchemy.engine.Engine | None
-            The SQLAlchemy engine to use for the DB schema.
-            Listed as optional for `alembic <https://alembic.sqlalchemy.org>`_
-            schema migration purposes so we can reference it inside it's ``env.py``
-            config file for :attr:`~meta` data inspection, but won't generally be
-            functional without one.
+        engine : sqlalchemy.engine.Engine
         """
+        assert engine, "Error: can't create schema without engine."
         _LOG.info("Create the DB schema for: %s", engine)
         self._engine = engine
         self._meta = MetaData()
 
+        # Common string column sizes.
+        self._exp_id_len = 512
+        self._param_id_len = 512
+        self._param_value_len = 1024
+        self._metric_id_len = 512
+        self._metric_value_len = 255
+        self._status_len = 16
+
+        # Some overrides for certain DB engines:
+        if engine and engine.dialect.name in {"mysql", "mariadb"}:
+            self._exp_id_len = 255
+            self._param_id_len = 255
+            self._metric_id_len = 255
+
         self.experiment = Table(
             "experiment",
             self._meta,
-            Column("exp_id", String(self._ID_LEN), nullable=False),
+            Column("exp_id", String(self._exp_id_len), nullable=False),
             Column("description", String(1024)),
             Column("root_env_config", String(1024), nullable=False),
             Column("git_repo", String(1024), nullable=False),
             Column("git_commit", String(40), nullable=False),
             # For backwards compatibility, we allow NULL for ts_start.
-            Column("ts_start", DateTime),
-            Column("ts_end", DateTime),
+            Column(
+                "ts_start",
+                DateTime(timezone=True).with_variant(
+                    mysql.DATETIME(fsp=6),
+                    "mysql",
+                ),
+            ),
+            Column(
+                "ts_end",
+                DateTime(timezone=True).with_variant(
+                    mysql.DATETIME(fsp=6),
+                    "mysql",
+                ),
+            ),
             # Should match the text IDs of `mlos_bench.environments.Status` enum:
             # For backwards compatibility, we allow NULL for status.
-            Column("status", String(self._STATUS_LEN)),
+            Column("status", String(self._status_len)),
             # There may be more than one mlos_benchd_service running on different hosts.
             # This column stores the host/container name of the driver that
             # picked up the experiment.
@@ -126,7 +143,7 @@ class DbSchema:
             "objectives",
             self._meta,
             Column("exp_id"),
-            Column("optimization_target", String(self._ID_LEN), nullable=False),
+            Column("optimization_target", String(self._metric_id_len), nullable=False),
             Column("optimization_direction", String(4), nullable=False),
             # TODO: Note: weight is not fully supported yet as currently
             # multi-objective is expected to explore each objective equally.
@@ -175,14 +192,28 @@ class DbSchema:
         self.trial = Table(
             "trial",
             self._meta,
-            Column("exp_id", String(self._ID_LEN), nullable=False),
+            Column("exp_id", String(self._exp_id_len), nullable=False),
             Column("trial_id", Integer, nullable=False),
             Column("config_id", Integer, nullable=False),
             Column("trial_runner_id", Integer, nullable=True, default=None),
-            Column("ts_start", DateTime, nullable=False),
-            Column("ts_end", DateTime),
+            Column(
+                "ts_start",
+                DateTime(timezone=True).with_variant(
+                    mysql.DATETIME(fsp=6),
+                    "mysql",
+                ),
+                nullable=False,
+            ),
+            Column(
+                "ts_end",
+                DateTime(timezone=True).with_variant(
+                    mysql.DATETIME(fsp=6),
+                    "mysql",
+                ),
+                nullable=True,
+            ),
             # Should match the text IDs of `mlos_bench.environments.Status` enum:
-            Column("status", String(self._STATUS_LEN), nullable=False),
+            Column("status", String(self._status_len), nullable=False),
             PrimaryKeyConstraint("exp_id", "trial_id"),
             ForeignKeyConstraint(["exp_id"], [self.experiment.c.exp_id]),
             ForeignKeyConstraint(["config_id"], [self.config.c.config_id]),
@@ -197,8 +228,8 @@ class DbSchema:
             "config_param",
             self._meta,
             Column("config_id", Integer, nullable=False),
-            Column("param_id", String(self._ID_LEN), nullable=False),
-            Column("param_value", String(self._PARAM_VALUE_LEN)),
+            Column("param_id", String(self._param_id_len), nullable=False),
+            Column("param_value", String(self._param_value_len)),
             PrimaryKeyConstraint("config_id", "param_id"),
             ForeignKeyConstraint(["config_id"], [self.config.c.config_id]),
         )
@@ -212,10 +243,10 @@ class DbSchema:
         self.trial_param = Table(
             "trial_param",
             self._meta,
-            Column("exp_id", String(self._ID_LEN), nullable=False),
+            Column("exp_id", String(self._exp_id_len), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("param_id", String(self._ID_LEN), nullable=False),
-            Column("param_value", String(self._PARAM_VALUE_LEN)),
+            Column("param_id", String(self._param_id_len), nullable=False),
+            Column("param_value", String(self._param_value_len)),
             PrimaryKeyConstraint("exp_id", "trial_id", "param_id"),
             ForeignKeyConstraint(
                 ["exp_id", "trial_id"],
@@ -230,10 +261,18 @@ class DbSchema:
         self.trial_status = Table(
             "trial_status",
             self._meta,
-            Column("exp_id", String(self._ID_LEN), nullable=False),
+            Column("exp_id", String(self._exp_id_len), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("ts", DateTime(timezone=True), nullable=False, default="now"),
-            Column("status", String(self._STATUS_LEN), nullable=False),
+            Column(
+                "ts",
+                DateTime(timezone=True).with_variant(
+                    mysql.DATETIME(fsp=6),
+                    "mysql",
+                ),
+                nullable=False,
+                default="now",
+            ),
+            Column("status", String(self._status_len), nullable=False),
             UniqueConstraint("exp_id", "trial_id", "ts"),
             ForeignKeyConstraint(
                 ["exp_id", "trial_id"],
@@ -247,10 +286,10 @@ class DbSchema:
         self.trial_result = Table(
             "trial_result",
             self._meta,
-            Column("exp_id", String(self._ID_LEN), nullable=False),
+            Column("exp_id", String(self._exp_id_len), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("metric_id", String(self._ID_LEN), nullable=False),
-            Column("metric_value", String(self._METRIC_VALUE_LEN)),
+            Column("metric_id", String(self._metric_id_len), nullable=False),
+            Column("metric_value", String(self._metric_value_len)),
             PrimaryKeyConstraint("exp_id", "trial_id", "metric_id"),
             ForeignKeyConstraint(
                 ["exp_id", "trial_id"],
@@ -265,11 +304,19 @@ class DbSchema:
         self.trial_telemetry = Table(
             "trial_telemetry",
             self._meta,
-            Column("exp_id", String(self._ID_LEN), nullable=False),
+            Column("exp_id", String(self._exp_id_len), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("ts", DateTime(timezone=True), nullable=False, default="now"),
-            Column("metric_id", String(self._ID_LEN), nullable=False),
-            Column("metric_value", String(self._METRIC_VALUE_LEN)),
+            Column(
+                "ts",
+                DateTime(timezone=True).with_variant(
+                    mysql.DATETIME(fsp=6),
+                    "mysql",
+                ),
+                nullable=False,
+                default="now",
+            ),
+            Column("metric_id", String(self._metric_id_len), nullable=False),
+            Column("metric_value", String(self._metric_value_len)),
             UniqueConstraint("exp_id", "trial_id", "ts", "metric_id"),
             ForeignKeyConstraint(
                 ["exp_id", "trial_id"],
@@ -288,13 +335,44 @@ class DbSchema:
         """Return the SQLAlchemy MetaData object."""
         return self._meta
 
-    @staticmethod
-    def _get_alembic_cfg(conn: Connection) -> config.Config:
+    def _get_alembic_cfg(self, conn: Connection) -> config.Config:
         alembic_cfg = config.Config(
             path_join(str(files("mlos_bench.storage.sql")), "alembic.ini", abs_path=True)
         )
+        assert self._engine is not None
+        alembic_cfg.set_main_option(
+            "sqlalchemy.url",
+            self._engine.url.render_as_string(
+                hide_password=False,
+            ),
+        )
         alembic_cfg.attributes["connection"] = conn
         return alembic_cfg
+
+    def drop_all_tables(self, *, force: bool = False) -> None:
+        """
+        Helper method used in testing to reset the DB schema.
+
+        Notes
+        -----
+        This method is not intended for production use, as it will drop all tables
+        in the database. Use with caution.
+
+        Parameters
+        ----------
+        force : bool
+            If True, drop all tables in the target database.
+            If False, this method will not drop any tables and will log a warning.
+        """
+        assert self._engine
+        self.meta.reflect(bind=self._engine)
+        if force:
+            self.meta.drop_all(bind=self._engine)
+        else:
+            _LOG.warning(
+                "Resetting the schema without force is not implemented. "
+                "Use force=True to drop all tables."
+            )
 
     def create(self) -> "DbSchema":
         """Create the DB schema."""

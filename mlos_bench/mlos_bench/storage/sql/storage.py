@@ -82,6 +82,33 @@ class SqlStorage(Storage):
                 _LOG.debug("DDL statements:\n%s", self._db_schema)
         return self._db_schema
 
+    def _reset_schema(self, *, force: bool = False) -> None:
+        """
+        Helper method used in testing to reset the DB schema.
+
+        Notes
+        -----
+        This method is not intended for production use, as it will drop all tables
+        in the database. Use with caution.
+
+        Parameters
+        ----------
+        force : bool
+            If True, drop all tables in the target database.
+            If False, this method will not drop any tables and will log a warning.
+        """
+        assert self._engine
+        if force:
+            self._schema.drop_all_tables(force=force)
+            self._db_schema = DbSchema(self._engine)
+            self._schema_created = False
+            self._schema_updated = False
+        else:
+            _LOG.warning(
+                "Resetting the schema without force is not implemented. "
+                "Use force=True to drop all tables."
+            )
+
     def update_schema(self) -> None:
         """Update the database schema."""
         if not self._schema_updated:
@@ -112,9 +139,13 @@ class SqlStorage(Storage):
                 experiment_id=exp.exp_id,
                 trial_id=-1,  # will be loaded upon __enter__ which calls _setup()
                 description=exp.description,
-                root_env_config=exp.root_env_config,
+                # Use special logic to load the experiment root config info directly.
+                root_env_config=None,
                 tunables=tunables,
                 opt_targets=opt_targets,
+                git_repo=exp.git_repo,
+                git_commit=exp.git_commit,
+                rel_root_env_config=exp.root_env_config,
             )
 
     def experiment(  # pylint: disable=too-many-arguments
