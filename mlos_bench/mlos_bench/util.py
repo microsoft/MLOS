@@ -480,6 +480,16 @@ def sanitize_config(config: dict[str, Any] | list[Any] | Any) -> dict[str, Any] 
     """
     sanitize_keys = {"password", "secret", "token", "api_key"}
 
+    # Try and parse the config as a JSON string first, if it's a string.
+    was_json = False
+    if isinstance(config, str):
+        try:
+            config = json.loads(config)
+            was_json = True
+        except json.JSONDecodeError:
+            # If it fails to parse, return the original string.
+            return config
+
     def recursive_sanitize(
         conf: dict[str, Any] | list[Any] | str,
     ) -> dict[str, Any] | list[Any] | str:
@@ -501,4 +511,8 @@ def sanitize_config(config: dict[str, Any] | list[Any] | Any) -> dict[str, Any] 
         # else, return un altered value (e.g., int, float, str)
         return conf
 
-    return recursive_sanitize(config)
+    sanitized = recursive_sanitize(config)
+    if was_json:
+        # If the original config was a JSON string, return it as a JSON string.
+        return json.dumps(sanitized, indent=2)
+    return sanitized
