@@ -9,12 +9,11 @@ from datetime import datetime
 from typing import Literal
 
 import pytest
-from pytest_lazy_fixtures.lazy_fixture import lf as lazy_fixture
 from pytz import UTC
 
 from mlos_bench.environments.status import Status
 from mlos_bench.storage.base_storage import Storage
-from mlos_bench.tests.storage.sql.fixtures import DOCKER_DBMS_FIXTURES
+from mlos_bench.tests.storage.sql.fixtures import PERSISTENT_SQL_STORAGE_FIXTURES
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
@@ -28,8 +27,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
     "persistent_storage",
     [
         # TODO: Improve this test to support non-sql backends eventually as well.
-        lazy_fixture("sqlite_storage"),
-        *DOCKER_DBMS_FIXTURES,
+        *PERSISTENT_SQL_STORAGE_FIXTURES,
     ],
 )
 def test_storage_pickle_restore_experiment_and_trial(

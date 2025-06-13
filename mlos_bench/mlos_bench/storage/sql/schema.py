@@ -39,11 +39,24 @@ from sqlalchemy import (
     create_mock_engine,
     inspect,
 )
+from sqlalchemy.dialects import mysql
 from sqlalchemy.engine import Engine
 
 from mlos_bench.util import path_join
 
 _LOG = logging.getLogger(__name__)
+
+
+def _mysql_datetime_with_fsp() -> mysql.DATETIME:
+    """
+    Return a MySQL DATETIME type with fractional seconds precision (fsp=6).
+
+    Notes
+    -----
+    Split out to allow single mypy ignore.
+    See <https://github.com/sqlalchemy/sqlalchemy/pull/12164> for details.
+    """
+    return mysql.DATETIME(fsp=6)  # type: ignore[no-untyped-call]
 
 
 class _DDL:
@@ -72,19 +85,15 @@ class DbSchema:
     # for all DB tables, so it's ok to disable the warnings.
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, engine: Engine | None):
+    def __init__(self, engine: Engine):
         """
         Declare the SQLAlchemy schema for the database.
 
         Parameters
         ----------
-        engine : sqlalchemy.engine.Engine | None
-            The SQLAlchemy engine to use for the DB schema.
-            Listed as optional for `alembic <https://alembic.sqlalchemy.org>`_
-            schema migration purposes so we can reference it inside it's ``env.py``
-            config file for :attr:`~meta` data inspection, but won't generally be
-            functional without one.
+        engine : sqlalchemy.engine.Engine
         """
+        assert engine, "Error: can't create schema without engine."
         _LOG.info("Create the DB schema for: %s", engine)
         self._engine = engine
         self._meta = MetaData()
@@ -112,8 +121,20 @@ class DbSchema:
             Column("git_repo", String(1024), nullable=False),
             Column("git_commit", String(40), nullable=False),
             # For backwards compatibility, we allow NULL for ts_start.
-            Column("ts_start", DateTime),
-            Column("ts_end", DateTime),
+            Column(
+                "ts_start",
+                DateTime(timezone=True).with_variant(
+                    _mysql_datetime_with_fsp(),
+                    "mysql",
+                ),
+            ),
+            Column(
+                "ts_end",
+                DateTime(timezone=True).with_variant(
+                    _mysql_datetime_with_fsp(),
+                    "mysql",
+                ),
+            ),
             # Should match the text IDs of `mlos_bench.environments.Status` enum:
             # For backwards compatibility, we allow NULL for status.
             Column("status", String(self._status_len)),
@@ -187,8 +208,22 @@ class DbSchema:
             Column("trial_id", Integer, nullable=False),
             Column("config_id", Integer, nullable=False),
             Column("trial_runner_id", Integer, nullable=True, default=None),
-            Column("ts_start", DateTime, nullable=False),
-            Column("ts_end", DateTime),
+            Column(
+                "ts_start",
+                DateTime(timezone=True).with_variant(
+                    _mysql_datetime_with_fsp(),
+                    "mysql",
+                ),
+                nullable=False,
+            ),
+            Column(
+                "ts_end",
+                DateTime(timezone=True).with_variant(
+                    _mysql_datetime_with_fsp(),
+                    "mysql",
+                ),
+                nullable=True,
+            ),
             # Should match the text IDs of `mlos_bench.environments.Status` enum:
             Column("status", String(self._status_len), nullable=False),
             PrimaryKeyConstraint("exp_id", "trial_id"),
@@ -240,7 +275,15 @@ class DbSchema:
             self._meta,
             Column("exp_id", String(self._exp_id_len), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("ts", DateTime(timezone=True), nullable=False, default="now"),
+            Column(
+                "ts",
+                DateTime(timezone=True).with_variant(
+                    _mysql_datetime_with_fsp(),
+                    "mysql",
+                ),
+                nullable=False,
+                default="now",
+            ),
             Column("status", String(self._status_len), nullable=False),
             UniqueConstraint("exp_id", "trial_id", "ts"),
             ForeignKeyConstraint(
@@ -275,7 +318,15 @@ class DbSchema:
             self._meta,
             Column("exp_id", String(self._exp_id_len), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("ts", DateTime(timezone=True), nullable=False, default="now"),
+            Column(
+                "ts",
+                DateTime(timezone=True).with_variant(
+                    _mysql_datetime_with_fsp(),
+                    "mysql",
+                ),
+                nullable=False,
+                default="now",
+            ),
             Column("metric_id", String(self._metric_id_len), nullable=False),
             Column("metric_value", String(self._metric_value_len)),
             UniqueConstraint("exp_id", "trial_id", "ts", "metric_id"),
@@ -296,10 +347,16 @@ class DbSchema:
         """Return the SQLAlchemy MetaData object."""
         return self._meta
 
-    @staticmethod
-    def _get_alembic_cfg(conn: Connection) -> config.Config:
+    def _get_alembic_cfg(self, conn: Connection) -> config.Config:
         alembic_cfg = config.Config(
             path_join(str(files("mlos_bench.storage.sql")), "alembic.ini", abs_path=True)
+        )
+        assert self._engine is not None
+        alembic_cfg.set_main_option(
+            "sqlalchemy.url",
+            self._engine.url.render_as_string(
+                hide_password=False,
+            ),
         )
         alembic_cfg.attributes["connection"] = conn
         return alembic_cfg

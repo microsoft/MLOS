@@ -48,6 +48,10 @@ if DOCKER:
         lazy_fixture("postgres_storage"),
     ]
 
+PERSISTENT_SQL_STORAGE_FIXTURES = [lazy_fixture("sqlite_storage")]
+if DOCKER:
+    PERSISTENT_SQL_STORAGE_FIXTURES.extend(DOCKER_DBMS_FIXTURES)
+
 
 @pytest.fixture(scope="session")
 def mysql_storage_info(

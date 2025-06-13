@@ -15,7 +15,7 @@ from mlos_bench.tests.storage.sql.fixtures import DOCKER_DBMS_FIXTURES
 # NOTE: This value is hardcoded to the latest revision in the alembic versions directory.
 # It could also be obtained programmatically using the "alembic heads" command or heads() API.
 # See Also: schema.py for an example of programmatic alembic config access.
-CURRENT_ALEMBIC_HEAD = "8928a401115b"
+CURRENT_ALEMBIC_HEAD = "b61aa446e724"
 
 # Try to test multiple DBMS engines.
 
