@@ -499,7 +499,8 @@ def _recursive_sanitize(
 
 def sanitize_config(config: dict[str, Any] | list[Any] | Any) -> dict[str, Any] | list[Any] | Any:
     """
-    Attempts to sanitize a configuration dictionary by obfuscating potentially sensitive keys.
+    Attempts to sanitize a configuration dictionary by obfuscating potentially sensitive
+    keys.
 
     Notes
     -----
