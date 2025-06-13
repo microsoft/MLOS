@@ -45,7 +45,7 @@ This document contains some notes on how to use [`alembic`](https://alembic.sqla
 
 1. If the migration script works, commit the changes to the [`mlos_bench/storage/sql/schema.py`](../schema.py) and [`mlos_bench/storage/sql/alembic/versions`](./versions/) files.
 
-   > Be sure to update the latest version in the [`test_storage_schemas.py`](../../../tests/storage/test_storage_schemas.py) file as well.
+   > Be sure to update the latest version in the [`test_storage_schemas.py`](../../../tests/storage/sql/test_storage_schemas.py) file as well.
 
 1. Merge that to the `main` branch.
 
