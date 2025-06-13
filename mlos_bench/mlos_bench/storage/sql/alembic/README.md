@@ -142,22 +142,6 @@ This document contains some notes on how to use [`alembic`](https://alembic.sqla
    docker kill postgres-alembic
    ```
 
-1. Cleanup any server instances you started.
-
-   For instance:
-
-   ```sh
-   rm mlos_bench/storage/sql/mlos_bench.sqlite
-   ```
-
-   ```sh
-   docker kill mysql-alembic
-   ```
-
-   ```sh
-   docker kill postgres-alembic
-   ```
-
 1. Merge that to the `main` branch.
 
 1. Might be good to cut a new `mlos_bench` release at this point as well.
