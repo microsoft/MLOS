@@ -191,11 +191,12 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         if any(c in json for c in ("{", "[")):
             # If the path contains braces, it is likely already a json string,
             # so just parse it.
-            _LOG.info("Load config from json string: %s", json)
+            if _LOG.isEnabledFor(logging.INFO):
+                _LOG.info("Load config from json string: %s", sanitize_config(json))
             try:
                 config: Any = json5.loads(json)
             except ValueError as ex:
-                _LOG.error("Failed to parse config from JSON string: %s", json)
+                _LOG.error("Failed to parse config from JSON string: %s", sanitize_config(json))
                 raise ValueError(f"Failed to parse config from JSON string: {json}") from ex
         else:
             json = self.resolve_path(json)
@@ -225,7 +226,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                 # (e.g. Azure ARM templates).
                 del config["$schema"]
         else:
-            _LOG.warning("Config %s is not validated against a schema.", json)
+            _LOG.warning("Config %s is not validated against a schema.", sanitize_config(json))
         return config  # type: ignore[no-any-return]
 
     def prepare_class_load(
@@ -707,7 +708,12 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         --------
         mlos_bench.services : Examples of service configurations.
         """
-        _LOG.info("Load services: %s parent: %s", jsons, parent.__class__.__name__)
+        if _LOG.isEnabledFor(logging.INFO):
+            _LOG.info(
+                "Load services: %s parent: %s",
+                sanitize_config(jsons),
+                parent.__class__.__name__,
+            )
         service = Service({}, global_config, parent)
         for json in jsons:
             config = self.load_config(json, ConfigSchema.SERVICE)
