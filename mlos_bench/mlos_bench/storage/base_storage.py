@@ -208,25 +208,7 @@ class Storage(metaclass=ABCMeta):
                 self._git_repo = git_repo
                 self._git_commit = git_commit
                 self._rel_root_env_config = rel_root_env_config
-
-                # Currently we only store the relative path of the root env config
-                # from the git repo it came from.
-                git_root = git_repo
-                if not os.path.exists(git_root):
-                    try:
-                        git_root = get_git_root(os.curdir)
-                    except CalledProcessError:
-                        _LOG.warning(
-                            "Failed to find a git repo in the current working directory: %s",
-                            os.curdir,
-                        )
-                        git_root = get_git_root(__file__)
-
-                self._abs_root_env_config = path_join(
-                    git_root,
-                    self._rel_root_env_config,
-                    abs_path=True,
-                )
+                self._abs_root_env_config = self._restore_abs_root_env_path_info()
                 _LOG.info(
                     "Resolved relative root_config %s for experiment %s to %s",
                     self._rel_root_env_config,
@@ -247,6 +229,66 @@ class Storage(metaclass=ABCMeta):
             self._description = description
             self._opt_targets = opt_targets
             self._in_context = False
+
+        def _restore_abs_root_env_path_info(self) -> str:
+            abs_root_env_config = None
+            # Currently we only store the relative path of the root env config
+            # from the git repo it came from.
+            # This attempts to restore the absolute path to the root config
+            # by finding the git repo root and joining it with the relative
+            # path.  If the git repo root cannot be found, it will try and
+            # find it from the current working directory, which may also
+            # fail, in which case we simply default to using the URL path of
+            # the repo.
+            if self._git_repo.startswith("file://"):
+                # If the git repo is a file URL, we need to convert it to a local path.
+                git_root = self._git_repo[7:]  # Remove 'file://' prefix
+            else:
+                git_root = self._git_repo
+            if not os.path.exists(git_root):
+                try:
+                    git_root = get_git_root(os.curdir)
+                except CalledProcessError:
+                    _LOG.warning(
+                        "Failed to find the git repo in the current working directory: %s",
+                        os.curdir,
+                    )
+                    git_root = None
+
+            if git_root:
+                # If we have a git root, lookup its info again to make sure
+                # it matches the DB info.
+                (git_repo, git_commit, rel_path, git_root) = get_git_info(git_root)
+                assert rel_path == "."
+                if git_repo != self._git_repo:
+                    _LOG.warning(
+                        "Git repo %s does not match the one in the DB: %s",
+                        git_repo,
+                        self._git_repo,
+                    )
+                if git_commit != self._git_commit:
+                    _LOG.warning(
+                        "Git commit %s does not match the one in the DB: %s",
+                        git_commit,
+                        self._git_commit,
+                    )
+
+                abs_root_env_config = path_join(
+                    git_root,
+                    self._rel_root_env_config,
+                    abs_path=True,
+                )
+
+            # Fallback to the git repo URL if the absolute path
+            # does not exist.
+            if not abs_root_env_config or not os.path.exists(abs_root_env_config):
+                _LOG.warning(
+                    "Root config file %s does not exist in the git repo %s",
+                    abs_root_env_config,
+                    git_root,
+                )
+                abs_root_env_config = f"{self._git_repo}/{self._rel_root_env_config}"
+            return abs_root_env_config
 
         def __enter__(self) -> Storage.Experiment:
             """
@@ -336,8 +378,18 @@ class Storage(metaclass=ABCMeta):
             """
             Get the Experiment's root Environment config file path.
 
-            This returns the current absolute path to the root config for this process
-            instead of the path relative to the git repo root.
+            This attempts to return the current absolute path to the root config
+            for this process instead of the path relative to the git repo root.
+
+            However, this may not always be possible if the git repo root is not
+            accessible, which can happen if the Experiment was restored from the
+            DB.
+
+            Notes
+            -----
+            This is mostly useful for other components (e.g.,
+            :py:class:`~mlos_bench.schedulers.base_scheduler.Scheduler`) to use
+            within the same process, and not across invocations.
             """
             return self._abs_root_env_config
 
