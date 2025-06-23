@@ -6,12 +6,10 @@
 import os
 import re
 import tempfile
-
 from pathlib import Path
 from subprocess import CalledProcessError
 
 import pytest
-
 
 from mlos_bench.util import get_git_info, get_git_root, path_join
 
@@ -68,7 +66,9 @@ def test_non_upstream_git() -> None:
     reason="Not running in GitHub Actions CI.",
 )
 def test_github_actions_git_info() -> None:
-    """Test that get_git_info matches GitHub Actions environment variables if running in CI."""
+    """Test that get_git_info matches GitHub Actions environment variables if running in
+    CI.
+    """
     repo_env = os.environ.get("GITHUB_REPOSITORY")  # "owner/repo" format
     sha_env = os.environ.get("GITHUB_SHA")
     assert repo_env, "GITHUB_REPOSITORY not set in environment."
