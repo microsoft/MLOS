@@ -283,10 +283,15 @@ def get_git_root(path: str = __file__) -> str:
     path : str, optional
         Path to the file in git repository.
 
+    Raises
+    ------
+    subprocess.CalledProcessError
+        If the path is not a git repository or the command fails.
+
     Returns
     -------
     str
-        _description_
+        The root directory of the git repository.
     """
     abspath = path_join(path, abs_path=True)
     if not os.path.exists(abspath) or not os.path.isdir(abspath):
@@ -307,6 +312,11 @@ def get_git_info(path: str = __file__) -> tuple[str, str, str, str]:
     ----------
     path : str
         Path to the file in git repository.
+
+    Raises
+    ------
+    subprocess.CalledProcessError
+        If the path is not a git repository or the command fails.
 
     Returns
     -------
