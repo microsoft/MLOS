@@ -10,7 +10,7 @@ from subprocess import CalledProcessError
 
 import pytest
 
-from mlos_bench.util import get_git_info, path_join
+from mlos_bench.util import get_git_info, get_git_root, path_join
 
 
 def test_get_git_info() -> None:
@@ -41,4 +41,4 @@ def test_non_git_dir() -> None:
     with tempfile.TemporaryDirectory() as non_git_dir:
         with pytest.raises(CalledProcessError):
             # This should raise an error because the directory is not a git repository.
-            get_git_info(non_git_dir)
+            get_git_root(non_git_dir)
