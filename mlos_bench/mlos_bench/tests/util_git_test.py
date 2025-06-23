@@ -5,6 +5,10 @@
 """Unit tests for get_git_info utility function."""
 import os
 import re
+import tempfile
+from subprocess import CalledProcessError
+
+import pytest
 
 from mlos_bench.util import get_git_info, path_join
 
@@ -30,3 +34,11 @@ def test_get_git_info_dir() -> None:
     assert re.match(r"[0-9a-f]{40}", git_commit) is not None
     assert rel_path == "mlos_bench/mlos_bench/tests"
     assert abs_path == path_join(dirname, abs_path=True)
+
+
+def test_non_git_dir() -> None:
+    """Check that we can handle a non-git directory."""
+    with tempfile.TemporaryDirectory() as non_git_dir:
+        with pytest.raises(CalledProcessError):
+            # This should raise an error because the directory is not a git repository.
+            get_git_info(non_git_dir)

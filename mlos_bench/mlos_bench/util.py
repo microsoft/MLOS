@@ -324,10 +324,8 @@ def get_git_info(path: str = __file__) -> tuple[str, str, str, str]:
     git_commit = subprocess.check_output(
         ["git", "-C", dirname, "rev-parse", "HEAD"], text=True
     ).strip()
-    git_root = subprocess.check_output(
-        ["git", "-C", dirname, "rev-parse", "--show-toplevel"], text=True
-    ).strip()
-    _LOG.debug("Current git branch: %s %s", git_repo, git_commit)
+    git_root = get_git_root(path=abspath)
+    _LOG.debug("Current git branch for %s: %s %s", git_root, git_repo, git_commit)
     rel_path = os.path.relpath(abspath, os.path.abspath(git_root))
     return (git_repo, git_commit, rel_path.replace("\\", "/"), abspath)
 
