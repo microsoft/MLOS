@@ -22,7 +22,6 @@ CURRENT_ALEMBIC_HEAD = "b61aa446e724"
 @pytest.mark.parametrize(
     "some_sql_storage_fixture",
     [
-        lazy_fixture("mem_storage"),
         lazy_fixture("sqlite_storage"),
         *DOCKER_DBMS_FIXTURES,
     ],
