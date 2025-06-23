@@ -223,9 +223,7 @@ class Storage(metaclass=ABCMeta):
                     self._git_commit,
                     self._rel_root_env_config,
                     self._abs_root_env_config,
-                ) = get_git_info(
-                    root_env_config,
-                )
+                ) = get_git_info(root_env_config)
             self._description = description
             self._opt_targets = opt_targets
             self._in_context = False
