@@ -299,8 +299,7 @@ def get_git_root(path: str = __file__) -> str:
     else:
         dirname = abspath
     git_root = subprocess.check_output(
-        ["git", "-C", dirname, "rev-parse", "--show-toplevel"],
-        text=True,
+        ["git", "-C", dirname, "rev-parse", "--show-toplevel"], text=True
     ).strip()
     return path_join(git_root, abs_path=True)
 
