@@ -413,7 +413,11 @@ def get_git_info(path: str = __file__) -> tuple[str, str, str, str]:
     ).strip()
     _LOG.debug("Current git branch for %s: %s %s", git_root, git_repo, git_commit)
     rel_path = os.path.relpath(abspath, os.path.abspath(git_root))
+    # TODO: return the branch too?
     return (git_repo, git_commit, rel_path.replace("\\", "/"), abspath)
+
+
+# TODO: Add support for checking out the branch locally.
 
 
 # Note: to avoid circular imports, we don't specify TunableValue here.
