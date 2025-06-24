@@ -54,6 +54,8 @@ def test_non_upstream_git() -> None:
         Path(non_upstream_git_dir).joinpath("README.md").touch()
         os.system(f"git -C {non_upstream_git_dir} add README.md")
         os.system(f"git -C {non_upstream_git_dir} commit -m 'Initial commit'")
+        os.system("git config user.email 'pytest@example.com'")
+        os.system("git config user.name 'PyTest User'")
         # This should raise an error because the repository has no upstream.
         (git_repo, _git_commit, rel_path, abs_path) = get_git_info(non_upstream_git_dir)
         assert git_repo == f"file://{non_upstream_git_dir}"
