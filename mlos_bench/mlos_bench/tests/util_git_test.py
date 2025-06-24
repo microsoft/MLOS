@@ -69,8 +69,8 @@ def test_non_upstream_git() -> None:
 )
 def test_github_actions_git_info() -> None:
     """
-    Test that get_git_info matches GitHub Actions environment variables if
-    running in CI.
+    Test that get_git_info matches GitHub Actions environment variables if running in
+    CI.
 
     Examples
     --------
