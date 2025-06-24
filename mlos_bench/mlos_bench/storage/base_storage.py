@@ -201,13 +201,27 @@ class Storage(metaclass=ABCMeta):
             self._experiment_id = experiment_id
             if root_env_config is not None:
                 if git_repo or git_commit or rel_root_env_config:
+                    # Extra args are only used when restoring an Experiment from the DB.
                     raise ValueError("Unexpected args: git_repo, git_commit, rel_root_env_config")
-                (
-                    self._git_repo,
-                    self._git_commit,
-                    self._rel_root_env_config,
-                    self._abs_root_env_config,
-                ) = get_git_info(root_env_config)
+                try:
+                    (
+                        self._git_repo,
+                        self._git_commit,
+                        self._rel_root_env_config,
+                        self._abs_root_env_config,
+                    ) = get_git_info(root_env_config)
+                except CalledProcessError as e:
+                    # Note: If the root_env_config is not in a git repo, we could still use it
+                    # as a relative path, but we won't have git metadata.
+                    # In this case, we *could* set the git metadata to None, but
+                    # the Experiment schema currently requires this to be set,
+                    # so we simply throw an error for now.
+                    _LOG.warning(
+                        "Failed to get git info for root_env_config %s: %s",
+                        root_env_config,
+                        e,
+                    )
+                    raise e
             else:
                 # Restoring from DB.
                 if not (git_repo and git_commit and rel_root_env_config):
