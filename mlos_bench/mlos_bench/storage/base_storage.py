@@ -25,7 +25,6 @@ mlos_bench.storage.base_trial_data.TrialData :
 from __future__ import annotations
 
 import logging
-import os
 from abc import ABCMeta, abstractmethod
 from collections.abc import Iterator, Mapping
 from contextlib import AbstractContextManager as ContextManager
@@ -40,7 +39,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import get_git_info, get_git_root, path_join
+from mlos_bench.util import get_git_info
 
 _LOG = logging.getLogger(__name__)
 
