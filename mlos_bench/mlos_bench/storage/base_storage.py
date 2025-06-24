@@ -193,21 +193,21 @@ class Storage(metaclass=ABCMeta):
             opt_targets: dict[str, Literal["min", "max"]],
             git_repo: str | None = None,
             git_commit: str | None = None,
-            rel_root_env_config: str | None = None,
+            git_rel_root_env_config: str | None = None,
         ):
             self._tunables = tunables.copy()
             self._trial_id = trial_id
             self._experiment_id = experiment_id
             self._abs_root_env_config: str | None
             if root_env_config is not None:
-                if git_repo or git_commit or rel_root_env_config:
+                if git_repo or git_commit or git_rel_root_env_config:
                     # Extra args are only used when restoring an Experiment from the DB.
                     raise ValueError("Unexpected args: git_repo, git_commit, rel_root_env_config")
                 try:
                     (
                         self._git_repo,
                         self._git_commit,
-                        self._rel_root_env_config,
+                        self._git_rel_root_env_config,
                         self._abs_root_env_config,
                     ) = get_git_info(root_env_config)
                 except CalledProcessError as e:
@@ -222,11 +222,11 @@ class Storage(metaclass=ABCMeta):
                     raise e
             else:
                 # Restoring from DB.
-                if not (git_repo and git_commit and rel_root_env_config):
+                if not (git_repo and git_commit and git_rel_root_env_config):
                     raise ValueError("Missing args: git_repo, git_commit, rel_root_env_config")
                 self._git_repo = git_repo
                 self._git_commit = git_commit
-                self._rel_root_env_config = rel_root_env_config
+                self._git_rel_root_env_config = git_rel_root_env_config
                 # Note: The absolute path to the root config is not stored in the DB,
                 # and resolving it is not always possible, so we omit this
                 # operation by default for now.
@@ -235,11 +235,11 @@ class Storage(metaclass=ABCMeta):
                 # implementation attempts.
                 self._abs_root_env_config = None
             assert isinstance(
-                self._rel_root_env_config, str
+                self._git_rel_root_env_config, str
             ), "Failed to get relative root config path"
             _LOG.info(
                 "Resolved relative root_config %s from %s at commit %s for Experiment %s to %s",
-                self._rel_root_env_config,
+                self._git_rel_root_env_config,
                 self._git_repo,
                 self._git_commit,
                 self._experiment_id,
@@ -334,7 +334,7 @@ class Storage(metaclass=ABCMeta):
             """Get the Experiment's root Environment config's relative file path to the
             git repo root.
             """
-            return self._rel_root_env_config
+            return self._git_rel_root_env_config
 
         @property
         def abs_root_env_config(self) -> str | None:

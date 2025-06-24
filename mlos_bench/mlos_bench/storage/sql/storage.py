@@ -162,7 +162,7 @@ class SqlStorage(Storage):
                 opt_targets=opt_targets,
                 git_repo=exp.git_repo,
                 git_commit=exp.git_commit,
-                rel_root_env_config=exp.root_env_config,
+                git_rel_root_env_config=exp.root_env_config,
             )
 
     def experiment(  # pylint: disable=too-many-arguments

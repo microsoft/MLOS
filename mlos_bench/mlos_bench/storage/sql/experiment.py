@@ -43,7 +43,7 @@ class Experiment(Storage.Experiment):
         opt_targets: dict[str, Literal["min", "max"]],
         git_repo: str | None = None,
         git_commit: str | None = None,
-        rel_root_env_config: str | None = None,
+        git_rel_root_env_config: str | None = None,
     ):
         super().__init__(
             tunables=tunables,
@@ -54,7 +54,7 @@ class Experiment(Storage.Experiment):
             opt_targets=opt_targets,
             git_repo=git_repo,
             git_commit=git_commit,
-            rel_root_env_config=rel_root_env_config,
+            git_rel_root_env_config=git_rel_root_env_config,
         )
         self._engine = engine
         self._schema = schema
@@ -95,7 +95,7 @@ class Experiment(Storage.Experiment):
                         description=self._description,
                         git_repo=self._git_repo,
                         git_commit=self._git_commit,
-                        root_env_config=self._rel_root_env_config,
+                        root_env_config=self._git_rel_root_env_config,
                     )
                 )
                 conn.execute(

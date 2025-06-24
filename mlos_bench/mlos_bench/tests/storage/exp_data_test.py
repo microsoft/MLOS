@@ -30,7 +30,7 @@ def test_exp_data_root_env_config(
     """Tests the root_env_config property of ExperimentData."""
     # pylint: disable=protected-access
     assert exp_data.root_env_config == (
-        exp_storage._rel_root_env_config,
+        exp_storage._git_rel_root_env_config,
         exp_storage._git_repo,
         exp_storage._git_commit,
     )
