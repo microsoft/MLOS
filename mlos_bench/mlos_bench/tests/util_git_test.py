@@ -7,7 +7,8 @@ import os
 import re
 import tempfile
 from pathlib import Path
-from subprocess import CalledProcessError, check_call as run
+from subprocess import CalledProcessError
+from subprocess import check_call as run
 
 import pytest
 
