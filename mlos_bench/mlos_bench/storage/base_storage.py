@@ -198,6 +198,7 @@ class Storage(metaclass=ABCMeta):
             self._tunables = tunables.copy()
             self._trial_id = trial_id
             self._experiment_id = experiment_id
+            self._abs_root_env_config: str | None
             if root_env_config is not None:
                 if git_repo or git_commit or rel_root_env_config:
                     # Extra args are only used when restoring an Experiment from the DB.
