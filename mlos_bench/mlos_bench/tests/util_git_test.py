@@ -7,7 +7,7 @@ import os
 import re
 import tempfile
 from pathlib import Path
-from subprocess import CalledProcessError
+from subprocess import CalledProcessError, check_call as run
 
 import pytest
 
@@ -47,19 +47,19 @@ def test_non_git_dir() -> None:
 
 def test_non_upstream_git() -> None:
     """Check that we can handle a git directory without an upstream."""
-    with tempfile.TemporaryDirectory() as non_upstream_git_dir:
-        non_upstream_git_dir = path_join(non_upstream_git_dir, abs_path=True)
+    with tempfile.TemporaryDirectory() as local_git_dir:
+        local_git_dir = path_join(local_git_dir, abs_path=True)
         # Initialize a new git repository.
-        os.system(f"git init {non_upstream_git_dir} -b main")
-        os.system(f"git -C {non_upstream_git_dir} config --local user.email 'pytest@example.com'")
-        os.system(f"git -C {non_upstream_git_dir} config --local user.name 'PyTest User'")
-        Path(non_upstream_git_dir).joinpath("README.md").touch()
-        os.system(f"git -C {non_upstream_git_dir} add README.md")
-        os.system(f"git -C {non_upstream_git_dir} commit -m 'Initial commit'")
+        run(["git", "init", local_git_dir, "-b", "main"])
+        run(["git", "-C", local_git_dir, "config", "--local", "user.email", "pytest@example.com"])
+        run(["git", "-C", local_git_dir, "config", "--local", "user.name", "PyTest User"])
+        Path(local_git_dir).joinpath("README.md").touch()
+        run(["git", "-C", local_git_dir, "add", "README.md"])
+        run(["git", "-C", local_git_dir, "commit", "-m", "Initial commit"])
         # This should raise an error because the repository has no upstream.
-        (git_repo, _git_commit, rel_path, abs_path) = get_git_info(non_upstream_git_dir)
-        assert git_repo == f"file://{non_upstream_git_dir}"
-        assert abs_path == non_upstream_git_dir
+        (git_repo, _git_commit, rel_path, abs_path) = get_git_info(local_git_dir)
+        assert git_repo == f"file://{local_git_dir}"
+        assert abs_path == local_git_dir
         assert rel_path == "."
 
 
