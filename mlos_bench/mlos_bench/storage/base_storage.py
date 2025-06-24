@@ -229,7 +229,6 @@ class Storage(metaclass=ABCMeta):
             self._in_context = False
 
         def _restore_abs_root_env_path_info(self) -> str:
-            abs_root_env_config = None
             # Currently we only store the relative path of the root env config
             # from the git repo it came from.
             # This attempts to restore the absolute path to the root config
@@ -238,12 +237,12 @@ class Storage(metaclass=ABCMeta):
             # find it from the current working directory, which may also
             # fail, in which case we simply default to using the URL path of
             # the repo.
+            abs_root_env_config = None
+            git_root: str | None = self._git_repo
             if self._git_repo.startswith("file://"):
                 # If the git repo is a file URL, we need to convert it to a local path.
                 git_root = self._git_repo[7:]  # Remove 'file://' prefix
-            else:
-                git_root = self._git_repo
-            if not os.path.exists(git_root):
+            if git_root and not os.path.exists(git_root):
                 try:
                     git_root = get_git_root(os.curdir)
                 except CalledProcessError:
