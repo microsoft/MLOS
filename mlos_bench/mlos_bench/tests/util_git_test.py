@@ -68,9 +68,24 @@ def test_non_upstream_git() -> None:
     reason="Not running in GitHub Actions CI.",
 )
 def test_github_actions_git_info() -> None:
-    """Test that get_git_info matches GitHub Actions environment variables if running in
-    CI.
     """
+    Test that get_git_info matches GitHub Actions environment variables if
+    running in CI.
+
+    Examples
+    --------
+    Test locally with the following command:
+
+    .. code-block:: shell
+
+        export GITHUB_ACTIONS=true
+        GITHUB_SHA=$(git rev-parse HEAD)
+        # GITHUB_REPOSITORY should be in "owner/repo" format.
+        # e.g., GITHUB_REPOSITORY="bpkroth/MLOS" or "microsoft/MLOS"
+        GITHUB_REPOSITORY=$(git rev-parse --abbrev-ref --symbolic-full-name HEAD@{u} | cut -d/ -f1 | xargs git remote get-url | grep https://github.com | cut -d/ -f4-)
+        pytest -n0 mlos_bench/mlos_bench/tests/util_git_test.py
+    ```
+    """  # pylint: disable=line-too-long # noqa: E501
     repo_env = os.environ.get("GITHUB_REPOSITORY")  # "owner/repo" format
     sha_env = os.environ.get("GITHUB_SHA")
     assert repo_env, "GITHUB_REPOSITORY not set in environment."
