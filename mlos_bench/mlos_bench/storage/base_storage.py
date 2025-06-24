@@ -199,12 +199,19 @@ class Storage(metaclass=ABCMeta):
             self._tunables = tunables.copy()
             self._trial_id = trial_id
             self._experiment_id = experiment_id
-            if root_env_config is None:
+            if root_env_config is not None:
+                if git_repo or git_commit or rel_root_env_config:
+                    raise ValueError("Unexpected args: git_repo, git_commit, rel_root_env_config")
+                (
+                    self._git_repo,
+                    self._git_commit,
+                    self._rel_root_env_config,
+                    self._abs_root_env_config,
+                ) = get_git_info(root_env_config)
+            else:
                 # Restoring from DB.
                 if not (git_repo and git_commit and rel_root_env_config):
-                    raise ValueError(
-                        "Missing required args: git_repo, git_commit, rel_root_env_config"
-                    )
+                    raise ValueError("Missing args: git_repo, git_commit, rel_root_env_config")
                 self._git_repo = git_repo
                 self._git_commit = git_commit
                 self._rel_root_env_config = rel_root_env_config
@@ -215,15 +222,6 @@ class Storage(metaclass=ABCMeta):
                     self._experiment_id,
                     self._abs_root_env_config,
                 )
-            else:
-                if git_repo or git_commit or rel_root_env_config:
-                    raise ValueError("Unexpected args: git_repo, git_commit, rel_root_env_config")
-                (
-                    self._git_repo,
-                    self._git_commit,
-                    self._rel_root_env_config,
-                    self._abs_root_env_config,
-                ) = get_git_info(root_env_config)
             self._description = description
             self._opt_targets = opt_targets
             self._in_context = False
