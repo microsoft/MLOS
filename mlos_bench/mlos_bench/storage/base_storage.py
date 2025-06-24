@@ -230,11 +230,15 @@ class Storage(metaclass=ABCMeta):
                 self._git_commit = git_commit
                 self._rel_root_env_config = rel_root_env_config
                 # Note: The absolute path to the root config is not stored in the DB,
-                # and resolving it is not always possible, so we omit this operation for now.
+                # and resolving it is not always possible, so we omit this
+                # operation by default for now.
                 # See commit 0cb5948865662776e92ceaca3f0a80a34c6a39ef in
                 # <https://github.com/microsoft/MLOS/pull/985> for prior
                 # implementation attempts.
-                self._abs_root_env_config = None  # self._restore_abs_root_env_path_info()
+                self._abs_root_env_config = None
+            assert isinstance(
+                self._rel_root_env_config, str
+            ), "Failed to get relative root config path"
             _LOG.info(
                 "Resolved relative root_config %s from %s at commit %s for Experiment %s to %s",
                 self._rel_root_env_config,
@@ -246,65 +250,6 @@ class Storage(metaclass=ABCMeta):
             self._description = description
             self._opt_targets = opt_targets
             self._in_context = False
-
-        def _restore_abs_root_env_path_info(self) -> str:
-            # Currently we only store the relative path of the root env config
-            # from the git repo it came from.
-            # This attempts to restore the absolute path to the root config
-            # by finding the git repo root and joining it with the relative
-            # path.  If the git repo root cannot be found, it will try and
-            # find it from the current working directory, which may also
-            # fail, in which case we simply default to using the URL path of
-            # the repo.
-            abs_root_env_config = None
-            git_root: str | None = self._git_repo
-            if self._git_repo.startswith("file://"):
-                # If the git repo is a file URL, we need to convert it to a local path.
-                git_root = self._git_repo[7:]  # Remove 'file://' prefix
-            if git_root and not os.path.exists(git_root):
-                try:
-                    git_root = get_git_root(os.curdir)
-                except CalledProcessError:
-                    _LOG.warning(
-                        "Failed to find the git repo in the current working directory: %s",
-                        os.curdir,
-                    )
-                    git_root = None
-
-            if git_root:
-                # If we have a git root, lookup its info again to make sure
-                # it matches the DB info.
-                (git_repo, git_commit, rel_path, git_root) = get_git_info(git_root)
-                assert rel_path == "."
-                if git_repo != self._git_repo:
-                    _LOG.warning(
-                        "Git repo %s does not match the one in the DB: %s",
-                        git_repo,
-                        self._git_repo,
-                    )
-                if git_commit != self._git_commit:
-                    _LOG.warning(
-                        "Git commit %s does not match the one in the DB: %s",
-                        git_commit,
-                        self._git_commit,
-                    )
-
-                abs_root_env_config = path_join(
-                    git_root,
-                    self._rel_root_env_config,
-                    abs_path=True,
-                )
-
-            # Fallback to the git repo URL if the absolute path
-            # does not exist.
-            if not abs_root_env_config or not os.path.exists(abs_root_env_config):
-                _LOG.warning(
-                    "Root config file %s does not exist in the git repo %s",
-                    abs_root_env_config,
-                    git_root,
-                )
-                abs_root_env_config = f"{self._git_repo}/{self._rel_root_env_config}"
-            return abs_root_env_config
 
         def __enter__(self) -> Storage.Experiment:
             """
