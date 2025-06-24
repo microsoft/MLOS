@@ -255,6 +255,8 @@ class Storage(metaclass=ABCMeta):
             """
             Enter the context of the experiment.
 
+            Notes
+            -----
             Override the `_setup` method to add custom context initialization.
             """
             _LOG.debug("Starting experiment: %s", self)
@@ -272,6 +274,8 @@ class Storage(metaclass=ABCMeta):
             """
             End the context of the experiment.
 
+            Notes
+            -----
             Override the `_teardown` method to add custom context teardown logic.
             """
             is_ok = exc_val is None
@@ -297,14 +301,14 @@ class Storage(metaclass=ABCMeta):
             Create a record of the new experiment or find an existing one in the
             storage.
 
-            This method is called by `Storage.Experiment.__enter__()`.
+            This method is called by :py:class:`.Storage.Experiment.__enter__()`.
             """
 
         def _teardown(self, is_ok: bool) -> None:
             """
             Finalize the experiment in the storage.
 
-            This method is called by `Storage.Experiment.__exit__()`.
+            This method is called by :py:class:`.Storage.Experiment.__exit__()`.
 
             Parameters
             ----------
@@ -337,7 +341,7 @@ class Storage(metaclass=ABCMeta):
         @property
         def abs_root_env_config(self) -> str | None:
             """
-            Get the Experiment's root Environment config file path.
+            Get the Experiment's root Environment config absolute file path.
 
             This attempts to return the current absolute path to the root config
             for this process instead of the path relative to the git repo root.
@@ -352,6 +356,9 @@ class Storage(metaclass=ABCMeta):
             :py:class:`~mlos_bench.schedulers.base_scheduler.Scheduler`) to use
             within the same process, and not across invocations.
             """
+            # TODO: In the future, we can consider fetching the git_repo to a
+            # standard working directory for ``mlos_bench`` and then resolving
+            # the root config path from there based on the relative path.
             return self._abs_root_env_config
 
         @property
