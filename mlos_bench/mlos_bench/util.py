@@ -280,7 +280,7 @@ def get_git_root(path: str = __file__) -> str:
 
     Parameters
     ----------
-    path : str, optional
+    path : Optional[str]
         Path to the file in git repository.
 
     Raises
