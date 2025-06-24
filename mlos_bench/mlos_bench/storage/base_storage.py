@@ -346,7 +346,8 @@ class Storage(metaclass=ABCMeta):
 
             However, this may not always be possible if the git repo root is not
             accessible, which can happen if the Experiment was restored from the
-            DB.
+            DB, but the process was started from a different working directory,
+            for instance.
 
             Notes
             -----
