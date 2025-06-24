@@ -153,7 +153,7 @@ def path_join(*args: str, abs_path: bool = False) -> str:
     """
     path = os.path.join(*args)
     if abs_path:
-        path = os.path.abspath(path)
+        path = os.path.realpath(path)
     return os.path.normpath(path).replace("\\", "/")
 
 
@@ -274,7 +274,115 @@ def check_required_params(config: Mapping[str, Any], required_params: Iterable[s
         )
 
 
-def get_git_info(path: str = __file__) -> tuple[str, str, str]:
+def get_git_root(path: str = __file__) -> str:
+    """
+    Get the root dir of the git repository.
+
+    Parameters
+    ----------
+    path : str, optional
+        Path to the file in git repository.
+
+    Raises
+    ------
+    subprocess.CalledProcessError
+        If the path is not a git repository or the command fails.
+
+    Returns
+    -------
+    str
+        The absolute path to the root directory of the git repository.
+    """
+    abspath = path_join(path, abs_path=True)
+    if not os.path.exists(abspath) or not os.path.isdir(abspath):
+        dirname = os.path.dirname(abspath)
+    else:
+        dirname = abspath
+    git_root = subprocess.check_output(
+        ["git", "-C", dirname, "rev-parse", "--show-toplevel"],
+        text=True,
+    ).strip()
+    return path_join(git_root, abs_path=True)
+
+
+def get_git_remote_info(path: str, remote: str) -> str:
+    """
+    Gets the remote URL for the given remote name in the git repository.
+
+    Parameters
+    ----------
+    path : str
+        Path to the file in git repository.
+    remote : str
+        The name of the remote (e.g., "origin").
+
+    Raises
+    ------
+    subprocess.CalledProcessError
+        If the command fails or the remote does not exist.
+
+    Returns
+    -------
+    str
+        The URL of the remote repository.
+    """
+    return subprocess.check_output(
+        ["git", "-C", path, "remote", "get-url", remote], text=True
+    ).strip()
+
+
+def get_git_repo_info(path: str) -> str:
+    """
+    Get the git repository URL for the given git repo.
+
+    Tries to get the upstream branch URL, falling back to the "origin" remote
+    if the upstream branch is not set or does not exist. If that also fails,
+    it returns a file URL pointing to the local path.
+
+    Parameters
+    ----------
+    path : str
+        Path to the git repository.
+
+    Raises
+    ------
+    subprocess.CalledProcessError
+        If the command fails or the git repository does not exist.
+
+    Returns
+    -------
+    str
+        The upstream URL of the git repository.
+    """
+    # In case "origin" remote is not set, or this branch has a different
+    # upstream, we should handle it gracefully.
+    # (e.g., fallback to the first one we find?)
+    path = path_join(path, abs_path=True)
+    cmd = ["git", "-C", path, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "HEAD@{u}"]
+    try:
+        git_remote = subprocess.check_output(cmd, text=True).strip()
+        git_remote = git_remote.split("/", 1)[0]
+        git_repo = get_git_remote_info(path, git_remote)
+    except subprocess.CalledProcessError:
+        git_remote = "origin"
+        _LOG.warning(
+            "Failed to get the upstream branch for %s. Falling back to '%s' remote.",
+            path,
+            git_remote,
+        )
+        try:
+            git_repo = get_git_remote_info(path, git_remote)
+        except subprocess.CalledProcessError:
+            git_repo = "file://" + path
+            _LOG.warning(
+                "Failed to get the upstream branch for %s. Falling back to '%s'.",
+                path,
+                git_repo,
+            )
+    return git_repo
+
+
+def get_git_info(path: str = __file__) -> tuple[str, str, str, str]:
     """
     Get the git repository, commit hash, and local path of the given file.
 
@@ -283,24 +391,30 @@ def get_git_info(path: str = __file__) -> tuple[str, str, str]:
     path : str
         Path to the file in git repository.
 
+    Raises
+    ------
+    subprocess.CalledProcessError
+        If the path is not a git repository or the command fails.
+
     Returns
     -------
-    (git_repo, git_commit, git_path) : tuple[str, str, str]
-        Git repository URL, last commit hash, and relative file path.
+    (git_repo, git_commit, rel_path, abs_path) : tuple[str, str, str, str]
+        Git repository URL, last commit hash, and relative file path and current
+        absolute path.
     """
-    dirname = os.path.dirname(path)
-    git_repo = subprocess.check_output(
-        ["git", "-C", dirname, "remote", "get-url", "origin"], text=True
-    ).strip()
+    abspath = path_join(path, abs_path=True)
+    if not os.path.exists(abspath) or not os.path.isdir(abspath):
+        dirname = os.path.dirname(abspath)
+    else:
+        dirname = abspath
+    git_root = get_git_root(path=abspath)
+    git_repo = get_git_repo_info(git_root)
     git_commit = subprocess.check_output(
         ["git", "-C", dirname, "rev-parse", "HEAD"], text=True
     ).strip()
-    git_root = subprocess.check_output(
-        ["git", "-C", dirname, "rev-parse", "--show-toplevel"], text=True
-    ).strip()
-    _LOG.debug("Current git branch: %s %s", git_repo, git_commit)
-    rel_path = os.path.relpath(os.path.abspath(path), os.path.abspath(git_root))
-    return (git_repo, git_commit, rel_path.replace("\\", "/"))
+    _LOG.debug("Current git branch for %s: %s %s", git_root, git_repo, git_commit)
+    rel_path = os.path.relpath(abspath, os.path.abspath(git_root))
+    return (git_repo, git_commit, rel_path.replace("\\", "/"), abspath)
 
 
 # Note: to avoid circular imports, we don't specify TunableValue here.
