@@ -80,10 +80,10 @@ def test_github_actions_git_info() -> None:
     .. code-block:: shell
 
         export GITHUB_ACTIONS=true
-        GITHUB_SHA=$(git rev-parse HEAD)
+        export GITHUB_SHA=$(git rev-parse HEAD)
         # GITHUB_REPOSITORY should be in "owner/repo" format.
         # e.g., GITHUB_REPOSITORY="bpkroth/MLOS" or "microsoft/MLOS"
-        GITHUB_REPOSITORY=$(git rev-parse --abbrev-ref --symbolic-full-name HEAD@{u} | cut -d/ -f1 | xargs git remote get-url | grep https://github.com | cut -d/ -f4-)
+        export GITHUB_REPOSITORY=$(git rev-parse --abbrev-ref --symbolic-full-name HEAD@{u} | cut -d/ -f1 | xargs git remote get-url | grep https://github.com | cut -d/ -f4-)
         pytest -n0 mlos_bench/mlos_bench/tests/util_git_test.py
     """  # pylint: disable=line-too-long # noqa: E501
     repo_env = os.environ.get("GITHUB_REPOSITORY")  # "owner/repo" format
