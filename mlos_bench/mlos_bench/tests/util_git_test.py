@@ -57,7 +57,7 @@ def test_non_upstream_git() -> None:
         Path(local_git_dir).joinpath("README.md").touch()
         run(["git", "-C", local_git_dir, "add", "README.md"])
         run(["git", "-C", local_git_dir, "commit", "-m", "Initial commit"])
-        # This should raise an error because the repository has no upstream.
+        # This should have slightly different behavior when there is no upstream.
         (git_repo, _git_commit, rel_path, abs_path) = get_git_info(local_git_dir)
         assert git_repo == f"file://{local_git_dir}"
         assert abs_path == local_git_dir
