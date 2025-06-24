@@ -215,13 +215,20 @@ class Storage(metaclass=ABCMeta):
                 self._git_repo = git_repo
                 self._git_commit = git_commit
                 self._rel_root_env_config = rel_root_env_config
-                self._abs_root_env_config = self._restore_abs_root_env_path_info()
-                _LOG.info(
-                    "Resolved relative root_config %s for experiment %s to %s",
-                    self._rel_root_env_config,
-                    self._experiment_id,
-                    self._abs_root_env_config,
-                )
+                # Note: The absolute path to the root config is not stored in the DB,
+                # and resolving it is not always possible, so we omit this operation for now.
+                # See commit 0cb5948865662776e92ceaca3f0a80a34c6a39ef in
+                # <https://github.com/microsoft/MLOS/pull/985> for prior
+                # implementation attempts.
+                self._abs_root_env_config = None  # self._restore_abs_root_env_path_info()
+            _LOG.info(
+                "Resolved relative root_config %s from %s at commit %s for Experiment %s to %s",
+                self._rel_root_env_config,
+                self._git_repo,
+                self._git_commit,
+                self._experiment_id,
+                self._abs_root_env_config,
+            )
             self._description = description
             self._opt_targets = opt_targets
             self._in_context = False
@@ -369,7 +376,7 @@ class Storage(metaclass=ABCMeta):
             return self._rel_root_env_config
 
         @property
-        def abs_root_env_config(self) -> str:
+        def abs_root_env_config(self) -> str | None:
             """
             Get the Experiment's root Environment config file path.
 

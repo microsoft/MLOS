@@ -375,7 +375,7 @@ def _dummy_run_exp(
         trial_runners=trial_runners,
         optimizer=opt,
         storage=storage,
-        root_env_config=exp.abs_root_env_config,
+        root_env_config=exp.abs_root_env_config or "ERROR-UNKNOWN.jsonc",
     )
 
     # Add some trial data to that experiment by "running" it.
