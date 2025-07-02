@@ -402,10 +402,10 @@ def get_git_info(path: str = __file__) -> tuple[str, str, str, str]:
         absolute path.
     """
     abspath = path_join(path, abs_path=True)
-    if not os.path.exists(abspath) or not os.path.isdir(abspath):
-        dirname = os.path.dirname(abspath)
-    else:
+    if os.path.exists(abspath) and os.path.isdir(abspath):
         dirname = abspath
+    else:
+        dirname = os.path.dirname(abspath)
     git_root = get_git_root(path=abspath)
     git_repo = get_git_repo_info(git_root)
     git_commit = subprocess.check_output(
