@@ -80,6 +80,9 @@ RUN echo "Setup miniconda" \
     && /opt/conda/bin/conda init \
     && /opt/conda/bin/conda config --set channel_priority strict \
     && /opt/conda/bin/conda info \
+    && /opt/conda/bin/conda config --show \
+    && /opt/conda/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main \
+    && /opt/conda/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r \
     && /opt/conda/bin/conda update -v -y -n base -c conda-forge -c defaults --all \
     && /opt/conda/bin/conda list -n base \
     && /opt/conda/bin/conda install -v -y -n base -c conda-forge -c defaults conda-libmamba-solver \
