@@ -64,8 +64,6 @@ COPY --from=deps-prep --chown=vscode:conda /tmp/conda-tmp/.pre-commit-config.yam
 # Combine the installation of miniconda and the mlos dependencies into a single step in order to save space.
 # This allows the mlos env to reference the base env's packages without duplication across layers.
 RUN echo "Setup miniconda" \
-    && set -x \
-    && export CONDA_NO_PROGRESS_BARS=1 \
     && curl -Ss --url https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-$(uname -m).sh -o /tmp/miniconda3.sh \
     && sudo sh /tmp/miniconda3.sh -b -u -p /opt/conda \
     && rm -rf /tmp/miniconda3.sh \
