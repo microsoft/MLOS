@@ -7,10 +7,6 @@
 from dataclasses import dataclass
 from subprocess import run
 
-from pytest_docker.plugin import Services as DockerServices
-
-from mlos_bench.tests import check_socket
-
 # The SSH test server port and name.
 # See Also: docker-compose.yml
 SSH_TEST_SERVER_PORT = 2254
@@ -21,7 +17,13 @@ REBOOT_TEST_SERVER_NAME = "reboot-server"
 
 @dataclass
 class SshTestServerInfo:
-    """A data class for SshTestServerInfo."""
+    """
+    A data class for SshTestServerInfo.
+
+    See Also
+    --------
+    mlos_bench.tests.storage.sql.SqlTestServerInfo
+    """
 
     compose_project_name: str
     service_name: str
@@ -70,12 +72,3 @@ class SshTestServerInfo:
             "port": self.get_port(uncached),
             "username": self.username,
         }
-
-
-def wait_docker_service_socket(docker_services: DockerServices, hostname: str, port: int) -> None:
-    """Wait until a docker service is ready."""
-    docker_services.wait_until_responsive(
-        check=lambda: check_socket(hostname, port),
-        timeout=30.0,
-        pause=0.5,
-    )

@@ -12,7 +12,8 @@ import pytest
 from pytz import UTC
 
 from mlos_bench.environments.status import Status
-from mlos_bench.storage.sql.storage import SqlStorage
+from mlos_bench.storage.base_storage import Storage
+from mlos_bench.tests.storage.sql.fixtures import PERSISTENT_SQL_STORAGE_FIXTURES
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
@@ -22,14 +23,24 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
     sys.platform == "win32",
     reason="Windows doesn't support multiple processes accessing the same file.",
 )
+@pytest.mark.parametrize(
+    "persistent_storage",
+    [
+        # TODO: Improve this test to support non-sql backends eventually as well.
+        *PERSISTENT_SQL_STORAGE_FIXTURES,
+    ],
+)
 def test_storage_pickle_restore_experiment_and_trial(
-    sqlite_storage: SqlStorage,
+    persistent_storage: Storage,
     tunable_groups: TunableGroups,
 ) -> None:
     """Check that we can pickle and unpickle the Storage object, and restore Experiment
     and Trial by id.
     """
-    storage = sqlite_storage
+    storage = persistent_storage
+    storage_class = storage.__class__
+    assert issubclass(storage_class, Storage)
+    assert storage_class != Storage
     # Create an Experiment and a Trial
     opt_targets: dict[str, Literal["min", "max"]] = {"metric": "min"}
     experiment = storage.experiment(
@@ -49,7 +60,7 @@ def test_storage_pickle_restore_experiment_and_trial(
     # Pickle and unpickle the Storage object
     pickled = pickle.dumps(storage)
     restored_storage = pickle.loads(pickled)
-    assert isinstance(restored_storage, SqlStorage)
+    assert isinstance(restored_storage, storage_class)
 
     # Restore the Experiment from storage by id and check that it matches the original
     restored_experiment = restored_storage.get_experiment_by_id(
