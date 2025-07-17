@@ -53,8 +53,6 @@ jobs:
       # See notes about $CONDA below.
       CONDA_DIR: unset
       # Use simple output for conda.
-      PYTHONUNBUFFERED: 1
-      TERM: dumb
       CONDA_NO_PROGRESS_BARS: 1
       # When parallel jobs are used, group the output to make debugging easier.
       MAKEFLAGS: -Oline

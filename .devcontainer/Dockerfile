@@ -65,8 +65,6 @@ COPY --from=deps-prep --chown=vscode:conda /tmp/conda-tmp/.pre-commit-config.yam
 # This allows the mlos env to reference the base env's packages without duplication across layers.
 RUN echo "Setup miniconda" \
     && set -x \
-    && export PYTHONUNBUFFERED=1 \
-    && export TERM=dumb \
     && export CONDA_NO_PROGRESS_BARS=1 \
     && curl -Ss --url https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-$(uname -m).sh -o /tmp/miniconda3.sh \
     && sudo sh /tmp/miniconda3.sh -b -u -p /opt/conda \

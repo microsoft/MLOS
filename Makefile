@@ -5,6 +5,9 @@ CONDA_ENV_NAME ?= mlos
 PYTHON_VERSION := $(shell echo "${CONDA_ENV_NAME}" | sed -r -e 's/^mlos[-]?//')
 ENV_YML := conda-envs/${CONDA_ENV_NAME}.yml
 
+CONDA_NO_PROGRESS_BARS ?= 1
+export CONDA_NO_PROGRESS_BARS
+
 # Find the non-build python files we should consider as rule dependencies.
 # Do a single find and multiple filters for better performance.
 REPO_FILES := $(shell find . -type f 2>/dev/null | egrep -v -e '^./(mlos_(core|bench|viz)/)?build/' -e '^./doc/source/' -e '^./doc/build/')
@@ -26,14 +29,6 @@ MKDIR_BUILD := $(shell test -d build || mkdir build)
 
 # Run make in parallel by default.
 MAKEFLAGS += -j$(shell nproc 2>/dev/null || sysctl -n hw.ncpu)
-
-# Adjust to use plain output for easier debugging.
-PYTHONUNBUFFERED ?= 1
-export PYTHONUNBUFFERED
-TERM ?= dumb
-export TERM
-CONDA_NO_PROGRESS_BARS ?= 1
-export CONDA_NO_PROGRESS_BARS
 #MAKEFLAGS += -Oline
 
 .PHONY: all
