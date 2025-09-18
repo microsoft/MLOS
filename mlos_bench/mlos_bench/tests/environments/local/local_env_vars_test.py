@@ -34,7 +34,7 @@ def _run_local_env(tunable_groups: TunableGroups, shell_subcmd: str, expected: d
         },
     )
 
-    check_env_success(local_env, tunable_groups, expected, [])
+    check_env_success(local_env, tunable_groups, expected_results=expected, expected_telemetry=[])
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="sh-like shell only")
