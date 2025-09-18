@@ -56,7 +56,7 @@ def _mysql_datetime_with_fsp() -> mysql.DATETIME:
     Split out to allow single mypy ignore.
     See <https://github.com/sqlalchemy/sqlalchemy/pull/12164> for details.
     """
-    return mysql.DATETIME(fsp=6)  # type: ignore[no-untyped-call]
+    return mysql.DATETIME(fsp=6)
 
 
 class _DDL:
