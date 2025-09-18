@@ -37,12 +37,11 @@ updates:
     directory: "/doc/"
     schedule:
       interval: "daily"
-# TODO: Add conda support eventually.
 # See Also: https://github.com/dependabot/dependabot-core/issues/1249
-#  - package-ecosystem: "conda"
-#    directory: "/conda-envs/"
-#    schedule:
-#      interval: "daily"
+  - package-ecosystem: "conda"
+    directory: "/conda-envs/"
+    schedule:
+      interval: "daily"
 # TODO: Add pre-commit support.
 # https://github.com/dependabot/dependabot-core/issues/1524
 #  - package-ecosystem: "pre-commit"
