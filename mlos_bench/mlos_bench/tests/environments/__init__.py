@@ -65,7 +65,10 @@ def check_env_success(
 
         (status, _ts, data) = env_context.run()
         assert status in expected_status_run
-        assert data == expected_results or data == pytest.approx(expected_results, nan_ok=True)
+        if expected_results is None:
+            assert data is None
+        else:
+            assert data == pytest.approx(expected_results, nan_ok=True)
 
         (status, _ts, telemetry) = env_context.status()
         assert status in expected_status_next
