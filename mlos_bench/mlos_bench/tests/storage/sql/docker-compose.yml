@@ -1,0 +1,40 @@
+name: mlos_bench-test-sql-storage
+services:
+  mysql-mlos-bench-server:
+    hostname: mysql-mlos-bench-server
+    attach: false
+    image: docker.io/library/mysql:latest
+    ports:
+      # To allow multiple instances of this to coexist, instead of explicitly
+      # mapping the port, let it get assigned randomly on the host.
+      - ${PORT:-3306}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=mlos_bench
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin --host localhost --protocol tcp --password=$${MYSQL_ROOT_PASSWORD} ping"]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 5s
+  postgres-mlos-bench-server:
+    hostname: postgres-mlos-bench-server
+    attach: false
+    image: docker.io/library/postgres:latest
+    ports:
+      # To allow multiple instances of this to coexist, instead of explicitly
+      # mapping the port, let it get assigned randomly on the host.
+      - ${PORT:-5432}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=mlos_bench
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 5s

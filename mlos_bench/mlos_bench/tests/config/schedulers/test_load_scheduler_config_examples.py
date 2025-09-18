@@ -2,23 +2,33 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Tests for loading storage config examples."""
+"""Tests for loading scheduler config examples."""
 import logging
 
 import pytest
 
+import mlos_bench.tests.optimizers.fixtures
+import mlos_bench.tests.storage.sql.fixtures
 from mlos_bench.config.schemas.config_schemas import ConfigSchema
+from mlos_bench.optimizers.mock_optimizer import MockOptimizer
+from mlos_bench.schedulers.base_scheduler import Scheduler
+from mlos_bench.schedulers.trial_runner import TrialRunner
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tests.config import BUILTIN_TEST_CONFIG_PATH, locate_config_examples
 from mlos_bench.util import get_class_from_name
 
+mock_opt = mlos_bench.tests.optimizers.fixtures.mock_opt
+storage = mlos_bench.tests.storage.sql.fixtures.storage
+
+
 _LOG = logging.getLogger(__name__)
 _LOG.setLevel(logging.DEBUG)
 
+# pylint: disable=redefined-outer-name
 
 # Get the set of configs to test.
-CONFIG_TYPE = "storage"
+CONFIG_TYPE = "schedulers"
 
 
 def filter_configs(configs_to_filter: list[str]) -> list[str]:
@@ -43,21 +53,33 @@ configs.extend(test_configs)
 
 
 @pytest.mark.parametrize("config_path", configs)
-def test_load_storage_config_examples(
+def test_load_scheduler_config_examples(
     config_loader_service: ConfigPersistenceService,
     config_path: str,
+    mock_env_config_path: str,
+    trial_runners: list[TrialRunner],
+    storage: Storage,
+    mock_opt: MockOptimizer,
 ) -> None:
     """Tests loading a config example."""
-    config = config_loader_service.load_config(config_path, ConfigSchema.STORAGE)
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    config = config_loader_service.load_config(config_path, ConfigSchema.SCHEDULER)
     assert isinstance(config, dict)
-    # Skip schema loading that would require a database connection for this test.
-    config["config"]["lazy_schema_create"] = True
     cls = get_class_from_name(config["class"])
-    assert issubclass(cls, Storage)
+    assert issubclass(cls, Scheduler)
+    global_config = {
+        # Required configs generally provided by the Launcher.
+        "experiment_id": f"test_experiment_{__name__}",
+        "trial_id": 1,
+    }
     # Make an instance of the class based on the config.
-    storage_inst = config_loader_service.build_storage(
+    scheduler_inst = config_loader_service.build_scheduler(
         config=config,
-        service=config_loader_service,
+        global_config=global_config,
+        trial_runners=trial_runners,
+        optimizer=mock_opt,
+        storage=storage,
+        root_env_config=mock_env_config_path,
     )
-    assert storage_inst is not None
-    assert isinstance(storage_inst, cls)
+    assert scheduler_inst is not None
+    assert isinstance(scheduler_inst, cls)

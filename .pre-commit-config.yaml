@@ -81,7 +81,7 @@ repos:
         args: [--py310-plus]
         stages: [pre-commit, manual]
 -   repo: https://github.com/PyCQA/isort
-    rev: 6.0.0
+    rev: 6.0.1
     hooks:
     -   id: isort
         require_serial: true
@@ -93,7 +93,7 @@ repos:
     -   id: black
         stages: [pre-commit, manual]
 -   repo: https://github.com/PyCQA/docformatter
-    rev: 06907d0 # v1.7.5
+    rev: v1.7.7
     hooks:
     -   id: docformatter
         stages: [pre-commit, manual]

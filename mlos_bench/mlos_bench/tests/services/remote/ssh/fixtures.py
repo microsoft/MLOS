@@ -9,7 +9,6 @@ Note: these are not in the conftest.py file because they are also used by remote
 """
 
 import os
-import sys
 import tempfile
 from collections.abc import Generator
 from subprocess import run
@@ -19,36 +18,20 @@ from pytest_docker.plugin import Services as DockerServices
 
 from mlos_bench.services.remote.ssh.ssh_fileshare import SshFileShareService
 from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
-from mlos_bench.tests import resolve_host_name
+from mlos_bench.tests import wait_docker_service_socket
 from mlos_bench.tests.services.remote.ssh import (
     ALT_TEST_SERVER_NAME,
     REBOOT_TEST_SERVER_NAME,
     SSH_TEST_SERVER_NAME,
     SshTestServerInfo,
-    wait_docker_service_socket,
 )
 
 # pylint: disable=redefined-outer-name
 
-HOST_DOCKER_NAME = "host.docker.internal"
-
-
-@pytest.fixture(scope="session")
-def ssh_test_server_hostname() -> str:
-    """Returns the local hostname to use to connect to the test ssh server."""
-    if sys.platform != "win32" and resolve_host_name(HOST_DOCKER_NAME):
-        # On Linux, if we're running in a docker container, we can use the
-        # --add-host (extra_hosts in docker-compose.yml) to refer to the host IP.
-        return HOST_DOCKER_NAME
-    # Docker (Desktop) for Windows (WSL2) uses a special networking magic
-    # to refer to the host machine as `localhost` when exposing ports.
-    # In all other cases, assume we're executing directly inside conda on the host.
-    return "localhost"
-
 
 @pytest.fixture(scope="session")
 def ssh_test_server(
-    ssh_test_server_hostname: str,
+    docker_hostname: str,
     docker_compose_project_name: str,
     locked_docker_services: DockerServices,
 ) -> Generator[SshTestServerInfo]:
@@ -66,12 +49,14 @@ def ssh_test_server(
         ssh_test_server_info = SshTestServerInfo(
             compose_project_name=docker_compose_project_name,
             service_name=SSH_TEST_SERVER_NAME,
-            hostname=ssh_test_server_hostname,
+            hostname=docker_hostname,
             username="root",
             id_rsa_path=id_rsa_file.name,
         )
         wait_docker_service_socket(
-            locked_docker_services, ssh_test_server_info.hostname, ssh_test_server_info.get_port()
+            locked_docker_services,
+            ssh_test_server_info.hostname,
+            ssh_test_server_info.get_port(),
         )
         id_rsa_src = f"/{ssh_test_server_info.username}/.ssh/id_rsa"
         docker_cp_cmd = (
@@ -116,7 +101,9 @@ def alt_test_server(
         id_rsa_path=ssh_test_server.id_rsa_path,
     )
     wait_docker_service_socket(
-        locked_docker_services, alt_test_server_info.hostname, alt_test_server_info.get_port()
+        locked_docker_services,
+        alt_test_server_info.hostname,
+        alt_test_server_info.get_port(),
     )
     return alt_test_server_info
 
