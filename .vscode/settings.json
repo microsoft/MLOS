@@ -176,5 +176,7 @@
     "githubPullRequests.experimental.chat": true,
     "github.copilot.chat.codesearch.enabled": true,
     "github.copilot.chat.copilotDebugCommand.enabled": true,
-    "github.copilot.chat.reviewSelection.enabled": true
+    "github.copilot.chat.reviewSelection.enabled": true,
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda"
 }
