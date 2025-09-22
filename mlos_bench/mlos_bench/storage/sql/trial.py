@@ -116,6 +116,12 @@ class Trial(Storage.Trial):
         metrics = super().update(status, timestamp, metrics)
         with self._engine.begin() as conn:
             self._update_status(conn, status, timestamp)
+        # Use a separate transaction for the following block to avoid issues with
+        # PostgreSQL's duplicate key constraint handling. If we attempt to insert
+        # or update rows that may violate unique constraints in the same transaction,
+        # the entire transaction can fail and be rolled back. Splitting into two
+        # transactions ensures that the status update is committed even if the
+        # subsequent insert fails due to a duplicate key.
         with self._engine.begin() as conn:
             try:
                 if status.is_completed():
