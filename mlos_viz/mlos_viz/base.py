@@ -30,6 +30,8 @@ def _get_kwarg_defaults(target: Callable, **kwargs: Any) -> dict[str, Any]:
     Note: this only works with non-positional kwargs (e.g., those after a * arg).
     """
     target_kwargs = {}
+    if target.__kwdefaults__ is None:
+        return target_kwargs
     for kword in target.__kwdefaults__:  # or {} # intentionally omitted for now
         if kword in kwargs:
             target_kwargs[kword] = kwargs[kword]
