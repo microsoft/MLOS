@@ -59,6 +59,13 @@ def ignore_plotter_warnings() -> None:
         ),
     )
 
+    warnings.filterwarnings(
+        "ignore",
+        module="matplotlib",
+        category=DeprecationWarning,
+        message="'mode' parameter is deprecated and will be removed in Pillow 13",
+    )
+
 
 def _add_groupby_desc_column(
     results_df: pandas.DataFrame,
