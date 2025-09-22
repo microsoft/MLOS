@@ -1,7 +1,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM mcr.microsoft.com/vscode/devcontainers/base AS base
+# TODO: FIXME: https://github.com/microsoft/MLOS/issues/1002
+FROM mcr.microsoft.com/vscode/devcontainers/base:bookworm AS base
 
 # Add some additional packages for the devcontainer terminal environment.
 USER root
