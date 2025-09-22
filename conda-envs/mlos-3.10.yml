@@ -20,6 +20,9 @@ dependencies:
   - python=3.10
   # See comments in mlos.yml.
   #- gcc_linux-64
+  # Install an SMAC requirement pre-compiled from conda-forge.
+  # See Also: https://github.com/microsoft/MLOS/issues/1001
+  - pyrfr>=0.9.0
   - pip:
     - bump2version
     - check-jsonschema
