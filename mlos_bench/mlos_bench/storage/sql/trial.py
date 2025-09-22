@@ -116,6 +116,7 @@ class Trial(Storage.Trial):
         metrics = super().update(status, timestamp, metrics)
         with self._engine.begin() as conn:
             self._update_status(conn, status, timestamp)
+        with self._engine.begin() as conn:
             try:
                 if status.is_completed():
                     # Final update of the status and ts_end:
