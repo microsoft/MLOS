@@ -52,10 +52,17 @@ if DOCKER:
     if cmd.returncode != 0 or not any(
         line for line in stdout.splitlines() if "Platform" in line and "linux" in line
     ):
-        warning("Docker is available but missing buildx support for targeting linux platform.")
         DOCKER = None
+        warning("Docker is available but missing buildx support for targeting linux platform.")
+        raise RuntimeError(
+            "DEBUGGING: "
+            "Docker is available but missing buildx support for targeting linux platform."
+        )
 if not DOCKER:
     warning("Docker is not available on this system. Some tests will be skipped.")
+    raise RuntimeError(
+        "DEBUGGING: Docker is not available on this system. Some tests will be skipped."
+    )
 requires_docker = pytest.mark.skipif(
     not DOCKER,
     reason="Docker with Linux support is not available on this system.",
@@ -66,6 +73,9 @@ requires_docker = pytest.mark.skipif(
 SSH = shutil.which("ssh")
 if not SSH:
     warning("ssh is not available on this system.  Some tests will be skipped.")
+    raise RuntimeError(
+        "DEBUGGING: ssh is not available on this system.  Some tests will be skipped."
+    )
 requires_ssh = pytest.mark.skipif(not SSH, reason="ssh is not available on this system.")
 
 # A common seed to use to avoid tracking down race conditions and intermingling
