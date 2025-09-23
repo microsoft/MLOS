@@ -55,7 +55,7 @@ if DOCKER:
         debug("Docker is available but missing buildx support for targeting linux platform.")
         DOCKER = None
 else:
-    debug("Docker is not available on this system.")
+    debug("docker is not available on this system.")
 requires_docker = pytest.mark.skipif(
     not DOCKER,
     reason="Docker with Linux support is not available on this system.",
@@ -64,6 +64,8 @@ requires_docker = pytest.mark.skipif(
 # A decorator for tests that require ssh.
 # Use with @requires_ssh above a test_...() function.
 SSH = shutil.which("ssh")
+if not SSH:
+    debug("ssh is not available on this system.")
 requires_ssh = pytest.mark.skipif(not SSH, reason="ssh is not available on this system.")
 
 # A common seed to use to avoid tracking down race conditions and intermingling
@@ -114,7 +116,7 @@ def wait_docker_service_healthy(
     docker_services: DockerServices,
     project_name: str,
     service_name: str,
-    timeout: float = 30.0,
+    timeout: float = 60.0,
 ) -> None:
     """Wait until a docker service is healthy."""
     docker_services.wait_until_responsive(
@@ -128,7 +130,7 @@ def wait_docker_service_socket(docker_services: DockerServices, hostname: str, p
     """Wait until a docker service is ready."""
     docker_services.wait_until_responsive(
         check=lambda: check_socket(hostname, port),
-        timeout=30.0,
+        timeout=60.0,
         pause=0.5,
     )
 
