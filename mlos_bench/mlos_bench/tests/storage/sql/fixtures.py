@@ -83,7 +83,7 @@ def docker_compose_project_name(short_testrun_uid: str) -> str:
     str
         Name of the docker-compose project.
     """
-    return f"mlos_bench-test-{short_testrun_uid}-{__name__.replace('.', '-')}"
+    return f"""mlos_bench-test-{short_testrun_uid}-{__name__.replace(".", "-")}"""
 
 
 @pytest.fixture(scope="session")

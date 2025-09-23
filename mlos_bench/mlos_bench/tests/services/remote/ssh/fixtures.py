@@ -61,7 +61,7 @@ def docker_compose_project_name(short_testrun_uid: str) -> str:
     """
     # Use the xdist testrun UID to ensure that the docker-compose project name
     # is unique across sessions, but shared amongst workers.
-    return f"mlos_bench-test-{short_testrun_uid}-{__name__.replace('.', '-')}"
+    return f"""mlos_bench-test-{short_testrun_uid}-{__name__.replace(".", "-")}"""
 
 
 @pytest.fixture(scope="session")
