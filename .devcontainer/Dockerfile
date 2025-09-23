@@ -1,7 +1,10 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-# TODO: FIXME: https://github.com/microsoft/MLOS/issues/1002
+# TODO: FIXME: Temporarily pin to bookworm until latest (trixie) base image is fully supported.
+# See Also:
+# - <https://github.com/microsoft/MLOS/issues/1002>
+# - .devcontainer/devcontainer.json
 FROM mcr.microsoft.com/vscode/devcontainers/base:bookworm AS base
 
 # Add some additional packages for the devcontainer terminal environment.
