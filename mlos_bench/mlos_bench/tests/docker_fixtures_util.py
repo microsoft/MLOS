@@ -2,29 +2,30 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-"""Helper functions for various docker test fixtures.
+"""
+Helper functions for various docker test fixtures.
 
-Test functions needing to use these should import them and then add them to
-their namespace in a conftest.py file.
+Test functions needing to use these should import them and then add them to their
+namespace in a conftest.py file.
 
-The intent of keeping these separate from conftest.py is to allow individual
-test to setup their own docker-compose configurations that are independent.
+The intent of keeping these separate from conftest.py is to allow individual test to
+setup their own docker-compose configurations that are independent.
 
-As such, each conftest.py should set their own docker_compose_file fixture
-pointing to the appropriate docker-compose.yml file(s) and set a unique
-docker_compose_project_name.
+As such, each conftest.py should set their own docker_compose_file fixture pointing to
+the appropriate docker-compose.yml file(s) and set a unique docker_compose_project_name.
 """
 # pylint: disable=redefined-outer-name
 
 import os
 import sys
-
 from collections.abc import Generator
 from typing import Any
+
 import pytest
 from fasteners import InterProcessLock, InterProcessReaderWriterLock
 from pytest_docker.plugin import Services as DockerServices
 from pytest_docker.plugin import get_docker_services
+
 
 # Fixtures to configure the pytest-docker plugin.
 @pytest.fixture(scope="session")
@@ -163,8 +164,8 @@ def locked_docker_services(
 
 __all__ = [
     # These two should be implemented in the conftest.py of the local test suite
-    #"docker_compose_file",
-    #"docker_compose_project_name",
+    # "docker_compose_file",
+    # "docker_compose_project_name",
     "docker_setup",
     "docker_services_lock",
     "docker_setup_teardown_lock",
