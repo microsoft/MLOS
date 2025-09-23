@@ -78,7 +78,7 @@ jobs:
         echo "NO_CACHE=true" >> $GITHUB_ENV
 
     - name: Run pytest with debug logging enabled for nightly runs
-      #if: github.event_name == 'schedule'
+      if: github.event_name == 'schedule'
       run: |
         echo "PYTEST_EXTRA_OPTIONS=--log-level=DEBUG" >> $GITHUB_ENV
 
