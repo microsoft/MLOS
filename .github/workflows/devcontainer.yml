@@ -175,6 +175,13 @@ jobs:
         # Now actually run the tests.
         docker exec --user vscode --env USER=vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v test
 
+    - name: Upload coverage report as build artifact
+      if: always() # ensures it runs even if tests fail
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage.xml
+
     - name: Generate and test binary distribution files
       timeout-minutes: 10
       run: |
