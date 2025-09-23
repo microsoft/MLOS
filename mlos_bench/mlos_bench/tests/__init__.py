@@ -52,8 +52,10 @@ if DOCKER:
     if cmd.returncode != 0 or not any(
         line for line in stdout.splitlines() if "Platform" in line and "linux" in line
     ):
-        debug("Docker is available but missing support for targeting linux platform.")
+        debug("Docker is available but missing buildx support for targeting linux platform.")
         DOCKER = None
+else:
+    debug("Docker is not available on this system.")
 requires_docker = pytest.mark.skipif(
     not DOCKER,
     reason="Docker with Linux support is not available on this system.",
