@@ -32,7 +32,11 @@
         "ghcr.io/devcontainers/features/azure-cli:1": {},
         //"ghcr.io/devcontainers/features/conda:1": {},
         "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
-            "moby": false
+            // Note: this may be required when moving to Debian Trixie base image.
+            // See Also:
+            // - <https://github.com/microsoft/MLOS/issues/1002>
+            // - .devcontainer/Dockerfile
+            //"moby": false
         },
         "ghcr.io/devcontainers/features/github-cli:1": {},
         "ghcr.io/stuartleeks/dev-container-features/azure-cli-persistence:0": {},
