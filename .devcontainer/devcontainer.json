@@ -42,6 +42,11 @@
         "ghcr.io/stuartleeks/dev-container-features/azure-cli-persistence:0": {},
         "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {}
     },
+    "forwardPorts": [
+        // Make the nginx instance started as a part of `make doc` available to view
+        // the coverage results.
+        8080
+    ],
     // Use 'postCreateCommand' to run commands after the container is created.
     // "postCreateCommand": "python --version",
     // Configure tool-specific properties.
