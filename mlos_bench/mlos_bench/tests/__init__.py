@@ -13,7 +13,7 @@ import os
 import shutil
 import socket
 from datetime import tzinfo
-from logging import debug, warning
+from logging import warning
 from subprocess import run
 
 import pytest
@@ -52,10 +52,10 @@ if DOCKER:
     if cmd.returncode != 0 or not any(
         line for line in stdout.splitlines() if "Platform" in line and "linux" in line
     ):
-        debug("Docker is available but missing buildx support for targeting linux platform.")
+        warning("Docker is available but missing buildx support for targeting linux platform.")
         DOCKER = None
-else:
-    debug("docker is not available on this system.")
+if not DOCKER:
+    warning("Docker is not available on this system. Some tests will be skipped.")
 requires_docker = pytest.mark.skipif(
     not DOCKER,
     reason="Docker with Linux support is not available on this system.",
@@ -65,7 +65,7 @@ requires_docker = pytest.mark.skipif(
 # Use with @requires_ssh above a test_...() function.
 SSH = shutil.which("ssh")
 if not SSH:
-    debug("ssh is not available on this system.")
+    warning("ssh is not available on this system.  Some tests will be skipped.")
 requires_ssh = pytest.mark.skipif(not SSH, reason="ssh is not available on this system.")
 
 # A common seed to use to avoid tracking down race conditions and intermingling
