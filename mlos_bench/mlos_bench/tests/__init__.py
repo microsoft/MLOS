@@ -45,25 +45,25 @@ BUILT_IN_ENV_VAR_DEFAULTS = {
 DOCKER = shutil.which("docker")
 if DOCKER:
     # Gathering info about Github CI docker.sock permissions for debugging purposes.
-    sock_path = "/var/run/docker.sock"
+    DOCKER_SOCK_PATH = "/var/run/docker.sock"
+    mode: str | None = None
+    uid: int | None = None
+    gid: int | None = None
+    current_uid: int | None = None
+    current_gid: int | None = None
+    gids: list[int] | None = None
     try:
-        st = os.stat(sock_path)
+        st = os.stat(DOCKER_SOCK_PATH)
         mode = stat.filemode(st.st_mode)
         uid = st.st_uid
         gid = st.st_gid
     except Exception as e:  # pylint: disable=broad-except
-        mode = None
-        uid = None
-        gid = None
-        warning(f"Could not stat {sock_path}: {e}")
+        warning(f"Could not stat {DOCKER_SOCK_PATH}: {e}")
     try:
         current_uid = os.getuid()
         current_gid = os.getgid()
         gids = os.getgroups()
     except Exception as e:  # pylint: disable=broad-except
-        current_uid = None
-        current_gid = None
-        gids = None
         warning(f"Could not get current user info: {e}")
 
     cmd = run(
@@ -82,7 +82,7 @@ if DOCKER:
             "Docker is available but missing buildx support for targeting linux platform:\n"
             + f"stdout:\n{stdout}\n"
             + f"stderr:\n{stderr}\n"
-            + f"sock_path: {sock_path} sock mode: {mode} sock uid: {uid} gid: {gid}\n"
+            + f"sock_path: {DOCKER_SOCK_PATH} sock mode: {mode} sock uid: {uid} gid: {gid}\n"
             + f"current_uid: {current_uid} groups: {gids}\n"
         )
 
