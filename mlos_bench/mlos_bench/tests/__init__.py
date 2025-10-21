@@ -101,9 +101,6 @@ requires_docker = pytest.mark.skipif(
 SSH = shutil.which("ssh")
 if not SSH:
     warning("ssh is not available on this system.  Some tests will be skipped.")
-    raise RuntimeError(
-        "DEBUGGING: ssh is not available on this system.  Some tests will be skipped."
-    )
 requires_ssh = pytest.mark.skipif(not SSH, reason="ssh is not available on this system.")
 
 # A common seed to use to avoid tracking down race conditions and intermingling
