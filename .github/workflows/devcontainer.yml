@@ -108,6 +108,11 @@ jobs:
       timeout-minutes: 3
       run: |
         set -x
+        ls -l /var/run/docker.sock
+        stat /var/run/docker.sock
+        id
+        id -u
+        id -g
         docker run -d --rm --user root \
           --volume /var/run/docker.sock:/var/run/docker.sock \
           --env DOCKER_BUILDKIT=$DOCKER_BUILDKIT \
