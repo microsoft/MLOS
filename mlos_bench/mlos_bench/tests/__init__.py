@@ -8,10 +8,13 @@ Tests for mlos_bench.
 Used to make mypy happy about multiple conftest.py modules.
 """
 import filecmp
+import grp
 import json
 import os
+import pwd
 import shutil
 import socket
+import stat
 from datetime import tzinfo
 from logging import warning
 from subprocess import run
@@ -38,10 +41,31 @@ BUILT_IN_ENV_VAR_DEFAULTS = {
     "trial_runner_id": None,
 }
 
-# A decorator for tests that require docker.
-# Use with @requires_docker above a test_...() function.
+
 DOCKER = shutil.which("docker")
 if DOCKER:
+    # Gathering info about Github CI docker.sock permissions for debugging purposes.
+    sock_path = "/var/run/docker.sock"
+    try:
+        st = os.stat(sock_path)
+        mode = stat.filemode(st.st_mode)
+        uid = st.st_uid
+        gid = st.st_gid
+    except Exception as e:  # pylint: disable=broad-except
+        mode = None
+        uid = None
+        gid = None
+        warning(f"Could not stat {sock_path}: {e}")
+    try:
+        current_uid = os.getuid()
+        current_gid = os.getgid()
+        gids = os.getgroups()
+    except Exception as e:  # pylint: disable=broad-except
+        current_uid = None
+        current_gid = None
+        gids = None
+        warning(f"Could not get current user info: {e}")
+
     cmd = run(
         "docker builder inspect default || docker buildx inspect default",
         shell=True,
@@ -49,13 +73,24 @@ if DOCKER:
         capture_output=True,
     )
     stdout = cmd.stdout.decode()
+    stderr = cmd.stderr.decode()
     if cmd.returncode != 0 or not any(
         line for line in stdout.splitlines() if "Platform" in line and "linux" in line
     ):
-        warning("Docker is available but missing buildx support for targeting linux platform.")
         DOCKER = None
+        warning(
+            "Docker is available but missing buildx support for targeting linux platform:\n"
+            + f"stdout:\n{stdout}\n"
+            + f"stderr:\n{stderr}\n"
+            + f"sock_path: {sock_path} sock mode: {mode} sock uid: {uid} gid: {gid}\n"
+            + f"current_uid: {current_uid} groups: {gids}\n"
+        )
+
 if not DOCKER:
     warning("Docker is not available on this system. Some tests will be skipped.")
+
+# A decorator for tests that require docker.
+# Use with @requires_docker above a test_...() function.
 requires_docker = pytest.mark.skipif(
     not DOCKER,
     reason="Docker with Linux support is not available on this system.",
