@@ -21,6 +21,9 @@ import pytz
 from pytest_docker.plugin import Services as DockerServices
 
 from mlos_bench.util import get_class_from_name, nullable
+import stat
+import pwd
+import grp
 
 ZONE_NAMES = [
     # Explicit time zones.
@@ -38,10 +41,43 @@ BUILT_IN_ENV_VAR_DEFAULTS = {
     "trial_runner_id": None,
 }
 
+
+# Gathering info about Github CI docker.sock permissions for debugging purposes.
+def _print_docker_sock_info():
+    sock_path = "/var/run/docker.sock"
+    try:
+        st = os.stat(sock_path)
+        mode = stat.filemode(st.st_mode)
+        uid = st.st_uid
+        gid = st.st_gid
+        user = pwd.getpwuid(uid).pw_name
+        group = grp.getgrgid(gid).gr_name
+        warning(f"{sock_path}:")
+        warning(f"  Mode: {mode}")
+        warning(f"  Owner: {user} (UID: {uid})")
+        warning(f"  Group: {group} (GID: {gid})")
+    except Exception as e:  # pylint: disable=broad-except
+        warning(f"Could not stat {sock_path}: {e}")
+
+    try:
+        current_uid = os.getuid()
+        current_gid = os.getgid()
+        current_user = pwd.getpwuid(current_uid).pw_name
+        current_group = grp.getgrgid(current_gid).gr_name
+        groups = [grp.getgrgid(g).gr_name for g in os.getgroups()]
+        warning("Current user info:")
+        warning(f"  User: {current_user} (UID: {current_uid})")
+        warning(f"  Group: {current_group} (GID: {current_gid})")
+        warning(f"  Groups: {groups}")
+    except Exception as e:  # pylint: disable=broad-except
+        warning(f"Could not get current user info: {e}")
+
+
 # A decorator for tests that require docker.
 # Use with @requires_docker above a test_...() function.
 DOCKER = shutil.which("docker")
 if DOCKER:
+    _print_docker_sock_info()
     cmd = run(
         "docker builder inspect default || docker buildx inspect default",
         shell=True,
