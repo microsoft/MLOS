@@ -43,7 +43,7 @@ BUILT_IN_ENV_VAR_DEFAULTS = {
 
 
 # Gathering info about Github CI docker.sock permissions for debugging purposes.
-def _print_docker_sock_info():
+def _print_docker_sock_info() -> None:
     sock_path = "/var/run/docker.sock"
     try:
         st = os.stat(sock_path)
