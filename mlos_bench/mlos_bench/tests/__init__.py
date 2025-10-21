@@ -64,7 +64,7 @@ def _print_docker_sock_info():
         current_gid = os.getgid()
         current_user = pwd.getpwuid(current_uid).pw_name
         current_group = grp.getgrgid(current_gid).gr_name
-        groups = [grp.getgrgid(g).gr_name for g in os.getgroups()]
+        groups = {g: grp.getgrgid(g).gr_name for g in os.getgroups()}
         warning("Current user info:")
         warning(f"  User: {current_user} (UID: {current_uid})")
         warning(f"  Group: {current_group} (GID: {current_gid})")
