@@ -53,10 +53,14 @@ if DOCKER:
         line for line in stdout.splitlines() if "Platform" in line and "linux" in line
     ):
         DOCKER = None
-        warning("Docker is available but missing buildx support for targeting linux platform.")
+        warning(
+            "Docker is available but missing buildx support for targeting linux platform: "
+            + stdout
+        )
         raise RuntimeError(
             "DEBUGGING: "
-            "Docker is available but missing buildx support for targeting linux platform."
+            + "Docker is available but missing buildx support for targeting linux platform: "
+            + stdout
         )
 if not DOCKER:
     warning("Docker is not available on this system. Some tests will be skipped.")
