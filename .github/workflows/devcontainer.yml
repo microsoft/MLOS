@@ -149,14 +149,19 @@ jobs:
       run: |
         set -x
         docker_sock_gid=`stat -c '%g' /var/run/docker.sock`
-        if ! docker exec --user vscode --env USER=vscode mlos-devcontainer id -G | sed 's/ /\n/' | grep -q -w $docker_sock_gid; then
+        if ! [ -w /var/run/docker.sock ] \
+        || ! docker exec --user vscode --env USER=vscode mlos-devcontainer id -G | sed 's/ /\n/' | grep -q -w $docker_sock_gid
+        then
           echo "ERROR: vscode user in container does not have access to docker.sock group (gid: $docker_sock_gid)" >&2
           exit 1
         fi
         docker exec --user vscode --env USER=vscode mlos-devcontainer docker version
         docker exec --user vscode --env USER=vscode mlos-devcontainer docker info
         docker exec --user vscode --env USER=vscode mlos-devcontainer docker buildx version
-        docker exec --user vscode --env USER=vscode mlos-devcontainer docker buildx ls | grep linux/
+        if ! docker exec --user vscode --env USER=vscode mlos-devcontainer docker buildx ls | grep linux/; then
+          echo "ERROR: docker buildx does not have linux builder available" >&2
+          exit 1
+        fi
 
     - name: Check that github.com is in the ssh known_hosts file
       run: |
