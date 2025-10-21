@@ -8,10 +8,13 @@ Tests for mlos_bench.
 Used to make mypy happy about multiple conftest.py modules.
 """
 import filecmp
+import grp
 import json
 import os
+import pwd
 import shutil
 import socket
+import stat
 from datetime import tzinfo
 from logging import warning
 from subprocess import run
@@ -21,9 +24,6 @@ import pytz
 from pytest_docker.plugin import Services as DockerServices
 
 from mlos_bench.util import get_class_from_name, nullable
-import stat
-import pwd
-import grp
 
 ZONE_NAMES = [
     # Explicit time zones.
