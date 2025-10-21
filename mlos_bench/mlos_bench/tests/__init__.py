@@ -42,8 +42,9 @@ BUILT_IN_ENV_VAR_DEFAULTS = {
 }
 
 
-# Gathering info about Github CI docker.sock permissions for debugging purposes.
-def _print_docker_sock_info() -> None:
+DOCKER = shutil.which("docker")
+if DOCKER:
+    # Gathering info about Github CI docker.sock permissions for debugging purposes.
     sock_path = "/var/run/docker.sock"
     try:
         st = os.stat(sock_path)
@@ -72,12 +73,6 @@ def _print_docker_sock_info() -> None:
     except Exception as e:  # pylint: disable=broad-except
         warning(f"Could not get current user info: {e}")
 
-
-# A decorator for tests that require docker.
-# Use with @requires_docker above a test_...() function.
-DOCKER = shutil.which("docker")
-if DOCKER:
-    _print_docker_sock_info()
     cmd = run(
         "docker builder inspect default || docker buildx inspect default",
         shell=True,
@@ -98,11 +93,15 @@ if DOCKER:
             + "Docker is available but missing buildx support for targeting linux platform: "
             + stdout
         )
+
 if not DOCKER:
     warning("Docker is not available on this system. Some tests will be skipped.")
     raise RuntimeError(
         "DEBUGGING: Docker is not available on this system. Some tests will be skipped."
     )
+
+# A decorator for tests that require docker.
+# Use with @requires_docker above a test_...() function.
 requires_docker = pytest.mark.skipif(
     not DOCKER,
     reason="Docker with Linux support is not available on this system.",
