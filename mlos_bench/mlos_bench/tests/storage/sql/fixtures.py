@@ -64,8 +64,8 @@ def docker_compose_file(pytestconfig: pytest.Config) -> list[str]:
 
     Returns
     -------
-    str
-        Path to the docker-compose file.
+    list[str]
+        List of paths to the docker-compose file(s).
     """
     _ = pytestconfig  # unused
     return [
