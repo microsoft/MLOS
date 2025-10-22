@@ -12,8 +12,9 @@ import json
 import os
 import shutil
 import socket
+import stat
 from datetime import tzinfo
-from logging import debug, warning
+from logging import warning
 from subprocess import run
 
 import pytest
@@ -38,10 +39,31 @@ BUILT_IN_ENV_VAR_DEFAULTS = {
     "trial_runner_id": None,
 }
 
-# A decorator for tests that require docker.
-# Use with @requires_docker above a test_...() function.
+
 DOCKER = shutil.which("docker")
 if DOCKER:
+    # Gathering info about Github CI docker.sock permissions for debugging purposes.
+    DOCKER_SOCK_PATH = "/var/run/docker.sock"
+    mode: str | None = None
+    uid: int | None = None
+    gid: int | None = None
+    current_uid: int | None = None
+    current_gid: int | None = None
+    gids: list[int] | None = None
+    try:
+        st = os.stat(DOCKER_SOCK_PATH)
+        mode = stat.filemode(st.st_mode)
+        uid = st.st_uid
+        gid = st.st_gid
+    except Exception as e:  # pylint: disable=broad-except
+        warning(f"Could not stat {DOCKER_SOCK_PATH}: {e}")
+    try:
+        current_uid = os.getuid()
+        current_gid = os.getgid()
+        gids = os.getgroups()
+    except Exception as e:  # pylint: disable=broad-except
+        warning(f"Could not get current user info: {e}")
+
     cmd = run(
         "docker builder inspect default || docker buildx inspect default",
         shell=True,
@@ -49,11 +71,24 @@ if DOCKER:
         capture_output=True,
     )
     stdout = cmd.stdout.decode()
+    stderr = cmd.stderr.decode()
     if cmd.returncode != 0 or not any(
         line for line in stdout.splitlines() if "Platform" in line and "linux" in line
     ):
-        debug("Docker is available but missing support for targeting linux platform.")
         DOCKER = None
+        warning(
+            "Docker is available but missing buildx support for targeting linux platform:\n"
+            + f"stdout:\n{stdout}\n"
+            + f"stderr:\n{stderr}\n"
+            + f"sock_path: {DOCKER_SOCK_PATH} sock mode: {mode} sock uid: {uid} gid: {gid}\n"
+            + f"current_uid: {current_uid} groups: {gids}\n"
+        )
+
+if not DOCKER:
+    warning("Docker is not available on this system. Some tests will be skipped.")
+
+# A decorator for tests that require docker.
+# Use with @requires_docker above a test_...() function.
 requires_docker = pytest.mark.skipif(
     not DOCKER,
     reason="Docker with Linux support is not available on this system.",
@@ -62,6 +97,8 @@ requires_docker = pytest.mark.skipif(
 # A decorator for tests that require ssh.
 # Use with @requires_ssh above a test_...() function.
 SSH = shutil.which("ssh")
+if not SSH:
+    warning("ssh is not available on this system.  Some tests will be skipped.")
 requires_ssh = pytest.mark.skipif(not SSH, reason="ssh is not available on this system.")
 
 # A common seed to use to avoid tracking down race conditions and intermingling
@@ -112,7 +149,7 @@ def wait_docker_service_healthy(
     docker_services: DockerServices,
     project_name: str,
     service_name: str,
-    timeout: float = 30.0,
+    timeout: float = 60.0,
 ) -> None:
     """Wait until a docker service is healthy."""
     docker_services.wait_until_responsive(
@@ -126,7 +163,7 @@ def wait_docker_service_socket(docker_services: DockerServices, hostname: str, p
     """Wait until a docker service is ready."""
     docker_services.wait_until_responsive(
         check=lambda: check_socket(hostname, port),
-        timeout=30.0,
+        timeout=60.0,
         pause=0.5,
     )
 

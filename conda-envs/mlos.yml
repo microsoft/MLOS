@@ -18,6 +18,9 @@ dependencies:
   # FIXME: Temporarily avoid broken libpq that's missing client headers.
   - libpq<17.0
   - python
+  # Install an SMAC requirement pre-compiled from conda-forge.
+  # See Also: https://github.com/microsoft/MLOS/issues/1001
+  - pyrfr>=0.9.0
   - pip:
     - bump2version
     - check-jsonschema
@@ -28,7 +31,7 @@ dependencies:
     - pylint==3.3.7
     - tomlkit
     - mypy==1.15.0
-    - pyright==1.1.400
+    - pyright==1.1.406
     - pandas-stubs
     - types-beautifulsoup4
     - types-colorama

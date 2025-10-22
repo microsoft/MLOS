@@ -104,6 +104,8 @@ def docker_compose_file(pytestconfig: pytest.Config) -> list[str]:
         Path to the docker-compose file.
     """
     _ = pytestconfig  # unused
+    # TODO: move this closer to the necessary submodules so that different
+    # docker tests can run independently.
     return [
         os.path.join(os.path.dirname(__file__), "services", "remote", "ssh", "docker-compose.yml"),
         os.path.join(os.path.dirname(__file__), "storage", "sql", "docker-compose.yml"),

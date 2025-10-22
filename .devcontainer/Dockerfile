@@ -1,7 +1,11 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM mcr.microsoft.com/vscode/devcontainers/base AS base
+# TODO: FIXME: Temporarily pin to bookworm until latest (trixie) base image is fully supported.
+# See Also:
+# - <https://github.com/microsoft/MLOS/issues/1002>
+# - .devcontainer/devcontainer.json
+FROM mcr.microsoft.com/vscode/devcontainers/base:bookworm AS base
 
 # Add some additional packages for the devcontainer terminal environment.
 USER root
@@ -80,6 +84,8 @@ RUN echo "Setup miniconda" \
     && /opt/conda/bin/conda init \
     && /opt/conda/bin/conda config --set channel_priority strict \
     && /opt/conda/bin/conda info \
+    && /opt/conda/bin/conda config --show \
+    && /opt/conda/bin/conda tos accept --override-channels --channel defaults \
     && /opt/conda/bin/conda update -v -y -n base -c conda-forge -c defaults --all \
     && /opt/conda/bin/conda list -n base \
     && /opt/conda/bin/conda install -v -y -n base -c conda-forge -c defaults conda-libmamba-solver \
