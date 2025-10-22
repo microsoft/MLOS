@@ -176,5 +176,17 @@
     "githubPullRequests.experimental.chat": true,
     "github.copilot.chat.codesearch.enabled": true,
     "github.copilot.chat.copilotDebugCommand.enabled": true,
-    "github.copilot.chat.reviewSelection.enabled": true
+    "github.copilot.chat.reviewSelection.enabled": true,
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda",
+    // Make the nginx instance started as a part of `make doc` available to view
+    // the coverage results.
+    "remote.localPortHost": "localhost",
+    "remote.SSH.defaultForwardedPorts": [
+        {
+            "name": "nginx for doc viewing",
+            "localPort": 8080,
+            "remotePort": 8080
+        }
+    ]
 }
