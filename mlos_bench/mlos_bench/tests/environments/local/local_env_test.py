@@ -105,7 +105,9 @@ def test_local_env_wide(tunable_groups: TunableGroups) -> None:
 
 
 def test_local_env_results_null_file(tunable_groups: TunableGroups) -> None:
-    """When the results file is of zero length, do not crash but mark the trial FAILED."""
+    """When the results file is of zero length, do not crash but mark the trial
+    FAILED.
+    """
     local_env = create_local_env(
         tunable_groups,
         {
