@@ -31,11 +31,22 @@
     "features": {
         "ghcr.io/devcontainers/features/azure-cli:1": {},
         //"ghcr.io/devcontainers/features/conda:1": {},
-        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+            // Note: this may be required when moving to Debian Trixie base image.
+            // See Also:
+            // - <https://github.com/microsoft/MLOS/issues/1002>
+            // - .devcontainer/Dockerfile
+            //"moby": false
+        },
         "ghcr.io/devcontainers/features/github-cli:1": {},
         "ghcr.io/stuartleeks/dev-container-features/azure-cli-persistence:0": {},
         "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {}
     },
+    "forwardPorts": [
+        // Make the nginx instance started as a part of `make doc` available to view
+        // the coverage results.
+        8080
+    ],
     // Use 'postCreateCommand' to run commands after the container is created.
     // "postCreateCommand": "python --version",
     // Configure tool-specific properties.
