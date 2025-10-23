@@ -7,7 +7,7 @@
 import os
 import sys
 from glob import glob
-from logging import warning
+from warnings import warn
 from pathlib import Path
 
 from mlos_bench.tests import tunable_groups_fixtures
@@ -21,8 +21,6 @@ exp_data = sql_storage_fixtures.exp_data
 
 tunable_groups_config = tunable_groups_fixtures.tunable_groups_config
 tunable_groups = tunable_groups_fixtures.tunable_groups
-
-warning("test")
 
 # Workaround for #1004
 # See Also: https://github.com/python/cpython/issues/111754
@@ -53,6 +51,8 @@ if sys.platform == "win32":
                         )
                     ).parent
                 )
-                warning(f"""Setting {env_var} to {os.environ[env_var]}""")
+                warn(f"""Setting {env_var} to {os.environ[env_var]}""", UserWarning)
             except StopIteration:
-                warning(f"{env_var} not found, some Tcl/Tk functionality may be limited.")
+                warn(
+                    UserWarning(f"{env_var} not found, some Tcl/Tk functionality may be limited.")
+                )
