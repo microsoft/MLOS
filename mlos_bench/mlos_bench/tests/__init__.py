@@ -13,6 +13,7 @@ import os
 import shutil
 import socket
 import stat
+import sys
 from datetime import tzinfo
 from logging import warning
 from subprocess import run
@@ -43,7 +44,12 @@ BUILT_IN_ENV_VAR_DEFAULTS = {
 DOCKER = shutil.which("docker")
 if DOCKER:
     # Gathering info about Github CI docker.sock permissions for debugging purposes.
-    DOCKER_SOCK_PATH = "/var/run/docker.sock"
+    DOCKER_SOCK_PATH: str
+    if sys.platform == "win32":
+        DOCKER_SOCK_PATH = "//./pipe/docker_engine"
+    else:
+        DOCKER_SOCK_PATH = "/var/run/docker.sock"
+
     mode: str | None = None
     uid: int | None = None
     gid: int | None = None
@@ -58,9 +64,12 @@ if DOCKER:
     except Exception as e:  # pylint: disable=broad-except
         warning(f"Could not stat {DOCKER_SOCK_PATH}: {e}")
     try:
-        current_uid = os.getuid()
-        current_gid = os.getgid()
-        gids = os.getgroups()
+        if sys.platform != "win32":
+            current_uid = os.getuid()
+            current_gid = os.getgid()
+            gids = os.getgroups()
+        if not os.access(DOCKER_SOCK_PATH, os.W_OK):
+            warning(f"Docker socket {DOCKER_SOCK_PATH} is not writable.")
     except Exception as e:  # pylint: disable=broad-except
         warning(f"Could not get current user info: {e}")
 
