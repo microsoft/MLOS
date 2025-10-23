@@ -101,3 +101,10 @@ def ignore_plotter_warnings() -> None:
         module="dabl",
         message="The legendHandles attribute was deprecated in Matplotlib 3.7 and will be removed",
     )
+
+    warnings.filterwarnings(
+        "ignore",
+        module="matplotlib",
+        category=DeprecationWarning,
+        message="'mode' parameter is deprecated and will be removed in Pillow 13",
+    )

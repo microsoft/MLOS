@@ -30,7 +30,7 @@ def _get_kwarg_defaults(target: Callable, **kwargs: Any) -> dict[str, Any]:
     Note: this only works with non-positional kwargs (e.g., those after a * arg).
     """
     target_kwargs = {}
-    for kword in target.__kwdefaults__:  # or {} # intentionally omitted for now
+    for kword in target.__kwdefaults__ or {}:
         if kword in kwargs:
             target_kwargs[kword] = kwargs[kword]
     return target_kwargs
@@ -57,6 +57,13 @@ def ignore_plotter_warnings() -> None:
             "vert: bool will be deprecated in a future version. "
             "Use orientation: {'vertical', 'horizontal'} instead."
         ),
+    )
+
+    warnings.filterwarnings(
+        "ignore",
+        module="matplotlib",
+        category=DeprecationWarning,
+        message="'mode' parameter is deprecated and will be removed in Pillow 13",
     )
 
 

@@ -34,8 +34,8 @@ def _mysql_datetime(*, with_fsp: bool = False) -> mysql.DATETIME:
     See <https://github.com/sqlalchemy/sqlalchemy/pull/12164> for details.
     """
     if with_fsp:
-        return mysql.DATETIME(fsp=6)  # type: ignore[no-untyped-call]
-    return mysql.DATETIME()  # type: ignore[no-untyped-call]
+        return mysql.DATETIME(fsp=6)
+    return mysql.DATETIME()
 
 
 def upgrade() -> None:

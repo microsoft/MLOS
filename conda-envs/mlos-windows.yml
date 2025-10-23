@@ -33,7 +33,7 @@ dependencies:
     - pylint==3.3.7
     - tomlkit
     - mypy==1.15.0
-    - pyright==1.1.400
+    - pyright==1.1.406
     - pandas-stubs
     - types-beautifulsoup4
     - types-colorama

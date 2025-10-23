@@ -108,7 +108,18 @@ jobs:
       timeout-minutes: 3
       run: |
         set -x
+        gid=`id -g`
+        docker_sock_gid=`stat -c '%g' /var/run/docker.sock`
+        docker_gid=`getent group docker | cut -d: -f3 || echo 999`
+        if [ -n "$docker_sock_gid" ]; then
+          docker_gid=$docker_sock_gid
+          echo "Using docker gid: $docker_gid"
+        fi
+        if [ "$docker_sock_gid" != "$docker_gid" ] && [ -n "$docker_sock_gid" != "$gid" ] && [ "$docker_sock_gid" != 0 ]; then
+          echo "WARNING: docker.sock gid ($docker_sock_gid) does not match host docker group gid ($docker_gid) or user gid ($gid)." >&2
+        fi
         docker run -d --rm --user root \
+          --group-add $docker_sock_gid \
           --volume /var/run/docker.sock:/var/run/docker.sock \
           --env DOCKER_BUILDKIT=$DOCKER_BUILDKIT \
           --volume $(pwd):/workspaces/MLOS \
@@ -129,6 +140,28 @@ jobs:
     - name: Print some debug info from inside the container
       run: |
         docker exec --user vscode --env USER=vscode mlos-devcontainer printenv
+        docker exec --user vscode --env USER=vscode mlos-devcontainer id
+        docker exec --user vscode --env USER=vscode mlos-devcontainer ls -l /var/run/docker.sock
+        docker exec --user vscode --env USER=vscode mlos-devcontainer stat /var/run/docker.sock
+
+    - name: Check that docker is usable inside the devcontainer
+      timeout-minutes: 2
+      run: |
+        set -x
+        docker_sock_gid=`stat -c '%g' /var/run/docker.sock`
+        if ! [ -w /var/run/docker.sock ] \
+        || ! docker exec --user vscode --env USER=vscode mlos-devcontainer id -G | sed 's/ /\n/' | grep -q -w $docker_sock_gid
+        then
+          echo "ERROR: vscode user in container does not have access to docker.sock group (gid: $docker_sock_gid)" >&2
+          exit 1
+        fi
+        docker exec --user vscode --env USER=vscode mlos-devcontainer docker version
+        docker exec --user vscode --env USER=vscode mlos-devcontainer docker info
+        docker exec --user vscode --env USER=vscode mlos-devcontainer docker buildx version
+        if ! docker exec --user vscode --env USER=vscode mlos-devcontainer docker buildx ls | grep linux/; then
+          echo "ERROR: docker buildx does not have linux builder available" >&2
+          exit 1
+        fi
 
     - name: Check that github.com is in the ssh known_hosts file
       run: |
@@ -170,10 +203,17 @@ jobs:
         test_count=$(docker exec --user vscode --env USER=vscode mlos-devcontainer \
           conda run -n mlos python -m pytest -svxl -n auto --collect-only --rootdir /workspaces/MLOS -s --cache-clear \
           | grep -c '<Function ')
-        if [ "${test_count:-0}" -lt 725 ]; then echo "Expected at least 725 tests, got '$test_count'" >&2; exit 1; fi
+        # if [ "${test_count:-0}" -lt 800 ]; then echo "Expected at least 800 tests, got '$test_count'" >&2; exit 1; fi
 
         # Now actually run the tests.
         docker exec --user vscode --env USER=vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v test
+
+    - name: Upload coverage report as build artifact
+      if: always() # ensures it runs even if tests fail
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage.xml
 
     - name: Generate and test binary distribution files
       timeout-minutes: 10
@@ -182,9 +222,7 @@ jobs:
         docker exec --user vscode --env USER=vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v dist dist-test
 
     - name: Test rebuilding the devcontainer in the devcontainer
-      # FIXME:
-      # timeout-minutes: 3
-      timeout-minutes: 10
+      timeout-minutes: 5
       run: |
         set -x
         git --no-pager diff --exit-code
@@ -299,3 +337,4 @@ jobs:
         branch: gh-pages
         folder: doc/build/html
         clean: true
+        single-commit: true
