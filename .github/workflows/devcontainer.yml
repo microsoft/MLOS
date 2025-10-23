@@ -337,3 +337,4 @@ jobs:
         branch: gh-pages
         folder: doc/build/html
         clean: true
+        single-commit: true
