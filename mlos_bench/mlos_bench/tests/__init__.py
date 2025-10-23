@@ -15,8 +15,8 @@ import socket
 import stat
 import sys
 from datetime import tzinfo
-from warnings import warn
 from subprocess import run
+from warnings import warn
 
 import pytest
 import pytz
