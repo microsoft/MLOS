@@ -211,7 +211,7 @@ class SshClientCache:
                             "%s: Created connection to %s.", current_thread().name, connection_id
                         )
                     return self._cache[connection_id]
-            except (ConnectionRefusedError, asyncssh.Error) as ex:
+            except ConnectionRefusedError as ex:  # TODO: Add other error handling here too
                 _LOG.warning(
                     "%s: Attempt %d: Failed to connect to %s: %s",
                     current_thread().name,
