@@ -4,9 +4,9 @@
 #
 """Export test fixtures for mlos_viz."""
 
-import glob
 import os
 import sys
+from glob import glob
 from logging import warning
 from pathlib import Path
 
@@ -26,18 +26,31 @@ tunable_groups = tunable_groups_fixtures.tunable_groups
 # See Also: https://github.com/python/cpython/issues/111754
 if sys.platform == "win32":
     # Fix Tcl/Tk folder
-    if "TK_LIBRARY" not in os.environ:
-        os.environ["TCL_LIBRARY"] = str(
-            Path(glob.glob(os.path.join(sys.base_prefix, "tcl", "tcl*", "init.tcl"))[0]).parent
-        )
-        warning(f"""Setting TCL_LIBRARY to {os.environ["TCL_LIBRARY"]}""")
-    if "TK_LIBRARY" not in os.environ:
-        os.environ["TK_LIBRARY"] = str(
-            Path(glob.glob(os.path.join(sys.base_prefix, "tcl", "tk*", "pkgIndex.tcl"))[0]).parent
-        )
-        warning(f"""Setting TK_LIBRARY to {os.environ["TK_LIBRARY"]}""")
-    if "TIX_LIBRARY" not in os.environ:
-        os.environ["TIX_LIBRARY"] = str(
-            Path(glob.glob(os.path.join(sys.base_prefix, "tcl", "tix*", "pkgIndex.tcl"))[0]).parent
-        )
-        warning(f"""Setting TIX_LIBRARY to {os.environ["TIX_LIBRARY"]}""")
+    tcl_path_info = {
+        "TCL_LIBRARY": ["tcl*", "init.tcl"],
+        "TK_LIBRARY": ["tk*", "pkgIndex.tcl"],
+        "TIX_LIBRARY": ["tix*", "pkgIndex.tcl"],
+    }
+    for env_var, (subdir_pattern, file_name) in tcl_path_info.items():
+        if env_var not in os.environ:
+            try:
+                os.environ[env_var] = str(
+                    Path(
+                        next(
+                            iter(
+                                glob(
+                                    os.path.join(
+                                        sys.base_prefix,
+                                        "Library",
+                                        "lib",
+                                        subdir_pattern,
+                                        file_name,
+                                    )
+                                )
+                            )
+                        )
+                    ).parent
+                )
+                warning(f"""Setting {env_var} to {os.environ[env_var]}""")
+            except StopIteration:
+                warning(f"{env_var} not found, some Tcl/Tk functionality may be limited.")
