@@ -101,6 +101,12 @@ jobs:
       run: |
         if (! (conda env list | Select-String -Pattern "^$env:CONDA_ENV_NAME ") ) { conda env create -v -n $env:CONDA_ENV_NAME -f conda-envs/$env:CONDA_ENV_YML }
         conda env update -v -n $env:CONDA_ENV_NAME -f conda-envs/$env:CONDA_ENV_YML --prune
+        $TCL_LIBRARY=(Get-ChildItem -Path "$env:CONDA/envs/$env:CONDA_ENV_NAME/Library/lib" -Recurse -Filter 'init.tcl' | Select-Object -First 1 | Select-Object -ExpandProperty Directory | Select-Object -ExpandProperty FullName)
+        "TCL_LIBRARY=$TCL_LIBRARY" >> $env:GITHUB_ENV
+        $TK_LIBRARY=(Get-ChildItem -Path "$env:CONDA/envs/$env:CONDA_ENV_NAME/Library/lib" -Recurse -Filter 'pkgIndex.tcl' | Select-Object -ExpandProperty Directory | Where-Object -Property Name -Like 'tk*' | Select-Object -ExpandProperty FullName)
+        "TK_LIBRARY=$TK_LIBRARY" >> $env:GITHUB_ENV
+        $TIX_LIBRARY=(Get-ChildItem -Path "$env:CONDA/envs/$env:CONDA_ENV_NAME/Library/lib" -Recurse -Filter 'pkgIndex.tcl' | Select-Object -ExpandProperty Directory | Where-Object -Property Name -Like 'tix*' | Select-Object -ExpandProperty FullName)
+        "TIX_LIBRARY=$TIX_LIBRARY" >> $env:GITHUB_ENV
 
     - name: Log conda info
       run: |
@@ -111,8 +117,11 @@ jobs:
 
     - name: Log TCL path
       run: |
-        Get-ChildItem -Recurse Env:
-        Get-ChildItem -Path ${{ env.CONDA }}/envs/mlos -Recurse -Filter '*tcl*' | Select-Object -ExpandProperty FullName
+        Get-Item Env:TCL_LIBRARY
+        Get-Item Env:TK_LIBRARY
+        Get-Item Env:TIX_LIBRARY
+        Get-ChildItem -Path ${{ env.CONDA }}/envs/$env:CONDA_ENV_NAME -Recurse -Filter 'init.tcl' | Select-Object -ExpandProperty FullName
+        Get-ChildItem -Path ${{ env.CONDA }}/envs/$env:CONDA_ENV_NAME -Recurse -Filter 'pkgIndex.tcl' | Select-Object -ExpandProperty FullName
 
     # This is moreso about code cleanliness, which is a dev thing, not a
     # functionality thing, and the rules for that change between python versions,
