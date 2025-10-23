@@ -109,6 +109,11 @@ jobs:
         conda config --show-sources
         conda list -n $env:CONDA_ENV_NAME
 
+    - name: Log TCL path
+      run: |
+        Get-ChildItem -Recurse Env:
+        Get-ChildItem -Path ${{ env.CONDA }}/envs/mlos -Recurse -Filter '*tcl*' | Select-Object -ExpandProperty FullName
+
     # This is moreso about code cleanliness, which is a dev thing, not a
     # functionality thing, and the rules for that change between python versions,
     # so only do this for the default in the devcontainer.
