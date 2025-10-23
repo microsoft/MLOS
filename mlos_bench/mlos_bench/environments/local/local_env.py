@@ -195,19 +195,23 @@ class LocalEnv(ScriptEnv):
             _LOG.debug("Not reading the data at: %s", self)
             return (Status.SUCCEEDED, timestamp, stdout_data)
 
-        data = self._normalize_columns(
-            pandas.read_csv(
-                self._config_loader_service.resolve_path(
-                    self._read_results_file,
-                    extra_paths=[self._temp_dir],
-                ),
-                index_col=False,
+        try:
+            data = self._normalize_columns(
+                pandas.read_csv(
+                    self._config_loader_service.resolve_path(
+                        self._read_results_file,
+                        extra_paths=[self._temp_dir],
+                    ),
+                    index_col=False,
+                )
             )
-        )
+        except pandas.errors.EmptyDataError:
+            _LOG.warning("Empty metrics file - fail the run")
+            return (Status.FAILED, timestamp, None)
 
         _LOG.debug("Read data:\n%s", data)
         if len(data) == 0:
-            _LOG.warning("Empty metrics file - fail the run")
+            _LOG.warning("No data in the metrics file - fail the run")
             return (Status.FAILED, timestamp, None)
         elif list(data.columns) == ["metric", "value"]:
             _LOG.info(
