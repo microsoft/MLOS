@@ -13,9 +13,10 @@ import os
 import shutil
 import socket
 import stat
+import sys
 from datetime import tzinfo
-from logging import warning
 from subprocess import run
+from warnings import warn
 
 import pytest
 import pytz
@@ -43,7 +44,12 @@ BUILT_IN_ENV_VAR_DEFAULTS = {
 DOCKER = shutil.which("docker")
 if DOCKER:
     # Gathering info about Github CI docker.sock permissions for debugging purposes.
-    DOCKER_SOCK_PATH = "/var/run/docker.sock"
+    DOCKER_SOCK_PATH: str
+    if sys.platform == "win32":
+        DOCKER_SOCK_PATH = "//./pipe/docker_engine"
+    else:
+        DOCKER_SOCK_PATH = "/var/run/docker.sock"
+
     mode: str | None = None
     uid: int | None = None
     gid: int | None = None
@@ -56,13 +62,16 @@ if DOCKER:
         uid = st.st_uid
         gid = st.st_gid
     except Exception as e:  # pylint: disable=broad-except
-        warning(f"Could not stat {DOCKER_SOCK_PATH}: {e}")
+        warn(f"Could not stat {DOCKER_SOCK_PATH}: {e}", UserWarning)
     try:
-        current_uid = os.getuid()
-        current_gid = os.getgid()
-        gids = os.getgroups()
+        if sys.platform != "win32":
+            current_uid = os.getuid()
+            current_gid = os.getgid()
+            gids = os.getgroups()
+        if not os.access(DOCKER_SOCK_PATH, os.W_OK):
+            warn(f"Docker socket {DOCKER_SOCK_PATH} is not writable.", UserWarning)
     except Exception as e:  # pylint: disable=broad-except
-        warning(f"Could not get current user info: {e}")
+        warn(f"Could not get current user info: {e}", UserWarning)
 
     cmd = run(
         "docker builder inspect default || docker buildx inspect default",
@@ -76,16 +85,17 @@ if DOCKER:
         line for line in stdout.splitlines() if "Platform" in line and "linux" in line
     ):
         DOCKER = None
-        warning(
+        warn(
             "Docker is available but missing buildx support for targeting linux platform:\n"
             + f"stdout:\n{stdout}\n"
             + f"stderr:\n{stderr}\n"
             + f"sock_path: {DOCKER_SOCK_PATH} sock mode: {mode} sock uid: {uid} gid: {gid}\n"
-            + f"current_uid: {current_uid} groups: {gids}\n"
+            + f"current_uid: {current_uid} groups: {gids}\n",
+            UserWarning,
         )
 
 if not DOCKER:
-    warning("Docker is not available on this system. Some tests will be skipped.")
+    warn("Docker is not available on this system. Some tests will be skipped.", UserWarning)
 
 # A decorator for tests that require docker.
 # Use with @requires_docker above a test_...() function.
@@ -98,7 +108,7 @@ requires_docker = pytest.mark.skipif(
 # Use with @requires_ssh above a test_...() function.
 SSH = shutil.which("ssh")
 if not SSH:
-    warning("ssh is not available on this system.  Some tests will be skipped.")
+    warn("ssh is not available on this system.  Some tests will be skipped.", UserWarning)
 requires_ssh = pytest.mark.skipif(not SSH, reason="ssh is not available on this system.")
 
 # A common seed to use to avoid tracking down race conditions and intermingling
@@ -223,14 +233,16 @@ def are_dir_trees_equal(dir1: str, dir2: str) -> bool:
         or len(dirs_cmp.right_only) > 0
         or len(dirs_cmp.funny_files) > 0
     ):
-        warning(
-            f"Found differences in dir trees {dir1}, {dir2}:\n"
-            f"{dirs_cmp.diff_files}\n{dirs_cmp.funny_files}"
+        warn(
+            UserWarning(
+                f"Found differences in dir trees {dir1}, {dir2}:\n"
+                f"{dirs_cmp.diff_files}\n{dirs_cmp.funny_files}"
+            )
         )
         return False
     (_, mismatch, errors) = filecmp.cmpfiles(dir1, dir2, dirs_cmp.common_files, shallow=False)
     if len(mismatch) > 0 or len(errors) > 0:
-        warning(f"Found differences in files:\n{mismatch}\n{errors}")
+        warn(f"Found differences in files:\n{mismatch}\n{errors}", UserWarning)
         return False
     for common_dir in dirs_cmp.common_dirs:
         new_dir1 = os.path.join(dir1, common_dir)
