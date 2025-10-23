@@ -7,8 +7,8 @@
 import os
 import sys
 from glob import glob
-from logging import warning
 from pathlib import Path
+from warnings import warn
 
 from mlos_bench.tests import tunable_groups_fixtures
 from mlos_bench.tests.storage.sql import fixtures as sql_storage_fixtures
@@ -51,6 +51,8 @@ if sys.platform == "win32":
                         )
                     ).parent
                 )
-                warning(f"""Setting {env_var} to {os.environ[env_var]}""")
+                warn(f"""Setting {env_var} to {os.environ[env_var]}""", UserWarning)
             except StopIteration:
-                warning(f"{env_var} not found, some Tcl/Tk functionality may be limited.")
+                warn(
+                    UserWarning(f"{env_var} not found, some Tcl/Tk functionality may be limited.")
+                )
