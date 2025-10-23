@@ -4,11 +4,11 @@
 #
 """Export test fixtures for mlos_viz."""
 
-from logging import warning
-from pathlib import Path
 import glob
 import os
 import sys
+from logging import warning
+from pathlib import Path
 
 from mlos_bench.tests import tunable_groups_fixtures
 from mlos_bench.tests.storage.sql import fixtures as sql_storage_fixtures
