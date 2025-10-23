@@ -156,9 +156,13 @@ class SqlStorage(Storage):
                 experiment_id=exp.exp_id,
                 trial_id=-1,  # will be loaded upon __enter__ which calls _setup()
                 description=exp.description,
-                root_env_config=exp.root_env_config,
+                # Use special logic to load the experiment root config info directly.
+                root_env_config=None,
                 tunables=tunables,
                 opt_targets=opt_targets,
+                git_repo=exp.git_repo,
+                git_commit=exp.git_commit,
+                git_rel_root_env_config=exp.root_env_config,
             )
 
     def experiment(  # pylint: disable=too-many-arguments

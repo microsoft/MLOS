@@ -29,6 +29,7 @@ from abc import ABCMeta, abstractmethod
 from collections.abc import Iterator, Mapping
 from contextlib import AbstractContextManager as ContextManager
 from datetime import datetime
+from subprocess import CalledProcessError
 from types import TracebackType
 from typing import Any, Literal
 
@@ -187,15 +188,62 @@ class Storage(metaclass=ABCMeta):
             tunables: TunableGroups,
             experiment_id: str,
             trial_id: int,
-            root_env_config: str,
+            root_env_config: str | None,
             description: str,
             opt_targets: dict[str, Literal["min", "max"]],
+            git_repo: str | None = None,
+            git_commit: str | None = None,
+            git_rel_root_env_config: str | None = None,
         ):
             self._tunables = tunables.copy()
             self._trial_id = trial_id
             self._experiment_id = experiment_id
-            (self._git_repo, self._git_commit, self._root_env_config) = get_git_info(
-                root_env_config
+            self._abs_root_env_config: str | None
+            if root_env_config is not None:
+                if git_repo or git_commit or git_rel_root_env_config:
+                    # Extra args are only used when restoring an Experiment from the DB.
+                    raise ValueError("Unexpected args: git_repo, git_commit, rel_root_env_config")
+                try:
+                    (
+                        self._git_repo,
+                        self._git_commit,
+                        self._git_rel_root_env_config,
+                        self._abs_root_env_config,
+                    ) = get_git_info(root_env_config)
+                except CalledProcessError as e:
+                    # Note: currently the Experiment schema requires git
+                    # metadata to be set.  We *could* set the git metadata to
+                    # dummy values, but for now we just throw an error.
+                    _LOG.warning(
+                        "Failed to get git info for root_env_config %s: %s",
+                        root_env_config,
+                        e,
+                    )
+                    raise e
+            else:
+                # Restoring from DB.
+                if not (git_repo and git_commit and git_rel_root_env_config):
+                    raise ValueError("Missing args: git_repo, git_commit, rel_root_env_config")
+                self._git_repo = git_repo
+                self._git_commit = git_commit
+                self._git_rel_root_env_config = git_rel_root_env_config
+                # Note: The absolute path to the root config is not stored in the DB,
+                # and resolving it is not always possible, so we omit this
+                # operation by default for now.
+                # See commit 0cb5948865662776e92ceaca3f0a80a34c6a39ef in
+                # <https://github.com/microsoft/MLOS/pull/985> for prior
+                # implementation attempts.
+                self._abs_root_env_config = None
+            assert isinstance(
+                self._git_rel_root_env_config, str
+            ), "Failed to get relative root config path"
+            _LOG.info(
+                "Resolved relative root_config %s from %s at commit %s for Experiment %s to %s",
+                self._git_rel_root_env_config,
+                self._git_repo,
+                self._git_commit,
+                self._experiment_id,
+                self._abs_root_env_config,
             )
             self._description = description
             self._opt_targets = opt_targets
@@ -205,6 +253,8 @@ class Storage(metaclass=ABCMeta):
             """
             Enter the context of the experiment.
 
+            Notes
+            -----
             Override the `_setup` method to add custom context initialization.
             """
             _LOG.debug("Starting experiment: %s", self)
@@ -222,6 +272,8 @@ class Storage(metaclass=ABCMeta):
             """
             End the context of the experiment.
 
+            Notes
+            -----
             Override the `_teardown` method to add custom context teardown logic.
             """
             is_ok = exc_val is None
@@ -247,14 +299,14 @@ class Storage(metaclass=ABCMeta):
             Create a record of the new experiment or find an existing one in the
             storage.
 
-            This method is called by `Storage.Experiment.__enter__()`.
+            This method is called by :py:class:`.Storage.Experiment.__enter__()`.
             """
 
         def _teardown(self, is_ok: bool) -> None:
             """
             Finalize the experiment in the storage.
 
-            This method is called by `Storage.Experiment.__exit__()`.
+            This method is called by :py:class:`.Storage.Experiment.__exit__()`.
 
             Parameters
             ----------
@@ -278,9 +330,35 @@ class Storage(metaclass=ABCMeta):
             return self._description
 
         @property
-        def root_env_config(self) -> str:
-            """Get the Experiment's root Environment config file path."""
-            return self._root_env_config
+        def rel_root_env_config(self) -> str:
+            """Get the Experiment's root Environment config's relative file path to the
+            git repo root.
+            """
+            return self._git_rel_root_env_config
+
+        @property
+        def abs_root_env_config(self) -> str | None:
+            """
+            Get the Experiment's root Environment config absolute file path.
+
+            This attempts to return the current absolute path to the root config
+            for this process instead of the path relative to the git repo root.
+
+            However, this may not always be possible if the git repo root is not
+            accessible, which can happen if the Experiment was restored from the
+            DB, but the process was started from a different working directory,
+            for instance.
+
+            Notes
+            -----
+            This is mostly useful for other components (e.g.,
+            :py:class:`~mlos_bench.schedulers.base_scheduler.Scheduler`) to use
+            within the same process, and not across invocations.
+            """
+            # TODO: In the future, we can consider fetching the git_repo to a
+            # standard working directory for ``mlos_bench`` and then resolving
+            # the root config path from there based on the relative path.
+            return self._abs_root_env_config
 
         @property
         def tunables(self) -> TunableGroups:
