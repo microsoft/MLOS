@@ -280,12 +280,15 @@ class MlosCoreOptimizer(Optimizer):
         df_configs = self._to_df(configs)  # Impute missing values, if necessary
 
         df_scores = self._adjust_signs_df(
-            pd.DataFrame([{} if score is None else score for score in scores])
+            pd.DataFrame(
+                [{} if score is None else score for score in scores],
+                columns=list(self._opt_targets),
+            )
         )
 
         if status is not None:
             # Select only the completed trials, set scores for failed trials to +inf.
-            df_status = pd.Series(status)
+            df_status = pd.Series(list(status), dtype=object)
             # TODO: Be more flexible with values used for failed trials (not just +inf).
             # Issue: https://github.com/microsoft/MLOS/issues/523
             df_scores[df_status != Status.SUCCEEDED] = float("inf")

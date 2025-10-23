@@ -50,5 +50,6 @@ docker run -it --rm \
     --env http_proxy="${http_proxy:-}" \
     --env https_proxy="${https_proxy:-}" \
     --env no_proxy="${no_proxy:-}" \
+    --add-host host.docker.internal:host-gateway \
     mlos-devcontainer \
     $*
