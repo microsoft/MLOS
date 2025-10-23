@@ -206,7 +206,10 @@ class LocalEnv(ScriptEnv):
         )
 
         _LOG.debug("Read data:\n%s", data)
-        if list(data.columns) == ["metric", "value"]:
+        if len(data) == 0:
+            _LOG.warning("Empty metrics file - fail the run")
+            return (Status.FAILED, timestamp, None)
+        elif list(data.columns) == ["metric", "value"]:
             _LOG.info(
                 "Local results have (metric,value) header and %d rows: assume long format",
                 len(data),
