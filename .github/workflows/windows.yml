@@ -119,11 +119,11 @@ jobs:
 
     - name: Log TCL path
       run: |
-        Get-Item Env:TCL_LIBRARY
-        Get-Item Env:TK_LIBRARY
-        Get-Item Env:TIX_LIBRARY
-        Get-ChildItem -Path ${{ env.CONDA }}/envs/$env:CONDA_ENV_NAME -Recurse -Filter 'init.tcl' | Select-Object -ExpandProperty FullName
-        Get-ChildItem -Path ${{ env.CONDA }}/envs/$env:CONDA_ENV_NAME -Recurse -Filter 'pkgIndex.tcl' | Select-Object -ExpandProperty FullName
+        Get-Item -ErrorAction Ignore Env:TCL_LIBRARY
+        Get-Item -ErrorAction Ignore Env:TK_LIBRARY
+        Get-Item -ErrorAction Ignore Env:TIX_LIBRARY
+        Get-ChildItem -ErrorAction Ignore -Path ${{ env.CONDA }}/envs/$env:CONDA_ENV_NAME -Recurse -Filter 'init.tcl' | Select-Object -ExpandProperty FullName
+        Get-ChildItem -ErrorAction Ignore -Path ${{ env.CONDA }}/envs/$env:CONDA_ENV_NAME -Recurse -Filter 'pkgIndex.tcl' | Select-Object -ExpandProperty FullName
 
     # This is moreso about code cleanliness, which is a dev thing, not a
     # functionality thing, and the rules for that change between python versions,
