@@ -7,9 +7,9 @@
 import logging
 import os
 from abc import ABCMeta
-from asyncio import sleep as async_sleep
 from asyncio import Event as CoroEvent
 from asyncio import Lock as CoroLock
+from asyncio import sleep as async_sleep
 from collections.abc import Callable, Coroutine
 from threading import current_thread
 from types import TracebackType
