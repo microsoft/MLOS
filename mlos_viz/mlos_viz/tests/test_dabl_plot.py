@@ -22,3 +22,4 @@ def test_dabl_plot(mock_boxplot: Mock, exp_data: ExperimentData) -> None:
         dabl.ignore_plotter_warnings()
         dabl.plot(exp_data)
     assert mock_boxplot.call_count >= 1
+    assert False, "Force failure for testing."

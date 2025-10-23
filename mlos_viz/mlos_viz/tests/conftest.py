@@ -22,6 +22,8 @@ exp_data = sql_storage_fixtures.exp_data
 tunable_groups_config = tunable_groups_fixtures.tunable_groups_config
 tunable_groups = tunable_groups_fixtures.tunable_groups
 
+warning("test")
+
 # Workaround for #1004
 # See Also: https://github.com/python/cpython/issues/111754
 if sys.platform == "win32":
