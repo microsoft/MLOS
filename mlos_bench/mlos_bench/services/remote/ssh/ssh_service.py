@@ -7,6 +7,7 @@
 import logging
 import os
 from abc import ABCMeta
+from asyncio import sleep as async_sleep
 from asyncio import Event as CoroEvent
 from asyncio import Lock as CoroLock
 from collections.abc import Callable, Coroutine
@@ -172,34 +173,59 @@ class SshClientCache:
             A tuple of (SSHClientConnection, SshClient).
         """
         _LOG.debug("%s: get_client_connection: %s", current_thread().name, connect_params)
-        async with self._cache_lock:
-            connection_id = SshClient.id_from_params(connect_params)
-            client: None | SshClient | asyncssh.SSHClient
-            _, client = self._cache.get(connection_id, (None, None))
-            if client:
-                _LOG.debug("%s: Checking cached client %s", current_thread().name, connection_id)
-                connection = await client.connection()
-                if not connection:
-                    _LOG.debug(
-                        "%s: Removing stale client connection %s from cache.",
-                        current_thread().name,
-                        connection_id,
-                    )
-                    self._cache.pop(connection_id)
-                    # Try to reconnect next.
-                else:
-                    _LOG.debug("%s: Using cached client %s", current_thread().name, connection_id)
-            if connection_id not in self._cache:
-                _LOG.debug(
-                    "%s: Establishing client connection to %s",
+        connection_id = SshClient.id_from_params(connect_params)
+        for i in range(3):  # TODO: make the retry count configurable
+            try:
+                async with self._cache_lock:
+                    client: None | SshClient | asyncssh.SSHClient
+                    _, client = self._cache.get(connection_id, (None, None))
+                    if client:
+                        _LOG.debug(
+                            "%s: Checking cached client %s", current_thread().name, connection_id
+                        )
+                        connection = await client.connection()
+                        if not connection:
+                            _LOG.debug(
+                                "%s: Removing stale client connection %s from cache.",
+                                current_thread().name,
+                                connection_id,
+                            )
+                            self._cache.pop(connection_id)
+                            # Try to reconnect next.
+                        else:
+                            _LOG.debug(
+                                "%s: Using cached client %s", current_thread().name, connection_id
+                            )
+                    if connection_id not in self._cache:
+                        _LOG.debug(
+                            "%s: Establishing client connection to %s",
+                            current_thread().name,
+                            connection_id,
+                        )
+                        connection, client = await asyncssh.create_connection(
+                            SshClient, **connect_params
+                        )
+                        assert isinstance(client, SshClient)
+                        self._cache[connection_id] = (connection, client)
+                        _LOG.debug(
+                            "%s: Created connection to %s.", current_thread().name, connection_id
+                        )
+                    return self._cache[connection_id]
+            except (ConnectionRefusedError, asyncssh.Error) as ex:
+                _LOG.warning(
+                    "%s: Attempt %d: Failed to connect to %s: %s",
                     current_thread().name,
+                    i + 1,
                     connection_id,
+                    ex,
                 )
-                connection, client = await asyncssh.create_connection(SshClient, **connect_params)
-                assert isinstance(client, SshClient)
-                self._cache[connection_id] = (connection, client)
-                _LOG.debug("%s: Created connection to %s.", current_thread().name, connection_id)
-            return self._cache[connection_id]
+                if i < 2:  # TODO: adjust to match max range
+                    await async_sleep(1.0)  # TODO: Make this configurable
+                if i == 2:  # TODO: adjust to match max range
+                    _LOG.error(
+                        "%s: Giving up connecting to %s", current_thread().name, connection_id
+                    )
+                    raise
 
     def cleanup(self) -> None:
         """Closes all cached connections."""
