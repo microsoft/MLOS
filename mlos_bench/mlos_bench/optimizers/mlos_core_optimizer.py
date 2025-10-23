@@ -280,7 +280,10 @@ class MlosCoreOptimizer(Optimizer):
         df_configs = self._to_df(configs)  # Impute missing values, if necessary
 
         df_scores = self._adjust_signs_df(
-            pd.DataFrame([{} if score is None else score for score in scores])
+            pd.DataFrame(
+                [{} if score is None else score for score in scores],
+                columns=list(self._opt_targets),
+            )
         )
 
         if status is not None:
