@@ -5,6 +5,7 @@
 """Unit tests for LocalEnv benchmark environment."""
 import pytest
 
+from mlos_bench.environments.status import Status
 from mlos_bench.tests.environments import check_env_success
 from mlos_bench.tests.environments.local import create_local_env
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -99,5 +100,49 @@ def test_local_env_wide(tunable_groups: TunableGroups) -> None:
             "throughput": 66,
             "score": 0.9,
         },
+        expected_telemetry=[],
+    )
+
+
+def test_local_env_results_null_file(tunable_groups: TunableGroups) -> None:
+    """When the results file is of zero length, do not crash but mark the trial
+    FAILED.
+    """
+    local_env = create_local_env(
+        tunable_groups,
+        {
+            "run": [
+                "echo '' > output.csv",
+            ],
+            "read_results_file": "output.csv",
+        },
+    )
+
+    check_env_success(
+        local_env,
+        tunable_groups,
+        expected_status_run={Status.FAILED},
+        expected_results=None,
+        expected_telemetry=[],
+    )
+
+
+def test_local_env_results_empty_file(tunable_groups: TunableGroups) -> None:
+    """When the results file has no data, do not crash but mark the trial FAILED."""
+    local_env = create_local_env(
+        tunable_groups,
+        {
+            "run": [
+                "echo 'latency,throughput,score' > output.csv",
+            ],
+            "read_results_file": "output.csv",
+        },
+    )
+
+    check_env_success(
+        local_env,
+        tunable_groups,
+        expected_status_run={Status.FAILED},
+        expected_results=None,
         expected_telemetry=[],
     )
