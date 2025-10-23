@@ -194,7 +194,7 @@ class Storage(metaclass=ABCMeta):
             self._tunables = tunables.copy()
             self._trial_id = trial_id
             self._experiment_id = experiment_id
-            (self._git_repo, self._git_commit, self._root_env_config) = get_git_info(
+            (self._git_repo, self._git_commit, self._root_env_config, _future_pr) = get_git_info(
                 root_env_config
             )
             self._description = description
