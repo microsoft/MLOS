@@ -7,6 +7,17 @@ import logging
 
 import pytest
 
+<<<<<<< HEAD
+from mlos_bench.config.schemas.config_schemas import ConfigSchema
+from mlos_bench.schedulers.base_scheduler import Scheduler
+from mlos_bench.services.config_persistence import ConfigPersistenceService
+from mlos_bench.tests.config import locate_config_examples
+from mlos_bench.util import get_class_from_name
+
+_LOG = logging.getLogger(__name__)
+_LOG.setLevel(logging.DEBUG)
+
+=======
 import mlos_bench.tests.optimizers.fixtures
 import mlos_bench.tests.storage.sql.fixtures
 from mlos_bench.config.schemas.config_schemas import ConfigSchema
@@ -26,6 +37,7 @@ _LOG = logging.getLogger(__name__)
 _LOG.setLevel(logging.DEBUG)
 
 # pylint: disable=redefined-outer-name
+>>>>>>> refactor/mock-scheduler-and-tests
 
 # Get the set of configs to test.
 CONFIG_TYPE = "schedulers"
@@ -43,6 +55,8 @@ configs = locate_config_examples(
 )
 assert configs
 
+<<<<<<< HEAD
+=======
 test_configs = locate_config_examples(
     BUILTIN_TEST_CONFIG_PATH,
     CONFIG_TYPE,
@@ -51,6 +65,7 @@ test_configs = locate_config_examples(
 # assert test_configs
 configs.extend(test_configs)
 
+>>>>>>> refactor/mock-scheduler-and-tests
 
 @pytest.mark.parametrize("config_path", configs)
 def test_load_scheduler_config_examples(

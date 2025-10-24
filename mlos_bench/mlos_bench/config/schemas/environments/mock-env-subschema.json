@@ -3,6 +3,136 @@
     "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/mock-env-subschema.json",
     "title": "mlos_bench MockEnv config",
     "description": "Config instance for a mlos_bench MockEnv",
+
+    "$defs": {
+        "mock_trial_common_phase_data": {
+            "type": "object",
+            "properties": {
+                "sleep": {
+                    "type": "number",
+                    "description": "Optional time to sleep (in seconds) before returning from this phase of the trial.",
+                    "examples": [0, 0.1, 0.5, 1, 2],
+                    "minimum": 0,
+                    "maximum": 60
+                },
+                "exception": {
+                    "type": "string",
+                    "description": "Optional exception message to raise during phase."
+                }
+            }
+        },
+        "mock_trial_status_run_phase_data": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "description": "The status to report for this phase of the trial.  Default is phase dependent.",
+                    "enum": [
+                        "UNKNOWN",
+                        "PENDING",
+                        "READY",
+                        "RUNNING",
+                        "SUCCEEDED",
+                        "CANCELED",
+                        "FAILED",
+                        "TIMED_OUT"
+                    ]
+                },
+                "metrics": {
+                    "type": "object",
+                    "description": "A dictionary of metrics for this phase of the trial.",
+                    "additionalProperties": {
+                        "type": [
+                            "number",
+                            "string",
+                            "boolean"
+                        ],
+                        "description": "The value of the metric."
+                    },
+                    "examples": [
+                        {
+                            "score": 0.95,
+                            "color": "green"
+                        },
+                        {
+                            "accuracy": 0.85,
+                            "loss": 0.15
+                        }
+                    ],
+                    "minProperties": 0
+                }
+            }
+        },
+        "mock_trial_data_item": {
+            "description": "Mock data for a single trial, split by phase",
+            "type": "object",
+            "properties": {
+                "run": {
+                    "description": "A dictionary of trial data for the run phase.",
+                    "type": "object",
+                    "allOf": [
+                        {
+                            "$ref": "#/$defs/mock_trial_common_phase_data"
+                        },
+                        {
+                            "$ref": "#/$defs/mock_trial_status_run_phase_data"
+                        }
+                    ],
+                    "minProperties": 1,
+                    "unevaluatedProperties": false
+                },
+                "status": {
+                    "description": "A dictionary of trial data for the status phase.",
+                    "type": "object",
+                    "allOf": [
+                        {
+                            "$ref": "#/$defs/mock_trial_common_phase_data"
+                        },
+                        {
+                            "$ref": "#/$defs/mock_trial_status_run_phase_data"
+                        }
+                    ],
+                    "minProperties": 1,
+                    "unevaluatedProperties": false
+                },
+                "setup": {
+                    "description": "A dictionary of trial data for the setup phase.",
+                    "type": "object",
+                    "allOf": [
+                        {
+                            "$ref": "#/$defs/mock_trial_common_phase_data"
+                        }
+                    ],
+                    "minProperties": 1,
+                    "unevaluatedProperties": false
+                },
+                "teardown": {
+                    "description": "A dictionary of trial data for the teardown phase.",
+                    "type": "object",
+                    "allOf": [
+                        {
+                            "$ref": "#/$defs/mock_trial_common_phase_data"
+                        }
+                    ],
+                    "minProperties": 1,
+                    "unevaluatedProperties": false
+                }
+            },
+            "unevaluatedProperties": false,
+            "minProperties": 1
+        },
+        "mock_trial_data": {
+            "description": "A set of mock trial data to use for testing, keyed by trial id. Used by MockEnv.",
+            "type": "object",
+            "patternProperties": {
+                "^[1-9][0-9]*$": {
+                    "$ref": "#/$defs/mock_trial_data_item"
+                }
+            },
+            "unevaluatedProperties": false,
+            "minProperties": 1
+        }
+    },
+
     "type": "object",
     "properties": {
         "class": {
@@ -42,6 +172,9 @@
                             },
                             "minItems": 1,
                             "uniqueItems": true
+                        },
+                        "mock_trial_data": {
+                            "$ref": "#/$defs/mock_trial_data"
                         }
                     }
                 }
