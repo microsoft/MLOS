@@ -30,6 +30,41 @@ from mlos_bench.tests.services.remote.ssh import (
 
 
 @pytest.fixture(scope="session")
+def docker_compose_file(pytestconfig: pytest.Config) -> list[str]:
+    """
+    Fixture for the path to the docker-compose file.
+
+    Parameters
+    ----------
+    pytestconfig : pytest.Config
+
+    Returns
+    -------
+    list[str]
+        List of paths to docker-compose files.
+    """
+    _ = pytestconfig  # unused
+    return [
+        os.path.join(os.path.dirname(__file__), "docker-compose.yml"),
+    ]
+
+
+@pytest.fixture(scope="session")
+def docker_compose_project_name(short_testrun_uid: str) -> str:
+    """
+    Returns the name of the docker-compose project.
+
+    Returns
+    -------
+    str
+        Name of the docker-compose project.
+    """
+    # Use the xdist testrun UID to ensure that the docker-compose project name
+    # is unique across sessions, but shared amongst workers.
+    return f"""mlos_bench-test-{short_testrun_uid}-{__name__.replace(".", "-")}"""
+
+
+@pytest.fixture(scope="session")
 def ssh_test_server(
     docker_hostname: str,
     docker_compose_project_name: str,
