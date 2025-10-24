@@ -54,6 +54,39 @@ if DOCKER:
 
 
 @pytest.fixture(scope="session")
+def docker_compose_file(pytestconfig: pytest.Config) -> list[str]:
+    """
+    Fixture for the path to the docker-compose file.
+
+    Parameters
+    ----------
+    pytestconfig : pytest.Config
+
+    Returns
+    -------
+    list[str]
+        List of paths to the docker-compose file(s).
+    """
+    _ = pytestconfig  # unused
+    return [
+        os.path.join(os.path.dirname(__file__), "docker-compose.yml"),
+    ]
+
+
+@pytest.fixture(scope="session")
+def docker_compose_project_name(short_testrun_uid: str) -> str:
+    """
+    Fixture for the name of the docker-compose project.
+
+    Returns
+    -------
+    str
+        Name of the docker-compose project.
+    """
+    return f"""mlos_bench-test-{short_testrun_uid}-{__name__.replace(".", "-")}"""
+
+
+@pytest.fixture(scope="session")
 def mysql_storage_info(
     docker_hostname: str,
     docker_compose_project_name: str,
