@@ -8,9 +8,14 @@ import json
 import os
 import tempfile
 from collections.abc import Generator
+from contextlib import contextmanager
+from importlib.resources import files
 from random import seed as rand_seed
 
 import pytest
+from fasteners import InterProcessLock
+from pytest_docker.plugin import Services as DockerServices
+from pytest_lazy_fixtures.lazy_fixture import lf as lazy_fixture
 
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.schedulers.sync_scheduler import SyncScheduler
@@ -19,15 +24,195 @@ from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.storage.sql.storage import SqlStorage
 from mlos_bench.storage.storage_factory import from_config
-from mlos_bench.tests import SEED
+from mlos_bench.tests import DOCKER, SEED, wait_docker_service_healthy
 from mlos_bench.tests.storage import (
     CONFIG_TRIAL_REPEAT_COUNT,
     MAX_TRIALS,
     TRIAL_RUNNER_COUNT,
 )
+from mlos_bench.tests.storage.sql import (
+    MYSQL_TEST_SERVER_NAME,
+    PGSQL_TEST_SERVER_NAME,
+    SqlTestServerInfo,
+)
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.util import path_join
 
 # pylint: disable=redefined-outer-name
+
+# Try to test multiple DBMS engines.
+DOCKER_DBMS_FIXTURES = []
+if DOCKER:
+    DOCKER_DBMS_FIXTURES = [
+        lazy_fixture("mysql_storage"),
+        lazy_fixture("postgres_storage"),
+    ]
+
+PERSISTENT_SQL_STORAGE_FIXTURES = [lazy_fixture("sqlite_storage")]
+if DOCKER:
+    PERSISTENT_SQL_STORAGE_FIXTURES.extend(DOCKER_DBMS_FIXTURES)
+
+
+@pytest.fixture(scope="session")
+def docker_compose_file(pytestconfig: pytest.Config) -> list[str]:
+    """
+    Fixture for the path to the docker-compose file.
+
+    Parameters
+    ----------
+    pytestconfig : pytest.Config
+
+    Returns
+    -------
+    list[str]
+        List of paths to the docker-compose file(s).
+    """
+    _ = pytestconfig  # unused
+    return [
+        os.path.join(os.path.dirname(__file__), "docker-compose.yml"),
+    ]
+
+
+@pytest.fixture(scope="session")
+def docker_compose_project_name(short_testrun_uid: str) -> str:
+    """
+    Fixture for the name of the docker-compose project.
+
+    Returns
+    -------
+    str
+        Name of the docker-compose project.
+    """
+    return f"""mlos_bench-test-{short_testrun_uid}-{__name__.replace(".", "-")}"""
+
+
+@pytest.fixture(scope="session")
+def mysql_storage_info(
+    docker_hostname: str,
+    docker_compose_project_name: str,
+    locked_docker_services: DockerServices,
+) -> SqlTestServerInfo:
+    """Fixture for getting mysql storage connection info."""
+    storage_info = SqlTestServerInfo(
+        compose_project_name=docker_compose_project_name,
+        service_name=MYSQL_TEST_SERVER_NAME,
+        hostname=docker_hostname,
+    )
+    wait_docker_service_healthy(
+        locked_docker_services,
+        storage_info.compose_project_name,
+        storage_info.service_name,
+    )
+
+    return storage_info
+
+
+@pytest.fixture(scope="session")
+def postgres_storage_info(
+    docker_hostname: str,
+    docker_compose_project_name: str,
+    locked_docker_services: DockerServices,
+) -> SqlTestServerInfo:
+    """Fixture for getting postgres storage connection info."""
+    storage_info = SqlTestServerInfo(
+        compose_project_name=docker_compose_project_name,
+        service_name=PGSQL_TEST_SERVER_NAME,
+        hostname=docker_hostname,
+    )
+    wait_docker_service_healthy(
+        locked_docker_services,
+        storage_info.compose_project_name,
+        storage_info.service_name,
+    )
+    return storage_info
+
+
+@contextmanager
+def _create_storage_from_test_server_info(
+    config_file: str,
+    test_server_info: SqlTestServerInfo,
+    shared_temp_dir: str,
+    short_testrun_uid: str,
+) -> Generator[SqlStorage]:
+    """
+    Creates a SqlStorage instance from the given test server info.
+
+    Notes
+    -----
+    Resets the schema as a cleanup operation on return from the function scope
+    fixture so each test gets a fresh storage instance.
+    Uses a file lock to ensure that only one test can access the storage at a time.
+
+    Yields
+    ------
+    SqlStorage
+    """
+    sql_storage_name = test_server_info.service_name
+    with InterProcessLock(
+        path_join(shared_temp_dir, f"{sql_storage_name}-{short_testrun_uid}.lock")
+    ):
+        global_config = {
+            "host": test_server_info.hostname,
+            "port": test_server_info.get_port() or 0,
+            "database": test_server_info.database,
+            "username": test_server_info.username,
+            "password": test_server_info.password,
+            "lazy_schema_create": True,
+        }
+        storage = from_config(
+            config_file,
+            global_configs=[json.dumps(global_config)],
+        )
+        assert isinstance(storage, SqlStorage)
+        try:
+            yield storage
+        finally:
+            # Cleanup the storage on return
+            storage._reset_schema(force=True)  # pylint: disable=protected-access
+
+
+@pytest.fixture(scope="function")
+def mysql_storage(
+    mysql_storage_info: SqlTestServerInfo,
+    shared_temp_dir: str,
+    short_testrun_uid: str,
+) -> Generator[SqlStorage]:
+    """
+    Fixture of a MySQL backed SqlStorage engine.
+
+    See Also
+    --------
+    _create_storage_from_test_server_info
+    """
+    with _create_storage_from_test_server_info(
+        path_join(str(files("mlos_bench.config")), "storage", "mysql.jsonc"),
+        mysql_storage_info,
+        shared_temp_dir,
+        short_testrun_uid,
+    ) as storage:
+        yield storage
+
+
+@pytest.fixture(scope="function")
+def postgres_storage(
+    postgres_storage_info: SqlTestServerInfo,
+    shared_temp_dir: str,
+    short_testrun_uid: str,
+) -> Generator[SqlStorage]:
+    """
+    Fixture of a Postgres backed SqlStorage engine.
+
+    See Also
+    --------
+    _create_storage_from_test_server_info
+    """
+    with _create_storage_from_test_server_info(
+        path_join(str(files("mlos_bench.config")), "storage", "postgresql.jsonc"),
+        postgres_storage_info,
+        shared_temp_dir,
+        short_testrun_uid,
+    ) as storage:
+        yield storage
 
 
 @pytest.fixture
@@ -60,6 +245,7 @@ def sqlite_storage() -> Generator[SqlStorage]:
         assert isinstance(storage, SqlStorage)
         storage.update_schema()
         yield storage
+        storage.dispose()
 
 
 @pytest.fixture

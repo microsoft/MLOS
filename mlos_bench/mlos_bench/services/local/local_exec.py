@@ -46,7 +46,7 @@ def split_cmdline(cmdline: str) -> Iterable[list[str]]:
     cmdline_tokens.whitespace_split = True
     subcmd = []
     for token in cmdline_tokens:
-        if token[0] not in cmdline_tokens.punctuation_chars:
+        if token[:1] not in cmdline_tokens.punctuation_chars:
             subcmd.append(token)
         else:
             # Separator encountered. Yield any non-empty previous subcmd we accumulated.

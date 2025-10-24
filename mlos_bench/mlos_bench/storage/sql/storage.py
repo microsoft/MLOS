@@ -5,6 +5,7 @@
 """Saving and restoring the benchmark data in SQL database."""
 
 import logging
+from types import TracebackType
 from typing import Literal
 
 from sqlalchemy import URL, Engine, create_engine
@@ -72,6 +73,22 @@ class SqlStorage(Storage):
         # Recreate the engine and schema.
         self._init_engine()
 
+    def dispose(self) -> None:
+        """Closes the database connection pool."""
+        if self._engine:
+            self._engine.dispose()
+            _LOG.info("Closed the database connection: %s", self)
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,  # pylint: disable=unused-argument
+        exc_val: BaseException | None,  # pylint: disable=unused-argument
+        exc_tb: TracebackType | None,  # pylint: disable=unused-argument
+    ) -> Literal[False]:
+        """Close the engine connection when exiting the context."""
+        self.dispose()
+        return False
+
     @property
     def _schema(self) -> DbSchema:
         """Lazily create schema upon first access."""
@@ -81,6 +98,33 @@ class SqlStorage(Storage):
             if _LOG.isEnabledFor(logging.DEBUG):
                 _LOG.debug("DDL statements:\n%s", self._db_schema)
         return self._db_schema
+
+    def _reset_schema(self, *, force: bool = False) -> None:
+        """
+        Helper method used in testing to reset the DB schema.
+
+        Notes
+        -----
+        This method is not intended for production use, as it will drop all tables
+        in the database. Use with caution.
+
+        Parameters
+        ----------
+        force : bool
+            If True, drop all tables in the target database.
+            If False, this method will not drop any tables and will log a warning.
+        """
+        assert self._engine
+        if force:
+            self._schema.drop_all_tables(force=force)
+            self._db_schema = DbSchema(self._engine)
+            self._schema_created = False
+            self._schema_updated = False
+        else:
+            _LOG.warning(
+                "Resetting the schema without force is not implemented. "
+                "Use force=True to drop all tables."
+            )
 
     def update_schema(self) -> None:
         """Update the database schema."""
