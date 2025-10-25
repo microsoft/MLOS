@@ -31,7 +31,7 @@ from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.tunables.tunable_types import TunableValue
-from mlos_bench.util import try_parse_val
+from mlos_bench.util import sanitize_config, try_parse_val
 
 _LOG_LEVEL = logging.INFO
 _LOG_FORMAT = "%(asctime)s %(filename)s:%(lineno)d %(funcName)s %(levelname)s %(message)s"
@@ -478,7 +478,8 @@ class Launcher:
         # other CLI options to use as common python/json variable replacements.
         config = {k.replace("-", "_"): v for k, v in config.items()}
 
-        _LOG.debug("Parsed config: %s", config)
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("Parsed config: %s", sanitize_config(config))
         return config
 
     def _load_config(

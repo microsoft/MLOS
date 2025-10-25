@@ -21,7 +21,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.tunables.tunable_types import TunableValue
-from mlos_bench.util import instantiate_from_config, merge_parameters
+from mlos_bench.util import instantiate_from_config, merge_parameters, sanitize_config
 
 if TYPE_CHECKING:
     from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
@@ -174,7 +174,11 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
         _LOG.debug("Parameters for '%s' :: %s", name, self._params)
 
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Config for: '%s'\n%s", name, json.dumps(self.config, indent=2))
+            _LOG.debug(
+                "Config for: '%s'\n%s",
+                name,
+                json.dumps(sanitize_config(self.config), indent=2),
+            )
 
     def _validate_json_config(self, config: dict, name: str) -> None:
         """Reconstructs a basic json config that this class might have been instantiated
