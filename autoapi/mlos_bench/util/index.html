@@ -1,0 +1,667 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlos_bench.util &mdash; MLOS 0.6.3.dev53+g549a69ab0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+
+  
+    <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/util/index.html"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=8b2becd3"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="mlos_bench.version" href="../version/index.html" />
+    <link rel="prev" title="mlos_bench.tunables.tunable_types" href="../tunables/tunable_types/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MLOS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Source Tree Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_tree_docs/index.html">MLOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_tree_docs/mlos_core/index.html">mlos-core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_tree_docs/mlos_bench/index.html">mlos-bench</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_tree_docs/mlos_viz/index.html">mlos-viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../mlos_core/index.html">mlos_core</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">mlos_bench</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#classes-overview">Classes Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../config/index.html">mlos_bench.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dict_templater/index.html">mlos_bench.dict_templater</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../environments/index.html">mlos_bench.environments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../event_loop_context/index.html">mlos_bench.event_loop_context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../launcher/index.html">mlos_bench.launcher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../optimizers/index.html">mlos_bench.optimizers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../os_environ/index.html">mlos_bench.os_environ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../run/index.html">mlos_bench.run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../schedulers/index.html">mlos_bench.schedulers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../services/index.html">mlos_bench.services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../storage/index.html">mlos_bench.storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tunables/index.html">mlos_bench.tunables</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mlos_bench.util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#attributes">Attributes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.check_required_params"><code class="docutils literal notranslate"><span class="pre">check_required_params()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.datetime_parser"><code class="docutils literal notranslate"><span class="pre">datetime_parser()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.get_class_from_name"><code class="docutils literal notranslate"><span class="pre">get_class_from_name()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.get_git_info"><code class="docutils literal notranslate"><span class="pre">get_git_info()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.get_git_remote_info"><code class="docutils literal notranslate"><span class="pre">get_git_remote_info()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.get_git_repo_info"><code class="docutils literal notranslate"><span class="pre">get_git_repo_info()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.get_git_root"><code class="docutils literal notranslate"><span class="pre">get_git_root()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.instantiate_from_config"><code class="docutils literal notranslate"><span class="pre">instantiate_from_config()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.merge_parameters"><code class="docutils literal notranslate"><span class="pre">merge_parameters()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.nullable"><code class="docutils literal notranslate"><span class="pre">nullable()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.path_join"><code class="docutils literal notranslate"><span class="pre">path_join()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.prepare_class_load"><code class="docutils literal notranslate"><span class="pre">prepare_class_load()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.preprocess_dynamic_configs"><code class="docutils literal notranslate"><span class="pre">preprocess_dynamic_configs()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.sanitize_config"><code class="docutils literal notranslate"><span class="pre">sanitize_config()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.strtobool"><code class="docutils literal notranslate"><span class="pre">strtobool()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.try_parse_val"><code class="docutils literal notranslate"><span class="pre">try_parse_val()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.utcify_nullable_timestamp"><code class="docutils literal notranslate"><span class="pre">utcify_nullable_timestamp()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.utcify_timestamp"><code class="docutils literal notranslate"><span class="pre">utcify_timestamp()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.BaseTypeVar"><code class="docutils literal notranslate"><span class="pre">BaseTypeVar</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.BaseTypes"><code class="docutils literal notranslate"><span class="pre">BaseTypes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_bench.util.NullableT"><code class="docutils literal notranslate"><span class="pre">NullableT</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../version/index.html">mlos_bench.version</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#attributes">Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../mlos_viz/index.html">mlos_viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">mlos_bench CLI usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mlos_bench.run.usage.html">mlos_bench CLI usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/microsoft/MLOS">Github Source Tree</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MLOS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">mlos_bench</a></li>
+      <li class="breadcrumb-item active">mlos_bench.util</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/mlos_bench/util/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mlos_bench.util">
+<span id="mlos-bench-util"></span><h1>mlos_bench.util<a class="headerlink" href="#module-mlos_bench.util" title="Link to this heading"></a></h1>
+<p>Various helper functions for mlos_bench.</p>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.util.BaseTypeVar" title="mlos_bench.util.BaseTypeVar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTypeVar</span></code></a></p></td>
+<td><p>BaseTypeVar is a generic with a constraint of the main base classes (e.g.,</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.util.BaseTypes" title="mlos_bench.util.BaseTypes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTypes</span></code></a></p></td>
+<td><p>Similar to <a class="reference internal" href="#mlos_bench.util.BaseTypeVar" title="mlos_bench.util.BaseTypeVar"><code class="xref py py-data docutils literal notranslate"><span class="pre">BaseTypeVar</span></code></a>, BaseTypes is a Union of the main base classes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.util.NullableT" title="mlos_bench.util.NullableT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NullableT</span></code></a></p></td>
+<td><p>A generic type variable for <a class="reference internal" href="#mlos_bench.util.nullable" title="mlos_bench.util.nullable"><code class="xref py py-func docutils literal notranslate"><span class="pre">nullable()</span></code></a> return types.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.util.check_required_params" title="mlos_bench.util.check_required_params"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_required_params</span></code></a>(→ None)</p></td>
+<td><p>Check if all required parameters are present in the configuration. Raise ValueError</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.util.datetime_parser" title="mlos_bench.util.datetime_parser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datetime_parser</span></code></a>(→ pandas.Series)</p></td>
+<td><p>Attempt to convert a pandas column to a datetime format.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.util.get_class_from_name" title="mlos_bench.util.get_class_from_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_class_from_name</span></code></a>(→ type)</p></td>
+<td><p>Gets the class from the fully qualified name.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.util.get_git_info" title="mlos_bench.util.get_git_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_git_info</span></code></a>(→ tuple[str, str, str, str])</p></td>
+<td><p>Get the git repository, commit hash, and local path of the given file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.util.get_git_remote_info" title="mlos_bench.util.get_git_remote_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_git_remote_info</span></code></a>(→ str)</p></td>
+<td><p>Gets the remote URL for the given remote name in the git repository.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.util.get_git_repo_info" title="mlos_bench.util.get_git_repo_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_git_repo_info</span></code></a>(→ str)</p></td>
+<td><p>Get the git repository URL for the given git repo.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.util.get_git_root" title="mlos_bench.util.get_git_root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_git_root</span></code></a>(→ str)</p></td>
+<td><p>Get the root dir of the git repository.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.util.instantiate_from_config" title="mlos_bench.util.instantiate_from_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">instantiate_from_config</span></code></a>(→ BaseTypeVar)</p></td>
+<td><p>Factory method for a new class instantiated from config.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.util.merge_parameters" title="mlos_bench.util.merge_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_parameters</span></code></a>(→ dict)</p></td>
+<td><p>Merge the source config dict into the destination config. Pick from the source</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.util.nullable" title="mlos_bench.util.nullable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nullable</span></code></a>(→ NullableT | None)</p></td>
+<td><p>Poor man's Maybe monad: apply the function to the value if it's not None.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.util.path_join" title="mlos_bench.util.path_join"><code class="xref py py-obj docutils literal notranslate"><span class="pre">path_join</span></code></a>(→ str)</p></td>
+<td><p>Joins the path components and normalizes the path.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.util.prepare_class_load" title="mlos_bench.util.prepare_class_load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare_class_load</span></code></a>(→ tuple[str, dict[str, Any]])</p></td>
+<td><p>Extract the class instantiation parameters from the configuration.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.util.preprocess_dynamic_configs" title="mlos_bench.util.preprocess_dynamic_configs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">preprocess_dynamic_configs</span></code></a>(→ dict)</p></td>
+<td><p>Replaces all <code class="docutils literal notranslate"><span class="pre">$name</span></code> values in the destination config with the corresponding value</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.util.sanitize_config" title="mlos_bench.util.sanitize_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sanitize_config</span></code></a>(→ dict[str, Any])</p></td>
+<td><p>Sanitize a configuration dictionary by obfuscating potentially sensitive keys.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.util.strtobool" title="mlos_bench.util.strtobool"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strtobool</span></code></a>(→ bool)</p></td>
+<td><p>Convert a string representation of truth to true (1) or false (0).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.util.try_parse_val" title="mlos_bench.util.try_parse_val"><code class="xref py py-obj docutils literal notranslate"><span class="pre">try_parse_val</span></code></a>(→ int | float | str | None)</p></td>
+<td><p>Try to parse the value as an int or float, otherwise return the string.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.util.utcify_nullable_timestamp" title="mlos_bench.util.utcify_nullable_timestamp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">utcify_nullable_timestamp</span></code></a>(→ datetime.datetime | None)</p></td>
+<td><p>A nullable version of utcify_timestamp.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.util.utcify_timestamp" title="mlos_bench.util.utcify_timestamp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">utcify_timestamp</span></code></a>(→ datetime.datetime)</p></td>
+<td><p>Augment a timestamp with zoneinfo if missing and convert it to UTC.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.check_required_params">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">check_required_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.14)"><span class="pre">collections.abc.Mapping</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(in Python v3.14)"><span class="pre">collections.abc.Iterable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.check_required_params" title="Link to this definition"></a></dt>
+<dd><p>Check if all required parameters are present in the configuration. Raise ValueError
+if any of the parameters are missing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Free-format dictionary with the configuration
+of the service or benchmarking environment.</p></li>
+<li><p><strong>required_params</strong> (<em>Iterable</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em>) – A collection of identifiers of the parameters that must be present
+in the configuration.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.datetime_parser">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">datetime_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datetime_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">pandas.Series</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'utc'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'local'</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">pandas.Series</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.datetime_parser" title="Link to this definition"></a></dt>
+<dd><p>Attempt to convert a pandas column to a datetime format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datetime_col</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><em>pandas.Series</em></a>) – The column to convert.</p></li>
+<li><p><strong>origin</strong> (<em>Literal</em><em>[</em><em>&quot;utc&quot;</em><em>, </em><em>&quot;local&quot;</em><em>]</em>) – Whether to interpret naive timestamps as originating from UTC or local time.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The converted datetime column.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)">pandas.Series</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – On parse errors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.get_class_from_name">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">get_class_from_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.get_class_from_name" title="Link to this definition"></a></dt>
+<dd><p>Gets the class from the fully qualified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>class_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Fully qualified class name.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Class object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)">type</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.get_git_info">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">get_git_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">__file__</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.get_git_info" title="Link to this definition"></a></dt>
+<dd><p>Get the git repository, commit hash, and local path of the given file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to the file in git repository.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/subprocess.html#subprocess.CalledProcessError" title="(in Python v3.14)"><strong>subprocess.CalledProcessError</strong></a> – If the path is not a git repository or the command fails.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>(git_repo, git_commit, rel_path, abs_path)</strong> – Git repository URL, last commit hash, and relative file path and current
+absolute path.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.get_git_remote_info">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">get_git_remote_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">remote</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.get_git_remote_info" title="Link to this definition"></a></dt>
+<dd><p>Gets the remote URL for the given remote name in the git repository.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to the file in git repository.</p></li>
+<li><p><strong>remote</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The name of the remote (e.g., “origin”).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/subprocess.html#subprocess.CalledProcessError" title="(in Python v3.14)"><strong>subprocess.CalledProcessError</strong></a> – If the command fails or the remote does not exist.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The URL of the remote repository.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.get_git_repo_info">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">get_git_repo_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.get_git_repo_info" title="Link to this definition"></a></dt>
+<dd><p>Get the git repository URL for the given git repo.</p>
+<p>Tries to get the upstream branch URL, falling back to the “origin” remote
+if the upstream branch is not set or does not exist. If that also fails,
+it returns a file URL pointing to the local path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to the git repository.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/subprocess.html#subprocess.CalledProcessError" title="(in Python v3.14)"><strong>subprocess.CalledProcessError</strong></a> – If the command fails or the git repository does not exist.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The upstream URL of the git repository.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.get_git_root">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">get_git_root</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">__file__</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.get_git_root" title="Link to this definition"></a></dt>
+<dd><p>Get the root dir of the git repository.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em>) – Path to the file in git repository.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/subprocess.html#subprocess.CalledProcessError" title="(in Python v3.14)"><strong>subprocess.CalledProcessError</strong></a> – If the path is not a git repository or the command fails.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The absolute path to the root directory of the git repository.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.instantiate_from_config">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">instantiate_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mlos_bench.util.BaseTypeVar" title="mlos_bench.util.BaseTypeVar"><span class="pre">BaseTypeVar</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mlos_bench.util.BaseTypeVar" title="mlos_bench.util.BaseTypeVar"><span class="pre">BaseTypeVar</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.instantiate_from_config" title="Link to this definition"></a></dt>
+<dd><p>Factory method for a new class instantiated from config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_class</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><em>type</em></a>) – Base type of the class to instantiate.
+Currently it’s one of {Environment, Service, Optimizer}.</p></li>
+<li><p><strong>class_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – FQN of a Python class to instantiate, e.g.,
+“mlos_bench.environments.remote.HostEnv”.
+Must be derived from the <cite>base_class</cite>.</p></li>
+<li><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – Positional arguments to pass to the constructor.</p></li>
+<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Keyword arguments to pass to the constructor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>inst</strong> – An instance of the <cite>class_name</cite> class.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[<a class="reference internal" href="../environments/base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment">Environment</a>, <a class="reference internal" href="../services/base_service/index.html#mlos_bench.services.base_service.Service" title="mlos_bench.services.base_service.Service">Service</a>, <a class="reference internal" href="../optimizers/base_optimizer/index.html#mlos_bench.optimizers.base_optimizer.Optimizer" title="mlos_bench.optimizers.base_optimizer.Optimizer">Optimizer</a>, <a class="reference internal" href="../storage/base_storage/index.html#mlos_bench.storage.base_storage.Storage" title="mlos_bench.storage.base_storage.Storage">Storage</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.merge_parameters">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">merge_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required_keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(in Python v3.14)"><span class="pre">collections.abc.Iterable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.merge_parameters" title="Link to this definition"></a></dt>
+<dd><p>Merge the source config dict into the destination config. Pick from the source
+configs <em>ONLY</em> the keys that are already present in the destination config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dest</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Destination config.</p></li>
+<li><p><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em> | </em><em>None</em>) – Source config.</p></li>
+<li><p><strong>required_keys</strong> (<em>Optional</em><em>[</em><em>Iterable</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em><em>]</em>) – An optional list of keys that must be present in the destination config.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>dest</strong> – A reference to the destination config after the merge.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.nullable">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">nullable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><span class="pre">collections.abc.Callable</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#mlos_bench.util.NullableT" title="mlos_bench.util.NullableT"><span class="pre">NullableT</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mlos_bench.util.NullableT" title="mlos_bench.util.NullableT"><span class="pre">NullableT</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.nullable" title="Link to this definition"></a></dt>
+<dd><p>Poor man’s Maybe monad: apply the function to the value if it’s not None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> (<em>Callable</em>) – Function to apply to the value.</p></li>
+<li><p><strong>value</strong> (<em>Any</em><em> | </em><em>None</em>) – Value to apply the function to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>value</strong> – The result of the function application or None if the value is None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mlos_bench.util.NullableT" title="mlos_bench.util.NullableT">NullableT</a> | None</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">nullable</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nullable</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nullable</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="go">&#39;1&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.path_join">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">path_join</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">abs_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.path_join" title="Link to this definition"></a></dt>
+<dd><p>Joins the path components and normalizes the path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path components.</p></li>
+<li><p><strong>abs_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, the path is converted to be absolute.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Joined path.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.prepare_class_load">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">prepare_class_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.prepare_class_load" title="Link to this definition"></a></dt>
+<dd><p>Extract the class instantiation parameters from the configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Configuration of the optimizer.</p></li>
+<li><p><strong>global_config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Global configuration parameters (optional).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>(class_name, class_config)</strong> – Name of the class to instantiate and its configuration.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.preprocess_dynamic_configs">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">preprocess_dynamic_configs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.preprocess_dynamic_configs" title="Link to this definition"></a></dt>
+<dd><p>Replaces all <code class="docutils literal notranslate"><span class="pre">$name</span></code> values in the destination config with the corresponding value
+from the source config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dest</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Destination config.</p></li>
+<li><p><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em> | </em><em>None</em>) – Source config.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>dest</strong> – A reference to the destination config after the preprocessing.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.sanitize_config">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">sanitize_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.sanitize_config" title="Link to this definition"></a></dt>
+<dd><p>Sanitize a configuration dictionary by obfuscating potentially sensitive keys.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Configuration dictionary to sanitize.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Sanitized configuration dictionary.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.strtobool">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">strtobool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.strtobool" title="Link to this definition"></a></dt>
+<dd><p>Convert a string representation of truth to true (1) or false (0).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>val</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – True values are ‘y’, ‘yes’, ‘t’, ‘true’, ‘on’, and ‘1’;
+False values are ‘n’, ‘no’, ‘f’, ‘false’, ‘off’, and ‘0’.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If ‘val’ is anything else.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.try_parse_val">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">try_parse_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.try_parse_val" title="Link to this definition"></a></dt>
+<dd><p>Try to parse the value as an int or float, otherwise return the string.</p>
+<p>This can help with config schema validation to make sure early on that
+the args we’re expecting are the right type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>val</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The initial cmd line arg value.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The parsed value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../tunables/tunable_types/index.html#mlos_bench.tunables.tunable_types.TunableValue" title="mlos_bench.tunables.tunable_types.TunableValue">TunableValue</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.utcify_nullable_timestamp">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">utcify_nullable_timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)"><span class="pre">datetime.datetime</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'utc'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'local'</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)"><span class="pre">datetime.datetime</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.utcify_nullable_timestamp" title="Link to this definition"></a></dt>
+<dd><p>A nullable version of utcify_timestamp.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)"><em>datetime.datetime</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>origin</strong> (<em>Literal</em><em>[</em><em>'utc'</em><em>, </em><em>'local'</em><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)">datetime.datetime</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.util.utcify_timestamp">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">utcify_timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)"><span class="pre">datetime.datetime</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'utc'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'local'</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)"><span class="pre">datetime.datetime</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.utcify_timestamp" title="Link to this definition"></a></dt>
+<dd><p>Augment a timestamp with zoneinfo if missing and convert it to UTC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)"><em>datetime.datetime</em></a>) – A timestamp to convert to UTC.
+Note: The original datetime may or may not have tzinfo associated with it.</p></li>
+<li><p><strong>origin</strong> (<em>Literal</em><em>[</em><em>&quot;utc&quot;</em><em>, </em><em>&quot;local&quot;</em><em>]</em>) – Whether the source timestamp is considered to be in UTC or local time.
+In the case of loading data from storage, where we intentionally convert all
+timestamps to UTC, this can help us retrieve the original timezone when the
+storage backend doesn’t explicitly store it.
+In the case of receiving data from a client or other source, this can help us
+convert the timestamp to UTC if it’s not already.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A datetime with zoneinfo in UTC.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)">datetime.datetime</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mlos_bench.util.BaseTypeVar">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">BaseTypeVar</span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.BaseTypeVar" title="Link to this definition"></a></dt>
+<dd><p>BaseTypeVar is a generic with a constraint of the main base classes (e.g.,
+<a class="reference internal" href="../environments/base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a>,
+<a class="reference internal" href="../optimizers/base_optimizer/index.html#mlos_bench.optimizers.base_optimizer.Optimizer" title="mlos_bench.optimizers.base_optimizer.Optimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Optimizer</span></code></a>,
+<a class="reference internal" href="../schedulers/base_scheduler/index.html#mlos_bench.schedulers.base_scheduler.Scheduler" title="mlos_bench.schedulers.base_scheduler.Scheduler"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scheduler</span></code></a>,
+<a class="reference internal" href="../services/base_service/index.html#mlos_bench.services.base_service.Service" title="mlos_bench.services.base_service.Service"><code class="xref py py-class docutils literal notranslate"><span class="pre">Service</span></code></a>,
+<a class="reference internal" href="../storage/base_storage/index.html#mlos_bench.storage.base_storage.Storage" title="mlos_bench.storage.base_storage.Storage"><code class="xref py py-class docutils literal notranslate"><span class="pre">Storage</span></code></a>, etc.).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mlos_bench.util.BaseTypes">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">BaseTypes</span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.BaseTypes" title="Link to this definition"></a></dt>
+<dd><p>Similar to <a class="reference internal" href="#mlos_bench.util.BaseTypeVar" title="mlos_bench.util.BaseTypeVar"><code class="xref py py-data docutils literal notranslate"><span class="pre">BaseTypeVar</span></code></a>, BaseTypes is a Union of the main base classes.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mlos_bench.util.NullableT">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.util.</span></span><span class="sig-name descname"><span class="pre">NullableT</span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/util.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.util.NullableT" title="Link to this definition"></a></dt>
+<dd><p>A generic type variable for <a class="reference internal" href="#mlos_bench.util.nullable" title="mlos_bench.util.nullable"><code class="xref py py-func docutils literal notranslate"><span class="pre">nullable()</span></code></a> return types.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../tunables/tunable_types/index.html" class="btn btn-neutral float-left" title="mlos_bench.tunables.tunable_types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../version/index.html" class="btn btn-neutral float-right" title="mlos_bench.version" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Microsoft GSL.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

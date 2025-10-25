@@ -1,0 +1,624 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlos_bench.tunables.tunable_types &mdash; MLOS 0.6.3.dev53+g549a69ab0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/plot_directive.css" />
+
+  
+    <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/tunables/tunable_types/index.html"/>
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=8b2becd3"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="mlos_bench.util" href="../../util/index.html" />
+    <link rel="prev" title="mlos_bench.tunables.tunable_groups" href="../tunable_groups/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MLOS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Source Tree Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source_tree_docs/index.html">MLOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source_tree_docs/mlos_core/index.html">mlos-core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source_tree_docs/mlos_bench/index.html">mlos-bench</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source_tree_docs/mlos_viz/index.html">mlos-viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../mlos_core/index.html">mlos_core</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">mlos_bench</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#classes-overview">Classes Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../config/index.html">mlos_bench.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dict_templater/index.html">mlos_bench.dict_templater</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../environments/index.html">mlos_bench.environments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../event_loop_context/index.html">mlos_bench.event_loop_context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../launcher/index.html">mlos_bench.launcher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../optimizers/index.html">mlos_bench.optimizers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../os_environ/index.html">mlos_bench.os_environ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../run/index.html">mlos_bench.run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../schedulers/index.html">mlos_bench.schedulers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../services/index.html">mlos_bench.services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../storage/index.html">mlos_bench.storage</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html">mlos_bench.tunables</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../index.html#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#classes">Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#usage">Usage</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="../covariant_group/index.html">mlos_bench.tunables.covariant_group</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../tunable/index.html">mlos_bench.tunables.tunable</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../tunable_groups/index.html">mlos_bench.tunables.tunable_groups</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">mlos_bench.tunables.tunable_types</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#attributes">Attributes</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#classes">Classes</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.DistributionDict"><code class="docutils literal notranslate"><span class="pre">DistributionDict</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.DistributionDict.type"><code class="docutils literal notranslate"><span class="pre">DistributionDict.type</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.DistributionDictOpt"><code class="docutils literal notranslate"><span class="pre">DistributionDictOpt</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.DistributionDictOpt.params"><code class="docutils literal notranslate"><span class="pre">DistributionDictOpt.params</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDict"><code class="docutils literal notranslate"><span class="pre">TunableDict</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDict.default"><code class="docutils literal notranslate"><span class="pre">TunableDict.default</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDict.type"><code class="docutils literal notranslate"><span class="pre">TunableDict.type</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDictOpt"><code class="docutils literal notranslate"><span class="pre">TunableDictOpt</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.description"><code class="docutils literal notranslate"><span class="pre">TunableDictOpt.description</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.distribution"><code class="docutils literal notranslate"><span class="pre">TunableDictOpt.distribution</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.log"><code class="docutils literal notranslate"><span class="pre">TunableDictOpt.log</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.meta"><code class="docutils literal notranslate"><span class="pre">TunableDictOpt.meta</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.quantization_bins"><code class="docutils literal notranslate"><span class="pre">TunableDictOpt.quantization_bins</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.range"><code class="docutils literal notranslate"><span class="pre">TunableDictOpt.range</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.range_weight"><code class="docutils literal notranslate"><span class="pre">TunableDictOpt.range_weight</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.special"><code class="docutils literal notranslate"><span class="pre">TunableDictOpt.special</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.special_weights"><code class="docutils literal notranslate"><span class="pre">TunableDictOpt.special_weights</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.values"><code class="docutils literal notranslate"><span class="pre">TunableDictOpt.values</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.values_weights"><code class="docutils literal notranslate"><span class="pre">TunableDictOpt.values_weights</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.tunable_dict_from_dict"><code class="docutils literal notranslate"><span class="pre">tunable_dict_from_dict()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.DistributionName"><code class="docutils literal notranslate"><span class="pre">DistributionName</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TUNABLE_DTYPE"><code class="docutils literal notranslate"><span class="pre">TUNABLE_DTYPE</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableValue"><code class="docutils literal notranslate"><span class="pre">TunableValue</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableValueType"><code class="docutils literal notranslate"><span class="pre">TunableValueType</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableValueTypeName"><code class="docutils literal notranslate"><span class="pre">TunableValueTypeName</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableValueTypeTuple"><code class="docutils literal notranslate"><span class="pre">TunableValueTypeTuple</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableValuesDict"><code class="docutils literal notranslate"><span class="pre">TunableValuesDict</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../util/index.html">mlos_bench.util</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../version/index.html">mlos_bench.version</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#attributes">Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mlos_viz/index.html">mlos_viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">mlos_bench CLI usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mlos_bench.run.usage.html">mlos_bench CLI usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/microsoft/MLOS">Github Source Tree</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MLOS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">mlos_bench</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">mlos_bench.tunables</a></li>
+      <li class="breadcrumb-item active">mlos_bench.tunables.tunable_types</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/autoapi/mlos_bench/tunables/tunable_types/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mlos_bench.tunables.tunable_types">
+<span id="mlos-bench-tunables-tunable-types"></span><h1>mlos_bench.tunables.tunable_types<a class="headerlink" href="#module-mlos_bench.tunables.tunable_types" title="Link to this heading"></a></h1>
+<p>Helper types for <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a>.</p>
+<p>The main class of interest to most users in this module is <a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDict" title="mlos_bench.tunables.tunable_types.TunableDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">TunableDict</span></code></a>,
+which provides the typed conversions from a JSON config to a config used for
+creating a <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a>.</p>
+<p>The other types are mostly used for type checking and documentation purposes.</p>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.tunables.tunable_types.DistributionName" title="mlos_bench.tunables.tunable_types.DistributionName"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DistributionName</span></code></a></p></td>
+<td><p>The <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.distribution" title="mlos_bench.tunables.tunable.Tunable.distribution"><code class="xref py py-attr docutils literal notranslate"><span class="pre">distribution</span></code></a> type names for a <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> value.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TUNABLE_DTYPE" title="mlos_bench.tunables.tunable_types.TUNABLE_DTYPE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TUNABLE_DTYPE</span></code></a></p></td>
+<td><p>Maps <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> types to their corresponding Python data types by name.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableValue" title="mlos_bench.tunables.tunable_types.TunableValue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TunableValue</span></code></a></p></td>
+<td><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">TypeAlias</span></code> for a <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter value.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableValueType" title="mlos_bench.tunables.tunable_types.TunableValueType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TunableValueType</span></code></a></p></td>
+<td><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">TypeAlias</span></code> for <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> value</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableValueTypeName" title="mlos_bench.tunables.tunable_types.TunableValueTypeName"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TunableValueTypeName</span></code></a></p></td>
+<td><p>The accepted string names of a <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> value <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.type" title="mlos_bench.tunables.tunable.Tunable.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">type</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableValueTypeTuple" title="mlos_bench.tunables.tunable_types.TunableValueTypeTuple"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TunableValueTypeTuple</span></code></a></p></td>
+<td><p>Tunable value <code class="docutils literal notranslate"><span class="pre">type</span></code> tuple.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableValuesDict" title="mlos_bench.tunables.tunable_types.TunableValuesDict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TunableValuesDict</span></code></a></p></td>
+<td><p>Tunable values dictionary type.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.tunables.tunable_types.DistributionDict" title="mlos_bench.tunables.tunable_types.DistributionDict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DistributionDict</span></code></a></p></td>
+<td><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code> for a <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter's required</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.tunables.tunable_types.DistributionDictOpt" title="mlos_bench.tunables.tunable_types.DistributionDictOpt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DistributionDictOpt</span></code></a></p></td>
+<td><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code> for a <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter's optional</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDict" title="mlos_bench.tunables.tunable_types.TunableDict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TunableDict</span></code></a></p></td>
+<td><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code> for a <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter's required config</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDictOpt" title="mlos_bench.tunables.tunable_types.TunableDictOpt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TunableDictOpt</span></code></a></p></td>
+<td><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code> for a <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter's optional config</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.tunables.tunable_types.tunable_dict_from_dict" title="mlos_bench.tunables.tunable_types.tunable_dict_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tunable_dict_from_dict</span></code></a>(→ TunableDict)</p></td>
+<td><p>Creates a TunableDict from a regular dict.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.DistributionDict">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlos_bench.tunables.tunable_types.</span></span><span class="sig-name descname"><span class="pre">DistributionDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.DistributionDict" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlos_bench.tunables.tunable_types.DistributionDictOpt" title="mlos_bench.tunables.tunable_types.DistributionDictOpt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DistributionDictOpt</span></code></a></p>
+<p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code> for a <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter’s required
+<a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.distribution" title="mlos_bench.tunables.tunable.Tunable.distribution"><code class="xref py py-attr docutils literal notranslate"><span class="pre">distribution</span></code></a> config parameters.</p>
+<p>Mostly used for type checking. These are the types expected to be received from the
+json config.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.distribution" title="mlos_bench.tunables.tunable.Tunable.distribution"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.distribution</span></code></a> :</dt><dd><p>Examples of Tunables with distributions.</p>
+</dd>
+<dt><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.distribution_params" title="mlos_bench.tunables.tunable.Tunable.distribution_params"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.distribution_params</span></code></a> :</dt><dd><p>Examples of distribution parameters.</p>
+</dd>
+</dl>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.DistributionDict.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#mlos_bench.tunables.tunable_types.DistributionName" title="mlos_bench.tunables.tunable_types.DistributionName"><span class="pre">DistributionName</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.DistributionDict.type" title="Link to this definition"></a></dt>
+<dd><p>The name of the distribution.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.distribution" title="mlos_bench.tunables.tunable.Tunable.distribution"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.distribution</span></code></a> :</dt><dd><p>Examples of distribution names.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.DistributionDictOpt">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlos_bench.tunables.tunable_types.</span></span><span class="sig-name descname"><span class="pre">DistributionDictOpt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.DistributionDictOpt" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
+<p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code> for a <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter’s optional
+<a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.distribution_params" title="mlos_bench.tunables.tunable.Tunable.distribution_params"><code class="xref py py-attr docutils literal notranslate"><span class="pre">distribution_params</span></code></a> config.</p>
+<p>Mostly used for type checking. These are the types expected to be received from
+the json config.</p>
+<p class="rubric">Notes</p>
+<p><a class="reference internal" href="#mlos_bench.tunables.tunable_types.DistributionDict" title="mlos_bench.tunables.tunable_types.DistributionDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">DistributionDict</span></code></a> contains the required fields for the
+<a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.distribution" title="mlos_bench.tunables.tunable.Tunable.distribution"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.distribution</span></code></a> parameter.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.distribution_params" title="mlos_bench.tunables.tunable.Tunable.distribution_params"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.distribution_params</span></code></a> :</dt><dd><p>Examples of distribution parameters.</p>
+</dd>
+</dl>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.DistributionDictOpt.params">
+<span class="sig-name descname"><span class="pre">params</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.DistributionDictOpt.params" title="Link to this definition"></a></dt>
+<dd><p>The parameters for the distribution.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.distribution_params" title="mlos_bench.tunables.tunable.Tunable.distribution_params"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.distribution_params</span></code></a> :</dt><dd><p>Examples of distribution parameters.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableDict">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlos_bench.tunables.tunable_types.</span></span><span class="sig-name descname"><span class="pre">TunableDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableDict" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDictOpt" title="mlos_bench.tunables.tunable_types.TunableDictOpt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TunableDictOpt</span></code></a></p>
+<p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code> for a <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter’s required config
+parameters.</p>
+<p>Mostly used for type checking. These are the types expected to be received from
+the json config.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example values of the TunableDict</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">TunableDict</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;range&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">]})</span>
+<span class="go">{&#39;type&#39;: &#39;int&#39;, &#39;default&#39;: 0, &#39;range&#39;: [0, 10]}</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example values of the TunableDict with optional fields</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">TunableDict</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;categorical&#39;</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">]})</span>
+<span class="go">{&#39;type&#39;: &#39;categorical&#39;, &#39;default&#39;: &#39;a&#39;, &#39;values&#39;: [&#39;a&#39;, &#39;b&#39;]}</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableDict.default">
+<span class="sig-name descname"><span class="pre">default</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableValue" title="mlos_bench.tunables.tunable_types.TunableValue"><span class="pre">TunableValue</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableDict.default" title="Link to this definition"></a></dt>
+<dd><p>The default value of the <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.default" title="mlos_bench.tunables.tunable.Tunable.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.default</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableDict.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableValueTypeName" title="mlos_bench.tunables.tunable_types.TunableValueTypeName"><span class="pre">TunableValueTypeName</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableDict.type" title="Link to this definition"></a></dt>
+<dd><p>The name of the type of the <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.type" title="mlos_bench.tunables.tunable.Tunable.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.type</span></code></a> : Examples of type names.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableDictOpt">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlos_bench.tunables.tunable_types.</span></span><span class="sig-name descname"><span class="pre">TunableDictOpt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableDictOpt" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
+<p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code> for a <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter’s optional config
+parameters.</p>
+<p>Mostly used for type checking. These are the types expected to be received from
+the json config.</p>
+<p class="rubric">Notes</p>
+<p><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDict" title="mlos_bench.tunables.tunable_types.TunableDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">TunableDict</span></code></a> contains the required fields for the
+<a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableDictOpt.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.description" title="Link to this definition"></a></dt>
+<dd><p>Description of the <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.description" title="mlos_bench.tunables.tunable.Tunable.description"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.description</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableDictOpt.distribution">
+<span class="sig-name descname"><span class="pre">distribution</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#mlos_bench.tunables.tunable_types.DistributionDict" title="mlos_bench.tunables.tunable_types.DistributionDict"><span class="pre">DistributionDict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.distribution" title="Link to this definition"></a></dt>
+<dd><p>Optional sampling distribution configuration for an “int” or “float” type
+<a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.distribution" title="mlos_bench.tunables.tunable.Tunable.distribution"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.distribution</span></code></a> :</dt><dd><p>Examples of distributions.</p>
+</dd>
+<dt><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.distribution_params" title="mlos_bench.tunables.tunable.Tunable.distribution_params"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.distribution_params</span></code></a> :</dt><dd><p>Examples of distribution parameters.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableDictOpt.log">
+<span class="sig-name descname"><span class="pre">log</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.log" title="Link to this definition"></a></dt>
+<dd><p>Whether to use log sampling for an “int” or “float” type <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a>
+parameter.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.is_log" title="mlos_bench.tunables.tunable.Tunable.is_log"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.is_log</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableDictOpt.meta">
+<span class="sig-name descname"><span class="pre">meta</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.meta" title="Link to this definition"></a></dt>
+<dd><p>Free form dict to store additional metadata for the <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter
+(e.g., unit suffix, etc.)</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.meta" title="mlos_bench.tunables.tunable.Tunable.meta"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.meta</span></code></a> : Examples of Tunables with metadata.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableDictOpt.quantization_bins">
+<span class="sig-name descname"><span class="pre">quantization_bins</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.quantization_bins" title="Link to this definition"></a></dt>
+<dd><p>The number of quantization bins for an “int” or “float” type <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a>
+parameter.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.quantization_bins" title="mlos_bench.tunables.tunable.Tunable.quantization_bins"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.quantization_bins</span></code></a> :</dt><dd><p>Examples of quantized Tunables.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableDictOpt.range">
+<span class="sig-name descname"><span class="pre">range</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><span class="pre">collections.abc.Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><span class="pre">collections.abc.Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.range" title="Link to this definition"></a></dt>
+<dd><p>The range of values for an “int” or “float” type <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter.</p>
+<p>Must be a sequence of two values: <code class="docutils literal notranslate"><span class="pre">[min,</span> <span class="pre">max]</span></code>.</p>
+<p>A range is required for “int” and “float” type Tunables.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.range" title="mlos_bench.tunables.tunable.Tunable.range"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.range</span></code></a> : Examples of ranges.
+<a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.values" title="mlos_bench.tunables.tunable.Tunable.values"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.values</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableDictOpt.range_weight">
+<span class="sig-name descname"><span class="pre">range_weight</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.range_weight" title="Link to this definition"></a></dt>
+<dd><p>Optional sampling weight for the main ranges of an “int” or “float” type
+<a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.range_weight" title="mlos_bench.tunables.tunable.Tunable.range_weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.range_weight</span></code></a> :</dt><dd><p>Examples of weighted sampling Tunables.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableDictOpt.special">
+<span class="sig-name descname"><span class="pre">special</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.special" title="Link to this definition"></a></dt>
+<dd><p>List of special values for an “int” or “float” type <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter.</p>
+<p>These are values that are considered special by the target system (e.g.,
+<code class="docutils literal notranslate"><span class="pre">null</span></code>, <code class="docutils literal notranslate"><span class="pre">0</span></code>, <code class="docutils literal notranslate"><span class="pre">-1</span></code>, <code class="docutils literal notranslate"><span class="pre">auto</span></code>, etc.) and should be sampled with higher
+weights.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.special" title="mlos_bench.tunables.tunable.Tunable.special"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.special</span></code></a> : Examples of special values.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableDictOpt.special_weights">
+<span class="sig-name descname"><span class="pre">special_weights</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.special_weights" title="Link to this definition"></a></dt>
+<dd><p>Optional sampling weights for the special values of an “int” or “float” type
+<a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.weights" title="mlos_bench.tunables.tunable.Tunable.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.weights</span></code></a> : Examples of weighted sampling Tunables.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableDictOpt.values">
+<span class="sig-name descname"><span class="pre">values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.values" title="Link to this definition"></a></dt>
+<dd><p>List of values (or categories) for a “categorical” type <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a>
+parameter.</p>
+<p>A list of values is required for “categorical” type Tunables.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.categories" title="mlos_bench.tunables.tunable.Tunable.categories"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.categories</span></code></a>
+<a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.values" title="mlos_bench.tunables.tunable.Tunable.values"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.values</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableDictOpt.values_weights">
+<span class="sig-name descname"><span class="pre">values_weights</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableDictOpt.values_weights" title="Link to this definition"></a></dt>
+<dd><p>Optional sampling weights for the values of a “categorical” type
+<a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.weights" title="mlos_bench.tunables.tunable.Tunable.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.weights</span></code></a> : Examples of weighted sampling Tunables.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.tunable_dict_from_dict">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.tunables.tunable_types.</span></span><span class="sig-name descname"><span class="pre">tunable_dict_from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDict" title="mlos_bench.tunables.tunable_types.TunableDict"><span class="pre">TunableDict</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.tunable_dict_from_dict" title="Link to this definition"></a></dt>
+<dd><p>Creates a TunableDict from a regular dict.</p>
+<p class="rubric">Notes</p>
+<p>Mostly used for type checking while instantiating a
+<a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> from a json config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – A regular dict that represents a <a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDict" title="mlos_bench.tunables.tunable_types.TunableDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">TunableDict</span></code></a>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableDict" title="mlos_bench.tunables.tunable_types.TunableDict">TunableDict</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example values of the TunableDict</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">json5</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">json</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="s2">&quot;{&#39;type&#39;: &#39;int&#39;, &#39;default&#39;: 0, &#39;range&#39;: [0, 10]}&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span>
+<span class="go">{&#39;type&#39;: &#39;int&#39;, &#39;default&#39;: 0, &#39;range&#39;: [0, 10]}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">typed_dict</span> <span class="o">=</span> <span class="n">tunable_dict_from_dict</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">typed_dict</span>
+<span class="go">{&#39;type&#39;: &#39;int&#39;, &#39;description&#39;: None, &#39;default&#39;: 0, &#39;values&#39;: None, &#39;range&#39;: [0, 10], &#39;quantization_bins&#39;: None, &#39;log&#39;: None, &#39;distribution&#39;: None, &#39;special&#39;: None, &#39;values_weights&#39;: None, &#39;special_weights&#39;: None, &#39;range_weight&#39;: None, &#39;meta&#39;: {}}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.DistributionName">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.tunables.tunable_types.</span></span><span class="sig-name descname"><span class="pre">DistributionName</span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.DistributionName" title="Link to this definition"></a></dt>
+<dd><p>The <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.distribution" title="mlos_bench.tunables.tunable.Tunable.distribution"><code class="xref py py-attr docutils literal notranslate"><span class="pre">distribution</span></code></a> type names for a <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> value.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.distribution" title="mlos_bench.tunables.tunable.Tunable.distribution"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.distribution</span></code></a> :</dt><dd><p>Example of accepted distribution names.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TUNABLE_DTYPE">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.tunables.tunable_types.</span></span><span class="sig-name descname"><span class="pre">TUNABLE_DTYPE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableValueTypeName" title="mlos_bench.tunables.tunable_types.TunableValueTypeName"><span class="pre">TunableValueTypeName</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableValueType" title="mlos_bench.tunables.tunable_types.TunableValueType"><span class="pre">TunableValueType</span></a><span class="p"><span class="pre">]</span></span></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TUNABLE_DTYPE" title="Link to this definition"></a></dt>
+<dd><p>Maps <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> types to their corresponding Python data types by name.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.dtype" title="mlos_bench.tunables.tunable.Tunable.dtype"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.dtype</span></code></a> : Example of type mappings.</p>
+</div>
+</dd></dl>
+
+<dl class="py type">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableValue">
+<em class="property"><span class="k"><span class="pre">type</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlos_bench.tunables.tunable_types.</span></span><span class="sig-name descname"><span class="pre">TunableValue</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableValue" title="Link to this definition"></a></dt>
+<dd><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">TypeAlias</span></code> for a <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> parameter value.</p>
+</dd></dl>
+
+<dl class="py type">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableValueType">
+<em class="property"><span class="k"><span class="pre">type</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlos_bench.tunables.tunable_types.</span></span><span class="sig-name descname"><span class="pre">TunableValueType</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableValueType" title="Link to this definition"></a></dt>
+<dd><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">TypeAlias</span></code> for <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> value
+<a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.dtype" title="mlos_bench.tunables.tunable.Tunable.dtype"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span> <span class="pre">type</span></code></a>.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.dtype" title="mlos_bench.tunables.tunable.Tunable.dtype"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.dtype</span></code></a> : Example of accepted types.</p>
+</div>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableValueTypeName">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.tunables.tunable_types.</span></span><span class="sig-name descname"><span class="pre">TunableValueTypeName</span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableValueTypeName" title="Link to this definition"></a></dt>
+<dd><p>The accepted string names of a <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> value <a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.type" title="mlos_bench.tunables.tunable.Tunable.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">type</span></code></a>.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../tunable/index.html#mlos_bench.tunables.tunable.Tunable.type" title="mlos_bench.tunables.tunable.Tunable.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.type</span></code></a> : Example of accepted type names.</p>
+</div>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableValueTypeTuple">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.tunables.tunable_types.</span></span><span class="sig-name descname"><span class="pre">TunableValueTypeTuple</span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableValueTypeTuple" title="Link to this definition"></a></dt>
+<dd><p>Tunable value <code class="docutils literal notranslate"><span class="pre">type</span></code> tuple.</p>
+<p class="rubric">Notes</p>
+<p>For checking whether a param is a <a class="reference internal" href="#mlos_bench.tunables.tunable_types.TunableValue" title="mlos_bench.tunables.tunable_types.TunableValue"><code class="xref py py-type docutils literal notranslate"><span class="pre">TunableValue</span></code></a> with
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#isinstance" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mlos_bench.tunables.tunable_types.TunableValuesDict">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.tunables.tunable_types.</span></span><span class="sig-name descname"><span class="pre">TunableValuesDict</span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tunables/tunable_types.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.tunables.tunable_types.TunableValuesDict" title="Link to this definition"></a></dt>
+<dd><p>Tunable values dictionary type.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../tunable_groups/index.html" class="btn btn-neutral float-left" title="mlos_bench.tunables.tunable_groups" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../util/index.html" class="btn btn-neutral float-right" title="mlos_bench.util" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Microsoft GSL.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

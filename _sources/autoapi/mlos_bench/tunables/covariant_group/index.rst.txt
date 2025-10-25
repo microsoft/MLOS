@@ -1,0 +1,204 @@
+mlos_bench.tunables.covariant_group
+===================================
+
+.. py:module:: mlos_bench.tunables.covariant_group
+
+.. autoapi-nested-parse::
+
+   CovariantTunableGroup class definition.
+
+   A collection of :py:class:`.Tunable` parameters that are updated together (e.g.,
+   with the same cost).
+
+   .. seealso::
+
+      :py:obj:`mlos_bench.tunables.tunable_groups`
+          TunableGroups class definition.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.tunables.covariant_group.CovariantTunableGroup
+
+
+Module Contents
+---------------
+
+.. py:class:: CovariantTunableGroup(name: str, config: dict)
+
+   A collection of :py:class:`.Tunable` parameters.
+
+   Changing any of the parameters in the group incurs the same cost of the experiment.
+
+   .. seealso::
+
+      mlos_bench.tunables.tunable_groups : TunableGroups class definition.
+
+      Create a new group of tunable parameters.
+
+      :param name: Human-readable identifier of the tunable parameters group.
+      :type name: str
+      :param config: Python dict that represents a CovariantTunableGroup
+                     (e.g., deserialized from JSON).
+      :type config: dict
+
+
+   .. py:method:: __contains__(tunable: str | mlos_bench.tunables.tunable.Tunable) -> bool
+
+
+   .. py:method:: __eq__(other: object) -> bool
+
+      Check if two CovariantTunableGroup objects are equal.
+
+      :param other: A covariant tunable group object to compare to.
+      :type other: CovariantTunableGroup
+
+      :returns: **is_equal** -- True if two CovariantTunableGroup objects are equal.
+      :rtype: bool
+
+
+
+   .. py:method:: __getitem__(tunable: str | mlos_bench.tunables.tunable.Tunable) -> mlos_bench.tunables.tunable_types.TunableValue
+
+
+   .. py:method:: __repr__() -> str
+
+      Produce a human-readable version of the CovariantTunableGroup (mostly for
+      logging).
+
+      :returns: **string** -- A human-readable version of the CovariantTunableGroup.
+      :rtype: str
+
+
+
+   .. py:method:: __setitem__(tunable: str | mlos_bench.tunables.tunable.Tunable, tunable_value: mlos_bench.tunables.tunable_types.TunableValue | mlos_bench.tunables.tunable.Tunable) -> mlos_bench.tunables.tunable_types.TunableValue
+
+
+   .. py:method:: copy() -> CovariantTunableGroup
+
+      Deep copy of the CovariantTunableGroup object.
+
+      :returns: **group** -- A new instance of the CovariantTunableGroup object
+                that is a deep copy of the original one.
+      :rtype: CovariantTunableGroup
+
+
+
+   .. py:method:: equals_defaults(other: CovariantTunableGroup) -> bool
+
+      Checks to see if the other CovariantTunableGroup is the same, ignoring the
+      current values of the two groups' Tunables.
+
+      :param other: A covariant tunable group object to compare to.
+      :type other: CovariantTunableGroup
+
+      :returns: **are_equal** -- True if the two CovariantTunableGroup objects' *metadata* are the same,
+                False otherwise.
+      :rtype: bool
+
+
+
+   .. py:method:: get_current_cost() -> int
+
+      Get the cost of the experiment given current tunable values.
+
+      :returns: **cost** -- Cost of the experiment or 0 if parameters have not been updated.
+      :rtype: int
+
+
+
+   .. py:method:: get_names() -> collections.abc.Iterable[str]
+
+      Get the names of all tunables in the group.
+
+
+
+   .. py:method:: get_tunable(tunable: str | mlos_bench.tunables.tunable.Tunable) -> mlos_bench.tunables.tunable.Tunable
+
+      Access the entire Tunable in a group (not just its value). Throw KeyError if the
+      tunable is not in the group.
+
+      :param tunable: Name of the tunable parameter.
+      :type tunable: str
+
+      :returns: An instance of the Tunable parameter.
+      :rtype: Tunable
+
+
+
+   .. py:method:: get_tunable_values_dict() -> dict[str, mlos_bench.tunables.tunable_types.TunableValue]
+
+      Get current values of all tunables in the group as a dict.
+
+      :returns: **tunables**
+      :rtype: dict[str, TunableValue]
+
+
+
+   .. py:method:: get_tunables() -> collections.abc.Iterable[mlos_bench.tunables.tunable.Tunable]
+
+      Gets the set of tunables for this CovariantTunableGroup.
+
+      :rtype: Iterable[Tunable]
+
+
+
+   .. py:method:: is_defaults() -> bool
+
+      Checks whether the currently assigned values of all tunables are at their
+      defaults.
+
+      :rtype: bool
+
+
+
+   .. py:method:: is_updated() -> bool
+
+      Check if any of the tunable values in the group has been updated.
+
+      :returns: **is_updated** -- True if any of the tunable values in the group has been updated, False otherwise.
+      :rtype: bool
+
+
+
+   .. py:method:: reset_is_updated() -> None
+
+      Clear the update flag.
+
+      That is, state that running an experiment with the current values of the
+      tunables in this group has no extra cost.
+
+
+
+   .. py:method:: restore_defaults() -> None
+
+      Restore all tunable parameters to their default values.
+
+
+
+   .. py:property:: cost
+      :type: int
+
+
+      Get the cost of changing the values in the covariant group. This value is a
+      constant. Use `get_current_cost()` to get the cost given the group update
+      status.
+
+      :returns: **cost** -- Cost of changing the values in the covariant group.
+      :rtype: int
+
+
+   .. py:property:: name
+      :type: str
+
+
+      Get the name of the covariant group.
+
+      :returns: **name** -- Name (i.e., a string id) of the covariant group.
+      :rtype: str
+
+

@@ -1,0 +1,415 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlos_bench.tunables &mdash; MLOS 0.6.3.dev53+g549a69ab0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+
+  
+    <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/tunables/index.html"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=8b2becd3"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="mlos_bench.tunables.covariant_group" href="covariant_group/index.html" />
+    <link rel="prev" title="mlos_bench.storage.util" href="../storage/util/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MLOS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Source Tree Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_tree_docs/index.html">MLOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_tree_docs/mlos_core/index.html">mlos-core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_tree_docs/mlos_bench/index.html">mlos-bench</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_tree_docs/mlos_viz/index.html">mlos-viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../mlos_core/index.html">mlos_core</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">mlos_bench</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#classes-overview">Classes Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../config/index.html">mlos_bench.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dict_templater/index.html">mlos_bench.dict_templater</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../environments/index.html">mlos_bench.environments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../event_loop_context/index.html">mlos_bench.event_loop_context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../launcher/index.html">mlos_bench.launcher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../optimizers/index.html">mlos_bench.optimizers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../os_environ/index.html">mlos_bench.os_environ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../run/index.html">mlos_bench.run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../schedulers/index.html">mlos_bench.schedulers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../services/index.html">mlos_bench.services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../storage/index.html">mlos_bench.storage</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mlos_bench.tunables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classes">Classes</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#tunable">Tunable</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#covarianttunablegroup">CovariantTunableGroup</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tunablegroups">TunableGroups</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#limitations">Limitations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="covariant_group/index.html">mlos_bench.tunables.covariant_group</a></li>
+<li class="toctree-l5"><a class="reference internal" href="tunable/index.html">mlos_bench.tunables.tunable</a></li>
+<li class="toctree-l5"><a class="reference internal" href="tunable_groups/index.html">mlos_bench.tunables.tunable_groups</a></li>
+<li class="toctree-l5"><a class="reference internal" href="tunable_types/index.html">mlos_bench.tunables.tunable_types</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../util/index.html">mlos_bench.util</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../version/index.html">mlos_bench.version</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#attributes">Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../mlos_viz/index.html">mlos_viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">mlos_bench CLI usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mlos_bench.run.usage.html">mlos_bench CLI usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/microsoft/MLOS">Github Source Tree</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MLOS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">mlos_bench</a></li>
+      <li class="breadcrumb-item active">mlos_bench.tunables</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/mlos_bench/tunables/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mlos_bench.tunables">
+<span id="mlos-bench-tunables"></span><h1><a class="toc-backref" href="#id2" role="doc-backlink">mlos_bench.tunables</a><a class="headerlink" href="#module-mlos_bench.tunables" title="Link to this heading"></a></h1>
+<p>Tunables classes for Environments in mlos_bench.</p>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#module-mlos_bench.tunables" id="id2">mlos_bench.tunables</a></p>
+<ul>
+<li><p><a class="reference internal" href="#overview" id="id3">Overview</a></p></li>
+<li><p><a class="reference internal" href="#classes" id="id4">Classes</a></p>
+<ul>
+<li><p><a class="reference internal" href="#tunable" id="id5">Tunable</a></p></li>
+<li><p><a class="reference internal" href="#covarianttunablegroup" id="id6">CovariantTunableGroup</a></p></li>
+<li><p><a class="reference internal" href="#tunablegroups" id="id7">TunableGroups</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#usage" id="id8">Usage</a></p></li>
+<li><p><a class="reference internal" href="#submodules" id="id9">Submodules</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="overview">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Overview</a><a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>mlos_bench uses the concept of “tunables” to define the configuration space for an
+<a class="reference internal" href="../environments/base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a>.</p>
+<p>An <a class="reference internal" href="../optimizers/base_optimizer/index.html#mlos_bench.optimizers.base_optimizer.Optimizer" title="mlos_bench.optimizers.base_optimizer.Optimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Optimizer</span></code></a> can then use these
+tunables to explore the configuration space in order to improve some target
+objective metrics (e.g., reduce tail latency, reduce cost, improve throughput,
+etc.).</p>
+<p>They are similar to the concept of “hyperparameters” in machine learning, but are
+used to configure the system being tested.</p>
+</section>
+<section id="classes">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Classes</a><a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<section id="tunable">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">Tunable</a><a class="headerlink" href="#tunable" title="Link to this heading"></a></h3>
+<p>The <a class="reference internal" href="tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> class is used to define a
+single tunable parameter.
+A <code class="docutils literal notranslate"><span class="pre">Tunable</span></code> has a <a class="reference internal" href="tunable/index.html#mlos_bench.tunables.tunable.Tunable.type" title="mlos_bench.tunables.tunable.Tunable.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">type</span></code></a> and can be a <code class="docutils literal notranslate"><span class="pre">categorical</span></code> or
+numeric (<code class="docutils literal notranslate"><span class="pre">int</span></code> or <code class="docutils literal notranslate"><span class="pre">float</span></code>) and always has at least a domain
+(<a class="reference internal" href="tunable/index.html#mlos_bench.tunables.tunable.Tunable.range" title="mlos_bench.tunables.tunable.Tunable.range"><code class="xref py py-attr docutils literal notranslate"><span class="pre">range</span></code></a> or set of <a class="reference internal" href="tunable/index.html#mlos_bench.tunables.tunable.Tunable.values" title="mlos_bench.tunables.tunable.Tunable.values"><code class="xref py py-attr docutils literal notranslate"><span class="pre">values</span></code></a>) and a
+<a class="reference internal" href="tunable/index.html#mlos_bench.tunables.tunable.Tunable.default" title="mlos_bench.tunables.tunable.Tunable.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">default</span></code></a>.
+Each type can also have a number of additional properties that can optionally be set
+to help control the sampling of the tunable.</p>
+<p>For instance:</p>
+<ul class="simple">
+<li><p>Numeric tunables can have a <a class="reference internal" href="tunable/index.html#mlos_bench.tunables.tunable.Tunable.distribution" title="mlos_bench.tunables.tunable.Tunable.distribution"><code class="xref py py-attr docutils literal notranslate"><span class="pre">distribution</span></code></a> property to specify the sampling
+distribution.  <a class="reference internal" href="tunable/index.html#mlos_bench.tunables.tunable.Tunable.is_log" title="mlos_bench.tunables.tunable.Tunable.is_log"><code class="xref py py-attr docutils literal notranslate"><span class="pre">log</span></code></a> sampling can also be enabled for
+numeric tunables.</p></li>
+<li><p>Categorical tunables can have a <a class="reference internal" href="tunable/index.html#mlos_bench.tunables.tunable.Tunable.weights" title="mlos_bench.tunables.tunable.Tunable.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">values_weights</span></code></a>
+property to specify biased sampling of the values</p></li>
+<li><p><a class="reference internal" href="tunable/index.html#mlos_bench.tunables.tunable.Tunable.special" title="mlos_bench.tunables.tunable.Tunable.special"><code class="xref py py-attr docutils literal notranslate"><span class="pre">special</span></code></a> values can be marked to indicate that they need more
+explicit testing.  This can be useful for values that indicate “automatic” or
+“disabled” behavior.</p></li>
+</ul>
+<p>The <a class="reference internal" href="tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> class attributes documentation
+and <a class="reference internal" href="tunable_types/index.html#mlos_bench.tunables.tunable_types.TunableDict" title="mlos_bench.tunables.tunable_types.TunableDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">TunableDict</span></code></a> class documentation
+provides some more information and example on the available properties.</p>
+<p>The full set of supported properties is specified in the <a class="reference external" href="https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-params-schema.json">JSON schema for tunable
+parameters</a>
+and can be seen in some of the <a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tests/config/schemas/tunable-params/test-cases/good/">test examples in the source tree</a>.</p>
+</section>
+<section id="covarianttunablegroup">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink">CovariantTunableGroup</a><a class="headerlink" href="#covarianttunablegroup" title="Link to this heading"></a></h3>
+<p>The <a class="reference internal" href="covariant_group/index.html#mlos_bench.tunables.covariant_group.CovariantTunableGroup" title="mlos_bench.tunables.covariant_group.CovariantTunableGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">CovariantTunableGroup</span></code></a> class is
+used to define a group of related tunable parameters that are all configured
+together with the same <code class="docutils literal notranslate"><span class="pre">cost</span></code> (e.g., is a more expensive operation required to
+reconfigure the system like redeployed vs. restarted vs. reloaded).
+Optimizers can use this information to explore the configuration space more efficiently.</p>
+</section>
+<section id="tunablegroups">
+<h3><a class="toc-backref" href="#id7" role="doc-backlink">TunableGroups</a><a class="headerlink" href="#tunablegroups" title="Link to this heading"></a></h3>
+<p>The <a class="reference internal" href="tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><code class="xref py py-class docutils literal notranslate"><span class="pre">TunableGroups</span></code></a> class is used to
+define an entire set of tunable parameters (e.g., combined set of covariant groups).</p>
+<section id="limitations">
+<h4>Limitations<a class="headerlink" href="#limitations" title="Link to this heading"></a></h4>
+<p>Currently we lack a config language for expressing constraints between tunables</p>
+<p>(e.g., <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">&lt;</span> <span class="pre">b</span></code> or <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">b</span> <span class="pre">&lt;</span> <span class="pre">c</span></code>)</p>
+<p>This is supported in the underlying <a class="reference internal" href="../../mlos_core/index.html#module-mlos_core" title="mlos_core"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_core</span></code></a> library, but is not yet
+exposed in the <code class="docutils literal notranslate"><span class="pre">mlos_bench</span></code> config API.</p>
+</section>
+</section>
+</section>
+<section id="usage">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Usage</a><a class="headerlink" href="#usage" title="Link to this heading"></a></h2>
+<p>Most user interactions with tunables will be through JSON configuration files.</p>
+<p>Since tunables are associated with an Environment, their configs are typically
+colocated with the environment configs (e.g., <code class="docutils literal notranslate"><span class="pre">env-name-tunables.jsonc</span></code>) and
+loaded with the Environment using the <code class="docutils literal notranslate"><span class="pre">include_tunables</span></code> property in the
+Environment config.</p>
+<p>Then individual covariant groups can be enabled via the <code class="docutils literal notranslate"><span class="pre">tunable_params</span></code> and
+<code class="docutils literal notranslate"><span class="pre">tunable_params_map</span></code> properties, possibly via <code class="docutils literal notranslate"><span class="pre">globals</span></code> <a class="reference external" href="../config/index.html#globals-and-variable-substitution">Variable Expansion</a>.</p>
+<p>See the <a class="reference internal" href="../config/index.html#module-mlos_bench.config" title="mlos_bench.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.config</span></code></a> and <a class="reference internal" href="../environments/index.html#module-mlos_bench.environments" title="mlos_bench.environments"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.environments</span></code></a> module
+documentation for more information.</p>
+<p>In benchmarking-only mode (e.g., without an <code class="docutils literal notranslate"><span class="pre">Optimizer</span></code> specified),
+<a class="reference external" href="../../../mlos_bench.run.usage.html">mlos_bench</a> can still run with a
+particular set of <code class="docutils literal notranslate"><span class="pre">--tunable-values</span></code> (e.g., a simple key-value file declaring
+a set of values to assign to the set of configured tunable parameters) in order
+to manually explore a configuration space.</p>
+<p>See the <a class="reference internal" href="../optimizers/one_shot_optimizer/index.html#mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer" title="mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneShotOptimizer</span></code></a>
+and <a class="reference internal" href="../run/index.html#module-mlos_bench.run" title="mlos_bench.run"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.run</span></code></a> module documentation and the for more information.</p>
+<p>During an Environment’s
+<a class="reference internal" href="../environments/base_environment/index.html#mlos_bench.environments.base_environment.Environment.setup" title="mlos_bench.environments.base_environment.Environment.setup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup()</span></code></a> and
+<a class="reference internal" href="../environments/base_environment/index.html#mlos_bench.environments.base_environment.Environment.run" title="mlos_bench.environments.base_environment.Environment.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> phases the
+tunables can be exported to a JSON file using the <code class="docutils literal notranslate"><span class="pre">dump_params_file</span></code> property
+of the Environment config for the user scripts to use when configuring the
+target system.
+The <a class="reference internal" href="tunable/index.html#mlos_bench.tunables.tunable.Tunable.meta" title="mlos_bench.tunables.tunable.Tunable.meta"><code class="xref py py-attr docutils literal notranslate"><span class="pre">meta</span></code></a> property of the tunable config can be used to add
+additional information for this step (e.g., a unit suffix to append to the
+value).</p>
+<p>See the <a class="reference internal" href="../environments/index.html#module-mlos_bench.environments" title="mlos_bench.environments"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.environments</span></code></a> module documentation for more information.</p>
+<p class="rubric">Examples</p>
+<p>Here’s a short (incomplete) example of some of the <a class="reference internal" href="tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><code class="xref py py-class docutils literal notranslate"><span class="pre">TunableGroups</span></code></a>
+JSON configuration options, expressed in Python (for testing purposes).
+However, most of the time you will be loading these from a JSON config file
+stored along with the associated
+<a class="reference internal" href="../environments/base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> config.</p>
+<p>For more tunable parameters examples refer to the <a class="reference external" href="https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-params-schema.json">JSON schema</a>
+or some of the <a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tests/config/schemas/tunable-params/test-cases/good/">test examples in the source tree</a>.</p>
+<p>There are also examples of <a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/tests/config/schemas/tunable-values/test-cases/good/">tunable values in the source tree</a>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Load tunables from JSON string.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">json5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlos_bench.services.config_persistence</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigPersistenceService</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">service</span> <span class="o">=</span> <span class="n">ConfigPersistenceService</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">json_config</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">... </span><span class="s1">// Use json5 (or jsonc) syntax to allow comments and other more flexible syntax.</span>
+<span class="gp">... </span><span class="s1">{</span>
+<span class="gp">... </span><span class="s1">  &quot;group_1&quot;: {</span>
+<span class="gp">... </span><span class="s1">    &quot;cost&quot;: 1,</span>
+<span class="gp">... </span><span class="s1">    &quot;params&quot;: {</span>
+<span class="gp">... </span><span class="s1">      &quot;colors&quot;: {</span>
+<span class="gp">... </span><span class="s1">        &quot;type&quot;: &quot;categorical&quot;,</span>
+<span class="gp">... </span><span class="s1">        // Values for the categorical tunable.</span>
+<span class="gp">... </span><span class="s1">        &quot;values&quot;: [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;],</span>
+<span class="gp">... </span><span class="s1">        // Weights for each value in the categorical distribution.</span>
+<span class="gp">... </span><span class="s1">        &quot;values_weights&quot;: [0.1, 0.2, 0.7],</span>
+<span class="gp">... </span><span class="s1">        // Default value.</span>
+<span class="gp">... </span><span class="s1">        &quot;default&quot;: &quot;green&quot;,</span>
+<span class="gp">... </span><span class="s1">      },</span>
+<span class="gp">... </span><span class="s1">      &quot;int_param&quot;: {</span>
+<span class="gp">... </span><span class="s1">        &quot;type&quot;: &quot;int&quot;,</span>
+<span class="gp">... </span><span class="s1">        &quot;range&quot;: [1, 10],</span>
+<span class="gp">... </span><span class="s1">        &quot;default&quot;: 5,</span>
+<span class="gp">... </span><span class="s1">        // Mark some values as &quot;special&quot;, that need more explicit testing.</span>
+<span class="gp">... </span><span class="s1">        // e.g., maybe these indicate &quot;automatic&quot; or &quot;disabled&quot; behavior for</span>
+<span class="gp">... </span><span class="s1">        // the system being tested instead of an explicit size</span>
+<span class="gp">... </span><span class="s1">        &quot;special&quot;: [-1, 0],</span>
+<span class="gp">... </span><span class="s1">        // Optionally specify a sampling distribution</span>
+<span class="gp">... </span><span class="s1">        // to influence which values to prioritize.</span>
+<span class="gp">... </span><span class="s1">        &quot;distribution&quot;: {</span>
+<span class="gp">... </span><span class="s1">            &quot;type&quot;: &quot;uniform&quot; // alternatively, &quot;beta&quot; or &quot;normal&quot;</span>
+<span class="gp">... </span><span class="s1">        },</span>
+<span class="gp">... </span><span class="s1">        // Free form key-value pairs that can be used with the</span>
+<span class="gp">... </span><span class="s1">        // tunable upon sampling for composing configs.</span>
+<span class="gp">... </span><span class="s1">        // These can be retrieved later to help generate</span>
+<span class="gp">... </span><span class="s1">        // config files from the sampled tunables.</span>
+<span class="gp">... </span><span class="s1">        &quot;meta&quot;: {</span>
+<span class="gp">... </span><span class="s1">          &quot;suffix&quot;: &quot;MB&quot;</span>
+<span class="gp">... </span><span class="s1">        }</span>
+<span class="gp">... </span><span class="s1">      },</span>
+<span class="gp">... </span><span class="s1">      &quot;float_param&quot;: {</span>
+<span class="gp">... </span><span class="s1">        &quot;type&quot;: &quot;float&quot;,</span>
+<span class="gp">... </span><span class="s1">        &quot;range&quot;: [1, 10000],</span>
+<span class="gp">... </span><span class="s1">        &quot;default&quot;: 1,</span>
+<span class="gp">... </span><span class="s1">        // Quantize the range into 100 bins</span>
+<span class="gp">... </span><span class="s1">        &quot;quantization_bins&quot;: 100,</span>
+<span class="gp">... </span><span class="s1">        // enable log sampling of the bins</span>
+<span class="gp">... </span><span class="s1">        &quot;log&quot;: true</span>
+<span class="gp">... </span><span class="s1">      }</span>
+<span class="gp">... </span><span class="s1">    }</span>
+<span class="gp">... </span><span class="s1">  }</span>
+<span class="gp">... </span><span class="s1">}</span>
+<span class="gp">... </span><span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tunables</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">load_tunables</span><span class="p">(</span><span class="n">jsons</span><span class="o">=</span><span class="p">[</span><span class="n">json_config</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Retrieve the current value for the tunable groups.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tunables</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">()</span>
+<span class="go">{&#39;colors&#39;: &#39;green&#39;, &#39;int_param&#39;: 5, &#39;float_param&#39;: 1.0}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Or an individual parameter:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tunables</span><span class="p">[</span><span class="s2">&quot;colors&quot;</span><span class="p">]</span>
+<span class="go">&#39;green&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Assign new values to the tunable groups.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tunable_values</span> <span class="o">=</span> <span class="n">json5</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">... </span><span class="s1">{</span>
+<span class="gp">... </span><span class="s1">  // can be partially specified</span>
+<span class="gp">... </span><span class="s1">  &quot;colors&quot;: &quot;red&quot;</span>
+<span class="gp">... </span><span class="s1">}</span>
+<span class="gp">... </span><span class="s1">&#39;&#39;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">tunables</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">tunable_values</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tunables</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">()</span>
+<span class="go">{&#39;colors&#39;: &#39;red&#39;, &#39;int_param&#39;: 5, &#39;float_param&#39;: 1.0}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Check if the tunables have been updated.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># mlos_bench uses this to reinvoke the setup() phase of the</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># associated Environment to reconfigure the system.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tunables</span><span class="o">.</span><span class="n">is_updated</span><span class="p">()</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Reset the tunables to their default values.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># As a special case, an empty json object will reset all tunables to the defaults.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tunable_values</span> <span class="o">=</span> <span class="n">json5</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">... </span><span class="si">{}</span>
+<span class="gp">... </span><span class="s1">&#39;&#39;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">tunables</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">tunable_values</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tunables</span><span class="o">.</span><span class="n">is_defaults</span><span class="p">()</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tunables</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">()</span>
+<span class="go">{&#39;colors&#39;: &#39;green&#39;, &#39;int_param&#39;: 5, &#39;float_param&#39;: 1.0}</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>Internally, <a class="reference internal" href="tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><code class="xref py py-class docutils literal notranslate"><span class="pre">TunableGroups</span></code></a> are converted to
+<a class="reference external" href="https://automl.github.io/ConfigSpace/latest/api/ConfigSpace/configuration_space/#ConfigSpace.configuration_space.ConfigurationSpace" title="(in ConfigSpace v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConfigSpace.ConfigurationSpace</span></code></a> objects for use with
+<a class="reference internal" href="../../mlos_core/index.html#module-mlos_core" title="mlos_core"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_core</span></code></a> using the <a class="reference internal" href="../optimizers/convert_configspace/index.html#module-mlos_bench.optimizers.convert_configspace" title="mlos_bench.optimizers.convert_configspace"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.optimizers.convert_configspace</span></code></a>.
+See the “Spaces” section in the <a class="reference internal" href="../../mlos_core/index.html#module-mlos_core" title="mlos_core"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_core</span></code></a> module documentation for more
+information.</p>
+<p>In order to handle sampling of <a class="reference internal" href="tunable/index.html#mlos_bench.tunables.tunable.Tunable.special" title="mlos_bench.tunables.tunable.Tunable.special"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Tunable.special</span></code></a> values, the <code class="docutils literal notranslate"><span class="pre">!</span></code>
+character is prohibited from being used in the name of a <a class="reference internal" href="tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a>.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="../config/index.html#module-mlos_bench.config" title="mlos_bench.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.config</span></code></a></dt><dd><p>Overview of the configuration system.</p>
+</dd>
+<dt><a class="reference internal" href="../environments/index.html#module-mlos_bench.environments" title="mlos_bench.environments"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.environments</span></code></a></dt><dd><p>Overview of Environments and their configurations.</p>
+</dd>
+<dt><a class="reference internal" href="../../mlos_core/optimizers/index.html#module-mlos_core.optimizers" title="mlos_core.optimizers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_core.optimizers</span></code></a></dt><dd><p>Overview of mlos_core optimizers.</p>
+</dd>
+<dt><a class="reference internal" href="../../mlos_core/spaces/index.html#module-mlos_core.spaces" title="mlos_core.spaces"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_core.spaces</span></code></a></dt><dd><p>Overview of the mlos_core configuration space system.</p>
+</dd>
+<dt><a class="reference internal" href="tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups.assign" title="mlos_bench.tunables.tunable_groups.TunableGroups.assign"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TunableGroups.assign()</span></code></a></dt><dd><p>Notes on special cases for assigning tunable values.</p>
+</dd>
+</dl>
+</div>
+</section>
+<section id="submodules">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Submodules</a><a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="covariant_group/index.html">mlos_bench.tunables.covariant_group</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tunable/index.html">mlos_bench.tunables.tunable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tunable_groups/index.html">mlos_bench.tunables.tunable_groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tunable_types/index.html">mlos_bench.tunables.tunable_types</a></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../storage/util/index.html" class="btn btn-neutral float-left" title="mlos_bench.storage.util" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="covariant_group/index.html" class="btn btn-neutral float-right" title="mlos_bench.tunables.covariant_group" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Microsoft GSL.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

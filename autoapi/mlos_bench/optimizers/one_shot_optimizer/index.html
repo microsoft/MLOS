@@ -1,0 +1,320 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlos_bench.optimizers.one_shot_optimizer &mdash; MLOS 0.6.3.dev53+g549a69ab0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/plot_directive.css" />
+
+  
+    <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/optimizers/one_shot_optimizer/index.html"/>
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=8b2becd3"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="mlos_bench.optimizers.track_best_optimizer" href="../track_best_optimizer/index.html" />
+    <link rel="prev" title="mlos_bench.optimizers.mock_optimizer" href="../mock_optimizer/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MLOS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Source Tree Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source_tree_docs/index.html">MLOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source_tree_docs/mlos_core/index.html">mlos-core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source_tree_docs/mlos_bench/index.html">mlos-bench</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source_tree_docs/mlos_viz/index.html">mlos-viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../mlos_core/index.html">mlos_core</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">mlos_bench</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#classes-overview">Classes Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../config/index.html">mlos_bench.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dict_templater/index.html">mlos_bench.dict_templater</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../environments/index.html">mlos_bench.environments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../event_loop_context/index.html">mlos_bench.event_loop_context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../launcher/index.html">mlos_bench.launcher</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html">mlos_bench.optimizers</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../index.html#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#api">API</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#spaces">Spaces</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#config">Config</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="../base_optimizer/index.html">mlos_bench.optimizers.base_optimizer</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../convert_configspace/index.html">mlos_bench.optimizers.convert_configspace</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../grid_search_optimizer/index.html">mlos_bench.optimizers.grid_search_optimizer</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../manual_optimizer/index.html">mlos_bench.optimizers.manual_optimizer</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../mlos_core_optimizer/index.html">mlos_bench.optimizers.mlos_core_optimizer</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../mock_optimizer/index.html">mlos_bench.optimizers.mock_optimizer</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">mlos_bench.optimizers.one_shot_optimizer</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#classes">Classes</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer"><code class="docutils literal notranslate"><span class="pre">OneShotOptimizer</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer.suggest"><code class="docutils literal notranslate"><span class="pre">OneShotOptimizer.suggest()</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer.supports_preload"><code class="docutils literal notranslate"><span class="pre">OneShotOptimizer.supports_preload</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../track_best_optimizer/index.html">mlos_bench.optimizers.track_best_optimizer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../os_environ/index.html">mlos_bench.os_environ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../run/index.html">mlos_bench.run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../schedulers/index.html">mlos_bench.schedulers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../services/index.html">mlos_bench.services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../storage/index.html">mlos_bench.storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tunables/index.html">mlos_bench.tunables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../util/index.html">mlos_bench.util</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../version/index.html">mlos_bench.version</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#attributes">Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mlos_viz/index.html">mlos_viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">mlos_bench CLI usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mlos_bench.run.usage.html">mlos_bench CLI usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/microsoft/MLOS">Github Source Tree</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MLOS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">mlos_bench</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">mlos_bench.optimizers</a></li>
+      <li class="breadcrumb-item active">mlos_bench.optimizers.one_shot_optimizer</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/autoapi/mlos_bench/optimizers/one_shot_optimizer/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mlos_bench.optimizers.one_shot_optimizer">
+<span id="mlos-bench-optimizers-one-shot-optimizer"></span><h1>mlos_bench.optimizers.one_shot_optimizer<a class="headerlink" href="#module-mlos_bench.optimizers.one_shot_optimizer" title="Link to this heading"></a></h1>
+<p>No-op optimizer for mlos_bench that proposes a single configuration.</p>
+<p>Explicit configs (partial or full) are possible using configuration files.</p>
+<p class="rubric">Examples</p>
+<p>Load tunables from a JSON string.
+Note: normally these would be automatically loaded from the
+<a class="reference internal" href="../../environments/base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Environment</span></code></a>’s
+<code class="docutils literal notranslate"><span class="pre">include_tunables</span></code> config parameter.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">json5</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">json</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlos_bench.environments.status</span><span class="w"> </span><span class="kn">import</span> <span class="n">Status</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlos_bench.services.config_persistence</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigPersistenceService</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">service</span> <span class="o">=</span> <span class="n">ConfigPersistenceService</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">json_config</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">... </span><span class="s1">{</span>
+<span class="gp">... </span><span class="s1">  &quot;group_1&quot;: {</span>
+<span class="gp">... </span><span class="s1">    &quot;cost&quot;: 1,</span>
+<span class="gp">... </span><span class="s1">    &quot;params&quot;: {</span>
+<span class="gp">... </span><span class="s1">      &quot;colors&quot;: {</span>
+<span class="gp">... </span><span class="s1">        &quot;type&quot;: &quot;categorical&quot;,</span>
+<span class="gp">... </span><span class="s1">        &quot;values&quot;: [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;],</span>
+<span class="gp">... </span><span class="s1">        &quot;default&quot;: &quot;green&quot;,</span>
+<span class="gp">... </span><span class="s1">      },</span>
+<span class="gp">... </span><span class="s1">      &quot;int_param&quot;: {</span>
+<span class="gp">... </span><span class="s1">        &quot;type&quot;: &quot;int&quot;,</span>
+<span class="gp">... </span><span class="s1">        &quot;range&quot;: [1, 3],</span>
+<span class="gp">... </span><span class="s1">        &quot;default&quot;: 2,</span>
+<span class="gp">... </span><span class="s1">      },</span>
+<span class="gp">... </span><span class="s1">      &quot;float_param&quot;: {</span>
+<span class="gp">... </span><span class="s1">        &quot;type&quot;: &quot;float&quot;,</span>
+<span class="gp">... </span><span class="s1">        &quot;range&quot;: [0, 1],</span>
+<span class="gp">... </span><span class="s1">        &quot;default&quot;: 0.5,</span>
+<span class="gp">... </span><span class="s1">        // Quantize the range into 3 bins</span>
+<span class="gp">... </span><span class="s1">        &quot;quantization_bins&quot;: 3,</span>
+<span class="gp">... </span><span class="s1">      }</span>
+<span class="gp">... </span><span class="s1">    }</span>
+<span class="gp">... </span><span class="s1">  }</span>
+<span class="gp">... </span><span class="s1">}</span>
+<span class="gp">... </span><span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tunables</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">load_tunables</span><span class="p">(</span><span class="n">jsons</span><span class="o">=</span><span class="p">[</span><span class="n">json_config</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Check the defaults:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tunables</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">()</span>
+<span class="go">{&#39;colors&#39;: &#39;green&#39;, &#39;int_param&#39;: 2, &#39;float_param&#39;: 0.5}</span>
+</pre></div>
+</div>
+<p>Load a JSON config of some tunable values to explicitly test.
+Normally these would be provided by the <a class="reference internal" href="../../run/index.html#module-mlos_bench.run" title="mlos_bench.run"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.run</span></code></a> CLI’s
+<code class="docutils literal notranslate"><span class="pre">--tunable-values</span></code> option.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tunable_values_json</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">... </span><span class="s1">{</span>
+<span class="gp">... </span><span class="s1">  &quot;colors&quot;: &quot;red&quot;,</span>
+<span class="gp">... </span><span class="s1">  &quot;int_param&quot;: 1,</span>
+<span class="gp">... </span><span class="s1">  &quot;float_param&quot;: 0.0</span>
+<span class="gp">... </span><span class="s1">}</span>
+<span class="gp">... </span><span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tunable_values</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">tunable_values_json</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tunables</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">tunable_values</span><span class="p">)</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">()</span>
+<span class="go">{&#39;colors&#39;: &#39;red&#39;, &#39;int_param&#39;: 1, &#39;float_param&#39;: 0.0}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="ow">not</span> <span class="n">tunables</span><span class="o">.</span><span class="n">is_defaults</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Now create a OneShotOptimizer from a JSON config string.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">optimizer_json_config</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">... </span><span class="s1">{</span>
+<span class="gp">... </span><span class="s1">  &quot;class&quot;: &quot;mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer&quot;,</span>
+<span class="gp">... </span><span class="s1">}</span>
+<span class="gp">... </span><span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">optimizer_json_config</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">build_optimizer</span><span class="p">(</span>
+<span class="gp">... </span>  <span class="n">tunables</span><span class="o">=</span><span class="n">tunables</span><span class="p">,</span>
+<span class="gp">... </span>  <span class="n">service</span><span class="o">=</span><span class="n">service</span><span class="p">,</span>
+<span class="gp">... </span>  <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Run the optimizer.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Note that it will only run for a single iteration and return the values we set.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">while</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">not_converged</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="n">suggestion</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">suggest</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">suggestion</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">())</span>
+<span class="go">{&#39;colors&#39;: &#39;red&#39;, &#39;int_param&#39;: 1, &#39;float_param&#39;: 0.0}</span>
+</pre></div>
+</div>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer" title="mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OneShotOptimizer</span></code></a></p></td>
+<td><p>No-op optimizer that proposes a single configuration and returns.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlos_bench.optimizers.one_shot_optimizer.</span></span><span class="sig-name descname"><span class="pre">OneShotOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tunables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><span class="pre">mlos_bench.tunables.tunable_groups.TunableGroups</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../services/base_service/index.html#mlos_bench.services.base_service.Service" title="mlos_bench.services.base_service.Service"><span class="pre">mlos_bench.services.base_service.Service</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/optimizers/one_shot_optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../mock_optimizer/index.html#mlos_bench.optimizers.mock_optimizer.MockOptimizer" title="mlos_bench.optimizers.mock_optimizer.MockOptimizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mlos_bench.optimizers.mock_optimizer.MockOptimizer</span></code></a></p>
+<p>No-op optimizer that proposes a single configuration and returns.</p>
+<p>Explicit configs (partial or full) are possible using configuration files.</p>
+<p>Create a new optimizer for the given configuration space defined by the
+tunables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tunables</strong> (<a class="reference internal" href="../../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><em>TunableGroups</em></a>) – The tunables to optimize.</p></li>
+<li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Free-format key/value pairs of configuration parameters to pass to the optimizer.</p></li>
+<li><p><strong>global_config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>service</strong> (<a class="reference internal" href="../../services/base_service/index.html#mlos_bench.services.base_service.Service" title="mlos_bench.services.base_service.Service"><em>Service</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer.suggest">
+<span class="sig-name descname"><span class="pre">suggest</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><span class="pre">mlos_bench.tunables.tunable_groups.TunableGroups</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/optimizers/one_shot_optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer.suggest" title="Link to this definition"></a></dt>
+<dd><p>Always produce the same (initial) suggestion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups">mlos_bench.tunables.tunable_groups.TunableGroups</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer.supports_preload">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">supports_preload</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/optimizers/one_shot_optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer.supports_preload" title="Link to this definition"></a></dt>
+<dd><p>Return True if the optimizer supports pre-loading the data from previous
+experiments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../mock_optimizer/index.html" class="btn btn-neutral float-left" title="mlos_bench.optimizers.mock_optimizer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../track_best_optimizer/index.html" class="btn btn-neutral float-right" title="mlos_bench.optimizers.track_best_optimizer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Microsoft GSL.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

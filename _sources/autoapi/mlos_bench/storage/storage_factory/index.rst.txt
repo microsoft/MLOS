@@ -1,0 +1,44 @@
+mlos_bench.storage.storage_factory
+==================================
+
+.. py:module:: mlos_bench.storage.storage_factory
+
+.. autoapi-nested-parse::
+
+   Factory method to create a new :py:class:`.Storage` instance from a
+   :py:attr:`~mlos_bench.config.schemas.config_schemas.ConfigSchema.STORAGE` type json
+   config.
+
+   .. seealso::
+
+      :py:obj:`mlos_bench.storage`
+          For example usage.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   mlos_bench.storage.storage_factory.from_config
+
+
+Module Contents
+---------------
+
+.. py:function:: from_config(config: str, global_configs: list[str] | None = None, **kwargs: Any) -> mlos_bench.storage.base_storage.Storage
+
+   Create a new storage object from JSON5 config file.
+
+   :param config: JSON5 config file or string to load.
+   :type config: str
+   :param global_configs: An optional list of config files with global parameters.
+   :type global_configs: Optional[list[str]]
+   :param kwargs: Additional configuration parameters.
+   :type kwargs: dict
+
+   :returns: **storage** -- A new storage object.
+   :rtype: Storage
+
+

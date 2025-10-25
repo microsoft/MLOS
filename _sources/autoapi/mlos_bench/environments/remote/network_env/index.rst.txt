@@ -1,0 +1,75 @@
+mlos_bench.environments.remote.network_env
+==========================================
+
+.. py:module:: mlos_bench.environments.remote.network_env
+
+.. autoapi-nested-parse::
+
+   Network Environment.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.environments.remote.network_env.NetworkEnv
+
+
+Module Contents
+---------------
+
+.. py:class:: NetworkEnv(*, name: str, config: dict, global_config: dict | None = None, tunables: mlos_bench.tunables.tunable_groups.TunableGroups | None = None, service: mlos_bench.services.base_service.Service | None = None)
+
+   Bases: :py:obj:`mlos_bench.environments.base_environment.Environment`
+
+
+   Network Environment.
+
+   Used to model creating a virtual network (and network security group),
+   but no real tuning is expected for it ... yet.
+
+   Create a new environment for network operations.
+
+   :param name: Human-readable name of the environment.
+   :type name: str
+   :param config: Free-format dictionary that contains the benchmark environment
+                  configuration. Each config must have at least the "tunable_params"
+                  and the "const_args" sections.
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters (e.g., security credentials)
+                         to be mixed in into the "const_args" section of the local config.
+   :type global_config: dict
+   :param tunables: A collection of tunable parameters for *all* environments.
+   :type tunables: TunableGroups
+   :param service: An optional service object (e.g., providing methods to
+                   deploy a network, etc.).
+   :type service: Service
+
+
+   .. py:method:: setup(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, global_config: dict | None = None) -> bool
+
+      Check if network is ready. Provision, if necessary.
+
+      :param tunables: A collection of groups of tunable parameters along with the
+                       parameters' values. NetworkEnv tunables are variable parameters that,
+                       together with the NetworkEnv configuration, are sufficient to provision
+                       and start a set of network resources (e.g., virtual network and network
+                       security group).
+      :type tunables: TunableGroups
+      :param global_config: Free-format dictionary of global parameters of the environment
+                            that are not used in the optimization process.
+      :type global_config: dict
+
+      :returns: **is_success** -- True if operation is successful, false otherwise.
+      :rtype: bool
+
+
+
+   .. py:method:: teardown() -> None
+
+      Shut down the Network and releases it.
+
+
+

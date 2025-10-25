@@ -1,0 +1,135 @@
+mlos_bench.storage.sql.storage
+==============================
+
+.. py:module:: mlos_bench.storage.sql.storage
+
+.. autoapi-nested-parse::
+
+   Saving and restoring the benchmark data in SQL database.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.storage.sql.storage.SqlStorage
+
+
+Module Contents
+---------------
+
+.. py:class:: SqlStorage(config: dict, global_config: dict | None = None, service: mlos_bench.services.base_service.Service | None = None)
+
+   Bases: :py:obj:`mlos_bench.storage.base_storage.Storage`
+
+
+   An implementation of the :py:class:`~.Storage` interface using SQLAlchemy
+   backend.
+
+   Create a new storage object.
+
+   :param config: Free-format key/value pairs of configuration parameters.
+   :type config: dict
+
+
+   .. py:method:: __exit__(exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: types.TracebackType | None) -> Literal[False]
+
+      Close the engine connection when exiting the context.
+
+
+
+   .. py:method:: __getstate__() -> dict
+
+      Return the state of the object for pickling.
+
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: __setstate__(state: dict) -> None
+
+      Restore the state of the object from pickling.
+
+
+
+   .. py:method:: dispose() -> None
+
+      Closes the database connection pool.
+
+
+
+   .. py:method:: experiment(*, experiment_id: str, trial_id: int, root_env_config: str, description: str, tunables: mlos_bench.tunables.tunable_groups.TunableGroups, opt_targets: dict[str, Literal['min', 'max']]) -> mlos_bench.storage.base_storage.Storage.Experiment
+
+      Create or reload an experiment in the Storage.
+
+      .. rubric:: Notes
+
+      We need the `opt_target` parameter here to know what metric to retrieve
+      when we load the data from previous trials. Later we will replace it with
+      full metadata about the optimization direction, multiple objectives, etc.
+
+      :param experiment_id: Unique identifier of the experiment.
+      :type experiment_id: str
+      :param trial_id: Starting number of the trial.
+      :type trial_id: int
+      :param root_env_config: A path to the root JSON configuration file of the benchmarking environment.
+      :type root_env_config: str
+      :param description: Human-readable description of the experiment.
+      :type description: str
+      :param tunables:
+      :type tunables: TunableGroups
+      :param opt_targets: Names of metrics we're optimizing for and the optimization direction {min, max}.
+      :type opt_targets: dict[str, Literal["min", "max"]]
+
+      :returns: **experiment** -- An object that allows to update the storage with
+                the results of the experiment and related data.
+      :rtype: Storage.Experiment
+
+
+
+   .. py:method:: get_experiment_by_id(experiment_id: str, tunables: mlos_bench.tunables.tunable_groups.TunableGroups, opt_targets: dict[str, Literal['min', 'max']]) -> mlos_bench.storage.base_storage.Storage.Experiment | None
+
+      Gets an Experiment by its ID.
+
+      :param experiment_id: ID of the Experiment to retrieve.
+      :type experiment_id: str
+      :param tunables: The tunables for the Experiment.
+      :type tunables: TunableGroups
+      :param opt_targets: The optimization targets for the Experiment's
+                          :py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer`.
+      :type opt_targets: dict[str, Literal["min", "max"]]
+
+      :returns: **experiment** -- The Experiment object, or None if it doesn't exist.
+      :rtype: Storage.Experiment | None
+
+      .. rubric:: Notes
+
+      Tunables are not stored in the database for the Experiment, only for the
+      Trials, so currently they can change if the user (incorrectly) adjusts
+      the configs on disk between resume runs.
+      Since this method is generally meant to load th Experiment from the
+      database for a child process to execute a Trial in the background we are
+      generally safe to simply pass these values from the parent process
+      rather than look them up in the database.
+
+
+
+   .. py:method:: update_schema() -> None
+
+      Update the database schema.
+
+
+
+   .. py:property:: experiments
+      :type: dict[str, mlos_bench.storage.base_experiment_data.ExperimentData]
+
+
+      Retrieve the experiments' data from the storage.
+
+      :returns: **experiments** -- A dictionary of the experiments' data, keyed by experiment id.
+      :rtype: dict[str, ExperimentData]
+
+

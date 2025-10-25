@@ -1,0 +1,67 @@
+mlos_bench.services.types.remote_exec_type
+==========================================
+
+.. py:module:: mlos_bench.services.types.remote_exec_type
+
+.. autoapi-nested-parse::
+
+   Protocol interface for Service types that provide helper functions to run scripts on
+   a remote host OS.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.types.remote_exec_type.SupportsRemoteExec
+
+
+Module Contents
+---------------
+
+.. py:class:: SupportsRemoteExec
+
+   Bases: :py:obj:`Protocol`
+
+
+   Protocol interface for Service types that provide helper functions to run scripts
+   on a remote host OS.
+
+
+   .. py:method:: get_remote_exec_results(config: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Get the results of the asynchronously running command.
+
+      :param config: Flat dictionary of (key, value) pairs of tunable parameters.
+                     Must have the "asyncResultsUrl" key to get the results.
+                     If the key is not present, return Status.PENDING.
+      :type config: dict
+
+      :returns: **result** -- A pair of Status and result.
+                Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: remote_exec(script: collections.abc.Iterable[str], config: dict, env_params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Run a command on remote host OS.
+
+      :param script: A list of lines to execute as a script on a remote VM.
+      :type script: Iterable[str]
+      :param config: Flat dictionary of (key, value) pairs of parameters.
+                     They usually come from `const_args` and `tunable_params`
+                     properties of the Environment.
+      :type config: dict
+      :param env_params: Parameters to pass as *shell* environment variables into the script.
+                         This is usually a subset of `config` with some possible conversions.
+      :type env_params: dict
+
+      :returns: **result** -- A pair of Status and result.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+

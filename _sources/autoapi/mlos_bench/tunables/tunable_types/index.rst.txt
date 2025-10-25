@@ -1,0 +1,378 @@
+mlos_bench.tunables.tunable_types
+=================================
+
+.. py:module:: mlos_bench.tunables.tunable_types
+
+.. autoapi-nested-parse::
+
+   Helper types for :py:class:`~mlos_bench.tunables.tunable.Tunable`.
+
+   The main class of interest to most users in this module is :py:class:`.TunableDict`,
+   which provides the typed conversions from a JSON config to a config used for
+   creating a :py:class:`~mlos_bench.tunables.tunable.Tunable`.
+
+   The other types are mostly used for type checking and documentation purposes.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   mlos_bench.tunables.tunable_types.DistributionName
+   mlos_bench.tunables.tunable_types.TUNABLE_DTYPE
+   mlos_bench.tunables.tunable_types.TunableValue
+   mlos_bench.tunables.tunable_types.TunableValueType
+   mlos_bench.tunables.tunable_types.TunableValueTypeName
+   mlos_bench.tunables.tunable_types.TunableValueTypeTuple
+   mlos_bench.tunables.tunable_types.TunableValuesDict
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.tunables.tunable_types.DistributionDict
+   mlos_bench.tunables.tunable_types.DistributionDictOpt
+   mlos_bench.tunables.tunable_types.TunableDict
+   mlos_bench.tunables.tunable_types.TunableDictOpt
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   mlos_bench.tunables.tunable_types.tunable_dict_from_dict
+
+
+Module Contents
+---------------
+
+.. py:class:: DistributionDict(*args, **kwargs)
+
+   Bases: :py:obj:`DistributionDictOpt`
+
+
+   A :py:class:`TypedDict` for a :py:class:`~.Tunable` parameter's required
+   :py:attr:`~.Tunable.distribution` config parameters.
+
+   Mostly used for type checking. These are the types expected to be received from the
+   json config.
+
+   .. seealso::
+
+      :py:attr:`Tunable.distribution <.Tunable.distribution>` :
+          Examples of Tunables with distributions.
+      :py:attr:`Tunable.distribution_params <.Tunable.distribution_params>` :
+          Examples of distribution parameters.
+
+      .. comment: don't inherit the docstring
+
+
+   .. py:attribute:: type
+      :type:  DistributionName
+
+      The name of the distribution.
+
+      .. seealso::
+
+         :py:attr:`Tunable.distribution <.Tunable.distribution>` :
+             Examples of distribution names.
+
+
+.. py:class:: DistributionDictOpt(*args, **kwargs)
+
+   Bases: :py:obj:`TypedDict`
+
+
+   A :py:class:`TypedDict` for a :py:class:`~.Tunable` parameter's optional
+   :py:attr:`~.Tunable.distribution_params` config.
+
+   Mostly used for type checking. These are the types expected to be received from
+   the json config.
+
+   .. rubric:: Notes
+
+   :py:class:`.DistributionDict` contains the required fields for the
+   :py:attr:`Tunable.distribution <.Tunable.distribution>` parameter.
+
+   .. seealso::
+
+      :py:attr:`Tunable.distribution_params <.Tunable.distribution_params>` :
+          Examples of distribution parameters.
+
+      .. comment: don't inherit the docstring
+
+
+   .. py:attribute:: params
+      :type:  dict[str, float] | None
+
+      The parameters for the distribution.
+
+      .. seealso::
+
+         :py:attr:`Tunable.distribution_params <.Tunable.distribution_params>` :
+             Examples of distribution parameters.
+
+
+.. py:class:: TunableDict(*args, **kwargs)
+
+   Bases: :py:obj:`TunableDictOpt`
+
+
+   A :py:class:`TypedDict` for a :py:class:`~.Tunable` parameter's required config
+   parameters.
+
+   Mostly used for type checking. These are the types expected to be received from
+   the json config.
+
+   .. rubric:: Examples
+
+   >>> # Example values of the TunableDict
+   >>> TunableDict({'type': 'int', 'default': 0, 'range': [0, 10]})
+   {'type': 'int', 'default': 0, 'range': [0, 10]}
+
+   >>> # Example values of the TunableDict with optional fields
+   >>> TunableDict({'type': 'categorical', 'default': 'a', 'values': ['a', 'b']})
+   {'type': 'categorical', 'default': 'a', 'values': ['a', 'b']}
+
+   .. comment: don't inherit the docstring
+
+
+   .. py:attribute:: default
+      :type:  TunableValue
+
+      The default value of the :py:class:`~.Tunable` parameter.
+
+      .. seealso:: :py:attr:`Tunable.default <.Tunable.default>`
+
+
+   .. py:attribute:: type
+      :type:  TunableValueTypeName
+
+      The name of the type of the :py:class:`~.Tunable` parameter.
+
+      .. seealso:: :py:attr:`Tunable.type <.Tunable.type>` : Examples of type names.
+
+
+.. py:class:: TunableDictOpt(*args, **kwargs)
+
+   Bases: :py:obj:`TypedDict`
+
+
+   A :py:class:`TypedDict` for a :py:class:`~.Tunable` parameter's optional config
+   parameters.
+
+   Mostly used for type checking. These are the types expected to be received from
+   the json config.
+
+   .. rubric:: Notes
+
+   :py:class:`TunableDict` contains the required fields for the
+   :py:class:`~.Tunable` parameter.
+
+   .. comment: don't inherit the docstring
+
+
+   .. py:attribute:: description
+      :type:  str | None
+
+      Description of the :py:class:`~.Tunable` parameter.
+
+      .. seealso:: :py:attr:`Tunable.description <.Tunable.description>`
+
+
+   .. py:attribute:: distribution
+      :type:  DistributionDict | None
+
+      Optional sampling distribution configuration for an "int" or "float" type
+      :py:class:`~.Tunable` parameter.
+
+      .. seealso::
+
+         :py:attr:`Tunable.distribution <.Tunable.distribution>` :
+             Examples of distributions.
+         :py:attr:`Tunable.distribution_params <.Tunable.distribution_params>` :
+             Examples of distribution parameters.
+
+
+   .. py:attribute:: log
+      :type:  bool | None
+
+      Whether to use log sampling for an "int" or "float" type :py:class:`~.Tunable`
+      parameter.
+
+      .. seealso:: :py:attr:`Tunable.is_log <.Tunable.is_log>`
+
+
+   .. py:attribute:: meta
+      :type:  dict[str, Any]
+
+      Free form dict to store additional metadata for the :py:class:`~.Tunable` parameter
+      (e.g., unit suffix, etc.)
+
+      .. seealso:: :py:attr:`Tunable.meta <.Tunable.meta>` : Examples of Tunables with metadata.
+
+
+   .. py:attribute:: quantization_bins
+      :type:  int | None
+
+      The number of quantization bins for an "int" or "float" type :py:class:`~.Tunable`
+      parameter.
+
+      .. seealso::
+
+         :py:attr:`Tunable.quantization_bins <.Tunable.quantization_bins>` :
+             Examples of quantized Tunables.
+
+
+   .. py:attribute:: range
+      :type:  collections.abc.Sequence[int] | collections.abc.Sequence[float] | None
+
+      The range of values for an "int" or "float" type :py:class:`~.Tunable` parameter.
+
+      Must be a sequence of two values: ``[min, max]``.
+
+      A range is required for "int" and "float" type Tunables.
+
+      .. seealso::
+
+         :py:attr:`Tunable.range <.Tunable.range>` : Examples of ranges.
+         :py:attr:`Tunable.values <.Tunable.values>`
+
+
+   .. py:attribute:: range_weight
+      :type:  float | None
+
+      Optional sampling weight for the main ranges of an "int" or "float" type
+      :py:class:`~.Tunable` parameter.
+
+      .. seealso::
+
+         :py:attr:`Tunable.range_weight <.Tunable.range_weight>` :
+             Examples of weighted sampling Tunables.
+
+
+   .. py:attribute:: special
+      :type:  list[int] | list[float] | None
+
+      List of special values for an "int" or "float" type :py:class:`~.Tunable` parameter.
+
+      These are values that are considered special by the target system (e.g.,
+      ``null``, ``0``, ``-1``, ``auto``, etc.) and should be sampled with higher
+      weights.
+
+      .. seealso:: :py:attr:`Tunable.special <.Tunable.special>` : Examples of special values.
+
+
+   .. py:attribute:: special_weights
+      :type:  list[float] | None
+
+      Optional sampling weights for the special values of an "int" or "float" type
+      :py:class:`~.Tunable` parameter.
+
+      .. seealso:: :py:attr:`Tunable.weights <.Tunable.weights>` : Examples of weighted sampling Tunables.
+
+
+   .. py:attribute:: values
+      :type:  list[str | None] | None
+
+      List of values (or categories) for a "categorical" type :py:class:`~.Tunable`
+      parameter.
+
+      A list of values is required for "categorical" type Tunables.
+
+      .. seealso::
+
+         :py:attr:`Tunable.categories <.Tunable.categories>`
+         :py:attr:`Tunable.values <.Tunable.values>`
+
+
+   .. py:attribute:: values_weights
+      :type:  list[float] | None
+
+      Optional sampling weights for the values of a "categorical" type
+      :py:class:`~.Tunable` parameter.
+
+      .. seealso:: :py:attr:`Tunable.weights <.Tunable.weights>` : Examples of weighted sampling Tunables.
+
+
+.. py:function:: tunable_dict_from_dict(config: dict[str, Any]) -> TunableDict
+
+   Creates a TunableDict from a regular dict.
+
+   .. rubric:: Notes
+
+   Mostly used for type checking while instantiating a
+   :py:class:`~.Tunable` from a json config.
+
+   :param config: A regular dict that represents a :py:class:`.TunableDict`.
+   :type config: dict[str, Any]
+
+   :rtype: TunableDict
+
+   .. rubric:: Examples
+
+   >>> # Example values of the TunableDict
+   >>> import json5 as json
+   >>> config = json.loads("{'type': 'int', 'default': 0, 'range': [0, 10]}")
+   >>> config
+   {'type': 'int', 'default': 0, 'range': [0, 10]}
+   >>> typed_dict = tunable_dict_from_dict(config)
+   >>> typed_dict
+   {'type': 'int', 'description': None, 'default': 0, 'values': None, 'range': [0, 10], 'quantization_bins': None, 'log': None, 'distribution': None, 'special': None, 'values_weights': None, 'special_weights': None, 'range_weight': None, 'meta': {}}
+
+
+.. py:data:: DistributionName
+
+   The :py:attr:`~.Tunable.distribution` type names for a :py:class:`~.Tunable` value.
+
+   .. seealso::
+
+      :py:attr:`Tunable.distribution <.Tunable.distribution>` :
+          Example of accepted distribution names.
+
+.. py:data:: TUNABLE_DTYPE
+   :type:  dict[TunableValueTypeName, TunableValueType]
+
+   Maps :py:class:`~.Tunable` types to their corresponding Python data types by name.
+
+   .. seealso:: :py:attr:`Tunable.dtype <.Tunable.dtype>` : Example of type mappings.
+
+.. py:type:: TunableValue
+   :canonical: int | float | str | None
+
+
+   A :py:class:`TypeAlias` for a :py:class:`~.Tunable` parameter value.
+
+.. py:type:: TunableValueType
+   :canonical: type[int] | type[float] | type[str]
+
+
+   A :py:class:`TypeAlias` for :py:class:`~.Tunable` value
+   :py:attr:`data type <.Tunable.dtype>`.
+
+   .. seealso:: :py:attr:`Tunable.dtype <.Tunable.dtype>` : Example of accepted types.
+
+.. py:data:: TunableValueTypeName
+
+   The accepted string names of a :py:class:`~.Tunable` value :py:attr:`~.Tunable.type`.
+
+   .. seealso:: :py:attr:`Tunable.type <.Tunable.type>` : Example of accepted type names.
+
+.. py:data:: TunableValueTypeTuple
+
+   Tunable value ``type`` tuple.
+
+   .. rubric:: Notes
+
+   For checking whether a param is a :py:type:`.TunableValue` with
+   :py:func:`isinstance`.
+
+.. py:data:: TunableValuesDict
+
+   Tunable values dictionary type.
+

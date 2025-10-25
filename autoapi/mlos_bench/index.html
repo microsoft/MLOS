@@ -1,0 +1,362 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlos_bench &mdash; MLOS 0.6.3.dev53+g549a69ab0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+
+  
+    <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/index.html"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8b2becd3"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="mlos_bench.config" href="config/index.html" />
+    <link rel="prev" title="mlos_core.version" href="../mlos_core/version/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            MLOS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Source Tree Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../source_tree_docs/index.html">MLOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../source_tree_docs/mlos_core/index.html">mlos-core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../source_tree_docs/mlos_bench/index.html">mlos-bench</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../source_tree_docs/mlos_viz/index.html">mlos-viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../mlos_core/index.html">mlos_core</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">mlos_bench</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#goals">Goals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interaction">Interaction</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#classes-overview">Classes Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="config/index.html">mlos_bench.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dict_templater/index.html">mlos_bench.dict_templater</a></li>
+<li class="toctree-l3"><a class="reference internal" href="environments/index.html">mlos_bench.environments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="event_loop_context/index.html">mlos_bench.event_loop_context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="launcher/index.html">mlos_bench.launcher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="optimizers/index.html">mlos_bench.optimizers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="os_environ/index.html">mlos_bench.os_environ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="run/index.html">mlos_bench.run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="schedulers/index.html">mlos_bench.schedulers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="services/index.html">mlos_bench.services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="storage/index.html">mlos_bench.storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tunables/index.html">mlos_bench.tunables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="util/index.html">mlos_bench.util</a></li>
+<li class="toctree-l3"><a class="reference internal" href="version/index.html">mlos_bench.version</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#attributes">Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#package-contents">Package Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mlos_bench.__version__"><code class="docutils literal notranslate"><span class="pre">__version__</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../mlos_viz/index.html">mlos_viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">mlos_bench CLI usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../mlos_bench.run.usage.html">mlos_bench CLI usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/microsoft/MLOS">Github Source Tree</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MLOS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">mlos_bench</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/autoapi/mlos_bench/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mlos_bench">
+<span id="mlos-bench"></span><h1><a class="toc-backref" href="#id1" role="doc-backlink">mlos_bench</a><a class="headerlink" href="#module-mlos_bench" title="Link to this heading"></a></h1>
+<p>mlos_bench is a framework to help automate benchmarking and OS/application parameter
+autotuning and the data management of the results.</p>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#module-mlos_bench" id="id1">mlos_bench</a></p>
+<ul>
+<li><p><a class="reference internal" href="#overview" id="id2">Overview</a></p>
+<ul>
+<li><p><a class="reference internal" href="#goals" id="id3">Goals</a></p></li>
+<li><p><a class="reference internal" href="#interaction" id="id4">Interaction</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#classes-overview" id="id5">Classes Overview</a></p></li>
+<li><p><a class="reference internal" href="#submodules" id="id6">Submodules</a></p></li>
+<li><p><a class="reference internal" href="#attributes" id="id7">Attributes</a></p></li>
+<li><p><a class="reference internal" href="#package-contents" id="id8">Package Contents</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="overview">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Overview</a><a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">mlos_bench</span></code> can be installed from <a class="reference external" href="https://pypi.org/project/mlos-bench">pypi</a>
+via <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mlos-bench</span></code> and executed using the <code class="docutils literal notranslate"><span class="pre">mlos_bench</span></code> <a class="reference external" href="../../mlos_bench.run.usage.html">command</a> using a collection of <cite>json</cite> <a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/">configs</a>
+which are managed and documented in the <a class="reference internal" href="config/index.html#module-mlos_bench.config" title="mlos_bench.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">config</span></code></a> module and
+elsewhere in this package documentation.</p>
+<p>It is intended to be used with <a class="reference internal" href="../mlos_core/index.html#module-mlos_core" title="mlos_core"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_core</span></code></a> via
+<a class="reference internal" href="optimizers/mlos_core_optimizer/index.html#mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer" title="mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">MlosCoreOptimizer</span></code></a> to help
+navigate complex parameter spaces more efficiently, though other
+<a class="reference internal" href="optimizers/index.html#module-mlos_bench.optimizers" title="mlos_bench.optimizers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">optimizers</span></code></a> are also available to help customize the search
+process easily by simply swapping out the
+<a class="reference internal" href="optimizers/base_optimizer/index.html#mlos_bench.optimizers.base_optimizer.Optimizer" title="mlos_bench.optimizers.base_optimizer.Optimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Optimizer</span></code></a> class in the associated
+json configs. For instance,
+<a class="reference internal" href="optimizers/grid_search_optimizer/index.html#mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer" title="mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridSearchOptimizer</span></code></a> can be
+used to perform a grid search over the parameter space instead, or no tuning at all
+and <code class="docutils literal notranslate"><span class="pre">mlos_bench</span></code> can be used as only a repeatable benchmarking tool.</p>
+<section id="goals">
+<h3><a class="toc-backref" href="#id3" role="doc-backlink">Goals</a><a class="headerlink" href="#goals" title="Link to this heading"></a></h3>
+<p>The overall goal of the MLOS project is to enable <em>reproducible</em> and <em>trackable</em>
+benchmarking and <em>efficient</em> autotuning for systems software.</p>
+<p>In this, automation of the benchmarking process is a key component that
+<code class="docutils literal notranslate"><span class="pre">mlos_bench</span></code> seeks to enable.</p>
+</section>
+<section id="interaction">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink">Interaction</a><a class="headerlink" href="#interaction" title="Link to this heading"></a></h3>
+<p>Users are expected to provide JSON <a class="reference internal" href="config/index.html#module-mlos_bench.config" title="mlos_bench.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.config</span></code></a> s that instruct the
+framework how to automate their benchmark, autotuning, or other Experiment.</p>
+<p>This may involve several steps such as</p>
+<ol class="arabic simple">
+<li><p>deploying a VM</p></li>
+<li><p>installing some software</p></li>
+<li><p>loading a dataset</p></li>
+<li><p>running a benchmark</p></li>
+<li><p>collecting and storing the results</p></li>
+<li><p>repeating for statistical and noise measures (we call each iteration a <code class="docutils literal notranslate"><span class="pre">Trial</span></code>)</p></li>
+<li><p>(optionally) repeating with a different configuration (e.g., for autotuning purposes)</p></li>
+<li><p>analyzing the results</p></li>
+</ol>
+<p>Since many of these phases are common across different benchmarks, the framework is
+intended to be modular and composable to allow reuse and faster development of new
+benchmarking environments or autotuning experiments.</p>
+<p>Where possible, the framework will provide common configs for reuse (e.g., deploying
+a VM on Azure, or run <a class="reference external" href="https://github.com/cmu-db/benchbase">benchbase</a> against
+a database system) to allow users to focus on the specifics of their
+experiments.</p>
+<p>Where none are currently available, one can create them external to MLOS, however
+users are also encouraged to <a class="reference external" href="https://github.com/microsoft/MLOS/CONTRIBUTING.md">submit PRs or Issues</a> to add new classes or config
+and script snippets for others to use as well.</p>
+<p>For more details on the configuration files, please see the documentation in the
+<a class="reference internal" href="config/index.html#module-mlos_bench.config" title="mlos_bench.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.config</span></code></a> module.</p>
+</section>
+</section>
+<section id="classes-overview">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Classes Overview</a><a class="headerlink" href="#classes-overview" title="Link to this heading"></a></h2>
+<p>The other core classes in this package are:</p>
+<ul>
+<li><p><a class="reference internal" href="environments/index.html#module-mlos_bench.environments" title="mlos_bench.environments"><code class="xref py py-mod docutils literal notranslate"><span class="pre">environments</span></code></a> which provide abstractions for representing an
+execution environment.</p>
+<p>These are generally the target of the optimization process and are used to
+evaluate the performance of a given configuration, though can also be used to
+simply run a single benchmark. They can be used, for instance, to provision a
+<a class="reference internal" href="environments/remote/vm_env/index.html#module-mlos_bench.environments.remote.vm_env" title="mlos_bench.environments.remote.vm_env"><code class="xref py py-mod docutils literal notranslate"><span class="pre">VM</span></code></a>, run benchmarks or execute
+any other arbitrary code on a <a class="reference internal" href="environments/remote/remote_env/index.html#module-mlos_bench.environments.remote.remote_env" title="mlos_bench.environments.remote.remote_env"><code class="xref py py-mod docutils literal notranslate"><span class="pre">remote</span> <span class="pre">machine</span></code></a>, and many other things.</p>
+</li>
+<li><p>Environments are often associated with <a class="reference internal" href="tunables/index.html#module-mlos_bench.tunables" title="mlos_bench.tunables"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tunables</span></code></a> which
+provide a language for specifying the set of configuration parameters that can be
+optimized or searched over with the <a class="reference internal" href="optimizers/index.html#module-mlos_bench.optimizers" title="mlos_bench.optimizers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">optimizers</span></code></a>.</p></li>
+<li><p><a class="reference internal" href="services/index.html#module-mlos_bench.services" title="mlos_bench.services"><code class="xref py py-mod docutils literal notranslate"><span class="pre">services</span></code></a> provide the necessary abstractions to run interact
+with the <a class="reference internal" href="environments/index.html#module-mlos_bench.environments" title="mlos_bench.environments"><code class="xref py py-mod docutils literal notranslate"><span class="pre">environments</span></code></a> in different settings.</p>
+<p>For instance, the
+<a class="reference internal" href="services/remote/azure/azure_vm_services/index.html#mlos_bench.services.remote.azure.azure_vm_services.AzureVMService" title="mlos_bench.services.remote.azure.azure_vm_services.AzureVMService"><code class="xref py py-class docutils literal notranslate"><span class="pre">AzureVMService</span></code></a> can
+be used to run commands on Azure VMs for a remote
+<a class="reference internal" href="environments/remote/vm_env/index.html#mlos_bench.environments.remote.vm_env.VMEnv" title="mlos_bench.environments.remote.vm_env.VMEnv"><code class="xref py py-mod docutils literal notranslate"><span class="pre">VMEnv</span></code></a>.</p>
+<p>Alternatively, one could swap out that service for
+<a class="reference internal" href="services/remote/ssh/ssh_host_service/index.html#mlos_bench.services.remote.ssh.ssh_host_service.SshHostService" title="mlos_bench.services.remote.ssh.ssh_host_service.SshHostService"><code class="xref py py-class docutils literal notranslate"><span class="pre">SshHostService</span></code></a> in
+order to target a different VM without having to change the
+<a class="reference internal" href="environments/base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> configuration at
+all since they both implement the same
+<a class="reference internal" href="services/types/remote_exec_type/index.html#mlos_bench.services.types.remote_exec_type.SupportsRemoteExec" title="mlos_bench.services.types.remote_exec_type.SupportsRemoteExec"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsRemoteExec</span></code></a>
+<a class="reference internal" href="services/types/index.html#module-mlos_bench.services.types" title="mlos_bench.services.types"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Services</span> <span class="pre">type</span></code></a> interfaces.</p>
+<p>This is particularly useful when running the same benchmark on different
+ecosystems and makes the configs more modular and composable.</p>
+</li>
+<li><p><a class="reference internal" href="storage/index.html#module-mlos_bench.storage" title="mlos_bench.storage"><code class="xref py py-mod docutils literal notranslate"><span class="pre">storage</span></code></a> which provides abstractions for storing and
+retrieving data from the experiments.</p>
+<p>For instance, nearly any <a class="reference internal" href="storage/sql/index.html#module-mlos_bench.storage.sql" title="mlos_bench.storage.sql"><code class="xref py py-mod docutils literal notranslate"><span class="pre">SQL</span></code></a> backend that
+<a class="reference external" href="https://www.sqlalchemy.org">sqlalchemy</a> supports can be used.</p>
+</li>
+</ul>
+<p>The data management and automation portions of experiment data is a key component of
+MLOS as it provides a unified way to manage experiment data across different
+Environments, enabling more reusable visualization and analysis by mapping benchmark
+metrics into common semantic types (e.g., via <a class="reference external" href="https://opentelemetry.io">OpenTelemetry</a>).</p>
+<p>Without this most experiments are effectively siloed and require custom, and more
+critically, non-reusable scripts to setup and later parse results and are hence
+harder to scale to many users.</p>
+<p>With these features as a part of the MLOS ecosystem, benchmarking can become a
+<em>service</em> that any developer, admin, researcher, etc. can use and adapt.</p>
+<p>See below for more information on the classes in this package.</p>
+<p class="rubric">Notes</p>
+<p>Note that while the docstrings in this package are generated from the source
+code and hence sometimes more focused on the implementation details, we do try
+to provide some (testable) examples here, but most user interactions with the
+package will be through the <a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/">json configs</a>.
+Even so it may be useful to look at the documentation here (perhaps especially
+starting with <a class="reference internal" href="config/index.html#module-mlos_bench.config" title="mlos_bench.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.config</span></code></a>) and, if necessary, the <a class="reference external" href="https://github.com/microsoft/MLOS">source code</a> to understand how those are interpreted.</p>
+<p class="rubric">Examples</p>
+<p>Here is an example that shows how to run a simple benchmark using the command line.</p>
+<p>The entry point for these configs can be found <a class="reference external" href="https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc">here</a>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">subprocess</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Note: we show the command wrapped in python here for testing purposes.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Alternatively replace test-cli-local-env-bench.jsonc with</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># test-cli-local-env-opt.jsonc for one that does an optimization loop.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;mlos_bench </span><span class="se">\</span>
+<span class="gp">... </span><span class="s2">--config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc </span><span class="se">\</span>
+<span class="gp">... </span><span class="s2">--globals experiment_test_local.jsonc </span><span class="se">\</span>
+<span class="gp">... </span><span class="s2">--tunable_values tunable-values/tunable-values-local.jsonc&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Here&#39;s the shell command you&#39;d actually run:</span><span class="se">\n</span><span class="s2"># </span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="go">Here&#39;s the shell command you&#39;d actually run:</span>
+<span class="go"># mlos_bench --config mlos_bench/mlos_bench/tests/config/cli/test-cli-local-env-bench.jsonc --globals experiment_test_local.jsonc --tunable_values tunable-values/tunable-values-local.jsonc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Now we run the command and check the output.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lines</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">first_line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">last_line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">expected</span> <span class="o">=</span> <span class="s2">&quot;INFO Launch: mlos_bench&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">first_line</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">expected</span> <span class="o">=</span> <span class="s2">&quot;INFO Final score: {&#39;score&#39;: 123.4, &#39;total_time&#39;: 123.4, &#39;throughput&#39;: 1234567.0}&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">last_line</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/">mlos_bench/README.md</a>
+for additional documentation and examples in the source tree.</p></li>
+<li><p><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/DEVNOTES.md">mlos_bench/DEVNOTES.md</a>
+for additional developer notes in the source tree.</p></li>
+<li><p>There is also a working example of using <code class="docutils literal notranslate"><span class="pre">mlos_bench</span></code> in a <em>separate config
+repo</em> (the more expected case for most users) in the <a class="reference external" href="https://github.com/Microsoft-CISL/sqlite-autotuning">sqlite-autotuning</a> repo.</p></li>
+</ul>
+</section>
+<section id="submodules">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Submodules</a><a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="config/index.html">mlos_bench.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dict_templater/index.html">mlos_bench.dict_templater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="environments/index.html">mlos_bench.environments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="event_loop_context/index.html">mlos_bench.event_loop_context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="launcher/index.html">mlos_bench.launcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimizers/index.html">mlos_bench.optimizers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="os_environ/index.html">mlos_bench.os_environ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run/index.html">mlos_bench.run</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schedulers/index.html">mlos_bench.schedulers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services/index.html">mlos_bench.services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="storage/index.html">mlos_bench.storage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tunables/index.html">mlos_bench.tunables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util/index.html">mlos_bench.util</a></li>
+<li class="toctree-l1"><a class="reference internal" href="version/index.html">mlos_bench.version</a></li>
+</ul>
+</div>
+</section>
+<section id="attributes">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Attributes</a><a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.__version__" title="mlos_bench.__version__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__version__</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="package-contents">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Package Contents</a><a class="headerlink" href="#package-contents" title="Link to this heading"></a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="mlos_bench.__version__">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.</span></span><span class="sig-name descname"><span class="pre">__version__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.6.2'</span></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/__init__.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.__version__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../mlos_core/version/index.html" class="btn btn-neutral float-left" title="mlos_core.version" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="config/index.html" class="btn btn-neutral float-right" title="mlos_bench.config" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Microsoft GSL.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

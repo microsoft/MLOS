@@ -1,0 +1,331 @@
+mlos_bench.tunables.tunable_groups
+==================================
+
+.. py:module:: mlos_bench.tunables.tunable_groups
+
+.. autoapi-nested-parse::
+
+   TunableGroups definition.
+
+   A collection of :py:class:`.CovariantTunableGroup` s of :py:class:`.Tunable`
+   parameters.
+
+   Used to define the configuration space for an
+   :py:class:`~mlos_bench.environments.base_environment.Environment` for an
+   :py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer` to explore.
+
+   Config
+   ++++++
+
+   The configuration of the tunable parameters is generally given via a JSON config file.
+   The syntax looks something like this:
+
+   .. code-block:: json
+
+       { // starts a TunableGroups config (e.g., for one Environment)
+           "group1": { // starts a CovariantTunableGroup config
+               "cost": 7,
+               "params": {
+                   "param1": { // starts a Tunable config, named "param1"
+                       "type": "int",
+                       "range": [0, 100],
+                       "default": 50
+                   },
+                   "param2": { // starts a new Tunable config, named "param2", within that same group
+                       "type": "float",
+                       "range": [0.0, 100.0],
+                       "default": 50.0
+                   },
+                   "param3": {
+                       "type": "categorical",
+                       "values": ["on", "off", "auto"],
+                       "default": "auto"
+                   }
+               }
+           },
+           "group2": { // starts a new CovariantTunableGroup config
+               "cost": 7,
+               "params": {
+                   "some_param1": {
+                       "type": "int",
+                       "range": [0, 10],
+                       "default": 5
+                   },
+                   "some_param2": {
+                       "type": "float",
+                       "range": [0.0, 100.0],
+                       "default": 50.0
+                   },
+                   "some_param3": {
+                       "type": "categorical",
+                       "values": ["red", "green", "blue"],
+                       "default": "green"
+                   }
+               }
+           }
+       }
+
+   The JSON config is expected to be a dictionary of covariant tunable groups.
+
+   Each covariant group has a name and a cost associated with changing any/all of the
+   parameters in that covariant group.
+
+   Each group has a dictionary of :py:class:`.Tunable` parameters, where the key is
+   the name of the parameter and the value is a dictionary of the parameter's
+   configuration (see the :py:class:`.Tunable` class for more information on the
+   different ways they can be configured).
+
+   Generally tunables are associated with an
+   :py:class:`~mlos_bench.environments.base_environment.Environment` and included along
+   with the Environment's config directory (e.g., ``env-name-tunables.mlos.jsonc``) and
+   referenced in the Environment config using the ``include_tunables`` property.
+
+   .. seealso::
+
+      :py:mod:`mlos_bench.tunables`
+          For more information on tunable parameters and their configuration.
+
+      :py:mod:`mlos_bench.tunables.tunable`
+          Tunable parameter definition.
+
+      :py:mod:`mlos_bench.config`
+          Configuration system for mlos_bench.
+
+      :py:mod:`mlos_bench.environments`
+          Environment configuration and setup.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.tunables.tunable_groups.TunableGroups
+
+
+Module Contents
+---------------
+
+.. py:class:: TunableGroups(config: dict | None = None)
+
+   A collection of :py:class:`.CovariantTunableGroup` s of :py:class:`.Tunable`
+   parameters.
+
+   Create a new group of tunable parameters.
+
+   :param config: Python dict of serialized representation of the covariant tunable groups.
+   :type config: dict
+
+   .. seealso::
+
+      :py:mod:`mlos_bench.tunables`
+          For more information on tunable parameters and their configuration.
+
+
+   .. py:method:: __bool__() -> bool
+
+
+   .. py:method:: __contains__(tunable: str | mlos_bench.tunables.tunable.Tunable) -> bool
+
+      Checks if the given name/tunable is in this tunable group.
+
+
+
+   .. py:method:: __eq__(other: object) -> bool
+
+      Check if two TunableGroups are equal.
+
+      :param other: A tunable groups object to compare to.
+      :type other: TunableGroups
+
+      :returns: **is_equal** -- True if two TunableGroups are equal.
+      :rtype: bool
+
+
+
+   .. py:method:: __getitem__(tunable: str | mlos_bench.tunables.tunable.Tunable) -> mlos_bench.tunables.tunable_types.TunableValue
+
+      Get the current value of a single tunable parameter.
+
+
+
+   .. py:method:: __iter__() -> collections.abc.Generator[tuple[mlos_bench.tunables.tunable.Tunable, mlos_bench.tunables.covariant_group.CovariantTunableGroup]]
+
+      An iterator over all tunables in the group.
+
+      :returns: **[(tunable, group), ...]** -- An iterator over all tunables in all groups. Each element is a 2-tuple
+                of an instance of the Tunable parameter and covariant group it belongs to.
+      :rtype: Generator[tuple[Tunable, CovariantTunableGroup]]
+
+
+
+   .. py:method:: __len__() -> int
+
+
+   .. py:method:: __repr__() -> str
+
+      Produce a human-readable version of the TunableGroups (mostly for logging).
+
+      :returns: **string** -- A human-readable version of the TunableGroups.
+      :rtype: str
+
+
+
+   .. py:method:: __setitem__(tunable: str | mlos_bench.tunables.tunable.Tunable, tunable_value: mlos_bench.tunables.tunable_types.TunableValue | mlos_bench.tunables.tunable.Tunable) -> mlos_bench.tunables.tunable_types.TunableValue
+
+      Update the current value of a single tunable parameter.
+
+
+
+   .. py:method:: assign(param_values: collections.abc.Mapping[str, mlos_bench.tunables.tunable_types.TunableValue]) -> TunableGroups
+
+      In-place update the values of the tunables from the dictionary of (key, value)
+      pairs.
+
+      :param param_values: Dictionary mapping Tunable parameter names to new values.
+
+                           As a special behavior when the mapping is empty (``{}``) the method will
+                           restore the default values rather than no-op.
+                           This allows an empty dictionary in json configs to be used to reset the
+                           tunables to defaults without having to copy the original values from the
+                           tunable_params definition.
+      :type param_values: Mapping[str, TunableValue]
+
+      :returns: **self** -- Self-reference for chaining.
+      :rtype: TunableGroups
+
+
+
+   .. py:method:: copy() -> TunableGroups
+
+      Deep copy of the TunableGroups object.
+
+      :returns: **tunables** -- A new instance of the TunableGroups object
+                that is a deep copy of the original one.
+      :rtype: TunableGroups
+
+
+
+   .. py:method:: get_covariant_group_names() -> collections.abc.Iterable[str]
+
+      Get the names of all covariance groups in the collection.
+
+      :returns: **group_names** -- IDs of the covariant tunable groups.
+      :rtype: [str]
+
+
+
+   .. py:method:: get_param_values(group_names: collections.abc.Iterable[str] | None = None, into_params: dict[str, mlos_bench.tunables.tunable_types.TunableValue] | None = None) -> dict[str, mlos_bench.tunables.tunable_types.TunableValue]
+
+      Get the current values of the tunables that belong to the specified covariance
+      groups.
+
+      :param group_names: IDs of the covariant tunable groups.
+                          Select parameters from all groups if omitted.
+      :type group_names: list of str or None
+      :param into_params: An optional dict to copy the parameters and their values into.
+      :type into_params: dict
+
+      :returns: **into_params** -- Flat dict of all parameters and their values from given covariance groups.
+      :rtype: dict
+
+
+
+   .. py:method:: get_tunable(tunable: str | mlos_bench.tunables.tunable.Tunable) -> tuple[mlos_bench.tunables.tunable.Tunable, mlos_bench.tunables.covariant_group.CovariantTunableGroup]
+
+      Access the entire Tunable (not just its value) and its covariant group. Throw
+      KeyError if the tunable is not found.
+
+      :param tunable: Name of the tunable parameter.
+      :type tunable: Union[str, Tunable]
+
+      :returns: **(tunable, group)** -- A 2-tuple of an instance of the Tunable parameter and covariant group it belongs to.
+      :rtype: (Tunable, CovariantTunableGroup)
+
+
+
+   .. py:method:: is_defaults() -> bool
+
+      Checks whether the currently assigned values of all tunables are at their
+      defaults.
+
+      :rtype: bool
+
+
+
+   .. py:method:: is_updated(group_names: collections.abc.Iterable[str] | None = None) -> bool
+
+      Check if any of the given covariant tunable groups has been updated.
+
+      :param group_names: IDs of the (covariant) tunable groups. Check all groups if omitted.
+      :type group_names: list of str or None
+
+      :returns: **is_updated** -- True if any of the specified tunable groups has been updated, False otherwise.
+      :rtype: bool
+
+
+
+   .. py:method:: merge(tunables: TunableGroups) -> TunableGroups
+
+      Merge the two collections of covariant tunable groups.
+
+      Unlike the dict `update` method, this method does not modify the
+      original when overlapping keys are found.
+      It is expected be used to merge the tunable groups referenced by a
+      standalone Environment config into a parent CompositeEnvironment,
+      for instance.
+      This allows self contained, potentially overlapping, but also
+      overridable configs to be composed together.
+
+      :param tunables: A collection of covariant tunable groups.
+      :type tunables: TunableGroups
+
+      :returns: **self** -- Self-reference for chaining.
+      :rtype: TunableGroups
+
+
+
+   .. py:method:: reset(group_names: collections.abc.Iterable[str] | None = None) -> TunableGroups
+
+      Clear the update flag of given covariant groups.
+
+      :param group_names: IDs of the (covariant) tunable groups. Reset all groups if omitted.
+      :type group_names: list of str or None
+
+      :returns: **self** -- Self-reference for chaining.
+      :rtype: TunableGroups
+
+
+
+   .. py:method:: restore_defaults(group_names: collections.abc.Iterable[str] | None = None) -> TunableGroups
+
+      Restore all tunable parameters to their default values.
+
+      :param group_names: IDs of the (covariant) tunable groups. Restore all groups if omitted.
+      :type group_names: list of str or None
+
+      :returns: **self** -- Self-reference for chaining.
+      :rtype: TunableGroups
+
+
+
+   .. py:method:: subgroup(group_names: collections.abc.Iterable[str]) -> TunableGroups
+
+      Select the covariance groups from the current set and create a new TunableGroups
+      object that consists of those covariance groups.
+
+      Note: The new TunableGroup will include *references* (not copies) to
+      original ones, so each will get updated together.
+      This is often desirable to support the use case of multiple related
+      Environments (e.g. Local vs Remote) using the same set of tunables
+      within a CompositeEnvironment.
+
+      :param group_names: IDs of the covariant tunable groups.
+      :type group_names: list of str
+
+      :returns: **tunables** -- A collection of covariant tunable groups.
+      :rtype: TunableGroups
+
+
+

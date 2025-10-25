@@ -1,0 +1,48 @@
+mlos_viz.dabl
+=============
+
+.. py:module:: mlos_viz.dabl
+
+.. autoapi-nested-parse::
+
+   Small wrapper functions for plotting :py:mod:`mlos_bench` data via
+   :external:py:func:`dabl.plot`.
+
+   .. rubric:: Notes
+
+   See `dabl <https://dabl.github.io/stable/>`_ for more information on the dabl library.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   mlos_viz.dabl.ignore_plotter_warnings
+   mlos_viz.dabl.plot
+
+
+Module Contents
+---------------
+
+.. py:function:: ignore_plotter_warnings() -> None
+
+   Add some filters to ignore warnings from the plotter.
+
+
+.. py:function:: plot(exp_data: mlos_bench.storage.base_experiment_data.ExperimentData | None = None, *, results_df: pandas.DataFrame | None = None, objectives: dict[str, Literal['min', 'max']] | None = None) -> None
+
+   Plots the :py:class:`~mlos_bench.storage.base_storage.Storage.Experiment` results
+   data using :external:py:func:`dabl.plot`.
+
+   :param exp_data: The ExperimentData (e.g., obtained from the storage layer) to plot.
+   :type exp_data: ExperimentData
+   :param results_df: Optional results_df to plot.
+                      If not provided, defaults to exp_data.results_df property.
+   :type results_df: pandas.DataFrame | None
+   :param objectives: Optional objectives to plot.
+                      If not provided, defaults to exp_data.objectives property.
+   :type objectives: Optional[dict[str, Literal["min", "max"]]]
+
+

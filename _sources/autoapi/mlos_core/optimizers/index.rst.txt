@@ -1,0 +1,135 @@
+mlos_core.optimizers
+====================
+
+.. py:module:: mlos_core.optimizers
+
+.. autoapi-nested-parse::
+
+   Initializer module for the mlos_core optimizers.
+
+   Optimizers are the main component of the :py:mod:`mlos_core` package.
+   They act as a wrapper around other OSS tuning libraries to provide a consistent API
+   interface to allow experimenting with different autotuning algorithms.
+
+   The :class:`~mlos_core.optimizers.optimizer.BaseOptimizer` class is the base class
+   for all Optimizers and provides the core
+   :py:meth:`~mlos_core.optimizers.optimizer.BaseOptimizer.suggest` and
+   :py:meth:`~mlos_core.optimizers.optimizer.BaseOptimizer.register` methods.
+
+   This module also provides a simple :py:class:`~.OptimizerFactory` class to
+   :py:meth:`~.OptimizerFactory.create` an Optimizer.
+
+   Generally speaking, the :py:mod:`mlos_core` package is intended to be used in
+   conjunction with the :py:mod:`mlos_bench` package, which provides a higher-level
+   interface for running benchmarks and autotuning experiments.
+
+   .. seealso::
+
+      :py:obj:`mlos_bench.optimizers.mlos_core_optimizer`
+          The mlos_bench Optimizer class that uses the mlos_core Optimizers to run autotuning experiments.
+
+   .. rubric:: Notes
+
+   See `mlos_core/optimizers/README.md
+   <https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/optimizers/>`_
+   for additional documentation and examples in the source tree.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/mlos_core/optimizers/bayesian_optimizers/index
+   /autoapi/mlos_core/optimizers/flaml_optimizer/index
+   /autoapi/mlos_core/optimizers/optimizer/index
+   /autoapi/mlos_core/optimizers/random_optimizer/index
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   mlos_core.optimizers.ConcreteOptimizer
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_core.optimizers.OptimizerFactory
+   mlos_core.optimizers.OptimizerType
+
+
+Package Contents
+----------------
+
+.. py:class:: OptimizerFactory
+
+   Simple factory class for creating
+   :class:`~mlos_core.optimizers.optimizer.BaseOptimizer`-derived objects.
+
+
+   .. py:method:: create(*, parameter_space: ConfigSpace.ConfigurationSpace, optimization_targets: list[str], optimizer_type: OptimizerType = DEFAULT_OPTIMIZER_TYPE, optimizer_kwargs: dict | None = None, space_adapter_type: mlos_core.spaces.adapters.SpaceAdapterType = SpaceAdapterType.IDENTITY, space_adapter_kwargs: dict | None = None) -> ConcreteOptimizer
+      :staticmethod:
+
+
+      Create a new optimizer instance, given the parameter space, optimizer type, and
+      potential optimizer options.
+
+      :param parameter_space: Input configuration space.
+      :type parameter_space: ConfigSpace.ConfigurationSpace
+      :param optimization_targets: The names of the optimization targets to minimize.
+      :type optimization_targets: list[str]
+      :param optimizer_type: Optimizer class as defined by Enum.
+      :type optimizer_type: OptimizerType
+      :param optimizer_kwargs: Optional arguments passed in Optimizer class constructor.
+      :type optimizer_kwargs: dict | None
+      :param space_adapter_type: Space adapter class to be used alongside the optimizer.
+      :type space_adapter_type: SpaceAdapterType | None
+      :param space_adapter_kwargs: Optional arguments passed in SpaceAdapter class constructor.
+      :type space_adapter_kwargs: dict | None
+
+      :returns: **optimizer** -- Instance of concrete optimizer class
+                (e.g., RandomOptimizer, FlamlOptimizer, SmacOptimizer, etc.).
+      :rtype: ConcreteOptimizer
+
+
+
+.. py:class:: OptimizerType(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+
+   Enumerate supported mlos_core optimizers.
+
+
+   .. py:attribute:: FLAML
+
+      An instance of :class:`~mlos_core.optimizers.flaml_optimizer.FlamlOptimizer`
+      class will be used.
+
+
+   .. py:attribute:: RANDOM
+
+      An instance of :class:`~mlos_core.optimizers.random_optimizer.RandomOptimizer`
+      class will be used.
+
+
+   .. py:attribute:: SMAC
+
+      An instance of
+      :class:`~mlos_core.optimizers.bayesian_optimizers.smac_optimizer.SmacOptimizer`
+      class will be used.
+
+
+.. py:data:: ConcreteOptimizer
+
+   Type alias for concrete optimizer classes.
+
+   (e.g., :class:`~mlos_core.optimizers.bayesian_optimizers.smac_optimizer.SmacOptimizer`, etc.)
+

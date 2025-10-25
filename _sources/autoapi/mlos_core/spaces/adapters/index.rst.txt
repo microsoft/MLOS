@@ -1,0 +1,120 @@
+mlos_core.spaces.adapters
+=========================
+
+.. py:module:: mlos_core.spaces.adapters
+
+.. autoapi-nested-parse::
+
+   Basic initializer module for the mlos_core space adapters.
+
+   Space adapters provide a mechanism for automatic transformation of the original
+   :py:class:`ConfigSpace.ConfigurationSpace` provided to the optimizer into a new
+   space that is more suitable for the optimizer.
+
+   By default the :py:class:`.IdentityAdapter` is used, which does not perform any
+   transformation.
+   But, for instance, the :py:class:`.LlamaTuneAdapter` can be used to automatically
+   transform the space to a lower dimensional one.
+
+   See the :py:mod:`mlos_bench.optimizers.mlos_core_optimizer` module for more
+   information on how to do this with :py:mod:`mlos_bench`.
+
+   This module provides a simple :py:class:`.SpaceAdapterFactory` class to
+   :py:meth:`~.SpaceAdapterFactory.create` space adapters.
+
+   Generally speaking, the :py:mod:`mlos_core` package is intended to be used in
+   conjunction with the :py:mod:`mlos_bench` package, which provides a higher-level
+   interface for running benchmarks and autotuning experiments.
+
+   .. seealso::
+
+      :py:obj:`mlos_bench.optimizers.mlos_core_optimizer`
+          The mlos_bench Optimizer class that uses the mlos_core Optimizers and SpaceAdapters to run autotuning experiments.
+
+   .. rubric:: Notes
+
+   See `mlos_core/spaces/adapters/README.md
+   <https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/spaces/adapters>`_
+   for additional documentation and examples in the source tree.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/mlos_core/spaces/adapters/adapter/index
+   /autoapi/mlos_core/spaces/adapters/identity_adapter/index
+   /autoapi/mlos_core/spaces/adapters/llamatune/index
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   mlos_core.spaces.adapters.ConcreteSpaceAdapter
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_core.spaces.adapters.SpaceAdapterFactory
+   mlos_core.spaces.adapters.SpaceAdapterType
+
+
+Package Contents
+----------------
+
+.. py:class:: SpaceAdapterFactory
+
+   Simple factory class for creating
+   :class:`~mlos_core.spaces.adapters.adapter.BaseSpaceAdapter`-derived objects.
+
+
+   .. py:method:: create(*, parameter_space: ConfigSpace.ConfigurationSpace, space_adapter_type: SpaceAdapterType | None = SpaceAdapterType.IDENTITY, space_adapter_kwargs: dict | None = None) -> ConcreteSpaceAdapter
+      :staticmethod:
+
+
+      Create a new space adapter instance, given the parameter space and potential
+      space adapter options.
+
+      :param parameter_space: Input configuration space.
+      :type parameter_space: ConfigSpace.ConfigurationSpace
+      :param space_adapter_type: Space adapter class to be used alongside the optimizer.
+      :type space_adapter_type: SpaceAdapterType | None
+      :param space_adapter_kwargs: Optional arguments passed in SpaceAdapter class constructor.
+      :type space_adapter_kwargs: dict | None
+
+      :returns: **space_adapter** -- Instance of concrete space adapter (e.g., None, LlamaTuneAdapter, etc.)
+      :rtype: ConcreteSpaceAdapter
+
+
+
+.. py:class:: SpaceAdapterType(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+
+   Enumerate supported mlos_core space adapters.
+
+
+   .. py:attribute:: IDENTITY
+
+      A no-op adapter (:class:`.IdentityAdapter`) will be used.
+
+
+   .. py:attribute:: LLAMATUNE
+
+      An instance of :class:`.LlamaTuneAdapter` class will be used.
+
+
+.. py:data:: ConcreteSpaceAdapter
+
+   Type alias for concrete SpaceAdapter classes (e.g.,
+   :class:`~mlos_core.spaces.adapters.identity_adapter.IdentityAdapter`, etc.)
+

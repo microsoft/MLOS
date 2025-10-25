@@ -1,0 +1,49 @@
+mlos_bench.dict_templater
+=========================
+
+.. py:module:: mlos_bench.dict_templater
+
+.. autoapi-nested-parse::
+
+   Simple class to help with nested dictionary ``$var`` templating in configuration file
+   expansions.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.dict_templater.DictTemplater
+
+
+Module Contents
+---------------
+
+.. py:class:: DictTemplater(source_dict: dict[str, Any])
+
+   Simple class to help with nested dictionary ``$var`` templating.
+
+   Initialize the templater.
+
+   :param source_dict: The template dict to use for source variables.
+   :type source_dict: dict[str, Any]
+
+
+   .. py:method:: expand_vars(*, extra_source_dict: dict[str, Any] | None = None, use_os_env: bool = False) -> dict[str, Any]
+
+      Expand the template variables in the destination dictionary.
+
+      :param extra_source_dict: An optional extra source dictionary to use for expansion.
+      :type extra_source_dict: dict[str, Any]
+      :param use_os_env: Whether to use the os environment variables a final fallback for expansion.
+      :type use_os_env: bool
+
+      :returns: The expanded dictionary.
+      :rtype: dict[str, Any]
+
+      :raises ValueError: On unsupported nested types.
+
+
+

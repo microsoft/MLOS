@@ -1,0 +1,67 @@
+mlos_bench.storage.sql.trial
+============================
+
+.. py:module:: mlos_bench.storage.sql.trial
+
+.. autoapi-nested-parse::
+
+   :py:class:`.Storage.Trial` interface implementation for saving and restoring
+   the benchmark trial data using `SQLAlchemy <https://sqlalchemy.org>`_ backend.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.storage.sql.trial.Trial
+
+
+Module Contents
+---------------
+
+.. py:class:: Trial(*, engine: sqlalchemy.engine.Engine, schema: mlos_bench.storage.sql.schema.DbSchema, tunables: mlos_bench.tunables.tunable_groups.TunableGroups, experiment_id: str, trial_id: int, config_id: int, trial_runner_id: int | None, opt_targets: dict[str, Literal['min', 'max']], status: mlos_bench.environments.status.Status, restoring: bool, config: dict[str, Any] | None = None)
+
+   Bases: :py:obj:`mlos_bench.storage.base_storage.Storage.Trial`
+
+
+   Store the results of a single run of the experiment in SQL database.
+
+
+   .. py:method:: set_trial_runner(trial_runner_id: int) -> int
+
+      Assign the trial to a specific TrialRunner.
+
+
+
+   .. py:method:: update(status: mlos_bench.environments.status.Status, timestamp: datetime.datetime, metrics: dict[str, Any] | None = None) -> dict[str, Any] | None
+
+      Update the storage with the results of the experiment.
+
+      :param status: Status of the experiment run.
+      :type status: Status
+      :param timestamp: Timestamp of the status and metrics.
+      :type timestamp: datetime.datetime
+      :param metrics: One or several metrics of the experiment run.
+                      Must contain the (float) optimization target if the status is SUCCEEDED.
+      :type metrics: Optional[dict[str, Any]]
+
+      :returns: **metrics** -- Same as `metrics`, but always in the dict format.
+      :rtype: Optional[dict[str, Any]]
+
+
+
+   .. py:method:: update_telemetry(status: mlos_bench.environments.status.Status, timestamp: datetime.datetime, metrics: list[tuple[datetime.datetime, str, Any]]) -> None
+
+      Save the experiment's telemetry data and intermediate status.
+
+      :param status: Current status of the trial.
+      :type status: Status
+      :param timestamp: Timestamp of the status (but not the metrics).
+      :type timestamp: datetime.datetime
+      :param metrics: Telemetry data.
+      :type metrics: list[tuple[datetime.datetime, str, Any]]
+
+
+

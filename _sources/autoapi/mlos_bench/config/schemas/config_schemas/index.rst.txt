@@ -1,0 +1,228 @@
+mlos_bench.config.schemas.config_schemas
+========================================
+
+.. py:module:: mlos_bench.config.schemas.config_schemas
+
+.. autoapi-nested-parse::
+
+   A simple class for describing where to find different `json config schemas
+   <https://json-schema.org>`_ and validating configs against them.
+
+   Used by the :py:class:`~mlos_bench.launcher.Launcher` and
+   :py:class:`~mlos_bench.services.config_persistence.ConfigPersistenceService` to
+   validate configs on load.
+
+   .. rubric:: Notes
+
+   - See `mlos_bench/config/schemas/README.md
+     <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/>`_
+     for additional documentation in the source tree.
+
+   - See `mlos_bench/config/README.md
+     <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_
+     for additional config examples in the source tree.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   mlos_bench.config.schemas.config_schemas.CONFIG_SCHEMA_DIR
+   mlos_bench.config.schemas.config_schemas.SCHEMA_STORE
+   mlos_bench.config.schemas.config_schemas.VALIDATION_ENV_FLAG
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.config.schemas.config_schemas.ConfigSchema
+   mlos_bench.config.schemas.config_schemas.SchemaStore
+
+
+Module Contents
+---------------
+
+.. py:class:: ConfigSchema(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+
+   An enum to help describe schema types and help validate configs against them.
+
+
+   .. py:method:: validate(config: dict) -> None
+
+      Validates the given config against this schema.
+
+      :param config: The config to validate.
+      :type config: dict
+
+      :raises jsonschema.exceptions.ValidationError: On validation failure.
+      :raises jsonschema.exceptions.SchemaError: On schema loading error.
+
+
+
+   .. py:attribute:: CLI
+      :value: b''
+
+
+      Json config `schema
+      <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/cli/cli-schema.json>`__
+      for :py:mod:`mlos_bench <mlos_bench.run>` CLI configuration.
+
+      .. seealso::
+
+         :py:obj:`mlos_bench.config`
+             documentation on the configuration system.
+
+         :py:obj:`mlos_bench.launcher.Launcher`
+             class is responsible for processing the CLI args.
+
+
+   .. py:attribute:: ENVIRONMENT
+      :value: b''
+
+
+      Json config `schema
+      <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/environments/environment-schema.json>`__
+      for :py:mod:`~mlos_bench.environments`.
+
+
+   .. py:attribute:: GLOBALS
+      :value: b''
+
+
+      Json config `schema
+      <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/cli/globals-schema.json>`__
+      for :py:mod:`global variables <mlos_bench.config>`.
+
+
+   .. py:attribute:: OPTIMIZER
+      :value: b''
+
+
+      Json config `schema
+      <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json>`__
+      for :py:mod:`~mlos_bench.optimizers`.
+
+
+   .. py:attribute:: SCHEDULER
+      :value: b''
+
+
+      Json config `schema
+      <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/schedulers/scheduler-schema.json>`__
+      for :py:mod:`~mlos_bench.schedulers`.
+
+
+   .. py:attribute:: SERVICE
+      :value: b''
+
+
+      Json config `schema
+      <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json>`__
+      for :py:mod:`~mlos_bench.services`.
+
+
+   .. py:attribute:: STORAGE
+      :value: b''
+
+
+      Json config `schema
+      <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/storage/storage-schema.json>`__
+      for :py:mod:`~mlos_bench.storage` instances.
+
+
+   .. py:attribute:: TUNABLE_PARAMS
+      :value: b''
+
+
+      Json config `schema
+      <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-params-schema.json>`__
+      for :py:mod:`~mlos_bench.tunables` instances.
+
+
+   .. py:attribute:: TUNABLE_VALUES
+      :value: b''
+
+
+      Json config `schema
+      <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-values-schema.json>`__
+      for values of :py:mod:`~mlos_bench.tunables.tunable_groups.TunableGroups` instances.
+
+      These can be used to specify the values of the tunables for a given experiment
+      using the :py:class:`~mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer`
+      for instance.
+
+
+   .. py:attribute:: UNIFIED
+      :value: b''
+
+
+      Combined global json `schema
+      <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/mlos-bench-config-schema.json>`__
+      use to validate any ``mlos_bench`` config file (e.g., ``*.mlos.jsonc`` files).
+
+      .. seealso:: <https://www.schemastore.org/>
+
+
+   .. py:property:: schema
+      :type: dict
+
+
+      Gets the schema object for this type.
+
+
+.. py:class:: SchemaStore
+
+   Bases: :py:obj:`collections.abc.Mapping`
+
+
+   A simple class for storing schemas and subschemas for the validator to
+   reference.
+
+
+   .. py:method:: __getitem__(key: str) -> dict
+
+      Gets the schema object for the given key.
+
+
+
+   .. py:method:: __iter__() -> collections.abc.Iterator
+
+
+   .. py:method:: __len__() -> int
+
+
+   .. py:property:: registry
+      :type: referencing.Registry
+
+
+      Returns a Registry object with all the schemas loaded.
+
+
+.. py:data:: CONFIG_SCHEMA_DIR
+   :value: b''
+
+
+   The local directory where all config schemas shipped as a part of the
+   :py:mod:`mlos_bench` module are stored.
+
+.. py:data:: SCHEMA_STORE
+
+   Static :py:class:`.SchemaStore` instance used for storing and retrieving schemas for
+   config validation.
+
+.. py:data:: VALIDATION_ENV_FLAG
+   :value: 'MLOS_BENCH_SKIP_SCHEMA_VALIDATION'
+
+
+   The special environment flag to set to skip schema validation when "true".
+
+   Useful for local development when you're making a lot of changes to the config or adding
+   new classes that aren't in the main repo yet.
+

@@ -1,0 +1,46 @@
+mlos_bench.storage.sql.tunable_config_data
+==========================================
+
+.. py:module:: mlos_bench.storage.sql.tunable_config_data
+
+.. autoapi-nested-parse::
+
+   An interface to access the tunable config data stored in a SQL DB using the
+   :py:class:`.TunableConfigData` interface.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.storage.sql.tunable_config_data.TunableConfigSqlData
+
+
+Module Contents
+---------------
+
+.. py:class:: TunableConfigSqlData(*, engine: sqlalchemy.engine.Engine, schema: mlos_bench.storage.sql.schema.DbSchema, tunable_config_id: int)
+
+   Bases: :py:obj:`mlos_bench.storage.base_tunable_config_data.TunableConfigData`
+
+
+   SQL interface for accessing the stored experiment benchmark (tunable) config data.
+
+   A configuration in this context is the set of tunable parameter values.
+
+
+   .. py:property:: config_df
+      :type: pandas.DataFrame
+
+
+      Retrieve the trials' tunable configuration from the storage.
+
+      Note: this corresponds to the Trial object's "tunables" property.
+
+      :returns: **config** -- A dataframe with the tunable configuration of the trial.
+                It has two `str` columns, "parameter" and "value".
+      :rtype: pandas.DataFrame
+
+

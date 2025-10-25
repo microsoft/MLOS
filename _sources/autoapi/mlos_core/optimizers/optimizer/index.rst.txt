@@ -1,0 +1,137 @@
+mlos_core.optimizers.optimizer
+==============================
+
+.. py:module:: mlos_core.optimizers.optimizer
+
+.. autoapi-nested-parse::
+
+   Contains the :py:class:`.BaseOptimizer` abstract class.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_core.optimizers.optimizer.BaseOptimizer
+
+
+Module Contents
+---------------
+
+.. py:class:: BaseOptimizer(*, parameter_space: ConfigSpace.ConfigurationSpace, optimization_targets: list[str], objective_weights: list[float] | None = None, space_adapter: mlos_core.spaces.adapters.adapter.BaseSpaceAdapter | None = None)
+
+   Optimizer abstract base class defining the basic interface:
+   :py:meth:`~.BaseOptimizer.suggest`,
+   :py:meth:`~.BaseOptimizer.register`,
+
+   Create a new instance of the base optimizer.
+
+   :param parameter_space: The parameter space to optimize.
+   :type parameter_space: ConfigSpace.ConfigurationSpace
+   :param optimization_targets: The names of the optimization targets to minimize.
+                                To maximize a target, use the negative of the target when registering scores.
+   :type optimization_targets: list[str]
+   :param objective_weights: Optional list of weights of optimization targets.
+   :type objective_weights: Optional[list[float]]
+   :param space_adapter: The space adapter class to employ for parameter space transformations.
+   :type space_adapter: BaseSpaceAdapter
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: cleanup() -> None
+
+      Remove temp files, release resources, etc.
+
+      after use. Default is no-op. Redefine this method in optimizers that require
+      cleanup.
+
+
+
+   .. py:method:: get_best_observations(n_max: int = 1) -> mlos_core.data_classes.Observations
+
+      Get the N best observations so far as a filtered version of Observations.
+      Default is N=1. The columns are ordered in ASCENDING order of the optimization
+      targets. The function uses `pandas.DataFrame.nsmallest(..., keep="first")`
+      method under the hood.
+
+      :param n_max: Maximum number of best observations to return. Default is 1.
+      :type n_max: int
+
+      :returns: **observations** -- A filtered version of Observations with the best N observations.
+      :rtype: Observations
+
+
+
+   .. py:method:: get_observations() -> mlos_core.data_classes.Observations
+
+      Returns the observations as a triplet of DataFrames (config, score, context).
+
+      :returns: **observations** -- All the observations registered so far.
+      :rtype: Observations
+
+
+
+   .. py:method:: register(observations: mlos_core.data_classes.Observation | mlos_core.data_classes.Observations) -> None
+
+      Register all observations at once. Exactly one of observations or observation
+      must be provided.
+
+      :param observations: The observations to register.
+      :type observations: Optional[Union[Observation, Observations]]
+
+
+
+   .. py:method:: register_pending(pending: mlos_core.data_classes.Suggestion) -> None
+      :abstractmethod:
+
+
+      Registers the given suggestion as "pending". That is it say, it has been
+      suggested by the optimizer, and an experiment trial has been started. This can
+      be useful for executing multiple trials in parallel, retry logic, etc.
+
+      :param pending: The pending suggestion to register.
+      :type pending: Suggestion
+
+
+
+   .. py:method:: suggest(*, context: pandas.Series | None = None, defaults: bool = False) -> mlos_core.data_classes.Suggestion
+
+      Wrapper method, which employs the space adapter (if any), after suggesting a new
+      configuration.
+
+      :param context: Not Yet Implemented.
+      :type context: pandas.Series
+      :param defaults: Whether or not to return the default config instead of an optimizer guided one.
+                       By default, use the one from the optimizer.
+      :type defaults: bool
+
+      :returns: **suggestion** -- The suggested point to evaluate.
+      :rtype: Suggestion
+
+
+
+   .. py:attribute:: optimizer_parameter_space
+      :type:  ConfigSpace.ConfigurationSpace
+
+      The parameter space actually used by the optimizer.
+
+      (in case a :py:mod:`SpaceAdapter <mlos_core.spaces.adapters>` is used)
+
+
+   .. py:attribute:: parameter_space
+      :type:  ConfigSpace.ConfigurationSpace
+
+      The parameter space to optimize.
+
+
+   .. py:property:: space_adapter
+      :type: mlos_core.spaces.adapters.adapter.BaseSpaceAdapter | None
+
+
+      Get the space adapter instance (if any).
+
+

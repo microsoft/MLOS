@@ -1,0 +1,362 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlos_bench.optimizers.convert_configspace &mdash; MLOS 0.6.3.dev53+g549a69ab0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/plot_directive.css" />
+
+  
+    <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/optimizers/convert_configspace/index.html"/>
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=8b2becd3"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="mlos_bench.optimizers.grid_search_optimizer" href="../grid_search_optimizer/index.html" />
+    <link rel="prev" title="mlos_bench.optimizers.base_optimizer" href="../base_optimizer/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            MLOS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Source Tree Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source_tree_docs/index.html">MLOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source_tree_docs/mlos_core/index.html">mlos-core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source_tree_docs/mlos_bench/index.html">mlos-bench</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source_tree_docs/mlos_viz/index.html">mlos-viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../mlos_core/index.html">mlos_core</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">mlos_bench</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#classes-overview">Classes Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../config/index.html">mlos_bench.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dict_templater/index.html">mlos_bench.dict_templater</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../environments/index.html">mlos_bench.environments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../event_loop_context/index.html">mlos_bench.event_loop_context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../launcher/index.html">mlos_bench.launcher</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html">mlos_bench.optimizers</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../index.html#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#api">API</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#spaces">Spaces</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#config">Config</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="../base_optimizer/index.html">mlos_bench.optimizers.base_optimizer</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">mlos_bench.optimizers.convert_configspace</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#classes">Classes</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.optimizers.convert_configspace.TunableValueKind"><code class="docutils literal notranslate"><span class="pre">TunableValueKind</span></code></a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.optimizers.convert_configspace.TunableValueKind.RANGE"><code class="docutils literal notranslate"><span class="pre">TunableValueKind.RANGE</span></code></a></li>
+<li class="toctree-l8"><a class="reference internal" href="#mlos_bench.optimizers.convert_configspace.TunableValueKind.SPECIAL"><code class="docutils literal notranslate"><span class="pre">TunableValueKind.SPECIAL</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.optimizers.convert_configspace.configspace_data_to_tunable_values"><code class="docutils literal notranslate"><span class="pre">configspace_data_to_tunable_values()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.optimizers.convert_configspace.special_param_name_is_temp"><code class="docutils literal notranslate"><span class="pre">special_param_name_is_temp()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.optimizers.convert_configspace.special_param_name_strip"><code class="docutils literal notranslate"><span class="pre">special_param_name_strip()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.optimizers.convert_configspace.special_param_names"><code class="docutils literal notranslate"><span class="pre">special_param_names()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.optimizers.convert_configspace.tunable_groups_to_configspace"><code class="docutils literal notranslate"><span class="pre">tunable_groups_to_configspace()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#mlos_bench.optimizers.convert_configspace.tunable_values_to_configuration"><code class="docutils literal notranslate"><span class="pre">tunable_values_to_configuration()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../grid_search_optimizer/index.html">mlos_bench.optimizers.grid_search_optimizer</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../manual_optimizer/index.html">mlos_bench.optimizers.manual_optimizer</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../mlos_core_optimizer/index.html">mlos_bench.optimizers.mlos_core_optimizer</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../mock_optimizer/index.html">mlos_bench.optimizers.mock_optimizer</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../one_shot_optimizer/index.html">mlos_bench.optimizers.one_shot_optimizer</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../track_best_optimizer/index.html">mlos_bench.optimizers.track_best_optimizer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../os_environ/index.html">mlos_bench.os_environ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../run/index.html">mlos_bench.run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../schedulers/index.html">mlos_bench.schedulers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../services/index.html">mlos_bench.services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../storage/index.html">mlos_bench.storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tunables/index.html">mlos_bench.tunables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../util/index.html">mlos_bench.util</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../version/index.html">mlos_bench.version</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#attributes">Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mlos_viz/index.html">mlos_viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">mlos_bench CLI usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mlos_bench.run.usage.html">mlos_bench CLI usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/microsoft/MLOS">Github Source Tree</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">MLOS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">mlos_bench</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">mlos_bench.optimizers</a></li>
+      <li class="breadcrumb-item active">mlos_bench.optimizers.convert_configspace</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/autoapi/mlos_bench/optimizers/convert_configspace/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mlos_bench.optimizers.convert_configspace">
+<span id="mlos-bench-optimizers-convert-configspace"></span><h1>mlos_bench.optimizers.convert_configspace<a class="headerlink" href="#module-mlos_bench.optimizers.convert_configspace" title="Link to this heading"></a></h1>
+<p>Functions to convert <a class="reference internal" href="../../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><code class="xref py py-class docutils literal notranslate"><span class="pre">TunableGroups</span></code></a> that <a class="reference internal" href="../../index.html#module-mlos_bench" title="mlos_bench"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench</span></code></a> uses to to
+<a class="reference external" href="https://automl.github.io/ConfigSpace/latest/api/ConfigSpace/configuration_space/#ConfigSpace.configuration_space.ConfigurationSpace" title="(in ConfigSpace v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConfigSpace.ConfigurationSpace</span></code></a> for use with the
+<a class="reference internal" href="../../../mlos_core/optimizers/index.html#module-mlos_core.optimizers" title="mlos_core.optimizers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_core.optimizers</span></code></a>.</p>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.optimizers.convert_configspace.TunableValueKind" title="mlos_bench.optimizers.convert_configspace.TunableValueKind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TunableValueKind</span></code></a></p></td>
+<td><p>Enum for the kind of the tunable value (special or not).</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.optimizers.convert_configspace.configspace_data_to_tunable_values" title="mlos_bench.optimizers.convert_configspace.configspace_data_to_tunable_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configspace_data_to_tunable_values</span></code></a>(→ dict[str, ...)</p></td>
+<td><p>Remove the fields that correspond to special values in ConfigSpace.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.optimizers.convert_configspace.special_param_name_is_temp" title="mlos_bench.optimizers.convert_configspace.special_param_name_is_temp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">special_param_name_is_temp</span></code></a>(→ bool)</p></td>
+<td><p>Check if name corresponds to a temporary ConfigSpace parameter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.optimizers.convert_configspace.special_param_name_strip" title="mlos_bench.optimizers.convert_configspace.special_param_name_strip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">special_param_name_strip</span></code></a>(→ str)</p></td>
+<td><p>Remove the temporary suffix from a special parameter name.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.optimizers.convert_configspace.special_param_names" title="mlos_bench.optimizers.convert_configspace.special_param_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">special_param_names</span></code></a>(→ tuple[str, str])</p></td>
+<td><p>Generate the names of the auxiliary hyperparameters that correspond to a tunable</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.optimizers.convert_configspace.tunable_groups_to_configspace" title="mlos_bench.optimizers.convert_configspace.tunable_groups_to_configspace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tunable_groups_to_configspace</span></code></a>(...)</p></td>
+<td><p>Convert TunableGroups to  hyperparameters in ConfigurationSpace.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_bench.optimizers.convert_configspace.tunable_values_to_configuration" title="mlos_bench.optimizers.convert_configspace.tunable_values_to_configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tunable_values_to_configuration</span></code></a>(...)</p></td>
+<td><p>Converts a TunableGroups current values to a ConfigSpace Configuration.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mlos_bench.optimizers.convert_configspace.TunableValueKind">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlos_bench.optimizers.convert_configspace.</span></span><span class="sig-name descname"><span class="pre">TunableValueKind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/optimizers/convert_configspace.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.optimizers.convert_configspace.TunableValueKind" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.Enum</span></code></a></p>
+<p>Enum for the kind of the tunable value (special or not).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.optimizers.convert_configspace.TunableValueKind.RANGE">
+<span class="sig-name descname"><span class="pre">RANGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'range'</span></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/optimizers/convert_configspace.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.optimizers.convert_configspace.TunableValueKind.RANGE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_bench.optimizers.convert_configspace.TunableValueKind.SPECIAL">
+<span class="sig-name descname"><span class="pre">SPECIAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'special'</span></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/optimizers/convert_configspace.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.optimizers.convert_configspace.TunableValueKind.SPECIAL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.optimizers.convert_configspace.configspace_data_to_tunable_values">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.optimizers.convert_configspace.</span></span><span class="sig-name descname"><span class="pre">configspace_data_to_tunable_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../tunables/tunable_types/index.html#mlos_bench.tunables.tunable_types.TunableValue" title="mlos_bench.tunables.tunable_types.TunableValue"><span class="pre">mlos_bench.tunables.tunable_types.TunableValue</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/optimizers/convert_configspace.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.optimizers.convert_configspace.configspace_data_to_tunable_values" title="Link to this definition"></a></dt>
+<dd><p>Remove the fields that correspond to special values in ConfigSpace.</p>
+<p>In particular, remove and keys suffixes added by <cite>special_param_names</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference internal" href="../../tunables/tunable_types/index.html#mlos_bench.tunables.tunable_types.TunableValue" title="mlos_bench.tunables.tunable_types.TunableValue">mlos_bench.tunables.tunable_types.TunableValue</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.optimizers.convert_configspace.special_param_name_is_temp">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.optimizers.convert_configspace.</span></span><span class="sig-name descname"><span class="pre">special_param_name_is_temp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/optimizers/convert_configspace.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.optimizers.convert_configspace.special_param_name_is_temp" title="Link to this definition"></a></dt>
+<dd><p>Check if name corresponds to a temporary ConfigSpace parameter.</p>
+<p>NOTE: <code class="docutils literal notranslate"><span class="pre">!</span></code> characters are currently disallowed in <a class="reference internal" href="../../tunables/tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> names in
+order handle this logic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The name of the hyperparameter.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>is_special</strong> – True if the name corresponds to a temporary ConfigSpace hyperparameter.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.optimizers.convert_configspace.special_param_name_strip">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.optimizers.convert_configspace.</span></span><span class="sig-name descname"><span class="pre">special_param_name_strip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/optimizers/convert_configspace.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.optimizers.convert_configspace.special_param_name_strip" title="Link to this definition"></a></dt>
+<dd><p>Remove the temporary suffix from a special parameter name.</p>
+<p>NOTE: <code class="docutils literal notranslate"><span class="pre">!</span></code> characters are currently disallowed in <a class="reference internal" href="../../tunables/tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> names in
+order handle this logic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The name of the hyperparameter.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>stripped_name</strong> – The name of the hyperparameter without the temporary suffix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.optimizers.convert_configspace.special_param_names">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.optimizers.convert_configspace.</span></span><span class="sig-name descname"><span class="pre">special_param_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/optimizers/convert_configspace.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.optimizers.convert_configspace.special_param_names" title="Link to this definition"></a></dt>
+<dd><p>Generate the names of the auxiliary hyperparameters that correspond to a tunable
+that can have special values.</p>
+<p>NOTE: <code class="docutils literal notranslate"><span class="pre">!</span></code> characters are currently disallowed in <a class="reference internal" href="../../tunables/tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunable</span></code></a> names in
+order handle this logic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The name of the tunable parameter.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>special_name</strong> (<em>str</em>) – The name of the hyperparameter that corresponds to the special value.</p></li>
+<li><p><strong>type_name</strong> (<em>str</em>) – The name of the hyperparameter that chooses between the regular and the special values.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.optimizers.convert_configspace.tunable_groups_to_configspace">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.optimizers.convert_configspace.</span></span><span class="sig-name descname"><span class="pre">tunable_groups_to_configspace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tunables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><span class="pre">mlos_bench.tunables.tunable_groups.TunableGroups</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://automl.github.io/ConfigSpace/latest/api/ConfigSpace/configuration_space/#ConfigSpace.configuration_space.ConfigurationSpace" title="(in ConfigSpace v0.0.0)"><span class="pre">ConfigSpace.ConfigurationSpace</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/optimizers/convert_configspace.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.optimizers.convert_configspace.tunable_groups_to_configspace" title="Link to this definition"></a></dt>
+<dd><p>Convert TunableGroups to  hyperparameters in ConfigurationSpace.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tunables</strong> (<a class="reference internal" href="../../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><em>TunableGroups</em></a>) – A collection of tunable parameters.</p></li>
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> | </em><em>None</em>) – Random seed to use.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>configspace</strong> – A new ConfigurationSpace instance that corresponds to the input TunableGroups.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://automl.github.io/ConfigSpace/latest/api/ConfigSpace/configuration_space/#ConfigSpace.configuration_space.ConfigurationSpace" title="(in ConfigSpace v0.0.0)">ConfigSpace.ConfigurationSpace</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mlos_bench.optimizers.convert_configspace.tunable_values_to_configuration">
+<span class="sig-prename descclassname"><span class="pre">mlos_bench.optimizers.convert_configspace.</span></span><span class="sig-name descname"><span class="pre">tunable_values_to_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tunables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><span class="pre">mlos_bench.tunables.tunable_groups.TunableGroups</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://automl.github.io/ConfigSpace/latest/api/ConfigSpace/configuration/#ConfigSpace.configuration.Configuration" title="(in ConfigSpace v0.0.0)"><span class="pre">ConfigSpace.Configuration</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/optimizers/convert_configspace.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.optimizers.convert_configspace.tunable_values_to_configuration" title="Link to this definition"></a></dt>
+<dd><p>Converts a TunableGroups current values to a ConfigSpace Configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tunables</strong> (<a class="reference internal" href="../../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><em>TunableGroups</em></a>) – The TunableGroups to take the current value from.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A ConfigSpace Configuration.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://automl.github.io/ConfigSpace/latest/api/ConfigSpace/configuration/#ConfigSpace.configuration.Configuration" title="(in ConfigSpace v0.0.0)">ConfigSpace.Configuration</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../base_optimizer/index.html" class="btn btn-neutral float-left" title="mlos_bench.optimizers.base_optimizer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../grid_search_optimizer/index.html" class="btn btn-neutral float-right" title="mlos_bench.optimizers.grid_search_optimizer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Microsoft GSL.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

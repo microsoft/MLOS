@@ -1,0 +1,63 @@
+mlos_core.spaces.converters.util
+================================
+
+.. py:module:: mlos_core.spaces.converters.util
+
+.. autoapi-nested-parse::
+
+   Helper functions for config space converters.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   mlos_core.spaces.converters.util.QUANTIZATION_BINS_META_KEY
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   mlos_core.spaces.converters.util.monkey_patch_cs_quantization
+   mlos_core.spaces.converters.util.monkey_patch_hp_quantization
+
+
+Module Contents
+---------------
+
+.. py:function:: monkey_patch_cs_quantization(cs: ConfigSpace.ConfigurationSpace) -> ConfigSpace.ConfigurationSpace
+
+   Monkey-patch quantization into the Hyperparameters of a ConfigSpace.
+
+   :param cs: ConfigSpace to patch.
+   :type cs: ConfigSpace.ConfigurationSpace
+
+   :returns: **cs** -- Patched ConfigSpace.
+   :rtype: ConfigSpace.ConfigurationSpace
+
+
+.. py:function:: monkey_patch_hp_quantization(hp: ConfigSpace.hyperparameters.Hyperparameter) -> ConfigSpace.hyperparameters.Hyperparameter
+
+   Monkey-patch quantization into the Hyperparameter.
+
+   Temporary workaround to dropped quantization support in ConfigSpace 1.0
+
+   .. rubric:: Notes
+
+   See <https://github.com/automl/ConfigSpace/issues/390>.
+
+   :param hp: ConfigSpace hyperparameter to patch.
+   :type hp: ConfigSpace.hyperparameters.Hyperparameter
+
+   :returns: **hp** -- Patched hyperparameter.
+   :rtype: ConfigSpace.hyperparameters.Hyperparameter
+
+
+.. py:data:: QUANTIZATION_BINS_META_KEY
+   :value: 'quantization_bins'
+
+

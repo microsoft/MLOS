@@ -1,0 +1,218 @@
+mlos_bench.optimizers.grid_search_optimizer
+===========================================
+
+.. py:module:: mlos_bench.optimizers.grid_search_optimizer
+
+.. autoapi-nested-parse::
+
+   Grid search Optimizer for mlos_bench.
+
+   Grid search is a simple optimizer that exhaustively searches the configuration space.
+
+   To do this it generates a grid of configurations to try, and then suggests them one by one.
+
+   Therefore, the number of configurations to try is the product of the
+   :py:attr:`~mlos_bench.tunables.tunable.Tunable.cardinality` of each of the
+   :py:mod:`~mlos_bench.tunables`.
+   (i.e., non :py:attr:`quantized <mlos_bench.tunables.tunable.Tunable.quantization_bins>`
+   tunables are not supported).
+
+   .. rubric:: Examples
+
+   Load tunables from a JSON string.
+   Note: normally these would be automatically loaded from the
+   :py:mod:`~mlos_bench.environments.base_environment.Environment`'s
+   ``include_tunables`` config parameter.
+
+   >>> import json5 as json
+   >>> from mlos_bench.environments.status import Status
+   >>> from mlos_bench.services.config_persistence import ConfigPersistenceService
+   >>> service = ConfigPersistenceService()
+   >>> json_config = '''
+   ... {
+   ...   "group_1": {
+   ...     "cost": 1,
+   ...     "params": {
+   ...       "colors": {
+   ...         "type": "categorical",
+   ...         "values": ["red", "blue", "green"],
+   ...         "default": "green",
+   ...       },
+   ...       "int_param": {
+   ...         "type": "int",
+   ...         "range": [1, 3],
+   ...         "default": 2,
+   ...       },
+   ...       "float_param": {
+   ...         "type": "float",
+   ...         "range": [0, 1],
+   ...         "default": 0.5,
+   ...         // Quantize the range into 3 bins
+   ...         "quantization_bins": 3,
+   ...       }
+   ...     }
+   ...   }
+   ... }
+   ... '''
+   >>> tunables = service.load_tunables(jsons=[json_config])
+   >>> # Check the defaults:
+   >>> tunables.get_param_values()
+   {'colors': 'green', 'int_param': 2, 'float_param': 0.5}
+
+   Now create a :py:class:`.GridSearchOptimizer` from a JSON config string.
+
+   >>> optimizer_json_config = '''
+   ... {
+   ...   "class": "mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer",
+   ...   "description": "GridSearchOptimizer",
+   ...     "config": {
+   ...         "max_suggestions": 100,
+   ...         "optimization_targets": {"score": "max"},
+   ...         "start_with_defaults": true
+   ...     }
+   ... }
+   ... '''
+   >>> config = json.loads(optimizer_json_config)
+   >>> grid_search_optimizer = service.build_optimizer(
+   ...   tunables=tunables,
+   ...   service=service,
+   ...   config=config,
+   ... )
+   >>> # Should have 3 values for each of the 3 tunables
+   >>> len(list(grid_search_optimizer.pending_configs))
+   27
+   >>> next(grid_search_optimizer.pending_configs)
+   {'colors': 'red', 'float_param': 0, 'int_param': 1}
+
+   Here are some examples of suggesting and registering configurations.
+
+   >>> suggested_config_1 = grid_search_optimizer.suggest()
+   >>> # Default should be suggested first, per json config.
+   >>> suggested_config_1.get_param_values()
+   {'colors': 'green', 'int_param': 2, 'float_param': 0.5}
+   >>> # Get another suggestion.
+   >>> # Note that multiple suggestions can be pending prior to
+   >>> # registering their scores, supporting parallel trial execution.
+   >>> suggested_config_2 = grid_search_optimizer.suggest()
+   >>> suggested_config_2.get_param_values()
+   {'colors': 'red', 'int_param': 1, 'float_param': 0.0}
+   >>> # Register some scores.
+   >>> # Note: Maximization problems track negative scores to produce a minimization problem.
+   >>> grid_search_optimizer.register(suggested_config_1, Status.SUCCEEDED, {"score": 42})
+   {'score': -42.0}
+   >>> grid_search_optimizer.register(suggested_config_2, Status.SUCCEEDED, {"score": 7})
+   {'score': -7.0}
+   >>> (best_score, best_config) = grid_search_optimizer.get_best_observation()
+   >>> best_score
+   {'score': 42.0}
+   >>> assert best_config == suggested_config_1
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.optimizers.grid_search_optimizer.GridSearchOptimizer
+
+
+Module Contents
+---------------
+
+.. py:class:: GridSearchOptimizer(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, config: dict, global_config: dict | None = None, service: mlos_bench.services.base_service.Service | None = None)
+
+   Bases: :py:obj:`mlos_bench.optimizers.track_best_optimizer.TrackBestOptimizer`
+
+
+   Grid search optimizer.
+
+   See :py:mod:`above <mlos_bench.optimizers.grid_search_optimizer>` for more details.
+
+   Create a new optimizer for the given configuration space defined by the
+   tunables.
+
+   :param tunables: The tunables to optimize.
+   :type tunables: TunableGroups
+   :param config: Free-format key/value pairs of configuration parameters to pass to the optimizer.
+   :type config: dict
+   :param global_config:
+   :type global_config: dict | None
+   :param service:
+   :type service: Service | None
+
+
+   .. py:method:: bulk_register(configs: collections.abc.Sequence[dict], scores: collections.abc.Sequence[dict[str, mlos_bench.tunables.tunable_types.TunableValue] | None], status: collections.abc.Sequence[mlos_bench.environments.status.Status] | None = None) -> bool
+
+      Pre-load the optimizer with the bulk data from previous experiments.
+
+      :param configs: Records of tunable values from other experiments.
+      :type configs: Sequence[dict]
+      :param scores: Benchmark results from experiments that correspond to `configs`.
+      :type scores: Sequence[Optional[dict[str, TunableValue]]]
+      :param status: Status of the experiments that correspond to `configs`.
+      :type status: Optional[Sequence[Status]]
+
+      :returns: **is_not_empty** -- True if there is data to register, false otherwise.
+      :rtype: bool
+
+
+
+   .. py:method:: not_converged() -> bool
+
+      Return True if not converged, False otherwise.
+
+      Base implementation just checks the iteration count.
+
+
+
+   .. py:method:: register(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, status: mlos_bench.environments.status.Status, score: dict[str, mlos_bench.tunables.tunable_types.TunableValue] | None = None) -> dict[str, float] | None
+
+      Register the observation for the given configuration.
+
+      :param tunables: The configuration that has been benchmarked.
+                       Usually it's the same config that the `.suggest()` method returned.
+      :type tunables: TunableGroups
+      :param status: Final status of the experiment (e.g., SUCCEEDED or FAILED).
+      :type status: Status
+      :param score: A dict with the final benchmark results.
+                    None if the experiment was not successful.
+      :type score: Optional[dict[str, TunableValue]]
+
+      :returns: **value** -- Benchmark scores extracted (and possibly transformed)
+                from the dataframe that's being MINIMIZED.
+      :rtype: Optional[dict[str, float]]
+
+
+
+   .. py:method:: suggest() -> mlos_bench.tunables.tunable_groups.TunableGroups
+
+      Generate the next grid search suggestion.
+
+
+
+   .. py:attribute:: MAX_CONFIGS
+      :value: 10000
+
+
+      Maximum number of configurations to enumerate.
+
+
+   .. py:property:: pending_configs
+      :type: collections.abc.Iterable[dict[str, mlos_bench.tunables.tunable_types.TunableValue]]
+
+
+      Gets the set of pending configs in this grid search optimizer.
+
+      :rtype: Iterable[dict[str, TunableValue]]
+
+
+   .. py:property:: suggested_configs
+      :type: collections.abc.Iterable[dict[str, mlos_bench.tunables.tunable_types.TunableValue]]
+
+
+      Gets the set of configs that have been suggested but not yet registered.
+
+      :rtype: Iterable[dict[str, TunableValue]]
+
+

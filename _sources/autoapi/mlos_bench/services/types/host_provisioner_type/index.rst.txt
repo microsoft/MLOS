@@ -1,0 +1,93 @@
+mlos_bench.services.types.host_provisioner_type
+===============================================
+
+.. py:module:: mlos_bench.services.types.host_provisioner_type
+
+.. autoapi-nested-parse::
+
+   Protocol interface for Host/VM provisioning operations.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning
+
+
+Module Contents
+---------------
+
+.. py:class:: SupportsHostProvisioning
+
+   Bases: :py:obj:`Protocol`
+
+
+   Protocol interface for Host/VM provisioning operations.
+
+
+   .. py:method:: deallocate_host(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Deallocates the Host/VM by shutting it down then releasing the compute
+      resources.
+
+      Note: This can cause the VM to arrive on a new host node when its
+      restarted, which may have different performance characteristics.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: deprovision_host(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Deprovisions the Host/VM by deleting it.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: provision_host(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Check if Host/VM is ready. Deploy a new Host/VM, if necessary.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+                     VMEnv tunables are variable parameters that, together with the
+                     VMEnv configuration, are sufficient to provision a VM.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: wait_host_deployment(params: dict, *, is_setup: bool) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Waits for a pending operation on a Host/VM to resolve to SUCCEEDED or FAILED.
+      Return TIMED_OUT when timing out.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+      :param is_setup: If True, wait for Host/VM being deployed; otherwise, wait for successful
+                       deprovisioning.
+      :type is_setup: bool
+
+      :returns: **result** -- A pair of Status and result.
+                Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+                Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+      :rtype: (Status, dict)
+
+
+

@@ -1,0 +1,129 @@
+mlos_bench.optimizers.convert_configspace
+=========================================
+
+.. py:module:: mlos_bench.optimizers.convert_configspace
+
+.. autoapi-nested-parse::
+
+   Functions to convert :py:class:`.TunableGroups` that :py:mod:`mlos_bench` uses to to
+   :py:class:`ConfigSpace.ConfigurationSpace` for use with the
+   :py:mod:`mlos_core.optimizers`.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.optimizers.convert_configspace.TunableValueKind
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   mlos_bench.optimizers.convert_configspace.configspace_data_to_tunable_values
+   mlos_bench.optimizers.convert_configspace.special_param_name_is_temp
+   mlos_bench.optimizers.convert_configspace.special_param_name_strip
+   mlos_bench.optimizers.convert_configspace.special_param_names
+   mlos_bench.optimizers.convert_configspace.tunable_groups_to_configspace
+   mlos_bench.optimizers.convert_configspace.tunable_values_to_configuration
+
+
+Module Contents
+---------------
+
+.. py:class:: TunableValueKind(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+
+   Enum for the kind of the tunable value (special or not).
+
+
+   .. py:attribute:: RANGE
+      :value: 'range'
+
+
+
+   .. py:attribute:: SPECIAL
+      :value: 'special'
+
+
+
+.. py:function:: configspace_data_to_tunable_values(data: dict) -> dict[str, mlos_bench.tunables.tunable_types.TunableValue]
+
+   Remove the fields that correspond to special values in ConfigSpace.
+
+   In particular, remove and keys suffixes added by `special_param_names`.
+
+
+.. py:function:: special_param_name_is_temp(name: str) -> bool
+
+   Check if name corresponds to a temporary ConfigSpace parameter.
+
+   NOTE: ``!`` characters are currently disallowed in :py:class:`.Tunable` names in
+   order handle this logic.
+
+   :param name: The name of the hyperparameter.
+   :type name: str
+
+   :returns: **is_special** -- True if the name corresponds to a temporary ConfigSpace hyperparameter.
+   :rtype: bool
+
+
+.. py:function:: special_param_name_strip(name: str) -> str
+
+   Remove the temporary suffix from a special parameter name.
+
+   NOTE: ``!`` characters are currently disallowed in :py:class:`.Tunable` names in
+   order handle this logic.
+
+   :param name: The name of the hyperparameter.
+   :type name: str
+
+   :returns: **stripped_name** -- The name of the hyperparameter without the temporary suffix.
+   :rtype: str
+
+
+.. py:function:: special_param_names(name: str) -> tuple[str, str]
+
+   Generate the names of the auxiliary hyperparameters that correspond to a tunable
+   that can have special values.
+
+   NOTE: ``!`` characters are currently disallowed in :py:class:`.Tunable` names in
+   order handle this logic.
+
+   :param name: The name of the tunable parameter.
+   :type name: str
+
+   :returns: * **special_name** (*str*) -- The name of the hyperparameter that corresponds to the special value.
+             * **type_name** (*str*) -- The name of the hyperparameter that chooses between the regular and the special values.
+
+
+.. py:function:: tunable_groups_to_configspace(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, seed: int | None = None) -> ConfigSpace.ConfigurationSpace
+
+   Convert TunableGroups to  hyperparameters in ConfigurationSpace.
+
+   :param tunables: A collection of tunable parameters.
+   :type tunables: TunableGroups
+   :param seed: Random seed to use.
+   :type seed: int | None
+
+   :returns: **configspace** -- A new ConfigurationSpace instance that corresponds to the input TunableGroups.
+   :rtype: ConfigSpace.ConfigurationSpace
+
+
+.. py:function:: tunable_values_to_configuration(tunables: mlos_bench.tunables.tunable_groups.TunableGroups) -> ConfigSpace.Configuration
+
+   Converts a TunableGroups current values to a ConfigSpace Configuration.
+
+   :param tunables: The TunableGroups to take the current value from.
+   :type tunables: TunableGroups
+
+   :returns: A ConfigSpace Configuration.
+   :rtype: ConfigSpace.Configuration
+
+

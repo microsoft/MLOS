@@ -1,0 +1,147 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlos-viz &mdash; MLOS 0.6.3.dev53+g549a69ab0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+
+  
+    <link rel="canonical" href="https://microsoft.github.io/MLOS/source_tree_docs/mlos_viz/index.html"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8b2becd3"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="mlos_core" href="../../autoapi/mlos_core/index.html" />
+    <link rel="prev" title="mlos-bench" href="../mlos_bench/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            MLOS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Source Tree Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">MLOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mlos_core/index.html">mlos-core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mlos_bench/index.html">mlos-bench</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">mlos-viz</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/mlos_core/index.html">mlos_core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/mlos_bench/index.html">mlos_bench</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/mlos_viz/index.html">mlos_viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">mlos_bench CLI usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../mlos_bench.run.usage.html">mlos_bench CLI usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/microsoft/MLOS">Github Source Tree</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MLOS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">mlos-viz</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/source_tree_docs/mlos_viz/index.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mlos-viz">
+<h1>mlos-viz<a class="headerlink" href="#mlos-viz" title="Link to this heading"></a></h1>
+<p>The <a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_viz/./"><code class="docutils literal notranslate"><span class="pre">mlos_viz</span></code></a> module is an aid to visualizing experiment benchmarking and optimization results generated and stored by <a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_viz/../mlos_bench/"><code class="docutils literal notranslate"><span class="pre">mlos_bench</span></code></a>.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>Its core API is <code class="docutils literal notranslate"><span class="pre">mlos_viz.plot(experiment)</span></code>, initially implemented as a wrapper around <a class="reference external" href="https://github.com/dabl/dabl"><code class="docutils literal notranslate"><span class="pre">dabl</span></code></a> to provide a basic visual overview of the results, where <code class="docutils literal notranslate"><span class="pre">experiment</span></code> is an <a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_viz/../mlos_bench/mlos_bench/storage/base_experiment_data.py"><code class="docutils literal notranslate"><span class="pre">ExperimentData</span></code></a> objected returned from the <a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_viz/../mlos_bench/mlos_bench/storage/"><code class="docutils literal notranslate"><span class="pre">mlos_bench.storage</span></code></a> layer APIs.</p>
+<p>In the future, we plan to add more automatic visualizations, interactive visualizations, feedback to the <code class="docutils literal notranslate"><span class="pre">mlos_bench</span></code> experiment trial scheduler, etc.</p>
+<p>It’s available for <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> via the pypi repository at <a class="reference external" href="https://pypi.org/project/mlos-viz/">mlos-viz</a>.</p>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://microsoft.github.io/MLOS/autoapi/mlos_viz/">https://microsoft.github.io/MLOS/autoapi/mlos_viz/</a> for more documentation details</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../mlos_bench/index.html" class="btn btn-neutral float-left" title="mlos-bench" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../autoapi/mlos_core/index.html" class="btn btn-neutral float-right" title="mlos_core" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Microsoft GSL.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

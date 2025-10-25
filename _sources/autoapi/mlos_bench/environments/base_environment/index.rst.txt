@@ -1,0 +1,202 @@
+mlos_bench.environments.base_environment
+========================================
+
+.. py:module:: mlos_bench.environments.base_environment
+
+.. autoapi-nested-parse::
+
+   A hierarchy of benchmark environments.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.environments.base_environment.Environment
+
+
+Module Contents
+---------------
+
+.. py:class:: Environment(*, name: str, config: dict, global_config: dict | None = None, tunables: mlos_bench.tunables.tunable_groups.TunableGroups | None = None, service: mlos_bench.services.base_service.Service | None = None)
+
+   Bases: :py:obj:`contextlib.AbstractContextManager`
+
+
+   An abstract base of all benchmark environments.
+
+   Create a new environment with a given config.
+
+   :param name: Human-readable name of the environment.
+   :type name: str
+   :param config: Free-format dictionary that contains the benchmark environment
+                  configuration. Each config must have at least the "tunable_params"
+                  and the "const_args" sections.
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters (e.g., security credentials)
+                         to be mixed in into the "const_args" section of the local config.
+   :type global_config: dict
+   :param tunables: A collection of groups of tunable parameters for all environments.
+   :type tunables: TunableGroups
+   :param service: An optional service object (e.g., providing methods to
+                   deploy or reboot a VM/Host, etc.).
+   :type service: Service
+
+
+   .. py:method:: __enter__() -> Environment
+
+      Enter the environment's benchmarking context.
+
+
+
+   .. py:method:: __exit__(ex_type: type[BaseException] | None, ex_val: BaseException | None, ex_tb: types.TracebackType | None) -> Literal[False]
+
+      Exit the context of the benchmarking environment.
+
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: __str__() -> str
+
+
+   .. py:method:: new(*, env_name: str, class_name: str, config: dict, global_config: dict | None = None, tunables: mlos_bench.tunables.tunable_groups.TunableGroups | None = None, service: mlos_bench.services.base_service.Service | None = None) -> Environment
+      :classmethod:
+
+
+      Factory method for a new environment with a given config.
+
+      :param env_name: Human-readable name of the environment.
+      :type env_name: str
+      :param class_name: FQN of a Python class to instantiate, e.g.,
+                         "mlos_bench.environments.remote.HostEnv".
+                         Must be derived from the `Environment` class.
+      :type class_name: str
+      :param config: Free-format dictionary that contains the benchmark environment
+                     configuration. It will be passed as a constructor parameter of
+                     the class specified by `name`.
+      :type config: dict
+      :param global_config: Free-format dictionary of global parameters (e.g., security credentials)
+                            to be mixed in into the "const_args" section of the local config.
+      :type global_config: dict
+      :param tunables: A collection of groups of tunable parameters for all environments.
+      :type tunables: TunableGroups
+      :param service: An optional service object (e.g., providing methods to
+                      deploy or reboot a VM/Host, etc.).
+      :type service: Service
+
+      :returns: **env** -- An instance of the `Environment` class initialized with `config`.
+      :rtype: Environment
+
+
+
+   .. py:method:: pprint(indent: int = 4, level: int = 0) -> str
+
+      Pretty-print the environment configuration. For composite environments, print
+      all children environments as well.
+
+      :param indent: Number of spaces to indent the output. Default is 4.
+      :type indent: int
+      :param level: Current level of indentation. Default is 0.
+      :type level: int
+
+      :returns: **pretty** -- Pretty-printed environment configuration.
+                Default output is the same as `__repr__`.
+      :rtype: str
+
+
+
+   .. py:method:: run() -> tuple[mlos_bench.environments.status.Status, datetime.datetime, dict[str, mlos_bench.tunables.tunable_types.TunableValue] | None]
+
+      Execute the run script for this environment.
+
+      For instance, this may start a new experiment, download results, reconfigure
+      the environment, etc. Details are configurable via the environment config.
+
+      :returns: **(status, timestamp, output)** -- 3-tuple of (Status, timestamp, output) values, where `output` is a dict
+                with the results or None if the status is not COMPLETED.
+                If run script is a benchmark, then the score is usually expected to
+                be in the `score` field.
+      :rtype: (Status, datetime.datetime, dict)
+
+
+
+   .. py:method:: setup(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, global_config: dict | None = None) -> bool
+
+      Set up a new benchmark environment, if necessary. This method must be
+      idempotent, i.e., calling it several times in a row should be equivalent to a
+      single call.
+
+      :param tunables: A collection of tunable parameters along with their values.
+      :type tunables: TunableGroups
+      :param global_config: Free-format dictionary of global parameters of the environment
+                            that are not used in the optimization process.
+      :type global_config: dict
+
+      :returns: **is_success** -- True if operation is successful, false otherwise.
+      :rtype: bool
+
+
+
+   .. py:method:: status() -> tuple[mlos_bench.environments.status.Status, datetime.datetime, list[tuple[datetime.datetime, str, Any]]]
+
+      Check the status of the benchmark environment.
+
+      :returns: **(benchmark_status, timestamp, telemetry)** -- 3-tuple of (benchmark status, timestamp, telemetry) values.
+                `timestamp` is UTC time stamp of the status; it's current time by default.
+                `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
+      :rtype: (Status, datetime.datetime, list)
+
+
+
+   .. py:method:: teardown() -> None
+
+      Tear down the benchmark environment.
+
+      This method must be idempotent, i.e., calling it several times in a row should
+      be equivalent to a single call.
+
+
+
+   .. py:attribute:: config
+
+
+   .. py:property:: const_args
+      :type: dict[str, mlos_bench.tunables.tunable_types.TunableValue]
+
+
+      Get the constant arguments for this Environment.
+
+      :returns: **parameters** -- Key/value pairs of all environment const_args parameters.
+      :rtype: Dict[str, TunableValue]
+
+
+   .. py:attribute:: name
+
+
+   .. py:property:: parameters
+      :type: dict[str, mlos_bench.tunables.tunable_types.TunableValue]
+
+
+      Key/value pairs of all environment parameters (i.e., `const_args` and
+      `tunable_params`). Note that before `.setup()` is called, all tunables will be
+      set to None.
+
+      :returns: **parameters** -- Key/value pairs of all environment parameters
+                (i.e., `const_args` and `tunable_params`).
+      :rtype: dict[str, TunableValue]
+
+
+   .. py:property:: tunable_params
+      :type: mlos_bench.tunables.tunable_groups.TunableGroups
+
+
+      Get the configuration space of the given environment.
+
+      :returns: **tunables** -- A collection of covariant groups of tunable parameters.
+      :rtype: TunableGroups
+
+

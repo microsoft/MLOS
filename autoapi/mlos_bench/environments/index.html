@@ -1,0 +1,576 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlos_bench.environments &mdash; MLOS 0.6.3.dev53+g549a69ab0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+
+  
+    <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/environments/index.html"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=8b2becd3"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="mlos_bench.environments.base_environment" href="base_environment/index.html" />
+    <link rel="prev" title="mlos_bench.dict_templater" href="../dict_templater/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MLOS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Source Tree Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_tree_docs/index.html">MLOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_tree_docs/mlos_core/index.html">mlos-core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_tree_docs/mlos_bench/index.html">mlos-bench</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_tree_docs/mlos_viz/index.html">mlos-viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../mlos_core/index.html">mlos_core</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">mlos_bench</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#classes-overview">Classes Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../config/index.html">mlos_bench.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dict_templater/index.html">mlos_bench.dict_templater</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mlos_bench.environments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#environment-parameterization">Environment Parameterization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#environment-tunables">Environment Tunables</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#tunable-parameters-map">Tunable Parameters Map</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Variable Propagation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#environment-services">Environment Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="base_environment/index.html">mlos_bench.environments.base_environment</a></li>
+<li class="toctree-l5"><a class="reference internal" href="composite_env/index.html">mlos_bench.environments.composite_env</a></li>
+<li class="toctree-l5"><a class="reference internal" href="local/index.html">mlos_bench.environments.local</a></li>
+<li class="toctree-l5"><a class="reference internal" href="mock_env/index.html">mlos_bench.environments.mock_env</a></li>
+<li class="toctree-l5"><a class="reference internal" href="remote/index.html">mlos_bench.environments.remote</a></li>
+<li class="toctree-l5"><a class="reference internal" href="script_env/index.html">mlos_bench.environments.script_env</a></li>
+<li class="toctree-l5"><a class="reference internal" href="status/index.html">mlos_bench.environments.status</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../event_loop_context/index.html">mlos_bench.event_loop_context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../launcher/index.html">mlos_bench.launcher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../optimizers/index.html">mlos_bench.optimizers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../os_environ/index.html">mlos_bench.os_environ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../run/index.html">mlos_bench.run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../schedulers/index.html">mlos_bench.schedulers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../services/index.html">mlos_bench.services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../storage/index.html">mlos_bench.storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tunables/index.html">mlos_bench.tunables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../util/index.html">mlos_bench.util</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../version/index.html">mlos_bench.version</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#attributes">Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../mlos_viz/index.html">mlos_viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">mlos_bench CLI usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mlos_bench.run.usage.html">mlos_bench CLI usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/microsoft/MLOS">Github Source Tree</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MLOS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">mlos_bench</a></li>
+      <li class="breadcrumb-item active">mlos_bench.environments</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/mlos_bench/environments/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mlos_bench.environments">
+<span id="mlos-bench-environments"></span><h1><a class="toc-backref" href="#id3" role="doc-backlink">mlos_bench.environments</a><a class="headerlink" href="#module-mlos_bench.environments" title="Link to this heading"></a></h1>
+<p>Tunable Environments for mlos_bench.</p>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#module-mlos_bench.environments" id="id3">mlos_bench.environments</a></p>
+<ul>
+<li><p><a class="reference internal" href="#overview" id="id4">Overview</a></p></li>
+<li><p><a class="reference internal" href="#environment-parameterization" id="id5">Environment Parameterization</a></p></li>
+<li><p><a class="reference internal" href="#environment-tunables" id="id6">Environment Tunables</a></p>
+<ul>
+<li><p><a class="reference internal" href="#tunable-parameters-map" id="id7">Tunable Parameters Map</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id1" id="id8">Variable Propagation</a></p></li>
+<li><p><a class="reference internal" href="#environment-services" id="id9">Environment Services</a></p></li>
+<li><p><a class="reference internal" href="#submodules" id="id10">Submodules</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="overview">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Overview</a><a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>Environments are classes that represent an execution setting (i.e., environment) for
+running a benchmark or tuning process.</p>
+<p>For instance, a <a class="reference internal" href="local/local_env/index.html#mlos_bench.environments.local.local_env.LocalEnv" title="mlos_bench.environments.local.local_env.LocalEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocalEnv</span></code></a> represents a local execution environment, a
+<a class="reference internal" href="remote/remote_env/index.html#mlos_bench.environments.remote.remote_env.RemoteEnv" title="mlos_bench.environments.remote.remote_env.RemoteEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">RemoteEnv</span></code></a> represents a remote execution environment, a
+<a class="reference internal" href="remote/vm_env/index.html#mlos_bench.environments.remote.vm_env.VMEnv" title="mlos_bench.environments.remote.vm_env.VMEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">VMEnv</span></code></a> represents a virtual
+machine, etc.</p>
+<p>An Environment goes through a series of <em>phases</em> (e.g.,
+<a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment.setup" title="mlos_bench.environments.base_environment.Environment.setup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup()</span></code></a>, <a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment.run" title="mlos_bench.environments.base_environment.Environment.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>,
+<a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment.teardown" title="mlos_bench.environments.base_environment.Environment.teardown"><code class="xref py py-meth docutils literal notranslate"><span class="pre">teardown()</span></code></a>, etc.) that can be used to prepare a VM, workload,
+etc.; run a benchmark, script, etc.; and clean up afterwards.
+Often, what these phases do (e.g., what commands to execute) will depend on the
+specific Environment and the configs that Environment was loaded with.
+This lets Environments be very flexible in what they can accomplish.</p>
+<p>Environments can be stacked together with the <a class="reference internal" href="composite_env/index.html#mlos_bench.environments.composite_env.CompositeEnv" title="mlos_bench.environments.composite_env.CompositeEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompositeEnv</span></code></a> class to
+represent complex setups (e.g., an application running on a remote VM with a
+benchmark running from a local machine).</p>
+<p>See below for the set of Environments currently available in this package.</p>
+<p>Note that additional ones can also be created by extending the base
+<a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> class and referencing them in the <a class="reference internal" href="../config/index.html#module-mlos_bench.config" title="mlos_bench.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">json</span> <span class="pre">configs</span></code></a> using the <code class="docutils literal notranslate"><span class="pre">class</span></code> key.</p>
+</section>
+<section id="environment-parameterization">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Environment Parameterization</a><a class="headerlink" href="#environment-parameterization" title="Link to this heading"></a></h2>
+<p>Each <a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> can have a set of parameters that define the
+environment’s configuration. These parameters can be <em>constant</em> (i.e., immutable from one trial
+run to the next) or <em>tunable</em> (i.e., suggested by the optimizer or provided by the user). The
+following clauses in the environment configuration are used to declare these parameters:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">tunable_params</span></code>:
+A list of <a class="reference internal" href="../tunables/index.html#module-mlos_bench.tunables" title="mlos_bench.tunables"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tunable</span></code></a> parameters’ (covariant) <em>groups</em>.
+At each trial, the Environment will obtain the new values of these parameters
+from the outside (e.g., from the <a class="reference internal" href="../optimizers/index.html#module-mlos_bench.optimizers" title="mlos_bench.optimizers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Optimizer</span></code></a>).</p>
+<p>Typically, this is set using variable expansion via the special
+<code class="docutils literal notranslate"><span class="pre">tunable_params_map</span></code> key in the <a class="reference external" href="../config/index.html#globals-and-variable-substitution">globals config</a>.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">const_args</span></code>:
+A dictionary of <em>constant</em> parameters along with their values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">required_args</span></code>:
+A list of <em>constant</em> parameters supplied to the environment externally
+(i.e., from a parent environment, global config file, or command line).</p></li>
+</ul>
+<p>Again, tunable parameters change on every trial, while constant parameters stay fixed for the
+entire experiment.</p>
+<p>During the <code class="docutils literal notranslate"><span class="pre">setup</span></code> and <code class="docutils literal notranslate"><span class="pre">run</span></code> phases, MLOS will combine the constant and
+tunable parameters and their values into a single dictionary and pass it to the
+corresponding method.</p>
+<p>Values of constant parameters defined in the Environment config can be
+overridden with the values from the command line and/or external config files.
+That allows MLOS users to have reusable immutable environment configurations and
+move all experiment-specific or sensitive data outside of the version-controlled
+files. We discuss the <a class="reference external" href="index.html#variable-propagation">variable propagation</a> mechanism
+in the section below.</p>
+</section>
+<section id="environment-tunables">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Environment Tunables</a><a class="headerlink" href="#environment-tunables" title="Link to this heading"></a></h2>
+<p>Each environment can use
+<a class="reference internal" href="../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><code class="xref py py-class docutils literal notranslate"><span class="pre">TunableGroups</span></code></a> to specify the set of
+configuration parameters that can be optimized or searched.
+At each iteration of the optimization process, the optimizer will generate a set of
+values for the <a class="reference internal" href="../tunables/tunable/index.html#mlos_bench.tunables.tunable.Tunable" title="mlos_bench.tunables.tunable.Tunable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tunables</span></code></a> that the
+environment can use to configure itself.</p>
+<p>At a python level, this happens by passing a
+<a class="reference internal" href="../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TunableGroups()</span></code></a> object to the
+<code class="docutils literal notranslate"><span class="pre">tunable_groups</span></code> parameter of the <a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> constructor, but that
+is typically handled by the
+<a class="reference internal" href="../services/config_persistence/index.html#mlos_bench.services.config_persistence.ConfigPersistenceService.load_environment" title="mlos_bench.services.config_persistence.ConfigPersistenceService.load_environment"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_environment()</span></code></a>
+method of the
+<a class="reference internal" href="../services/config_persistence/index.html#mlos_bench.services.config_persistence.ConfigPersistenceService" title="mlos_bench.services.config_persistence.ConfigPersistenceService"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ConfigPersistenceService()</span></code></a> invoked
+by the <code class="docutils literal notranslate"><span class="pre">mlos_bench</span></code> command line tool’s <a class="reference internal" href="../launcher/index.html#mlos_bench.launcher.Launcher" title="mlos_bench.launcher.Launcher"><code class="xref py py-class docutils literal notranslate"><span class="pre">mlos_bench.launcher.Launcher</span></code></a>
+class.</p>
+<p>In the typical json user level configs, this is specified in the
+<code class="docutils literal notranslate"><span class="pre">include_tunables</span></code> section of the Environment config to include the
+<a class="reference internal" href="../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><code class="xref py py-class docutils literal notranslate"><span class="pre">TunableGroups</span></code></a> definitions from other
+json files when the <a class="reference internal" href="../launcher/index.html#mlos_bench.launcher.Launcher" title="mlos_bench.launcher.Launcher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Launcher</span></code></a> processes the initial
+set of config files.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">tunable_params</span></code> setting in the <code class="docutils literal notranslate"><span class="pre">config</span></code> section of the Environment config can then be
+used to limit <em>which</em> of the <code class="docutils literal notranslate"><span class="pre">TunableGroups</span></code> should be used for the Environment.</p>
+<section id="tunable-parameters-map">
+<h3><a class="toc-backref" href="#id7" role="doc-backlink">Tunable Parameters Map</a><a class="headerlink" href="#tunable-parameters-map" title="Link to this heading"></a></h3>
+<p>Although the full set of tunable parameters (and groups) of each Environment is always known in
+advance, in practice we often want to limit it to a smaller subset for a given experiment. This
+can be done by adding an extra level of indirection and specifying the <code class="docutils literal notranslate"><span class="pre">tunable_params_map</span></code> in
+the global config. <code class="docutils literal notranslate"><span class="pre">tunable_params_map</span></code> associates a variable name with a list of
+<a class="reference internal" href="../tunables/tunable_groups/index.html#mlos_bench.tunables.tunable_groups.TunableGroups" title="mlos_bench.tunables.tunable_groups.TunableGroups"><code class="xref py py-class docutils literal notranslate"><span class="pre">TunableGroups</span></code></a> names, e.g.,</p>
+<blockquote>
+<div><div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="c1">// experiment-globals.mlos.jsonc</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;tunable_params_map&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;tunables_ref1&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;tunable_group1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;tunable_group2&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;tunables_ref2&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">  </span><span class="c1">// Useful to disable all tunables.</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Later, in the Environment config, we can use these variable names to refer to the
+tunable groups we want to use for that Environment:</p>
+<blockquote>
+<div><div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="c1">// environment.mlos.jsonc</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// ...</span>
+<span class="w">  </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;tunable_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;$tunables_ref1&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// Will be replaced with &quot;tunable_group1&quot;, &quot;tunable_group2&quot;</span>
+<span class="w">      </span><span class="s2">&quot;$tunables_ref2&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// A no-op</span>
+<span class="w">      </span><span class="s2">&quot;tunable_group3&quot;</span><span class="w">   </span><span class="c1">// Can still refer to a group directly.</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="c1">// ... etc.</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Note: this references the <a class="reference external" href="https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/config/tunables/dummy-tunables.jsonc">dummy-tunables.jsonc</a>
+file for simplicity.</p>
+<p>Using such <code class="docutils literal notranslate"><span class="pre">&quot;$tunables_ref&quot;</span></code> variables in the Environment config allows us to dynamically
+change the set of active <code class="docutils literal notranslate"><span class="pre">TunableGroups</span></code> for a given Environment using the global config
+without modifying the Environment configuration files for each experiment, thus making them
+more modular and composable.</p>
+</section>
+</section>
+<section id="id1">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Variable Propagation</a><a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<p>Parameters declared in the <code class="docutils literal notranslate"><span class="pre">const_args</span></code> or <code class="docutils literal notranslate"><span class="pre">required_args</span></code> sections of the Environment
+config can be overridden with values specified in the external config files or the command
+line. In fact, <code class="docutils literal notranslate"><span class="pre">const_args</span></code> or <code class="docutils literal notranslate"><span class="pre">required_args</span></code> sections can be viewed as placeholders
+for the parameters that are being pushed to the environment from the outside.</p>
+<p>The same parameter can be present in both <code class="docutils literal notranslate"><span class="pre">const_args</span></code> and <code class="docutils literal notranslate"><span class="pre">required_args</span></code> sections.
+<code class="docutils literal notranslate"><span class="pre">required_args</span></code> is just a way to emphasize the importance of the parameter and create a
+placeholder for it when no default value can be specified the <code class="docutils literal notranslate"><span class="pre">const_args</span></code> section.
+If a <code class="docutils literal notranslate"><span class="pre">required_args</span></code> parameter is not present in the <code class="docutils literal notranslate"><span class="pre">const_args</span></code> section,
+and can’t be resolved from the <code class="docutils literal notranslate"><span class="pre">globals</span></code> this allows MLOS to fail fast and
+return an error to the user indicating an incomplete config.</p>
+<p>Note that the parameter <strong>must</strong> appear in the child Environment <code class="docutils literal notranslate"><span class="pre">const_args</span></code> or
+<code class="docutils literal notranslate"><span class="pre">required_args</span></code> section; if a parameter is not present in one of these
+placeholders of the Environment config, it will not be propagated. This allows MLOS
+users to have small immutable Environment configurations and combine and parameterize
+them with external (global) configs.</p>
+<p>Taking it to the next level outside of the Environment configs, the parameters
+can be defined in the external key-value JSON config files (usually referred to
+as <a class="reference external" href="../config/index.html#globals-and-variable-substitution">global config files</a> in MLOS lingo).
+See <a class="reference internal" href="../config/index.html#module-mlos_bench.config" title="mlos_bench.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.config</span></code></a> for more details.</p>
+<p>We can summarize the parameter propagation rules as follows:</p>
+<ol class="arabic simple">
+<li><p>An environment will only get the parameters defined in its <code class="docutils literal notranslate"><span class="pre">const_args</span></code> or
+<code class="docutils literal notranslate"><span class="pre">required_args</span></code> sections.</p></li>
+<li><p>Values of the parameters defined in the global config files will override the values of the
+corresponding parameters in all environments.</p></li>
+<li><p>Values of the command line parameters take precedence over values defined in the global or
+environment configs.</p></li>
+</ol>
+<p class="rubric">Examples</p>
+<p>Here’s a simple working example of a local environment config (written in Python
+instead of JSON for testing) to show how variable propagation works:</p>
+<p>Note: this references the <a class="reference external" href="https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/config/tunables/dummy-tunables.jsonc">dummy-tunables.jsonc</a>
+file for simplicity.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># globals.jsonc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">globals_json</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">... </span><span class="s1">{</span>
+<span class="gp">... </span><span class="s1">    &quot;experiment_id&quot;: &quot;test_experiment&quot;,</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="s1">    &quot;const_arg_from_globals_1&quot;: &quot;Substituted from globals - 1&quot;,</span>
+<span class="gp">... </span><span class="s1">    &quot;const_arg_from_globals_2&quot;: &quot;Substituted from globals - 2&quot;,</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="s1">    &quot;const_arg_from_cli_1&quot;: &quot;Will be overridden from CLI&quot;,</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="s1">    // Define reference names to represent tunable groups in the Environment configs.</span>
+<span class="gp">... </span><span class="s1">    &quot;tunable_params_map&quot;: {</span>
+<span class="gp">... </span><span class="s1">        &quot;tunables_ref1&quot;: [&quot;dummy_params_group1&quot;, &quot;dummy_params_group2&quot;],</span>
+<span class="gp">... </span><span class="s1">        &quot;tunables_ref2&quot;: [],  // Useful to disable all tunables for the Environment.</span>
+<span class="gp">... </span><span class="s1">    }</span>
+<span class="gp">... </span><span class="s1">}</span>
+<span class="gp">... </span><span class="s1">&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># environment.jsonc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">environment_json</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">... </span><span class="s1">{</span>
+<span class="gp">... </span><span class="s1">    &quot;class&quot;: &quot;mlos_bench.environments.local.local_env.LocalEnv&quot;,</span>
+<span class="gp">... </span><span class="s1">    &quot;name&quot;: &quot;test_env1&quot;,</span>
+<span class="gp">... </span><span class="s1">    &quot;include_tunables&quot;: [</span>
+<span class="gp">... </span><span class="s1">        &quot;tunables/dummy-tunables.jsonc&quot;  // For simplicity, include all tunables available.</span>
+<span class="gp">... </span><span class="s1">    ],</span>
+<span class="gp">... </span><span class="s1">    &quot;config&quot;: {</span>
+<span class="gp">... </span><span class="s1">        &quot;tunable_params&quot;: [</span>
+<span class="gp">... </span><span class="s1">            &quot;$tunables_ref1&quot;,       // Includes &quot;dummy_params_group1&quot;, &quot;dummy_params_group2&quot;</span>
+<span class="gp">... </span><span class="s1">            &quot;$tunables_ref2&quot;,       // A no-op</span>
+<span class="gp">... </span><span class="s1">            &quot;dummy_params_group3&quot;   // Can still refer to a group directly.</span>
+<span class="gp">... </span><span class="s1">        ],</span>
+<span class="gp">... </span><span class="s1">        &quot;const_args&quot;: {</span>
+<span class="gp">... </span><span class="s1">            // Environment-specific non-tunable constant parameters:</span>
+<span class="gp">... </span><span class="s1">            &quot;const_arg_1&quot;: &quot;Default value of const_arg_1&quot;,</span>
+<span class="gp">... </span><span class="s1">            &quot;const_arg_from_globals_1&quot;: &quot;To be replaced from global config&quot;,</span>
+<span class="gp">... </span><span class="s1">            &quot;const_arg_from_cli_1&quot;: &quot;To be replaced from CLI&quot;</span>
+<span class="gp">... </span><span class="s1">        },</span>
+<span class="gp">... </span><span class="s1">        &quot;required_args&quot;: [</span>
+<span class="gp">... </span><span class="s1">            // These parameters always come from elsewhere:</span>
+<span class="gp">... </span><span class="s1">            &quot;const_arg_from_globals_2&quot;,</span>
+<span class="gp">... </span><span class="s1">            &quot;const_arg_from_cli_2&quot;,</span>
+<span class="gp">... </span><span class="s1">            // We already define these parameters in &quot;const_args&quot; section above;</span>
+<span class="gp">... </span><span class="s1">            // mentioning them here is optional, but can be used for clarity:</span>
+<span class="gp">... </span><span class="s1">            &quot;const_arg_from_globals_1&quot;,</span>
+<span class="gp">... </span><span class="s1">            &quot;const_arg_from_cli_1&quot;</span>
+<span class="gp">... </span><span class="s1">        ],</span>
+<span class="gp">... </span><span class="s1">        &quot;run&quot;: [</span>
+<span class="gp">... </span><span class="s1">            &quot;echo Hello world&quot;</span>
+<span class="gp">... </span><span class="s1">        ]</span>
+<span class="gp">... </span><span class="s1">    }</span>
+<span class="gp">... </span><span class="s1">}</span>
+<span class="gp">... </span><span class="s1">&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<p>Now that we have our environment and global configurations, we can instantiate the
+<a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> and inspect it. In this example we will simulate the command line execution to demonstrate how CLI parameters propagate to the environment.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Load the globals and environment configs defined above via the Launcher as</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># if we were calling `mlos_bench` directly on the CLI.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlos_bench.launcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">Launcher</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">argv</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="s2">&quot;--environment&quot;</span><span class="p">,</span> <span class="n">environment_json</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;--globals&quot;</span><span class="p">,</span> <span class="n">globals_json</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="c1"># Override some values via CLI directly:</span>
+<span class="gp">... </span>    <span class="s2">&quot;--const_arg_from_cli_1&quot;</span><span class="p">,</span> <span class="s2">&quot;Substituted from CLI - 1&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;--const_arg_from_cli_2&quot;</span><span class="p">,</span> <span class="s2">&quot;Substituted from CLI - 2&quot;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">launcher</span> <span class="o">=</span> <span class="n">Launcher</span><span class="p">(</span><span class="s2">&quot;sample_launcher&quot;</span><span class="p">,</span> <span class="n">argv</span><span class="o">=</span><span class="n">argv</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span> <span class="o">=</span> <span class="n">launcher</span><span class="o">.</span><span class="n">root_environment</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">name</span>
+<span class="go">&#39;test_env1&#39;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">env</span></code> is an instance of <a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> class that we can use to setup, run, and tear
+down the environment. It also has a set of properties and methods that we can use to access the
+object’s parameters. This way we can check the actual runtime configuration of the environment.</p>
+<p>First, let’s check the tunable parameters:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">env</span><span class="o">.</span><span class="n">tunable_params</span><span class="o">.</span><span class="n">get_param_values</span><span class="p">()</span> <span class="o">==</span> <span class="p">{</span>
+<span class="gp">... </span>   <span class="s2">&quot;dummy_param&quot;</span><span class="p">:</span> <span class="s2">&quot;dummy&quot;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="s2">&quot;dummy_param_int&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="s2">&quot;dummy_param_float&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="s2">&quot;dummy_param3&quot;</span><span class="p">:</span> <span class="mf">0.0</span>
+<span class="gp">... </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>We can see the tunables from <code class="docutils literal notranslate"><span class="pre">dummy_params_group1</span></code> and <code class="docutils literal notranslate"><span class="pre">dummy_params_group2</span></code> groups specified
+via <code class="docutils literal notranslate"><span class="pre">$tunables_ref1</span></code>, as well as the tunables from <code class="docutils literal notranslate"><span class="pre">dummy_params_group3</span></code> that we specified
+directly in the Environment config. All tunables are initialized to their default values.</p>
+<p>Now let’s see how the variable propagation works.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">const_args</span><span class="p">[</span><span class="s2">&quot;const_arg_1&quot;</span><span class="p">]</span>
+<span class="go">&#39;Default value of const_arg_1&#39;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">const_arg_1</span></code> has the value we have assigned in the <code class="docutils literal notranslate"><span class="pre">&quot;const_args&quot;</span></code> section of the
+Environment config. No surprises here.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">const_args</span><span class="p">[</span><span class="s2">&quot;const_arg_from_globals_1&quot;</span><span class="p">]</span>
+<span class="go">&#39;Substituted from globals - 1&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">const_args</span><span class="p">[</span><span class="s2">&quot;const_arg_from_globals_2&quot;</span><span class="p">]</span>
+<span class="go">&#39;Substituted from globals - 2&#39;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">const_arg_from_globals_1</span></code> and <code class="docutils literal notranslate"><span class="pre">const_arg_from_globals_2</span></code> were declared in the Environment’s
+<code class="docutils literal notranslate"><span class="pre">const_args</span></code> and <code class="docutils literal notranslate"><span class="pre">required_args</span></code> sections, respectively. Their values were overridden by the
+values from the global config.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">const_args</span><span class="p">[</span><span class="s2">&quot;const_arg_from_cli_1&quot;</span><span class="p">]</span>
+<span class="go">&#39;Substituted from CLI - 1&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">const_args</span><span class="p">[</span><span class="s2">&quot;const_arg_from_cli_2&quot;</span><span class="p">]</span>
+<span class="go">&#39;Substituted from CLI - 2&#39;</span>
+</pre></div>
+</div>
+<p>Likewise, <code class="docutils literal notranslate"><span class="pre">const_arg_from_cli_1</span></code> and <code class="docutils literal notranslate"><span class="pre">const_arg_from_cli_2</span></code> got their values from the
+command line. Note that for <code class="docutils literal notranslate"><span class="pre">const_arg_from_cli_1</span></code> the value from the command line takes
+precedence over the values specified in the Environment’s <code class="docutils literal notranslate"><span class="pre">const_args</span></code> section <strong>and</strong> the one
+in the global config.</p>
+<p>Now let’s set up the environment and see how the constant and tunable parameters get combined.
+We’ll also assign some non-default values to the tunables, as the optimizer would do on each
+trial.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">tunable_params</span><span class="p">[</span><span class="s2">&quot;dummy_param_int&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">99</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">tunable_params</span><span class="p">[</span><span class="s2">&quot;dummy_param3&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.999</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">env</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">assert</span> <span class="n">env</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">tunable_params</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">assert</span> <span class="n">env</span><span class="o">.</span><span class="n">parameters</span> <span class="o">==</span> <span class="p">{</span>
+<span class="gp">... </span>        <span class="s2">&quot;const_arg_1&quot;</span><span class="p">:</span> <span class="s2">&quot;Default value of const_arg_1&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s2">&quot;const_arg_from_globals_1&quot;</span><span class="p">:</span> <span class="s2">&quot;Substituted from globals - 1&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s2">&quot;const_arg_from_globals_2&quot;</span><span class="p">:</span> <span class="s2">&quot;Substituted from globals - 2&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s2">&quot;const_arg_from_cli_1&quot;</span><span class="p">:</span> <span class="s2">&quot;Substituted from CLI - 1&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s2">&quot;const_arg_from_cli_2&quot;</span><span class="p">:</span> <span class="s2">&quot;Substituted from CLI - 2&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s2">&quot;trial_id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s2">&quot;trial_runner_id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s2">&quot;experiment_id&quot;</span><span class="p">:</span> <span class="s2">&quot;test_experiment&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s2">&quot;dummy_param&quot;</span><span class="p">:</span> <span class="s2">&quot;dummy&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s2">&quot;dummy_param_int&quot;</span><span class="p">:</span> <span class="mi">99</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s2">&quot;dummy_param_float&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s2">&quot;dummy_param3&quot;</span><span class="p">:</span> <span class="mf">0.999</span>
+<span class="gp">... </span>    <span class="p">}</span>
+</pre></div>
+</div>
+<p>These are the values visible to the implementations of the <a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment.setup" title="mlos_bench.environments.base_environment.Environment.setup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup()</span></code></a>,
+<a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment.run" title="mlos_bench.environments.base_environment.Environment.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>, and <a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment.teardown" title="mlos_bench.environments.base_environment.Environment.teardown"><code class="xref py py-meth docutils literal notranslate"><span class="pre">teardown()</span></code></a> methods. We can see both
+the constant and tunable parameters combined into a single dictionary
+<a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment.parameters" title="mlos_bench.environments.base_environment.Environment.parameters"><code class="xref py py-attr docutils literal notranslate"><span class="pre">parameters</span></code></a> with proper values assigned to each of them on each iteration.
+When implementing a new <a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a>-derived class, developers can rely on the
+<a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment.parameters" title="mlos_bench.environments.base_environment.Environment.parameters"><code class="xref py py-attr docutils literal notranslate"><span class="pre">parameters</span></code></a> data in their versions of <a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment.setup" title="mlos_bench.environments.base_environment.Environment.setup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup()</span></code></a> and
+other methods. For example, <a class="reference internal" href="remote/vm_env/index.html#mlos_bench.environments.remote.vm_env.VMEnv" title="mlos_bench.environments.remote.vm_env.VMEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">VMEnv</span></code></a> would then
+pass the <a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment.parameters" title="mlos_bench.environments.base_environment.Environment.parameters"><code class="xref py py-attr docutils literal notranslate"><span class="pre">parameters</span></code></a> into an ARM template when provisioning a new VM,
+and <a class="reference internal" href="local/local_env/index.html#mlos_bench.environments.local.local_env.LocalEnv" title="mlos_bench.environments.local.local_env.LocalEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocalEnv</span></code></a> can dump them into a JSON file
+specified in the <code class="docutils literal notranslate"><span class="pre">dump_params_file</span></code> config property, or/and cherry-pick some of these values
+and make them shell variables with the <code class="docutils literal notranslate"><span class="pre">shell_env_params</span></code>.</p>
+<p>A few <a class="reference external" href="../config/index.html#well-known-variables">Well Known Parameters</a>
+parameters like <code class="docutils literal notranslate"><span class="pre">trial_id</span></code> and <code class="docutils literal notranslate"><span class="pre">trial_runner_id</span></code> are added by the
+<a class="reference internal" href="../schedulers/index.html#module-mlos_bench.schedulers" title="mlos_bench.schedulers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Scheduler</span></code></a> and used for trials parallelization
+and storage of the results. It is sometimes useful to add them, for example, to
+the paths used by the Environment, as in, e.g.,
+<code class="docutils literal notranslate"><span class="pre">&quot;/storage/$experiment_id/$trial_id/data/&quot;</span></code>, to prevent conflicts when running
+multiple Experiments and Trials in parallel.</p>
+<p>We will discuss passing the parameters to external scripts and using them in referencing files
+and directories in local and shared storage in the documentation of the concrete
+<a class="reference internal" href="base_environment/index.html#mlos_bench.environments.base_environment.Environment" title="mlos_bench.environments.base_environment.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> implementations, especially
+<a class="reference internal" href="script_env/index.html#mlos_bench.environments.script_env.ScriptEnv" title="mlos_bench.environments.script_env.ScriptEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScriptEnv</span></code></a> and
+<a class="reference internal" href="local/local_env/index.html#mlos_bench.environments.local.local_env.LocalEnv" title="mlos_bench.environments.local.local_env.LocalEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocalEnv</span></code></a>.</p>
+</section>
+<section id="environment-services">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Environment Services</a><a class="headerlink" href="#environment-services" title="Link to this heading"></a></h2>
+<p>Environments can also reference <a class="reference internal" href="../services/index.html#module-mlos_bench.services" title="mlos_bench.services"><code class="xref py py-mod docutils literal notranslate"><span class="pre">services</span></code></a> that provide the
+necessary support to perform the actions that environment needs for each of its
+phases depending upon where its being deployed (e.g., local machine, remote machine,
+cloud provider VM, etc.)</p>
+<p>Although this can be done in the Environment config directly with the
+<code class="docutils literal notranslate"><span class="pre">include_services</span></code> key, it is often more useful to do it in the global or
+<a class="reference internal" href="../config/index.html#module-mlos_bench.config" title="mlos_bench.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cli</span> <span class="pre">config</span></code></a> to allow for the same Environment to be
+used in different settings (e.g., local machine, SSH accessible machine, Azure VM,
+etc.) without having to change the Environment config.</p>
+<p>Variable propagation rules described in the previous section for the environment
+configs also apply to the <a class="reference internal" href="../services/index.html#module-mlos_bench.services" title="mlos_bench.services"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Service</span></code></a>
+configurations.</p>
+<p>That is, every parameter defined in the Service config can be overridden by a
+corresponding parameter from the global config or the command line.</p>
+<p>All global configs, command line parameters, Environment <code class="docutils literal notranslate"><span class="pre">const_args</span></code> and
+<code class="docutils literal notranslate"><span class="pre">required_args</span></code> sections, and Service config parameters thus form one flat
+name space of parameters.  This imposes a certain risk of name clashes, but also
+simplifies the configuration process and allows users to keep all
+experiment-specific data in a few human-readable files.</p>
+<p>We will discuss the examples of such global and local configuration parameters in the
+documentation of the concrete <a class="reference internal" href="../services/index.html#module-mlos_bench.services" title="mlos_bench.services"><code class="xref py py-mod docutils literal notranslate"><span class="pre">services</span></code></a> and
+<a class="reference internal" href="#module-mlos_bench.environments" title="mlos_bench.environments"><code class="xref py py-mod docutils literal notranslate"><span class="pre">environments</span></code></a>.</p>
+<p class="rubric">Examples</p>
+<p>While this documentation is generated from the source code and is intended to be a
+useful reference on the internal details, most users will be more interested in
+generating json configs to be used with the <code class="docutils literal notranslate"><span class="pre">mlos_bench</span></code> command line tool.</p>
+<p>For a simple working user oriented example please see the <a class="reference external" href="https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/tests/config/environments/local/test_local_env.jsonc">test_local_env_bench.jsonc</a>
+file or other examples in the source tree linked below.</p>
+<p>For more developer oriented examples please see the <a class="reference external" href="https://github.com/microsoft/MLOS/blob/main/mlos_bench/mlos_bench/tests/">mlos_bench/tests/environments</a>
+directory in the source tree.</p>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>See <a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/environments/">mlos_bench/environments/README.md</a>
+for additional documentation in the source tree.</p></li>
+<li><p>See <a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/environments/">mlos_bench/config/environments/README.md</a>
+for additional config examples in the source tree.</p></li>
+</ul>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="../config/index.html#module-mlos_bench.config" title="mlos_bench.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.config</span></code></a></dt><dd><p>Overview of the configuration system.</p>
+</dd>
+<dt><a class="reference internal" href="../services/index.html#module-mlos_bench.services" title="mlos_bench.services"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.services</span></code></a></dt><dd><p>Overview of the Services available to the Environments and their configurations.</p>
+</dd>
+<dt><a class="reference internal" href="../tunables/index.html#module-mlos_bench.tunables" title="mlos_bench.tunables"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench.tunables</span></code></a></dt><dd><p>Overview of the Tunables available to the Environments and their configurations.</p>
+</dd>
+</dl>
+</div>
+</section>
+<section id="submodules">
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">Submodules</a><a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="base_environment/index.html">mlos_bench.environments.base_environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="composite_env/index.html">mlos_bench.environments.composite_env</a></li>
+<li class="toctree-l1"><a class="reference internal" href="local/index.html">mlos_bench.environments.local</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mock_env/index.html">mlos_bench.environments.mock_env</a></li>
+<li class="toctree-l1"><a class="reference internal" href="remote/index.html">mlos_bench.environments.remote</a></li>
+<li class="toctree-l1"><a class="reference internal" href="script_env/index.html">mlos_bench.environments.script_env</a></li>
+<li class="toctree-l1"><a class="reference internal" href="status/index.html">mlos_bench.environments.status</a></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../dict_templater/index.html" class="btn btn-neutral float-left" title="mlos_bench.dict_templater" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="base_environment/index.html" class="btn btn-neutral float-right" title="mlos_bench.environments.base_environment" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Microsoft GSL.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

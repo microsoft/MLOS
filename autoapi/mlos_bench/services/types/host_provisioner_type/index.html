@@ -1,0 +1,301 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlos_bench.services.types.host_provisioner_type &mdash; MLOS 0.6.3.dev53+g549a69ab0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/plot_directive.css" />
+
+  
+    <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_bench/services/types/host_provisioner_type/index.html"/>
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=8b2becd3"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link rel="next" title="mlos_bench.services.types.local_exec_type" href="../local_exec_type/index.html" />
+    <link rel="prev" title="mlos_bench.services.types.host_ops_type" href="../host_ops_type/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            MLOS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Source Tree Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source_tree_docs/index.html">MLOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source_tree_docs/mlos_core/index.html">mlos-core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source_tree_docs/mlos_bench/index.html">mlos-bench</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source_tree_docs/mlos_viz/index.html">mlos-viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../mlos_core/index.html">mlos_core</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">mlos_bench</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../index.html#classes-overview">Classes Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../../config/index.html">mlos_bench.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dict_templater/index.html">mlos_bench.dict_templater</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../environments/index.html">mlos_bench.environments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../event_loop_context/index.html">mlos_bench.event_loop_context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../launcher/index.html">mlos_bench.launcher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../optimizers/index.html">mlos_bench.optimizers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../os_environ/index.html">mlos_bench.os_environ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../run/index.html">mlos_bench.run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../schedulers/index.html">mlos_bench.schedulers</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../../index.html">mlos_bench.services</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="../../base_fileshare/index.html">mlos_bench.services.base_fileshare</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../base_service/index.html">mlos_bench.services.base_service</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../config_persistence/index.html">mlos_bench.services.config_persistence</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../local/index.html">mlos_bench.services.local</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../remote/index.html">mlos_bench.services.remote</a></li>
+<li class="toctree-l5 current"><a class="reference internal" href="../index.html">mlos_bench.services.types</a><ul class="current">
+<li class="toctree-l6 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l7"><a class="reference internal" href="../authenticator_type/index.html">mlos_bench.services.types.authenticator_type</a></li>
+<li class="toctree-l7"><a class="reference internal" href="../bound_method/index.html">mlos_bench.services.types.bound_method</a></li>
+<li class="toctree-l7"><a class="reference internal" href="../config_loader_type/index.html">mlos_bench.services.types.config_loader_type</a></li>
+<li class="toctree-l7"><a class="reference internal" href="../fileshare_type/index.html">mlos_bench.services.types.fileshare_type</a></li>
+<li class="toctree-l7"><a class="reference internal" href="../host_ops_type/index.html">mlos_bench.services.types.host_ops_type</a></li>
+<li class="toctree-l7 current"><a class="current reference internal" href="#">mlos_bench.services.types.host_provisioner_type</a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#classes">Classes</a></li>
+<li class="toctree-l8"><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li class="toctree-l9"><a class="reference internal" href="#mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning"><code class="docutils literal notranslate"><span class="pre">SupportsHostProvisioning</span></code></a><ul>
+<li class="toctree-l10"><a class="reference internal" href="#mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning.deallocate_host"><code class="docutils literal notranslate"><span class="pre">SupportsHostProvisioning.deallocate_host()</span></code></a></li>
+<li class="toctree-l10"><a class="reference internal" href="#mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning.deprovision_host"><code class="docutils literal notranslate"><span class="pre">SupportsHostProvisioning.deprovision_host()</span></code></a></li>
+<li class="toctree-l10"><a class="reference internal" href="#mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning.provision_host"><code class="docutils literal notranslate"><span class="pre">SupportsHostProvisioning.provision_host()</span></code></a></li>
+<li class="toctree-l10"><a class="reference internal" href="#mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning.wait_host_deployment"><code class="docutils literal notranslate"><span class="pre">SupportsHostProvisioning.wait_host_deployment()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="../local_exec_type/index.html">mlos_bench.services.types.local_exec_type</a></li>
+<li class="toctree-l7"><a class="reference internal" href="../network_provisioner_type/index.html">mlos_bench.services.types.network_provisioner_type</a></li>
+<li class="toctree-l7"><a class="reference internal" href="../os_ops_type/index.html">mlos_bench.services.types.os_ops_type</a></li>
+<li class="toctree-l7"><a class="reference internal" href="../remote_config_type/index.html">mlos_bench.services.types.remote_config_type</a></li>
+<li class="toctree-l7"><a class="reference internal" href="../remote_exec_type/index.html">mlos_bench.services.types.remote_exec_type</a></li>
+<li class="toctree-l7"><a class="reference internal" href="../vm_provisioner_type/index.html">mlos_bench.services.types.vm_provisioner_type</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../storage/index.html">mlos_bench.storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tunables/index.html">mlos_bench.tunables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../util/index.html">mlos_bench.util</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../version/index.html">mlos_bench.version</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../index.html#attributes">Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mlos_viz/index.html">mlos_viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">mlos_bench CLI usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../mlos_bench.run.usage.html">mlos_bench CLI usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/microsoft/MLOS">Github Source Tree</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">MLOS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">mlos_bench</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">mlos_bench.services</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">mlos_bench.services.types</a></li>
+      <li class="breadcrumb-item active">mlos_bench.services.types.host_provisioner_type</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../_sources/autoapi/mlos_bench/services/types/host_provisioner_type/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mlos_bench.services.types.host_provisioner_type">
+<span id="mlos-bench-services-types-host-provisioner-type"></span><h1>mlos_bench.services.types.host_provisioner_type<a class="headerlink" href="#module-mlos_bench.services.types.host_provisioner_type" title="Link to this heading"></a></h1>
+<p>Protocol interface for Host/VM provisioning operations.</p>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning" title="mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SupportsHostProvisioning</span></code></a></p></td>
+<td><p>Protocol interface for Host/VM provisioning operations.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlos_bench.services.types.host_provisioner_type.</span></span><span class="sig-name descname"><span class="pre">SupportsHostProvisioning</span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/services/types/host_provisioner_type.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>Protocol interface for Host/VM provisioning operations.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning.deallocate_host">
+<span class="sig-name descname"><span class="pre">deallocate_host</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../../environments/status/index.html#mlos_bench.environments.status.Status" title="mlos_bench.environments.status.Status"><span class="pre">mlos_bench.environments.status.Status</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/services/types/host_provisioner_type.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning.deallocate_host" title="Link to this definition"></a></dt>
+<dd><p>Deallocates the Host/VM by shutting it down then releasing the compute
+resources.</p>
+<p>Note: This can cause the VM to arrive on a new host node when its
+restarted, which may have different performance characteristics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Flat dictionary of (key, value) pairs of tunable parameters.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> – A pair of Status and result. The result is always {}.
+Status is one of {PENDING, SUCCEEDED, FAILED}</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference internal" href="../../../environments/status/index.html#mlos_bench.environments.status.Status" title="mlos_bench.environments.status.Status">Status</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning.deprovision_host">
+<span class="sig-name descname"><span class="pre">deprovision_host</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../../environments/status/index.html#mlos_bench.environments.status.Status" title="mlos_bench.environments.status.Status"><span class="pre">mlos_bench.environments.status.Status</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/services/types/host_provisioner_type.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning.deprovision_host" title="Link to this definition"></a></dt>
+<dd><p>Deprovisions the Host/VM by deleting it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Flat dictionary of (key, value) pairs of tunable parameters.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> – A pair of Status and result. The result is always {}.
+Status is one of {PENDING, SUCCEEDED, FAILED}</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference internal" href="../../../environments/status/index.html#mlos_bench.environments.status.Status" title="mlos_bench.environments.status.Status">Status</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning.provision_host">
+<span class="sig-name descname"><span class="pre">provision_host</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../../environments/status/index.html#mlos_bench.environments.status.Status" title="mlos_bench.environments.status.Status"><span class="pre">mlos_bench.environments.status.Status</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/services/types/host_provisioner_type.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning.provision_host" title="Link to this definition"></a></dt>
+<dd><p>Check if Host/VM is ready. Deploy a new Host/VM, if necessary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Flat dictionary of (key, value) pairs of tunable parameters.
+VMEnv tunables are variable parameters that, together with the
+VMEnv configuration, are sufficient to provision a VM.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> – A pair of Status and result. The result is always {}.
+Status is one of {PENDING, SUCCEEDED, FAILED}</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference internal" href="../../../environments/status/index.html#mlos_bench.environments.status.Status" title="mlos_bench.environments.status.Status">Status</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning.wait_host_deployment">
+<span class="sig-name descname"><span class="pre">wait_host_deployment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_setup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../../environments/status/index.html#mlos_bench.environments.status.Status" title="mlos_bench.environments.status.Status"><span class="pre">mlos_bench.environments.status.Status</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/services/types/host_provisioner_type.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning.wait_host_deployment" title="Link to this definition"></a></dt>
+<dd><p>Waits for a pending operation on a Host/VM to resolve to SUCCEEDED or FAILED.
+Return TIMED_OUT when timing out.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Flat dictionary of (key, value) pairs of tunable parameters.</p></li>
+<li><p><strong>is_setup</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, wait for Host/VM being deployed; otherwise, wait for successful
+deprovisioning.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> – A pair of Status and result.
+Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+Result is info on the operation runtime if SUCCEEDED, otherwise {}.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference internal" href="../../../environments/status/index.html#mlos_bench.environments.status.Status" title="mlos_bench.environments.status.Status">Status</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../host_ops_type/index.html" class="btn btn-neutral float-left" title="mlos_bench.services.types.host_ops_type" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../local_exec_type/index.html" class="btn btn-neutral float-right" title="mlos_bench.services.types.local_exec_type" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Microsoft GSL.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

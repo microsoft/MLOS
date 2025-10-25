@@ -1,0 +1,137 @@
+mlos_viz.base
+=============
+
+.. py:module:: mlos_viz.base
+
+.. autoapi-nested-parse::
+
+   Base functions for visualizing, explain, and gain insights from results.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   mlos_viz.base.augment_results_df_with_config_trial_group_stats
+   mlos_viz.base.ignore_plotter_warnings
+   mlos_viz.base.limit_top_n_configs
+   mlos_viz.base.plot_optimizer_trends
+   mlos_viz.base.plot_top_n_configs
+
+
+Module Contents
+---------------
+
+.. py:function:: augment_results_df_with_config_trial_group_stats(exp_data: mlos_bench.storage.base_experiment_data.ExperimentData | None = None, *, results_df: pandas.DataFrame | None = None, requested_result_cols: collections.abc.Iterable[str] | None = None) -> pandas.DataFrame
+
+   Add a number of useful statistical measure columns to the results dataframe.
+
+   In particular, for each numeric result, we add the following columns for each
+   requested result column:
+
+   - ".p50": the median of each config trial group results
+
+   - ".p75": the p75 of each config trial group results
+
+   - ".p90": the p90 of each config trial group results
+
+   - ".p95": the p95 of each config trial group results
+
+   - ".p99": the p95 of each config trial group results
+
+   - ".mean": the mean of each config trial group results
+
+   - ".stddev": the mean of each config trial group results
+
+   - ".var": the variance of each config trial group results
+
+   - ".var_zscore": the zscore of this group (i.e., variance relative to the stddev
+     of all group variances). This can be useful for filtering out outliers (e.g.,
+     configs with high variance relative to others by restricting to abs < 2 to
+     remove those two standard deviations from the mean variance across all config
+     trial groups).
+
+   Additionally, we add a "tunable_config_trial_group_size" column that indicates
+   the number of trials using a particular config.
+
+   :param exp_data: The ExperimentData (e.g., obtained from the storage layer) to plot.
+   :type exp_data: ExperimentData
+   :param results_df: The results dataframe to augment, by default None to use the results_df property.
+   :type results_df: pandas.DataFrame | None
+   :param requested_result_cols: Which results columns to augment, by default None to use all results columns
+                                 that look numeric.
+   :type requested_result_cols: Optional[Iterable[str]]
+
+   :returns: The augmented results dataframe.
+   :rtype: pandas.DataFrame
+
+
+.. py:function:: ignore_plotter_warnings() -> None
+
+   Suppress some annoying warnings from third-party data visualization packages by
+   adding them to the warnings filter.
+
+
+.. py:function:: limit_top_n_configs(exp_data: mlos_bench.storage.base_experiment_data.ExperimentData | None = None, *, results_df: pandas.DataFrame | None = None, objectives: dict[str, Literal['min', 'max']] | None = None, top_n_configs: int = 10, method: Literal['mean', 'p50', 'p75', 'p90', 'p95', 'p99'] = 'mean') -> tuple[pandas.DataFrame, list[int], dict[str, bool]]
+
+   Utility function to process the results and determine the best performing configs
+   including potential repeats to help assess variability.
+
+   :param exp_data: The ExperimentData (e.g., obtained from the storage layer) to operate on.
+   :type exp_data: ExperimentData | None
+   :param results_df: The results dataframe to augment, by default None to use
+                      :py:attr:`.ExperimentData.results_df` property.
+   :type results_df: pandas.DataFrame | None
+   :param objectives: Which result column(s) to use for sorting the configs, and in which
+                      direction ("min" or "max").
+                      By default None to automatically select the :py:attr:`.ExperimentData.objectives`.
+   :type objectives: Iterable[str]
+   :param top_n_configs: How many configs to return, including the default, by default 10.
+   :type top_n_configs: int
+   :param method: Which statistical method to use when sorting the config groups before
+                  determining the cutoff, by default "mean".
+   :type method: Literal["mean", "median", "p50", "p75", "p90", "p95", "p99"] = "mean",
+
+   :returns: * *(top_n_config_results_df, top_n_config_ids, orderby_cols)*
+             * *tuple[pandas.DataFrame, list[int], dict[str, bool]]* -- The filtered results dataframe, the config ids, and the columns used to
+               order the configs.
+
+
+.. py:function:: plot_optimizer_trends(exp_data: mlos_bench.storage.base_experiment_data.ExperimentData | None = None, *, results_df: pandas.DataFrame | None = None, objectives: dict[str, Literal['min', 'max']] | None = None) -> None
+
+   Plots the optimizer trends for the Experiment.
+
+   :param exp_data: The ExperimentData (e.g., obtained from the storage layer) to plot.
+   :type exp_data: ExperimentData
+   :param results_df: Optional results_df to plot.
+                      If not provided, defaults to :py:attr:`.ExperimentData.results_df` property.
+   :type results_df: pandas.DataFrame | None
+   :param objectives: Optional objectives to plot.
+                      If not provided, defaults to :py:attr:`.ExperimentData.objectives` property.
+   :type objectives: Optional[dict[str, Literal["min", "max"]]]
+
+
+.. py:function:: plot_top_n_configs(exp_data: mlos_bench.storage.base_experiment_data.ExperimentData | None = None, *, results_df: pandas.DataFrame | None = None, objectives: dict[str, Literal['min', 'max']] | None = None, with_scatter_plot: bool = False, **kwargs: Any) -> None
+
+   Plots the top-N configs along with the default config for the given
+   :py:class:`.ExperimentData`.
+
+   Intended to be used from a Jupyter notebook.
+
+   :param exp_data: The experiment data to plot.
+   :type exp_data: ExperimentData
+   :param results_df: Optional results_df to plot.
+                      If not provided, defaults to :py:attr:`.ExperimentData.results_df` property.
+   :type results_df: pandas.DataFrame | None
+   :param objectives: Optional objectives to plot.
+                      If not provided, defaults to :py:attr:`.ExperimentData.objectives` property.
+   :type objectives: Optional[dict[str, Literal["min", "max"]]]
+   :param with_scatter_plot: Whether to also add scatter plot to the output figure.
+   :type with_scatter_plot: bool
+   :param kwargs: Remaining keyword arguments are passed along to the
+                  :py:func:`limit_top_n_configs` function.
+   :type kwargs: dict
+
+

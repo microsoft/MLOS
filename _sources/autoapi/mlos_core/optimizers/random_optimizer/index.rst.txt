@@ -1,0 +1,57 @@
+mlos_core.optimizers.random_optimizer
+=====================================
+
+.. py:module:: mlos_core.optimizers.random_optimizer
+
+.. autoapi-nested-parse::
+
+   RandomOptimizer class.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_core.optimizers.random_optimizer.RandomOptimizer
+
+
+Module Contents
+---------------
+
+.. py:class:: RandomOptimizer(*, parameter_space: ConfigSpace.ConfigurationSpace, optimization_targets: list[str], objective_weights: list[float] | None = None, space_adapter: mlos_core.spaces.adapters.adapter.BaseSpaceAdapter | None = None)
+
+   Bases: :py:obj:`mlos_core.optimizers.optimizer.BaseOptimizer`
+
+
+   Optimizer class that produces random suggestions.
+
+   Useful for baseline comparison against Bayesian optimizers.
+
+   Create a new instance of the base optimizer.
+
+   :param parameter_space: The parameter space to optimize.
+   :type parameter_space: ConfigSpace.ConfigurationSpace
+   :param optimization_targets: The names of the optimization targets to minimize.
+                                To maximize a target, use the negative of the target when registering scores.
+   :type optimization_targets: list[str]
+   :param objective_weights: Optional list of weights of optimization targets.
+   :type objective_weights: Optional[list[float]]
+   :param space_adapter: The space adapter class to employ for parameter space transformations.
+   :type space_adapter: BaseSpaceAdapter
+
+
+   .. py:method:: register_pending(pending: mlos_core.data_classes.Suggestion) -> None
+      :abstractmethod:
+
+
+      Registers the given suggestion as "pending". That is it say, it has been
+      suggested by the optimizer, and an experiment trial has been started. This can
+      be useful for executing multiple trials in parallel, retry logic, etc.
+
+      :param pending: The pending suggestion to register.
+      :type pending: Suggestion
+
+
+

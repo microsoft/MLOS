@@ -1,0 +1,177 @@
+mlos_bench.environments.status
+==============================
+
+.. py:module:: mlos_bench.environments.status
+
+.. autoapi-nested-parse::
+
+   Enum for the status of the benchmark/environment Trial or Experiment.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   mlos_bench.environments.status.COMPLETED_STATUSES
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.environments.status.Status
+
+
+Module Contents
+---------------
+
+.. py:class:: Status(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+
+   Enum for the status of the benchmark/environment Trial or Experiment.
+
+
+   .. py:method:: completed_statuses() -> frozenset[Status]
+      :staticmethod:
+
+
+      Get the set of :py:data:`.COMPLETED_STATUSES`.
+
+
+
+   .. py:method:: is_canceled() -> bool
+
+      Check if the status of the benchmark/environment Trial or Experiment is
+      CANCELED.
+
+
+
+   .. py:method:: is_completed() -> bool
+
+      Check if the status of the benchmark/environment Trial or Experiment is one
+      of :py:data:`.COMPLETED_STATUSES`.
+
+
+
+   .. py:method:: is_failed() -> bool
+
+      Check if the status of the benchmark/environment Trial or Experiment is
+      FAILED.
+
+
+
+   .. py:method:: is_good() -> bool
+
+      Check if the status of the benchmark/environment is good.
+
+
+
+   .. py:method:: is_pending() -> bool
+
+      Check if the status of the benchmark/environment Trial or Experiment is
+      PENDING.
+
+
+
+   .. py:method:: is_ready() -> bool
+
+      Check if the status of the benchmark/environment Trial or Experiment is
+      READY.
+
+
+
+   .. py:method:: is_running() -> bool
+
+      Check if the status of the benchmark/environment Trial or Experiment is
+      RUNNING.
+
+
+
+   .. py:method:: is_succeeded() -> bool
+
+      Check if the status of the benchmark/environment Trial or Experiment is
+      SUCCEEDED.
+
+
+
+   .. py:method:: is_timed_out() -> bool
+
+      Check if the status of the benchmark/environment Trial or Experiment is
+      TIMED_OUT.
+
+
+
+   .. py:method:: parse(status: Any) -> Status
+      :staticmethod:
+
+
+      Convert the input to a Status enum.
+
+      :param status: The status to parse. This can be a string (or string convertible),
+                     int, or Status enum.
+      :type status: Any
+
+      :returns: The corresponding Status enum value or else UNKNOWN if the input is not
+                recognized.
+      :rtype: Status
+
+
+
+   .. py:attribute:: CANCELED
+      :value: 5
+
+
+
+   .. py:attribute:: FAILED
+      :value: 6
+
+
+
+   .. py:attribute:: PENDING
+      :value: 1
+
+
+
+   .. py:attribute:: READY
+      :value: 2
+
+
+
+   .. py:attribute:: RUNNING
+      :value: 3
+
+
+
+   .. py:attribute:: SUCCEEDED
+      :value: 4
+
+
+
+   .. py:attribute:: TIMED_OUT
+      :value: 7
+
+
+
+   .. py:attribute:: UNKNOWN
+      :value: 0
+
+
+
+.. py:data:: COMPLETED_STATUSES
+
+   The set of completed statuses.
+
+   Includes all statuses that indicate the trial or experiment has finished, either
+   successfully or not.
+   This set is used to determine if a trial or experiment has reached a final state.
+   This includes:
+   - :py:attr:`.Status.SUCCEEDED`: The trial or experiment completed successfully.
+   - :py:attr:`.Status.CANCELED`: The trial or experiment was canceled.
+   - :py:attr:`.Status.FAILED`: The trial or experiment failed.
+   - :py:attr:`.Status.TIMED_OUT`: The trial or experiment timed out.
+

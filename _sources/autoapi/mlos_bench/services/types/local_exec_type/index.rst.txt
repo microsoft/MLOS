@@ -1,0 +1,65 @@
+mlos_bench.services.types.local_exec_type
+=========================================
+
+.. py:module:: mlos_bench.services.types.local_exec_type
+
+.. autoapi-nested-parse::
+
+   Protocol interface for Service types that provide helper functions to run scripts and
+   commands locally on the scheduler side.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.types.local_exec_type.SupportsLocalExec
+
+
+Module Contents
+---------------
+
+.. py:class:: SupportsLocalExec
+
+   Bases: :py:obj:`Protocol`
+
+
+   Protocol interface for a collection of methods to run scripts and commands in an
+   external process on the node acting as the scheduler.
+
+   Can be useful for data processing due to reduced dependency management complications
+   vs the target environment. Used in LocalEnv and provided by LocalExecService.
+
+
+   .. py:method:: local_exec(script_lines: collections.abc.Iterable[str], env: collections.abc.Mapping[str, mlos_bench.tunables.tunable_types.TunableValue] | None = None, cwd: str | None = None) -> tuple[int, str, str]
+
+      Execute the script lines from `script_lines` in a local process.
+
+      :param script_lines: Lines of the script to run locally.
+                           Treat every line as a separate command to run.
+      :type script_lines: Iterable[str]
+      :param env: Environment variables (optional).
+      :type env: Mapping[str, Union[int, float, str]]
+      :param cwd: Work directory to run the script at.
+                  If omitted, use `temp_dir` or create a temporary dir.
+      :type cwd: str
+
+      :returns: **(return_code, stdout, stderr)** -- A 3-tuple of return code, stdout, and stderr of the script process.
+      :rtype: (int, str, str)
+
+
+
+   .. py:method:: temp_dir_context(path: str | None = None) -> tempfile.TemporaryDirectory | contextlib.nullcontext
+
+      Create a temp directory or use the provided path.
+
+      :param path: A path to the temporary directory. Create a new one if None.
+      :type path: str | None
+
+      :returns: **temp_dir_context** -- Temporary directory context to use in the `with` clause.
+      :rtype: tempfile.TemporaryDirectory
+
+
+

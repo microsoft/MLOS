@@ -1,0 +1,94 @@
+mlos_bench.environments.local.local_fileshare_env
+=================================================
+
+.. py:module:: mlos_bench.environments.local.local_fileshare_env
+
+.. autoapi-nested-parse::
+
+   Scheduler-side Environment to run scripts locally and upload/download data to the
+   shared storage.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.environments.local.local_fileshare_env.LocalFileShareEnv
+
+
+Module Contents
+---------------
+
+.. py:class:: LocalFileShareEnv(*, name: str, config: dict, global_config: dict | None = None, tunables: mlos_bench.tunables.tunable_groups.TunableGroups | None = None, service: mlos_bench.services.base_service.Service | None = None)
+
+   Bases: :py:obj:`mlos_bench.environments.local.local_env.LocalEnv`
+
+
+   Scheduler-side Environment that runs scripts locally and uploads/downloads data
+   to the shared file storage.
+
+   Create a new application environment with a given config.
+
+   :param name: Human-readable name of the environment.
+   :type name: str
+   :param config: Free-format dictionary that contains the benchmark environment
+                  configuration. Each config must have at least the "tunable_params"
+                  and the "const_args" sections.
+                  `LocalFileShareEnv` must also have at least some of the following
+                  parameters: {setup, upload, run, download, teardown,
+                  dump_params_file, read_results_file}
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters (e.g., security credentials)
+                         to be mixed in into the "const_args" section of the local config.
+   :type global_config: dict
+   :param tunables: A collection of tunable parameters for *all* environments.
+   :type tunables: TunableGroups
+   :param service: An optional service object (e.g., providing methods to
+                   deploy or reboot a VM, etc.).
+   :type service: Service
+
+
+   .. py:method:: run() -> tuple[mlos_bench.environments.status.Status, datetime.datetime, dict[str, mlos_bench.tunables.tunable_types.TunableValue] | None]
+
+      Download benchmark results from the shared storage and run post-processing
+      scripts locally.
+
+      :returns: **(status, timestamp, output)** -- 3-tuple of (Status, timestamp, output) values, where `output` is a dict
+                with the results or None if the status is not COMPLETED.
+                If run script is a benchmark, then the score is usually expected to
+                be in the `score` field.
+      :rtype: (Status, datetime.datetime, dict)
+
+
+
+   .. py:method:: setup(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, global_config: dict | None = None) -> bool
+
+      Run setup scripts locally and upload the scripts and data to the shared storage.
+
+      :param tunables: A collection of tunable OS and application parameters along with their
+                       values. In a local environment these could be used to prepare a config
+                       file on the scheduler prior to transferring it to the remote environment,
+                       for instance.
+      :type tunables: TunableGroups
+      :param global_config: Free-format dictionary of global parameters of the environment
+                            that are not used in the optimization process.
+      :type global_config: dict
+
+      :returns: **is_success** -- True if operation is successful, false otherwise.
+      :rtype: bool
+
+
+
+   .. py:method:: status() -> tuple[mlos_bench.environments.status.Status, datetime.datetime, list[tuple[datetime.datetime, str, Any]]]
+
+      Check the status of the benchmark environment.
+
+      :returns: **(benchmark_status, timestamp, telemetry)** -- 3-tuple of (benchmark status, timestamp, telemetry) values.
+                `timestamp` is UTC time stamp of the status; it's current time by default.
+                `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
+      :rtype: (Status, datetime.datetime, list)
+
+
+

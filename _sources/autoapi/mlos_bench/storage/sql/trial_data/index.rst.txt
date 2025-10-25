@@ -1,0 +1,71 @@
+mlos_bench.storage.sql.trial_data
+=================================
+
+.. py:module:: mlos_bench.storage.sql.trial_data
+
+.. autoapi-nested-parse::
+
+   An interface to access the benchmark trial data stored in SQL DB using the
+   :py:class:`.TrialData` interface.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.storage.sql.trial_data.TrialSqlData
+
+
+Module Contents
+---------------
+
+.. py:class:: TrialSqlData(*, engine: sqlalchemy.engine.Engine, schema: mlos_bench.storage.sql.schema.DbSchema, experiment_id: str, trial_id: int, config_id: int, ts_start: datetime.datetime, ts_end: datetime.datetime | None, status: mlos_bench.environments.status.Status, trial_runner_id: int | None = None)
+
+   Bases: :py:obj:`mlos_bench.storage.base_trial_data.TrialData`
+
+
+   An interface to access the trial data stored in the SQL DB.
+
+
+   .. py:property:: metadata_df
+      :type: pandas.DataFrame
+
+
+      Retrieve the trials' metadata params.
+
+      Note: this corresponds to the Trial object's "config" property.
+
+
+   .. py:property:: results_df
+      :type: pandas.DataFrame
+
+
+      Retrieve the trials' results from the storage.
+
+
+   .. py:property:: telemetry_df
+      :type: pandas.DataFrame
+
+
+      Retrieve the trials' telemetry from the storage.
+
+
+   .. py:property:: tunable_config
+      :type: mlos_bench.storage.base_tunable_config_data.TunableConfigData
+
+
+      Retrieve the trial's tunable configuration from the storage.
+
+      Note: this corresponds to the Trial object's "tunables" property.
+
+
+   .. py:property:: tunable_config_trial_group
+      :type: mlos_bench.storage.base_tunable_config_trial_group_data.TunableConfigTrialGroupData
+
+
+      Retrieve the trial's tunable config group configuration data from the
+      storage.
+
+
