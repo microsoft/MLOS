@@ -10,5 +10,20 @@
         "mysql": ["mysql-innodb", "mysql-myisam", "mysql-binlog", "mysql-hugepages"]
     },
     "experiment_id": "ExperimentName",
-    "trial_id": 1
+    "trial_id": 1,
+
+    "mock_trial_data": {
+        "1": {
+            "setup": {
+                "sleep": 1
+            },
+            "run": {
+                "status": "SUCCEEDED",
+                "metrics": {
+                    "score": 0.9,
+                    "color": "green"
+                }
+            }
+        }
+    }
 }

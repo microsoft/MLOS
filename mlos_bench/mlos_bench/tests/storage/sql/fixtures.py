@@ -215,7 +215,7 @@ def postgres_storage(
         yield storage
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def sqlite_storage() -> Generator[SqlStorage]:
     """
     Fixture for file based SQLite storage in a temporary directory.

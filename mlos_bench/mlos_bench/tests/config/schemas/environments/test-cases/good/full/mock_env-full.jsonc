@@ -25,6 +25,38 @@
         "mock_env_metrics": [
             "latency",
             "cost"
-        ]
+        ],
+        "mock_trial_data": {
+            "1": {
+                "setup": {
+                    "sleep": 0.1
+                },
+                "status": {
+                    "metrics": {
+                        "latency": 0.2,
+                        "cost": 0.3
+                    }
+                },
+                "run": {
+                    "sleep": 0.2,
+                    "status": "SUCCEEDED",
+                    "metrics": {
+                        "latency": 0.1,
+                        "cost": 0.2
+                    }
+                },
+                "teardown": {
+                    "sleep": 0.1
+                }
+            },
+            "2": {
+                "setup": {
+                    "exception": "Some exception"
+                },
+                "teardown": {
+                    "exception": "Some other exception"
+                }
+            }
+        }
     }
 }
