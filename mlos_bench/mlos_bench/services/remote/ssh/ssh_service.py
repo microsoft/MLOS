@@ -226,6 +226,7 @@ class SshClientCache:
                         "%s: Giving up connecting to %s", current_thread().name, connection_id
                     )
                     raise
+        raise RuntimeError("Unreachable code in get_client_connection")
 
     def cleanup(self) -> None:
         """Closes all cached connections."""
