@@ -56,7 +56,7 @@ jobs:
       MAKEFLAGS: -Oline
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - uses: conda-incubator/setup-miniconda@v3
 
@@ -177,7 +177,7 @@ jobs:
       contents: read
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Install docker
       timeout-minutes: 15
