@@ -171,6 +171,11 @@ def wait_docker_service_healthy(
 
 def wait_docker_service_socket(docker_services: DockerServices, hostname: str, port: int) -> None:
     """Wait until a docker service is ready."""
+    import logging
+
+    _LOG = logging.getLogger(__name__)
+    _LOG.info("log in wait_docker_service_socket: %s", __name__)
+
     import threading
 
     thread_id = threading.get_ident()

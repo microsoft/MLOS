@@ -9,6 +9,7 @@ import time
 from importlib.metadata import PackageNotFoundError, version
 from subprocess import run
 from threading import Thread
+from venv import logger
 from warnings import warn
 
 import pytest
@@ -85,6 +86,12 @@ def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo, server_
     )
     cmd = run(ssh_cmd.split(), capture_output=True, text=True, check=True)
     assert cmd.stdout.strip() == server_name
+
+    import logging
+
+    _LOG = logging.getLogger(__name__)
+    _LOG.info("log in test: %s", __name__)
+    assert False, "Force failure for debugging"
 
 
 @pytest.mark.filterwarnings(

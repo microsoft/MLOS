@@ -99,6 +99,11 @@ def ssh_test_server(
         port = ssh_test_server_info.get_port()
         warn("[Thread %s] Main SSH server discovered on port %d" % (thread_id, port), UserWarning)
 
+        import logging
+
+        _LOG = logging.getLogger(__name__)
+        _LOG.info("log in ssh_test_server fixture: %s", __name__)
+
         wait_docker_service_socket(
             locked_docker_services,
             ssh_test_server_info.hostname,
