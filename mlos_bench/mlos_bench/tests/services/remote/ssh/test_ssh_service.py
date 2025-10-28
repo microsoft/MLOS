@@ -58,7 +58,7 @@ def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo, server_
     thread_id = threading.get_ident()
 
     warn(
-        "[Thread {}] test_ssh_service_test_infra starting with {}".format(thread_id, server_name),
+        f"[Thread {thread_id}] test_ssh_service_test_infra starting with {server_name}",
         UserWarning,
     )
 
