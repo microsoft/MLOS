@@ -175,6 +175,10 @@ jobs:
       timeout-minutes: 5
       run: make CONDA_ENV_NAME=$CONDA_ENV_NAME check
 
+    - name: Run tests
+      continue-on-error: true
+      run: conda -n $CONDA_ENV_NAME run python3 debug_ssh_tests.py
+
     # Only run the coverage checks on the devcontainer job.
     - name: Run tests
       run: make CONDA_ENV_NAME=$CONDA_ENV_NAME SKIP_COVERAGE=true test

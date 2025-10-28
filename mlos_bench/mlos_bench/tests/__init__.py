@@ -171,11 +171,30 @@ def wait_docker_service_healthy(
 
 def wait_docker_service_socket(docker_services: DockerServices, hostname: str, port: int) -> None:
     """Wait until a docker service is ready."""
-    docker_services.wait_until_responsive(
-        check=lambda: check_socket(hostname, port),
-        timeout=60.0,
-        pause=0.5,
-    )
+    import logging
+    import threading
+
+    _LOG = logging.getLogger(__name__)
+    thread_id = threading.get_ident()
+
+    _LOG.info("[Thread %s] Waiting for %s:%d to become responsive", thread_id, hostname, port)
+
+    def check_with_logging() -> bool:
+        result = check_socket(hostname, port)
+        if not result:
+            _LOG.debug("[Thread %s] Socket check failed for %s:%d", thread_id, hostname, port)
+        return result
+
+    try:
+        docker_services.wait_until_responsive(
+            check=check_with_logging,
+            timeout=60.0,
+            pause=0.5,
+        )
+        _LOG.info("[Thread %s] Socket %s:%d is now responsive", thread_id, hostname, port)
+    except Exception as e:
+        _LOG.error("[Thread %s] Failed waiting for %s:%d: %s", thread_id, hostname, port, e)
+        raise
 
 
 def check_socket(host: str, port: int, timeout: float = 1.0) -> bool:
@@ -192,10 +211,37 @@ def check_socket(host: str, port: int, timeout: float = 1.0) -> bool:
     -------
     bool
     """
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.settimeout(timeout)  # seconds
-        result = sock.connect_ex((host, port))
-        return result == 0
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(timeout)  # seconds
+            result = sock.connect_ex((host, port))
+            success = result == 0
+            if not success:
+                import logging
+                import threading
+
+                _LOG = logging.getLogger(__name__)
+                _LOG.debug(
+                    "[Thread %s] Socket connection to %s:%d failed with code %d",
+                    threading.get_ident(),
+                    host,
+                    port,
+                    result,
+                )
+            return success
+    except Exception as e:
+        import logging
+        import threading
+
+        _LOG = logging.getLogger(__name__)
+        _LOG.debug(
+            "[Thread %s] Socket check exception for %s:%d: %s",
+            threading.get_ident(),
+            host,
+            port,
+            e,
+        )
+        return False
 
 
 def resolve_host_name(host: str) -> str | None:

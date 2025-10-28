@@ -52,12 +52,33 @@ if version("pytest") >= "8.0.0":
 )
 def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo, server_name: str) -> None:
     """Check for the pytest-docker ssh test infra."""
+    import logging
+    import threading
+    _LOG = logging.getLogger(__name__)
+    thread_id = threading.get_ident()
+    
+    _LOG.info(
+        "[Thread %s] test_ssh_service_test_infra starting with %s",
+        thread_id, server_name
+    )
+    
     assert ssh_test_server_info.service_name == server_name
 
     ip_addr = resolve_host_name(ssh_test_server_info.hostname)
     assert ip_addr is not None
 
-    local_port = ssh_test_server_info.get_port()
+    # Use validation method to detect stale ports
+    if not ssh_test_server_info.validate_connection():
+        _LOG.warning(
+            "[Thread %s] Cached port validation failed, getting fresh port for %s",
+            thread_id, server_name
+        )
+    
+    local_port = ssh_test_server_info.get_port_with_validation()
+    _LOG.info(
+        "[Thread %s] Using port %d for %s",
+        thread_id, local_port, server_name
+    )
     assert check_socket(ip_addr, local_port)
     ssh_cmd = (
         "ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new "
