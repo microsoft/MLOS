@@ -6,6 +6,7 @@
 
 import logging
 import threading
+from warnings import warn
 from dataclasses import dataclass
 from subprocess import run
 
@@ -41,18 +42,16 @@ class SshTestServerInfo:
         Note: this value can change when the service restarts so we can't rely on
         the DockerServices.
         """
-        _LOG = logging.getLogger(__name__)
         thread_id = threading.get_ident()
 
         if self._port is None or uncached:
-            _LOG.info(
-                "[Thread %s] Discovering port for %s (uncached=%s, cached_port=%s)",
-                thread_id,
-                self.service_name,
-                uncached,
-                self._port,
+            warn(
+                "[Thread %s] Discovering port for %s (uncached=%s, cached_port=%s)"
+                % (thread_id, self.service_name, uncached, self._port),
+                UserWarning,
             )
             try:
+                # NOTE: this cache may become stale in another worker if the container restarts in one and the other worker doesn't notice the new port.
                 port_cmd = run(
                     (
                         f"docker compose -p {self.compose_project_name} "
@@ -65,22 +64,33 @@ class SshTestServerInfo:
                 new_port = int(port_cmd.stdout.decode().strip().split(":")[1])
                 old_port = self._port
                 self._port = new_port
-                _LOG.info(
-                    "[Thread %s] Port for %s: %s -> %s (uncached=%s)",
-                    thread_id,
-                    self.service_name,
-                    old_port,
-                    new_port,
-                    uncached,
+                warn(
+                    "[Thread %s] Port for %s: %s -> %s (uncached=%s)"
+                    % (
+                        thread_id,
+                        self.service_name,
+                        old_port,
+                        new_port,
+                        uncached,
+                    ),
+                    UserWarning,
                 )
             except Exception as e:
-                _LOG.error(
-                    "[Thread %s] Failed to get port for %s: %s", thread_id, self.service_name, e
+                warn(
+                    "[Thread %s] Failed to get port for %s: %s"
+                    % (
+                        thread_id,
+                        self.service_name,
+                        e,
+                    ),
+                    UserWarning,
                 )
                 raise
         else:
-            _LOG.debug(
-                "[Thread %s] Using cached port %s for %s", thread_id, self._port, self.service_name
+            warn(
+                "[Thread %s] Using cached port %s for %s"
+                % (thread_id, self._port, self.service_name),
+                UserWarning,
             )
         return self._port
 
@@ -114,7 +124,6 @@ class SshTestServerInfo:
         if self._port is None:
             return False
 
-        _LOG = logging.getLogger(__name__)
         thread_id = threading.get_ident()
 
         # Import here to avoid circular imports
@@ -122,18 +131,24 @@ class SshTestServerInfo:
 
         is_connectable = check_socket(self.hostname, self._port, timeout)
         if not is_connectable:
-            _LOG.warning(
-                "[Thread %s] Connection validation FAILED for %s:%d - port may be stale!",
-                thread_id,
-                self.service_name,
-                self._port,
+            warn(
+                "[Thread %s] Connection validation FAILED for %s:%d - port may be stale!"
+                % (
+                    thread_id,
+                    self.service_name,
+                    self._port,
+                ),
+                UserWarning,
             )
         else:
-            _LOG.debug(
-                "[Thread %s] Connection validation OK for %s:%d",
-                thread_id,
-                self.service_name,
-                self._port,
+            warn(
+                "[Thread %s] Connection validation OK for %s:%d"
+                % (
+                    thread_id,
+                    self.service_name,
+                    self._port,
+                ),
+                UserWarning,
             )
         return is_connectable
 
@@ -143,7 +158,6 @@ class SshTestServerInfo:
 
         This helps detect stale cached ports caused by container restarts.
         """
-        _LOG = logging.getLogger(__name__)
         thread_id = threading.get_ident()
 
         # First try cached port
@@ -151,11 +165,14 @@ class SshTestServerInfo:
             if self.validate_connection(timeout):
                 return self._port
             else:
-                _LOG.warning(
-                    "[Thread %s] Cached port %d for %s failed validation, refreshing...",
-                    thread_id,
-                    self._port,
-                    self.service_name,
+                warn(
+                    "[Thread %s] Cached port %d for %s failed validation, refreshing..."
+                    % (
+                        thread_id,
+                        self._port,
+                        self.service_name,
+                    ),
+                    UserWarning,
                 )
                 # Force refresh
                 return self.get_port(uncached=True)

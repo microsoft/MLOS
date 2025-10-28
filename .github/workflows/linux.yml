@@ -175,9 +175,13 @@ jobs:
       timeout-minutes: 5
       run: make CONDA_ENV_NAME=$CONDA_ENV_NAME check
 
-    - name: Run tests
+    - name: Run debug_ssh_tests.py
       continue-on-error: true
       run: conda -n $CONDA_ENV_NAME run python3 debug_ssh_tests.py
+
+    - name: Run ssh tests
+      continue-on-error: true
+      run: conda -n $CONDA_ENV_NAME run python3 -m pytest -vv -rP mlos_bench/mlos_bench/tests/services/remote/ssh
 
     # Only run the coverage checks on the devcontainer job.
     - name: Run tests

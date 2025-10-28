@@ -7,6 +7,7 @@
 import logging
 import time
 from subprocess import CalledProcessError, run
+from warnings import warn
 
 from pytest_docker.plugin import Services as DockerServices
 
@@ -40,18 +41,22 @@ def test_ssh_service_remote_exec(
 
     thread_id = threading.get_ident()
 
-    _LOG.info(
-        "[Thread %s] test_ssh_service_remote_exec starting - validating server connections",
-        thread_id,
+    warn(
+        "[Thread %s] test_ssh_service_remote_exec starting - validating server connections"
+        % (thread_id,),
+        UserWarning,
     )
 
     # Validate connections before starting test
     for server_info, name in [(ssh_test_server, "main"), (alt_test_server, "alt")]:
         if not server_info.validate_connection():
-            _LOG.warning(
-                "[Thread %s] %s server connection validation failed, may have stale port",
-                thread_id,
-                name,
+            warn(
+                "[Thread %s] %s server connection validation failed, may have stale port"
+                % (
+                    thread_id,
+                    name,
+                ),
+                UserWarning,
             )
 
     with ssh_host_service:
@@ -175,20 +180,26 @@ def check_ssh_service_reboot(
 
     thread_id = threading.get_ident()
 
-    _LOG.warning(
-        "[Thread %s] *** STARTING REBOOT TEST (graceful=%s) - This will change container ports! ***",
-        thread_id,
-        graceful,
+    warn(
+        "[Thread %s] *** STARTING REBOOT TEST (graceful=%s) - This will change container ports! ***"
+        % (
+            thread_id,
+            graceful,
+        ),
+        UserWarning,
     )
 
     with ssh_host_service:
         reboot_test_srv_ssh_svc_conf = reboot_test_server.to_ssh_service_config(uncached=True)
         original_port = reboot_test_srv_ssh_svc_conf["ssh_port"]
-        _LOG.warning(
-            "[Thread %s] Reboot test using original port %d for %s",
-            thread_id,
-            original_port,
-            reboot_test_server.service_name,
+        warn(
+            "[Thread %s] Reboot test using original port %d for %s"
+            % (
+                thread_id,
+                original_port,
+                reboot_test_server.service_name,
+            ),
+            UserWarning,
         )
         (status, results_info) = ssh_host_service.remote_exec(
             script=['echo "sleeping..."', "sleep 30", 'echo "should not reach this point"'],
@@ -230,38 +241,50 @@ def check_ssh_service_reboot(
                     capture_output=True,
                     check=False,
                 )
-                _LOG.info(
-                    "[Thread %s] Docker ps output (attempt %d):\nSTDOUT:\n%s\nSTDERR:\n%s",
-                    thread_id,
-                    attempt + 1,
-                    run_res.stdout.decode(),
-                    run_res.stderr.decode(),
+                warn(
+                    "[Thread %s] Docker ps output (attempt %d):\nSTDOUT:\n%s\nSTDERR:\n%s"
+                    % (
+                        thread_id,
+                        attempt + 1,
+                        run_res.stdout.decode(),
+                        run_res.stderr.decode(),
+                    ),
+                    UserWarning,
                 )
                 reboot_test_srv_ssh_svc_conf_new = reboot_test_server.to_ssh_service_config(
                     uncached=True
                 )
                 new_port = reboot_test_srv_ssh_svc_conf_new["ssh_port"]
-                _LOG.warning(
-                    "[Thread %s] Port check attempt %d: %d -> %d",
-                    thread_id,
-                    attempt + 1,
-                    original_port,
-                    new_port,
-                )
-                if new_port != original_port:
-                    _LOG.warning(
-                        "[Thread %s] *** PORT CHANGED: %d -> %d (this affects ALL workers!) ***",
+                warn(
+                    "[Thread %s] Port check attempt %d: %d -> %d"
+                    % (
                         thread_id,
+                        attempt + 1,
                         original_port,
                         new_port,
+                    ),
+                    UserWarning,
+                )
+                if new_port != original_port:
+                    warn(
+                        "[Thread %s] *** PORT CHANGED: %d -> %d (this affects ALL workers!) ***"
+                        % (
+                            thread_id,
+                            original_port,
+                            new_port,
+                        ),
+                        UserWarning,
                     )
                     break
             except CalledProcessError as ex:
-                _LOG.error(
-                    "[Thread %s] Failed to check port for reboot test server (attempt %d): %s",
-                    thread_id,
-                    attempt + 1,
-                    ex,
+                warn(
+                    "[Thread %s] Failed to check port for reboot test server (attempt %d): %s"
+                    % (
+                        thread_id,
+                        attempt + 1,
+                        ex,
+                    ),
+                    UserWarning,
                 )
         assert (
             reboot_test_srv_ssh_svc_conf_new["ssh_port"]
@@ -283,9 +306,10 @@ def check_ssh_service_reboot(
         assert status.is_succeeded()
         assert results["stdout"].strip() == REBOOT_TEST_SERVER_NAME
 
-        _LOG.warning(
-            "[Thread %s] *** REBOOT TEST COMPLETED - Other workers may now have stale cached ports! ***",
-            thread_id,
+        warn(
+            "[Thread %s] *** REBOOT TEST COMPLETED - Other workers may now have stale cached ports! ***"
+            % (thread_id,),
+            UserWarning,
         )
 
 
