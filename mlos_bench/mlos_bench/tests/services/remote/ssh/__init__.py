@@ -6,9 +6,9 @@
 
 import logging
 import threading
-from warnings import warn
 from dataclasses import dataclass
 from subprocess import run
+from warnings import warn
 
 # The SSH test server port and name.
 # See Also: docker-compose.yml

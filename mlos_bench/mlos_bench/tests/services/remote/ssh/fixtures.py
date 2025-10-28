@@ -86,7 +86,7 @@ def ssh_test_server(
     with tempfile.NamedTemporaryFile() as id_rsa_file:
         thread_id = threading.get_ident()
 
-        warn("[Thread %s] Setting up ssh_test_server fixture" % (thread_id,), UserWarning)
+        warn("[Thread {}] Setting up ssh_test_server fixture".format(thread_id), UserWarning)
 
         ssh_test_server_info = SshTestServerInfo(
             compose_project_name=docker_compose_project_name,
@@ -105,7 +105,7 @@ def ssh_test_server(
             port,
         )
 
-        warn("[Thread %s] Main SSH server validated and ready" % (thread_id,), UserWarning)
+        warn("[Thread {}] Main SSH server validated and ready".format(thread_id), UserWarning)
         id_rsa_src = f"/{ssh_test_server_info.username}/.ssh/id_rsa"
         docker_cp_cmd = (
             f"docker compose -p {docker_compose_project_name} "
@@ -143,7 +143,7 @@ def alt_test_server(
     # Only the host port it is allocate is different.
     thread_id = threading.get_ident()
 
-    warn("[Thread %s] Setting up alt_test_server fixture" % (thread_id,), UserWarning)
+    warn("[Thread {}] Setting up alt_test_server fixture".format(thread_id), UserWarning)
 
     alt_test_server_info = SshTestServerInfo(
         compose_project_name=ssh_test_server.compose_project_name,
@@ -162,7 +162,7 @@ def alt_test_server(
         port,
     )
 
-    warn("[Thread %s] Alt SSH server validated and ready" % (thread_id,), UserWarning)
+    warn("[Thread {}] Alt SSH server validated and ready".format(thread_id), UserWarning)
     return alt_test_server_info
 
 
@@ -181,7 +181,7 @@ def reboot_test_server(
     # Only the host port it is allocate is different.
     thread_id = threading.get_ident()
 
-    warn("[Thread %s] Setting up reboot_test_server fixture" % (thread_id,), UserWarning)
+    warn("[Thread {}] Setting up reboot_test_server fixture".format(thread_id), UserWarning)
 
     reboot_test_server_info = SshTestServerInfo(
         compose_project_name=ssh_test_server.compose_project_name,
@@ -200,7 +200,7 @@ def reboot_test_server(
         port,
     )
 
-    warn("[Thread %s] Reboot SSH server validated and ready" % (thread_id,), UserWarning)
+    warn("[Thread {}] Reboot SSH server validated and ready".format(thread_id), UserWarning)
     return reboot_test_server_info
 
 

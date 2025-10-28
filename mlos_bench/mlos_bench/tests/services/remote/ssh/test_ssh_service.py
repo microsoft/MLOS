@@ -6,10 +6,10 @@
 
 import asyncio
 import time
-from warnings import warn
 from importlib.metadata import PackageNotFoundError, version
 from subprocess import run
 from threading import Thread
+from warnings import warn
 
 import pytest
 from pytest_lazy_fixtures.lazy_fixture import lf as lazy_fixture
@@ -58,7 +58,7 @@ def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo, server_
     thread_id = threading.get_ident()
 
     warn(
-        "[Thread %s] test_ssh_service_test_infra starting with %s" % (thread_id, server_name),
+        "[Thread {}] test_ssh_service_test_infra starting with {}".format(thread_id, server_name),
         UserWarning,
     )
 
