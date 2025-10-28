@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 """
 Debug script for SSH test race conditions.
 
@@ -10,35 +14,48 @@ import subprocess
 import sys
 from pathlib import Path
 
+
 def setup_logging():
     """Configure detailed logging for debugging."""
     # Configure root logger
     logging.basicConfig(
         level=logging.DEBUG,
-        format='%(asctime)s.%(msecs)03d [%(levelname)8s] %(name)s: %(message)s',
-        datefmt='%H:%M:%S',
+        format="%(asctime)s.%(msecs)03d [%(levelname)8s] %(name)s: %(message)s",
+        datefmt="%H:%M:%S",
         handlers=[
             logging.StreamHandler(sys.stdout),
-            logging.FileHandler('ssh_test_debug.log', mode='w')
-        ]
+            logging.FileHandler("ssh_test_debug.log", mode="w"),
+        ],
     )
 
     # Set specific loggers to appropriate levels
-    logging.getLogger('mlos_bench.tests.services.remote.ssh').setLevel(logging.DEBUG)
-    logging.getLogger('mlos_bench.tests').setLevel(logging.INFO)
-    logging.getLogger('pytest_docker').setLevel(logging.INFO)
+    logging.getLogger("mlos_bench.tests.services.remote.ssh").setLevel(logging.DEBUG)
+    logging.getLogger("mlos_bench.tests").setLevel(logging.INFO)
+    logging.getLogger("pytest_docker").setLevel(logging.INFO)
 
     print("Logging configured. Debug output will be saved to ssh_test_debug.log")
+
 
 def run_tests():
     """Run SSH tests with debugging enabled."""
     setup_logging()
 
-    test_dir = Path(__file__).parent / "mlos_bench" / "mlos_bench" / "tests" / "services" / "remote" / "ssh"
+    test_dir = (
+        Path(__file__).parent
+        / "mlos_bench"
+        / "mlos_bench"
+        / "tests"
+        / "services"
+        / "remote"
+        / "ssh"
+    )
 
     cmd = [
-        sys.executable, "-m", "pytest",
-        "-v", "-s",  # Verbose and don't capture output
+        sys.executable,
+        "-m",
+        "pytest",
+        "-v",
+        "-s",  # Verbose and don't capture output
         "--tb=short",  # Short traceback format
         "--log-level=DEBUG",  # Enable pytest debug logging
         "-x",  # Stop on first failure
@@ -56,19 +73,33 @@ def run_tests():
         print("\nTest run interrupted by user")
         return 130
 
+
 def run_parallel_tests():
     """Run tests in parallel to reproduce race conditions."""
     setup_logging()
 
-    test_dir = Path(__file__).parent / "mlos_bench" / "mlos_bench" / "tests" / "services" / "remote" / "ssh"
+    test_dir = (
+        Path(__file__).parent
+        / "mlos_bench"
+        / "mlos_bench"
+        / "tests"
+        / "services"
+        / "remote"
+        / "ssh"
+    )
 
     cmd = [
-        sys.executable, "-m", "pytest",
-        "-v", "-s",  # Verbose and don't capture output
+        sys.executable,
+        "-m",
+        "pytest",
+        "-v",
+        "-s",  # Verbose and don't capture output
         "--tb=short",  # Short traceback format
         "--log-level=INFO",  # Less verbose for parallel runs
-        "-n", "2",  # Run with 2 workers to increase chance of race
-        "--dist", "worksteal",  # Dynamic work distribution
+        "-n",
+        "2",  # Run with 2 workers to increase chance of race
+        "--dist",
+        "worksteal",  # Dynamic work distribution
         str(test_dir / "test_ssh_service.py"),
         str(test_dir / "test_ssh_host_service.py"),
     ]
@@ -83,6 +114,7 @@ def run_parallel_tests():
         print("\nParallel test run interrupted by user")
         return 130
 
+
 if __name__ == "__main__":
     import argparse
 
@@ -90,7 +122,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--parallel",
         action="store_true",
-        help="Run tests in parallel to reproduce race conditions"
+        help="Run tests in parallel to reproduce race conditions",
     )
 
     args = parser.parse_args()
