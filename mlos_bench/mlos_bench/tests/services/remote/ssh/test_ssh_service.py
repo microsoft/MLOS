@@ -84,6 +84,8 @@ def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo, server_
     cmd = run(ssh_cmd.split(), capture_output=True, text=True, check=True)
     assert cmd.stdout.strip() == server_name
 
+    # assert False, "Force failure for debugging."
+
 
 @pytest.mark.filterwarnings(
     "ignore:.*(coroutine 'sleep' was never awaited).*:RuntimeWarning:.*event_loop_context_test.*:0"
