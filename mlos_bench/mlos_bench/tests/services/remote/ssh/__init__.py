@@ -44,12 +44,13 @@ class SshTestServerInfo:
         """
         thread_id = threading.get_ident()
 
+        warn(
+            "[Thread %s] Discovering port for %s (uncached=%s, cached_port=%s)"
+            % (thread_id, self.service_name, uncached, self._port),
+            UserWarning,
+        )
+
         if self._port is None or uncached:
-            warn(
-                "[Thread %s] Discovering port for %s (uncached=%s, cached_port=%s)"
-                % (thread_id, self.service_name, uncached, self._port),
-                UserWarning,
-            )
             try:
                 # NOTE: this cache may become stale in another worker if the container restarts in one and the other worker doesn't notice the new port.
                 port_cmd = run(
