@@ -23,6 +23,7 @@ LOG_FMT = (
 )
 DATE_FMT = "%Y-%m-%d %H:%M:%S"
 
+
 def is_master(config: pytest.Config) -> bool:
     """True if the code running the given pytest.config object is running in a xdist
     master node or not running xdist at all.
@@ -76,6 +77,7 @@ def pytest_configure(config: pytest.Config) -> None:
     log_formatter = logging.Formatter(fmt=LOG_FMT, datefmt=DATE_FMT)
     file_handler.setFormatter(log_formatter)
     logging.getLogger().addHandler(file_handler)
+
 
 def pytest_configure_node(node: WorkerController) -> None:
     """Xdist hook used to inform workers of the location of the shared temp dir."""
