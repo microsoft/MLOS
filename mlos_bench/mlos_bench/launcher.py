@@ -37,6 +37,14 @@ _LOG_LEVEL = logging.INFO
 _LOG_FORMAT = "%(asctime)s %(filename)s:%(lineno)d %(funcName)s %(levelname)s %(message)s"
 logging.basicConfig(level=_LOG_LEVEL, format=_LOG_FORMAT)
 
+# TODO: Future PR: See Also: /conftest.py, setup.cfg
+# _LOG_FORMAT = (
+#    "%(asctime)s.%(msecs)03d [%(process)d][%(threadName)s] "
+#    "[%(filename)s:%(lineno)d %(funcName)s] "
+#    "%(levelname)s %(message)s"
+# )
+# logging.basicConfig(level=_LOG_LEVEL, format=_LOG_FORMAT, datefmt="%Y-%m-%d %H:%M:%S")
+
 _LOG = logging.getLogger(__name__)
 
 

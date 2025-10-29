@@ -16,15 +16,86 @@ the appropriate docker-compose.yml file(s) and set a unique docker_compose_proje
 """
 # pylint: disable=redefined-outer-name
 
+import json
+import logging
 import os
 import sys
 from collections.abc import Generator
+from json import JSONDecodeError
+from subprocess import CalledProcessError, run
+from time import sleep
 from typing import Any
 
 import pytest
 from fasteners import InterProcessLock, InterProcessReaderWriterLock
 from pytest_docker.plugin import Services as DockerServices
 from pytest_docker.plugin import get_docker_services
+
+_LOG = logging.getLogger(__name__)
+
+
+def wait_docker_service_healthy(
+    compose_project_name: str,
+    service_name: str,
+    timeout_seconds: int = 30,
+    check_interval_seconds: int = 1,
+) -> None:
+    """
+    Waits for the specified docker service to become healthy.
+
+    Parameters
+    ----------
+    compose_project_name : str
+        The docker-compose project name.
+    service_name : str
+        The name of the service to wait for.
+    timeout_seconds : int
+        The maximum time to wait for the service to become healthy.
+    check_interval_seconds : int
+        The interval between health checks.
+    """
+    for _ in range(0, timeout_seconds, check_interval_seconds):
+        try:
+            inspect_cmd = run(
+                (
+                    f"docker compose -p {compose_project_name} "
+                    f"ps --format '{{{{.ID}}}}' {service_name}"
+                ),
+                shell=True,
+                check=True,
+                capture_output=True,
+            )
+            container_id = inspect_cmd.stdout.decode().strip()
+            if not container_id:
+                raise RuntimeError(f"Container ID for {service_name} not found")
+            inspect_state_cmd = run(
+                f"docker inspect {container_id}",
+                shell=True,
+                check=True,
+                capture_output=True,
+            )
+            inspect_data = json.loads(inspect_state_cmd.stdout.decode())
+            state = inspect_data[0].get("State", {})
+            health = state.get("Health")
+            if state.get("Status") == "running" and (
+                not health or health.get("Status") == "healthy"
+            ):
+                _LOG.debug("Container %s is running and healthy", service_name)
+                return
+            else:
+                _LOG.info(
+                    (
+                        "Waiting for %s to become running (State.Status: %s) "
+                        "and healthy (Health.Status=%s)"
+                    ),
+                    service_name,
+                    state.get("Status") if state else "UNKNOWN",
+                    health.get("Status") if health else "N/A",
+                )
+        except (RuntimeError, CalledProcessError, JSONDecodeError) as e:
+            _LOG.error("Error checking health of %s: %s", service_name, e)
+        sleep(check_interval_seconds)
+    raise RuntimeError(f"Container {service_name} did not become healthy in time.")
 
 
 # Fixtures to configure the pytest-docker plugin.
@@ -44,16 +115,16 @@ def docker_setup() -> list[str] | str:
 @pytest.fixture(scope="session")
 def docker_compose_file(pytestconfig: pytest.Config) -> list[str]:
     """
-    Fixture for the path to the docker-compose file.
+    Base fixture for the path to the docker-compose file(s).
 
     Parameters
     ----------
     pytestconfig : pytest.Config
 
-    Returns
-    -------
-    list[str]
-        List of paths to the docker-compose file(s).
+    Notes
+    -----
+    This fixture should be overridden in the local conftest.py to point to the actual
+    docker-compose.yml files needed for the tests.
     """
     _ = pytestconfig  # unused
     # Add additional configs as necessary here.

@@ -7,6 +7,7 @@
 # Note: This file is named conftest.py so that pytest picks it up automatically
 # without the need to adjust PYTHONPATH or sys.path as much.
 
+import logging
 import os
 import shutil
 from tempfile import mkdtemp
@@ -14,6 +15,14 @@ from warnings import warn
 
 import pytest
 from xdist.workermanage import WorkerController
+
+# See Also: setup.cfg and launcher.py
+LOG_FMT = (
+    "%(asctime)s.%(msecs)03d [%(process)d][%(threadName)s] "
+    "[%(filename)s:%(lineno)d %(funcName)s] "
+    "%(levelname)s: %(message)s"
+)
+DATE_FMT = "%Y-%m-%d %H:%M:%S"
 
 
 def is_master(config: pytest.Config) -> bool:
@@ -55,6 +64,20 @@ def pytest_configure(config: pytest.Config) -> None:
     if is_master(config):
         # Add it to the config so that it can passed to the worker nodes.
         setattr(config, "shared_temp_dir", mkdtemp())
+
+    # Configure per-worker log file.
+    worker_id = getattr(config, "workerinput", {}).get("workerid", "master")
+    os.makedirs("logs", exist_ok=True)
+    log_file_path = os.path.join("logs", f"pytest-{worker_id}.log")
+    file_handler = logging.FileHandler(log_file_path, mode="w")
+    if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+        file_handler.setLevel(logging.DEBUG)
+    else:
+        file_handler.setLevel(logging.INFO)
+    # logging.basicConfig(level=file_handler.level, format=LOG_FMT, datefmt=DATE_FMT)
+    log_formatter = logging.Formatter(fmt=LOG_FMT, datefmt=DATE_FMT)
+    file_handler.setFormatter(log_formatter)
+    logging.getLogger().addHandler(file_handler)
 
 
 def pytest_configure_node(node: WorkerController) -> None:

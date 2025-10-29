@@ -181,3 +181,11 @@ jobs:
 
     - name: Generate and test binary distribution files
       run: make CONDA_ENV_NAME=$CONDA_ENV_NAME CONDA_INFO_LEVEL=-v dist dist-test
+
+    - name: Upload pytest logs
+      if: always()
+      uses: actions/upload-artifact@v5
+      with:
+        name: linux-${{ matrix.python_version }}-pytest-logs
+        path: logs/pytest*.log
+        retention-days: 7

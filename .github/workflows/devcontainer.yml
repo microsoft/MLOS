@@ -208,13 +208,6 @@ jobs:
         # Now actually run the tests.
         docker exec --user vscode --env USER=vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v test
 
-    - name: Upload coverage report as build artifact
-      if: always() # ensures it runs even if tests fail
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: coverage.xml
-
     - name: Generate and test binary distribution files
       timeout-minutes: 10
       run: |
@@ -298,6 +291,21 @@ jobs:
         docker tag mlos-devcontainer:latest ${{ secrets.ACR_LOGINURL }}/mlos-devcontainer:$image_tag
         docker push ${{ secrets.ACR_LOGINURL }}/mlos-devcontainer:$image_tag
 
+    # ensure these run even if tests fail, but only after everything else is done or skipped
+    - name: Upload coverage report as build artifact
+      if: always()
+      uses: actions/upload-artifact@v5
+      with:
+        name: coverage-report
+        path: coverage.xml
+
+    - name: Upload pytest logs
+      if: always()
+      uses: actions/upload-artifact@v5
+      with:
+        name: devcontainer-pytest-logs
+        path: logs/pytest*.log
+        retention-days: 7
 
   PublishDocs:
     name: Publish Documentation

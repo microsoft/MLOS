@@ -9,6 +9,7 @@ Used to make mypy happy about multiple conftest.py modules.
 """
 import filecmp
 import json
+import logging
 import os
 import shutil
 import socket
@@ -23,6 +24,8 @@ import pytz
 from pytest_docker.plugin import Services as DockerServices
 
 from mlos_bench.util import get_class_from_name, nullable
+
+_LOG = logging.getLogger(__name__)
 
 ZONE_NAMES = [
     # Explicit time zones.
@@ -171,11 +174,24 @@ def wait_docker_service_healthy(
 
 def wait_docker_service_socket(docker_services: DockerServices, hostname: str, port: int) -> None:
     """Wait until a docker service is ready."""
-    docker_services.wait_until_responsive(
-        check=lambda: check_socket(hostname, port),
-        timeout=60.0,
-        pause=0.5,
-    )
+    _LOG.info("Waiting for %s:%d to become responsive", hostname, port)
+
+    def check_with_logging() -> bool:
+        result = check_socket(hostname, port)
+        if not result:
+            _LOG.debug("Socket check failed for %s:%d", hostname, port)
+        return result
+
+    try:
+        docker_services.wait_until_responsive(
+            check=check_with_logging,
+            timeout=60.0,
+            pause=0.5,
+        )
+        _LOG.info("Socket %s:%d is now responsive", hostname, port)
+    except Exception as e:
+        _LOG.error("Failed waiting for %s:%d: %s", hostname, port, e)
+        raise
 
 
 def check_socket(host: str, port: int, timeout: float = 1.0) -> bool:
@@ -192,10 +208,27 @@ def check_socket(host: str, port: int, timeout: float = 1.0) -> bool:
     -------
     bool
     """
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.settimeout(timeout)  # seconds
-        result = sock.connect_ex((host, port))
-        return result == 0
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(timeout)  # seconds
+            result = sock.connect_ex((host, port))
+            success = result == 0
+            if not success:
+                _LOG.debug(
+                    "Socket connection to %s:%d failed with code %d",
+                    host,
+                    port,
+                    result,
+                )
+            return success
+    except (OSError, TimeoutError) as e:
+        _LOG.debug(
+            "Socket check exception for %s:%d: %s",
+            host,
+            port,
+            e,
+        )
+        return False
 
 
 def resolve_host_name(host: str) -> str | None:

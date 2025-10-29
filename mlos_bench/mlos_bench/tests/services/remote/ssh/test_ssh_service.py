@@ -5,6 +5,7 @@
 """Tests for mlos_bench.services.remote.ssh.SshService base class."""
 
 import asyncio
+import logging
 import time
 from importlib.metadata import PackageNotFoundError, version
 from subprocess import run
@@ -40,6 +41,8 @@ if version("pytest") >= "8.0.0":
         # OK: pytest-lazy-fixture not installed
         pass
 
+_LOG = logging.getLogger(__name__)
+
 
 @requires_docker
 @requires_ssh
@@ -52,12 +55,22 @@ if version("pytest") >= "8.0.0":
 )
 def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo, server_name: str) -> None:
     """Check for the pytest-docker ssh test infra."""
+    _LOG.info("test_ssh_service_test_infra starting with %s", server_name)
+
     assert ssh_test_server_info.service_name == server_name
 
     ip_addr = resolve_host_name(ssh_test_server_info.hostname)
     assert ip_addr is not None
 
+    # Use validation method to detect stale ports
+    if not ssh_test_server_info.validate_connection():
+        _LOG.warning(
+            "Cached port validation failed, getting fresh port for %s",
+            server_name,
+        )
+
     local_port = ssh_test_server_info.get_port()
+    _LOG.info("Using port %d for %s", local_port, server_name)
     assert check_socket(ip_addr, local_port)
     ssh_cmd = (
         "ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new "
@@ -66,6 +79,8 @@ def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo, server_
     )
     cmd = run(ssh_cmd.split(), capture_output=True, text=True, check=True)
     assert cmd.stdout.strip() == server_name
+
+    # assert False, "Force failure for debugging."
 
 
 @pytest.mark.filterwarnings(
