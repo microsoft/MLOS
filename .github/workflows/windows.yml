@@ -142,6 +142,13 @@ jobs:
       run: |
         .github/workflows/build-dist-test.ps1
 
+    - name: Upload pytest logs
+      if: always()
+      uses: actions/upload-artifact@v5
+      with:
+        name: pytest-logs
+        path: logs/pytest*.log
+        retention-days: 7
 
   WindowsDevContainerBuildTest:
     name: Windows DevContainer Build/Test

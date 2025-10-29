@@ -171,3 +171,6 @@ build/*.build-stamp
 *.duckdb
 *.db.wal
 *.duckdb.wal
+
+# pytest logs
+logs/pytest*.log
