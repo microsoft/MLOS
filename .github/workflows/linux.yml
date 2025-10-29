@@ -186,6 +186,6 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v5
       with:
-        name: pytest-logs
+        name: linux-${{ matrix.python_version }}-pytest-logs
         path: logs/pytest*.log
         retention-days: 7

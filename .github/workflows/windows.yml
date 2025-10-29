@@ -146,7 +146,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v5
       with:
-        name: pytest-logs
+        name: windows-pytest-logs
         path: logs/pytest*.log
         retention-days: 7
 
