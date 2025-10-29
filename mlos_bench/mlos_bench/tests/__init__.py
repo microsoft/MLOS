@@ -8,6 +8,7 @@ Tests for mlos_bench.
 Used to make mypy happy about multiple conftest.py modules.
 """
 import filecmp
+import logging
 import json
 import os
 import shutil
@@ -23,6 +24,8 @@ import pytz
 from pytest_docker.plugin import Services as DockerServices
 
 from mlos_bench.util import get_class_from_name, nullable
+
+_LOG = logging.getLogger(__name__)
 
 ZONE_NAMES = [
     # Explicit time zones.
@@ -171,18 +174,12 @@ def wait_docker_service_healthy(
 
 def wait_docker_service_socket(docker_services: DockerServices, hostname: str, port: int) -> None:
     """Wait until a docker service is ready."""
-    import logging
-    import threading
-
-    _LOG = logging.getLogger(__name__)
-    thread_id = threading.get_ident()
-
-    _LOG.info("[Thread %s] Waiting for %s:%d to become responsive", thread_id, hostname, port)
+    _LOG.info("Waiting for %s:%d to become responsive", hostname, port)
 
     def check_with_logging() -> bool:
         result = check_socket(hostname, port)
         if not result:
-            _LOG.debug("[Thread %s] Socket check failed for %s:%d", thread_id, hostname, port)
+            _LOG.debug("Socket check failed for %s:%d", hostname, port)
         return result
 
     try:
@@ -191,9 +188,9 @@ def wait_docker_service_socket(docker_services: DockerServices, hostname: str, p
             timeout=60.0,
             pause=0.5,
         )
-        _LOG.info("[Thread %s] Socket %s:%d is now responsive", thread_id, hostname, port)
+        _LOG.info("Socket %s:%d is now responsive", hostname, port)
     except Exception as e:
-        _LOG.error("[Thread %s] Failed waiting for %s:%d: %s", thread_id, hostname, port, e)
+        _LOG.error("Failed waiting for %s:%d: %s", hostname, port, e)
         raise
 
 
@@ -217,26 +214,16 @@ def check_socket(host: str, port: int, timeout: float = 1.0) -> bool:
             result = sock.connect_ex((host, port))
             success = result == 0
             if not success:
-                import logging
-                import threading
-
-                _LOG = logging.getLogger(__name__)
                 _LOG.debug(
-                    "[Thread %s] Socket connection to %s:%d failed with code %d",
-                    threading.get_ident(),
+                    "Socket connection to %s:%d failed with code %d",
                     host,
                     port,
                     result,
                 )
             return success
-    except Exception as e:
-        import logging
-        import threading
-
-        _LOG = logging.getLogger(__name__)
+    except (IOError, TimeoutError) as e:
         _LOG.debug(
-            "[Thread %s] Socket check exception for %s:%d: %s",
-            threading.get_ident(),
+            "Socket check exception for %s:%d: %s",
             host,
             port,
             e,

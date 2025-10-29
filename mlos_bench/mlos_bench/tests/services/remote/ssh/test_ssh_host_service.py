@@ -243,7 +243,7 @@ def check_ssh_service_reboot(
                     )
                     break
             except CalledProcessError as ex:
-                _LOG.error(
+                _LOG.info(
                     "Failed to check port for reboot test server (attempt %d): %s",
                     attempt + 1,
                     ex,

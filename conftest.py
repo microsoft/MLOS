@@ -16,6 +16,7 @@ from warnings import warn
 import pytest
 from xdist.workermanage import WorkerController
 
+# See Also: setup.cfg and launcher.py
 LOG_FMT = (
     "%(asctime)s.%(msecs)03d [%(process)d][%(threadName)s] "
     "[%(filename)s:%(lineno)d %(funcName)s] "

@@ -34,9 +34,13 @@ from mlos_bench.tunables.tunable_types import TunableValue
 from mlos_bench.util import try_parse_val
 
 _LOG_LEVEL = logging.INFO
-_LOG_FORMAT = "%(asctime)s [%(processName)s] [%(threadName)s] %(filename)s:%(lineno)d %(funcName)s %(levelname)s %(message)s"
-logging.basicConfig(level=_LOG_LEVEL, format=_LOG_FORMAT)
-logging.basicConfig(datefmt="%Y-%m-%d %H:%M:%S.%f")
+# See Also: /conftest.py, setup.cfg
+_LOG_FORMAT = (
+    "%(asctime)s.%(msecs)03d [%(process)d][%(threadName)s] "
+    "[%(filename)s:%(lineno)d %(funcName)s] "
+    "%(levelname)s %(message)s"
+)
+logging.basicConfig(level=_LOG_LEVEL, format=_LOG_FORMAT, datefmt="%Y-%m-%d %H:%M:%S")
 
 _LOG = logging.getLogger(__name__)
 
