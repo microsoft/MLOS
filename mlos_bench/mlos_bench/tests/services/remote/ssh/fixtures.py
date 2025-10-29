@@ -11,7 +11,6 @@ Note: these are not in the conftest.py file because they are also used by remote
 import logging
 import os
 import tempfile
-import threading
 from collections.abc import Generator
 from subprocess import run
 
@@ -29,6 +28,8 @@ from mlos_bench.tests.services.remote.ssh import (
 )
 
 # pylint: disable=redefined-outer-name
+
+_LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="session")
@@ -83,10 +84,7 @@ def ssh_test_server(
     """
     # Get a copy of the ssh id_rsa key from the test ssh server.
     with tempfile.NamedTemporaryFile() as id_rsa_file:
-        _LOG = logging.getLogger(__name__)
-        thread_id = threading.get_ident()
-
-        _LOG.info("[Thread %s] Setting up ssh_test_server fixture", thread_id)
+        _LOG.info("Setting up ssh_test_server fixture")
 
         ssh_test_server_info = SshTestServerInfo(
             compose_project_name=docker_compose_project_name,
@@ -97,7 +95,7 @@ def ssh_test_server(
         )
 
         port = ssh_test_server_info.get_port()
-        _LOG.info("[Thread %s] Main SSH server discovered on port %d", thread_id, port)
+        _LOG.info("Main SSH server discovered on port %d", port)
 
         wait_docker_service_socket(
             locked_docker_services,
@@ -105,7 +103,7 @@ def ssh_test_server(
             port,
         )
 
-        _LOG.info("[Thread %s] Main SSH server validated and ready", thread_id)
+        _LOG.info("Main SSH server validated and ready")
         id_rsa_src = f"/{ssh_test_server_info.username}/.ssh/id_rsa"
         docker_cp_cmd = (
             f"docker compose -p {docker_compose_project_name} "
@@ -141,10 +139,8 @@ def alt_test_server(
     # Note: The alt-server uses the same image as the ssh-server container, so
     # the id_rsa key and username should all match.
     # Only the host port it is allocate is different.
-    _LOG = logging.getLogger(__name__)
-    thread_id = threading.get_ident()
 
-    _LOG.info("[Thread %s] Setting up alt_test_server fixture", thread_id)
+    _LOG.info("Setting up alt_test_server fixture")
 
     alt_test_server_info = SshTestServerInfo(
         compose_project_name=ssh_test_server.compose_project_name,
@@ -155,7 +151,7 @@ def alt_test_server(
     )
 
     port = alt_test_server_info.get_port()
-    _LOG.info("[Thread %s] Alt SSH server discovered on port %d", thread_id, port)
+    _LOG.info("Alt SSH server discovered on port %d", port)
 
     wait_docker_service_socket(
         locked_docker_services,
@@ -163,7 +159,7 @@ def alt_test_server(
         port,
     )
 
-    _LOG.info("[Thread %s] Alt SSH server validated and ready", thread_id)
+    _LOG.info("Alt SSH server validated and ready")
     return alt_test_server_info
 
 
@@ -180,10 +176,8 @@ def reboot_test_server(
     # Note: The reboot-server uses the same image as the ssh-server container, so
     # the id_rsa key and username should all match.
     # Only the host port it is allocate is different.
-    _LOG = logging.getLogger(__name__)
-    thread_id = threading.get_ident()
 
-    _LOG.info("[Thread %s] Setting up reboot_test_server fixture", thread_id)
+    _LOG.info("Setting up reboot_test_server fixture")
 
     reboot_test_server_info = SshTestServerInfo(
         compose_project_name=ssh_test_server.compose_project_name,
@@ -194,7 +188,7 @@ def reboot_test_server(
     )
 
     port = reboot_test_server_info.get_port()
-    _LOG.info("[Thread %s] Reboot SSH server discovered on port %d", thread_id, port)
+    _LOG.info("Reboot SSH server discovered on port %d", port)
 
     wait_docker_service_socket(
         locked_docker_services,
@@ -202,7 +196,7 @@ def reboot_test_server(
         port,
     )
 
-    _LOG.info("[Thread %s] Reboot SSH server validated and ready", thread_id)
+    _LOG.info("Reboot SSH server validated and ready")
     return reboot_test_server_info
 
 

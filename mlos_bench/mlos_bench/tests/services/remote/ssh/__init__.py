@@ -5,9 +5,11 @@
 """Common data classes for the SSH service tests."""
 
 import logging
-import threading
 from dataclasses import dataclass
 from subprocess import run
+
+from mlos_bench.tests import check_socket
+from mlos_bench.tests.docker_fixtures_util import wait_docker_service_healthy
 
 # The SSH test server port and name.
 # See Also: docker-compose.yml
@@ -15,6 +17,8 @@ SSH_TEST_SERVER_PORT = 2254
 SSH_TEST_SERVER_NAME = "ssh-server"
 ALT_TEST_SERVER_NAME = "alt-server"
 REBOOT_TEST_SERVER_NAME = "reboot-server"
+
+_LOG = logging.getLogger(__name__)
 
 
 @dataclass
@@ -34,55 +38,62 @@ class SshTestServerInfo:
     id_rsa_path: str
     _port: int | None = None
 
-    def get_port(self, uncached: bool = False) -> int:
+    def get_port(self, uncached: bool = False, check_port: bool = True) -> int:
         """
         Gets the port that the SSH test server is listening on.
 
         Note: this value can change when the service restarts so we can't rely on
         the DockerServices.
         """
-        _LOG = logging.getLogger(__name__)
-        thread_id = threading.get_ident()
-
-        if self._port is None or uncached:
-            _LOG.info(
-                "[Thread %s] Discovering port for %s (uncached=%s, cached_port=%s)",
-                thread_id,
-                self.service_name,
-                uncached,
-                self._port,
-            )
-            try:
-                # NOTE: this cache may become stale in another worker if the container restarts in one and the other worker doesn't notice the new port.
-                port_cmd = run(
-                    (
-                        f"docker compose -p {self.compose_project_name} "
-                        f"port {self.service_name} {SSH_TEST_SERVER_PORT}"
-                    ),
-                    shell=True,
-                    check=True,
-                    capture_output=True,
-                )
-                new_port = int(port_cmd.stdout.decode().strip().split(":")[1])
-                old_port = self._port
-                self._port = new_port
-                _LOG.info(
-                    "[Thread %s] Port for %s: %s -> %s (uncached=%s)",
-                    thread_id,
+        if not uncached and self._port is not None:
+            # NOTE: this cache may become stale in another worker if the
+            # container restarts in one and the other worker doesn't notice the new port.
+            # Optionally check the status of the cached port before returning it.
+            if not check_port or self.validate_connection():
+                _LOG.debug(
+                    "Using cached port %s for %s %s validation.",
+                    self._port,
                     self.service_name,
-                    old_port,
-                    new_port,
-                    uncached,
+                    "with" if check_port else "without",
                 )
-            except Exception as e:
-                _LOG.error(
-                    "[Thread %s] Failed to get port for %s: %s", thread_id, self.service_name, e
-                )
-                raise
-        else:
-            _LOG.debug(
-                "[Thread %s] Using cached port %s for %s", thread_id, self._port, self.service_name
-            )
+                return self._port
+
+        # Check container state before proceeding to avoid a race in docker
+        # container startup.
+        _LOG.info(
+            (
+                "Discovering port for %s (uncached=%s, cached_port=%s) "
+                "after waiting for container readiness."
+            ),
+            self.service_name,
+            uncached,
+            self._port,
+        )
+        wait_docker_service_healthy(
+            self.compose_project_name,
+            self.service_name,
+        )
+        _LOG.debug("Container %s is healthy, getting port...", self.service_name)
+
+        port_cmd = run(
+            (
+                f"docker compose -p {self.compose_project_name} "
+                f"port {self.service_name} {SSH_TEST_SERVER_PORT}"
+            ),
+            shell=True,
+            check=True,
+            capture_output=True,
+        )
+        new_port = int(port_cmd.stdout.decode().strip().split(":")[1])
+        old_port = self._port
+        self._port = new_port
+        _LOG.info(
+            "Port for %s: %s -> %s (uncached=%s)",
+            self.service_name,
+            old_port,
+            new_port,
+            uncached,
+        )
         return self._port
 
     def to_ssh_service_config(self, uncached: bool = False) -> dict:
@@ -115,51 +126,17 @@ class SshTestServerInfo:
         if self._port is None:
             return False
 
-        _LOG = logging.getLogger(__name__)
-        thread_id = threading.get_ident()
-
-        # Import here to avoid circular imports
-        from mlos_bench.tests import check_socket
-
         is_connectable = check_socket(self.hostname, self._port, timeout)
         if not is_connectable:
             _LOG.warning(
-                "[Thread %s] Connection validation FAILED for %s:%d - port may be stale!",
-                thread_id,
+                "Connection validation FAILED for %s:%d - port may be stale!",
                 self.service_name,
                 self._port,
             )
         else:
             _LOG.debug(
-                "[Thread %s] Connection validation OK for %s:%d",
-                thread_id,
+                "Connection validation OK for %s:%d",
                 self.service_name,
                 self._port,
             )
         return is_connectable
-
-    def get_port_with_validation(self, timeout: float = 2.0) -> int:
-        """
-        Get port with automatic validation and refresh if connection fails.
-
-        This helps detect stale cached ports caused by container restarts.
-        """
-        _LOG = logging.getLogger(__name__)
-        thread_id = threading.get_ident()
-
-        # First try cached port
-        if self._port is not None:
-            if self.validate_connection(timeout):
-                return self._port
-            else:
-                _LOG.warning(
-                    "[Thread %s] Cached port %d for %s failed validation, refreshing...",
-                    thread_id,
-                    self._port,
-                    self.service_name,
-                )
-                # Force refresh
-                return self.get_port(uncached=True)
-        else:
-            # No cached port, get fresh one
-            return self.get_port(uncached=False)
