@@ -8,8 +8,8 @@ Tests for mlos_bench.
 Used to make mypy happy about multiple conftest.py modules.
 """
 import filecmp
-import logging
 import json
+import logging
 import os
 import shutil
 import socket
@@ -221,7 +221,7 @@ def check_socket(host: str, port: int, timeout: float = 1.0) -> bool:
                     result,
                 )
             return success
-    except (IOError, TimeoutError) as e:
+    except (OSError, TimeoutError) as e:
         _LOG.debug(
             "Socket check exception for %s:%d: %s",
             host,
