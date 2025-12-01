@@ -1,0 +1,32 @@
+mlos_bench.storage.util
+=======================
+
+.. py:module:: mlos_bench.storage.util
+
+.. autoapi-nested-parse::
+
+   Utility functions for the storage subsystem.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   mlos_bench.storage.util.kv_df_to_dict
+
+
+Module Contents
+---------------
+
+.. py:function:: kv_df_to_dict(dataframe: pandas.DataFrame) -> dict[str, mlos_bench.tunables.tunable_types.TunableValue | None]
+
+   Utility function to convert certain flat key-value dataframe formats used by the
+   mlos_bench.storage modules to a dict.
+
+   :param dataframe: A dataframe with exactly two columns, 'parameter' (or 'metric') and 'value', where
+                     'parameter' is a string and 'value' is some TunableValue or None.
+   :type dataframe: pandas.DataFrame
+
+

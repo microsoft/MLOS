@@ -1,0 +1,26 @@
+mlos_bench.version
+==================
+
+.. py:module:: mlos_bench.version
+
+.. autoapi-nested-parse::
+
+   Version number for the mlos_bench package.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   mlos_bench.version.VERSION
+
+
+Module Contents
+---------------
+
+.. py:data:: VERSION
+   :value: '0.6.2'
+
+

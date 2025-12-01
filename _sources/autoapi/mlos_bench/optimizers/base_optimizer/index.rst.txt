@@ -1,0 +1,225 @@
+mlos_bench.optimizers.base_optimizer
+====================================
+
+.. py:module:: mlos_bench.optimizers.base_optimizer
+
+.. autoapi-nested-parse::
+
+   Base class for an interface between the benchmarking framework and :py:mod:`mlos_core`
+   optimizers and other config suggestion methods.
+
+   .. seealso::
+
+      :py:obj:`mlos_bench.optimizers`
+          For more information on the available optimizers and their usage.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.optimizers.base_optimizer.Optimizer
+
+
+Module Contents
+---------------
+
+.. py:class:: Optimizer(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, config: dict, global_config: dict | None = None, service: mlos_bench.services.base_service.Service | None = None)
+
+   Bases: :py:obj:`contextlib.AbstractContextManager`
+
+
+   An abstract interface between the benchmarking framework and :py:mod:`mlos_core`
+   optimizers and other config suggestion methods.
+
+   Create a new optimizer for the given configuration space defined by the
+   tunables.
+
+   :param tunables: The tunables to optimize.
+   :type tunables: TunableGroups
+   :param config: Free-format key/value pairs of configuration parameters to pass to the optimizer.
+   :type config: dict
+   :param global_config:
+   :type global_config: dict | None
+   :param service:
+   :type service: Service | None
+
+
+   .. py:method:: __enter__() -> Optimizer
+
+      Enter the optimizer's context.
+
+
+
+   .. py:method:: __exit__(ex_type: type[BaseException] | None, ex_val: BaseException | None, ex_tb: types.TracebackType | None) -> Literal[False]
+
+      Exit the context of the optimizer.
+
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: bulk_register(configs: collections.abc.Sequence[dict], scores: collections.abc.Sequence[dict[str, mlos_bench.tunables.tunable_types.TunableValue] | None], status: collections.abc.Sequence[mlos_bench.environments.status.Status] | None = None) -> bool
+      :abstractmethod:
+
+
+      Pre-load the optimizer with the bulk data from previous experiments.
+
+      :param configs: Records of tunable values from other experiments.
+      :type configs: Sequence[dict]
+      :param scores: Benchmark results from experiments that correspond to `configs`.
+      :type scores: Sequence[Optional[dict[str, TunableValue]]]
+      :param status: Status of the experiments that correspond to `configs`.
+      :type status: Optional[Sequence[Status]]
+
+      :returns: **is_not_empty** -- True if there is data to register, false otherwise.
+      :rtype: bool
+
+
+
+   .. py:method:: get_best_observation() -> tuple[dict[str, float], mlos_bench.tunables.tunable_groups.TunableGroups] | tuple[None, None]
+      :abstractmethod:
+
+
+      Get the best observation so far.
+
+      :returns: **(value, tunables)** -- The best value and the corresponding configuration.
+                (None, None) if no successful observation has been registered yet.
+      :rtype: tuple[dict[str, float], TunableGroups]
+
+
+
+   .. py:method:: not_converged() -> bool
+
+      Return True if not converged, False otherwise.
+
+      Base implementation just checks the iteration count.
+
+
+
+   .. py:method:: register(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, status: mlos_bench.environments.status.Status, score: dict[str, mlos_bench.tunables.tunable_types.TunableValue] | None = None) -> dict[str, float] | None
+      :abstractmethod:
+
+
+      Register the observation for the given configuration.
+
+      :param tunables: The configuration that has been benchmarked.
+                       Usually it's the same config that the `.suggest()` method returned.
+      :type tunables: TunableGroups
+      :param status: Final status of the experiment (e.g., SUCCEEDED or FAILED).
+      :type status: Status
+      :param score: A dict with the final benchmark results.
+                    None if the experiment was not successful.
+      :type score: Optional[dict[str, TunableValue]]
+
+      :returns: **value** -- Benchmark scores extracted (and possibly transformed)
+                from the dataframe that's being MINIMIZED.
+      :rtype: Optional[dict[str, float]]
+
+
+
+   .. py:method:: suggest() -> mlos_bench.tunables.tunable_groups.TunableGroups
+
+      Generate the next suggestion. Base class' implementation increments the
+      iteration count and returns the current values of the tunables.
+
+      :returns: **tunables** -- The next configuration to benchmark.
+                These are the same tunables we pass to the constructor,
+                but with the values set to the next suggestion.
+      :rtype: TunableGroups
+
+
+
+   .. py:attribute:: BASE_SUPPORTED_CONFIG_PROPS
+
+
+   .. py:property:: config_space
+      :type: ConfigSpace.ConfigurationSpace
+
+
+      Get the tunable parameters of the optimizer as a ConfigurationSpace.
+
+      :returns: The ConfigSpace representation of the tunable parameters.
+      :rtype: ConfigSpace.ConfigurationSpace
+
+
+   .. py:property:: current_iteration
+      :type: int
+
+
+      The current number of iterations (suggestions) registered.
+
+      Note: this may or may not be the same as the number of configurations.
+      See Also: Scheduler.trial_config_repeat_count and Scheduler.max_trials.
+
+
+   .. py:attribute:: experiment_id
+      :value: ''
+
+
+
+   .. py:property:: max_suggestions
+      :type: int
+
+
+      The maximum number of iterations (suggestions) to run.
+
+      Note: this may or may not be the same as the number of configurations.
+      See Also: Scheduler.trial_config_repeat_count and Scheduler.max_trials.
+
+
+   .. py:property:: name
+      :type: str
+
+
+      The name of the optimizer.
+
+      We save this information in mlos_bench storage to track the source of each
+      configuration.
+
+
+   .. py:property:: seed
+      :type: int
+
+
+      The random seed for the optimizer.
+
+
+   .. py:property:: start_with_defaults
+      :type: bool
+
+
+      Return True if the optimizer should start with the default values.
+
+      Note: This parameter is mutable and will be reset to False after the
+      defaults are first suggested.
+
+
+   .. py:property:: supports_preload
+      :type: bool
+
+
+      Return True if the optimizer supports pre-loading the data from previous
+      experiments.
+
+
+   .. py:property:: targets
+      :type: dict[str, Literal['min', 'max']]
+
+
+      Returns a dictionary of optimization targets and their direction.
+
+
+   .. py:property:: tunable_params
+      :type: mlos_bench.tunables.tunable_groups.TunableGroups
+
+
+      Get the tunable parameters of the optimizer as TunableGroups.
+
+      :returns: **tunables** -- A collection of covariant groups of tunable parameters.
+      :rtype: TunableGroups
+
+

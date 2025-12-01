@@ -1,0 +1,55 @@
+mlos_core.spaces.converters.flaml
+=================================
+
+.. py:module:: mlos_core.spaces.converters.flaml
+
+.. autoapi-nested-parse::
+
+   Contains space converters for
+   :py:class:`~mlos_core.optimizers.flaml_optimizer.FlamlOptimizer`
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   mlos_core.spaces.converters.flaml.FlamlDomain
+   mlos_core.spaces.converters.flaml.FlamlSpace
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   mlos_core.spaces.converters.flaml.configspace_to_flaml_space
+
+
+Module Contents
+---------------
+
+.. py:function:: configspace_to_flaml_space(config_space: ConfigSpace.ConfigurationSpace) -> dict[str, FlamlDomain]
+
+   Converts a ConfigSpace.ConfigurationSpace to dict.
+
+   :param config_space: Input configuration space.
+   :type config_space: ConfigSpace.ConfigurationSpace
+
+   :returns: **flaml_space** -- A dictionary of flaml.tune.sample.Domain objects keyed by parameter name.
+   :rtype: dict
+
+
+.. py:type:: FlamlDomain
+   :canonical: Domain
+
+
+   Flaml domain type alias.
+
+.. py:type:: FlamlSpace
+   :canonical: dict[str, Domain]
+
+
+   Flaml space type alias - a `dict[str, FlamlDomain]`
+

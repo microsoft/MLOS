@@ -1,0 +1,77 @@
+mlos_bench.services.types.os_ops_type
+=====================================
+
+.. py:module:: mlos_bench.services.types.os_ops_type
+
+.. autoapi-nested-parse::
+
+   Protocol interface for Host/OS operations.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.types.os_ops_type.SupportsOSOps
+
+
+Module Contents
+---------------
+
+.. py:class:: SupportsOSOps
+
+   Bases: :py:obj:`Protocol`
+
+
+   Protocol interface for Host/OS operations.
+
+
+   .. py:method:: reboot(params: dict, force: bool = False) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Initiates a (graceful) shutdown of the Host/VM OS.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+      :param force: If True, force restart the Host/VM.
+      :type force: bool
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: shutdown(params: dict, force: bool = False) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Initiates a (graceful) shutdown of the Host/VM OS.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+      :param force: If True, force stop the Host/VM.
+      :type force: bool
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: wait_os_operation(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Waits for a pending operation on an OS to resolve to SUCCEEDED or FAILED. Return
+      TIMED_OUT when timing out.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+                     Must have the "asyncResultsUrl" key to get the results.
+                     If the key is not present, return Status.PENDING.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result.
+                Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+                Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+      :rtype: (Status, dict)
+
+
+

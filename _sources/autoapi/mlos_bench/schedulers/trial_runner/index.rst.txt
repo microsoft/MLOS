@@ -1,0 +1,123 @@
+mlos_bench.schedulers.trial_runner
+==================================
+
+.. py:module:: mlos_bench.schedulers.trial_runner
+
+.. autoapi-nested-parse::
+
+   Simple class to run an individual Trial on a given Environment.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.schedulers.trial_runner.TrialRunner
+
+
+Module Contents
+---------------
+
+.. py:class:: TrialRunner(trial_runner_id: int, env: mlos_bench.environments.base_environment.Environment)
+
+   Simple class to help run an individual Trial on an environment.
+
+   TrialRunner manages the lifecycle of a single trial, including setup, run, teardown,
+   and async status polling via EventLoopContext background threads.
+
+   Multiple TrialRunners can be used in a multi-processing pool to run multiple trials
+   in parallel, for instance.
+
+
+   .. py:method:: __enter__() -> TrialRunner
+
+
+   .. py:method:: __exit__(ex_type: type[BaseException] | None, ex_val: BaseException | None, ex_tb: types.TracebackType | None) -> Literal[False]
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: __str__() -> str
+
+
+   .. py:method:: create_from_json(*, config_loader: mlos_bench.services.base_service.Service, env_json: str, svcs_json: str | list[str] | None = None, num_trial_runners: int = 1, tunable_groups: mlos_bench.tunables.tunable_groups.TunableGroups | None = None, global_config: dict[str, Any] | None = None) -> list[TrialRunner]
+      :classmethod:
+
+
+      Create a list of TrialRunner instances, and their associated Environments and
+      Services, from JSON configurations.
+
+      Since each TrialRunner instance is independent, they can be run in parallel,
+      and hence must each get their own copy of the Environment and Services to
+      operate on.
+
+      The global_config is shared across all TrialRunners, but each copy gets its
+      own unique trial_runner_id.
+
+      :param config_loader: A service instance capable of loading configuration (i.e., SupportsConfigLoading).
+      :type config_loader: Service
+      :param env_json: JSON file or string representing the environment configuration.
+      :type env_json: str
+      :param svcs_json: JSON file(s) or string(s) representing the Services configuration.
+      :type svcs_json: str | list[str] | None
+      :param num_trial_runners: Number of TrialRunner instances to create. Default is 1.
+      :type num_trial_runners: int
+      :param tunable_groups: TunableGroups instance to use as the parent Tunables for the
+                             environment. Default is None.
+      :type tunable_groups: TunableGroups | None
+      :param global_config: Global configuration parameters. Default is None.
+      :type global_config: dict[str, Any] | None
+
+      :returns: A list of TrialRunner instances created from the provided configuration.
+      :rtype: list[TrialRunner]
+
+
+
+   .. py:method:: run_trial(trial: mlos_bench.storage.base_storage.Storage.Trial, global_config: dict[str, Any] | None = None) -> tuple[mlos_bench.environments.status.Status, datetime.datetime, dict[str, mlos_bench.tunables.tunable_types.TunableValue] | None]
+
+      Run a single trial on this TrialRunner's Environment and stores the results in
+      the backend Trial Storage.
+
+      :param trial: A Storage class based Trial used to persist the experiment trial data.
+      :type trial: Storage.Trial
+      :param global_config: Global configuration parameters.
+      :type global_config: dict
+
+      :returns: **(trial_status, trial_score)** -- Status and results of the trial.
+      :rtype: (Status, dict[str, float] | None)
+
+
+
+   .. py:method:: teardown() -> None
+
+      Tear down the Environment.
+
+      Call it after the completion of one (or more) `.run()` in the TrialRunner
+      context.
+
+
+
+   .. py:property:: environment
+      :type: mlos_bench.environments.base_environment.Environment
+
+
+      Get the Environment.
+
+
+   .. py:property:: is_running
+      :type: bool
+
+
+      Get the running state of the current TrialRunner.
+
+
+   .. py:property:: trial_runner_id
+      :type: int
+
+
+      Get the TrialRunner's id.
+
+

@@ -1,0 +1,71 @@
+mlos_bench.environments.remote.host_env
+=======================================
+
+.. py:module:: mlos_bench.environments.remote.host_env
+
+.. autoapi-nested-parse::
+
+   Remote host Environment.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.environments.remote.host_env.HostEnv
+
+
+Module Contents
+---------------
+
+.. py:class:: HostEnv(*, name: str, config: dict, global_config: dict | None = None, tunables: mlos_bench.tunables.tunable_groups.TunableGroups | None = None, service: mlos_bench.services.base_service.Service | None = None)
+
+   Bases: :py:obj:`mlos_bench.environments.base_environment.Environment`
+
+
+   Remote host environment.
+
+   Create a new environment for host operations.
+
+   :param name: Human-readable name of the environment.
+   :type name: str
+   :param config: Free-format dictionary that contains the benchmark environment
+                  configuration. Each config must have at least the "tunable_params"
+                  and the "const_args" sections.
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters (e.g., security credentials)
+                         to be mixed in into the "const_args" section of the local config.
+   :type global_config: dict
+   :param tunables: A collection of tunable parameters for *all* environments.
+   :type tunables: TunableGroups
+   :param service: An optional service object (e.g., providing methods to
+                   deploy or reboot a VM/host, etc.).
+   :type service: Service
+
+
+   .. py:method:: setup(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, global_config: dict | None = None) -> bool
+
+      Check if host is ready. (Re)provision and start it, if necessary.
+
+      :param tunables: A collection of groups of tunable parameters along with the
+                       parameters' values. HostEnv tunables are variable parameters that,
+                       together with the HostEnv configuration, are sufficient to provision
+                       and start a Host.
+      :type tunables: TunableGroups
+      :param global_config: Free-format dictionary of global parameters of the environment
+                            that are not used in the optimization process.
+      :type global_config: dict
+
+      :returns: **is_success** -- True if operation is successful, false otherwise.
+      :rtype: bool
+
+
+
+   .. py:method:: teardown() -> None
+
+      Shut down the Host and release it.
+
+
+

@@ -1,0 +1,91 @@
+mlos_bench.services.remote.azure.azure_network_services
+=======================================================
+
+.. py:module:: mlos_bench.services.remote.azure.azure_network_services
+
+.. autoapi-nested-parse::
+
+   A collection Service functions for managing virtual networks on Azure.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.remote.azure.azure_network_services.AzureNetworkService
+
+
+Module Contents
+---------------
+
+.. py:class:: AzureNetworkService(config: dict[str, Any] | None = None, global_config: dict[str, Any] | None = None, parent: mlos_bench.services.base_service.Service | None = None, methods: dict[str, collections.abc.Callable] | list[collections.abc.Callable] | None = None)
+
+   Bases: :py:obj:`mlos_bench.services.remote.azure.azure_deployment_services.AzureDeploymentService`, :py:obj:`mlos_bench.services.types.network_provisioner_type.SupportsNetworkProvisioning`
+
+
+   Helper methods to manage Virtual Networks on Azure.
+
+   Create a new instance of Azure Network services proxy.
+
+   :param config: Free-format dictionary that contains the benchmark environment
+                  configuration.
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters.
+   :type global_config: dict
+   :param parent: Parent service that can provide mixin functions.
+   :type parent: Service
+   :param methods: New methods to register with the service.
+   :type methods: Union[dict[str, Callable], list[Callable], None]
+
+
+   .. py:method:: deprovision_network(params: dict, ignore_errors: bool = True) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Deprovisions the virtual network on Azure by deleting it.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+      :param ignore_errors: Whether to ignore errors (default) encountered during the operation
+                            (e.g., due to dependent resources still in use).
+      :type ignore_errors: bool
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: provision_network(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Deploy a virtual network, if necessary.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+                     NetworkEnv tunables are variable parameters that, together with the
+                     NetworkEnv configuration, are sufficient to provision a virtual network.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result. The result is the input `params` plus the
+                parameters extracted from the response JSON, or {} if the status is FAILED.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: wait_network_deployment(params: dict, *, is_setup: bool) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
+      Return TIMED_OUT when timing out.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+      :param is_setup: If True, wait for VM being deployed; otherwise, wait for successful deprovisioning.
+      :type is_setup: bool
+
+      :returns: **result** -- A pair of Status and result.
+                Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+                Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+      :rtype: (Status, dict)
+
+
+

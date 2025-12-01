@@ -1,0 +1,49 @@
+mlos_bench.services.remote.azure.azure_deployment_services
+==========================================================
+
+.. py:module:: mlos_bench.services.remote.azure.azure_deployment_services
+
+.. autoapi-nested-parse::
+
+   Base class for certain Azure Services classes that do deployments.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.remote.azure.azure_deployment_services.AzureDeploymentService
+
+
+Module Contents
+---------------
+
+.. py:class:: AzureDeploymentService(config: dict[str, Any] | None = None, global_config: dict[str, Any] | None = None, parent: mlos_bench.services.base_service.Service | None = None, methods: dict[str, collections.abc.Callable] | list[collections.abc.Callable] | None = None)
+
+   Bases: :py:obj:`mlos_bench.services.base_service.Service`
+
+
+   Helper methods to manage and deploy Azure resources via REST APIs.
+
+   Create a new instance of an Azure Services proxy.
+
+   :param config: Free-format dictionary that contains the benchmark environment
+                  configuration.
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters.
+   :type global_config: dict
+   :param parent: Parent service that can provide mixin functions.
+   :type parent: Service
+   :param methods: New methods to register with the service.
+   :type methods: Union[dict[str, Callable], list[Callable], None]
+
+
+   .. py:property:: deploy_params
+      :type: dict
+
+
+      Get the deployment parameters.
+
+

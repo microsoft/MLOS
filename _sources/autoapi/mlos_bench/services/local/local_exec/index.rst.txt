@@ -1,0 +1,88 @@
+mlos_bench.services.local.local_exec
+====================================
+
+.. py:module:: mlos_bench.services.local.local_exec
+
+.. autoapi-nested-parse::
+
+   Helper functions to run scripts and commands locally on the scheduler side.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.local.local_exec.LocalExecService
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   mlos_bench.services.local.local_exec.split_cmdline
+
+
+Module Contents
+---------------
+
+.. py:class:: LocalExecService(config: dict[str, Any] | None = None, global_config: dict[str, Any] | None = None, parent: mlos_bench.services.base_service.Service | None = None, methods: dict[str, collections.abc.Callable] | list[collections.abc.Callable] | None = None)
+
+   Bases: :py:obj:`mlos_bench.services.local.temp_dir_context.TempDirContextService`, :py:obj:`mlos_bench.services.types.local_exec_type.SupportsLocalExec`
+
+
+   Collection of methods to run scripts and commands in an external process on the node
+   acting as the scheduler.
+
+   Can be useful for data processing due to reduced dependency management complications
+   vs the target environment.
+
+   Create a new instance of a service to run scripts locally.
+
+   :param config: Free-format dictionary that contains parameters for the service.
+                  (E.g., root path for config files, etc.)
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters.
+   :type global_config: dict
+   :param parent: An optional parent service that can provide mixin functions.
+   :type parent: Service
+   :param methods: New methods to register with the service.
+   :type methods: Union[dict[str, Callable], list[Callable], None]
+
+
+   .. py:method:: local_exec(script_lines: collections.abc.Iterable[str], env: collections.abc.Mapping[str, mlos_bench.tunables.tunable_types.TunableValue] | None = None, cwd: str | None = None) -> tuple[int, str, str]
+
+      Execute the script lines from `script_lines` in a local process.
+
+      :param script_lines: Lines of the script to run locally.
+                           Treat every line as a separate command to run.
+      :type script_lines: Iterable[str]
+      :param env: Environment variables (optional).
+      :type env: Mapping[str, Union[int, float, str]]
+      :param cwd: Work directory to run the script at.
+                  If omitted, use `temp_dir` or create a temporary dir.
+      :type cwd: str
+
+      :returns: **(return_code, stdout, stderr)** -- A 3-tuple of return code, stdout, and stderr of the script process.
+      :rtype: (int, str, str)
+
+
+
+   .. py:attribute:: abort_on_error
+
+
+.. py:function:: split_cmdline(cmdline: str) -> collections.abc.Iterable[list[str]]
+
+   A single command line may contain multiple commands separated by special characters
+   (e.g., &&, ||, etc.) so further split the commandline into an array of subcommand
+   arrays.
+
+   :param cmdline: The commandline to split.
+   :type cmdline: str
+
+   :Yields: *Iterable[list[str]]* -- A list of subcommands or separators, each one a list of tokens.
+            Can be rejoined as a flattened array.
+
+

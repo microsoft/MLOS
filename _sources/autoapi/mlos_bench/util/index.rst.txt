@@ -1,0 +1,322 @@
+mlos_bench.util
+===============
+
+.. py:module:: mlos_bench.util
+
+.. autoapi-nested-parse::
+
+   Various helper functions for mlos_bench.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   mlos_bench.util.BaseTypeVar
+   mlos_bench.util.BaseTypes
+   mlos_bench.util.NullableT
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   mlos_bench.util.check_required_params
+   mlos_bench.util.datetime_parser
+   mlos_bench.util.get_class_from_name
+   mlos_bench.util.get_git_info
+   mlos_bench.util.get_git_remote_info
+   mlos_bench.util.get_git_repo_info
+   mlos_bench.util.get_git_root
+   mlos_bench.util.instantiate_from_config
+   mlos_bench.util.merge_parameters
+   mlos_bench.util.nullable
+   mlos_bench.util.path_join
+   mlos_bench.util.prepare_class_load
+   mlos_bench.util.preprocess_dynamic_configs
+   mlos_bench.util.sanitize_config
+   mlos_bench.util.strtobool
+   mlos_bench.util.try_parse_val
+   mlos_bench.util.utcify_nullable_timestamp
+   mlos_bench.util.utcify_timestamp
+
+
+Module Contents
+---------------
+
+.. py:function:: check_required_params(config: collections.abc.Mapping[str, Any], required_params: collections.abc.Iterable[str]) -> None
+
+   Check if all required parameters are present in the configuration. Raise ValueError
+   if any of the parameters are missing.
+
+   :param config: Free-format dictionary with the configuration
+                  of the service or benchmarking environment.
+   :type config: dict
+   :param required_params: A collection of identifiers of the parameters that must be present
+                           in the configuration.
+   :type required_params: Iterable[str]
+
+
+.. py:function:: datetime_parser(datetime_col: pandas.Series, *, origin: Literal['utc', 'local']) -> pandas.Series
+
+   Attempt to convert a pandas column to a datetime format.
+
+   :param datetime_col: The column to convert.
+   :type datetime_col: pandas.Series
+   :param origin: Whether to interpret naive timestamps as originating from UTC or local time.
+   :type origin: Literal["utc", "local"]
+
+   :returns: The converted datetime column.
+   :rtype: pandas.Series
+
+   :raises ValueError: On parse errors.
+
+
+.. py:function:: get_class_from_name(class_name: str) -> type
+
+   Gets the class from the fully qualified name.
+
+   :param class_name: Fully qualified class name.
+   :type class_name: str
+
+   :returns: Class object.
+   :rtype: type
+
+
+.. py:function:: get_git_info(path: str = __file__) -> tuple[str, str, str, str]
+
+   Get the git repository, commit hash, and local path of the given file.
+
+   :param path: Path to the file in git repository.
+   :type path: str
+
+   :raises subprocess.CalledProcessError: If the path is not a git repository or the command fails.
+
+   :returns: **(git_repo, git_commit, rel_path, abs_path)** -- Git repository URL, last commit hash, and relative file path and current
+             absolute path.
+   :rtype: tuple[str, str, str, str]
+
+
+.. py:function:: get_git_remote_info(path: str, remote: str) -> str
+
+   Gets the remote URL for the given remote name in the git repository.
+
+   :param path: Path to the file in git repository.
+   :type path: str
+   :param remote: The name of the remote (e.g., "origin").
+   :type remote: str
+
+   :raises subprocess.CalledProcessError: If the command fails or the remote does not exist.
+
+   :returns: The URL of the remote repository.
+   :rtype: str
+
+
+.. py:function:: get_git_repo_info(path: str) -> str
+
+   Get the git repository URL for the given git repo.
+
+   Tries to get the upstream branch URL, falling back to the "origin" remote
+   if the upstream branch is not set or does not exist. If that also fails,
+   it returns a file URL pointing to the local path.
+
+   :param path: Path to the git repository.
+   :type path: str
+
+   :raises subprocess.CalledProcessError: If the command fails or the git repository does not exist.
+
+   :returns: The upstream URL of the git repository.
+   :rtype: str
+
+
+.. py:function:: get_git_root(path: str = __file__) -> str
+
+   Get the root dir of the git repository.
+
+   :param path: Path to the file in git repository.
+   :type path: Optional[str]
+
+   :raises subprocess.CalledProcessError: If the path is not a git repository or the command fails.
+
+   :returns: The absolute path to the root directory of the git repository.
+   :rtype: str
+
+
+.. py:function:: instantiate_from_config(base_class: type[BaseTypeVar], class_name: str, *args: Any, **kwargs: Any) -> BaseTypeVar
+
+   Factory method for a new class instantiated from config.
+
+   :param base_class: Base type of the class to instantiate.
+                      Currently it's one of {Environment, Service, Optimizer}.
+   :type base_class: type
+   :param class_name: FQN of a Python class to instantiate, e.g.,
+                      "mlos_bench.environments.remote.HostEnv".
+                      Must be derived from the `base_class`.
+   :type class_name: str
+   :param args: Positional arguments to pass to the constructor.
+   :type args: list
+   :param kwargs: Keyword arguments to pass to the constructor.
+   :type kwargs: dict
+
+   :returns: **inst** -- An instance of the `class_name` class.
+   :rtype: Union[Environment, Service, Optimizer, Storage]
+
+
+.. py:function:: merge_parameters(*, dest: dict, source: dict | None = None, required_keys: collections.abc.Iterable[str] | None = None) -> dict
+
+   Merge the source config dict into the destination config. Pick from the source
+   configs *ONLY* the keys that are already present in the destination config.
+
+   :param dest: Destination config.
+   :type dest: dict
+   :param source: Source config.
+   :type source: dict | None
+   :param required_keys: An optional list of keys that must be present in the destination config.
+   :type required_keys: Optional[Iterable[str]]
+
+   :returns: **dest** -- A reference to the destination config after the merge.
+   :rtype: dict
+
+
+.. py:function:: nullable(func: collections.abc.Callable[Ellipsis, NullableT], value: Any | None) -> NullableT | None
+
+   Poor man's Maybe monad: apply the function to the value if it's not None.
+
+   :param func: Function to apply to the value.
+   :type func: Callable
+   :param value: Value to apply the function to.
+   :type value: Any | None
+
+   :returns: **value** -- The result of the function application or None if the value is None.
+   :rtype: NullableT | None
+
+   .. rubric:: Examples
+
+   >>> nullable(int, "1")
+   1
+   >>> nullable(int, None)
+   ...
+   >>> nullable(str, 1)
+   '1'
+
+
+.. py:function:: path_join(*args: str, abs_path: bool = False) -> str
+
+   Joins the path components and normalizes the path.
+
+   :param args: Path components.
+   :type args: str
+   :param abs_path: If True, the path is converted to be absolute.
+   :type abs_path: bool
+
+   :returns: Joined path.
+   :rtype: str
+
+
+.. py:function:: prepare_class_load(config: dict, global_config: dict[str, Any] | None = None) -> tuple[str, dict[str, Any]]
+
+   Extract the class instantiation parameters from the configuration.
+
+   :param config: Configuration of the optimizer.
+   :type config: dict
+   :param global_config: Global configuration parameters (optional).
+   :type global_config: dict
+
+   :returns: **(class_name, class_config)** -- Name of the class to instantiate and its configuration.
+   :rtype: (str, dict)
+
+
+.. py:function:: preprocess_dynamic_configs(*, dest: dict, source: dict | None = None) -> dict
+
+   Replaces all ``$name`` values in the destination config with the corresponding value
+   from the source config.
+
+   :param dest: Destination config.
+   :type dest: dict
+   :param source: Source config.
+   :type source: dict | None
+
+   :returns: **dest** -- A reference to the destination config after the preprocessing.
+   :rtype: dict
+
+
+.. py:function:: sanitize_config(config: dict[str, Any]) -> dict[str, Any]
+
+   Sanitize a configuration dictionary by obfuscating potentially sensitive keys.
+
+   :param config: Configuration dictionary to sanitize.
+   :type config: dict
+
+   :returns: Sanitized configuration dictionary.
+   :rtype: dict
+
+
+.. py:function:: strtobool(val: str) -> bool
+
+   Convert a string representation of truth to true (1) or false (0).
+
+   :param val: True values are 'y', 'yes', 't', 'true', 'on', and '1';
+               False values are 'n', 'no', 'f', 'false', 'off', and '0'.
+   :type val: str
+
+   :raises ValueError: If 'val' is anything else.
+
+
+.. py:function:: try_parse_val(val: str | None) -> int | float | str | None
+
+   Try to parse the value as an int or float, otherwise return the string.
+
+   This can help with config schema validation to make sure early on that
+   the args we're expecting are the right type.
+
+   :param val: The initial cmd line arg value.
+   :type val: str
+
+   :returns: The parsed value.
+   :rtype: TunableValue
+
+
+.. py:function:: utcify_nullable_timestamp(timestamp: datetime.datetime | None, *, origin: Literal['utc', 'local']) -> datetime.datetime | None
+
+   A nullable version of utcify_timestamp.
+
+
+.. py:function:: utcify_timestamp(timestamp: datetime.datetime, *, origin: Literal['utc', 'local']) -> datetime.datetime
+
+   Augment a timestamp with zoneinfo if missing and convert it to UTC.
+
+   :param timestamp: A timestamp to convert to UTC.
+                     Note: The original datetime may or may not have tzinfo associated with it.
+   :type timestamp: datetime.datetime
+   :param origin: Whether the source timestamp is considered to be in UTC or local time.
+                  In the case of loading data from storage, where we intentionally convert all
+                  timestamps to UTC, this can help us retrieve the original timezone when the
+                  storage backend doesn't explicitly store it.
+                  In the case of receiving data from a client or other source, this can help us
+                  convert the timestamp to UTC if it's not already.
+   :type origin: Literal["utc", "local"]
+
+   :returns: A datetime with zoneinfo in UTC.
+   :rtype: datetime.datetime
+
+
+.. py:data:: BaseTypeVar
+
+   BaseTypeVar is a generic with a constraint of the main base classes (e.g.,
+   :py:class:`~mlos_bench.environments.base_environment.Environment`,
+   :py:class:`~mlos_bench.optimizers.base_optimizer.Optimizer`,
+   :py:class:`~mlos_bench.schedulers.base_scheduler.Scheduler`,
+   :py:class:`~mlos_bench.services.base_service.Service`,
+   :py:class:`~mlos_bench.storage.base_storage.Storage`, etc.).
+
+.. py:data:: BaseTypes
+
+   Similar to :py:data:`.BaseTypeVar`, BaseTypes is a Union of the main base classes.
+
+.. py:data:: NullableT
+
+   A generic type variable for :py:func:`nullable` return types.
+

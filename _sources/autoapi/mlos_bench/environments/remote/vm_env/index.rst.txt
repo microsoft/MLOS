@@ -1,0 +1,49 @@
+mlos_bench.environments.remote.vm_env
+=====================================
+
+.. py:module:: mlos_bench.environments.remote.vm_env
+
+.. autoapi-nested-parse::
+
+   Remote VM (Host) Environment.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.environments.remote.vm_env.VMEnv
+
+
+Module Contents
+---------------
+
+.. py:class:: VMEnv(*, name: str, config: dict, global_config: dict | None = None, tunables: mlos_bench.tunables.tunable_groups.TunableGroups | None = None, service: mlos_bench.services.base_service.Service | None = None)
+
+   Bases: :py:obj:`mlos_bench.environments.remote.host_env.HostEnv`
+
+
+   Remote VM/host environment.
+
+   Note: this is just a class alias for HostEnv for historical purposes.
+
+   Create a new environment for host operations.
+
+   :param name: Human-readable name of the environment.
+   :type name: str
+   :param config: Free-format dictionary that contains the benchmark environment
+                  configuration. Each config must have at least the "tunable_params"
+                  and the "const_args" sections.
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters (e.g., security credentials)
+                         to be mixed in into the "const_args" section of the local config.
+   :type global_config: dict
+   :param tunables: A collection of tunable parameters for *all* environments.
+   :type tunables: TunableGroups
+   :param service: An optional service object (e.g., providing methods to
+                   deploy or reboot a VM/host, etc.).
+   :type service: Service
+
+

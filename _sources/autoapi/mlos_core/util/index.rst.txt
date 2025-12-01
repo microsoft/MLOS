@@ -1,0 +1,90 @@
+mlos_core.util
+==============
+
+.. py:module:: mlos_core.util
+
+.. autoapi-nested-parse::
+
+   Internal helper functions for mlos_core package.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   mlos_core.util.compare_optional_dataframe
+   mlos_core.util.compare_optional_series
+   mlos_core.util.config_to_series
+   mlos_core.util.drop_nulls
+   mlos_core.util.normalize_config
+
+
+Module Contents
+---------------
+
+.. py:function:: compare_optional_dataframe(left: pandas.DataFrame | None, right: pandas.DataFrame | None) -> bool
+
+   Compare DataFrames that may also be None.
+
+   :param left: The left DataFrame to compare
+   :type left: pandas.DataFrame | None
+   :param right: The right DataFrame to compare
+   :type right: pandas.DataFrame | None
+
+   :returns: Compare the equality of two pd.DataFrame | None objects
+   :rtype: bool
+
+
+.. py:function:: compare_optional_series(left: pandas.Series | None, right: pandas.Series | None) -> bool
+
+   Compare Series that may also be None.
+
+   :param left: The left Series to compare
+   :type left: pandas.Series | None
+   :param right: The right Series to compare
+   :type right: pandas.Series | None
+
+   :returns: Compare the equality of two pd.Series | None objects
+   :rtype: bool
+
+
+.. py:function:: config_to_series(config: ConfigSpace.Configuration) -> pandas.Series
+
+   Converts a ConfigSpace config to a Series.
+
+   :param config: The config to convert.
+   :type config: ConfigSpace.Configuration
+
+   :returns: A Series, containing the config's parameters.
+   :rtype: pandas.Series
+
+
+.. py:function:: drop_nulls(d: dict) -> dict
+
+   Remove all key-value pairs where the value is None.
+
+   :param d: The dictionary to clean.
+   :type d: dict
+
+   :returns: The cleaned dictionary.
+   :rtype: dict
+
+
+.. py:function:: normalize_config(config_space: ConfigSpace.ConfigurationSpace, config: ConfigSpace.Configuration | dict) -> ConfigSpace.Configuration
+
+   Convert a dictionary to a valid ConfigSpace configuration.
+
+   Some optimizers and adapters ignore ConfigSpace conditionals when proposing new
+   configurations. We have to manually remove inactive hyperparameters such suggestions.
+
+   :param config_space: The parameter space to use.
+   :type config_space: ConfigSpace.ConfigurationSpace
+   :param config: The configuration to convert.
+   :type config: dict
+
+   :returns: **cs_config** -- A valid ConfigSpace configuration with inactive parameters removed.
+   :rtype: ConfigSpace.Configuration
+
+

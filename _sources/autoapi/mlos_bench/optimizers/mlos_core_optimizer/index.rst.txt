@@ -1,0 +1,276 @@
+mlos_bench.optimizers.mlos_core_optimizer
+=========================================
+
+.. py:module:: mlos_bench.optimizers.mlos_core_optimizer
+
+.. autoapi-nested-parse::
+
+   A wrapper for :py:mod:`mlos_core.optimizers` for :py:mod:`mlos_bench`.
+
+   Config
+   ------
+   :py:mod:`mlos_bench.optimizers` has an overview of the configuration options for
+   the py:mod:`.MlosCoreOptimizer`.
+
+   .. seealso::
+
+      :py:mod:`mlos_bench.optimizers`
+          Another working example of an :py:class:`.MlosCoreOptimizer`.
+
+      :py:mod:`mlos_core.optimizers`
+          Documentation on the underlying mlos_core Optimizers.
+
+      :py:mod:`mlos_core.spaces.adapters`
+          Documentation on the underlying mlos_core SpaceAdapters.
+
+   .. rubric:: Examples
+
+   Load tunables from a JSON string.
+   Note: normally these would be automatically loaded from the
+   :py:mod:`~mlos_bench.environments.base_environment.Environment`'s
+   ``include_tunables`` config parameter.
+
+   >>> import json5 as json
+   >>> import mlos_core.optimizers
+   >>> from mlos_bench.environments.status import Status
+   >>> from mlos_bench.services.config_persistence import ConfigPersistenceService
+   >>> service = ConfigPersistenceService()
+   >>> json_config = '''
+   ... {
+   ...   "group_1": {
+   ...     "cost": 1,
+   ...     "params": {
+   ...       "flags": {
+   ...         "type": "categorical",
+   ...         "values": ["on", "off", "auto"],
+   ...         "default": "auto",
+   ...       },
+   ...       "int_param": {
+   ...         "type": "int",
+   ...         "range": [1, 100],
+   ...         "default": 10,
+   ...       },
+   ...       "float_param": {
+   ...         "type": "float",
+   ...         "range": [0, 100],
+   ...         "default": 50.0,
+   ...       }
+   ...     }
+   ...   }
+   ... }
+   ... '''
+   >>> tunables = service.load_tunables(jsons=[json_config])
+   >>> # Here's the defaults:
+   >>> tunables.get_param_values()
+   {'flags': 'auto', 'int_param': 10, 'float_param': 50.0}
+
+   When using the :py:class:`.MlosCoreOptimizer`, we can also specify some
+   additional properties, for instance the ``optimizer_type``, which is one of the
+   mlos_core :py:data:`~mlos_core.optimizers.OptimizerType` enum values:
+
+   >>> import mlos_core.optimizers
+   >>> print([member.name for member in mlos_core.optimizers.OptimizerType])
+   ['RANDOM', 'FLAML', 'SMAC']
+
+   These may also include their own configuration options, which can be specified
+   as additional key-value pairs in the ``config`` section, where each key-value
+   corresponds to an argument to the respective OptimizerTypes's constructor.
+   See :py:meth:`mlos_core.optimizers.OptimizerFactory.create` for more details.
+
+   Other Optimizers may also have their own configuration options.
+   See each class' documentation for details.
+
+   When using :py:class:`.MlosCoreOptimizer`, we can also specify an optional an
+   ``space_adapter_type``, which can sometimes help manipulate the configuration
+   space to something more manageable.  It should be one of the following
+   :py:data:`~mlos_core.spaces.adapters.SpaceAdapterType` enum values:
+
+   >>> import mlos_core.spaces.adapters
+   >>> print([member.name for member in mlos_core.spaces.adapters.SpaceAdapterType])
+   ['IDENTITY', 'LLAMATUNE']
+
+   These may also include their own configuration options, which can be specified
+   as additional key-value pairs in the optional ``space_adapter_config`` section,
+   where each key-value corresponds to an argument to the respective
+   OptimizerTypes's constructor.  See
+   :py:meth:`mlos_core.spaces.adapters.SpaceAdapterFactory.create` for more details.
+
+   Here's an example JSON config for an :py:class:`.MlosCoreOptimizer`.
+
+   >>> optimizer_json_config = '''
+   ... {
+   ...   "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+   ...   "description": "MlosCoreOptimizer",
+   ...     "config": {
+   ...         "max_suggestions": 1000,
+   ...         "optimization_targets": {
+   ...             "throughput": "max",
+   ...             "cost": "min",
+   ...         },
+   ...         "start_with_defaults": true,
+   ...         "seed": 42,
+   ...         // Override the default optimizer type
+   ...         // Must be one of the mlos_core OptimizerType enum values.
+   ...         "optimizer_type": "SMAC",
+   ...         // Optionally provide some additional configuration options for the optimizer.
+   ...         // Note: these are optimizer-specific and may not be supported by all optimizers.
+   ...         "n_random_init": 25,
+   ...         "n_random_probability": 0.01,
+   ...         // Optionally override the default space adapter type
+   ...         // Must be one of the mlos_core SpaceAdapterType enum values.
+   ...         // LlamaTune is a method for automatically doing space reduction
+   ...         // from the original space.
+   ...         "space_adapter_type": "LLAMATUNE",
+   ...         "space_adapter_config": {
+   ...             // Note: these values are probably too low,
+   ...             // but it's just for demonstration.
+   ...             "num_low_dims": 2,
+   ...             "max_unique_values_per_param": 10,
+   ...          }
+   ...     }
+   ... }
+   ... '''
+
+   That config will typically be loaded via the ``--optimizer`` command-line
+   argument to the :py:mod:`mlos_bench <mlos_bench.run>` CLI.
+   However, for demonstration purposes, we can load it directly here:
+
+   >>> config = json.loads(optimizer_json_config)
+   >>> optimizer = service.build_optimizer(
+   ...   tunables=tunables,
+   ...   service=service,
+   ...   config=config,
+   ... )
+
+   Internally the Scheduler will call the Optimizer's methods to suggest
+   configurations, like so:
+
+   >>> suggested_config_1 = optimizer.suggest()
+   >>> # Normally default values should be suggested first, per json config.
+   >>> # However, since LlamaTune is being employed here, the first suggestion may
+   >>> # be projected to a slightly different space.
+   >>> suggested_config_1.get_param_values()
+   {'flags': 'auto', 'int_param': 1, 'float_param': 55.5555555555556}
+   >>> # Get another suggestion.
+   >>> # Note that multiple suggestions can be pending prior to
+   >>> # registering their scores, supporting parallel trial execution.
+   >>> suggested_config_2 = optimizer.suggest()
+   >>> suggested_config_2.get_param_values()
+   {'flags': 'on', 'int_param': 78, 'float_param': 88.8888888888889}
+   >>> # Register some scores.
+   >>> # Note: Maximization problems track negative scores to produce a minimization problem.
+   >>> optimizer.register(suggested_config_1, Status.SUCCEEDED, {"throughput": 42, "cost": 19})
+   {'throughput': -42.0, 'cost': 19.0}
+   >>> optimizer.register(suggested_config_2, Status.SUCCEEDED, {"throughput": 7, "cost": 17.2})
+   {'throughput': -7.0, 'cost': 17.2}
+   >>> (best_score, best_config) = optimizer.get_best_observation()
+   >>> best_score
+   {'throughput': 42.0, 'cost': 19.0}
+   >>> assert best_config == suggested_config_1
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer
+
+
+Module Contents
+---------------
+
+.. py:class:: MlosCoreOptimizer(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, config: dict, global_config: dict | None = None, service: mlos_bench.services.base_service.Service | None = None)
+
+   Bases: :py:obj:`mlos_bench.optimizers.base_optimizer.Optimizer`
+
+
+   A wrapper class for the :py:mod:`mlos_core.optimizers`.
+
+   Create a new optimizer for the given configuration space defined by the
+   tunables.
+
+   :param tunables: The tunables to optimize.
+   :type tunables: TunableGroups
+   :param config: Free-format key/value pairs of configuration parameters to pass to the optimizer.
+   :type config: dict
+   :param global_config:
+   :type global_config: dict | None
+   :param service:
+   :type service: Service | None
+
+
+   .. py:method:: __exit__(ex_type: type[BaseException] | None, ex_val: BaseException | None, ex_tb: types.TracebackType | None) -> Literal[False]
+
+      Exit the context of the optimizer.
+
+
+
+   .. py:method:: bulk_register(configs: collections.abc.Sequence[dict], scores: collections.abc.Sequence[dict[str, mlos_bench.tunables.tunable_types.TunableValue] | None], status: collections.abc.Sequence[mlos_bench.environments.status.Status] | None = None) -> bool
+
+      Pre-load the optimizer with the bulk data from previous experiments.
+
+      :param configs: Records of tunable values from other experiments.
+      :type configs: Sequence[dict]
+      :param scores: Benchmark results from experiments that correspond to `configs`.
+      :type scores: Sequence[Optional[dict[str, TunableValue]]]
+      :param status: Status of the experiments that correspond to `configs`.
+      :type status: Optional[Sequence[Status]]
+
+      :returns: **is_not_empty** -- True if there is data to register, false otherwise.
+      :rtype: bool
+
+
+
+   .. py:method:: get_best_observation() -> tuple[dict[str, float], mlos_bench.tunables.tunable_groups.TunableGroups] | tuple[None, None]
+
+      Get the best observation so far.
+
+      :returns: **(value, tunables)** -- The best value and the corresponding configuration.
+                (None, None) if no successful observation has been registered yet.
+      :rtype: tuple[dict[str, float], TunableGroups]
+
+
+
+   .. py:method:: register(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, status: mlos_bench.environments.status.Status, score: dict[str, mlos_bench.tunables.tunable_types.TunableValue] | None = None) -> dict[str, float] | None
+
+      Register the observation for the given configuration.
+
+      :param tunables: The configuration that has been benchmarked.
+                       Usually it's the same config that the `.suggest()` method returned.
+      :type tunables: TunableGroups
+      :param status: Final status of the experiment (e.g., SUCCEEDED or FAILED).
+      :type status: Status
+      :param score: A dict with the final benchmark results.
+                    None if the experiment was not successful.
+      :type score: Optional[dict[str, TunableValue]]
+
+      :returns: **value** -- Benchmark scores extracted (and possibly transformed)
+                from the dataframe that's being MINIMIZED.
+      :rtype: Optional[dict[str, float]]
+
+
+
+   .. py:method:: suggest() -> mlos_bench.tunables.tunable_groups.TunableGroups
+
+      Generate the next suggestion. Base class' implementation increments the
+      iteration count and returns the current values of the tunables.
+
+      :returns: **tunables** -- The next configuration to benchmark.
+                These are the same tunables we pass to the constructor,
+                but with the values set to the next suggestion.
+      :rtype: TunableGroups
+
+
+
+   .. py:property:: name
+      :type: str
+
+
+      The name of the optimizer.
+
+      We save this information in mlos_bench storage to track the source of each
+      configuration.
+
+

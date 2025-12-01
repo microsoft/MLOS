@@ -1,0 +1,90 @@
+mlos_bench.services.types.host_ops_type
+=======================================
+
+.. py:module:: mlos_bench.services.types.host_ops_type
+
+.. autoapi-nested-parse::
+
+   Protocol interface for Host/VM boot operations.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.types.host_ops_type.SupportsHostOps
+
+
+Module Contents
+---------------
+
+.. py:class:: SupportsHostOps
+
+   Bases: :py:obj:`Protocol`
+
+
+   Protocol interface for Host/VM boot operations.
+
+
+   .. py:method:: restart_host(params: dict, force: bool = False) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Restarts the host by initiating a (graceful) shutdown.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+      :param force: If True, force restart the Host/VM.
+      :type force: bool
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: start_host(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Start a Host/VM.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: stop_host(params: dict, force: bool = False) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Stops the Host/VM by initiating a (graceful) shutdown.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+      :param force: If True, force stop the Host/VM.
+      :type force: bool
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: wait_host_operation(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Waits for a pending operation on a Host/VM to resolve to SUCCEEDED or FAILED.
+      Return TIMED_OUT when timing out.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+                     Must have the "asyncResultsUrl" key to get the results.
+                     If the key is not present, return Status.PENDING.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result.
+                Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+                Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+      :rtype: (Status, dict)
+
+
+

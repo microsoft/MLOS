@@ -1,0 +1,59 @@
+mlos_bench.storage.sql.common
+=============================
+
+.. py:module:: mlos_bench.storage.sql.common
+
+.. autoapi-nested-parse::
+
+   Common SQL methods for accessing the stored benchmark data.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   mlos_bench.storage.sql.common.get_results_df
+   mlos_bench.storage.sql.common.get_trials
+   mlos_bench.storage.sql.common.save_params
+
+
+Module Contents
+---------------
+
+.. py:function:: get_results_df(engine: sqlalchemy.engine.Engine, schema: mlos_bench.storage.sql.schema.DbSchema, experiment_id: str, tunable_config_id: int | None = None) -> pandas.DataFrame
+
+   Gets TrialData for the given experiment_id and optionally additionally restricted by
+   tunable_config_id.
+
+   The returned DataFrame includes each trial's metadata, config, and results in
+   wide format, with config parameters prefixed with
+   :py:attr:`.ExperimentData.CONFIG_COLUMN_PREFIX` and results prefixed with
+   :py:attr:`.ExperimentData.RESULT_COLUMN_PREFIX`.
+
+   .. seealso:: :py:class:`~mlos_bench.storage.sql.tunable_config_trial_group_data.TunableConfigTrialGroupSqlData`, :py:class:`~mlos_bench.storage.sql.experiment_data.ExperimentSqlData`
+
+
+.. py:function:: get_trials(engine: sqlalchemy.engine.Engine, schema: mlos_bench.storage.sql.schema.DbSchema, experiment_id: str, tunable_config_id: int | None = None) -> dict[int, mlos_bench.storage.base_trial_data.TrialData]
+
+   Gets :py:class:`~.TrialData` for the given ``experiment_id`` and optionally
+   additionally restricted by ``tunable_config_id``.
+
+   .. seealso:: :py:class:`~mlos_bench.storage.sql.tunable_config_trial_group_data.TunableConfigTrialGroupSqlData`, :py:class:`~mlos_bench.storage.sql.experiment_data.ExperimentSqlData`
+
+
+.. py:function:: save_params(conn: sqlalchemy.engine.Connection, table: sqlalchemy.schema.Table, params: collections.abc.Mapping[str, Any], **kwargs: Any) -> None
+
+   Updates a set of (param_id, param_value) tuples in the given Table.
+
+   :param conn: A connection to the backend database.
+   :type conn: sqlalchemy.engine.Connection
+   :param table: The table to update.
+   :type table: sqlalchemy.schema.Table
+   :param params: The new (param_id, param_value) tuples to upsert to the Table.
+   :type params: dict[str, Any]
+   :param \*\*kwargs: Primary key info for the given table.
+   :type \*\*kwargs: dict[str, Any]
+
+

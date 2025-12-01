@@ -1,0 +1,69 @@
+mlos_bench.services.types.authenticator_type
+============================================
+
+.. py:module:: mlos_bench.services.types.authenticator_type
+
+.. autoapi-nested-parse::
+
+   Protocol interface for authentication for the cloud services.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   mlos_bench.services.types.authenticator_type.T_co
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.types.authenticator_type.SupportsAuth
+
+
+Module Contents
+---------------
+
+.. py:class:: SupportsAuth
+
+   Bases: :py:obj:`Protocol`\ [\ :py:obj:`T_co`\ ]
+
+
+   Protocol interface for authentication for the cloud services.
+
+
+   .. py:method:: get_access_token() -> str
+
+      Get the access token for cloud services.
+
+      :returns: **access_token** -- Access token.
+      :rtype: str
+
+
+
+   .. py:method:: get_auth_headers() -> dict
+
+      Get the authorization part of HTTP headers for REST API calls.
+
+      :returns: **access_header** -- HTTP header containing the access token.
+      :rtype: dict
+
+
+
+   .. py:method:: get_credential() -> T_co
+
+      Get the credential object for cloud services.
+
+      :returns: **credential** -- Cloud-specific credential object.
+      :rtype: T_co
+
+
+
+.. py:data:: T_co
+
+   Type variable for the return type of the credential object.
+

@@ -1,0 +1,263 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlos_core.spaces.adapters.identity_adapter &mdash; MLOS 0.6.3.dev53+g549a69ab0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/plot_directive.css" />
+
+  
+    <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_core/spaces/adapters/identity_adapter/index.html"/>
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=8b2becd3"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link rel="next" title="mlos_core.spaces.adapters.llamatune" href="../llamatune/index.html" />
+    <link rel="prev" title="mlos_core.spaces.adapters.adapter" href="../adapter/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            MLOS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Source Tree Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source_tree_docs/index.html">MLOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source_tree_docs/mlos_core/index.html">mlos-core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source_tree_docs/mlos_bench/index.html">mlos-bench</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source_tree_docs/mlos_viz/index.html">mlos-viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">mlos_core</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../index.html#data-classes">Data Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../index.html#spaces">Spaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../index.html#classes-overview">Classes Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../../data_classes/index.html">mlos_core.data_classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../optimizers/index.html">mlos_core.optimizers</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../../index.html">mlos_core.spaces</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l5 current"><a class="reference internal" href="../index.html">mlos_core.spaces.adapters</a><ul class="current">
+<li class="toctree-l6 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l7"><a class="reference internal" href="../adapter/index.html">mlos_core.spaces.adapters.adapter</a></li>
+<li class="toctree-l7 current"><a class="current reference internal" href="#">mlos_core.spaces.adapters.identity_adapter</a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#classes">Classes</a></li>
+<li class="toctree-l8"><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li class="toctree-l9"><a class="reference internal" href="#mlos_core.spaces.adapters.identity_adapter.IdentityAdapter"><code class="docutils literal notranslate"><span class="pre">IdentityAdapter</span></code></a><ul>
+<li class="toctree-l10"><a class="reference internal" href="#mlos_core.spaces.adapters.identity_adapter.IdentityAdapter.inverse_transform"><code class="docutils literal notranslate"><span class="pre">IdentityAdapter.inverse_transform()</span></code></a></li>
+<li class="toctree-l10"><a class="reference internal" href="#mlos_core.spaces.adapters.identity_adapter.IdentityAdapter.transform"><code class="docutils literal notranslate"><span class="pre">IdentityAdapter.transform()</span></code></a></li>
+<li class="toctree-l10"><a class="reference internal" href="#mlos_core.spaces.adapters.identity_adapter.IdentityAdapter.target_parameter_space"><code class="docutils literal notranslate"><span class="pre">IdentityAdapter.target_parameter_space</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l7"><a class="reference internal" href="../llamatune/index.html">mlos_core.spaces.adapters.llamatune</a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="../index.html#attributes">Attributes</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../index.html#classes">Classes</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../../converters/index.html">mlos_core.spaces.converters</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../util/index.html">mlos_core.util</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../version/index.html">mlos_core.version</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../index.html#attributes">Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mlos_bench/index.html">mlos_bench</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mlos_viz/index.html">mlos_viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">mlos_bench CLI usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../mlos_bench.run.usage.html">mlos_bench CLI usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/microsoft/MLOS">Github Source Tree</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">MLOS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">mlos_core</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">mlos_core.spaces</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">mlos_core.spaces.adapters</a></li>
+      <li class="breadcrumb-item active">mlos_core.spaces.adapters.identity_adapter</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../_sources/autoapi/mlos_core/spaces/adapters/identity_adapter/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mlos_core.spaces.adapters.identity_adapter">
+<span id="mlos-core-spaces-adapters-identity-adapter"></span><h1>mlos_core.spaces.adapters.identity_adapter<a class="headerlink" href="#module-mlos_core.spaces.adapters.identity_adapter" title="Link to this heading"></a></h1>
+<p>Contains the Identity (no-op) Space Adapter class.</p>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_core.spaces.adapters.identity_adapter.IdentityAdapter" title="mlos_core.spaces.adapters.identity_adapter.IdentityAdapter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IdentityAdapter</span></code></a></p></td>
+<td><p>Identity (no-op) SpaceAdapter class.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mlos_core.spaces.adapters.identity_adapter.IdentityAdapter">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlos_core.spaces.adapters.identity_adapter.</span></span><span class="sig-name descname"><span class="pre">IdentityAdapter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">orig_parameter_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://automl.github.io/ConfigSpace/latest/api/ConfigSpace/configuration_space/#ConfigSpace.configuration_space.ConfigurationSpace" title="(in ConfigSpace v0.0.0)"><span class="pre">ConfigSpace.ConfigurationSpace</span></a></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/spaces/adapters/identity_adapter.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_core.spaces.adapters.identity_adapter.IdentityAdapter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../adapter/index.html#mlos_core.spaces.adapters.adapter.BaseSpaceAdapter" title="mlos_core.spaces.adapters.adapter.BaseSpaceAdapter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mlos_core.spaces.adapters.adapter.BaseSpaceAdapter</span></code></a></p>
+<p>Identity (no-op) SpaceAdapter class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>orig_parameter_space</strong> (<a class="reference external" href="https://automl.github.io/ConfigSpace/latest/api/ConfigSpace/configuration_space/#ConfigSpace.configuration_space.ConfigurationSpace" title="(in ConfigSpace v0.0.0)"><em>ConfigSpace.ConfigurationSpace</em></a>) – The original parameter space to explore.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mlos_core.spaces.adapters.identity_adapter.IdentityAdapter.inverse_transform">
+<span class="sig-name descname"><span class="pre">inverse_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">pandas.Series</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">pandas.Series</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/spaces/adapters/identity_adapter.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_core.spaces.adapters.identity_adapter.IdentityAdapter.inverse_transform" title="Link to this definition"></a></dt>
+<dd><p>Translates a configuration, which belongs to the original parameter space, to
+the target parameter space. This method is called by the <cite>register</cite> method of
+the <a class="reference internal" href="../../../optimizers/optimizer/index.html#mlos_core.optimizers.optimizer.BaseOptimizer" title="mlos_core.optimizers.optimizer.BaseOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOptimizer</span></code></a> class, and
+performs the inverse operation of <a class="reference internal" href="../adapter/index.html#mlos_core.spaces.adapters.adapter.BaseSpaceAdapter.transform" title="mlos_core.spaces.adapters.adapter.BaseSpaceAdapter.transform"><code class="xref py py-meth docutils literal notranslate"><span class="pre">transform()</span></code></a>
+method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>configuration</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><em>pandas.Series</em></a>) – A Series of configuration parameters, which belong to the original parameter space.
+The indices are the parameter names the original parameter space and the
+rows are the configurations.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>configuration</strong> – Series of the translated configurations / parameters.
+The indices are the parameter names of the target parameter space and
+the rows are the configurations.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)">pandas.Series</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlos_core.spaces.adapters.identity_adapter.IdentityAdapter.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">pandas.Series</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">pandas.Series</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/spaces/adapters/identity_adapter.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_core.spaces.adapters.identity_adapter.IdentityAdapter.transform" title="Link to this definition"></a></dt>
+<dd><p>Translates a configuration, which belongs to the target parameter space, to the
+original parameter space. This method is called by the
+<a class="reference internal" href="../../../optimizers/optimizer/index.html#mlos_core.optimizers.optimizer.BaseOptimizer.suggest" title="mlos_core.optimizers.optimizer.BaseOptimizer.suggest"><code class="xref py py-meth docutils literal notranslate"><span class="pre">suggest()</span></code></a> method of the
+<a class="reference internal" href="../../../optimizers/optimizer/index.html#mlos_core.optimizers.optimizer.BaseOptimizer" title="mlos_core.optimizers.optimizer.BaseOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOptimizer</span></code></a> class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>configuration</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><em>pandas.Series</em></a>) – Pandas series. Column names are the parameter names
+of the target parameter space.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>configuration</strong> – Pandas series, containing the translated configuration.
+Column names are the parameter names of the original parameter space.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)">pandas.Series</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlos_core.spaces.adapters.identity_adapter.IdentityAdapter.target_parameter_space">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_parameter_space</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://automl.github.io/ConfigSpace/latest/api/ConfigSpace/configuration_space/#ConfigSpace.configuration_space.ConfigurationSpace" title="(in ConfigSpace v0.0.0)"><span class="pre">ConfigSpace.ConfigurationSpace</span></a></em><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/spaces/adapters/identity_adapter.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_core.spaces.adapters.identity_adapter.IdentityAdapter.target_parameter_space" title="Link to this definition"></a></dt>
+<dd><p>Target parameter space that is fed to the underlying optimizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://automl.github.io/ConfigSpace/latest/api/ConfigSpace/configuration_space/#ConfigSpace.configuration_space.ConfigurationSpace" title="(in ConfigSpace v0.0.0)">ConfigSpace.ConfigurationSpace</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../adapter/index.html" class="btn btn-neutral float-left" title="mlos_core.spaces.adapters.adapter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../llamatune/index.html" class="btn btn-neutral float-right" title="mlos_core.spaces.adapters.llamatune" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Microsoft GSL.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

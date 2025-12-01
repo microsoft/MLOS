@@ -1,0 +1,23 @@
+mlos_bench.run
+==============
+
+.. py:module:: mlos_bench.run
+
+.. autoapi-nested-parse::
+
+   mlos_bench main optimization loop and benchmark runner CLI.
+
+   Note: this script is also available as a CLI tool via ``pip`` under the name ``mlos_bench``.
+
+   See the current ``--help`` `output for details <../../../mlos_bench.run.usage.html>`_.
+
+   .. seealso::
+
+      :py:obj:`mlos_bench.config`
+          documentation on the configuration system.
+
+      :py:obj:`mlos_bench.launcher.Launcher`
+          class is responsible for processing the CLI args.
+
+
+

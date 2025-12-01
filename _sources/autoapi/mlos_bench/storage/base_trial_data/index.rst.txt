@@ -1,0 +1,183 @@
+mlos_bench.storage.base_trial_data
+==================================
+
+.. py:module:: mlos_bench.storage.base_trial_data
+
+.. autoapi-nested-parse::
+
+   Base interface for accessing the stored benchmark trial data.
+
+   A single trial is a single run of an experiment with a given configuration (e.g., set of
+   tunable parameters).
+
+   .. seealso::
+
+      :py:mod:`mlos_bench.storage`
+          The base storage module for mlos_bench, which includes some basic examples in the documentation.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.storage.base_trial_data.TrialData
+
+
+Module Contents
+---------------
+
+.. py:class:: TrialData(*, experiment_id: str, trial_id: int, tunable_config_id: int, ts_start: datetime.datetime, ts_end: datetime.datetime | None, status: mlos_bench.environments.status.Status, trial_runner_id: int | None = None)
+
+   Base interface for accessing the stored experiment benchmark trial data.
+
+   A trial is a single run of an experiment with a given configuration (e.g., set of
+   tunable parameters).
+
+
+   .. py:method:: __eq__(other: Any) -> bool
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:property:: experiment_id
+      :type: str
+
+
+      ID of the experiment this trial belongs to.
+
+
+   .. py:property:: metadata_df
+      :type: pandas.DataFrame
+
+      :abstractmethod:
+
+
+      Retrieve the trials' metadata parameters as a dataframe.
+
+      Note: this corresponds to the Trial object's "config" property.
+
+      :returns: **metadata** -- An optional dataframe with the metadata associated with the trial.
+                It has two `str` columns, "parameter" and "value".
+                Returns an empty dataframe if there is no metadata.
+      :rtype: pandas.DataFrame
+
+
+   .. py:property:: metadata_dict
+      :type: dict
+
+
+      Retrieve the trials' metadata parameters as a dict.
+
+      Note: this corresponds to the Trial object's "config" property.
+
+      :returns: **metadata**
+      :rtype: dict
+
+
+   .. py:property:: results_df
+      :type: pandas.DataFrame
+
+      :abstractmethod:
+
+
+      Retrieve the trials' results from the storage.
+
+      :returns: **results** -- A dataframe with the trial results.
+                It has two `str` columns, "metric" and "value".
+                If the trial status is not SUCCEEDED, the dataframe is empty.
+      :rtype: pandas.DataFrame
+
+
+   .. py:property:: results_dict
+      :type: dict[str, mlos_bench.tunables.tunable_types.TunableValue | None]
+
+
+      Retrieve the trials' results from the storage as a dict.
+
+      :returns: **results**
+      :rtype: dict
+
+
+   .. py:property:: status
+      :type: mlos_bench.environments.status.Status
+
+
+      Status of the trial.
+
+
+   .. py:property:: telemetry_df
+      :type: pandas.DataFrame
+
+      :abstractmethod:
+
+
+      Retrieve the trials' telemetry from the storage as a dataframe.
+
+      :returns: **config** -- A dataframe with the trial telemetry, if there is any.
+                It has one `datetime` column, "ts", and two `str` columns, "metric" and "value".
+                If the trial status is not SUCCEEDED, or there is no telemetry data,
+                the dataframe is empty.
+      :rtype: pandas.DataFrame
+
+
+   .. py:property:: trial_id
+      :type: int
+
+
+      ID of the trial.
+
+
+   .. py:property:: trial_runner_id
+      :type: int | None
+
+
+      ID of the TrialRunner.
+
+
+   .. py:property:: ts_end
+      :type: datetime.datetime | None
+
+
+      End timestamp of the trial (UTC).
+
+
+   .. py:property:: ts_start
+      :type: datetime.datetime
+
+
+      Start timestamp of the trial (UTC).
+
+
+   .. py:property:: tunable_config
+      :type: mlos_bench.storage.base_tunable_config_data.TunableConfigData
+
+      :abstractmethod:
+
+
+      Retrieve the trials' tunable configuration data from the storage.
+
+      Note: this corresponds to the Trial object's "tunables" property.
+
+      :returns: **tunable_config** -- A TunableConfigData object.
+      :rtype: TunableConfigData
+
+
+   .. py:property:: tunable_config_id
+      :type: int
+
+
+      ID of the (tunable) configuration of the trial.
+
+
+   .. py:property:: tunable_config_trial_group
+      :type: mlos_bench.storage.base_tunable_config_trial_group_data.TunableConfigTrialGroupData
+
+      :abstractmethod:
+
+
+      Retrieve the trial's (tunable) config trial group data from the storage.
+
+

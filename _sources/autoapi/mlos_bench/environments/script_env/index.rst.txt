@@ -1,0 +1,63 @@
+mlos_bench.environments.script_env
+==================================
+
+.. py:module:: mlos_bench.environments.script_env
+
+.. autoapi-nested-parse::
+
+   Base scriptable benchmark environment.
+
+   TODO: Document how variable propogation works in the script environments using
+   shell_env_params, required_args, const_args, etc.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.environments.script_env.ScriptEnv
+
+
+Module Contents
+---------------
+
+.. py:class:: ScriptEnv(*, name: str, config: dict, global_config: dict | None = None, tunables: mlos_bench.tunables.tunable_groups.TunableGroups | None = None, service: mlos_bench.services.base_service.Service | None = None)
+
+   Bases: :py:obj:`mlos_bench.environments.base_environment.Environment`
+
+
+   Base Environment that runs scripts for the different phases (e.g.,
+   :py:meth:`.Environment.setup`, :py:meth:`.Environment.run`,
+   :py:meth:`.Environment.teardown`, etc.)
+
+   Create a new environment for script execution.
+
+   :param name: Human-readable name of the environment.
+   :type name: str
+   :param config: Free-format dictionary that contains the benchmark environment
+                  configuration. Each config must have at least the `tunable_params`
+                  and the `const_args` sections. It must also have at least one of
+                  the following parameters: {`setup`, `run`, `teardown`}.
+                  Additional parameters:
+
+                  - `shell_env_params` - an array of parameters to pass to the script
+                     as shell environment variables, and
+                  - `shell_env_params_rename` - a dictionary of {to: from} mappings
+                     of the script parameters. If not specified, replace all
+                     non-alphanumeric characters with underscores.
+
+                  If neither `shell_env_params` nor `shell_env_params_rename` are specified,
+                  *no* additional shell parameters will be passed to the script.
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters (e.g., security credentials)
+                         to be mixed in into the "const_args" section of the local config.
+   :type global_config: dict
+   :param tunables: A collection of tunable parameters for *all* environments.
+   :type tunables: TunableGroups
+   :param service: An optional service object (e.g., providing methods to
+                   deploy or reboot a VM, etc.).
+   :type service: Service
+
+

@@ -1,0 +1,87 @@
+mlos_bench.launcher
+===================
+
+.. py:module:: mlos_bench.launcher
+
+.. autoapi-nested-parse::
+
+   A helper class to load the configuration files, parse the command line parameters, and
+   instantiate the main components of mlos_bench system.
+
+   It is used in the :py:mod:`mlos_bench.run` module to run the benchmark/optimizer
+   from the command line.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.launcher.Launcher
+
+
+Module Contents
+---------------
+
+.. py:class:: Launcher(description: str, long_text: str = '', argv: list[str] | None = None)
+
+   Command line launcher for mlos_bench and mlos_core.
+
+
+   .. py:property:: config_loader
+      :type: mlos_bench.services.config_persistence.ConfigPersistenceService
+
+
+      Get the config loader service.
+
+
+   .. py:attribute:: global_config
+
+
+   .. py:attribute:: optimizer
+
+
+   .. py:attribute:: root_env_config
+
+
+   .. py:property:: root_environment
+      :type: mlos_bench.environments.base_environment.Environment
+
+
+      Gets the root (prototypical) Environment from the first TrialRunner.
+
+      Note: All TrialRunners have the same Environment config and are made
+      unique by their use of the unique trial_runner_id assigned to each
+      TrialRunner's Environment's global_config.
+
+      .. rubric:: Notes
+
+      This is mostly for convenience and backwards compatibility.
+
+
+   .. py:attribute:: scheduler
+
+
+   .. py:property:: service
+      :type: mlos_bench.services.base_service.Service
+
+
+      Get the parent service.
+
+
+   .. py:attribute:: storage
+
+
+   .. py:attribute:: teardown
+      :type:  bool
+
+
+   .. py:attribute:: trial_runners
+      :value: []
+
+
+
+   .. py:attribute:: tunables
+
+

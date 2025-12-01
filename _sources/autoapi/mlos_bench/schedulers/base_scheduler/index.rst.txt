@@ -1,0 +1,294 @@
+mlos_bench.schedulers.base_scheduler
+====================================
+
+.. py:module:: mlos_bench.schedulers.base_scheduler
+
+.. autoapi-nested-parse::
+
+   Base class for the optimization loop scheduling policies.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.schedulers.base_scheduler.Scheduler
+
+
+Module Contents
+---------------
+
+.. py:class:: Scheduler(*, config: dict[str, Any], global_config: dict[str, Any], trial_runners: collections.abc.Iterable[mlos_bench.schedulers.trial_runner.TrialRunner], optimizer: mlos_bench.optimizers.base_optimizer.Optimizer, storage: mlos_bench.storage.base_storage.Storage, root_env_config: str)
+
+   Bases: :py:obj:`contextlib.AbstractContextManager`
+
+
+   Base class for the optimization loop scheduling policies.
+
+   Create a new instance of the scheduler. The constructor of this and the derived
+   classes is called by the persistence service after reading the class JSON
+   configuration. Other objects like the TrialRunner(s) and their Environment(s)
+   and Optimizer are provided by the Launcher.
+
+   :param config: The configuration for the Scheduler.
+   :type config: dict
+   :param global_config: The global configuration for the Experiment.
+   :type global_config: dict
+   :param trial_runner: The set of TrialRunner(s) (and associated Environment(s)) to benchmark/optimize.
+   :type trial_runner: Iterable[TrialRunner]
+   :param optimizer: The Optimizer to use.
+   :type optimizer: Optimizer
+   :param storage: The Storage to use.
+   :type storage: Storage
+   :param root_env_config: Path to the root Environment configuration.
+   :type root_env_config: str
+
+
+   .. py:method:: __enter__() -> Scheduler
+
+      Enter the scheduler's context.
+
+
+
+   .. py:method:: __exit__(ex_type: type[BaseException] | None, ex_val: BaseException | None, ex_tb: types.TracebackType | None) -> Literal[False]
+
+      Exit the context of the scheduler.
+
+
+
+   .. py:method:: __repr__() -> str
+
+      Produce a human-readable version of the Scheduler (mostly for logging).
+
+      :returns: **string** -- A human-readable version of the Scheduler.
+      :rtype: str
+
+
+
+   .. py:method:: add_new_optimizer_suggestions() -> bool
+
+      Optimizer part of the loop.
+
+      Load the results of the executed trials into the
+      :py:class:`~.Optimizer`, suggest new configurations, and add them to the
+      queue.
+
+      :returns: The return value indicates whether the optimization process should
+                continue to get suggestions from the Optimizer or not.
+                See Also: :py:meth:`~.Scheduler.not_done`.
+      :rtype: bool
+
+
+
+   .. py:method:: add_trial_to_queue(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, ts_start: datetime.datetime | None = None) -> None
+
+      Add a configuration to the queue of trials 1 or more times.
+
+      (e.g., according to the :py:attr:`~.Scheduler.trial_config_repeat_count`)
+
+      :param tunables: The tunable configuration to add to the queue.
+      :type tunables: TunableGroups
+      :param ts_start: Optional timestamp to use to start the trial.
+      :type ts_start: datetime.datetime | None
+
+      .. rubric:: Notes
+
+      Alternative scheduling policies may prefer to expand repeats over
+      time as well as space, or adjust the number of repeats (budget) of a given
+      trial based on whether initial results are promising.
+
+
+
+   .. py:method:: assign_trial_runners(trials: collections.abc.Iterable[mlos_bench.storage.base_storage.Storage.Trial]) -> None
+
+      Assigns a :py:class:`~.TrialRunner` to each :py:class:`~.Storage.Trial` in the
+      batch.
+
+      The base class implements a simple round-robin scheduling algorithm for
+      each Trial in sequence.
+
+      Subclasses can override this method to implement a more sophisticated policy.
+      For instance::
+
+          def assign_trial_runners(
+              self,
+              trials: Iterable[Storage.Trial],
+          ) -> TrialRunner:
+              trial_runners_map = {}
+              # Implement a more sophisticated policy here.
+              # For example, to assign the Trial to the TrialRunner with the least
+              # number of running Trials.
+              # Or assign the Trial to the TrialRunner that hasn't executed this
+              # TunableValues Config yet.
+              for (trial, trial_runner) in trial_runners_map:
+                  # Call the base class method to assign the TrialRunner in the Trial's metadata.
+                  trial.set_trial_runner(trial_runner)
+              ...
+
+      .. rubric:: Notes
+
+      Subclasses are *not* required to assign a TrialRunner to the Trial
+      (e.g., if the Trial should be deferred to a later time).
+
+      :param trials: The trial to assign a TrialRunner to.
+      :type trials: Iterable[Storage.Trial]
+
+
+
+   .. py:method:: get_best_observation() -> tuple[dict[str, float] | None, mlos_bench.tunables.tunable_groups.TunableGroups | None]
+
+      Get the best observation from the optimizer.
+
+
+
+   .. py:method:: get_trial_runner(trial: mlos_bench.storage.base_storage.Storage.Trial) -> mlos_bench.schedulers.trial_runner.TrialRunner
+
+      Gets the :py:class:`~.TrialRunner` associated with the given
+      :py:class:`~.Storage.Trial`.
+
+      :param trial: The trial to get the associated TrialRunner for.
+      :type trial: Storage.Trial
+
+      :rtype: TrialRunner
+
+
+
+   .. py:method:: load_tunable_config(config_id: int) -> mlos_bench.tunables.tunable_groups.TunableGroups
+
+      Load the existing tunable configuration from the storage.
+
+
+
+   .. py:method:: not_done() -> bool
+
+      Check the stopping conditions.
+
+      By default, stop when the :py:class:`.Optimizer` converges or the limit
+      of :py:attr:`~.Scheduler.max_trials` is reached.
+
+
+
+   .. py:method:: run_schedule(running: bool = False) -> None
+
+      Runs the current schedule of trials.
+
+      Check for :py:class:`~.Storage.Trial` instances with `:py:attr:`.Status.PENDING`
+      and an assigned :py:attr:`~.Storage.Trial.trial_runner_id` in the queue and run
+      them with :py:meth:`~.Scheduler.run_trial`.
+
+      Subclasses can override this method to implement a more sophisticated
+      scheduling policy.
+
+      :param running: If True, run the trials that are already in a "running" state (e.g., to resume them).
+                      If False (default), run the trials that are pending.
+      :type running: bool
+
+
+
+   .. py:method:: run_trial(trial: mlos_bench.storage.base_storage.Storage.Trial) -> None
+      :abstractmethod:
+
+
+      Set up and run a single trial.
+
+      Save the results in the storage.
+
+
+
+   .. py:method:: start() -> None
+
+      Start the scheduling loop.
+
+
+
+   .. py:method:: teardown() -> None
+
+      Tear down the TrialRunners/Environment(s).
+
+      Call it after the completion of the :py:meth:`Scheduler.start` in the
+      Scheduler context.
+
+
+
+   .. py:property:: environments
+      :type: collections.abc.Iterable[mlos_bench.environments.base_environment.Environment]
+
+
+      Gets the Environment from the TrialRunners.
+
+
+   .. py:property:: experiment
+      :type: mlos_bench.storage.base_storage.Storage.Experiment | None
+
+
+      Gets the Experiment Storage.
+
+
+   .. py:attribute:: global_config
+
+
+   .. py:property:: max_trials
+      :type: int
+
+
+      Gets the maximum number of trials to run for a given experiment, or -1 for no
+      limit.
+
+
+   .. py:property:: optimizer
+      :type: mlos_bench.optimizers.base_optimizer.Optimizer
+
+
+      Gets the Optimizer.
+
+
+   .. py:property:: ran_trials
+      :type: list[mlos_bench.storage.base_storage.Storage.Trial]
+
+
+      Get the list of trials that were run.
+
+
+   .. py:property:: root_environment
+      :type: mlos_bench.environments.base_environment.Environment
+
+
+      Gets the root (prototypical) Environment from the first TrialRunner.
+
+      .. rubric:: Notes
+
+      All TrialRunners have the same Environment config and are made
+      unique by their use of the unique trial_runner_id assigned to each
+      TrialRunner's Environment's global_config.
+
+
+   .. py:property:: storage
+      :type: mlos_bench.storage.base_storage.Storage
+
+
+      Gets the Storage.
+
+
+   .. py:property:: trial_config_repeat_count
+      :type: int
+
+
+      Gets the number of trials to run for a given config.
+
+
+   .. py:property:: trial_count
+      :type: int
+
+
+      Gets the current number of trials run for the experiment.
+
+
+   .. py:property:: trial_runners
+      :type: dict[int, mlos_bench.schedulers.trial_runner.TrialRunner]
+
+
+      Gets the set of Trial Runners.
+
+

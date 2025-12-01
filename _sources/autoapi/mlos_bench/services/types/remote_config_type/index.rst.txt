@@ -1,0 +1,60 @@
+mlos_bench.services.types.remote_config_type
+============================================
+
+.. py:module:: mlos_bench.services.types.remote_config_type
+
+.. autoapi-nested-parse::
+
+   Protocol interface for configuring cloud services.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.types.remote_config_type.SupportsRemoteConfig
+
+
+Module Contents
+---------------
+
+.. py:class:: SupportsRemoteConfig
+
+   Bases: :py:obj:`Protocol`
+
+
+   Protocol interface for configuring cloud services.
+
+
+   .. py:method:: configure(config: dict[str, Any], params: dict[str, Any]) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Update the parameters of a SaaS service in the cloud.
+
+      :param config: Key/value pairs of configuration parameters (e.g., vmName).
+      :type config: dict[str, Any]
+      :param params: Key/value pairs of the service parameters to update.
+      :type params: dict[str, Any]
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: is_config_pending(config: dict[str, Any]) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Check if the configuration of a service requires reboot or restart.
+
+      :param config: Key/value pairs of configuration parameters (e.g., vmName).
+      :type config: dict[str, Any]
+
+      :returns: **result** -- A pair of Status and result. A Boolean field
+                "isConfigPendingRestart" indicates whether the service restart is required.
+                If "isConfigPendingReboot" is set to True, rebooting a VM is necessary.
+                Status is one of {PENDING, TIMED_OUT, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+

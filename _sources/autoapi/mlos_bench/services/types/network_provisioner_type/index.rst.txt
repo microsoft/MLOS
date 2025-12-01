@@ -1,0 +1,79 @@
+mlos_bench.services.types.network_provisioner_type
+==================================================
+
+.. py:module:: mlos_bench.services.types.network_provisioner_type
+
+.. autoapi-nested-parse::
+
+   Protocol interface for Network provisioning operations.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.types.network_provisioner_type.SupportsNetworkProvisioning
+
+
+Module Contents
+---------------
+
+.. py:class:: SupportsNetworkProvisioning
+
+   Bases: :py:obj:`Protocol`
+
+
+   Protocol interface for Network provisioning operations.
+
+
+   .. py:method:: deprovision_network(params: dict, ignore_errors: bool = True) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Deprovisions the Network by deleting it.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+      :param ignore_errors: Whether to ignore errors (default) encountered during the operation
+                            (e.g., due to dependent resources still in use).
+      :type ignore_errors: bool
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: provision_network(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Check if Network is ready. Deploy a new Network, if necessary.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+                     NetworkEnv tunables are variable parameters that, together with the
+                     NetworkEnv configuration, are sufficient to provision a NetworkEnv.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: wait_network_deployment(params: dict, *, is_setup: bool) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Waits for a pending operation on a Network to resolve to SUCCEEDED or FAILED.
+      Return TIMED_OUT when timing out.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+      :param is_setup: If True, wait for Network being deployed; otherwise, wait for successful
+                       deprovisioning.
+      :type is_setup: bool
+
+      :returns: **result** -- A pair of Status and result.
+                Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+                Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+      :rtype: (Status, dict)
+
+
+

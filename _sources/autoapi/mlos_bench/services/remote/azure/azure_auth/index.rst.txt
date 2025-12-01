@@ -1,0 +1,60 @@
+mlos_bench.services.remote.azure.azure_auth
+===========================================
+
+.. py:module:: mlos_bench.services.remote.azure.azure_auth
+
+.. autoapi-nested-parse::
+
+   A collection Service functions for managing VMs on Azure.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.remote.azure.azure_auth.AzureAuthService
+
+
+Module Contents
+---------------
+
+.. py:class:: AzureAuthService(config: dict[str, Any] | None = None, global_config: dict[str, Any] | None = None, parent: mlos_bench.services.base_service.Service | None = None, methods: dict[str, collections.abc.Callable] | list[collections.abc.Callable] | None = None)
+
+   Bases: :py:obj:`mlos_bench.services.base_service.Service`, :py:obj:`mlos_bench.services.types.authenticator_type.SupportsAuth`\ [\ :py:obj:`azure.core.credentials.TokenCredential`\ ]
+
+
+   Helper methods to get access to Azure services.
+
+   Create a new instance of Azure authentication services proxy.
+
+   :param config: Free-format dictionary that contains the benchmark environment
+                  configuration.
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters.
+   :type global_config: dict
+   :param parent: Parent service that can provide mixin functions.
+   :type parent: Service
+   :param methods: New methods to register with the service.
+   :type methods: Union[dict[str, Callable], list[Callable], None]
+
+
+   .. py:method:: get_access_token() -> str
+
+      Get the access token from Azure CLI, if expired.
+
+
+
+   .. py:method:: get_auth_headers() -> dict
+
+      Get the authorization part of HTTP headers for REST API calls.
+
+
+
+   .. py:method:: get_credential() -> azure.core.credentials.TokenCredential
+
+      Return the Azure SDK credential object.
+
+
+

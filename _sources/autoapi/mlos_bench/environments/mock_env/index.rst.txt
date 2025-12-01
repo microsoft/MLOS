@@ -1,0 +1,70 @@
+mlos_bench.environments.mock_env
+================================
+
+.. py:module:: mlos_bench.environments.mock_env
+
+.. autoapi-nested-parse::
+
+   Scheduler-side environment to mock the benchmark results.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.environments.mock_env.MockEnv
+
+
+Module Contents
+---------------
+
+.. py:class:: MockEnv(*, name: str, config: dict, global_config: dict | None = None, tunables: mlos_bench.tunables.tunable_groups.TunableGroups | None = None, service: mlos_bench.services.base_service.Service | None = None)
+
+   Bases: :py:obj:`mlos_bench.environments.base_environment.Environment`
+
+
+   Scheduler-side environment to mock the benchmark results.
+
+   Create a new environment that produces mock benchmark data.
+
+   :param name: Human-readable name of the environment.
+   :type name: str
+   :param config: Free-format dictionary that contains the benchmark environment configuration.
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters (e.g., security credentials)
+                         to be mixed in into the "const_args" section of the local config.
+                         Optional arguments are `mock_env_seed`, `mock_env_range`, and `mock_env_metrics`.
+                         Set `mock_env_seed` to -1 for deterministic behavior, 0 for default randomness.
+   :type global_config: dict
+   :param tunables: A collection of tunable parameters for *all* environments.
+   :type tunables: TunableGroups
+   :param service: An optional service object. Not used by this class.
+   :type service: Service
+
+
+   .. py:method:: run() -> tuple[mlos_bench.environments.status.Status, datetime.datetime, dict[str, mlos_bench.tunables.tunable_types.TunableValue] | None]
+
+      Produce mock benchmark data for one experiment.
+
+      :returns: **(status, timestamp, output)** -- 3-tuple of (Status, timestamp, output) values, where `output` is a dict
+                with the results or None if the status is not COMPLETED.
+                The keys of the `output` dict are the names of the metrics
+                specified in the config; by default it's just one metric
+                named "score". All output metrics have the same value.
+      :rtype: (Status, datetime.datetime, dict)
+
+
+
+   .. py:method:: status() -> tuple[mlos_bench.environments.status.Status, datetime.datetime, list[tuple[datetime.datetime, str, Any]]]
+
+      Produce mock benchmark status telemetry for one experiment.
+
+      :returns: **(benchmark_status, timestamp, telemetry)** -- 3-tuple of (benchmark status, timestamp, telemetry) values.
+                `timestamp` is UTC time stamp of the status; it's current time by default.
+                `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
+      :rtype: (Status, datetime.datetime, list)
+
+
+

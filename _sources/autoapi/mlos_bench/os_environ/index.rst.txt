@@ -1,0 +1,37 @@
+mlos_bench.os_environ
+=====================
+
+.. py:module:: mlos_bench.os_environ
+
+.. autoapi-nested-parse::
+
+   Simple platform agnostic abstraction for the OS environment variables. Meant as a
+   replacement for :external:py:data:`os.environ` vs ``nt.environ``.
+
+   .. rubric:: Example
+
+   >>> # Import the environ object.
+   >>> from mlos_bench.os_environ import environ
+   >>> # Set an environment variable.
+   >>> environ["FOO"] = "bar"
+   >>> # Get an environment variable.
+   >>> pwd = environ.get("PWD")
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   mlos_bench.os_environ.environ
+
+
+Module Contents
+---------------
+
+.. py:data:: environ
+   :type:  EnvironType
+
+   A platform agnostic abstraction for the OS environment variables.
+

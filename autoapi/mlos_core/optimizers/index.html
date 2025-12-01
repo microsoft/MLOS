@@ -1,0 +1,301 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlos_core.optimizers &mdash; MLOS 0.6.3.dev53+g549a69ab0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+
+  
+    <link rel="canonical" href="https://microsoft.github.io/MLOS/autoapi/mlos_core/optimizers/index.html"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=8b2becd3"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="mlos_core.optimizers.bayesian_optimizers" href="bayesian_optimizers/index.html" />
+    <link rel="prev" title="mlos_core.data_classes" href="../data_classes/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MLOS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Source Tree Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_tree_docs/index.html">MLOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_tree_docs/mlos_core/index.html">mlos-core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_tree_docs/mlos_bench/index.html">mlos-bench</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_tree_docs/mlos_viz/index.html">mlos-viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">mlos_core</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#data-classes">Data Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#spaces">Spaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#classes-overview">Classes Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../data_classes/index.html">mlos_core.data_classes</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mlos_core.optimizers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="bayesian_optimizers/index.html">mlos_core.optimizers.bayesian_optimizers</a></li>
+<li class="toctree-l5"><a class="reference internal" href="flaml_optimizer/index.html">mlos_core.optimizers.flaml_optimizer</a></li>
+<li class="toctree-l5"><a class="reference internal" href="optimizer/index.html">mlos_core.optimizers.optimizer</a></li>
+<li class="toctree-l5"><a class="reference internal" href="random_optimizer/index.html">mlos_core.optimizers.random_optimizer</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#attributes">Attributes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classes">Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#package-contents">Package Contents</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_core.optimizers.OptimizerFactory"><code class="docutils literal notranslate"><span class="pre">OptimizerFactory</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#mlos_core.optimizers.OptimizerFactory.create"><code class="docutils literal notranslate"><span class="pre">OptimizerFactory.create()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_core.optimizers.OptimizerType"><code class="docutils literal notranslate"><span class="pre">OptimizerType</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#mlos_core.optimizers.OptimizerType.FLAML"><code class="docutils literal notranslate"><span class="pre">OptimizerType.FLAML</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#mlos_core.optimizers.OptimizerType.RANDOM"><code class="docutils literal notranslate"><span class="pre">OptimizerType.RANDOM</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#mlos_core.optimizers.OptimizerType.SMAC"><code class="docutils literal notranslate"><span class="pre">OptimizerType.SMAC</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#mlos_core.optimizers.ConcreteOptimizer"><code class="docutils literal notranslate"><span class="pre">ConcreteOptimizer</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../spaces/index.html">mlos_core.spaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../util/index.html">mlos_core.util</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../version/index.html">mlos_core.version</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#attributes">Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../mlos_bench/index.html">mlos_bench</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mlos_viz/index.html">mlos_viz</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">mlos_bench CLI usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mlos_bench.run.usage.html">mlos_bench CLI usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/microsoft/MLOS">Github Source Tree</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MLOS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">mlos_core</a></li>
+      <li class="breadcrumb-item active">mlos_core.optimizers</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/mlos_core/optimizers/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mlos_core.optimizers">
+<span id="mlos-core-optimizers"></span><h1>mlos_core.optimizers<a class="headerlink" href="#module-mlos_core.optimizers" title="Link to this heading"></a></h1>
+<p>Initializer module for the mlos_core optimizers.</p>
+<p>Optimizers are the main component of the <a class="reference internal" href="../index.html#module-mlos_core" title="mlos_core"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_core</span></code></a> package.
+They act as a wrapper around other OSS tuning libraries to provide a consistent API
+interface to allow experimenting with different autotuning algorithms.</p>
+<p>The <a class="reference internal" href="optimizer/index.html#mlos_core.optimizers.optimizer.BaseOptimizer" title="mlos_core.optimizers.optimizer.BaseOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOptimizer</span></code></a> class is the base class
+for all Optimizers and provides the core
+<a class="reference internal" href="optimizer/index.html#mlos_core.optimizers.optimizer.BaseOptimizer.suggest" title="mlos_core.optimizers.optimizer.BaseOptimizer.suggest"><code class="xref py py-meth docutils literal notranslate"><span class="pre">suggest()</span></code></a> and
+<a class="reference internal" href="optimizer/index.html#mlos_core.optimizers.optimizer.BaseOptimizer.register" title="mlos_core.optimizers.optimizer.BaseOptimizer.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> methods.</p>
+<p>This module also provides a simple <a class="reference internal" href="#mlos_core.optimizers.OptimizerFactory" title="mlos_core.optimizers.OptimizerFactory"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptimizerFactory</span></code></a> class to
+<a class="reference internal" href="#mlos_core.optimizers.OptimizerFactory.create" title="mlos_core.optimizers.OptimizerFactory.create"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create()</span></code></a> an Optimizer.</p>
+<p>Generally speaking, the <a class="reference internal" href="../index.html#module-mlos_core" title="mlos_core"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_core</span></code></a> package is intended to be used in
+conjunction with the <a class="reference internal" href="../../mlos_bench/index.html#module-mlos_bench" title="mlos_bench"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mlos_bench</span></code></a> package, which provides a higher-level
+interface for running benchmarks and autotuning experiments.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="../../mlos_bench/optimizers/mlos_core_optimizer/index.html#module-mlos_bench.optimizers.mlos_core_optimizer" title="mlos_bench.optimizers.mlos_core_optimizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mlos_bench.optimizers.mlos_core_optimizer</span></code></a></dt><dd><p>The mlos_bench Optimizer class that uses the mlos_core Optimizers to run autotuning experiments.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>See <a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/optimizers/">mlos_core/optimizers/README.md</a>
+for additional documentation and examples in the source tree.</p>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="bayesian_optimizers/index.html">mlos_core.optimizers.bayesian_optimizers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flaml_optimizer/index.html">mlos_core.optimizers.flaml_optimizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimizer/index.html">mlos_core.optimizers.optimizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="random_optimizer/index.html">mlos_core.optimizers.random_optimizer</a></li>
+</ul>
+</div>
+</section>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_core.optimizers.ConcreteOptimizer" title="mlos_core.optimizers.ConcreteOptimizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConcreteOptimizer</span></code></a></p></td>
+<td><p>Type alias for concrete optimizer classes.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mlos_core.optimizers.OptimizerFactory" title="mlos_core.optimizers.OptimizerFactory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OptimizerFactory</span></code></a></p></td>
+<td><p>Simple factory class for creating</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mlos_core.optimizers.OptimizerType" title="mlos_core.optimizers.OptimizerType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OptimizerType</span></code></a></p></td>
+<td><p>Enumerate supported mlos_core optimizers.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="package-contents">
+<h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mlos_core.optimizers.OptimizerFactory">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlos_core.optimizers.</span></span><span class="sig-name descname"><span class="pre">OptimizerFactory</span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/optimizers/__init__.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_core.optimizers.OptimizerFactory" title="Link to this definition"></a></dt>
+<dd><p>Simple factory class for creating
+<a class="reference internal" href="optimizer/index.html#mlos_core.optimizers.optimizer.BaseOptimizer" title="mlos_core.optimizers.optimizer.BaseOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOptimizer</span></code></a>-derived objects.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mlos_core.optimizers.OptimizerFactory.create">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://automl.github.io/ConfigSpace/latest/api/ConfigSpace/configuration_space/#ConfigSpace.configuration_space.ConfigurationSpace" title="(in ConfigSpace v0.0.0)"><span class="pre">ConfigSpace.ConfigurationSpace</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimization_targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mlos_core.optimizers.OptimizerType" title="mlos_core.optimizers.OptimizerType"><span class="pre">OptimizerType</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DEFAULT_OPTIMIZER_TYPE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">space_adapter_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../spaces/adapters/index.html#mlos_core.spaces.adapters.SpaceAdapterType" title="mlos_core.spaces.adapters.SpaceAdapterType"><span class="pre">mlos_core.spaces.adapters.SpaceAdapterType</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">SpaceAdapterType.IDENTITY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">space_adapter_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mlos_core.optimizers.ConcreteOptimizer" title="mlos_core.optimizers.ConcreteOptimizer"><span class="pre">ConcreteOptimizer</span></a></span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/optimizers/__init__.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_core.optimizers.OptimizerFactory.create" title="Link to this definition"></a></dt>
+<dd><p>Create a new optimizer instance, given the parameter space, optimizer type, and
+potential optimizer options.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameter_space</strong> (<a class="reference external" href="https://automl.github.io/ConfigSpace/latest/api/ConfigSpace/configuration_space/#ConfigSpace.configuration_space.ConfigurationSpace" title="(in ConfigSpace v0.0.0)"><em>ConfigSpace.ConfigurationSpace</em></a>) – Input configuration space.</p></li>
+<li><p><strong>optimization_targets</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em>) – The names of the optimization targets to minimize.</p></li>
+<li><p><strong>optimizer_type</strong> (<a class="reference internal" href="#mlos_core.optimizers.OptimizerType" title="mlos_core.optimizers.OptimizerType"><em>OptimizerType</em></a>) – Optimizer class as defined by Enum.</p></li>
+<li><p><strong>optimizer_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em> | </em><em>None</em>) – Optional arguments passed in Optimizer class constructor.</p></li>
+<li><p><strong>space_adapter_type</strong> (<a class="reference internal" href="../spaces/adapters/index.html#mlos_core.spaces.adapters.SpaceAdapterType" title="mlos_core.spaces.adapters.SpaceAdapterType"><em>SpaceAdapterType</em></a><em> | </em><em>None</em>) – Space adapter class to be used alongside the optimizer.</p></li>
+<li><p><strong>space_adapter_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em> | </em><em>None</em>) – Optional arguments passed in SpaceAdapter class constructor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>optimizer</strong> – Instance of concrete optimizer class
+(e.g., RandomOptimizer, FlamlOptimizer, SmacOptimizer, etc.).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mlos_core.optimizers.ConcreteOptimizer" title="mlos_core.optimizers.ConcreteOptimizer">ConcreteOptimizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlos_core.optimizers.OptimizerType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlos_core.optimizers.</span></span><span class="sig-name descname"><span class="pre">OptimizerType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/optimizers/__init__.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_core.optimizers.OptimizerType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.Enum</span></code></a></p>
+<p>Enumerate supported mlos_core optimizers.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_core.optimizers.OptimizerType.FLAML">
+<span class="sig-name descname"><span class="pre">FLAML</span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/optimizers/__init__.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_core.optimizers.OptimizerType.FLAML" title="Link to this definition"></a></dt>
+<dd><p>An instance of <a class="reference internal" href="flaml_optimizer/index.html#mlos_core.optimizers.flaml_optimizer.FlamlOptimizer" title="mlos_core.optimizers.flaml_optimizer.FlamlOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">FlamlOptimizer</span></code></a>
+class will be used.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_core.optimizers.OptimizerType.RANDOM">
+<span class="sig-name descname"><span class="pre">RANDOM</span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/optimizers/__init__.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_core.optimizers.OptimizerType.RANDOM" title="Link to this definition"></a></dt>
+<dd><p>An instance of <a class="reference internal" href="random_optimizer/index.html#mlos_core.optimizers.random_optimizer.RandomOptimizer" title="mlos_core.optimizers.random_optimizer.RandomOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">RandomOptimizer</span></code></a>
+class will be used.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlos_core.optimizers.OptimizerType.SMAC">
+<span class="sig-name descname"><span class="pre">SMAC</span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/optimizers/__init__.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_core.optimizers.OptimizerType.SMAC" title="Link to this definition"></a></dt>
+<dd><p>An instance of
+<a class="reference internal" href="bayesian_optimizers/smac_optimizer/index.html#mlos_core.optimizers.bayesian_optimizers.smac_optimizer.SmacOptimizer" title="mlos_core.optimizers.bayesian_optimizers.smac_optimizer.SmacOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">SmacOptimizer</span></code></a>
+class will be used.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mlos_core.optimizers.ConcreteOptimizer">
+<span class="sig-prename descclassname"><span class="pre">mlos_core.optimizers.</span></span><span class="sig-name descname"><span class="pre">ConcreteOptimizer</span></span><a class="reference external" href="https://github.com/microsoft/MLOS/tree/main/mlos_core/mlos_core/optimizers/__init__.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlos_core.optimizers.ConcreteOptimizer" title="Link to this definition"></a></dt>
+<dd><p>Type alias for concrete optimizer classes.</p>
+<p>(e.g., <a class="reference internal" href="bayesian_optimizers/smac_optimizer/index.html#mlos_core.optimizers.bayesian_optimizers.smac_optimizer.SmacOptimizer" title="mlos_core.optimizers.bayesian_optimizers.smac_optimizer.SmacOptimizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">SmacOptimizer</span></code></a>, etc.)</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../data_classes/index.html" class="btn btn-neutral float-left" title="mlos_core.data_classes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="bayesian_optimizers/index.html" class="btn btn-neutral float-right" title="mlos_core.optimizers.bayesian_optimizers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Microsoft GSL.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

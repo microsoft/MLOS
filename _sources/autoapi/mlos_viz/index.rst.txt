@@ -1,0 +1,119 @@
+mlos_viz
+========
+
+.. py:module:: mlos_viz
+
+.. autoapi-nested-parse::
+
+   mlos_viz is a framework to help visualizing, explain, and gain insights from results
+   from the :py:mod:`mlos_bench` framework for benchmarking and optimization automation.
+
+   It can be installed from `pypi <https://pypi.org/project/mlos-viz>`_ via ``pip
+   install mlos-viz``.
+
+   Overview
+   ++++++++
+
+   Its main entrypoint is the :py:func:`plot` function, which can be used to
+   automatically visualize :py:class:`~.ExperimentData` from :py:mod:`mlos_bench` using
+   other libraries for automatic data correlation and visualization like
+   :external:py:func:`dabl <dabl.plot>`.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/mlos_viz/base/index
+   /autoapi/mlos_viz/dabl/index
+   /autoapi/mlos_viz/util/index
+   /autoapi/mlos_viz/version/index
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   mlos_viz.__version__
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_viz.MlosVizMethod
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   mlos_viz.ignore_plotter_warnings
+   mlos_viz.plot
+
+
+Package Contents
+----------------
+
+.. py:class:: MlosVizMethod(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+
+   What method to use for visualizing the Experiment results.
+
+
+   .. py:attribute:: AUTO
+
+      The default automatic :py:class:`~.ExperimentData` visualization method.
+
+
+   .. py:attribute:: DABL
+      :value: 'dabl'
+
+
+      Use DABL for automatic data correlation and visualization of
+      :py:class:`~.ExperimentData`.
+
+
+.. py:function:: ignore_plotter_warnings(plotter_method: MlosVizMethod = MlosVizMethod.AUTO) -> None
+
+   Suppress some annoying warnings from third-party data visualization packages by
+   adding them to the warnings filter.
+
+   :param plotter_method: The method to use for visualizing the Experiment results.
+   :type plotter_method: MlosVizMethod
+
+
+.. py:function:: plot(exp_data: mlos_bench.storage.base_experiment_data.ExperimentData | None = None, *, results_df: pandas.DataFrame | None = None, objectives: dict[str, Literal['min', 'max']] | None = None, plotter_method: MlosVizMethod = MlosVizMethod.AUTO, filter_warnings: bool = True, **kwargs: Any) -> None
+
+   Plots the results of the given :py:class:`~.ExperimentData`.
+
+   Intended to be used from a Jupyter notebook.
+
+   :param exp_data: The Experiment data to plot.
+   :type exp_data: ExperimentData
+   :param results_df: Optional `results_df` to plot.
+                      If not provided, defaults to :py:attr:`.ExperimentData.results_df` property.
+   :type results_df: pandas.DataFrame | None
+   :param objectives: Optional objectives to plot.
+                      If not provided, defaults to :py:attr:`.ExperimentData.objectives` property.
+   :type objectives: Optional[dict[str, Literal["min", "max"]]]
+   :param plotter_method: The method to use for visualizing the Experiment results.
+   :type plotter_method: MlosVizMethod
+   :param filter_warnings: Whether or not to filter some warnings from the plotter.
+   :type filter_warnings: bool
+   :param kwargs: Remaining keyword arguments are passed along to the underlying plotter(s).
+   :type kwargs: dict
+
+
+.. py:data:: __version__
+   :value: '0.6.2'
+
+

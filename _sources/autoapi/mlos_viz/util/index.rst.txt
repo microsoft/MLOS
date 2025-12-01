@@ -1,0 +1,42 @@
+mlos_viz.util
+=============
+
+.. py:module:: mlos_viz.util
+
+.. autoapi-nested-parse::
+
+   Utility functions for manipulating experiment results data.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   mlos_viz.util.expand_results_data_args
+
+
+Module Contents
+---------------
+
+.. py:function:: expand_results_data_args(exp_data: mlos_bench.storage.base_experiment_data.ExperimentData | None = None, results_df: pandas.DataFrame | None = None, objectives: dict[str, Literal['min', 'max']] | None = None) -> tuple[pandas.DataFrame, dict[str, bool]]
+
+   Expands some common arguments for working with results data.
+
+   Used by mlos_viz as well.
+
+   :param exp_data: ExperimentData to operate on.
+   :type exp_data: ExperimentData | None
+   :param results_df: Optional results_df argument.
+                      If not provided, defaults to :py:attr:`.ExperimentData.results_df` property.
+   :type results_df: pandas.DataFrame | None
+   :param objectives: Optional objectives set to operate on.
+                      If not provided, defaults to :py:attr:`.ExperimentData.objectives` property.
+   :type objectives: Optional[dict[str, Literal["min", "max"]]]
+
+   :returns: The results dataframe and the objectives columns in the dataframe, plus
+             whether or not they are in ascending order.
+   :rtype: tuple[pandas.DataFrame, dict[str, bool]]
+
+
