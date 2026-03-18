@@ -1,1 +1,47 @@
-mlos.yml
+name: mlos
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Basic dev environment packages.
+  # All other dependencies for the mlos modules come from pip.
+  - pip
+  - python-build
+  - jupyter
+  - ipykernel
+  - nb_conda_kernels
+  - matplotlib-base
+  - seaborn
+  - pandas
+  - pyarrow
+  - swig
+  # FIXME: Temporarily avoid broken libpq that's missing client headers.
+  - libpq<17.0
+  - python
+  # Install an SMAC requirement pre-compiled from conda-forge.
+  # See Also: https://github.com/microsoft/MLOS/issues/1001
+  - pyrfr>=0.9.0
+  - pip:
+    - bump2version
+    - check-jsonschema
+    # Fixed versions for easier maintainability.
+    # Dependabot can update explicitly as necessary.
+    - pre-commit==4.2.0
+    - pycodestyle==2.13.0
+    - pylint==3.3.7
+    - tomlkit
+    - mypy==1.15.0
+    - pyright==1.1.408
+    - pandas-stubs
+    - types-beautifulsoup4
+    - types-colorama
+    - types-jsonschema
+    - types-pygments
+    - types-requests
+    - types-setuptools
+    # Workaround a pylance issue in vscode that prevents it finding the latest
+    # method of pip installing editable modules.
+    # https://github.com/microsoft/pylance-release/issues/3473
+    - "--config-settings editable_mode=compat --editable ../mlos_core[full-tests]"
+    - "--config-settings editable_mode=compat --editable ../mlos_bench[full-tests]"
+    - "--config-settings editable_mode=compat --editable ../mlos_viz[full-tests]"
