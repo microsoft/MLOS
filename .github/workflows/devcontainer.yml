@@ -266,7 +266,7 @@ jobs:
 
     - name: Container Registry Login
       if: (github.repository == 'microsoft/mlos') && (github.ref == 'refs/heads/main' || github.ref_type == 'tag')
-      uses: docker/login-action@v3
+      uses: docker/login-action@v4
       with:
         # This is the URL of the container registry, which is configured in Github
         # Settings and currently corresponds to the mlos-core ACR.
