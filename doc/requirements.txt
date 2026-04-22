@@ -3,7 +3,7 @@ sphinx>=8.2.0
 sphinx-autoapi>=3.6.0
 intersphinx_registry>=0.2501.23 # https://github.com/Quansight-Labs/intersphinx_registry/pull/58
 nbsphinx
-jupyter_core>=4.11.2    # nbsphix dependency - addresses CVE-2022-39286
+jupyter_core>=5.9.1    # nbsphix dependency - addresses CVE-2022-39286
 nbconvert
 mistune>=2.0.3          # Address CVE-2022-34749
 sphinx-rtd-theme
