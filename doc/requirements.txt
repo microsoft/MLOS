@@ -5,7 +5,7 @@ intersphinx_registry>=0.2501.23 # https://github.com/Quansight-Labs/intersphinx_
 nbsphinx
 jupyter_core>=4.11.2    # nbsphix dependency - addresses CVE-2022-39286
 nbconvert
-mistune>=2.0.3          # Address CVE-2022-34749
+mistune>=3.2.0          # Address CVE-2022-34749
 sphinx-rtd-theme
 myst-parser
 
