@@ -18,8 +18,9 @@ on:
     types: [ published ]
   merge_group:
     types: [checks_requested]
-  schedule:
-    - cron: "1 0 * * *"
+  # Disabled for now:
+  #schedule:
+  #  - cron: "1 0 * * *"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
