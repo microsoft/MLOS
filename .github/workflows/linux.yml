@@ -51,9 +51,9 @@ jobs:
       MAKEFLAGS: -Oline
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-    - uses: conda-incubator/setup-miniconda@v3
+    - uses: conda-incubator/setup-miniconda@fc2d68f6413eb2d87b895e92f8584b5b94a10167 # v3.3.0
 
     - name: Set cache timestamp variables
       id: set_cache_vars
@@ -78,7 +78,7 @@ jobs:
     - name: Restore cached conda packages
       id: restore-conda-cache
       if: ${{ github.event_name != 'schedule' }}
-      uses: actions/cache@v4
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       with:
         #path: ${{ env.CONDA_DIR }}/envs/${{ env.CONDA_ENV_NAME }}
         path: ${{ env.CONDA_DIR }}/pkgs
@@ -90,7 +90,7 @@ jobs:
     - name: Restore cached pip packages
       id: restore-pip-cache
       if: ${{ github.event_name != 'schedule' }}
-      uses: actions/cache@v4
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       with:
         path: ${{ env.PIP_CACHE_DIR }}
         key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
@@ -101,7 +101,7 @@ jobs:
     - name: Restore cached pre-commit hooks
       id: restore-pre-commit-cache
       if: ${{ github.event_name != 'schedule' }}
-      uses: actions/cache@v4
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       with:
         path: ~/.cache/pre-commit
         key: pre-commit-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('.pre-commit-config.yaml') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
