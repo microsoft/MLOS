@@ -9,6 +9,8 @@ updates:
     directory: "/.github/workflows/"
     schedule:
       interval: "daily"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "docker"
     directory: "/.devcontainer/"
     schedule:
