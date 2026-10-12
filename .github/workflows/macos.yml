@@ -148,7 +148,7 @@ jobs:
       run: |
         set -x
         conda run -n mlos python -c \
-          'from sys import version_info as vers; assert (vers.major, vers.minor) == (3, 13), f"Unexpected python version: {vers}"'
+          'from sys import version_info as vers; assert (vers.major, vers.minor) == (3, 14), f"Unexpected python version: {vers}"'
 
     # This is moreso about code cleanliness, which is a dev thing, not a
     # functionality thing, and the rules for that change between python versions,
@@ -215,4 +215,4 @@ jobs:
 
     - name: Basic test of the devcontainer
       run: |
-        .devcontainer/script/run-devcontainer.sh conda run -n mlos python --version | grep "Python 3.13"
+        .devcontainer/script/run-devcontainer.sh conda run -n mlos python --version | grep "Python 3.14"
