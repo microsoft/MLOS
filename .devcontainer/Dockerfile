@@ -92,6 +92,7 @@ RUN echo "Setup miniconda" \
     && /opt/conda/bin/conda list -n base \
     && /opt/conda/bin/conda install -v -y -n base -c conda-forge -c defaults conda-libmamba-solver python=3.12 \
     && /opt/conda/bin/conda tos accept --override-channels --channel defaults \
+    && sudo ln -s /opt/conda/bin/python3.12 /usr/local/bin/python3.12 \
     && /opt/conda/bin/conda config --system --set solver libmamba \
     && echo "# Install some additional editor packages for the base environment." \
     && /opt/conda/bin/conda run -n base pip install --no-cache-dir -U pynvim \

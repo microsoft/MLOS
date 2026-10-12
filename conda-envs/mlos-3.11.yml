@@ -12,7 +12,7 @@ dependencies:
   - nb_conda_kernels
   - matplotlib-base
   - seaborn
-  - pandas
+  - pandas>=2.2,<3
   - pyarrow
   - swig
   # FIXME: Temporarily avoid broken libpq that's missing client headers.
@@ -34,7 +34,7 @@ dependencies:
     - tomlkit
     - mypy==1.15.0
     - pyright==1.1.406
-    - pandas-stubs<3
+    - pandas-stubs>=2.2,<2.3
     - types-beautifulsoup4
     - types-colorama
     - types-jsonschema
