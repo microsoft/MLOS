@@ -356,7 +356,7 @@ class DbSchema:
             "sqlalchemy.url",
             self._engine.url.render_as_string(
                 hide_password=False,
-            ),
+            ).replace("%", "%%"),
         )
         alembic_cfg.attributes["connection"] = conn
         return alembic_cfg

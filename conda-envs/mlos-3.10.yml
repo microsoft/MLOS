@@ -34,7 +34,7 @@ dependencies:
     - tomlkit
     - mypy==1.15.0
     - pyright==1.1.406
-    - pandas-stubs
+    - pandas-stubs<3
     - types-beautifulsoup4
     - types-colorama
     - types-jsonschema

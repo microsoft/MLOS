@@ -95,7 +95,7 @@ setup(
         "scipy>=1.3.2",
         "numpy>=1.24",
         "numpy<2.0",  # FIXME: temporarily workaround llamatune issues
-        'pandas >= 2.2.0;python_version>="3.9"',
+        'pandas >= 2.2.0, < 3;python_version>="3.9"',
         "ConfigSpace>=1.0",
     ],
     extras_require=extra_requires,
