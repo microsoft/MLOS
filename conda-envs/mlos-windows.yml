@@ -29,12 +29,12 @@ dependencies:
     - check-jsonschema
     # Fixed versions for easier maintainability.
     # Dependabot can update explicitly as necessary.
-    - pre-commit==4.2.0
-    - pycodestyle==2.13.0
-    - pylint==3.3.7
+    - pre-commit==4.5.1
+    - pycodestyle==2.14.0
+    - pylint==4.0.5
     - tomlkit
-    - mypy==1.15.0
-    - pyright==1.1.406
+    - mypy==1.19.1
+    - pyright==1.1.408
     - pandas-stubs>=2.2,<2.3
     - types-beautifulsoup4
     - types-colorama
