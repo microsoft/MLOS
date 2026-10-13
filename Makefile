@@ -481,7 +481,7 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 	test -s doc/build/html/autoapi/mlos_viz/dabl/index.html
 	grep -q -e '--config CONFIG' doc/build/html//mlos_bench.run.usage.html
 	# Look for malformed rst links: `LinkName <LinkTarget>`_
-	if find doc/build/html -name '*.html' -print0 | xargs -0 grep -m1 '&gt;`_' | grep -m1 .; then echo "Bad links found"; false; fi
+	if find doc/build/html -path 'doc/build/html/htmlcov' -prune -o -name '*.html' -print0 | xargs -0 grep -m1 '&gt;`_' | grep .; then echo "Bad links found"; false; fi
 	# Check doc logs for errors (but skip over some known ones) ...
 	@cat doc/build/log.txt \
 		| egrep -C1 -e WARNING -e CRITICAL -e ERROR \
