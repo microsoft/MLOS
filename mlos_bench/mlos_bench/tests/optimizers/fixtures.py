@@ -90,7 +90,7 @@ def flaml_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         service=None,
         config={
             "optimization_targets": {"score": "min"},
-            "max_suggestions": 15,
+            "max_suggestions": 30,
             "optimizer_type": "FLAML",
             "seed": SEED,
         },
