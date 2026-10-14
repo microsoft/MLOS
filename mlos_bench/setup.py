@@ -69,11 +69,11 @@ extra_requires: dict[str, list[str]] = {  # pylint: disable=consider-using-named
     # Additional tools for extra functionality.
     "azure": ["azure-storage-file-share", "azure-identity", "azure-keyvault"],
     "ssh": ["asyncssh>=2.19.0"],
-    "storage-sql-duckdb": ["sqlalchemy", "alembic", "duckdb_engine"],
-    "storage-sql-mysql": ["sqlalchemy", "alembic", "mysql-connector-python"],
-    "storage-sql-postgres": ["sqlalchemy", "alembic", "psycopg2"],
+    "storage-sql-duckdb": ["sqlalchemy<2.1", "alembic", "duckdb_engine"],
+    "storage-sql-mysql": ["sqlalchemy<2.1", "alembic", "mysql-connector-python"],
+    "storage-sql-postgres": ["sqlalchemy<2.1", "alembic", "psycopg2"],
     # sqlite3 comes with python, so we don't need to install it.
-    "storage-sql-sqlite": ["sqlalchemy", "alembic"],
+    "storage-sql-sqlite": ["sqlalchemy<2.1", "alembic"],
     # Transitive extra_requires from mlos-core.
     "flaml": ["flaml[blendsearch]"],
     "smac": ["smac"],
@@ -98,6 +98,7 @@ setup(
     version=VERSION,
     install_requires=[
         "mlos-core==" + VERSION,
+        "pytz",
         "requests",
         "json5",
         "jsonschema>=4.18.0",

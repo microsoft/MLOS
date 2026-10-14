@@ -255,7 +255,7 @@ class Service(ContextManager):
             services = {svc.__name__: svc for svc in services}
 
         self._service_methods.update(services)
-        self.__dict__.update(self._service_methods)
+        vars(self).update(self._service_methods)
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Added methods to: %s", self.pprint())

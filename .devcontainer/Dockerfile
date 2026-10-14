@@ -67,6 +67,7 @@ COPY --from=deps-prep --chown=vscode:conda /tmp/conda-tmp/.pre-commit-config.yam
 
 # Combine the installation of miniconda and the mlos dependencies into a single step in order to save space.
 # This allows the mlos env to reference the base env's packages without duplication across layers.
+# Keep Python 3.12 in base for pinned pre-commit hooks; mlos still uses floating Python.
 RUN echo "Setup miniconda" \
     && curl -Ss --url https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-$(uname -m).sh -o /tmp/miniconda3.sh \
     && sudo sh /tmp/miniconda3.sh -b -u -p /opt/conda \
@@ -87,8 +88,11 @@ RUN echo "Setup miniconda" \
     && /opt/conda/bin/conda config --show \
     && /opt/conda/bin/conda tos accept --override-channels --channel defaults \
     && /opt/conda/bin/conda update -v -y -n base -c conda-forge -c defaults --all \
+    && /opt/conda/bin/conda tos accept --override-channels --channel defaults \
     && /opt/conda/bin/conda list -n base \
-    && /opt/conda/bin/conda install -v -y -n base -c conda-forge -c defaults conda-libmamba-solver \
+    && /opt/conda/bin/conda install -v -y -n base -c conda-forge -c defaults conda-libmamba-solver python=3.12 \
+    && /opt/conda/bin/conda tos accept --override-channels --channel defaults \
+    && sudo ln -s /opt/conda/bin/python3.12 /usr/local/bin/python3.12 \
     && /opt/conda/bin/conda config --system --set solver libmamba \
     && echo "# Install some additional editor packages for the base environment." \
     && /opt/conda/bin/conda run -n base pip install --no-cache-dir -U pynvim \
