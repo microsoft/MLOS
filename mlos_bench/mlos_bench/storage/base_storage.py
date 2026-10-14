@@ -38,7 +38,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import get_git_info
+from mlos_bench.util import get_git_info, sanitize_config
 
 _LOG = logging.getLogger(__name__)
 
@@ -62,7 +62,8 @@ class Storage(metaclass=ABCMeta):
         config : dict
             Free-format key/value pairs of configuration parameters.
         """
-        _LOG.debug("Storage config: %s", config)
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("Storage config: %s", sanitize_config(config))
         self._validate_json_config(config)
         self._service = service
         self._config = config.copy()
@@ -431,7 +432,7 @@ class Storage(metaclass=ABCMeta):
                     _config = DictTemplater(config).expand_vars()
                     assert isinstance(_config, dict)
                 except ValueError as e:
-                    _LOG.error("Non-serializable config: %s", config, exc_info=e)
+                    _LOG.error("Non-serializable config: %s", sanitize_config(config), exc_info=e)
                     raise e
             return self._new_trial(tunables, ts_start, config)
 

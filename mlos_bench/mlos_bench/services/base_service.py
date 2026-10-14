@@ -16,7 +16,7 @@ from typing import Any, Literal
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.types.bound_method import BoundMethod
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
-from mlos_bench.util import instantiate_from_config
+from mlos_bench.util import instantiate_from_config, sanitize_config
 
 _LOG = logging.getLogger(__name__)
 
@@ -99,9 +99,21 @@ class Service(ContextManager):
             self._config_loader_service = parent
 
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Service: %s Config:\n%s", self, json.dumps(self.config, indent=2))
-            _LOG.debug("Service: %s Globals:\n%s", self, json.dumps(global_config or {}, indent=2))
-            _LOG.debug("Service: %s Parent: %s", self, parent.pprint() if parent else None)
+            _LOG.debug(
+                "Service: %s Config:\n%s",
+                self,
+                json.dumps(sanitize_config(self.config), indent=2),
+            )
+            _LOG.debug(
+                "Service: %s Globals:\n%s",
+                self,
+                json.dumps(sanitize_config(global_config or {}), indent=2),
+            )
+            _LOG.debug(
+                "Service: %s Parent: %s",
+                self,
+                parent.pprint() if parent else None,
+            )
 
     @staticmethod
     def merge_methods(
