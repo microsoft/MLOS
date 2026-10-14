@@ -41,9 +41,9 @@ jobs:
       cache_prev_hour: unset
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-    - uses: conda-incubator/setup-miniconda@v3
+    - uses: conda-incubator/setup-miniconda@be893c923ea9cf1cf7cd510fbdde27c7e18cbdcb # v4.1.0
 
     - name: Set cache timestamp variables
       id: set_cache_vars
@@ -68,13 +68,13 @@ jobs:
     - name: Restore cached conda environment
       id: restore-conda-cache
       if: github.event_name != 'schedule'
-      uses: actions/cache@v4
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ${{ env.CONDA }}/envs/mlos
-        key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_YML }}') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
+        key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles(format('conda-envs/{0}', env.CONDA_ENV_YML)) }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
         restore-keys: |
-          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_YML }}') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
-          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_YML }}') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}
+          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles(format('conda-envs/{0}', env.CONDA_ENV_YML)) }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
+          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles(format('conda-envs/{0}', env.CONDA_ENV_YML)) }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}
 
     - name: Log some environment variables for debugging
       run: |
@@ -126,6 +126,10 @@ jobs:
         Get-ChildItem -ErrorAction Continue -Path ${{ env.CONDA }}/envs/$env:CONDA_ENV_NAME -Recurse -Filter 'init.tcl' | Select-Object -ExpandProperty FullName
         Get-ChildItem -ErrorAction Continue -Path ${{ env.CONDA }}/envs/$env:CONDA_ENV_NAME -Recurse -Filter 'pkgIndex.tcl' | Select-Object -ExpandProperty FullName
 
+    - name: Verify installed runtime dependencies
+      run: |
+        conda run -n $env:CONDA_ENV_NAME python -c "import numpy, pandas; from importlib.metadata import version; assert numpy.__version__ == version('numpy') and numpy.__version__.split('.')[0] == '1', f'Unexpected NumPy runtime: {numpy.__version__}'; assert pandas.__version__ == version('pandas') and pandas.__version__.split('.')[0] == '2', f'Unexpected pandas runtime: {pandas.__version__}'"
+
     # This is moreso about code cleanliness, which is a dev thing, not a
     # functionality thing, and the rules for that change between python versions,
     # so only do this for the default in the devcontainer.
@@ -159,7 +163,7 @@ jobs:
       contents: read
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
     - name: Check docker
       run: |

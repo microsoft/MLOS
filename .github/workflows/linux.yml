@@ -40,6 +40,7 @@ jobs:
           - "3.11"
           - "3.12"
           - "3.13"
+          - "3.14"
 
     env:
       cache_cur_date: unset
@@ -52,9 +53,9 @@ jobs:
       MAKEFLAGS: -Oline
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-    - uses: conda-incubator/setup-miniconda@v3
+    - uses: conda-incubator/setup-miniconda@be893c923ea9cf1cf7cd510fbdde27c7e18cbdcb # v4.1.0
 
     - name: Set cache timestamp variables
       id: set_cache_vars
@@ -79,7 +80,7 @@ jobs:
     - name: Restore cached conda packages
       id: restore-conda-cache
       if: ${{ github.event_name != 'schedule' }}
-      uses: actions/cache@v4
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         #path: ${{ env.CONDA_DIR }}/envs/${{ env.CONDA_ENV_NAME }}
         path: ${{ env.CONDA_DIR }}/pkgs
@@ -91,7 +92,7 @@ jobs:
     - name: Restore cached pip packages
       id: restore-pip-cache
       if: ${{ github.event_name != 'schedule' }}
-      uses: actions/cache@v4
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ${{ env.PIP_CACHE_DIR }}
         key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_*/pyproject.toml') }}-${{ hashFiles('mlos_*/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
@@ -102,7 +103,7 @@ jobs:
     - name: Restore cached pre-commit hooks
       id: restore-pre-commit-cache
       if: ${{ github.event_name != 'schedule' }}
-      uses: actions/cache@v4
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.cache/pre-commit
         key: pre-commit-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('.pre-commit-config.yaml') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
@@ -155,7 +156,7 @@ jobs:
       run: |
         set -x
         conda run -n mlos python -c \
-          'from sys import version_info as vers; assert (vers.major, vers.minor) == (3, 13), f"Unexpected python version: {vers}"'
+          'from sys import version_info as vers; assert (vers.major, vers.minor) == (3, 14), f"Unexpected python version: {vers}"'
 
     # This is moreso about code cleanliness, which is a dev thing, not a
     # functionality thing, and the rules for that sometimes change between

@@ -157,7 +157,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes,too-many-public-m
             t_config.get("values_weights") or t_config.get("special_weights") or []
         )
         self._range_weight: float | None = t_config.get("range_weight")
-        self._current_value = None
+        self._current_value: TunableValue = None
         self._sanity_check()
         self.value = self._default
 

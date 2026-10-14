@@ -22,6 +22,8 @@ ci:
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 default_stages: [pre-commit]
+default_language_version:
+    python: python3.12
 
 # Note "require_serial" actually controls whether that particular hook's files
 # are partitioned and the hook executable called in parallel across them, not

@@ -69,7 +69,7 @@ class SqlStorage(Storage):
 
     def __setstate__(self, state: dict) -> None:
         """Restore the state of the object from pickling."""
-        self.__dict__.update(state)
+        vars(self).update(state)
         # Recreate the engine and schema.
         self._init_engine()
 
