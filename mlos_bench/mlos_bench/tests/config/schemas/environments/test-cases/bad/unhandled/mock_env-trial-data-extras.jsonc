@@ -1,0 +1,15 @@
+{
+    "class": "mlos_bench.environments.mock_env.MockEnv",
+    "config": {
+        "mock_trial_data": {
+            "1": {
+                "new_phase": {
+                    "status": "FAILED"
+                },
+                "run": {
+                    "expected": "property"
+                }
+            }
+        }
+    }
+}

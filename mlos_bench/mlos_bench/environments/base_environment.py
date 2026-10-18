@@ -363,6 +363,92 @@ class Environment(ContextManager, metaclass=abc.ABCMeta):
         """
         return self._params.copy()
 
+    @property
+    def current_trial_id(self) -> int:
+        """
+        Get the current trial ID.
+
+        This value can be used in scripts or environment variables to help
+        identify the Trial this Environment is currently running.
+
+        Returns
+        -------
+        trial_id : int
+            The current trial ID.
+
+        Notes
+        -----
+        This method is used to identify the current trial ID for the environment.
+        It is expected to be called *after* the base
+        :py:meth:`Environment.setup` method has been called and parameters have
+        been assigned.
+        """
+        val = self._params["trial_id"]
+        assert isinstance(val, int), (
+            "Expected trial_id to be an int, but got %s (type %s): %s",
+            val,
+            type(val),
+            self._params,
+        )
+        return val
+
+    @property
+    def trial_runner_id(self) -> int:
+        """
+        Get the ID of the :py:class:`~.mlos_bench.schedulers.trial_runner.TrialRunner`
+        for this Environment.
+
+        This value can be used in scripts or environment variables to help
+        identify the TrialRunner for this Environment.
+
+        Returns
+        -------
+        trial_runner_id : int
+            The trial runner ID.
+
+        Notes
+        -----
+        This shouldn't change during the lifetime of the Environment since each
+        Environment is assigned to a single TrialRunner.
+        """
+        val = self._params["trial_runner_id"]
+        assert isinstance(val, int), (
+            "Expected trial_runner_id to be an int, but got %s (type %s)",
+            val,
+            type(val),
+        )
+        return val
+
+    @property
+    def experiment_id(self) -> str:
+        """
+        Get the ID of the experiment.
+
+        This value can be used in scripts or environment variables to help
+        identify the TrialRunner for this Environment.
+
+        Returns
+        -------
+        experiment_id : str
+            The ID of the experiment.
+
+        Notes
+        -----
+        This value comes from the globals config or ``mlos_bench`` CLI arguments
+        in the experiment setup.
+
+        See Also
+        --------
+        mlos_bench.config : documentation on the configuration system
+        """
+        val = self._params["experiment_id"]
+        assert isinstance(val, str), (
+            "Expected experiment_id to be an int, but got %s (type %s)",
+            val,
+            type(val),
+        )
+        return val
+
     def setup(self, tunables: TunableGroups, global_config: dict | None = None) -> bool:
         """
         Set up a new benchmark environment, if necessary. This method must be

@@ -24,6 +24,9 @@
         },
         "optimization_targets": {
             "$ref": "./common-defs-subschemas.json#/$defs/optimization_targets"
+        },
+        "mock_trial_data": {
+            "$ref": "../environments/mock-env-subschema.json#/$defs/mock_trial_data"
         }
     },
     "additionalProperties": {

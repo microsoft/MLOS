@@ -5,7 +5,7 @@
 """
 Base scriptable benchmark environment.
 
-TODO: Document how variable propogation works in the script environments using
+TODO: Document how variable propagation works in the script environments using
 shell_env_params, required_args, const_args, etc.
 """
 

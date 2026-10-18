@@ -1,0 +1,13 @@
+{
+    "class": "mlos_bench.environments.mock_env.MockEnv",
+    "config": {
+        "mock_trial_data": {
+            // invalid trial id
+            "trial_id_1": {
+                "run": {
+                    "status": "FAILED"
+                }
+            }
+        }
+    }
+}
