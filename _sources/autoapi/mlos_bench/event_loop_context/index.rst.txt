@@ -1,0 +1,79 @@
+mlos_bench.event_loop_context
+=============================
+
+.. py:module:: mlos_bench.event_loop_context
+
+.. autoapi-nested-parse::
+
+   EventLoopContext class definition.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   mlos_bench.event_loop_context.CoroReturnType
+   mlos_bench.event_loop_context.FutureReturnType
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.event_loop_context.EventLoopContext
+
+
+Module Contents
+---------------
+
+.. py:class:: EventLoopContext
+
+   EventLoopContext encapsulates a background thread for :external:py:mod:`asyncio`
+   event loop processing as an aid for context managers.
+
+   There is generally only expected to be one of these, either as a base class instance
+   if it's specific to that functionality or for the full mlos_bench process to support
+   parallel trial runners, for instance.
+
+   It's :py:meth:`.enter` and :py:meth:`.exit` routines are expected to be called
+   from the caller's context manager routines (e.g., __enter__ and __exit__).
+
+
+   .. py:method:: enter() -> None
+
+      Manages starting the background thread for event loop processing.
+
+
+
+   .. py:method:: exit() -> None
+
+      Manages cleaning up the background thread for event loop processing.
+
+
+
+   .. py:method:: run_coroutine(coro: collections.abc.Coroutine[Any, Any, CoroReturnType]) -> FutureReturnType
+
+      Runs the given coroutine in the background event loop thread and returns a
+      Future that can be used to wait for the result.
+
+      :param coro: The coroutine to run.
+      :type coro: Coroutine[Any, Any, CoroReturnType]
+
+      :returns: A future that will be completed when the coroutine completes.
+      :rtype: concurrent.futures.Future[CoroReturnType]
+
+
+
+.. py:data:: CoroReturnType
+
+   Type variable for the return type of an :external:py:mod:`asyncio` coroutine.
+
+.. py:type:: FutureReturnType
+   :canonical: Future[CoroReturnType]
+
+
+   Type variable for the return type of a :py:class:`~concurrent.futures.Future`.
+

@@ -1,0 +1,134 @@
+mlos_bench.services.base_service
+================================
+
+.. py:module:: mlos_bench.services.base_service
+
+.. autoapi-nested-parse::
+
+   Base class for the service mix-ins.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.base_service.Service
+
+
+Module Contents
+---------------
+
+.. py:class:: Service(config: dict[str, Any] | None = None, global_config: dict[str, Any] | None = None, parent: Service | None = None, methods: dict[str, collections.abc.Callable] | list[collections.abc.Callable] | None = None)
+
+   Bases: :py:obj:`contextlib.AbstractContextManager`
+
+
+   An abstract base of all Environment Services and used to build up mix-ins.
+
+   Create a new service with a given config.
+
+   :param config: Free-format dictionary that contains the service configuration.
+                  It will be passed as a constructor parameter of the class
+                  specified by `class_name`.
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters.
+   :type global_config: dict
+   :param parent: An optional parent service that can provide mixin functions.
+   :type parent: Service
+   :param methods: New methods to register with the service.
+   :type methods: Union[dict[str, Callable], list[Callable], None]
+
+
+   .. py:method:: __enter__() -> Service
+
+      Enter the Service mix-in context.
+
+      Calls the _enter_context() method of all the Services registered under this one.
+
+
+
+   .. py:method:: __exit__(ex_type: type[BaseException] | None, ex_val: BaseException | None, ex_tb: types.TracebackType | None) -> Literal[False]
+
+      Exit the Service mix-in context.
+
+      Calls the _exit_context() method of all the Services registered under this one.
+
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: export() -> dict[str, collections.abc.Callable]
+
+      Return a dictionary of functions available in this service.
+
+      :returns: **services** -- A dictionary of string -> function pairs.
+      :rtype: dict
+
+
+
+   .. py:method:: merge_methods(ext_methods: dict[str, collections.abc.Callable] | list[collections.abc.Callable] | None, local_methods: dict[str, collections.abc.Callable] | list[collections.abc.Callable]) -> dict[str, collections.abc.Callable]
+      :staticmethod:
+
+
+      Merge methods from the external caller with the local ones.
+
+      This function is usually called by the derived class constructor just before
+      invoking the constructor of the base class.
+
+
+
+   .. py:method:: new(class_name: str, config: dict[str, Any] | None = None, global_config: dict[str, Any] | None = None, parent: Service | None = None) -> Service
+      :classmethod:
+
+
+      Factory method for a new service with a given config.
+
+      :param class_name: FQN of a Python class to instantiate, e.g.,
+                         "mlos_bench.services.remote.azure.AzureVMService".
+                         Must be derived from the `Service` class.
+      :type class_name: str
+      :param config: Free-format dictionary that contains the service configuration.
+                     It will be passed as a constructor parameter of the class
+                     specified by `class_name`.
+      :type config: dict
+      :param global_config: Free-format dictionary of global parameters.
+      :type global_config: dict
+      :param parent: A parent service that can provide mixin functions.
+      :type parent: Service
+
+      :returns: **svc** -- An instance of the `Service` class initialized with `config`.
+      :rtype: Service
+
+
+
+   .. py:method:: pprint() -> str
+
+      Produce a human-readable string listing all public methods of the service.
+
+
+
+   .. py:method:: register(services: dict[str, collections.abc.Callable] | list[collections.abc.Callable]) -> None
+
+      Register new mix-in services.
+
+      :param services: A dictionary of string -> function pairs.
+      :type services: dict or list
+
+
+
+   .. py:attribute:: config
+
+
+   .. py:property:: config_loader_service
+      :type: mlos_bench.services.types.config_loader_type.SupportsConfigLoading
+
+
+      Return a config loader service.
+
+      :returns: **config_loader_service** -- A config loader service.
+      :rtype: SupportsConfigLoading
+
+

@@ -1,0 +1,25 @@
+mlos_bench.config.schemas
+=========================
+
+.. py:module:: mlos_bench.config.schemas
+
+.. autoapi-nested-parse::
+
+   A module for managing config schemas and their validation.
+
+   .. seealso::
+
+      :py:obj:`mlos_bench.config.schemas.config_schemas`
+          The module handling the actual schema definitions and validation.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/mlos_bench/config/schemas/config_schemas/index
+
+

@@ -1,0 +1,72 @@
+mlos_bench.services.remote.azure.azure_saas
+===========================================
+
+.. py:module:: mlos_bench.services.remote.azure.azure_saas
+
+.. autoapi-nested-parse::
+
+   A collection Service functions for configuring SaaS instances on Azure.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.remote.azure.azure_saas.AzureSaaSConfigService
+
+
+Module Contents
+---------------
+
+.. py:class:: AzureSaaSConfigService(config: dict[str, Any] | None = None, global_config: dict[str, Any] | None = None, parent: mlos_bench.services.base_service.Service | None = None, methods: dict[str, collections.abc.Callable] | list[collections.abc.Callable] | None = None)
+
+   Bases: :py:obj:`mlos_bench.services.base_service.Service`, :py:obj:`mlos_bench.services.types.remote_config_type.SupportsRemoteConfig`
+
+
+   Helper methods to configure Azure Flex services.
+
+   Create a new instance of Azure services proxy.
+
+   :param config: Free-format dictionary that contains the benchmark environment
+                  configuration.
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters.
+   :type global_config: dict
+   :param parent: Parent service that can provide mixin functions.
+   :type parent: Service
+   :param methods: New methods to register with the service.
+   :type methods: Union[dict[str, Callable], list[Callable], None]
+
+
+   .. py:method:: configure(config: dict[str, Any], params: dict[str, Any]) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Update the parameters of an Azure DB service.
+
+      :param config: Key/value pairs of configuration parameters (e.g., vmName).
+      :type config: dict[str, Any]
+      :param params: Key/value pairs of the service parameters to update.
+      :type params: dict[str, Any]
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: is_config_pending(config: dict[str, Any]) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Check if the configuration of an Azure DB service requires a reboot or restart.
+
+      :param config: Key/value pairs of configuration parameters (e.g., vmName).
+      :type config: dict[str, Any]
+
+      :returns: **result** -- A pair of Status and result. A Boolean field
+                "isConfigPendingRestart" indicates whether the service restart is required.
+                If "isConfigPendingReboot" is set to True, rebooting a VM is necessary.
+                Status is one of {PENDING, TIMED_OUT, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+

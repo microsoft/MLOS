@@ -1,0 +1,71 @@
+mlos_bench.optimizers.track_best_optimizer
+==========================================
+
+.. py:module:: mlos_bench.optimizers.track_best_optimizer
+
+.. autoapi-nested-parse::
+
+   TrackBestOptimizer base class for mlos_bench.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.optimizers.track_best_optimizer.TrackBestOptimizer
+
+
+Module Contents
+---------------
+
+.. py:class:: TrackBestOptimizer(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, config: dict, global_config: dict | None = None, service: mlos_bench.services.base_service.Service | None = None)
+
+   Bases: :py:obj:`mlos_bench.optimizers.base_optimizer.Optimizer`
+
+
+   Base Optimizer class that keeps track of the best score and configuration.
+
+   Create a new optimizer for the given configuration space defined by the
+   tunables.
+
+   :param tunables: The tunables to optimize.
+   :type tunables: TunableGroups
+   :param config: Free-format key/value pairs of configuration parameters to pass to the optimizer.
+   :type config: dict
+   :param global_config:
+   :type global_config: dict | None
+   :param service:
+   :type service: Service | None
+
+
+   .. py:method:: get_best_observation() -> tuple[dict[str, float], mlos_bench.tunables.tunable_groups.TunableGroups] | tuple[None, None]
+
+      Get the best observation so far.
+
+      :returns: **(value, tunables)** -- The best value and the corresponding configuration.
+                (None, None) if no successful observation has been registered yet.
+      :rtype: tuple[dict[str, float], TunableGroups]
+
+
+
+   .. py:method:: register(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, status: mlos_bench.environments.status.Status, score: dict[str, mlos_bench.tunables.tunable_types.TunableValue] | None = None) -> dict[str, float] | None
+
+      Register the observation for the given configuration.
+
+      :param tunables: The configuration that has been benchmarked.
+                       Usually it's the same config that the `.suggest()` method returned.
+      :type tunables: TunableGroups
+      :param status: Final status of the experiment (e.g., SUCCEEDED or FAILED).
+      :type status: Status
+      :param score: A dict with the final benchmark results.
+                    None if the experiment was not successful.
+      :type score: Optional[dict[str, TunableValue]]
+
+      :returns: **value** -- Benchmark scores extracted (and possibly transformed)
+                from the dataframe that's being MINIMIZED.
+      :rtype: Optional[dict[str, float]]
+
+
+

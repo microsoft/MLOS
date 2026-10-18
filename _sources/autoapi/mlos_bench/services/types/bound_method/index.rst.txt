@@ -1,0 +1,43 @@
+mlos_bench.services.types.bound_method
+======================================
+
+.. py:module:: mlos_bench.services.types.bound_method
+
+.. autoapi-nested-parse::
+
+   Protocol representing a bound method.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.types.bound_method.BoundMethod
+
+
+Module Contents
+---------------
+
+.. py:class:: BoundMethod
+
+   Bases: :py:obj:`Protocol`
+
+
+   A callable method bound to an object.
+
+
+   .. py:method:: __call__(*args: Any, **kwargs: Any) -> Any
+
+      Call the bound method.
+
+
+
+   .. py:property:: __self__
+      :type: Any
+
+
+      The self object of the bound method.
+
+

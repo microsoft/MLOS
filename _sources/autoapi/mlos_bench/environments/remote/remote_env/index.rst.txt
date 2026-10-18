@@ -1,0 +1,94 @@
+mlos_bench.environments.remote.remote_env
+=========================================
+
+.. py:module:: mlos_bench.environments.remote.remote_env
+
+.. autoapi-nested-parse::
+
+   Remotely executed benchmark/script environment.
+
+   e.g. Application Environment
+
+   TODO: Document how variable propagation works in the remote environments.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.environments.remote.remote_env.RemoteEnv
+
+
+Module Contents
+---------------
+
+.. py:class:: RemoteEnv(*, name: str, config: dict, global_config: dict | None = None, tunables: mlos_bench.tunables.tunable_groups.TunableGroups | None = None, service: mlos_bench.services.base_service.Service | None = None)
+
+   Bases: :py:obj:`mlos_bench.environments.script_env.ScriptEnv`
+
+
+   Environment to run benchmarks and scripts on a remote host OS.
+
+   e.g. Application Environment
+
+   Create a new environment for remote execution.
+
+   :param name: Human-readable name of the environment.
+   :type name: str
+   :param config: Free-format dictionary that contains the benchmark environment
+                  configuration. Each config must have at least the "tunable_params"
+                  and the "const_args" sections.
+                  `RemoteEnv` must also have at least some of the following parameters:
+                  {setup, run, teardown, wait_boot}
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters (e.g., security credentials)
+                         to be mixed in into the "const_args" section of the local config.
+   :type global_config: dict
+   :param tunables: A collection of tunable parameters for *all* environments.
+   :type tunables: TunableGroups
+   :param service: An optional service object (e.g., providing methods to
+                   deploy or reboot a Host, VM, OS, etc.).
+   :type service: Service
+
+
+   .. py:method:: run() -> tuple[mlos_bench.environments.status.Status, datetime.datetime, dict[str, mlos_bench.tunables.tunable_types.TunableValue] | None]
+
+      Runs the run script on the remote environment.
+
+      This can be used to, for instance, submit a new experiment to the
+      remote application environment by (re)configuring an application and
+      launching the benchmark, or run a script that collects the results.
+
+      :returns: **(status, timestamp, output)** -- 3-tuple of (Status, timestamp, output) values, where `output` is a dict
+                with the results or None if the status is not COMPLETED.
+                If run script is a benchmark, then the score is usually expected to
+                be in the `score` field.
+      :rtype: (Status, datetime.datetime, dict)
+
+
+
+   .. py:method:: setup(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, global_config: dict | None = None) -> bool
+
+      Check if the environment is ready and set up the application and benchmarks on a
+      remote host.
+
+      :param tunables: A collection of tunable OS and application parameters along with their
+                       values. Setting these parameters should not require an OS reboot.
+      :type tunables: TunableGroups
+      :param global_config: Free-format dictionary of global parameters of the environment
+                            that are not used in the optimization process.
+      :type global_config: dict
+
+      :returns: **is_success** -- True if operation is successful, false otherwise.
+      :rtype: bool
+
+
+
+   .. py:method:: teardown() -> None
+
+      Clean up and shut down the remote environment.
+
+
+

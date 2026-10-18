@@ -1,0 +1,252 @@
+mlos_core.data_classes
+======================
+
+.. py:module:: mlos_core.data_classes
+
+.. autoapi-nested-parse::
+
+   Data classes for ``mlos_core`` used to pass around configurations, observations, and
+   suggestions.
+
+   ``mlos_core`` uses :external:py:mod:`pandas` :external:py:class:`~pandas.DataFrame`
+   s and :external:py:class:`~pandas.Series` to represent configurations and scores and
+   context (information about where the configuration was evaluated).
+
+   These modules encapsulate tuples of those for easier passing around and manipulation.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_core.data_classes.Observation
+   mlos_core.data_classes.Observations
+   mlos_core.data_classes.Suggestion
+
+
+Module Contents
+---------------
+
+.. py:class:: Observation(*, config: pandas.Series, score: pandas.Series = pd.Series(), context: pandas.Series | None = None, metadata: pandas.Series | None = None)
+
+   A single observation of a configuration.
+
+   Creates a new Observation object.
+
+   :param config: The configuration observed.
+   :type config: pandas.Series
+   :param score: The score metrics observed.
+   :type score: pandas.Series
+   :param context: The context in which the configuration was evaluated.
+                   Not Yet Implemented.
+   :type context: pandas.Series | None
+   :param metadata: The metadata in which the configuration was evaluated
+   :type metadata: pandas.Series | None
+
+
+   .. py:method:: __eq__(other: Any) -> bool
+
+
+   .. py:method:: __ne__(other: Any) -> bool
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: to_suggestion() -> Suggestion
+
+      Converts the observation to a suggestion.
+
+      :returns: The suggestion.
+      :rtype: Suggestion
+
+
+
+   .. py:property:: config
+      :type: pandas.Series
+
+
+      Gets (a copy of) the config of the Observation.
+
+
+   .. py:property:: context
+      :type: pandas.Series | None
+
+
+      Gets (a copy of) the context of the Observation.
+
+
+   .. py:property:: metadata
+      :type: pandas.Series | None
+
+
+      Gets (a copy of) the metadata of the Observation.
+
+
+   .. py:property:: score
+      :type: pandas.Series
+
+
+      Gets (a copy of) the score of the Observation.
+
+
+.. py:class:: Observations(*, configs: pandas.DataFrame = pd.DataFrame(), scores: pandas.DataFrame = pd.DataFrame(), contexts: pandas.DataFrame | None = None, metadata: pandas.DataFrame | None = None, observations: collections.abc.Iterable[Observation] | None = None)
+
+   A set of observations of a configuration scores.
+
+   Creates a new Observation object.
+
+   Can accept either a set of Observations or a collection of aligned config and
+   score (and optionally context) dataframes.
+
+   If both are provided the two sets will be merged.
+
+   :param configs: Pandas dataframe containing configurations. Column names are the parameter names.
+   :type configs: pandas.DataFrame
+   :param scores: The score metrics observed in a dataframe.
+   :type scores: pandas.DataFrame
+   :param contexts: The context in which the configuration was evaluated.
+                    Not Yet Implemented.
+   :type contexts: pandas.DataFrame | None
+   :param metadata: The metadata in which the configuration was evaluated
+                    Not Yet Implemented.
+   :type metadata: pandas.DataFrame | None
+
+
+   .. py:method:: __eq__(other: Any) -> bool
+
+
+   .. py:method:: __iter__() -> collections.abc.Iterator[Observation]
+
+
+   .. py:method:: __len__() -> int
+
+
+   .. py:method:: __ne__(other: Any) -> bool
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: append(observation: Observation) -> None
+
+      Appends the given observation to this observation.
+
+      :param observation: The observation to append.
+      :type observation: Observation
+
+
+
+   .. py:method:: filter_by_index(index: pandas.Index) -> Observations
+
+      Filters the observation by the given indices.
+
+      :param index: The indices to filter by.
+      :type index: pandas.Index
+
+      :returns: The filtered observation.
+      :rtype: Observation
+
+
+
+   .. py:property:: configs
+      :type: pandas.DataFrame
+
+
+      Gets a copy of the configs of the Observations.
+
+
+   .. py:property:: contexts
+      :type: pandas.DataFrame | None
+
+
+      Gets a copy of the contexts of the Observations.
+
+
+   .. py:property:: metadata
+      :type: pandas.DataFrame | None
+
+
+      Gets a copy of the metadata of the Observations.
+
+
+   .. py:property:: scores
+      :type: pandas.DataFrame
+
+
+      Gets a copy of the scores of the Observations.
+
+
+.. py:class:: Suggestion(*, config: pandas.Series, context: pandas.Series | None = None, metadata: pandas.Series | None = None)
+
+   A single suggestion for a configuration.
+
+   A Suggestion is an Observation that has not yet been scored. Evaluating the
+   Suggestion and calling `complete(scores)` can convert it to an Observation.
+
+   Creates a new Suggestion.
+
+   :param config: The configuration suggested.
+   :type config: pandas.Series
+   :param context: The context for this suggestion, by default None
+   :type context: pandas.Series | None
+   :param metadata: Any metadata provided by the underlying optimizer, by default None
+   :type metadata: pandas.Series | None
+
+
+   .. py:method:: __eq__(other: Any) -> bool
+
+
+   .. py:method:: __ne__(other: Any) -> bool
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: complete(score: pandas.Series) -> Observation
+
+      Completes the Suggestion by adding a score to turn it into an Observation.
+
+      :param score: The score metrics observed.
+      :type score: pandas.Series
+
+      :returns: The observation of the suggestion.
+      :rtype: Observation
+
+
+
+   .. py:method:: to_configspace_config(space: ConfigSpace.ConfigurationSpace) -> ConfigSpace.Configuration
+
+      Convert a Configuration Space to a Configuration.
+
+      :param space: The ConfigurationSpace to be converted.
+      :type space: ConfigSpace.ConfigurationSpace
+
+      :returns: The output Configuration.
+      :rtype: ConfigSpace.Configuration
+
+
+
+   .. py:property:: config
+      :type: pandas.Series
+
+
+      Gets (a copy of) the config of the Suggestion.
+
+
+   .. py:property:: context
+      :type: pandas.Series | None
+
+
+      Gets (a copy of) the context of the Suggestion.
+
+
+   .. py:property:: metadata
+      :type: pandas.Series | None
+
+
+      Gets (a copy of) the metadata of the Suggestion.
+
+
