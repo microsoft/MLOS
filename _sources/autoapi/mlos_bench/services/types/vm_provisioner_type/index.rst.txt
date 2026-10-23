@@ -1,0 +1,131 @@
+mlos_bench.services.types.vm_provisioner_type
+=============================================
+
+.. py:module:: mlos_bench.services.types.vm_provisioner_type
+
+.. autoapi-nested-parse::
+
+   Protocol interface for VM provisioning operations.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.types.vm_provisioner_type.SupportsVMOps
+
+
+Module Contents
+---------------
+
+.. py:class:: SupportsVMOps
+
+   Bases: :py:obj:`Protocol`
+
+
+   Protocol interface for VM provisioning operations.
+
+
+   .. py:method:: vm_deprovision(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Deallocates the VM by shutting it down then releasing the compute resources.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: vm_provision(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Check if VM is ready. Deploy a new VM, if necessary.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+                     VMEnv tunables are variable parameters that, together with the
+                     VMEnv configuration, are sufficient to provision a VM.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: vm_restart(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Restarts the VM by initiating a graceful shutdown.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: vm_start(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Start a VM.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: vm_stop(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Stops the VM by initiating a graceful shutdown.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: wait_vm_deployment(is_setup: bool, params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
+      Return TIMED_OUT when timing out.
+
+      :param is_setup: If True, wait for VM being deployed; otherwise, wait for successful deprovisioning.
+      :type is_setup: bool
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result.
+                Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+                Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: wait_vm_operation(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Waits for a pending operation on a VM to resolve to SUCCEEDED or FAILED. Return
+      TIMED_OUT when timing out.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+                     Must have the "asyncResultsUrl" key to get the results.
+                     If the key is not present, return Status.PENDING.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result.
+                Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+                Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+      :rtype: (Status, dict)
+
+
+

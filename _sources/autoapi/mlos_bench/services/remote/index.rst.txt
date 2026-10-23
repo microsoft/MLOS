@@ -1,0 +1,21 @@
+mlos_bench.services.remote
+==========================
+
+.. py:module:: mlos_bench.services.remote
+
+.. autoapi-nested-parse::
+
+   Services for executing scripts and commands on remote hosts.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/mlos_bench/services/remote/azure/index
+   /autoapi/mlos_bench/services/remote/ssh/index
+
+

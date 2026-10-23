@@ -1,0 +1,26 @@
+mlos_viz.version
+================
+
+.. py:module:: mlos_viz.version
+
+.. autoapi-nested-parse::
+
+   Version number for the mlos_viz package.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   mlos_viz.version.VERSION
+
+
+Module Contents
+---------------
+
+.. py:data:: VERSION
+   :value: '0.6.2'
+
+

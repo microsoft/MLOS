@@ -1,0 +1,77 @@
+mlos_core.spaces.adapters.identity_adapter
+==========================================
+
+.. py:module:: mlos_core.spaces.adapters.identity_adapter
+
+.. autoapi-nested-parse::
+
+   Contains the Identity (no-op) Space Adapter class.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_core.spaces.adapters.identity_adapter.IdentityAdapter
+
+
+Module Contents
+---------------
+
+.. py:class:: IdentityAdapter(*, orig_parameter_space: ConfigSpace.ConfigurationSpace)
+
+   Bases: :py:obj:`mlos_core.spaces.adapters.adapter.BaseSpaceAdapter`
+
+
+   Identity (no-op) SpaceAdapter class.
+
+   :param orig_parameter_space: The original parameter space to explore.
+   :type orig_parameter_space: ConfigSpace.ConfigurationSpace
+
+
+   .. py:method:: inverse_transform(configuration: pandas.Series) -> pandas.Series
+
+      Translates a configuration, which belongs to the original parameter space, to
+      the target parameter space. This method is called by the `register` method of
+      the :py:class:`~mlos_core.optimizers.optimizer.BaseOptimizer` class, and
+      performs the inverse operation of :py:meth:`~.BaseSpaceAdapter.transform`
+      method.
+
+      :param configuration: A Series of configuration parameters, which belong to the original parameter space.
+                            The indices are the parameter names the original parameter space and the
+                            rows are the configurations.
+      :type configuration: pandas.Series
+
+      :returns: **configuration** -- Series of the translated configurations / parameters.
+                The indices are the parameter names of the target parameter space and
+                the rows are the configurations.
+      :rtype: pandas.Series
+
+
+
+   .. py:method:: transform(configuration: pandas.Series) -> pandas.Series
+
+      Translates a configuration, which belongs to the target parameter space, to the
+      original parameter space. This method is called by the
+      :py:meth:`~mlos_core.optimizers.optimizer.BaseOptimizer.suggest` method of the
+      :py:class:`~mlos_core.optimizers.optimizer.BaseOptimizer` class.
+
+      :param configuration: Pandas series. Column names are the parameter names
+                            of the target parameter space.
+      :type configuration: pandas.Series
+
+      :returns: **configuration** -- Pandas series, containing the translated configuration.
+                Column names are the parameter names of the original parameter space.
+      :rtype: pandas.Series
+
+
+
+   .. py:property:: target_parameter_space
+      :type: ConfigSpace.ConfigurationSpace
+
+
+      Target parameter space that is fed to the underlying optimizer.
+
+

@@ -1,0 +1,54 @@
+
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    width="74.63"
+    height="20"
+    role="img"
+    aria-label="tests: 1259"
+>
+    <style>
+        rect {
+            height: 20px;
+        }
+
+        text {
+            text-rendering: geometricPrecision;
+            dominant-baseline: middle;
+            text-anchor: middle;
+            font-family: Verdana,Geneva,DejaVu Sans,sans-serif;
+            font-size: 110px;
+            fill: #fff;
+        }
+
+        .shadow {
+            transform: translate(10px, 10px);
+            fill: #010101;
+        }
+    </style>
+    <title>tests: 1259</title>
+    <linearGradient id="s" x2="0" y2="100%">
+        <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+        <stop offset="1" stop-opacity=".1"/>
+    </linearGradient>
+    <clipPath id="r">
+        <rect width="100%" rx="3" fill="#fff"/>
+    </clipPath>
+    <g clip-path="url(#r)" >
+        <g>
+            <rect width="36.67" fill="#555"/>
+            <g transform="scale(.1)">
+                <text x="183.35" y="100" textLength="266.7" class="shadow">tests</text>
+                <text x="183.35" y="100" textLength="266.7">tests</text>
+            </g>
+        </g>
+        <g transform="translate(36.67 0)">
+            <rect width="37.96" fill="#4c1"/>
+            <g transform="scale(.1)">
+                <text x="189.8" y="100" textLength="279.6" class="shadow">1259</text>
+                <text x="189.8" y="100" textLength="279.6">1259</text>
+            </g>
+        </g>
+        <rect width="100%" height="100%" fill="url(#s)"/>
+    </g>
+</svg>

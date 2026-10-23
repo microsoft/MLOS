@@ -1,0 +1,69 @@
+mlos_bench.optimizers.mock_optimizer
+====================================
+
+.. py:module:: mlos_bench.optimizers.mock_optimizer
+
+.. autoapi-nested-parse::
+
+   Mock optimizer for mlos_bench.
+
+   Mostly intended for testing and validation. This optimizer produces random suggestions.
+   The range of the suggestions can be controlled by a config.
+
+   See the test cases or example json configs for more details.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.optimizers.mock_optimizer.MockOptimizer
+
+
+Module Contents
+---------------
+
+.. py:class:: MockOptimizer(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, config: dict, global_config: dict | None = None, service: mlos_bench.services.base_service.Service | None = None)
+
+   Bases: :py:obj:`mlos_bench.optimizers.track_best_optimizer.TrackBestOptimizer`
+
+
+   Mock optimizer to test the Environment API.
+
+   Create a new optimizer for the given configuration space defined by the
+   tunables.
+
+   :param tunables: The tunables to optimize.
+   :type tunables: TunableGroups
+   :param config: Free-format key/value pairs of configuration parameters to pass to the optimizer.
+   :type config: dict
+   :param global_config:
+   :type global_config: dict | None
+   :param service:
+   :type service: Service | None
+
+
+   .. py:method:: bulk_register(configs: collections.abc.Sequence[dict], scores: collections.abc.Sequence[dict[str, mlos_bench.tunables.tunable_types.TunableValue] | None], status: collections.abc.Sequence[mlos_bench.environments.status.Status] | None = None) -> bool
+
+      Pre-load the optimizer with the bulk data from previous experiments.
+
+      :param configs: Records of tunable values from other experiments.
+      :type configs: Sequence[dict]
+      :param scores: Benchmark results from experiments that correspond to `configs`.
+      :type scores: Sequence[Optional[dict[str, TunableValue]]]
+      :param status: Status of the experiments that correspond to `configs`.
+      :type status: Optional[Sequence[Status]]
+
+      :returns: **is_not_empty** -- True if there is data to register, false otherwise.
+      :rtype: bool
+
+
+
+   .. py:method:: suggest() -> mlos_bench.tunables.tunable_groups.TunableGroups
+
+      Generate the next (random) suggestion.
+
+
+

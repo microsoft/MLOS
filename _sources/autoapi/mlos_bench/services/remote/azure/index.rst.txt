@@ -1,0 +1,25 @@
+mlos_bench.services.remote.azure
+================================
+
+.. py:module:: mlos_bench.services.remote.azure
+
+.. autoapi-nested-parse::
+
+   Azure-specific benchmark environments for mlos_bench.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/mlos_bench/services/remote/azure/azure_auth/index
+   /autoapi/mlos_bench/services/remote/azure/azure_deployment_services/index
+   /autoapi/mlos_bench/services/remote/azure/azure_fileshare/index
+   /autoapi/mlos_bench/services/remote/azure/azure_network_services/index
+   /autoapi/mlos_bench/services/remote/azure/azure_saas/index
+   /autoapi/mlos_bench/services/remote/azure/azure_vm_services/index
+
+

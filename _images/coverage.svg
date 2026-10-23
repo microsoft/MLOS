@@ -1,0 +1,54 @@
+
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    width="95.99"
+    height="20"
+    role="img"
+    aria-label="coverage: 93%"
+>
+    <style>
+        rect {
+            height: 20px;
+        }
+
+        text {
+            text-rendering: geometricPrecision;
+            dominant-baseline: middle;
+            text-anchor: middle;
+            font-family: Verdana,Geneva,DejaVu Sans,sans-serif;
+            font-size: 110px;
+            fill: #fff;
+        }
+
+        .shadow {
+            transform: translate(10px, 10px);
+            fill: #010101;
+        }
+    </style>
+    <title>coverage: 93%</title>
+    <linearGradient id="s" x2="0" y2="100%">
+        <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+        <stop offset="1" stop-opacity=".1"/>
+    </linearGradient>
+    <clipPath id="r">
+        <rect width="100%" rx="3" fill="#fff"/>
+    </clipPath>
+    <g clip-path="url(#r)" >
+        <g>
+            <rect width="60.17" fill="#555"/>
+            <g transform="scale(.1)">
+                <text x="300.85" y="100" textLength="501.7" class="shadow">coverage</text>
+                <text x="300.85" y="100" textLength="501.7">coverage</text>
+            </g>
+        </g>
+        <g transform="translate(60.17 0)">
+            <rect width="35.82" fill="#97ca00"/>
+            <g transform="scale(.1)">
+                <text x="179.1" y="100" textLength="258.2" class="shadow">93%</text>
+                <text x="179.1" y="100" textLength="258.2">93%</text>
+            </g>
+        </g>
+        <rect width="100%" height="100%" fill="url(#s)"/>
+    </g>
+</svg>
