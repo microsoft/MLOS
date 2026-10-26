@@ -1,5 +1,5 @@
 setuptools-scm>=10.3.4
-sphinx>=8.2.0,<9
+sphinx>=9.2.0,<10
 sphinx-autoapi>=3.8.1
 intersphinx_registry>=0.2609.5 # https://github.com/Quansight-Labs/intersphinx_registry/pull/58
 nbsphinx
