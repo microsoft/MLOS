@@ -1,0 +1,115 @@
+mlos_bench.storage.base_tunable_config_trial_group_data
+=======================================================
+
+.. py:module:: mlos_bench.storage.base_tunable_config_trial_group_data
+
+.. autoapi-nested-parse::
+
+   Base interface for accessing the stored benchmark config trial group data.
+
+   Since a single config may be used by multiple trials, we can group them together for
+   easier analysis.
+
+   .. seealso::
+
+      :py:mod:`mlos_bench.storage`
+          The base storage module for mlos_bench, which includes some basic examples in the documentation.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.storage.base_tunable_config_trial_group_data.TunableConfigTrialGroupData
+
+
+Module Contents
+---------------
+
+.. py:class:: TunableConfigTrialGroupData(*, experiment_id: str, tunable_config_id: int, tunable_config_trial_group_id: int | None = None)
+
+   Base interface for accessing the stored experiment benchmark tunable config trial
+   group data.
+
+   A (tunable) config is used to define an instance of values for a set of tunable
+   parameters for a given experiment and can be used by one or more trial instances
+   (e.g., for repeats), which we call a (tunable) config trial group.
+
+
+   .. py:method:: __eq__(other: Any) -> bool
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:property:: experiment_id
+      :type: str
+
+
+      ID of the experiment.
+
+
+   .. py:property:: results_df
+      :type: pandas.DataFrame
+
+      :abstractmethod:
+
+
+      Retrieve all results for this (tunable) config trial group as a single
+      DataFrame.
+
+      :returns: **results** -- A DataFrame with configurations and results from all trials of the experiment.
+                Has columns [trial_id, config_id, ts_start, ts_end, status]
+                followed by tunable config parameters (prefixed with "config.") and
+                trial results (prefixed with "result."). The latter can be NULLs if the
+                trial was not successful.
+      :rtype: pandas.DataFrame
+
+      .. seealso:: :py:attr:`mlos_bench.storage.base_experiment_data.ExperimentData.results_df`
+
+
+   .. py:property:: trials
+      :type: dict[int, mlos_bench.storage.base_trial_data.TrialData]
+
+      :abstractmethod:
+
+
+      Retrieve the trials' data for this (tunable) config trial group from the
+      storage.
+
+      :returns: **trials** -- A dictionary of the trials' data, keyed by trial id.
+      :rtype: dict[int, TrialData]
+
+
+   .. py:property:: tunable_config
+      :type: mlos_bench.storage.base_tunable_config_data.TunableConfigData
+
+      :abstractmethod:
+
+
+      Retrieve the (tunable) config data for this (tunable) config trial group from
+      the storage.
+
+      :rtype: TunableConfigData
+
+
+   .. py:property:: tunable_config_id
+      :type: int
+
+
+      ID of the config.
+
+
+   .. py:property:: tunable_config_trial_group_id
+      :type: int
+
+
+      The unique ID (within this experiment) of the (tunable) config trial group.
+
+      This is a unique identifier for all trials in this experiment using the given
+      config_id, and typically defined as the the minimum trial_id for the given
+      config_id.
+
+

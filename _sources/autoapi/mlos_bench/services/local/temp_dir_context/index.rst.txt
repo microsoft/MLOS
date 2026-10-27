@@ -1,0 +1,59 @@
+mlos_bench.services.local.temp_dir_context
+==========================================
+
+.. py:module:: mlos_bench.services.local.temp_dir_context
+
+.. autoapi-nested-parse::
+
+   Helper functions to work with temp files locally on the scheduler side.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.local.temp_dir_context.TempDirContextService
+
+
+Module Contents
+---------------
+
+.. py:class:: TempDirContextService(config: dict[str, Any] | None = None, global_config: dict[str, Any] | None = None, parent: mlos_bench.services.base_service.Service | None = None, methods: dict[str, collections.abc.Callable] | list[collections.abc.Callable] | None = None)
+
+   Bases: :py:obj:`mlos_bench.services.base_service.Service`
+
+
+   A *base* service class that provides a method to create a temporary directory
+   context for local scripts.
+
+   It is inherited by LocalExecService and MockLocalExecService. This class is not
+   supposed to be used as a standalone service.
+
+   Create a new instance of a service that provides temporary directory context for
+   local exec service.
+
+   :param config: Free-format dictionary that contains parameters for the service.
+                  (E.g., root path for config files, etc.)
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters.
+   :type global_config: dict
+   :param parent: An optional parent service that can provide mixin functions.
+   :type parent: Service
+   :param methods: New methods to register with the service.
+   :type methods: Union[dict[str, Callable], list[Callable], None]
+
+
+   .. py:method:: temp_dir_context(path: str | None = None) -> tempfile.TemporaryDirectory | contextlib.nullcontext
+
+      Create a temp directory or use the provided path.
+
+      :param path: A path to the temporary directory. Create a new one if None.
+      :type path: str
+
+      :returns: **temp_dir_context** -- Temporary directory context to use in the `with` clause.
+      :rtype: tempfile.TemporaryDirectory
+
+
+

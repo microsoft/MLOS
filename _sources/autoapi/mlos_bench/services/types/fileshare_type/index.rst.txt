@@ -1,0 +1,63 @@
+mlos_bench.services.types.fileshare_type
+========================================
+
+.. py:module:: mlos_bench.services.types.fileshare_type
+
+.. autoapi-nested-parse::
+
+   Protocol interface for file share operations.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.types.fileshare_type.SupportsFileShareOps
+
+
+Module Contents
+---------------
+
+.. py:class:: SupportsFileShareOps
+
+   Bases: :py:obj:`Protocol`
+
+
+   Protocol interface for file share operations.
+
+
+   .. py:method:: download(params: dict, remote_path: str, local_path: str, recursive: bool = True) -> None
+
+      Downloads contents from a remote share path to a local path.
+
+      :param params: Flat dictionary of (key, value) pairs of (optional) connection details.
+      :type params: dict
+      :param remote_path: Path to download from the remote file share, a file if recursive=False
+                          or a directory if recursive=True.
+      :type remote_path: str
+      :param local_path: Path to store the downloaded content to.
+      :type local_path: str
+      :param recursive: If False, ignore the subdirectories;
+                        if True (the default), download the entire directory tree.
+      :type recursive: bool
+
+
+
+   .. py:method:: upload(params: dict, local_path: str, remote_path: str, recursive: bool = True) -> None
+
+      Uploads contents from a local path to remote share path.
+
+      :param params: Flat dictionary of (key, value) pairs of (optional) connection details.
+      :type params: dict
+      :param local_path: Path to the local directory to upload contents from.
+      :type local_path: str
+      :param remote_path: Path in the remote file share to store the uploaded content to.
+      :type remote_path: str
+      :param recursive: If False, ignore the subdirectories;
+                        if True (the default), upload the entire directory tree.
+      :type recursive: bool
+
+
+

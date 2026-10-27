@@ -1,0 +1,129 @@
+mlos_bench.environments.composite_env
+=====================================
+
+.. py:module:: mlos_bench.environments.composite_env
+
+.. autoapi-nested-parse::
+
+   Composite benchmark environment.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.environments.composite_env.CompositeEnv
+
+
+Module Contents
+---------------
+
+.. py:class:: CompositeEnv(*, name: str, config: dict, global_config: dict | None = None, tunables: mlos_bench.tunables.tunable_groups.TunableGroups | None = None, service: mlos_bench.services.base_service.Service | None = None)
+
+   Bases: :py:obj:`mlos_bench.environments.base_environment.Environment`
+
+
+   Composite benchmark environment.
+
+   Create a new environment with a given config.
+
+   :param name: Human-readable name of the environment.
+   :type name: str
+   :param config: Free-format dictionary that contains the environment
+                  configuration. Must have a "children" section.
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters (e.g., security credentials)
+                         to be mixed in into the "const_args" section of the local config.
+   :type global_config: dict
+   :param tunables: A collection of groups of tunable parameters for *all* environments.
+   :type tunables: TunableGroups
+   :param service: An optional service object (e.g., providing methods to
+                   deploy or reboot a VM, etc.).
+   :type service: Service
+
+
+   .. py:method:: __enter__() -> mlos_bench.environments.base_environment.Environment
+
+      Enter the environment's benchmarking context.
+
+
+
+   .. py:method:: __exit__(ex_type: type[BaseException] | None, ex_val: BaseException | None, ex_tb: types.TracebackType | None) -> Literal[False]
+
+      Exit the context of the benchmarking environment.
+
+
+
+   .. py:method:: pprint(indent: int = 4, level: int = 0) -> str
+
+      Pretty-print the environment and its children.
+
+      :param indent: Number of spaces to indent the output at each level. Default is 4.
+      :type indent: int
+      :param level: Current level of indentation. Default is 0.
+      :type level: int
+
+      :returns: **pretty** -- Pretty-printed environment configuration.
+      :rtype: str
+
+
+
+   .. py:method:: run() -> tuple[mlos_bench.environments.status.Status, datetime.datetime, dict[str, mlos_bench.tunables.tunable_types.TunableValue] | None]
+
+      Submit a new experiment to the environment. Return the result of the *last*
+      child environment if successful, or the status of the last failed environment
+      otherwise.
+
+      :returns: **(status, timestamp, output)** -- 3-tuple of (Status, timestamp, output) values, where `output` is a dict
+                with the results or None if the status is not COMPLETED.
+                If run script is a benchmark, then the score is usually expected to
+                be in the `score` field.
+      :rtype: (Status, datetime.datetime, dict)
+
+
+
+   .. py:method:: setup(tunables: mlos_bench.tunables.tunable_groups.TunableGroups, global_config: dict | None = None) -> bool
+
+      Set up the children environments.
+
+      :param tunables: A collection of tunable parameters along with their values.
+      :type tunables: TunableGroups
+      :param global_config: Free-format dictionary of global parameters of the environment
+                            that are not used in the optimization process.
+      :type global_config: dict
+
+      :returns: **is_success** -- True if all children setup() operations are successful,
+                false otherwise.
+      :rtype: bool
+
+
+
+   .. py:method:: status() -> tuple[mlos_bench.environments.status.Status, datetime.datetime, list[tuple[datetime.datetime, str, Any]]]
+
+      Check the status of the benchmark environment.
+
+      :returns: **(benchmark_status, timestamp, telemetry)** -- 3-tuple of (benchmark status, timestamp, telemetry) values.
+                `timestamp` is UTC time stamp of the status; it's current time by default.
+                `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
+      :rtype: (Status, datetime.datetime, list)
+
+
+
+   .. py:method:: teardown() -> None
+
+      Tear down the children environments.
+
+      This method is idempotent, i.e., calling it several times is equivalent to a
+      single call. The environments are being torn down in the reverse order.
+
+
+
+   .. py:property:: children
+      :type: list[mlos_bench.environments.base_environment.Environment]
+
+
+      Return the list of child environments.
+
+

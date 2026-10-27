@@ -1,0 +1,170 @@
+mlos_bench.services.remote.ssh.ssh_service
+==========================================
+
+.. py:module:: mlos_bench.services.remote.ssh.ssh_service
+
+.. autoapi-nested-parse::
+
+   A collection functions for interacting with SSH servers as file shares.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.remote.ssh.ssh_service.SshClient
+   mlos_bench.services.remote.ssh.ssh_service.SshClientCache
+   mlos_bench.services.remote.ssh.ssh_service.SshService
+
+
+Module Contents
+---------------
+
+.. py:class:: SshClient(*args: tuple, **kwargs: dict)
+
+   Bases: :py:obj:`asyncssh.SSHClient`
+
+
+   Wrapper around SSHClient to help provide connection caching and reconnect logic.
+
+   Used by the SshService to try and maintain a single connection to hosts, handle
+   reconnects if possible, and use that to run commands rather than reconnect for each
+   command.
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: connection() -> asyncssh.connection.SSHClientConnection | None
+      :async:
+
+
+      Waits for and returns the asyncssh.connection.SSHClientConnection to be
+      established or lost.
+
+
+
+   .. py:method:: connection_lost(exc: Exception | None) -> None
+
+      Called when a connection is lost or closed
+
+      This method is called when a connection is closed. If the
+      connection is shut down cleanly, *exc* will be `None`.
+      Otherwise, it will be an exception explaining the reason for
+      the disconnect.
+
+      :param exc:
+          The exception which caused the connection to close, or
+          `None` if the connection closed cleanly
+      :type exc: :class:`Exception`
+
+
+
+
+   .. py:method:: connection_made(conn: asyncssh.connection.SSHClientConnection) -> None
+
+      Override hook provided by asyncssh.SSHClient.
+
+      Changes the connection_id from _CONNECTION_PENDING to a unique id repr.
+
+
+
+   .. py:method:: id_from_connection(connection: asyncssh.connection.SSHClientConnection) -> str
+      :staticmethod:
+
+
+      Gets a unique id repr for the connection.
+
+
+
+   .. py:method:: id_from_params(connect_params: dict) -> str
+      :staticmethod:
+
+
+      Gets a unique id repr for the connection.
+
+
+
+.. py:class:: SshClientCache
+
+   Manages a cache of SshClient connections.
+
+   Note: Only one per event loop thread supported.
+   See additional details in SshService comments.
+
+
+   .. py:method:: __len__() -> int
+
+
+   .. py:method:: __str__() -> str
+
+
+   .. py:method:: cleanup() -> None
+
+      Closes all cached connections.
+
+
+
+   .. py:method:: enter() -> None
+
+      Manages the cache lifecycle with reference counting.
+
+      To be used in the __enter__ method of a caller's context manager.
+
+
+
+   .. py:method:: exit() -> None
+
+      Manages the cache lifecycle with reference counting.
+
+      To be used in the __exit__ method of a caller's context manager.
+
+
+
+   .. py:method:: get_client_connection(connect_params: dict) -> tuple[asyncssh.connection.SSHClientConnection, SshClient]
+      :async:
+
+
+      Gets a (possibly cached) client connection.
+
+      :param connect_params: Parameters to pass to asyncssh.create_connection.
+      :type connect_params: dict
+
+      :returns: A tuple of (SSHClientConnection, SshClient).
+      :rtype: tuple[asyncssh.connection.SSHClientConnection, SshClient]
+
+
+
+.. py:class:: SshService(config: dict[str, Any] | None = None, global_config: dict[str, Any] | None = None, parent: mlos_bench.services.base_service.Service | None = None, methods: dict[str, collections.abc.Callable] | list[collections.abc.Callable] | None = None)
+
+   Bases: :py:obj:`mlos_bench.services.base_service.Service`
+
+
+   Base class for SSH services.
+
+   Create a new service with a given config.
+
+   :param config: Free-format dictionary that contains the service configuration.
+                  It will be passed as a constructor parameter of the class
+                  specified by `class_name`.
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters.
+   :type global_config: dict
+   :param parent: An optional parent service that can provide mixin functions.
+   :type parent: Service
+   :param methods: New methods to register with the service.
+   :type methods: Union[dict[str, Callable], list[Callable], None]
+
+
+   .. py:method:: clear_client_cache() -> None
+      :classmethod:
+
+
+      Clears the cache of client connections.
+
+      Note: This may cause in flight operations to fail.
+
+
+

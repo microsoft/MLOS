@@ -1,0 +1,66 @@
+mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer
+===========================================================
+
+.. py:module:: mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer
+
+.. autoapi-nested-parse::
+
+   Contains the wrapper classes for base Bayesian optimizers.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer.BaseBayesianOptimizer
+
+
+Module Contents
+---------------
+
+.. py:class:: BaseBayesianOptimizer(*, parameter_space: ConfigSpace.ConfigurationSpace, optimization_targets: list[str], objective_weights: list[float] | None = None, space_adapter: mlos_core.spaces.adapters.adapter.BaseSpaceAdapter | None = None)
+
+   Bases: :py:obj:`mlos_core.optimizers.optimizer.BaseOptimizer`
+
+
+   Abstract base class defining the interface for Bayesian optimization.
+
+   Create a new instance of the base optimizer.
+
+   :param parameter_space: The parameter space to optimize.
+   :type parameter_space: ConfigSpace.ConfigurationSpace
+   :param optimization_targets: The names of the optimization targets to minimize.
+                                To maximize a target, use the negative of the target when registering scores.
+   :type optimization_targets: list[str]
+   :param objective_weights: Optional list of weights of optimization targets.
+   :type objective_weights: Optional[list[float]]
+   :param space_adapter: The space adapter class to employ for parameter space transformations.
+   :type space_adapter: BaseSpaceAdapter
+
+
+   .. py:method:: acquisition_function(suggestion: mlos_core.data_classes.Suggestion) -> numpy.typing.NDArray
+      :abstractmethod:
+
+
+      Invokes the acquisition function from this Bayesian optimizer for the given
+      configuration.
+
+      :param suggestion: The suggestion containing the configuration(s) to evaluate.
+      :type suggestion: Suggestion
+
+
+
+   .. py:method:: surrogate_predict(suggestion: mlos_core.data_classes.Suggestion) -> numpy.typing.NDArray
+      :abstractmethod:
+
+
+      Obtain a prediction from this Bayesian optimizer's surrogate model for the given
+      configuration(s).
+
+      :param suggestion: The suggestion containing the configuration(s) to predict.
+      :type suggestion: Suggestion
+
+
+

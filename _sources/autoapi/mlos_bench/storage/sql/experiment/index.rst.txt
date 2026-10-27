@@ -1,0 +1,110 @@
+mlos_bench.storage.sql.experiment
+=================================
+
+.. py:module:: mlos_bench.storage.sql.experiment
+
+.. autoapi-nested-parse::
+
+   :py:class:`.Storage.Experiment` interface implementation for saving and restoring
+   the benchmark experiment data using `SQLAlchemy <https://sqlalchemy.org>`_ backend.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.storage.sql.experiment.Experiment
+
+
+Module Contents
+---------------
+
+.. py:class:: Experiment(*, engine: sqlalchemy.engine.Engine, schema: mlos_bench.storage.sql.schema.DbSchema, tunables: mlos_bench.tunables.tunable_groups.TunableGroups, experiment_id: str, trial_id: int, root_env_config: str, description: str, opt_targets: dict[str, Literal['min', 'max']])
+
+   Bases: :py:obj:`mlos_bench.storage.base_storage.Storage.Experiment`
+
+
+   Logic for retrieving and storing the results of a single experiment.
+
+
+   .. py:method:: get_trial_by_id(trial_id: int) -> mlos_bench.storage.base_storage.Storage.Trial | None
+
+      Gets a Trial by its ID.
+
+      :param trial_id: ID of the Trial to retrieve for this Experiment.
+      :type trial_id: int
+
+      :returns: **trial** -- The Trial object, or None if it doesn't exist.
+      :rtype: Storage.Trial | None
+
+
+
+   .. py:method:: load(last_trial_id: int = -1) -> tuple[list[int], list[dict], list[dict[str, Any] | None], list[mlos_bench.environments.status.Status]]
+
+      Load (tunable values, benchmark scores, status) to warm-up the optimizer.
+
+      If `last_trial_id` is present, load only the data from the (completed) trials
+      that were scheduled *after* the given trial ID. Otherwise, return data from ALL
+      merged-in experiments and attempt to impute the missing tunable values.
+
+      :param last_trial_id: (Optional) Trial ID to start from.
+      :type last_trial_id: int
+
+      :returns: **(trial_ids, configs, scores, status)** -- Trial ids, Tunable values, benchmark scores, and status of the trials.
+      :rtype: ([int], [dict], [dict] | None, [Status])
+
+
+
+   .. py:method:: load_telemetry(trial_id: int) -> list[tuple[datetime.datetime, str, Any]]
+
+      Retrieve the telemetry data for a given trial.
+
+      :param trial_id: Trial ID.
+      :type trial_id: int
+
+      :returns: **metrics** -- Telemetry data.
+      :rtype: list[tuple[datetime.datetime, str, Any]]
+
+
+
+   .. py:method:: load_tunable_config(config_id: int) -> dict[str, Any]
+
+      Load tunable values for a given config ID.
+
+
+
+   .. py:method:: merge(experiment_ids: list[str]) -> None
+
+      Merge in the results of other (compatible) experiments trials. Used to help
+      warm up the optimizer for this experiment.
+
+      :param experiment_ids: List of IDs of the experiments to merge in.
+      :type experiment_ids: list[str]
+
+
+
+   .. py:method:: pending_trials(timestamp: datetime.datetime, *, running: bool = False, trial_runner_assigned: bool | None = None) -> collections.abc.Iterator[mlos_bench.storage.base_storage.Storage.Trial]
+
+      Return an iterator over :py:attr:`~.Status.PENDING`
+      :py:class:`~.Storage.Trial` instances that have a scheduled start time to
+      run on or before the specified timestamp.
+
+      :param timestamp: The time in UTC to check for scheduled Trials.
+      :type timestamp: datetime.datetime
+      :param running: If True, include the Trials that are also
+                      :py:attr:`~.Status.RUNNING` or :py:attr:`~.Status.READY`.
+                      Otherwise, return only the scheduled trials.
+      :type running: bool
+      :param trial_runner_assigned: If True, include the Trials that are assigned to a
+                                    :py:class:`~.TrialRunner`. If False, return only the trials
+                                    that are not assigned to any :py:class:`~.TrialRunner`.
+                                    If None, return all trials regardless of their assignment.
+      :type trial_runner_assigned: bool | None
+
+      :returns: **trials** -- An iterator over the scheduled (and maybe running) trials.
+      :rtype: Iterator[Storage.Trial]
+
+
+

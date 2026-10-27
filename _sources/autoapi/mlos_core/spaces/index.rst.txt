@@ -1,0 +1,26 @@
+mlos_core.spaces
+================
+
+.. py:module:: mlos_core.spaces
+
+.. autoapi-nested-parse::
+
+   Space adapters and converters.
+
+   .. seealso::
+
+      :py:mod:`mlos_core`
+          for an overview of configuration spaces in ``mlos_core``.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/mlos_core/spaces/adapters/index
+   /autoapi/mlos_core/spaces/converters/index
+
+

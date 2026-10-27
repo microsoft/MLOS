@@ -1,0 +1,77 @@
+mlos_bench.storage.base_tunable_config_data
+===========================================
+
+.. py:module:: mlos_bench.storage.base_tunable_config_data
+
+.. autoapi-nested-parse::
+
+   Base interface for accessing the stored benchmark (tunable) config data.
+
+   Note: a configuration in this context is the set of tunable parameter values and can
+   be used by one or more trials.
+
+   .. seealso::
+
+      :py:mod:`mlos_bench.storage`
+          The base storage module for mlos_bench, which includes some basic examples in the documentation.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.storage.base_tunable_config_data.TunableConfigData
+
+
+Module Contents
+---------------
+
+.. py:class:: TunableConfigData(*, tunable_config_id: int)
+
+   Base interface for accessing the stored experiment benchmark (tunable) config data.
+
+   A configuration in this context is the set of tunable parameter values.
+
+
+   .. py:method:: __eq__(other: Any) -> bool
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:property:: config_df
+      :type: pandas.DataFrame
+
+      :abstractmethod:
+
+
+      Retrieve the trials' tunable configuration from the storage.
+
+      Note: this corresponds to the Trial object's "tunables" property.
+
+      :returns: **config** -- A dataframe with the tunable configuration of the trial.
+                It has two `str` columns, "parameter" and "value".
+      :rtype: pandas.DataFrame
+
+
+   .. py:property:: config_dict
+      :type: dict[str, mlos_bench.tunables.tunable_types.TunableValue | None]
+
+
+      Retrieve the trials' tunable configuration from the storage as a dict.
+
+      Note: this corresponds to the Trial object's "tunables" property.
+
+      :returns: **config**
+      :rtype: dict
+
+
+   .. py:property:: tunable_config_id
+      :type: int
+
+
+      Unique ID of the (tunable) configuration.
+
+

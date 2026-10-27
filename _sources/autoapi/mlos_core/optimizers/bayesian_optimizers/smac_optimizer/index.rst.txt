@@ -1,0 +1,154 @@
+mlos_core.optimizers.bayesian_optimizers.smac_optimizer
+=======================================================
+
+.. py:module:: mlos_core.optimizers.bayesian_optimizers.smac_optimizer
+
+.. autoapi-nested-parse::
+
+   Contains the wrapper class for the :py:class:`.SmacOptimizer`.
+
+   .. rubric:: Notes
+
+   See the `SMAC3 Documentation <https://automl.github.io/SMAC3/main/index.html>`_ for
+   more details.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_core.optimizers.bayesian_optimizers.smac_optimizer.SmacOptimizer
+
+
+Module Contents
+---------------
+
+.. py:class:: SmacOptimizer(*, parameter_space: ConfigSpace.ConfigurationSpace, optimization_targets: list[str], objective_weights: list[float] | None = None, space_adapter: mlos_core.spaces.adapters.adapter.BaseSpaceAdapter | None = None, seed: int | None = 0, run_name: str | None = None, output_directory: str | None = None, max_trials: int = 100, n_random_init: int | None = None, max_ratio: float | None = None, use_default_config: bool = False, n_random_probability: float = 0.1)
+
+   Bases: :py:obj:`mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer.BaseBayesianOptimizer`
+
+
+   Wrapper class for SMAC based Bayesian optimization.
+
+   Instantiate a new SMAC optimizer wrapper.
+
+   :param parameter_space: The parameter space to optimize.
+   :type parameter_space: ConfigSpace.ConfigurationSpace
+   :param optimization_targets: The names of the optimization targets to minimize.
+   :type optimization_targets: list[str]
+   :param objective_weights: Optional list of weights of optimization targets.
+   :type objective_weights: Optional[list[float]]
+   :param space_adapter: The space adapter class to employ for parameter space transformations.
+   :type space_adapter: BaseSpaceAdapter
+   :param seed: By default SMAC uses a known seed (0) to keep results reproducible.
+                However, if a `None` seed is explicitly provided, we let a random seed
+                be produced by SMAC.
+   :type seed: int | None
+   :param run_name: Name of this run. This is used to easily distinguish across different runs.
+                    If set to `None` (default), SMAC will generate a hash from metadata.
+   :type run_name: str | None
+   :param output_directory: The directory where SMAC output will saved. If set to `None` (default),
+                            a temporary dir will be used.
+   :type output_directory: str | None
+   :param max_trials: Maximum number of trials (i.e., function evaluations) to be run. Defaults to 100.
+                      Note that modifying this value directly affects the value of
+                      `n_random_init`, if latter is set to `None`.
+   :type max_trials: int
+   :param n_random_init: Number of points evaluated at start to bootstrap the optimizer.
+                         Default depends on max_trials and number of parameters and max_ratio.
+                         Note: it can sometimes be useful to set this to 1 when pre-warming the
+                         optimizer from historical data. See Also:
+                         :py:meth:`mlos_bench.optimizers.base_optimizer.Optimizer.bulk_register`
+   :type n_random_init: int | None
+   :param max_ratio: Maximum ratio of max_trials to be random configs to be evaluated
+                     at start to bootstrap the optimizer.
+                     Useful if you want to explicitly control the number of random
+                     configs evaluated at start.
+   :type max_ratio: int | None
+   :param use_default_config: Whether to use the default config for the first trial after random initialization.
+   :type use_default_config: bool
+   :param n_random_probability: Probability of choosing to evaluate a random configuration during optimization.
+                                Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
+   :type n_random_probability: float
+
+
+   .. py:method:: __del__() -> None
+
+
+   .. py:method:: acquisition_function(suggestion: mlos_core.data_classes.Suggestion) -> numpy.typing.NDArray
+
+      Invokes the acquisition function from this Bayesian optimizer for the given
+      configuration.
+
+      :param suggestion: The suggestion containing the configuration(s) to evaluate.
+      :type suggestion: Suggestion
+
+
+
+   .. py:method:: cleanup() -> None
+
+      Remove temp files, release resources, etc.
+
+      after use. Default is no-op. Redefine this method in optimizers that require
+      cleanup.
+
+
+
+   .. py:method:: register_pending(pending: mlos_core.data_classes.Suggestion) -> None
+      :abstractmethod:
+
+
+      Registers the given suggestion as "pending". That is it say, it has been
+      suggested by the optimizer, and an experiment trial has been started. This can
+      be useful for executing multiple trials in parallel, retry logic, etc.
+
+      :param pending: The pending suggestion to register.
+      :type pending: Suggestion
+
+
+
+   .. py:method:: surrogate_predict(suggestion: mlos_core.data_classes.Suggestion) -> numpy.typing.NDArray
+
+      Obtain a prediction from this Bayesian optimizer's surrogate model for the given
+      configuration(s).
+
+      :param suggestion: The suggestion containing the configuration(s) to predict.
+      :type suggestion: Suggestion
+
+
+
+   .. py:attribute:: base_optimizer
+
+
+   .. py:property:: max_ratio
+      :type: float | None
+
+
+      Gets the `max_ratio` parameter used in py:meth:`constructor <.__init__>` of this
+      SmacOptimizer.
+
+      :rtype: float
+
+
+   .. py:property:: n_random_init
+      :type: int
+
+
+      Gets the number of random samples to use to initialize the optimizer's search
+      space sampling.
+
+      Note: This may not be equal to the value passed to the initializer, due to
+      logic present in the SMAC.
+
+      .. seealso:: :py:attr:`.max_ratio`
+
+      :returns: The number of random samples used to initialize the optimizer's search space sampling.
+      :rtype: int
+
+
+   .. py:attribute:: trial_info_map
+      :type:  dict[ConfigSpace.Configuration, smac.runhistory.TrialInfo]
+
+

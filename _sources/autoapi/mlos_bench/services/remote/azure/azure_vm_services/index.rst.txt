@@ -1,0 +1,266 @@
+mlos_bench.services.remote.azure.azure_vm_services
+==================================================
+
+.. py:module:: mlos_bench.services.remote.azure.azure_vm_services
+
+.. autoapi-nested-parse::
+
+   A collection Service functions for managing VMs on Azure.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.services.remote.azure.azure_vm_services.AzureVMService
+
+
+Module Contents
+---------------
+
+.. py:class:: AzureVMService(config: dict[str, Any] | None = None, global_config: dict[str, Any] | None = None, parent: mlos_bench.services.base_service.Service | None = None, methods: dict[str, collections.abc.Callable] | list[collections.abc.Callable] | None = None)
+
+   Bases: :py:obj:`mlos_bench.services.remote.azure.azure_deployment_services.AzureDeploymentService`, :py:obj:`mlos_bench.services.types.host_provisioner_type.SupportsHostProvisioning`, :py:obj:`mlos_bench.services.types.host_ops_type.SupportsHostOps`, :py:obj:`mlos_bench.services.types.os_ops_type.SupportsOSOps`, :py:obj:`mlos_bench.services.types.remote_exec_type.SupportsRemoteExec`
+
+
+   Helper methods to manage VMs on Azure.
+
+   Create a new instance of Azure VM services proxy.
+
+   :param config: Free-format dictionary that contains the benchmark environment
+                  configuration.
+   :type config: dict
+   :param global_config: Free-format dictionary of global parameters.
+   :type global_config: dict
+   :param parent: Parent service that can provide mixin functions.
+   :type parent: Service
+   :param methods: New methods to register with the service.
+   :type methods: Union[dict[str, Callable], list[Callable], None]
+
+
+   .. py:method:: deallocate_host(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Deallocates the VM on Azure by shutting it down then releasing the compute
+      resources.
+
+      Note: This can cause the VM to arrive on a new host node when its
+      restarted, which may have different performance characteristics.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: deprovision_host(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Deprovisions the VM on Azure by deleting it.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: get_remote_exec_results(config: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Get the results of the asynchronously running command.
+
+      :param config: Flat dictionary of (key, value) pairs of tunable parameters.
+                     Must have the "asyncResultsUrl" key to get the results.
+                     If the key is not present, return Status.PENDING.
+      :type config: dict
+
+      :returns: **result** -- A pair of Status and result.
+                Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+                A dict can have an "stdout" key with the remote output
+                and an "stderr" key for errors / warnings.
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: provision_host(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Check if Azure VM is ready. Deploy a new VM, if necessary.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+                     HostEnv tunables are variable parameters that, together with the
+                     HostEnv configuration, are sufficient to provision a VM.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result. The result is the input `params` plus the
+                parameters extracted from the response JSON, or {} if the status is FAILED.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: reboot(params: dict, force: bool = False) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Initiates a (graceful) shutdown of the Host/VM OS.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+      :param force: If True, force restart the Host/VM.
+      :type force: bool
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: remote_exec(script: collections.abc.Iterable[str], config: dict, env_params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Run a command on Azure VM.
+
+      :param script: A list of lines to execute as a script on a remote VM.
+      :type script: Iterable[str]
+      :param config: Flat dictionary of (key, value) pairs of the Environment parameters.
+                     They usually come from `const_args` and `tunable_params`
+                     properties of the Environment.
+      :type config: dict
+      :param env_params: Parameters to pass as *shell* environment variables into the script.
+                         This is usually a subset of `config` with some possible conversions.
+      :type env_params: dict
+
+      :returns: **result** -- A pair of Status and result.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: restart_host(params: dict, force: bool = False) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Reboot the VM on Azure by initiating a graceful shutdown.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+      :param force: If True, force restart the Host/VM.
+      :type force: bool
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: shutdown(params: dict, force: bool = False) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Initiates a (graceful) shutdown of the Host/VM OS.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+      :param force: If True, force stop the Host/VM.
+      :type force: bool
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: start_host(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Start the VM on Azure.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: stop_host(params: dict, force: bool = False) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Stops the VM on Azure by initiating a graceful shutdown.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+      :param force: If True, force stop the Host/VM.
+      :type force: bool
+
+      :returns: **result** -- A pair of Status and result. The result is always {}.
+                Status is one of {PENDING, SUCCEEDED, FAILED}
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: wait_host_deployment(params: dict, *, is_setup: bool) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
+      Return TIMED_OUT when timing out.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+      :type params: dict
+      :param is_setup: If True, wait for VM being deployed; otherwise, wait for successful deprovisioning.
+      :type is_setup: bool
+
+      :returns: **result** -- A pair of Status and result.
+                Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+                Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: wait_host_operation(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
+      Return TIMED_OUT when timing out.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+                     Must have the "asyncResultsUrl" key to get the results.
+                     If the key is not present, return Status.PENDING.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result.
+                Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+                Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: wait_os_operation(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Waits for a pending operation on an OS to resolve to SUCCEEDED or FAILED. Return
+      TIMED_OUT when timing out.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+                     Must have the "asyncResultsUrl" key to get the results.
+                     If the key is not present, return Status.PENDING.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result.
+                Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+                Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+      :rtype: (Status, dict)
+
+
+
+   .. py:method:: wait_remote_exec_operation(params: dict) -> tuple[mlos_bench.environments.status.Status, dict]
+
+      Waits for a pending remote execution on an Azure VM to resolve to SUCCEEDED or
+      FAILED. Return TIMED_OUT when timing out.
+
+      :param params: Flat dictionary of (key, value) pairs of tunable parameters.
+                     Must have the "asyncResultsUrl" key to get the results.
+                     If the key is not present, return Status.PENDING.
+      :type params: dict
+
+      :returns: **result** -- A pair of Status and result.
+                Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+                Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+      :rtype: (Status, dict)
+
+
+

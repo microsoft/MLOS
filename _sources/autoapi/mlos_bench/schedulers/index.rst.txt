@@ -1,0 +1,22 @@
+mlos_bench.schedulers
+=====================
+
+.. py:module:: mlos_bench.schedulers
+
+.. autoapi-nested-parse::
+
+   Interfaces and implementations of the optimization loop scheduling policies.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/mlos_bench/schedulers/base_scheduler/index
+   /autoapi/mlos_bench/schedulers/sync_scheduler/index
+   /autoapi/mlos_bench/schedulers/trial_runner/index
+
+

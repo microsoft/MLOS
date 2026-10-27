@@ -1,0 +1,106 @@
+mlos_bench.storage.sql.experiment_data
+======================================
+
+.. py:module:: mlos_bench.storage.sql.experiment_data
+
+.. autoapi-nested-parse::
+
+   An interface to access the benchmark experiment data stored in SQL DB using the
+   :py:class:`.ExperimentData` interface.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_bench.storage.sql.experiment_data.ExperimentSqlData
+
+
+Module Contents
+---------------
+
+.. py:class:: ExperimentSqlData(*, engine: sqlalchemy.engine.Engine, schema: mlos_bench.storage.sql.schema.DbSchema, experiment_id: str, description: str, root_env_config: str, git_repo: str, git_commit: str)
+
+   Bases: :py:obj:`mlos_bench.storage.base_experiment_data.ExperimentData`
+
+
+   SQL interface for accessing the stored experiment benchmark data.
+
+   An experiment groups together a set of trials that are run with a given set of
+   scripts and mlos_bench configuration files.
+
+
+   .. py:property:: default_tunable_config_id
+      :type: int | None
+
+
+      Retrieves the (tunable) config id for the default tunable values for this
+      experiment.
+
+      Note: this is by *default* the first trial executed for this experiment.
+      However, it is currently possible that the user changed the tunables config
+      in between resumptions of an experiment.
+
+      :rtype: int
+
+
+   .. py:property:: objectives
+      :type: dict[str, Literal['min', 'max']]
+
+
+      Retrieve the experiment's objectives data from the storage.
+
+      :returns: **objectives** -- A dictionary of the experiment's objective names (optimization_targets)
+                and their directions (e.g., min or max).
+      :rtype: dict[str, Literal["min", "max"]]
+
+
+   .. py:property:: results_df
+      :type: pandas.DataFrame
+
+
+      Retrieve all experimental results as a single DataFrame.
+
+      :returns: **results** -- A DataFrame with configurations and results from all trials of the experiment.
+                Has columns
+                [trial_id, tunable_config_id, tunable_config_trial_group_id, ts_start, ts_end, status]
+                followed by tunable config parameters (prefixed with "config.") and
+                trial results (prefixed with "result."). The latter can be NULLs if the
+                trial was not successful.
+      :rtype: pandas.DataFrame
+
+      .. seealso:: :py:attr:`.ExperimentData.CONFIG_COLUMN_PREFIX`, :py:attr:`.ExperimentData.RESULT_COLUMN_PREFIX`
+
+
+   .. py:property:: trials
+      :type: dict[int, mlos_bench.storage.base_trial_data.TrialData]
+
+
+      Retrieve the experiment's trials' data from the storage.
+
+      :returns: **trials** -- A dictionary of the trials' data, keyed by trial id.
+      :rtype: dict[int, TrialData]
+
+
+   .. py:property:: tunable_config_trial_groups
+      :type: dict[int, mlos_bench.storage.base_tunable_config_trial_group_data.TunableConfigTrialGroupData]
+
+
+      Retrieve the Experiment's (Tunable) Config Trial Group data from the storage.
+
+      :returns: **trials** -- A dictionary of the trials' data, keyed by (tunable) by config id.
+      :rtype: dict[int, TunableConfigTrialGroupData]
+
+
+   .. py:property:: tunable_configs
+      :type: dict[int, mlos_bench.storage.base_tunable_config_data.TunableConfigData]
+
+
+      Retrieve the experiment's (tunable) configs' data from the storage.
+
+      :returns: **trials** -- A dictionary of the configs' data, keyed by (tunable) config id.
+      :rtype: dict[int, TunableConfigData]
+
+

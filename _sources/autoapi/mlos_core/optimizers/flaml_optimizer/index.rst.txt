@@ -1,0 +1,96 @@
+mlos_core.optimizers.flaml_optimizer
+====================================
+
+.. py:module:: mlos_core.optimizers.flaml_optimizer
+
+.. autoapi-nested-parse::
+
+   Contains the :py:class:`.FlamlOptimizer` class.
+
+   .. rubric:: Notes
+
+   See the `Flaml Documentation <https://microsoft.github.io/FLAML/>`_ for more
+   details.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   mlos_core.optimizers.flaml_optimizer.EvaluatedSample
+   mlos_core.optimizers.flaml_optimizer.FlamlOptimizer
+
+
+Module Contents
+---------------
+
+.. py:class:: EvaluatedSample
+
+   Bases: :py:obj:`NamedTuple`
+
+
+   A named tuple representing a sample that has been evaluated.
+
+
+   .. py:attribute:: config
+      :type:  dict
+
+
+   .. py:attribute:: score
+      :type:  float
+
+
+.. py:class:: FlamlOptimizer(*, parameter_space: ConfigSpace.ConfigurationSpace, optimization_targets: list[str], objective_weights: list[float] | None = None, space_adapter: mlos_core.spaces.adapters.adapter.BaseSpaceAdapter | None = None, low_cost_partial_config: dict | None = None, seed: int | None = None)
+
+   Bases: :py:obj:`mlos_core.optimizers.optimizer.BaseOptimizer`
+
+
+   Wrapper class for FLAML Optimizer: A fast library for AutoML and tuning.
+
+   Create an MLOS wrapper for FLAML.
+
+   :param parameter_space: The parameter space to optimize.
+   :type parameter_space: ConfigSpace.ConfigurationSpace
+   :param optimization_targets: The names of the optimization targets to minimize.
+   :type optimization_targets: list[str]
+   :param objective_weights: Optional list of weights of optimization targets.
+   :type objective_weights: Optional[list[float]]
+   :param space_adapter: The space adapter class to employ for parameter space transformations.
+   :type space_adapter: BaseSpaceAdapter
+   :param low_cost_partial_config: A dictionary from a subset of controlled dimensions to the initial low-cost values.
+                                   More info:
+                                   https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
+   :type low_cost_partial_config: dict
+   :param seed: If provided, calls np.random.seed() with the provided value to set the
+                seed globally at init.
+   :type seed: int | None
+
+
+   .. py:method:: register_pending(pending: mlos_core.data_classes.Suggestion) -> None
+      :abstractmethod:
+
+
+      Registers the given suggestion as "pending". That is it say, it has been
+      suggested by the optimizer, and an experiment trial has been started. This can
+      be useful for executing multiple trials in parallel, retry logic, etc.
+
+      :param pending: The pending suggestion to register.
+      :type pending: Suggestion
+
+
+
+   .. py:attribute:: evaluated_samples
+      :type:  dict[ConfigSpace.Configuration, EvaluatedSample]
+
+
+   .. py:attribute:: flaml_parameter_space
+      :type:  dict[str, mlos_core.spaces.converters.flaml.FlamlDomain]
+
+
+   .. py:attribute:: low_cost_partial_config
+      :value: None
+
+
+
